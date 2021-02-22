@@ -20,6 +20,15 @@ public class CbExtServerProperties {
 	@Value("${sb.hub.graph.service.url}")
 	private String sbHubGraphServiceUrl;
 
+	@Value("${spring.data.cassandra.sb.username}")
+	private String cassandraUserName;
+
+	@Value("${spring.data.cassandra.sb.password}")
+	private String cassandraPassword;
+
+	@Value("${spring.data.cassandra.sb.keyspace-name}")
+	private String sbExtKeyspace;
+
 	
 	public String getWfServiceHost() {
 		return wfServiceHost;
@@ -59,6 +68,30 @@ public class CbExtServerProperties {
 
 	public void setSbHubGraphServiceUrl(String sbHubGraphServiceUrl) {
 		this.sbHubGraphServiceUrl = sbHubGraphServiceUrl;
+	}
+
+	public String getCassandraUserName() {
+		return cassandraUserName;
+	}
+
+	public void setCassandraUserName(String cassandraUserName) {
+		this.cassandraUserName = cassandraUserName;
+	}
+
+	public String getCassandraPassword() {
+		return cassandraPassword;
+	}
+
+	public void setCassandraPassword(String cassandraPassword) {
+		this.cassandraPassword = cassandraPassword;
+	}
+
+	public String getSbExtKeyspace() {
+		return sbExtKeyspace;
+	}
+
+	public void setSbExtKeyspace(String sbExtKeyspace) {
+		this.sbExtKeyspace = sbExtKeyspace;
 	}
 
 	@Override
