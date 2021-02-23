@@ -4,6 +4,7 @@ public class MandatoryContentInfo {
     private String rootOrg;
     private String org;
     private String contentType;
+    private String batchId;
     private Float minProgressForCompletion = 0.0f;
 
     private Float userProgress = 0.0f;
@@ -46,5 +47,13 @@ public class MandatoryContentInfo {
 
     public void setUserProgress(Float userProgress) {
         this.userProgress = userProgress;
+    }
+
+    public String getBatchId() {
+        return batchId;
+    }
+
+    public void setBatchId(String batchId) {
+        this.batchId = batchId;
     }
 }

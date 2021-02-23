@@ -13,6 +13,9 @@ public class MandatoryContentModel {
     @Column("content_type")
     private String contentType;
 
+    @Column("batch_id")
+    private String batchId;
+
     @Column("minProgressForCompletion")
     private Float minProgressCheck;
 
@@ -38,5 +41,13 @@ public class MandatoryContentModel {
 
     public void setMinProgressCheck(Float minProgressCheck) {
         this.minProgressCheck = minProgressCheck;
+    }
+
+    public String getBatchId() {
+        return batchId;
+    }
+
+    public void setBatchId(String batchId) {
+        this.batchId = batchId;
     }
 }

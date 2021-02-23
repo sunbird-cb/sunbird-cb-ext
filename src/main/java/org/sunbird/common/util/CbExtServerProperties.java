@@ -29,7 +29,17 @@ public class CbExtServerProperties {
 	@Value("${spring.data.cassandra.sb.keyspace-name}")
 	private String sbExtKeyspace;
 
-	
+
+	@Value("${sunbird.course.service.host}")
+	private String courseServiceHost;
+
+	@Value("${progress.api.endpoint}")
+	private String progressReadEndPoint;
+
+
+
+
+
 	public String getWfServiceHost() {
 		return wfServiceHost;
 	}
@@ -92,6 +102,22 @@ public class CbExtServerProperties {
 
 	public void setSbExtKeyspace(String sbExtKeyspace) {
 		this.sbExtKeyspace = sbExtKeyspace;
+	}
+
+	public String getCourseServiceHost() {
+		return courseServiceHost;
+	}
+
+	public void setCourseServiceHost(String courseServiceHost) {
+		this.courseServiceHost = courseServiceHost;
+	}
+
+	public String getProgressReadEndPoint() {
+		return progressReadEndPoint;
+	}
+
+	public void setProgressReadEndPoint(String progressReadEndPoint) {
+		this.progressReadEndPoint = progressReadEndPoint;
 	}
 
 	@Override
