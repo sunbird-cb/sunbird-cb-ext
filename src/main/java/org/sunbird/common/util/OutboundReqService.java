@@ -7,6 +7,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.sunbird.core.logger.CbExtLogger;
@@ -21,12 +22,17 @@ public class OutboundReqService {
 
     private CbExtLogger logger = new CbExtLogger(getClass().getName());
 
-    public Map fetchResultUsingPost(String uri, Object request) {
+    public Map fetchResultUsingPost(String uri, Object request, Map<String, String> headersValues) {
         ObjectMapper mapper = new ObjectMapper();
         mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
         Map response = null;
         try {
             HttpHeaders headers = new HttpHeaders();
+            if (!CollectionUtils.isEmpty(headersValues)) {
+                headersValues.forEach((k, v) -> {
+                    headers.set(k, v);
+                });
+            }
             headers.setContentType(MediaType.APPLICATION_JSON);
             HttpEntity<Object> entity = new HttpEntity<>(request, headers);
             StringBuilder str = new StringBuilder(this.getClass().getCanonicalName())

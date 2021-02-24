@@ -34,7 +34,7 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
 
 
     @Override
-    public MandatoryContentResponse getMandatoryContentStatusForUser(String rootOrg, String org, String userId) {
+    public MandatoryContentResponse getMandatoryContentStatusForUser(String authUserToken, String rootOrg, String org, String userId) {
         MandatoryContentResponse response = new MandatoryContentResponse();
         List<MandatoryContentModel> contentList = mandatoryContentRepository.getMandatoryContentsInfo(rootOrg, org);
         if (CollectionUtils.isEmpty(contentList)) {
@@ -55,7 +55,7 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
         } catch (JsonProcessingException e) {
             logger.error(e);
         }
-        enrichProgressDetails(response, userId);
+        enrichProgressDetails(authUserToken, response, userId);
         try {
             logger.info("getMandatoryContentStatusForUser: Ret Value is: " + new ObjectMapper().writer().withDefaultPrettyPrinter().writeValueAsString(response));
         } catch (JsonProcessingException e) {
@@ -79,10 +79,13 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
         return response;
     }
 
-    public void enrichProgressDetails(MandatoryContentResponse mandatoryContentInfo, String userId) {
+    public void enrichProgressDetails(String authUserToken, MandatoryContentResponse mandatoryContentInfo, String userId) {
         HashMap<String, Object> req;
         HashMap<String, Object> reqObj;
         List<String> fields = Arrays.asList("progressdetails");
+        HashMap<String, String> headersValues = new HashMap<>();
+        headersValues.put("X-Authenticated-User-Token", authUserToken);
+        headersValues.put("Authorization", cbExtServerProperties.getSbApiKey());
         for (Map.Entry<String, MandatoryContentInfo> infoMap : mandatoryContentInfo.getContentDetails().entrySet()) {
             try {
                 req = new HashMap<>();
@@ -92,7 +95,7 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
                 reqObj.put("batchId", infoMap.getValue().getBatchId());
                 reqObj.put("fields", fields);
                 req.put("request", reqObj);
-                Map response = outboundReqService.fetchResultUsingPost(cbExtServerProperties.getCourseServiceHost()+cbExtServerProperties.getProgressReadEndPoint(), req);
+                Map response = outboundReqService.fetchResultUsingPost(cbExtServerProperties.getCourseServiceHost()+cbExtServerProperties.getProgressReadEndPoint(), req, headersValues);
                 if (response.get("responseCode").equals("OK")) {
                     List<Object> result = (List<Object>) ((HashMap<String, Object>) response.get("result")).get("contentList");
                     if (!CollectionUtils.isEmpty(result)) {

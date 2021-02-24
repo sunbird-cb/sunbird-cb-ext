@@ -22,9 +22,10 @@ public class MandatoryContentController {
      */
     @GetMapping("/v1/check/mandatoryContentStatus")
     public ResponseEntity<?> getMandatoryContentStatus(
+            @RequestHeader("xAuthUser") String authUserToken,
             @RequestHeader("rootOrg") String rootOrg,
             @RequestHeader("org") String org,
             @RequestHeader("wid") String userId) throws Exception {
-        return new ResponseEntity<>(service.getMandatoryContentStatusForUser(rootOrg, org, userId), HttpStatus.OK);
+        return new ResponseEntity<>(service.getMandatoryContentStatusForUser(authUserToken, rootOrg, org, userId), HttpStatus.OK);
     }
 }
