@@ -37,6 +37,7 @@ public interface PortalService {
 	boolean isAdmin(String strDeptType, String roleName, String userId);
 
 	boolean validateCBPUserLogin(String userId);
+	boolean validateFracUserLogin(String userId);
 
 	DepartmentInfo addDepartment(String userId, String userRoleName, DepartmentInfo deptInfo,String rootOrg) throws Exception;
 

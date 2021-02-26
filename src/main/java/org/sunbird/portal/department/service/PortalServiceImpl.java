@@ -115,11 +115,11 @@ public class PortalServiceImpl implements PortalService {
 		}
 		return Collections.emptyList();
 	}
-	
+
 	@Override
 	public DeptPublicInfo searchDept(String deptName) {
 		Department dept = deptRepo.findByDeptNameIgnoreCase(deptName);
-		if(dept != null) {
+		if (dept != null) {
 			return dept.getPublicInfo();
 		}
 		return null;
@@ -418,9 +418,8 @@ public class PortalServiceImpl implements PortalService {
 		headers.set(ROOT_ORG_CONST, rootOrg);
 		headers.set(ORG_CONST, org);
 		HttpEntity<Object> entity = new HttpEntity<>(request, headers);
-		restTemplate.postForObject(serverConfig.getWfServiceHost() +
-		serverConfig.getWfServicePath(), entity,
-		Map.class);
+		restTemplate.postForObject(serverConfig.getWfServiceHost() + serverConfig.getWfServicePath(), entity,
+				Map.class);
 		return userDeptInfo;
 	}
 
@@ -486,10 +485,10 @@ public class PortalServiceImpl implements PortalService {
 		headers.set(ROOT_ORG_CONST, rootOrg);
 		headers.set(ORG_CONST, org);
 		HttpEntity<Object> entity = new HttpEntity<>(request, headers);
-	
-		  restTemplate.postForObject(serverConfig.getWfServiceHost() +
-		  serverConfig.getWfServicePath(), entity, Map.class);
-		 
+
+		restTemplate.postForObject(serverConfig.getWfServiceHost() + serverConfig.getWfServicePath(), entity,
+				Map.class);
+
 		return userDeptInfo;
 	}
 
@@ -960,6 +959,48 @@ public class PortalServiceImpl implements PortalService {
 				}
 			}
 		}
+		return false;
+	}
+
+	@Override
+	public boolean validateFracUserLogin(String userId) {
+		List<Role> roleList = roleRepo.findAllByRoleNameIn(PortalConstants.FRAC_ROLES);
+		Set<Integer> fracRoleIds = new HashSet<Integer>();
+		for (Role r : roleList) {
+			fracRoleIds.add(r.getId());
+		}
+
+		List<UserDepartmentRole> userDeptRoleList = userDepartmentRoleRepo
+				.findAllByUserIdAndIsActiveAndIsBlocked(userId, true, false);
+		if (!DataValidator.isCollectionEmpty(userDeptRoleList)) {
+			for (UserDepartmentRole userDeptRole : userDeptRoleList) {
+				if (!userDeptRole.getIsActive() || userDeptRole.getIsBlocked()) {
+					continue;
+				}
+				// Just check this department type is "SPV"
+				Department dept = deptRepo.findById(userDeptRole.getDeptId()).get();
+				if (dept != null) {
+					Iterable<DepartmentType> deptTypeList = deptTypeRepo
+							.findAllById(Arrays.asList(dept.getDeptTypeIds()));
+					if (!DataValidator.isCollectionEmpty(deptTypeList)) {
+						for (DepartmentType deptType : deptTypeList) {
+							if (deptType.getDeptType().equalsIgnoreCase(PortalConstants.MDO_DEPT_TYPE)) {
+								// We have found the expected Department.
+								// Let's check user has at least one Role.
+								for (Integer uRoleId : userDeptRole.getRoleIds()) {
+									if (fracRoleIds.contains(uRoleId)) {
+										return true;
+									}
+								}
+							} else {
+								continue;
+							}
+						}
+					}
+				}
+			}
+		}
+
 		return false;
 	}
 }

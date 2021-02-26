@@ -121,6 +121,18 @@ public class PortalController {
 		return new ResponseEntity<>(portalService.getAllDepartments(rootOrg), HttpStatus.OK);
 	}
 	// ----------------- SPV APIs -----------------------
+	
+	// ----------------- FRAC APIs ----------------------
+	@GetMapping("/portal/frac/mydepartment")
+	public ResponseEntity<?> getMyFracDepartment(@RequestHeader("wid") String wid,
+			@RequestParam(name = "allUsers", required = false) boolean isUserInfoRequired,
+			@RequestHeader("rootOrg") String rootOrg) throws Exception {
+		if (!portalService.validateFracUserLogin(wid)) {
+			throw new Exception("User is not assigned with any FRAC related roles.");
+		}
+		return new ResponseEntity<>(mdoPortalService.getMyFracDepartment(wid, isUserInfoRequired, rootOrg), HttpStatus.OK);
+	}
+	// ----------------- END OF FRAC APIs ---------------
 
 	// ----------------- MDO APIs -----------------------
 	@GetMapping("/portal/mdo/isAdmin")
