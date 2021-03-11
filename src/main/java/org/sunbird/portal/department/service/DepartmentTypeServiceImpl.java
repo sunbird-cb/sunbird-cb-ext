@@ -1,10 +1,6 @@
 package org.sunbird.portal.department.service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -49,8 +45,13 @@ public class DepartmentTypeServiceImpl implements DepartmentTypeService {
 	}
 
 	@Override
-	public DepartmentType getDepartmentTypeById(Integer id) {
-		return deptTypeRepo.findById(id).get();
+	public DepartmentType getDepartmentTypeById(Integer id) throws Exception {
+		Optional<DepartmentType> departmentType = deptTypeRepo.findById(id);
+		if (departmentType.isPresent()) {
+			return departmentType.get();
+		} else {
+			throw new Exception("Failed to get the Department type . On Id : " + id);
+		}
 	}
 
 	@Override

@@ -1,7 +1,9 @@
 package org.sunbird.common.util;
 
 public class Constants {
-	
+	private Constants() {
+		throw new IllegalStateException("Utility class");
+	}
 	public static final String UUID = "wid";
 	public static final String KID = "kid";
 	public static final String SOURCE_ID = "source_id";

@@ -36,8 +36,13 @@ public class RoleServiceImpl implements RoleService {
 	}
 
 	@Override
-	public Role getRoleById(Integer roleId) {
-		return roleRepo.findById(roleId).get();
+	public Role getRoleById(Integer roleId) throws Exception {
+		Optional<Role> role = roleRepo.findById(roleId);
+		if (role.isPresent()) {
+			return role.get();
+		} else {
+			throw new Exception("No Role exist with id - " + roleId);
+		}
 	}
 
 	private CbExtLogger logger = new CbExtLogger(RoleServiceImpl.class.getName());
@@ -140,7 +145,7 @@ public class RoleServiceImpl implements RoleService {
 				returnedRoleList.add(iterableRole.next().getRoleName());
 			}
 		} catch (Exception ex) {
-			ex.printStackTrace();
+			logger.error(ex);
 		}
 		return returnedRoleList;
 	}
