@@ -42,4 +42,10 @@ public class Constants {
 	public static final String SOURCE_DATA = "source_data";
 	public static final String USER_ID = "userId";
 	public static final String FILTERS = "filters";
+
+	public static final String SUCCESSFUL = "Successful";
+	public static final String FAILED = "Failed";
+	public static final String MESSAGE = "message";
+	public static final String DATA = "data";
+	public static final String STATUS = "status";
 }
