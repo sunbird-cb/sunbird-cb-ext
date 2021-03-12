@@ -19,7 +19,7 @@ public class AllocationController {
     private AllocationService allocationService;
 
     @PostMapping("/getUsers")
-    public ResponseEntity<Response> findRecommendedConnections(@RequestBody SearchCriteria searchCriteria) {
+    public ResponseEntity<Response> getUsers(@RequestBody SearchCriteria searchCriteria) {
         Response response = allocationService.getUsers(searchCriteria);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
