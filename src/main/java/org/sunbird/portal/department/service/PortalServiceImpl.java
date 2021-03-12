@@ -220,7 +220,7 @@ public class PortalServiceImpl implements PortalService {
 
 	private boolean hasCBPRole(Department dept, List<UserDepartmentRole> userDeptRoleList) {
 		for (UserDepartmentRole userDeptRole : userDeptRoleList) {
-			if (userDeptRole.getDeptId() == dept.getDeptId()) {
+			if (userDeptRole.getDeptId()!=null &&  userDeptRole.getDeptId().equals(dept.getDeptId())) {
 				Iterable<Role> userRoles = roleRepo.findAllById(Arrays.asList(userDeptRole.getRoleIds()));
 				for (Role r : userRoles) {
 					if (PortalConstants.CBP_ROLES.contains(r.getRoleName())) {
@@ -334,9 +334,10 @@ public class PortalServiceImpl implements PortalService {
 
 	@Override
 	public DepartmentInfo updateDepartment(DepartmentInfo deptInfo, String rootOrg) throws Exception {
-		Department existingDept = deptRepo.findById(deptInfo.getId()).get();
-		logger.info("Updating Department record -> " + existingDept);
-		if (existingDept != null) {
+		Optional<Department> department = deptRepo.findById(deptInfo.getId());
+		if (department.isPresent()) {
+			Department existingDept = department.get();
+			logger.info("Updating Department record -> " + existingDept);
 			existingDept.setDescription(deptInfo.getDescription());
 			existingDept.setHeadquarters(deptInfo.getHeadquarters());
 			existingDept.setLogo(deptInfo.getLogo());
@@ -399,9 +400,9 @@ public class PortalServiceImpl implements PortalService {
 		// Try to get existing dept if available
 		String prevDeptName = "";
 		if (prevDeptId != 0) {
-			Department prevDept = deptRepo.findById(prevDeptId).get();
-			if (prevDept != null) {
-				prevDeptName = prevDept.getDeptName();
+			Optional<Department> OptionalPrevDept = deptRepo.findById(prevDeptId);
+			if (OptionalPrevDept.isPresent()) {
+				prevDeptName = OptionalPrevDept.get().getDeptName();
 			}
 		}
 
@@ -467,9 +468,9 @@ public class PortalServiceImpl implements PortalService {
 		// Try to get existing dept if available
 		String prevDeptName = "";
 		if (prevDeptId != 0) {
-			Department prevDept = deptRepo.findById(prevDeptId).get();
-			if (prevDept != null) {
-				prevDeptName = prevDept.getDeptName();
+			Optional<Department> OptionalPrevDept = deptRepo.findById(prevDeptId);
+			if (OptionalPrevDept.isPresent()) {
+				prevDeptName = OptionalPrevDept.get().getDeptName();
 			}
 		}
 		HashMap<String, Object> fromValue = new HashMap<>();
@@ -572,12 +573,13 @@ public class PortalServiceImpl implements PortalService {
 					for (Role role : roles) {
 						if (role.getRoleName().contains(roleName)) {
 							// Just check this department type is equal to given roleName
-							Department dept = deptRepo.findById(userDeptRole.getDeptId()).get();
-							if (dept != null) {
-								str.append("Found Department with Id: ").append(dept.getDeptId())
+							Optional<Department> dept = deptRepo.findById(userDeptRole.getDeptId());
+
+							if (dept.isPresent()) {
+								str.append("Found Department with Id: ").append(dept.get().getDeptId())
 										.append(System.lineSeparator());
 								Iterable<DepartmentType> deptTypeList = deptTypeRepo
-										.findAllById(Arrays.asList(dept.getDeptTypeIds()));
+										.findAllById(Arrays.asList(dept.get().getDeptTypeIds()));
 								if (!DataValidator.isCollectionEmpty(deptTypeList)) {
 									for (DepartmentType deptType : deptTypeList) {
 										if (deptType.getDeptType().equalsIgnoreCase(strDeptType)) {
@@ -833,8 +835,8 @@ public class PortalServiceImpl implements PortalService {
 		}
 
 		// Check department exist
-		Department dept = deptRepo.findById(userDeptRole.getDeptId()).get();
-		if (dept == null) {
+		Optional<Department> dept = deptRepo.findById(userDeptRole.getDeptId());
+		if (!dept.isPresent()) {
 			throw new Exception("Invalid Department");
 		}
 
@@ -854,10 +856,12 @@ public class PortalServiceImpl implements PortalService {
 				throw new Exception("Invalid Role Names Provided");
 			}
 
-			List<Role> rolesAvailableInDept = getDepartmentRoles(Arrays.asList(dept.getDeptTypeIds()));
-
-			Set<String> availableRoleNames = rolesAvailableInDept.stream().map(i -> i.getRoleName())
-					.collect(Collectors.toSet());
+			List<Role> rolesAvailableInDept = getDepartmentRoles(Arrays.asList(dept.get().getDeptTypeIds()));
+			Set<String> availableRoleNames = new HashSet<>();
+			if (!CollectionUtils.isEmpty(rolesAvailableInDept)) {
+				availableRoleNames = rolesAvailableInDept.stream().map(i -> i.getRoleName())
+						.collect(Collectors.toSet());
+			}
 			for (String roleName : userDeptRole.getRoles()) {
 				if (!availableRoleNames.contains(roleName)) {
 					throw new Exception("Invalid Role Name provided for the Department");
@@ -937,10 +941,10 @@ public class PortalServiceImpl implements PortalService {
 					continue;
 				}
 				// Just check this department type is "SPV"
-				Department dept = deptRepo.findById(userDeptRole.getDeptId()).get();
-				if (dept != null) {
+				Optional<Department> dept = deptRepo.findById(userDeptRole.getDeptId());
+				if (dept.isPresent()) {
 					Iterable<DepartmentType> deptTypeList = deptTypeRepo
-							.findAllById(Arrays.asList(dept.getDeptTypeIds()));
+							.findAllById(Arrays.asList(dept.get().getDeptTypeIds()));
 					if (!DataValidator.isCollectionEmpty(deptTypeList)) {
 						for (DepartmentType deptType : deptTypeList) {
 							if (deptType.getDeptType().equalsIgnoreCase(PortalConstants.CBP_DEPT_TYPE)) {
@@ -978,10 +982,10 @@ public class PortalServiceImpl implements PortalService {
 					continue;
 				}
 				// Just check this department type is "SPV"
-				Department dept = deptRepo.findById(userDeptRole.getDeptId()).get();
-				if (dept != null) {
+				Optional<Department> dept = deptRepo.findById(userDeptRole.getDeptId());
+				if (dept.isPresent()) {
 					Iterable<DepartmentType> deptTypeList = deptTypeRepo
-							.findAllById(Arrays.asList(dept.getDeptTypeIds()));
+							.findAllById(Arrays.asList(dept.get().getDeptTypeIds()));
 					if (!DataValidator.isCollectionEmpty(deptTypeList)) {
 						for (DepartmentType deptType : deptTypeList) {
 							if (deptType.getDeptType().equalsIgnoreCase(PortalConstants.MDO_DEPT_TYPE)) {

@@ -30,7 +30,7 @@ public class DepartmentTypeController {
 	}
 
 	@GetMapping("/portal/departmentTypeById/{deptTypeId}")
-	public ResponseEntity<DepartmentType> getDepartmentByTypeId(@PathVariable("deptTypeId") Integer deptTypeId) {
+	public ResponseEntity<DepartmentType> getDepartmentByTypeId(@PathVariable("deptTypeId") Integer deptTypeId) throws Exception {
 		return new ResponseEntity<DepartmentType>(deptService.getDepartmentTypeById(deptTypeId), HttpStatus.OK);
 	}
 

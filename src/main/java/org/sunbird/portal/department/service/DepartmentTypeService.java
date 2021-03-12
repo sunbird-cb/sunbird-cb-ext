@@ -1,10 +1,9 @@
 package org.sunbird.portal.department.service;
 
+import org.sunbird.portal.department.dto.DepartmentType;
+
 import java.util.List;
 import java.util.Map;
-
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.sunbird.portal.department.dto.DepartmentType;
 
 public interface DepartmentTypeService {
 
@@ -12,7 +11,7 @@ public interface DepartmentTypeService {
 
 	List<DepartmentType> getDepartmentByType(String deptType);
 
-	DepartmentType getDepartmentTypeById(Integer id);
+	DepartmentType getDepartmentTypeById(Integer id) throws Exception;
 
 	Map<String, List<String>> getDepartmentTypeNames();
 }

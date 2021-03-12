@@ -9,6 +9,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestTemplate;
 import org.sunbird.common.model.OpenSaberApiResp;
 import org.sunbird.common.model.OpenSaberApiUserProfile;
@@ -36,13 +37,13 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 	private CbExtLogger logger = new CbExtLogger(getClass().getName());
 
 	@Override
-	public boolean validateUser(String rootOrg, String userId) throws ApplicationLogicError {
+	public boolean validateUser(String rootOrg, String userId){
 
-		Map<String, Object> requestMap = new HashMap<String, Object>();
+		Map<String, Object> requestMap = new HashMap<>();
 
-		Map<String, Object> request = new HashMap<String, Object>();
+		Map<String, Object> request = new HashMap<>();
 
-		Map<String, String> filters = new HashMap<String, String>();
+		Map<String, String> filters = new HashMap<>();
 		filters.put(Constants.USER_ID, userId);
 		request.put(Constants.FILTERS, filters);
 
@@ -58,11 +59,9 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 
 			SunbirdApiResp sunbirdApiResp = restTemplate.postForObject(serverUrl, requestEnty, SunbirdApiResp.class);
 
-			if (sunbirdApiResp != null && "OK".equalsIgnoreCase(sunbirdApiResp.getResponseCode())
-					&& sunbirdApiResp.getResult().getResponse().getCount() >= 1) {
-				return true;
-			} else
-				return false;
+			boolean expression = (sunbirdApiResp != null && "OK".equalsIgnoreCase(sunbirdApiResp.getResponseCode())
+					&& sunbirdApiResp.getResult().getResponse().getCount() >= 1);
+				return expression;
 
 		} catch (Exception e) {
 			throw new ApplicationLogicError("Sunbird Service ERROR: ", e);
@@ -75,9 +74,9 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 
 		Map<String, Object> result = new HashMap<>();
 
-		Map<String, Object> request = new HashMap<String, Object>();
-		Map<String, Object> filters = new HashMap<String, Object>();
-		Map<String, Object> idKeyword = new HashMap<String, Object>();
+		Map<String, Object> request = new HashMap<>();
+		Map<String, Object> filters = new HashMap<>();
+		Map<String, Object> idKeyword = new HashMap<>();
 		idKeyword.put("or", userIds);
 		filters.put("id.keyword", idKeyword);
 		request.put("limit", userIds.size());
@@ -92,7 +91,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 			OpenSaberApiResp openSaberApiResp = restTemplate.postForObject(serverUrl, requestEnty,
 					OpenSaberApiResp.class);
 			if (openSaberApiResp != null && "OK".equalsIgnoreCase(openSaberApiResp.getResponseCode())
-					&& openSaberApiResp.getResult().getUserProfile().size() >= 1) {
+					&& !CollectionUtils.isEmpty(openSaberApiResp.getResult().getUserProfile()) ) {
 				for (OpenSaberApiUserProfile userProfile : openSaberApiResp.getResult().getUserProfile()) {
 					result.put(userProfile.getUserId(), userProfile);
 				}

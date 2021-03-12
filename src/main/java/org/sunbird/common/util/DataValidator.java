@@ -3,6 +3,10 @@ package org.sunbird.common.util;
 import java.util.List;
 
 public class DataValidator {
+
+	private DataValidator() {
+		throw new IllegalStateException("DataValidator class");
+	}
 	public static boolean isStringEmpty(String str) {
 		return str == null || str.isEmpty();
 	}

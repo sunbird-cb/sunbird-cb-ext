@@ -48,8 +48,7 @@ public class SunbirdConfig extends CassandraConfig {
         session.setSchemaAction(getSchemaAction());
         session.setStartupScripts(getStartupScripts());
         session.setShutdownScripts(getShutdownScripts());
-        logger.info("Cassandra session created for " + getKeyspaceName() + "keyspace with IP : " + getContactPoints()
-                + ":" + getPort());
+        logger.info(String.format("Cassandra session created for  %s keyspace with IP :  %s", getKeyspaceName(), getContactPoints()));
         return session;
     }
 }

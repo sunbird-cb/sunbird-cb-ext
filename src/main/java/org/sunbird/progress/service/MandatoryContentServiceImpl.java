@@ -99,9 +99,12 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
                 if (response.get("responseCode").equals("OK")) {
                     List<Object> result = (List<Object>) ((HashMap<String, Object>) response.get("result")).get("contentList");
                     if (!CollectionUtils.isEmpty(result)) {
-                        Map<String, Object> content = (Map<String, Object>) result.stream().findFirst().get();
-                        BigDecimal progress = new BigDecimal(content.get("completionPercentage").toString());
-                        mandatoryContentInfo.getContentDetails().get(infoMap.getKey()).setUserProgress(progress.floatValue());
+                        Optional<Object> optionResult= result.stream().findFirst();
+                        if(optionResult.isPresent()){
+                            Map<String, Object> content = (Map<String, Object>) optionResult.get();
+                            BigDecimal progress = new BigDecimal(content.get("completionPercentage").toString());
+                            mandatoryContentInfo.getContentDetails().get(infoMap.getKey()).setUserProgress(progress.floatValue());
+                        }
                     }
                 }
             } catch (Exception ex) {
