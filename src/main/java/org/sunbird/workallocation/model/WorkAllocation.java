@@ -9,8 +9,8 @@ public class WorkAllocation {
     private String userId;
     private String deptId;
     private String deptName;
-    private List<ActiveList> activeList;
-    private List<Object> archivedList;
+    private List<Role> activeList;
+    private List<Role> archivedList;
     private long updatedAt;
     private String updatedBy;
 
@@ -38,19 +38,19 @@ public class WorkAllocation {
         this.deptName = deptName;
     }
 
-    public List<ActiveList> getActiveList() {
+    public List<Role> getActiveList() {
         return activeList;
     }
 
-    public void setActiveList(List<ActiveList> activeList) {
-        this.activeList = activeList;
+    public void setActiveList(List<Role> role) {
+        this.activeList = role;
     }
 
-    public List<Object> getArchivedList() {
+    public List<Role> getArchivedList() {
         return archivedList;
     }
 
-    public void setArchivedList(List<Object> archivedList) {
+    public void setArchivedList(List<Role> archivedList) {
         this.archivedList = archivedList;
     }
 
