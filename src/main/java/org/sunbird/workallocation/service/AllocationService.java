@@ -125,8 +125,7 @@ public class AllocationService {
         if (!StringUtils.isEmpty(type))
             searchRequest.types(type);
         searchRequest.source(searchSourceBuilder);
-        SearchResponse searchResponse = esClient.search(searchRequest, RequestOptions.DEFAULT);
-        return searchResponse;
+        return esClient.search(searchRequest, RequestOptions.DEFAULT);
 
     }
 
@@ -141,8 +140,10 @@ public class AllocationService {
         List<Map<String, Object>> professionalDetails = (List<Map<String, Object>>) searObjectMap.get("professionalDetails");
         String depName = null;
         if (!CollectionUtils.isEmpty(professionalDetails)) {
-            Map<String, Object> propDetails = professionalDetails.stream().findFirst().get();
-            depName = CollectionUtils.isEmpty(propDetails) ? "" : (String) propDetails.get("name");
+            Optional<Map<String, Object>> propDetails = professionalDetails.stream().findFirst();
+            if(propDetails.isPresent()){
+                depName = CollectionUtils.isEmpty(propDetails.get()) ? "" : (String)propDetails.get().get("name");
+            }
         }
         HashMap<String, Object> result = new HashMap<>();
         result.put("first_name", personalDetails.get("firstname"));
@@ -165,7 +166,6 @@ public class AllocationService {
             throw new BadRequestException("Search term should not be empty!");
         List<Map<String, Object>> resultArray = new ArrayList<>();
         Map<String, Object> result;
-        String depName;
         final BoolQueryBuilder query = QueryBuilders.boolQuery();
         query
                 .should(QueryBuilders.matchPhrasePrefixQuery("personalDetails.primaryEmail", searchTerm))
