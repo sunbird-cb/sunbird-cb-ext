@@ -283,4 +283,9 @@ public class PortalController {
 			throw new Exception("User is not assigned with any CBP related roles.");
 		}
 	}
+
+	@GetMapping("/portal/isUserActive")
+	public ResponseEntity<Boolean> isUserActive(@RequestHeader("userId") String userId) {
+		return new ResponseEntity<Boolean>(portalService.isUserActive(userId), HttpStatus.OK);
+	}
 }
