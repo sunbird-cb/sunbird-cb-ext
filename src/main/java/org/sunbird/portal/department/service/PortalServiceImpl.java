@@ -1007,4 +1007,12 @@ public class PortalServiceImpl implements PortalService {
 
 		return false;
 	}
+
+	@Override
+	public Boolean isUserActive(String userId) {
+		List<UserDepartmentRole> userDepartmentRole = userDepartmentRoleRepo.findAllByUserIdAndIsActiveAndIsBlocked(userId, true, false);
+		if (!CollectionUtils.isEmpty(userDepartmentRole))
+			return true;
+		return false;
+	}
 }
