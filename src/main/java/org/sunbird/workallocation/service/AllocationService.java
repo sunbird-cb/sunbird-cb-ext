@@ -1,21 +1,22 @@
 package org.sunbird.workallocation.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.rest.RestStatus;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.sunbird.common.model.Response;
 import org.sunbird.common.util.CbExtServerProperties;
@@ -34,6 +35,8 @@ public class AllocationService {
 
     public static final String ALLOCATION_DETAILS = "allocationDetails";
     public static final String USER_DETAILS = "userDetails";
+    public static final String ADD = "add";
+    public static final String UPDATE = "update";
     private Logger logger = LoggerFactory.getLogger(AllocationService.class);
 
     final String[] includeFields = {"personalDetails.firstname", "personalDetails.surname", "personalDetails.primaryEmail", "id", "professionalDetails.name"};
@@ -48,7 +51,63 @@ public class AllocationService {
     @Autowired
     private CbExtServerProperties configuration;
 
+    @Autowired
+    private IndexerService indexerService;
+
+    @Autowired
+    private EnrichmentService enrichmentService;
+
+    @Value("${workallocation.index.name}")
+    public String index;
+
+    @Value("${workallocation.index.type}")
+    public String indexType;
+
     ObjectMapper mapper = new ObjectMapper();
+
+    /**
+     * @param userId         user id
+     * @param workAllocation work allocation object
+     * @return response
+     */
+    public Response addWorkAllocation(String userId, WorkAllocation workAllocation) {
+        validator.validateWorkAllocationReq(workAllocation);
+        enrichmentService.enrichDates(userId, workAllocation, null, ADD);
+        RestStatus restStatus = indexerService.addEntity(index, indexType, workAllocation.getUserId(), mapper.convertValue(workAllocation, Map.class));
+        Response response = new Response();
+        if (!ObjectUtils.isEmpty(restStatus)) {
+            response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
+        } else {
+            response.put(Constants.MESSAGE, Constants.FAILED);
+        }
+        response.put(Constants.DATA, restStatus);
+        response.put(Constants.STATUS, HttpStatus.OK);
+        return response;
+    }
+
+    /**
+     * @param userId         user id
+     * @param workAllocation work allocation object
+     * @return response
+     */
+    public Response updateWorkAllocation(String userId, WorkAllocation workAllocation) {
+        validator.validateWorkAllocationReq(workAllocation);
+        Map<String, Object> existingRecord = indexerService.readEntity(index, indexType, workAllocation.getUserId());
+        if (CollectionUtils.isEmpty(existingRecord)) {
+            throw new BadRequestException("No record found on given user Id!");
+        }
+        enrichmentService.enrichDates(userId, workAllocation, mapper.convertValue(existingRecord, WorkAllocation.class), UPDATE);
+        RestStatus restStatus = indexerService.updateEntity(index, indexType, workAllocation.getUserId(), mapper.convertValue(workAllocation, Map.class));
+        Response response = new Response();
+        if (!ObjectUtils.isEmpty(restStatus)) {
+            response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
+        } else {
+            response.put(Constants.MESSAGE, Constants.FAILED);
+        }
+        response.put(Constants.DATA, restStatus);
+        response.put(Constants.STATUS, HttpStatus.OK);
+        return response;
+    }
 
     /**
      * Search User's for work allocation
@@ -65,8 +124,10 @@ public class AllocationService {
         List<WorkAllocation> allocationSearchList = new ArrayList<>();
         List<Map<String, Object>> finalRes = new ArrayList<>();
         Map<String, Object> result;
+        long totalCount = 0;
         try {
-            SearchResponse searchResponse = getEsResult(configuration.getAllocationIndexName(), configuration.getAllocationIndexType(), sourceBuilder);
+            SearchResponse searchResponse = indexerService.getEsResult(index, indexType, sourceBuilder);
+            totalCount = searchResponse.getHits().getTotalHits();
             for (SearchHit hit : searchResponse.getHits()) {
                 allocationSearchList.add(mapper.convertValue(hit.getSourceAsMap(), WorkAllocation.class));
             }
@@ -84,6 +145,7 @@ public class AllocationService {
         Response response = new Response();
         response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
         response.put(Constants.DATA, finalRes);
+        response.put("count", totalCount);
         response.put(Constants.STATUS, HttpStatus.OK);
         return response;
     }
@@ -101,7 +163,7 @@ public class AllocationService {
         query.must(QueryBuilders.termsQuery("id.keyword", userIds));
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder().query(query);
         sourceBuilder.fetchSource(includeFields, new String[]{});
-        SearchResponse searchResponse = getEsResult(configuration.getEsProfileIndex(), configuration.getEsProfileIndexType(), sourceBuilder);
+        SearchResponse searchResponse = indexerService.getEsResult(configuration.getEsProfileIndex(), configuration.getEsProfileIndexType(), sourceBuilder);
         for (SearchHit hit : searchResponse.getHits()) {
             Map<String, Object> userResult = extractUserDetails(hit.getSourceAsMap());
             if (!StringUtils.isEmpty(userResult.get("wid")))
@@ -110,24 +172,6 @@ public class AllocationService {
         return result;
     }
 
-    /**
-     * Search the document in es based on provided information
-     *
-     * @param indexName           es index name
-     * @param type                index type
-     * @param searchSourceBuilder source builder
-     * @return es search response
-     * @throws IOException
-     */
-    public SearchResponse getEsResult(String indexName, String type, SearchSourceBuilder searchSourceBuilder) throws IOException {
-        SearchRequest searchRequest = new SearchRequest();
-        searchRequest.indices(indexName);
-        if (!StringUtils.isEmpty(type))
-            searchRequest.types(type);
-        searchRequest.source(searchSourceBuilder);
-        return esClient.search(searchRequest, RequestOptions.DEFAULT);
-
-    }
 
     /**
      * Extract the user details from elastic search map
@@ -141,8 +185,8 @@ public class AllocationService {
         String depName = null;
         if (!CollectionUtils.isEmpty(professionalDetails)) {
             Optional<Map<String, Object>> propDetails = professionalDetails.stream().findFirst();
-            if(propDetails.isPresent()){
-                depName = CollectionUtils.isEmpty(propDetails.get()) ? "" : (String)propDetails.get().get("name");
+            if (propDetails.isPresent()) {
+                depName = CollectionUtils.isEmpty(propDetails.get()) ? "" : (String) propDetails.get().get("name");
             }
         }
         HashMap<String, Object> result = new HashMap<>();
@@ -173,7 +217,7 @@ public class AllocationService {
                 .should(QueryBuilders.matchPhrasePrefixQuery("personalDetails.surname", searchTerm));
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder().query(query);
         sourceBuilder.fetchSource(includeFields, new String[]{});
-        SearchResponse searchResponse = getEsResult(configuration.getEsProfileIndex(), configuration.getEsProfileIndexType(), sourceBuilder);
+        SearchResponse searchResponse = indexerService.getEsResult(configuration.getEsProfileIndex(), configuration.getEsProfileIndexType(), sourceBuilder);
         for (SearchHit hit : searchResponse.getHits()) {
             result = extractUserDetails(hit.getSourceAsMap());
             resultArray.add(result);
@@ -200,7 +244,7 @@ public class AllocationService {
             final QueryBuilder query = QueryBuilders.termsQuery("userId.keyword", userIds);
             SearchSourceBuilder sourceBuilder = new SearchSourceBuilder().query(query);
             try {
-                SearchResponse searchResponse = getEsResult(configuration.getAllocationIndexName(), configuration.getAllocationIndexType(), sourceBuilder);
+                SearchResponse searchResponse = indexerService.getEsResult(index, indexType, sourceBuilder);
                 for (SearchHit hit : searchResponse.getHits()) {
                     allocationSearchMap.put((String) hit.getSourceAsMap().get("userId"), hit.getSourceAsMap());
                 }

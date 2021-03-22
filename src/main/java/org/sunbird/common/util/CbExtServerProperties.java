@@ -61,12 +61,6 @@ public class CbExtServerProperties {
     @Value("${es.profile.source.fields}")
     private String[] esProfileSourceFields;
 
-    @Value("${workallocation.index.name}")
-    private String allocationIndexName;
-
-    @Value("${workallocation.index.type}")
-    private String allocationIndexType;
-
     public String getWfServiceHost() {
         return wfServiceHost;
     }
@@ -209,22 +203,6 @@ public class CbExtServerProperties {
 
     public void setEsProfileSourceFields(String[] esProfileSourceFields) {
         this.esProfileSourceFields = esProfileSourceFields;
-    }
-
-    public String getAllocationIndexName() {
-        return allocationIndexName;
-    }
-
-    public void setAllocationIndexName(String allocationIndexName) {
-        this.allocationIndexName = allocationIndexName;
-    }
-
-    public String getAllocationIndexType() {
-        return allocationIndexType;
-    }
-
-    public void setAllocationIndexType(String allocationIndexType) {
-        this.allocationIndexType = allocationIndexType;
     }
 
     @Override
