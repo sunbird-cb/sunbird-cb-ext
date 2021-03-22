@@ -40,6 +40,27 @@ public class CbExtServerProperties {
     @Value("${sb.api.key}")
     private String sbApiKey;
 
+    @Value("${es.host}")
+    private String esHost;
+
+    @Value("${es.port}")
+    private String esPort;
+
+    @Value("${es.username}")
+    private String esUser;
+
+    @Value("${es.password}")
+    private String esPassword;
+
+    @Value("${es.profile.index}")
+    private String esProfileIndex;
+
+    @Value("${es.profile.index.type}")
+    private String esProfileIndexType;
+
+    @Value("${es.profile.source.fields}")
+    private String[] esProfileSourceFields;
+
     public String getWfServiceHost() {
         return wfServiceHost;
     }
@@ -126,6 +147,62 @@ public class CbExtServerProperties {
 
     public void setSbApiKey(String sbApiKey) {
         this.sbApiKey = sbApiKey;
+    }
+
+    public String getEsHost() {
+        return esHost;
+    }
+
+    public void setEsHost(String esHost) {
+        this.esHost = esHost;
+    }
+
+    public String getEsPort() {
+        return esPort;
+    }
+
+    public void setEsPort(String esPort) {
+        this.esPort = esPort;
+    }
+
+    public String getEsUser() {
+        return esUser;
+    }
+
+    public void setEsUser(String esUser) {
+        this.esUser = esUser;
+    }
+
+    public String getEsPassword() {
+        return esPassword;
+    }
+
+    public void setEsPassword(String esPassword) {
+        this.esPassword = esPassword;
+    }
+
+    public String getEsProfileIndex() {
+        return esProfileIndex;
+    }
+
+    public void setEsProfileIndex(String esProfileIndex) {
+        this.esProfileIndex = esProfileIndex;
+    }
+
+    public String getEsProfileIndexType() {
+        return esProfileIndexType;
+    }
+
+    public void setEsProfileIndexType(String esProfileIndexType) {
+        this.esProfileIndexType = esProfileIndexType;
+    }
+
+    public String[] getEsProfileSourceFields() {
+        return esProfileSourceFields;
+    }
+
+    public void setEsProfileSourceFields(String[] esProfileSourceFields) {
+        this.esProfileSourceFields = esProfileSourceFields;
     }
 
     @Override
