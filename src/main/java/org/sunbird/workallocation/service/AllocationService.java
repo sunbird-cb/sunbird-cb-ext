@@ -145,7 +145,7 @@ public class AllocationService {
         Response response = new Response();
         response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
         response.put(Constants.DATA, finalRes);
-        response.put("count", totalCount);
+        response.put("totalhit", totalCount);
         response.put(Constants.STATUS, HttpStatus.OK);
         return response;
     }
