@@ -39,7 +39,7 @@ public interface PortalService {
 	boolean validateCBPUserLogin(String userId);
 	boolean validateFracUserLogin(String userId);
 
-	DepartmentInfo addDepartment(String userId, String userRoleName, DepartmentInfo deptInfo,String rootOrg) throws Exception;
+	DepartmentInfo addDepartment(String authUserToken, String userId, String userRoleName, DepartmentInfo deptInfo,String rootOrg) throws Exception;
 
 	DepartmentInfo getMyDepartment(String userId,String rootOrg) throws Exception;
 

@@ -68,10 +68,10 @@ public class PortalController {
 	}
 
 	@PostMapping("/portal/spv/department")
-	public ResponseEntity<DepartmentInfo> addDepartment(@RequestHeader("wid") String wid,
+	public ResponseEntity<DepartmentInfo> addDepartment(@RequestHeader("xAuthUser") String authUserToken, @RequestHeader("wid") String wid,
 			@RequestBody DepartmentInfo deptInfo, @RequestHeader("rootOrg") String rootOrg) throws Exception {
 		validateUserAccess(PortalConstants.SPV_DEPT_TYPE, PortalConstants.SPV_ROLE_NAME, wid);
-		return new ResponseEntity<DepartmentInfo>(spvPortalService.addDepartment(wid, deptInfo, rootOrg),
+		return new ResponseEntity<DepartmentInfo>(spvPortalService.addDepartment(authUserToken, wid, deptInfo, rootOrg),
 				HttpStatus.OK);
 	}
 

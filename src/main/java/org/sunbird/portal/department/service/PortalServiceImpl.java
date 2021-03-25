@@ -25,6 +25,7 @@ import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.common.util.DataValidator;
 import org.sunbird.core.logger.CbExtLogger;
+import org.sunbird.core.producer.Producer;
 import org.sunbird.portal.department.PortalConstants;
 import org.sunbird.portal.department.dto.Department;
 import org.sunbird.portal.department.dto.DepartmentRole;
@@ -71,6 +72,9 @@ public class PortalServiceImpl implements PortalService {
 
 	@Autowired
 	CbExtServerProperties serverConfig;
+
+	@Autowired
+	Producer producer;
 
 	private static final String ROOT_ORG_CONST = "rootOrg";
 	private static final String ORG_CONST = "org";
@@ -271,7 +275,7 @@ public class PortalServiceImpl implements PortalService {
 	}
 
 	@Override
-	public DepartmentInfo addDepartment(String userId, String userRoleName, DepartmentInfo deptInfo, String rootOrg)
+	public DepartmentInfo addDepartment(String authUserToken, String userId, String userRoleName, DepartmentInfo deptInfo, String rootOrg)
 			throws Exception {
 		validateDepartmentInfo(deptInfo);
 
@@ -329,6 +333,10 @@ public class PortalServiceImpl implements PortalService {
 				}
 			}
 		}
+		HashMap<String, Object> orgObj = new HashMap<>();
+		orgObj.put("userToken", authUserToken);
+		orgObj.put("orgName", dept.getDeptName());
+		producer.push(serverConfig.getOrgCreationKafkaTopic(), orgObj);
 		return enrichDepartmentInfo(dept, false, true, rootOrg);
 	}
 

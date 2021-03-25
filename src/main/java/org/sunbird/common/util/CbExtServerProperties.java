@@ -61,6 +61,12 @@ public class CbExtServerProperties {
     @Value("${es.profile.source.fields}")
     private String[] esProfileSourceFields;
 
+    @Value("${org.create.endpoint}")
+    private String orgCreateEndPoint;
+
+    @Value("${kafka.topics.org.creation}")
+    private String orgCreationKafkaTopic;
+
     public String getWfServiceHost() {
         return wfServiceHost;
     }
@@ -203,6 +209,22 @@ public class CbExtServerProperties {
 
     public void setEsProfileSourceFields(String[] esProfileSourceFields) {
         this.esProfileSourceFields = esProfileSourceFields;
+    }
+
+    public String getOrgCreateEndPoint() {
+        return orgCreateEndPoint;
+    }
+
+    public void setOrgCreateEndPoint(String orgCreateEndPoint) {
+        this.orgCreateEndPoint = orgCreateEndPoint;
+    }
+
+    public String getOrgCreationKafkaTopic() {
+        return orgCreationKafkaTopic;
+    }
+
+    public void setOrgCreationKafkaTopic(String orgCreationKafkaTopic) {
+        this.orgCreationKafkaTopic = orgCreationKafkaTopic;
     }
 
     @Override
