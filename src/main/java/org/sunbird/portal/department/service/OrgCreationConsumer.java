@@ -26,8 +26,6 @@ public class OrgCreationConsumer {
         try {
             ObjectMapper mapper = new ObjectMapper();
             Map<String, Object> orgObject = mapper.readValue(String.valueOf(data.value()), Map.class);
-            log.info("Received Topic Request :");
-            log.info(mapper.writeValueAsString(orgObject));
             processService.createOrg(orgObject);
         } catch (IOException e) {
             log.error(e);
