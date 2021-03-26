@@ -13,7 +13,6 @@ import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.core.logger.CbExtLogger;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Service
@@ -27,10 +26,10 @@ public class OrgCreationProcessService {
     @Autowired
     RestTemplate restTemplate;
 
-    public void createOrg(Map<String, Object> orgObect) {
-        log.info("Creating org to sb start ....");
+    public void createOrg(Map<String, Object> orgObj) {
+        log.info("Creating org to sb started ....");
         ObjectMapper mapper = new ObjectMapper();
-        String orgName = (String) orgObect.get("orgName");
+        String orgName = (String) orgObj.get("orgName");
         Map<String, Object> request = new HashMap<>();
         HashMap<String, Object> innerReq = new HashMap<>();
         innerReq.put("channel", orgName);
@@ -38,7 +37,7 @@ public class OrgCreationProcessService {
         innerReq.put("isRootOrg", true);
         request.put("request", innerReq);
         HttpHeaders headers = new HttpHeaders();
-        headers.set("X-Authenticated-User-Token", (String) orgObect.get("userToken"));
+        headers.set("X-Authenticated-User-Token", (String) orgObj.get("userToken"));
         headers.set("Authorization", extServerProperties.getSbApiKey());
         HttpEntity<Object> entity = new HttpEntity<>(request, headers);
         try {
@@ -50,7 +49,7 @@ public class OrgCreationProcessService {
         if(!CollectionUtils.isEmpty(response) && !ObjectUtils.isEmpty(response.get("result"))){
             String orgId = (String)((Map<String, Object>)response.get("result")).get("organisationId");
             log.info("Created org Id : " + orgId);
-            log.info("Creating org to sb finish ....");
+            log.info("Creating org to sb finished ....");
         }else {
             log.info("Some exception occurred while creating the org ....");
         }
