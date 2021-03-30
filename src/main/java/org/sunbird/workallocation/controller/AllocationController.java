@@ -13,30 +13,32 @@ import org.sunbird.workallocation.service.AllocationService;
 @RequestMapping("/v1/workallocation")
 public class AllocationController {
 
-    @Autowired
-    private AllocationService allocationService;
+	@Autowired
+	private AllocationService allocationService;
 
-    @PostMapping("/add")
-    public ResponseEntity<Response> add(@RequestHeader("userId") String userId, @RequestBody WorkAllocation workAllocation) {
-        Response response = allocationService.addWorkAllocation(userId, workAllocation);
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+	@PostMapping("/add")
+	public ResponseEntity<Response> add(@RequestHeader("Authorization") String authUserToken,
+			@RequestHeader("userId") String userId, @RequestBody WorkAllocation workAllocation) {
+		Response response = allocationService.addWorkAllocation(authUserToken, userId, workAllocation);
+		return new ResponseEntity<>(response, HttpStatus.OK);
+	}
 
-    @PostMapping("/update")
-    public ResponseEntity<Response> update(@RequestHeader("userId") String userId, @RequestBody WorkAllocation workAllocation) {
-        Response response = allocationService.updateWorkAllocation(userId, workAllocation);
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+	@PostMapping("/update")
+	public ResponseEntity<Response> update(@RequestHeader("Authorization") String authUserToken,
+			@RequestHeader("userId") String userId, @RequestBody WorkAllocation workAllocation) {
+		Response response = allocationService.updateWorkAllocation(authUserToken, userId, workAllocation);
+		return new ResponseEntity<>(response, HttpStatus.OK);
+	}
 
-    @PostMapping("/getUsers")
-    public ResponseEntity<Response> getUsers(@RequestBody SearchCriteria searchCriteria) {
-        Response response = allocationService.getUsers(searchCriteria);
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+	@PostMapping("/getUsers")
+	public ResponseEntity<Response> getUsers(@RequestBody SearchCriteria searchCriteria) {
+		Response response = allocationService.getUsers(searchCriteria);
+		return new ResponseEntity<>(response, HttpStatus.OK);
+	}
 
-    @GetMapping("/users/autocomplete")
-    public ResponseEntity<Response> userAutoComplete(@RequestParam("searchTerm") String searchTerm) {
-        Response response = allocationService.userAutoComplete(searchTerm);
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+	@GetMapping("/users/autocomplete")
+	public ResponseEntity<Response> userAutoComplete(@RequestParam("searchTerm") String searchTerm) {
+		Response response = allocationService.userAutoComplete(searchTerm);
+		return new ResponseEntity<>(response, HttpStatus.OK);
+	}
 }

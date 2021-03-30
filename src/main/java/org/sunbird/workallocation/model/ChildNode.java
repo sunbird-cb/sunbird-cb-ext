@@ -1,5 +1,10 @@
 package org.sunbird.workallocation.model;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -67,4 +72,12 @@ public class ChildNode {
     public void setParentRole(String parentRole) {
         this.parentRole = parentRole;
     }
+    
+    public Map<String, Object> getFracRequest(String source) {
+		Map<String, Object> frac = new HashMap<String, Object>();
+		frac.put("name", name);
+		frac.put("type", "ROLE");
+		frac.put("source", source);
+		return frac;
+	}
 }

@@ -66,7 +66,28 @@ public class CbExtServerProperties {
 
     @Value("${kafka.topics.org.creation}")
     private String orgCreationKafkaTopic;
-
+    
+    @Value("${km.base.host}")
+    private String kmBaseHost;
+    
+    @Value("${km.base.framework.path}")
+    private String kmFrameWorkPath;
+    
+    @Value("${frac.host}")
+    private String fracHost;
+    
+    @Value("${frac.node.path}")
+    private String fracNodePath;
+    
+    @Value("${frac.activity.path}")
+    private String fracActivityPath;
+    
+    @Value("${frac.node.source}")
+    private String fracSource;
+    
+    @Value("${frac.node.source.useDeptName}")
+    private boolean fracSourceUseDeptName;
+    
     public String getWfServiceHost() {
         return wfServiceHost;
     }
@@ -226,8 +247,64 @@ public class CbExtServerProperties {
     public void setOrgCreationKafkaTopic(String orgCreationKafkaTopic) {
         this.orgCreationKafkaTopic = orgCreationKafkaTopic;
     }
+    
+    public String getKmBaseHost() {
+		return kmBaseHost;
+	}
 
-    @Override
+	public void setKmBaseHost(String kmBaseHost) {
+		this.kmBaseHost = kmBaseHost;
+	}
+
+	public String getKmFrameWorkPath() {
+		return kmFrameWorkPath;
+	}
+
+	public void setKmFrameWorkPath(String kmFrameWorkPath) {
+		this.kmFrameWorkPath = kmFrameWorkPath;
+	}
+	
+	public String getFracHost() {
+		return fracHost;
+	}
+
+	public void setFracHost(String fracHost) {
+		this.fracHost = fracHost;
+	}
+
+	public String getFracNodePath() {
+		return fracNodePath;
+	}
+
+	public void setFracNodePath(String fracNodePath) {
+		this.fracNodePath = fracNodePath;
+	}
+	
+	public String getFracActivityPath() {
+		return fracActivityPath;
+	}
+
+	public void setFracActivityPath(String fracActivityPath) {
+		this.fracActivityPath = fracActivityPath;
+	}
+
+	public String getFracSource() {
+		return fracSource;
+	}
+
+	public void setFracSource(String fracSource) {
+		this.fracSource = fracSource;
+	}
+
+	public boolean isFracSourceUseDeptName() {
+		return fracSourceUseDeptName;
+	}
+
+	public void setFracSourceUseDeptName(boolean fracSourceUseDeptName) {
+		this.fracSourceUseDeptName = fracSourceUseDeptName;
+	}
+
+	@Override
     public String toString() {
         StringBuilder str = new StringBuilder("SB-CB-Ext Server Properties: ");
         str.append("[wfServiceHost=").append(wfServiceHost).append("],");
