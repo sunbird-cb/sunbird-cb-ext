@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.util.CollectionUtils;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -119,20 +121,22 @@ public class Role {
 		isArchived = archived;
 	}
 
-	public Map<String, Object> getFracRequest(String source) {
-		Map<String, Object> frac = new HashMap<String, Object>();
-		frac.put("name", name);
-		frac.put("type", "ROLE");
-		frac.put("source", source);
-		List<Map<String, Object>> children = new ArrayList<Map<String, Object>>();
-		for (ChildNode cn : childNodes) {
-			Map<String, Object> child = new HashMap<String, Object>();
-			child.put("name", cn.getName());
-			child.put("Type", "ACTIVITY");
-			child.put("source", source);
-			children.add(child);
+	public FracRequest getFracRequest(String source) {
+		FracRequest req = new FracRequest();
+		req.setName(source);
+		req.setName(name);
+		req.setType("ROLE");
+		if (!CollectionUtils.isEmpty(childNodes)) {
+			List<ChildNode> children = new ArrayList<ChildNode>();
+			for (ChildNode cn : childNodes) {
+				ChildNode newCN = new ChildNode();
+				newCN.setName(cn.getName());
+				newCN.setType(cn.getType());
+				newCN.setSource(source);
+				children.add(newCN);
+			}
+			req.setChildren(children);
 		}
-		frac.put("children", children);
-		return frac;
+		return req;
 	}
 }

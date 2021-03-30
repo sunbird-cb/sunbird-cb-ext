@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
@@ -32,14 +33,14 @@ import org.sunbird.common.model.Response;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.core.exception.BadRequestException;
-import org.sunbird.core.logger.CbExtLogger;
 import org.sunbird.workallocation.model.ChildNode;
+import org.sunbird.workallocation.model.FracRequest;
+import org.sunbird.workallocation.model.FracResponse;
 import org.sunbird.workallocation.model.Role;
 import org.sunbird.workallocation.model.SearchCriteria;
 import org.sunbird.workallocation.model.WorkAllocation;
 import org.sunbird.workallocation.util.Validator;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
@@ -53,8 +54,6 @@ public class AllocationService {
 
 	final String[] includeFields = { "personalDetails.firstname", "personalDetails.surname",
 			"personalDetails.primaryEmail", "id", "professionalDetails.name" };
-
-	private CbExtLogger log = new CbExtLogger(getClass().getName());
 
 	@Autowired
 	private CbExtServerProperties extServerProperties;
@@ -303,7 +302,7 @@ public class AllocationService {
 		List<Role> newRoleList = new ArrayList<Role>();
 		try {
 			for (Role r : oldRoleList) {
-				if ("".equals(r.getId())) {
+				if (r.getId() == null || "".equals(r.getId())) {
 					Role newRole = fetchAddedRole(authUserToken, r);
 					newRoleList.add(newRole);
 				} else {
@@ -312,7 +311,7 @@ public class AllocationService {
 					if (!CollectionUtils.isEmpty(r.getChildNodes())) {
 						List<ChildNode> newChildNodes = new ArrayList<ChildNode>();
 						for (ChildNode cn : r.getChildNodes()) {
-							if ("".equals(cn.getId())) {
+							if (cn.getId() == null || "".equals(cn.getId())) {
 								ChildNode newCN = fetchAddedActivity(authUserToken, cn);
 								newChildNodes.add(newCN);
 							} else {
@@ -325,62 +324,50 @@ public class AllocationService {
 				}
 			}
 		} catch (Exception e) {
-			log.error(e);
+			logger.error("Failed to Add Role / Activity. Excption: ", e);
 		}
 		if (oldRoleList.size() == newRoleList.size()) {
 			workAllocation.setActiveList(newRoleList);
 		} else {
-			log.error(new Exception("Failed to create FRAC Roles / Activities. Old List Size: " + oldRoleList.size()
-					+ ", New List Size: " + newRoleList.size()));
+			logger.error("Failed to create FRAC Roles / Activities. Old List Size: " + oldRoleList.size()
+					+ ", New List Size: " + newRoleList.size());
 		}
 	}
 
-	private Role fetchAddedRole(String authUserToken, Role role) {
-		log.info("Adding Role into FRAC Service...");
+	private Role fetchAddedRole(String authUserToken, Role role) throws Exception {
+		logger.info("Adding Role into FRAC Service...");
 		ObjectMapper mapper = new ObjectMapper();
 
-		Map<String, Object> request = role.getFracRequest(getSourceValue());
+		FracRequest request = role.getFracRequest(getSourceValue());
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("Authorization", authUserToken);
-		HttpEntity<Object> entity = new HttpEntity<>(request, headers);
-		try {
-			log.info(mapper.writeValueAsString(request));
-		} catch (JsonProcessingException e) {
-			log.error(e);
+		headers.add("Accept", MediaType.APPLICATION_JSON_VALUE);
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		HttpEntity<String> entity = new HttpEntity<>(mapper.writeValueAsString(request), headers);
+		FracResponse response = restTemplate.postForObject(
+				extServerProperties.getFracHost() + extServerProperties.getFracNodePath(), entity, FracResponse.class);
+		if (response != null && response.getStatusInfo().getStatusCode() == 200) {
+			return processRole(response);
 		}
-		Map<String, Object> response = restTemplate.postForObject(
-				extServerProperties.getFracHost() + extServerProperties.getFracNodePath(), entity, Map.class);
-
-		Map<String, Object> responseData = (Map<String, Object>) response.get("responseData");
-		if (responseData != null && !CollectionUtils.isEmpty(responseData)) {
-			return processRole(responseData);
-		}
-
 		return role;
 	}
 
-	private ChildNode fetchAddedActivity(String authUserToken, ChildNode cn) {
-		log.info("Adding Role into FRAC Service...");
+	private ChildNode fetchAddedActivity(String authUserToken, ChildNode cn) throws Exception {
+		logger.info("Adding Activity into FRAC Service...");
 		ObjectMapper mapper = new ObjectMapper();
-
-		Map<String, Object> request = cn.getFracRequest(getSourceValue());
+		ChildNode request = cn.getFracRequest(getSourceValue());
 		HttpHeaders headers = new HttpHeaders();
+		headers.add("Accept", MediaType.APPLICATION_JSON_VALUE);
+		headers.setContentType(MediaType.APPLICATION_JSON);
 		headers.set("Authorization", authUserToken);
-		HttpEntity<Object> entity = new HttpEntity<>(request, headers);
-		try {
-			log.info(mapper.writeValueAsString(request));
-		} catch (JsonProcessingException e) {
-			log.error(e);
+		HttpEntity<String> entity = new HttpEntity<>(mapper.writeValueAsString(request), headers);
+		FracResponse response = restTemplate.postForObject(
+				extServerProperties.getFracHost() + extServerProperties.getFracActivityPath(), entity,
+				FracResponse.class);
+
+		if (response != null && response.getStatusInfo().getStatusCode() == 200) {
+			return processActivity(response);
 		}
-
-		Map<String, Object> response = restTemplate.postForObject(
-				extServerProperties.getFracHost() + extServerProperties.getFracActivityPath(), entity, Map.class);
-
-		Map<String, Object> responseData = (Map<String, Object>) response.get("responseData");
-		if (responseData != null && !CollectionUtils.isEmpty(responseData)) {
-			return processActivity(responseData);
-		}
-
 		return cn;
 	}
 
@@ -390,17 +377,17 @@ public class AllocationService {
 		return extServerProperties.getFracSource();
 	}
 
-	private Role processRole(Map<String, Object> response) {
+	private Role processRole(FracResponse response) {
 		Role r = new Role();
-		r.setId((String) response.get("id"));
-		r.setName((String) response.get("name"));
-		r.setType((String) response.get("type"));
-		r.setStatus((String) response.get("status"));
-		r.setSource((String) response.get("source"));
-		List<Map<String, Object>> children = (List<Map<String, Object>>) response.get("children");
+		r.setId(response.getResponseData().getId());
+		r.setName(response.getResponseData().getName());
+		r.setType(response.getResponseData().getType());
+		r.setStatus(response.getResponseData().getStatus());
+		r.setSource(response.getResponseData().getSource());
+		List<ChildNode> children = response.getResponseData().getChildren();
 		if (children != null && !CollectionUtils.isEmpty(children)) {
 			List<ChildNode> childNodes = new ArrayList<ChildNode>();
-			for (Map<String, Object> child : children) {
+			for (ChildNode child : children) {
 				childNodes.add(processActivity(child));
 			}
 			r.setChildNodes(childNodes);
@@ -408,38 +395,23 @@ public class AllocationService {
 		return r;
 	}
 
-	private ChildNode processActivity(Map<String, Object> child) {
+	private ChildNode processActivity(FracResponse child) {
 		ChildNode cn = new ChildNode();
-		cn.setId((String) child.get("id"));
-		cn.setType((String) child.get("type"));
-		cn.setName((String) child.get("name"));
-		cn.setStatus((String) child.get("status"));
-		cn.setSource((String) child.get("source"));
+		cn.setId(child.getResponseData().getId());
+		cn.setType(child.getResponseData().getType());
+		cn.setName(child.getResponseData().getName());
+		cn.setStatus(child.getResponseData().getStatus());
+		cn.setSource(child.getResponseData().getSource());
 		return cn;
 	}
 
-	private void fetchCatalog(String authUserToken, String framework, String category) {
-		log.info("Creating org to sb started ....");
-		ObjectMapper mapper = new ObjectMapper();
-		Map<String, Object> request = new HashMap<>();
-		HttpHeaders headers = new HttpHeaders();
-		headers.set("X-Authenticated-User-Token", authUserToken);
-		headers.set("Authorization", extServerProperties.getSbApiKey());
-		HttpEntity<Object> entity = new HttpEntity<>(request, headers);
-		try {
-			log.info(mapper.writeValueAsString(request));
-		} catch (JsonProcessingException e) {
-			log.error(e);
-		}
-		Map<String, Object> response = (Map<String, Object>) restTemplate.getForEntity(
-				extServerProperties.getKmBaseHost() + extServerProperties.getKmFrameWorkPath() + framework, Map.class);
-		if (!CollectionUtils.isEmpty(response) && !ObjectUtils.isEmpty(response.get("result"))) {
-			Map<String, Object> frameworkObj = (Map<String, Object>) ((Map<String, Object>) response.get("result"))
-					.get("framework");
-
-		} else {
-			log.info("Some exception occurred while creating the org ....");
-		}
+	private ChildNode processActivity(ChildNode child) {
+		ChildNode cn = new ChildNode();
+		cn.setId(child.getId());
+		cn.setType(child.getType());
+		cn.setName(child.getName());
+		cn.setStatus(child.getStatus());
+		cn.setSource(child.getSource());
+		return cn;
 	}
-
 }
