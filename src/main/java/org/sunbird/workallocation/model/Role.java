@@ -121,21 +121,36 @@ public class Role {
 		isArchived = archived;
 	}
 
-	public FracRequest getFracRequest(String source) {
+	public FracRequest getFracRequest(String source, ChildNode child) {
 		FracRequest req = new FracRequest();
 		req.setName(source);
 		req.setName(name);
 		req.setType("ROLE");
-		if (!CollectionUtils.isEmpty(childNodes)) {
-			List<ChildNode> children = new ArrayList<ChildNode>();
-			for (ChildNode cn : childNodes) {
-				ChildNode newCN = new ChildNode();
-				newCN.setName(cn.getName());
-				newCN.setType(cn.getType());
-				newCN.setSource(source);
-				children.add(newCN);
-			}
+		if ("".equals(id)) {
+			req.setId(null);
+		} else {
+			req.setId(id);
+		}
+
+		List<ChildNode> children = new ArrayList<ChildNode>();
+		if (child != null) {
+			ChildNode newCN = new ChildNode();
+			newCN.setName(child.getName());
+			newCN.setType(child.getType());
+			newCN.setSource(source);
+			children.add(newCN);
 			req.setChildren(children);
+		} else {
+			if (!CollectionUtils.isEmpty(childNodes)) {
+				for (ChildNode cn : childNodes) {
+					ChildNode newCN = new ChildNode();
+					newCN.setName(cn.getName());
+					newCN.setType(cn.getType());
+					newCN.setSource(source);
+					children.add(newCN);
+				}
+				req.setChildren(children);
+			}
 		}
 		return req;
 	}

@@ -6,6 +6,7 @@ public class FracRequest {
 	private String type;
 	private String name;
 	private String source;
+	private String id;
 	private List<ChildNode> children;
 
 	public String getType() {
@@ -38,6 +39,14 @@ public class FracRequest {
 
 	public void setChildren(List<ChildNode> children) {
 		this.children = children;
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
 	}
 
 }

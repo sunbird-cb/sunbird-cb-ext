@@ -303,7 +303,7 @@ public class AllocationService {
 		try {
 			for (Role r : oldRoleList) {
 				if (r.getId() == null || "".equals(r.getId())) {
-					Role newRole = fetchAddedRole(authUserToken, r);
+					Role newRole = fetchAddedRole(authUserToken, r, null);
 					newRoleList.add(newRole);
 				} else {
 					// Role is from FRAC - No need to create new.
@@ -312,8 +312,8 @@ public class AllocationService {
 						List<ChildNode> newChildNodes = new ArrayList<ChildNode>();
 						for (ChildNode cn : r.getChildNodes()) {
 							if (cn.getId() == null || "".equals(cn.getId())) {
-								ChildNode newCN = fetchAddedActivity(authUserToken, cn);
-								newChildNodes.add(newCN);
+								Role newRole = fetchAddedRole(authUserToken, r, cn);
+								newChildNodes.add(newRole.getChildNodes().get(0));
 							} else {
 								newChildNodes.add(cn);
 							}
@@ -334,11 +334,11 @@ public class AllocationService {
 		}
 	}
 
-	private Role fetchAddedRole(String authUserToken, Role role) throws Exception {
+	private Role fetchAddedRole(String authUserToken, Role role, ChildNode cn) throws Exception {
 		logger.info("Adding Role into FRAC Service...");
 		ObjectMapper mapper = new ObjectMapper();
 
-		FracRequest request = role.getFracRequest(getSourceValue());
+		FracRequest request = role.getFracRequest(getSourceValue(), cn);
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("Authorization", authUserToken);
 		headers.add("Accept", MediaType.APPLICATION_JSON_VALUE);
@@ -351,26 +351,7 @@ public class AllocationService {
 		}
 		return role;
 	}
-
-	private ChildNode fetchAddedActivity(String authUserToken, ChildNode cn) throws Exception {
-		logger.info("Adding Activity into FRAC Service...");
-		ObjectMapper mapper = new ObjectMapper();
-		ChildNode request = cn.getFracRequest(getSourceValue());
-		HttpHeaders headers = new HttpHeaders();
-		headers.add("Accept", MediaType.APPLICATION_JSON_VALUE);
-		headers.setContentType(MediaType.APPLICATION_JSON);
-		headers.set("Authorization", authUserToken);
-		HttpEntity<String> entity = new HttpEntity<>(mapper.writeValueAsString(request), headers);
-		FracResponse response = restTemplate.postForObject(
-				extServerProperties.getFracHost() + extServerProperties.getFracActivityPath(), entity,
-				FracResponse.class);
-
-		if (response != null && response.getStatusInfo().getStatusCode() == 200) {
-			return processActivity(response);
-		}
-		return cn;
-	}
-
+	
 	private String getSourceValue() {
 		// TODO -- Check useDeptName config value. If TRUE then get the current
 		// department.
@@ -393,16 +374,6 @@ public class AllocationService {
 			r.setChildNodes(childNodes);
 		}
 		return r;
-	}
-
-	private ChildNode processActivity(FracResponse child) {
-		ChildNode cn = new ChildNode();
-		cn.setId(child.getResponseData().getId());
-		cn.setType(child.getResponseData().getType());
-		cn.setName(child.getResponseData().getName());
-		cn.setStatus(child.getResponseData().getStatus());
-		cn.setSource(child.getResponseData().getSource());
-		return cn;
 	}
 
 	private ChildNode processActivity(ChildNode child) {
