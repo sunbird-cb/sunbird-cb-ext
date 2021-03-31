@@ -16,6 +16,8 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.rest.RestStatus;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.sort.SortBuilders;
+import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -144,10 +146,11 @@ public class AllocationService {
 	public Response getUsers(SearchCriteria criteria) {
 		validator.validateCriteria(criteria);
 		final BoolQueryBuilder query = QueryBuilders.boolQuery();
-		query.must(QueryBuilders.matchQuery("deptName", criteria.getDepartmentName())).must(QueryBuilders.existsQuery("userId"));
+		query.must(QueryBuilders.matchQuery("deptName", criteria.getDepartmentName())).must(QueryBuilders.existsQuery("userId")).must(QueryBuilders.wildcardQuery("userId", "?*"));
 		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder().query(query);
 		sourceBuilder.from(criteria.getPageNo());
 		sourceBuilder.size(criteria.getPageSize());
+		sourceBuilder.sort(SortBuilders.fieldSort("userName.keyword").order(SortOrder.ASC));
 		List<WorkAllocation> allocationSearchList = new ArrayList<>();
 		List<Map<String, Object>> finalRes = new ArrayList<>();
 		Map<String, Object> result;
