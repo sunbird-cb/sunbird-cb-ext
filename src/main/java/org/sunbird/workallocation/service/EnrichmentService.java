@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import org.sunbird.common.util.Constants;
 import org.sunbird.workallocation.model.ChildNode;
 import org.sunbird.workallocation.model.Role;
@@ -53,7 +54,9 @@ public class EnrichmentService {
             }
             if (!CollectionUtils.isEmpty(existingRecord.getArchivedList())) {
                 for (Role exRole : existingRecord.getArchivedList()) {
-                    exArchivedRoleAndChildIds.put(exRole.getId(), exRole.getChildNodes().stream().map(ChildNode::getId).collect(Collectors.toSet()));
+                    Set<String> exArchChildIds = exRole.getChildNodes().stream().filter(event -> !StringUtils.isEmpty(event.getId())).map(ChildNode::getId).collect(Collectors.toSet());
+                    if(!CollectionUtils.isEmpty(exArchChildIds))
+                    exArchivedRoleAndChildIds.put(exRole.getId(), exArchChildIds);
                 }
             }
             if (!CollectionUtils.isEmpty(workAllocation.getActiveList())) {
@@ -83,7 +86,7 @@ public class EnrichmentService {
                         archivedRole.setArchivedAt(currentMillis);
                     } else {
                         if (!CollectionUtils.isEmpty(archivedRole.getChildNodes())) {
-                            Set<String> childIds = archivedRole.getChildNodes().stream().map(ChildNode::getId).collect(Collectors.toSet());
+                            Set<String> childIds = archivedRole.getChildNodes().stream().filter(entity -> !StringUtils.isEmpty(entity.getId())).map(ChildNode::getId).collect(Collectors.toSet());
                             if (!(childIds.containsAll(exActiveRoleAndChildIds.get(archivedRole.getId())) && exActiveRoleAndChildIds.get(archivedRole.getId()).containsAll(childIds))) {
                                 archivedRole.setArchivedAt(currentMillis);
                             }
