@@ -15,8 +15,8 @@ public class Validator {
 		}
 	}
 
-	public void validateWorkAllocationReq(WorkAllocation workAllocation) {
-		if (StringUtils.isEmpty(workAllocation.getUserId())) {
+	public void validateWorkAllocationReq(WorkAllocation workAllocation, String reqType) {
+		if (reqType.equals("update") && StringUtils.isEmpty(workAllocation.getUserId())) {
 			throw new BadRequestException("User Id can not be empty!");
 		}
 		if (StringUtils.isEmpty(workAllocation.getDeptId())) {

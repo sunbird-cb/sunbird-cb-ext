@@ -87,7 +87,7 @@ public class AllocationService {
 	 * @return response
 	 */
 	public Response addWorkAllocation(String userAuthToken, String userId, WorkAllocation workAllocation) {
-		validator.validateWorkAllocationReq(workAllocation);
+		validator.validateWorkAllocationReq(workAllocation, ADD);
 		enrichmentService.enrichDates(userId, workAllocation, null, ADD);
 		if (!CollectionUtils.isEmpty(workAllocation.getActiveList())) {
 			verifyRoleActivity(userAuthToken, workAllocation);
@@ -111,7 +111,7 @@ public class AllocationService {
 	 * @return response
 	 */
 	public Response updateWorkAllocation(String authUserToken, String userId, WorkAllocation workAllocation) {
-		validator.validateWorkAllocationReq(workAllocation);
+		validator.validateWorkAllocationReq(workAllocation, UPDATE);
 		if (!CollectionUtils.isEmpty(workAllocation.getActiveList())) {
 			verifyRoleActivity(authUserToken, workAllocation);
 		}
@@ -143,7 +143,8 @@ public class AllocationService {
 	 */
 	public Response getUsers(SearchCriteria criteria) {
 		validator.validateCriteria(criteria);
-		final QueryBuilder query = QueryBuilders.termQuery("deptName.keyword", criteria.getDepartmentName());
+		final BoolQueryBuilder query = QueryBuilders.boolQuery();
+		query.must(QueryBuilders.matchQuery("deptName", criteria.getDepartmentName())).must(QueryBuilders.existsQuery("userId"));
 		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder().query(query);
 		sourceBuilder.from(criteria.getPageNo());
 		sourceBuilder.size(criteria.getPageSize());

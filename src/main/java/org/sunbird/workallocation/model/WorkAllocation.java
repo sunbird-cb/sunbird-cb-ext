@@ -7,6 +7,8 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class WorkAllocation {
     private String userId;
+    private String userName;
+    private String userEmail;
     private String deptId;
     private String deptName;
     private List<Role> activeList;
@@ -77,5 +79,21 @@ public class WorkAllocation {
 
     public void setUserPosition(String userPosition) {
         this.userPosition = userPosition;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public String getUserEmail() {
+        return userEmail;
+    }
+
+    public void setUserEmail(String userEmail) {
+        this.userEmail = userEmail;
     }
 }

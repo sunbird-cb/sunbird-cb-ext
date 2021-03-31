@@ -40,7 +40,11 @@ public class IndexerService {
         logger.debug("addEntity starts with index {} and entityId {}", index, entityId);
         IndexResponse response = null;
         try {
-            response = esClient.index(new IndexRequest(index, indexType, entityId).source(indexDocument), RequestOptions.DEFAULT);
+            if(!StringUtils.isEmpty(entityId)){
+                response = esClient.index(new IndexRequest(index, indexType, entityId).source(indexDocument), RequestOptions.DEFAULT);
+            }else{
+                response = esClient.index(new IndexRequest(index, indexType).source(indexDocument), RequestOptions.DEFAULT);
+            }
             logger.info("response for entityId {} is {}", entityId, response);
         } catch (IOException e) {
             logger.error("Exception in adding record to ElasticSearch", e);
