@@ -9,6 +9,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
@@ -41,6 +42,7 @@ import org.sunbird.workallocation.model.FracResponse;
 import org.sunbird.workallocation.model.Role;
 import org.sunbird.workallocation.model.SearchCriteria;
 import org.sunbird.workallocation.model.WorkAllocation;
+import org.sunbird.workallocation.util.FRACReqBuilder;
 import org.sunbird.workallocation.util.Validator;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -75,6 +77,9 @@ public class AllocationService {
 	@Autowired
 	private EnrichmentService enrichmentService;
 
+	@Autowired
+	private FRACReqBuilder fracReqBuilder;
+
 	@Value("${workallocation.index.name}")
 	public String index;
 
@@ -93,6 +98,9 @@ public class AllocationService {
 		enrichmentService.enrichDates(userId, workAllocation, null, ADD);
 		if (!CollectionUtils.isEmpty(workAllocation.getActiveList())) {
 			verifyRoleActivity(userAuthToken, workAllocation);
+		}
+		if(StringUtils.isEmpty(workAllocation.getPositionId()) && !StringUtils.isEmpty(workAllocation.getUserPosition())){
+			workAllocation.setPositionId(createUserPosition(userAuthToken, workAllocation.getUserPosition()));
 		}
 		RestStatus restStatus = indexerService.addEntity(index, indexType, workAllocation.getUserId(),
 				mapper.convertValue(workAllocation, Map.class));
@@ -117,7 +125,9 @@ public class AllocationService {
 		if (!CollectionUtils.isEmpty(workAllocation.getActiveList())) {
 			verifyRoleActivity(authUserToken, workAllocation);
 		}
-
+		if(StringUtils.isEmpty(workAllocation.getPositionId()) && !StringUtils.isEmpty(workAllocation.getUserPosition())){
+			workAllocation.setPositionId(createUserPosition(authUserToken, workAllocation.getUserPosition()));
+		}
 		Map<String, Object> existingRecord = indexerService.readEntity(index, indexType, workAllocation.getUserId());
 		if (CollectionUtils.isEmpty(existingRecord)) {
 			throw new BadRequestException("No record found on given user Id!");
@@ -146,7 +156,7 @@ public class AllocationService {
 	public Response getUsers(SearchCriteria criteria) {
 		validator.validateCriteria(criteria);
 		final BoolQueryBuilder query = QueryBuilders.boolQuery();
-		query.must(QueryBuilders.matchQuery("deptName", criteria.getDepartmentName())).must(QueryBuilders.existsQuery("userId")).must(QueryBuilders.wildcardQuery("userId", "?*"));
+		query.must(QueryBuilders.matchQuery("deptName", criteria.getDepartmentName()));
 		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder().query(query);
 		sourceBuilder.from(criteria.getPageNo());
 		sourceBuilder.size(criteria.getPageSize());
@@ -303,7 +313,7 @@ public class AllocationService {
 
 	private void verifyRoleActivity(String authUserToken, WorkAllocation workAllocation) {
 		List<Role> oldRoleList = workAllocation.getActiveList();
-		List<Role> newRoleList = new ArrayList<Role>();
+		List<Role> newRoleList = new ArrayList<>();
 		try {
 			for (Role r : oldRoleList) {
 				if (r.getId() == null || "".equals(r.getId())) {
@@ -313,12 +323,13 @@ public class AllocationService {
 					// Role is from FRAC - No need to create new.
 					// However, we need to check Activity is from FRAC or not.
 					if (!CollectionUtils.isEmpty(r.getChildNodes())) {
-						List<ChildNode> newChildNodes = new ArrayList<ChildNode>();
+						List<ChildNode> newChildNodes = new ArrayList<>();
 						for (ChildNode cn : r.getChildNodes()) {
 							if (cn.getId() == null || "".equals(cn.getId())) {
 								Role newRole = fetchAddedRole(authUserToken, r, cn);
 								newChildNodes.add(newRole.getChildNodes().get(0));
-							} else {
+							}
+							else {
 								newChildNodes.add(cn);
 							}
 						}
@@ -336,6 +347,29 @@ public class AllocationService {
 			logger.error("Failed to create FRAC Roles / Activities. Old List Size: " + oldRoleList.size()
 					+ ", New List Size: " + newRoleList.size());
 		}
+	}
+
+	private String  createUserPosition(String authUserToken, String positionName){
+		logger.info("Adding Position into FRAC System...");
+		String positionId = null;
+		FracRequest request = fracReqBuilder.getPositionRequest(getSourceValue(), positionName);
+		HttpHeaders headers = new HttpHeaders();
+		headers.set("Authorization", authUserToken);
+		headers.add("Accept", MediaType.APPLICATION_JSON_VALUE);
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		HttpEntity<String> entity = null;
+		try {
+			entity = new HttpEntity<>(mapper.writeValueAsString(request), headers);
+			FracResponse response = restTemplate.postForObject(
+					extServerProperties.getFracHost() + extServerProperties.getFracActivityPath(), entity, FracResponse.class);
+			if(!ObjectUtils.isEmpty(response) && !ObjectUtils.isEmpty(response.getResponseData())){
+				positionId = response.getResponseData().getId();
+			}
+			logger.info("Added Position successful ...");
+		} catch (JsonProcessingException e) {
+			logger.error("Parsing Exception While Creating the Position in Frac", e);
+		}
+		return positionId;
 	}
 
 	private Role fetchAddedRole(String authUserToken, Role role, ChildNode cn) throws Exception {

@@ -14,6 +14,7 @@ public class WorkAllocation {
     private List<Role> activeList;
     private List<Role> archivedList;
     private String userPosition;
+    private String positionId;
     private long updatedAt;
     private String updatedBy;
 
@@ -95,5 +96,13 @@ public class WorkAllocation {
 
     public void setUserEmail(String userEmail) {
         this.userEmail = userEmail;
+    }
+
+    public String getPositionId() {
+        return positionId;
+    }
+
+    public void setPositionId(String positionId) {
+        this.positionId = positionId;
     }
 }
