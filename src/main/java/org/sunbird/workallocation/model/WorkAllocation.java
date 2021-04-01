@@ -6,6 +6,7 @@ import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class WorkAllocation {
+    private String id;
     private String userId;
     private String userName;
     private String userEmail;
@@ -104,5 +105,13 @@ public class WorkAllocation {
 
     public void setPositionId(String positionId) {
         this.positionId = positionId;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 }
