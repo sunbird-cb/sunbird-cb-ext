@@ -87,10 +87,10 @@ public class EnrichmentService {
                     } else {
                         if (!CollectionUtils.isEmpty(archivedRole.getChildNodes())) {
                             Set<String> childIds = archivedRole.getChildNodes().stream().filter(entity -> !StringUtils.isEmpty(entity.getId())).map(ChildNode::getId).collect(Collectors.toSet());
-                            if (!(childIds.containsAll(exActiveRoleAndChildIds.get(archivedRole.getId())) && exActiveRoleAndChildIds.get(archivedRole.getId()).containsAll(childIds))) {
+                            if (!(childIds.containsAll(exArchivedRoleAndChildIds.get(archivedRole.getId())) && exArchivedRoleAndChildIds.get(archivedRole.getId()).containsAll(childIds))) {
                                 archivedRole.setArchivedAt(currentMillis);
                             }
-                        } else if (CollectionUtils.isEmpty(archivedRole.getChildNodes()) && !CollectionUtils.isEmpty(exActiveRoleAndChildIds.get(archivedRole.getId()))) {
+                        } else if (CollectionUtils.isEmpty(archivedRole.getChildNodes()) && !CollectionUtils.isEmpty(exArchivedRoleAndChildIds.get(archivedRole.getId()))) {
                             archivedRole.setArchivedAt(currentMillis);
                         }
                     }
