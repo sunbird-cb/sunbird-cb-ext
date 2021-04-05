@@ -1,7 +1,5 @@
 package org.sunbird.catalog.service;
 
-import java.io.IOException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,8 +15,6 @@ import org.sunbird.catalog.model.Framework;
 import org.sunbird.catalog.model.FrameworkResponse;
 import org.sunbird.common.util.CbExtServerProperties;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
@@ -32,11 +28,11 @@ public class CatalogServiceImpl {
 	@Autowired
 	private CbExtServerProperties extServerProperties;
 
-	public Catalog getCatalog(String authUserToken, String framework, String category) {
-		return fetchCatalog(authUserToken, framework, category);
+	public Catalog getCatalog(String authUserToken, boolean isEnrichConsumption) {
+		return fetchCatalog(authUserToken, isEnrichConsumption);
 	}
 
-	private Catalog fetchCatalog(String authUserToken, String framework, String category) {
+	private Catalog fetchCatalog(String authUserToken, boolean isEnrichConsumption) {
 		log.info("Fetching Framework details...");
 		ObjectMapper mapper = new ObjectMapper();
 		HttpHeaders headers = new HttpHeaders();
@@ -44,14 +40,14 @@ public class CatalogServiceImpl {
 		headers.set("Authorization", extServerProperties.getSbApiKey());
 		HttpEntity<Object> entity = new HttpEntity<>(headers);
 
-		ResponseEntity<String> responseStr = restTemplate.exchange(
-				extServerProperties.getKmBaseHost() + extServerProperties.getKmFrameWorkPath() + framework,
+		ResponseEntity<String> responseStr = restTemplate.exchange(extServerProperties.getKmBaseHost()
+				+ extServerProperties.getKmFrameWorkPath() + extServerProperties.getTaxonomyFrameWorkName(),
 				HttpMethod.GET, entity, String.class);
 		FrameworkResponse response;
 		try {
 			response = mapper.readValue(responseStr.getBody(), FrameworkResponse.class);
 			if (response != null && "successful".equalsIgnoreCase(response.getParams().getStatus())) {
-				return processResponse(response.getResult().getFramework(), category);
+				return processResponse(response.getResult().getFramework(), isEnrichConsumption);
 			} else {
 				log.info("Some exception occurred while creating the org ....");
 			}
@@ -61,13 +57,15 @@ public class CatalogServiceImpl {
 		return new Catalog();
 	}
 
-	private Catalog processResponse(Framework framework, String categoryName) {
+	private Catalog processResponse(Framework framework, boolean isEnrichConsumption) {
 		Catalog catalog = new Catalog();
 		for (Category c : framework.getCategories()) {
-			if (categoryName.equalsIgnoreCase(c.getName())) {
+			if (c.getName() != null && c.getName().equalsIgnoreCase(extServerProperties.getTaxonomyCategoryName())) {
 				catalog.setTerms(c.getTerms());
 			}
 		}
+
+		// TODO - Enrich Consumption details for the given term name.
 		return catalog;
 	}
 }

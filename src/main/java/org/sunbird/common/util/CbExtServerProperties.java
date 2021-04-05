@@ -30,7 +30,6 @@ public class CbExtServerProperties {
     @Value("${spring.data.cassandra.sb.keyspace-name}")
     private String sbExtKeyspace;
 
-
     @Value("${sunbird.course.service.host}")
     private String courseServiceHost;
 
@@ -87,6 +86,12 @@ public class CbExtServerProperties {
     
     @Value("${frac.node.source.useDeptName}")
     private boolean fracSourceUseDeptName;
+    
+    @Value("${igot.taxonomy.framework.name}")
+    private String taxonomyFrameWorkName;
+    
+    @Value("${igot.taxonomy.category.name}")
+    private String taxonomyCategoryName;
     
     public String getWfServiceHost() {
         return wfServiceHost;
@@ -302,6 +307,22 @@ public class CbExtServerProperties {
 
 	public void setFracSourceUseDeptName(boolean fracSourceUseDeptName) {
 		this.fracSourceUseDeptName = fracSourceUseDeptName;
+	}
+	
+	public String getTaxonomyFrameWorkName() {
+		return taxonomyFrameWorkName;
+	}
+
+	public void setTaxonomyFrameWorkName(String taxonomyFrameWorkName) {
+		this.taxonomyFrameWorkName = taxonomyFrameWorkName;
+	}
+
+	public String getTaxonomyCategoryName() {
+		return taxonomyCategoryName;
+	}
+
+	public void setTaxonomyCategoryName(String taxonomyCategoryName) {
+		this.taxonomyCategoryName = taxonomyCategoryName;
 	}
 
 	@Override
