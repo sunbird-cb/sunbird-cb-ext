@@ -160,7 +160,7 @@ public class AllocationService {
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder().query(query);
         sourceBuilder.from(criteria.getPageNo());
         sourceBuilder.size(criteria.getPageSize());
-        sourceBuilder.sort(SortBuilders.fieldSort("userName.keyword").order(SortOrder.ASC));
+        sourceBuilder.sort(SortBuilders.fieldSort("updatedAt").order(SortOrder.DESC));
         List<WorkAllocation> allocationSearchList = new ArrayList<>();
         List<Map<String, Object>> finalRes = new ArrayList<>();
         Map<String, Object> result;
