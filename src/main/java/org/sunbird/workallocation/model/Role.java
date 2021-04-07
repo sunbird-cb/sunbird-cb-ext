@@ -1,14 +1,11 @@
 package org.sunbird.workallocation.model;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.springframework.util.CollectionUtils;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Role {
@@ -132,7 +129,7 @@ public class Role {
 			req.setId(id);
 		}
 
-		List<ChildNode> children = new ArrayList<ChildNode>();
+		List<ChildNode> children = new ArrayList<>();
 		if (child != null) {
 			ChildNode newCN = new ChildNode();
 			newCN.setName(child.getName());
@@ -144,9 +141,13 @@ public class Role {
 			if (!CollectionUtils.isEmpty(childNodes)) {
 				for (ChildNode cn : childNodes) {
 					ChildNode newCN = new ChildNode();
+					if (!StringUtils.isEmpty(cn.getId()))
+						newCN.setId(cn.getId());
+
 					newCN.setName(cn.getName());
 					newCN.setType(cn.getType());
 					newCN.setSource(source);
+					newCN.setDescription(cn.getDescription());
 					children.add(newCN);
 				}
 				req.setChildren(children);

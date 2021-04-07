@@ -316,7 +316,7 @@ public class AllocationService {
         List<Role> newRoleList = new ArrayList<>();
         try {
             for (Role r : oldRoleList) {
-                if (r.getId() == null || "".equals(r.getId())) {
+                if (StringUtils.isEmpty(r.getId())) {
                     Role newRole = fetchAddedRole(authUserToken, r, null);
                     newRoleList.add(newRole);
                 } else {
@@ -324,13 +324,12 @@ public class AllocationService {
                     // However, we need to check Activity is from FRAC or not.
                     if (!CollectionUtils.isEmpty(r.getChildNodes())) {
                         List<ChildNode> newChildNodes = new ArrayList<>();
-                        for (ChildNode cn : r.getChildNodes()) {
-                            if (cn.getId() == null || "".equals(cn.getId())) {
-                                Role newRole = fetchAddedRole(authUserToken, r, cn);
-                                newChildNodes.add(newRole.getChildNodes().get(0));
-                            } else {
-                                newChildNodes.add(cn);
-                            }
+                        boolean isNewChildAdded = r.getChildNodes().stream().anyMatch(childNode -> StringUtils.isEmpty(childNode.getId()));
+                        if (isNewChildAdded) {
+                            Role newRole = fetchAddedRole(authUserToken, r, null);
+                            newChildNodes.addAll(newRole.getChildNodes());
+                        } else {
+                            newChildNodes.addAll(r.getChildNodes());
                         }
                         r.setChildNodes(newChildNodes);
                     }
