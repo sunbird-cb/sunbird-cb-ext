@@ -1028,6 +1028,7 @@ public class PortalServiceImpl implements PortalService {
 	 */
 	private void createUserDepartmentRoleAudit(UserDepartmentRole userDepartmentRole, String modifiedBy) {
 		try {
+			logger.info("Triggered the audit event .....");
 			UserDepartmentRoleAudit auditObject = new UserDepartmentRoleAudit(userDepartmentRole.getUserId(),
 					userDepartmentRole.getDeptId(), userDepartmentRole.getRoleIds(), userDepartmentRole.getIsActive(),
 					userDepartmentRole.getIsBlocked(), modifiedBy);

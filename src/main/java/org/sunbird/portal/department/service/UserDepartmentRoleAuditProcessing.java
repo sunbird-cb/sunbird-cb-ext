@@ -19,18 +19,19 @@ public class UserDepartmentRoleAuditProcessing {
     @Autowired
     private UserDepartmentRoleAuditRepo userDepartmentRoleAuditRepo;
 
-    private CbExtLogger log = new CbExtLogger(getClass().getName());
+    private CbExtLogger logger = new CbExtLogger(getClass().getName());
 
     @KafkaListener(id = "id1", groupId = "userRoleAuditTopic-consumer", topicPartitions = {
             @TopicPartition(topic = "${kafka.topics.userrole.audit}", partitions = {"0", "1", "2", "3"})})
     public void processMessage(ConsumerRecord<String, String> data) {
         try {
+            logger.info("Consuming the audit records .....");
             ObjectMapper mapper = new ObjectMapper();
             UserDepartmentRoleAudit auditObject = mapper.readValue(String.valueOf(data.value()), UserDepartmentRoleAudit.class);
             auditObject.setCreatedTime(new Date().getTime());
             userDepartmentRoleAuditRepo.save(auditObject);
         } catch (IOException e) {
-            log.error(e);
+            logger.error(e);
         }
     }
 
