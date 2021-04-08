@@ -92,6 +92,9 @@ public class CbExtServerProperties {
     
     @Value("${igot.taxonomy.category.name}")
     private String taxonomyCategoryName;
+
+    @Value("${kafka.topics.userrole.audit}")
+    private String userRoleAuditTopic;
     
     public String getWfServiceHost() {
         return wfServiceHost;
@@ -325,7 +328,15 @@ public class CbExtServerProperties {
 		this.taxonomyCategoryName = taxonomyCategoryName;
 	}
 
-	@Override
+    public String getUserRoleAuditTopic() {
+        return userRoleAuditTopic;
+    }
+
+    public void setUserRoleAuditTopic(String userRoleAuditTopic) {
+        this.userRoleAuditTopic = userRoleAuditTopic;
+    }
+
+    @Override
     public String toString() {
         StringBuilder str = new StringBuilder("SB-CB-Ext Server Properties: ");
         str.append("[wfServiceHost=").append(wfServiceHost).append("],");
