@@ -390,7 +390,7 @@ public class PortalServiceImpl implements PortalService {
 		existingRecord.setRoleIds(roleIds.stream().collect(Collectors.toList()).toArray(new Integer[roleIds.size()]));
 
 		UserDepartmentInfo userDeptInfo = enrichUserDepartment(userDepartmentRoleRepo.save(existingRecord), rootOrg);
-		createUserDepartmentRoleAudit(userDeptRole, wid);
+		createUserDepartmentRoleAudit(existingRecord, wid);
 		// Update the WF history and OpenSaber profile for department details
 		HashMap<String, Object> request = new HashMap<>();
 		request.put("userId", userDeptInfo.getUserId());
@@ -458,7 +458,7 @@ public class PortalServiceImpl implements PortalService {
 		existingRecord.setRoleIds(roleIds.stream().collect(Collectors.toList()).toArray(new Integer[roleIds.size()]));
 
 		UserDepartmentInfo userDeptInfo = enrichUserDepartment(userDepartmentRoleRepo.save(existingRecord), rootOrg);
-		createUserDepartmentRoleAudit(userDeptRole, wid);
+		createUserDepartmentRoleAudit(existingRecord, wid);
 		// Update the WF history and OpenSaber profile for department details
 		HashMap<String, Object> request = new HashMap<>();
 		request.put("userId", userDeptInfo.getUserId());
