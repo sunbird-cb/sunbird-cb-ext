@@ -27,11 +27,7 @@ import org.sunbird.common.util.DataValidator;
 import org.sunbird.core.logger.CbExtLogger;
 import org.sunbird.core.producer.Producer;
 import org.sunbird.portal.department.PortalConstants;
-import org.sunbird.portal.department.dto.Department;
-import org.sunbird.portal.department.dto.DepartmentRole;
-import org.sunbird.portal.department.dto.DepartmentType;
-import org.sunbird.portal.department.dto.Role;
-import org.sunbird.portal.department.dto.UserDepartmentRole;
+import org.sunbird.portal.department.dto.*;
 import org.sunbird.portal.department.model.DepartmentInfo;
 import org.sunbird.portal.department.model.DeptPublicInfo;
 import org.sunbird.portal.department.model.DeptTypeInfo;
@@ -328,6 +324,7 @@ public class PortalServiceImpl implements PortalService {
 					userDeptRole.setIsActive(true);
 					userDeptRole.setIsBlocked(false);
 					userDeptRole = userDepartmentRoleRepo.save(userDeptRole);
+					createUserDepartmentRoleAudit(userDeptRole, userId);
 				} catch (Exception e) {
 					logger.error(e); // TODO -- Need to decide what to do with this failed error...
 				}
@@ -393,7 +390,7 @@ public class PortalServiceImpl implements PortalService {
 		existingRecord.setRoleIds(roleIds.stream().collect(Collectors.toList()).toArray(new Integer[roleIds.size()]));
 
 		UserDepartmentInfo userDeptInfo = enrichUserDepartment(userDepartmentRoleRepo.save(existingRecord), rootOrg);
-
+		createUserDepartmentRoleAudit(existingRecord, wid);
 		// Update the WF history and OpenSaber profile for department details
 		HashMap<String, Object> request = new HashMap<>();
 		request.put("userId", userDeptInfo.getUserId());
@@ -461,7 +458,7 @@ public class PortalServiceImpl implements PortalService {
 		existingRecord.setRoleIds(roleIds.stream().collect(Collectors.toList()).toArray(new Integer[roleIds.size()]));
 
 		UserDepartmentInfo userDeptInfo = enrichUserDepartment(userDepartmentRoleRepo.save(existingRecord), rootOrg);
-
+		createUserDepartmentRoleAudit(existingRecord, wid);
 		// Update the WF history and OpenSaber profile for department details
 		HashMap<String, Object> request = new HashMap<>();
 		request.put("userId", userDeptInfo.getUserId());
@@ -1022,5 +1019,24 @@ public class PortalServiceImpl implements PortalService {
 		if (!CollectionUtils.isEmpty(userDepartmentRole))
 			return true;
 		return false;
+	}
+
+	/**
+	 *
+	 * @param userDepartmentRole user department role object
+	 * @param modifiedBy modified by value
+	 */
+	private void createUserDepartmentRoleAudit(UserDepartmentRole userDepartmentRole, String modifiedBy) {
+		try {
+			logger.info("Triggered the audit event .....");
+			UserDepartmentRoleAudit auditObject = new UserDepartmentRoleAudit(userDepartmentRole.getUserId(),
+					userDepartmentRole.getDeptId(), userDepartmentRole.getRoleIds(), userDepartmentRole.getIsActive(),
+					userDepartmentRole.getIsBlocked(), modifiedBy);
+			producer.push(serverConfig.getUserRoleAuditTopic(), auditObject);
+		} catch (Exception ex) {
+			logger.info("Exception occurred while creating the user department audit!");
+			logger.error(ex);
+		}
+
 	}
 }
