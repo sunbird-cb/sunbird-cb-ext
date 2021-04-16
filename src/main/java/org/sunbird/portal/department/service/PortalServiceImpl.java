@@ -348,6 +348,9 @@ public class PortalServiceImpl implements PortalService {
 			existingDept.setLogo(deptInfo.getLogo());
 			existingDept.setDeptName(deptInfo.getDeptName());
 			existingDept.setDeptTypeIds(deptInfo.getDeptTypeIds());
+			if(deptInfo.getSourceId() != null) {
+				existingDept.setSourceId(deptInfo.getSourceId());
+			}
 			logger.info("Updating Department with existing record -> " + existingDept);
 
 			existingDept = deptRepo.save(existingDept);
