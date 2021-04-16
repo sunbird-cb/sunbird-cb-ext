@@ -49,6 +49,9 @@ public class Department {
 	
 	@Column(name="created_by")
 	private String createdBy;
+	
+	@Column(name="source_id")
+	private Integer sourceId;
 
 	public Department() {
 	}
@@ -132,6 +135,30 @@ public class Department {
 	public void setCreatedBy(String createdBy) {
 		this.createdBy = createdBy;
 	}
+	
+	public Integer getId() {
+		return id;
+	}
+
+	public void setId(Integer id) {
+		this.id = id;
+	}
+
+	public Integer[] getDeptTypeId() {
+		return deptTypeId;
+	}
+
+	public void setDeptTypeId(Integer[] deptTypeId) {
+		this.deptTypeId = deptTypeId;
+	}
+
+	public Integer getSourceId() {
+		return sourceId;
+	}
+
+	public void setSourceId(Integer sourceId) {
+		this.sourceId = sourceId;
+	}
 
 	public static Department clone(DepartmentInfo deptInfo) {
 		Department dept = new Department();
@@ -141,6 +168,9 @@ public class Department {
 		dept.setHeadquarters(deptInfo.getHeadquarters());
 		dept.setRootOrg(deptInfo.getRootOrg());
 		dept.setLogo(deptInfo.getLogo());
+		if(deptInfo.getSourceId() != null) {
+			dept.setSourceId(deptInfo.getSourceId());
+		}
 		return dept;
 	}
 	

@@ -22,6 +22,11 @@ SB-CB-EXT uses a number of open source projects:
 
 ## Installation
 
+**Kafka Topics Required**
+
+- orgCreation - Used to create SB Org object when new Department is created
+- userRoleAuditTopic - Used to update the user_department_role record in Audit table 
+
 **Postgresql table list**
 
 - department_types
@@ -52,6 +57,7 @@ CREATE TABLE IF NOT EXISTS departments (
   headquarters VARCHAR(64),
   logo bytea,
   creation_date bigint,
+  source_id integer,
   created_by text
 );
 ```
@@ -77,7 +83,8 @@ CREATE TABLE IF NOT EXISTS user_department_role (
   dept_id int REFERENCES departments (id) NOT NULL,
   role_ids integer[] NOT NULL,
   isActive boolean NOT NULL,
-  isBlocked boolean NOT NULL
+  isBlocked boolean NOT NULL,
+  source_user_id TEXT
 );
 ```
 

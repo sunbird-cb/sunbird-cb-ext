@@ -220,7 +220,7 @@ public class PortalServiceImpl implements PortalService {
 
 	private boolean hasCBPRole(Department dept, List<UserDepartmentRole> userDeptRoleList) {
 		for (UserDepartmentRole userDeptRole : userDeptRoleList) {
-			if (userDeptRole.getDeptId()!=null &&  userDeptRole.getDeptId().equals(dept.getDeptId())) {
+			if (userDeptRole.getDeptId() != null && userDeptRole.getDeptId().equals(dept.getDeptId())) {
 				Iterable<Role> userRoles = roleRepo.findAllById(Arrays.asList(userDeptRole.getRoleIds()));
 				for (Role r : userRoles) {
 					if (PortalConstants.CBP_ROLES.contains(r.getRoleName())) {
@@ -271,8 +271,8 @@ public class PortalServiceImpl implements PortalService {
 	}
 
 	@Override
-	public DepartmentInfo addDepartment(String authUserToken, String userId, String userRoleName, DepartmentInfo deptInfo, String rootOrg)
-			throws Exception {
+	public DepartmentInfo addDepartment(String authUserToken, String userId, String userRoleName,
+			DepartmentInfo deptInfo, String rootOrg) throws Exception {
 		validateDepartmentInfo(deptInfo);
 
 		if (deptInfo.getDeptTypeIds() == null) {
@@ -637,7 +637,9 @@ public class PortalServiceImpl implements PortalService {
 			deptInfo.setLogo(dept.getLogo());
 			deptInfo.setCreationDate(dept.getCreationDate());
 			deptInfo.setCreatedBy(dept.getCreatedBy());
-
+			if (dept.getSourceId() != null) {
+				deptInfo.setSourceId(dept.getSourceId());
+			}
 			// Get Dept Type Information
 			deptInfo.setDeptTypeInfos(enrichDepartmentTypeInfo(dept.getDeptTypeIds()));
 
@@ -1015,7 +1017,8 @@ public class PortalServiceImpl implements PortalService {
 
 	@Override
 	public Boolean isUserActive(String userId) {
-		List<UserDepartmentRole> userDepartmentRole = userDepartmentRoleRepo.findAllByUserIdAndIsActiveAndIsBlocked(userId, true, false);
+		List<UserDepartmentRole> userDepartmentRole = userDepartmentRoleRepo
+				.findAllByUserIdAndIsActiveAndIsBlocked(userId, true, false);
 		if (!CollectionUtils.isEmpty(userDepartmentRole))
 			return true;
 		return false;
@@ -1024,7 +1027,7 @@ public class PortalServiceImpl implements PortalService {
 	/**
 	 *
 	 * @param userDepartmentRole user department role object
-	 * @param modifiedBy modified by value
+	 * @param modifiedBy         modified by value
 	 */
 	private void createUserDepartmentRoleAudit(UserDepartmentRole userDepartmentRole, String modifiedBy) {
 		try {

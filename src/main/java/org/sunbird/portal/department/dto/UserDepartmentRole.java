@@ -19,38 +19,43 @@ public class UserDepartmentRole {
 	@Id
 	@Column(name = "id")
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	Integer id;
+	private Integer id;
 
 	@Column(name = "user_id")
 	@NotNull
-	String userId;
+	private String userId;
 
 	@Column(name = "dept_id")
 	@NotNull
-	Integer deptId;
+	private Integer deptId;
 
 	@Column(name = "role_ids")
 	@NotNull
 	@Type(type = "org.sunbird.portal.department.dto.GenericArrayUserType")
-	Integer[] roleIds;
+	private Integer[] roleIds;
 
 	@Column(name = "isactive")
 	@NotNull
-	Boolean isActive;
+	private Boolean isActive;
 
 	@Column(name = "isblocked")
 	@NotNull
-	Boolean isBlocked;
+	private Boolean isBlocked;
 
 	@Transient
-	List<String> roles;
+	private List<String> roles;
+
+	@Column(name = "source_user_id")
+	private String sourceUserId;
 
 	public UserDepartmentRole() {
 	}
 
-	public UserDepartmentRole(Integer id, String userId, Integer deptId, Integer[] roleIds, Boolean isActive) {
+	public UserDepartmentRole(Integer id, String userId, String sourceUserId, Integer deptId, Integer[] roleIds,
+			Boolean isActive) {
 		this.id = id;
 		this.userId = userId;
+		this.sourceUserId = sourceUserId;
 		this.deptId = deptId;
 		this.roleIds = roleIds;
 		this.isActive = isActive;
@@ -112,8 +117,21 @@ public class UserDepartmentRole {
 		this.roles = roles;
 	}
 
+	public String getSourceUserId() {
+		return sourceUserId;
+	}
+
+	public void setSourceUserId(String sourceUserId) {
+		this.sourceUserId = sourceUserId;
+	}
+
+	public void setId(Integer id) {
+		this.id = id;
+	}
+
 	public String toString() {
-		return "[UserDepartmentRole = " + ", Id: " + ((id == null) ? 0 : id) + ", userId: " + userId + ", DeptRoleId: "
-				+ roleIds + ", isActive: " + isActive + ", isBlocked: " + isBlocked + "]";
+		return "[UserDepartmentRole = " + ", Id: " + ((id == null) ? 0 : id) + ", userId: " + userId
+				+ ", sourceUserId: " + sourceUserId + ", DeptRoleId: " + roleIds + ", isActive: " + isActive
+				+ ", isBlocked: " + isBlocked + "]";
 	}
 }

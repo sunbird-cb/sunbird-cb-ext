@@ -24,6 +24,7 @@ public class DepartmentInfo implements Comparable<DepartmentInfo> {
 	private List<PortalUserInfo> inActive_users;
 	private List<PortalUserInfo> blocked_users;
 	private List<String> currentUserRoles;
+	private Integer sourceId;
 
 	public Integer getId() {
 		return id;
@@ -196,6 +197,14 @@ public class DepartmentInfo implements Comparable<DepartmentInfo> {
 		this.createdBy = createdBy;
 	}
 
+	public Integer getSourceId() {
+		return sourceId;
+	}
+
+	public void setSourceId(Integer sourceId) {
+		this.sourceId = sourceId;
+	}
+
 	public String toString() {
 		StringBuilder str = new StringBuilder("DepartmentInfo:");
 		str.append(" Id:").append(id);
@@ -208,6 +217,9 @@ public class DepartmentInfo implements Comparable<DepartmentInfo> {
 		str.append(", noOfUsers: ").append(noOfUsers);
 		str.append(", creationDate: ").append(creationDate);
 		str.append(", createdBy: ").append(createdBy);
+		if (sourceId != null) {
+			str.append(", sourceId: ").append(sourceId);
+		}
 		str.append("]");
 
 		return str.toString();
