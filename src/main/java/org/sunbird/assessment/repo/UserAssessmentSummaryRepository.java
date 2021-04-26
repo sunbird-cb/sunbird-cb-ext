@@ -14,6 +14,6 @@ public interface UserAssessmentSummaryRepository
 	 * @param userId
 	 * @return
 	 */
-	@Query("select count(*) from bodhi.user_assessment_summary where root_org=?0 and user_id=?1")
+	@Query("select count(*) from user_assessment_summary where root_org=?0 and user_id=?1")
 	public long countByPrimaryKeyRootOrgAndPrimaryKeyUserId(String rootOrg, String userId);
 }

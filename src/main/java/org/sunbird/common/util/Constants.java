@@ -1,9 +1,14 @@
 package org.sunbird.common.util;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 public class Constants {
 	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}
+
 	public static final String UUID = "wid";
 	public static final String KID = "kid";
 	public static final String SOURCE_ID = "source_id";
@@ -51,4 +56,28 @@ public class Constants {
 
 	public static final String ADD = "add";
 	public static final String UPDATE = "update";
+
+	public static final String ROOT_ORG_CONSTANT = "rootOrg";
+	public static final String ORG_CONSTANT = "org";
+	public static final String USER_ID_CONSTANT = "userId";
+	public static final String FIELD_PASSED_CONSTANT = "fieldsPassed";
+	public static final String FETCH_ONE_LEVEL_CONSTANT = "fetchOneLevel";
+	public static final String SKIP_ACCESS_CHECK_CONSTANT = "skipAccessCheck";
+	public static final String FIELDS_CONSTANT = "fields";
+	public static final boolean FIELDS_PASSED = true;
+	public static final boolean FETCH_ON_LEVEL = false;
+	public static final boolean SKIP_ACCESS_CHECK = true;
+	public static final List<String> MINIMUL_FIELDS = Collections
+			.unmodifiableList(Arrays.asList("identifier", "duration", "downloadUrl", "description", "mimeType",
+					"artifactUrl", "name", "status", "resourceType", "categoryType", "category"));
+	public static final String FETCH_RESULT_CONSTANT = ".fetchResult:";
+	public static final String URI_CONSTANT = "URI: ";
+	public static final String REQUEST_CONSTANT = "Request: ";
+	public static final String RESPONSE_CONSTANT = "Response: ";
+	public static final String SERVICE_ERROR_CONSTANT = "Http Client threw an Exception:";
+	public static final String EXTERNAL_SERVICE_ERROR_CODE = "Exception while querying the external service:";
+	public static final String CONTENT_ID_REPLACER = "{contentId}";
+
+	// User assessment pass mark
+	public static final Float ASSESSMENT_PASS_SCORE = 60.0f;
 }

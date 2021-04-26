@@ -1,17 +1,23 @@
 package org.sunbird.assessment.service;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.sunbird.assessment.dto.AssessmentSubmissionDTO;
 import org.sunbird.assessment.repo.AssessmentRepository;
+import org.sunbird.common.model.SunbirdApiResp;
 import org.sunbird.common.service.ContentService;
-import org.sunbird.core.exception.InvalidDataInputException;
+import org.sunbird.common.service.UserUtilityService;
+import org.sunbird.core.exception.ApplicationLogicError;
+import org.sunbird.core.exception.BadRequestException;
 
+@Service
 public class AssessmentServiceImpl implements AssessmentService {
 
 	@Autowired
@@ -20,31 +26,26 @@ public class AssessmentServiceImpl implements AssessmentService {
 	@Autowired
 	ContentService contentService;
 
+	@Autowired
+	UserUtilityService userUtilService;
+
+	@Autowired
+	AssessmentUtilService assessUtilServ;
+
 	@Override
-	public Map<String, Object> submitAssessment(String rootOrg, AssessmentSubmissionDTO data, String userEmail)
+	public Map<String, Object> submitAssessment(String rootOrg, AssessmentSubmissionDTO data, String userId)
 			throws Exception {
+		// Check User exists
+		if (!userUtilService.validateUser(rootOrg, userId)) {
+			throw new BadRequestException("Invalid UserId.");
+		}
+
 		Map<String, Object> ret = new HashMap<String, Object>();
 
 		// TODO - Need to get the Assessment ContentMeta Data
-		List<Map<String, Object>> sourceList = contentService.getMetaByIDListandSource(
-				new ArrayList<String>(Arrays.asList(new String[] { data.getIdentifier() })),
-				new String[] { "artifactUrl", "collections", "contentType" }, "Live");
+		// Get the assessment-key.json file. Current version has both the answers
 
-		if (sourceList.size() == 0) {
-			throw new InvalidDataInputException("invalid.resource");
-		}
-
-		Map<String, Object> source = sourceList.get(0);
-		// assessment answers
-		Map<String, Object> answers = new HashMap<String, Object>();
-		if (data.isAssessment())
-			answers = repository
-					.getAssessmentAnswerKey(source.get("artifactUrl").toString().replaceAll(".json", "-key.json"));
-
-		else
-			answers = repository.getQuizAnswerKey(data);
-
-		Map<String, Object> resultMap = assessUtilServ.validateAssessment(data.getQuestions(), answers);
+		Map<String, Object> resultMap = assessUtilServ.validateAssessment(data.getQuestions());
 		Double result = (Double) resultMap.get("result");
 		Integer correct = (Integer) resultMap.get("correct");
 		Integer blank = (Integer) resultMap.get("blank");
@@ -53,22 +54,15 @@ public class AssessmentServiceImpl implements AssessmentService {
 		Map<String, Object> persist = new HashMap<String, Object>();
 
 		// Fetch parent of an assessment with status live
-		List<Map<String, Object>> parentList = (List<Map<String, Object>>) source.get("collections");
-		List<String> parentIds = new ArrayList<>();
-		parentList.forEach(item -> parentIds.add(item.get("identifier").toString()));
 		String parentId = "";
-		if (parentList != null && parentList.size() > 0) {
-			List<Map<String, Object>> parentMeta = contentService.getMetaByIDListandSource(parentIds,
-					new String[] { "status", "identifier" }, null);
-			for (Map<String, Object> parentData : parentMeta) {
-				if (Arrays.asList(ContentMetaConstants.LIVE_CONTENT_STATUS).contains(parentData.get("status"))) {
-					parentId = parentData.get("identifier").toString();
-					break;
-				}
+		SunbirdApiResp contentHierarchy = contentService.getHeirarchyResponse(data.getIdentifier());
+		if (contentHierarchy != null) {
+			try {
+				parentId = contentHierarchy.getResult().getContent().getParent();
+			} catch (Exception e) {
 			}
 		}
 		persist.put("parent", parentId);
-
 		persist.put("result", result);
 		persist.put("sourceId", data.getIdentifier());
 		persist.put("title", data.getTitle());
@@ -79,64 +73,15 @@ public class AssessmentServiceImpl implements AssessmentService {
 		persist.put("incorrect", inCorrect);
 
 		if (data.isAssessment()) {
-			Map<String, Object> tempSource = null;
 			// get parent data for assessment
-			if (((List<Object>) source.get("collections")).size() > 0) {
-
-				List<Map<String, Object>> sources = contentService.getMetaByIDListandSource(
-						new ArrayList<String>(Arrays.asList(parentId)), new String[] { "contentType", "collections" },
-						null);
-
-				if (sources.size() == 0) {
-					throw new InvalidDataInputException("invalid.resource");
-				}
-				tempSource = sources.get(0);
-
-				persist.put("parentContentType", tempSource.get("contentType"));
-
-			} else {
-				persist.put("parentContentType", "");
-			}
-			// insert into assessment table
-			repository.insertQuizOrAssessment(persist, true);
-
-			if (tempSource != null && result >= 60) {
-				if (tempSource.get("contentType").equals("Course")) {
-					// insert certificate and medals
-					String courseId = parentId;
-
-					// Fetch live programs of the course
-					List<Map<String, Object>> programsOfCourse = (List<Map<String, Object>>) tempSource
-							.get("collections");
-					List<String> allPrograms = new ArrayList<>();
-					programsOfCourse.forEach(program -> allPrograms.add(program.get("identifier").toString()));
-					boolean parent = programsOfCourse.size() > 0 ? true : false;
-					List<String> programId = new ArrayList<String>();
-
-					if (allPrograms != null && allPrograms.size() > 0) {
-						List<Map<String, Object>> programMeta = contentService.getMetaByIDListandSource(allPrograms,
-								new String[] { "identifier", "status" }, null);
-						for (Map<String, Object> programData : programMeta) {
-							if (Arrays.asList(ContentMetaConstants.LIVE_CONTENT_STATUS)
-									.contains(programData.get("status"))) {
-								programId.add(programData.get("identifier").toString());
-							}
-						}
-					}
-
-					bRepository.insertInBadges(rootOrg, courseId, programId, userId, parent);
-					bRepository.insertCourseAndQuizBadge(rootOrg, userId, "Course", data.getIdentifier());
-				}
-			}
-			contentProgressService.callProgress(rootOrg, userId, data.getIdentifier(), submissionMimeType,
-					Float.parseFloat(result.toString()));
+			// TODO - Get parentContentType details by calling Hierarchy API
+			persist.put("parentContentType", "");
 		} else {
-			// insert into quiz table
-			persist.remove("parent");
-			repository.insertQuizOrAssessment(persist, false);
-			bRepository.insertCourseAndQuizBadge(rootOrg, userId, "Quiz", data.getIdentifier());
-			contentProgressService.callProgress(rootOrg, userId, data.getIdentifier(), submissionMimeType, 100f);
+			persist.put("parentContentType", "");
 		}
+
+		// insert into assessment table
+		repository.insertQuizOrAssessment(persist, data.isAssessment());
 
 		ret.put("result", result);
 		ret.put("correct", correct);
@@ -151,14 +96,90 @@ public class AssessmentServiceImpl implements AssessmentService {
 	@Override
 	public Map<String, Object> getAssessmentByContentUser(String rootOrg, String courseId, String userId)
 			throws Exception {
-		// TODO Auto-generated method stub
-		return null;
+		Map<String, Object> result = new TreeMap<>();
+		try {
+			// get all submission data from cassandra
+			List<Map<String, Object>> assessmentResults = repository.getAssessmetbyContentUser(rootOrg, courseId,
+					userId);
+			// retain only those fields that need to be sent to front end
+			List<Map<String, Object>> assessments = getAssessments(assessmentResults);
+
+			// initialize variables to calculate first attempt and max score
+			Integer noOfAttemptsForPass = 0;
+			Integer noOfAttemptsForMaxScore = 0;
+			boolean passed = false;
+			Object firstPassTs = null;
+			BigDecimal max = new BigDecimal(-Double.MIN_VALUE);
+			Object maxScoreTs = null;
+
+			/*
+			 * Logic to Find The First Time Passed and The Max Score Attained along with
+			 * Their No of Attempts and Timestamps
+			 */
+			for (int i = assessments.size() - 1; i > -1; i--) {
+				Map<String, Object> row = assessments.get(i);
+				BigDecimal percentage = (BigDecimal) row.get("result");
+				/*
+				 * Logic to Obtain the First Pass using a Passed flag to attain the Attempts as
+				 * well as the first Time passed Time Stamp
+				 */
+				if (!passed) {
+					noOfAttemptsForPass++;
+					if (percentage.doubleValue() >= 60.0) {
+						passed = true;
+						firstPassTs = row.get("takenOn");
+					}
+				}
+
+				/*
+				 * Logic to Obtain the max scored assessment comparison to attain the Attempts
+				 * as well as the Max Scored Assessment Time Stamp
+				 */
+				if (max.compareTo(percentage) < 0) {
+					max = (BigDecimal) row.get("result");
+					maxScoreTs = row.get("takenOn");
+					noOfAttemptsForMaxScore = (assessments.size() - i);
+				}
+			}
+
+			/* Populating the Response to give Processed Data to Front End */
+			if (assessments.size() > 0) {
+				if (passed) {
+					result.put("firstPassOn", firstPassTs);
+					result.put("attemptsToPass", noOfAttemptsForPass);
+				}
+
+				result.put("maxScore", max);
+				result.put("maxScoreAttainedOn", maxScoreTs);
+				result.put("attemptsForMaxScore", noOfAttemptsForMaxScore);
+			}
+			result.put("pastAssessments", assessments);
+		} catch (NullPointerException e) {
+			throw new ApplicationLogicError("REQUEST_COULD_NOT_BE_PROCESSED", e);
+		}
+		return result;
 	}
 
 	@Override
 	public Map<String, Object> submitAssessmentByIframe(String rootOrg, Map<String, Object> request) throws Exception {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	// A method to Format Data in the FrontEndFormat
+	private List<Map<String, Object>> getAssessments(List<Map<String, Object>> result) {
+		List<Map<String, Object>> assessments = new ArrayList<>();
+		for (Map<String, Object> map : result) {
+			Map<String, Object> assessmentData = new HashMap<>();
+			String res = map.get("result_percent").toString();
+			assessmentData.put("result", new BigDecimal(res).setScale(2, BigDecimal.ROUND_UP));
+			assessmentData.put("correctlyAnswered", map.get("correct_count"));
+			assessmentData.put("wronglyAnswered", map.get("incorrect_count"));
+			assessmentData.put("notAttempted", map.get("not_answered_count"));
+			assessmentData.put("takenOn", map.get("ts_created"));
+			assessments.add(assessmentData);
+		}
+		return assessments;
 	}
 
 }

@@ -96,7 +96,29 @@ public class CbExtServerProperties {
     @Value("${kafka.topics.userrole.audit}")
     private String userRoleAuditTopic;
     
-    public String getWfServiceHost() {
+    @Value("${content-service-host}")
+	private String contentHost;
+
+	@Value("${content-hierarchy-endpoint}")
+	private String hierarchyEndPoint;
+	
+    public String getContentHost() {
+		return contentHost;
+	}
+
+	public void setContentHost(String contentHost) {
+		this.contentHost = contentHost;
+	}
+
+	public String getHierarchyEndPoint() {
+		return hierarchyEndPoint;
+	}
+
+	public void setHierarchyEndPoint(String hierarchyEndPoint) {
+		this.hierarchyEndPoint = hierarchyEndPoint;
+	}
+
+	public String getWfServiceHost() {
         return wfServiceHost;
     }
 

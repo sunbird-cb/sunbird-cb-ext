@@ -1,16 +1,34 @@
 package org.sunbird.common.service;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.sunbird.common.model.SunbirdApiResp;
+import org.sunbird.common.util.CbExtServerProperties;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+@Service
 public class ContentServiceImpl implements ContentService {
 
-	@Override
-	public List<Map<String, Object>> getMetaByIDListandSource(List<String> ids, String[] source, String status)
-			throws IOException {
-		// TODO Get the Content Meta by Id
+	@Autowired
+	private OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
+
+	@Autowired
+	CbExtServerProperties serverConfig;
+
+	@Autowired
+	private ObjectMapper mapper;
+
+	public SunbirdApiResp getHeirarchyResponse(String contentId) {
+		StringBuilder url = new StringBuilder();
+		url.append(serverConfig.getContentHost()).append(serverConfig.getHierarchyEndPoint()).append("/" + contentId)
+				.append("?mode=edit");
+		SunbirdApiResp response = mapper.convertValue(outboundRequestHandlerService.fetchResult(url.toString()),
+				SunbirdApiResp.class);
+		if (response.getResponseCode().equalsIgnoreCase("Ok")) {
+			return response;
+		}
+
 		return null;
 	}
-
 }

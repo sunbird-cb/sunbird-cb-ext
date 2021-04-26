@@ -7,5 +7,4 @@ import org.springframework.stereotype.Repository;
 public interface UserAssessmentMasterRepository
 		extends CassandraRepository<UserAssessmentMasterModel, UserAssessmentMasterPrimaryKeyModel>,
 		UserAssessmentMasterRepositoryCustom {
-
 }

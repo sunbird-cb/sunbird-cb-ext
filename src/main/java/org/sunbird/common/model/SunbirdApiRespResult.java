@@ -1,8 +1,8 @@
 package org.sunbird.common.model;
 
 public class SunbirdApiRespResult {
-	
 	private SunbirdApiResultResponse response;
+	private SunbirdApiHierarchyResultContent content;
 
 	public SunbirdApiResultResponse getResponse() {
 		return response;
@@ -12,4 +12,11 @@ public class SunbirdApiRespResult {
 		this.response = response;
 	}
 
+	public SunbirdApiHierarchyResultContent getContent() {
+		return content;
+	}
+
+	public void setContent(SunbirdApiHierarchyResultContent content) {
+		this.content = content;
+	}
 }
