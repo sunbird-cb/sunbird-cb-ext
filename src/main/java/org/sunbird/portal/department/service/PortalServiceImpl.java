@@ -147,6 +147,11 @@ public class PortalServiceImpl implements PortalService {
 		return enrichDepartmentInfo(getMyCurrentDepartment(roleName, userId), isUserInfoRequired, true, rootOrg);
 	}
 
+	public DepartmentInfo getMyDepartmentForRoles(List<String> roleNames, String userId, boolean isUserInfoRequired,
+			String rootOrg) throws Exception {
+		return enrichDepartmentInfo(getMyCurrentDepartment(roleNames, userId), isUserInfoRequired, true, rootOrg);
+	}
+
 	@Override
 	public DepartmentInfo getMyCbpDepartment(String userId, String rootOrg) throws Exception {
 		Department myDept = null;
@@ -183,6 +188,41 @@ public class PortalServiceImpl implements PortalService {
 		}
 
 		return enrichDepartmentInfo(myDept, false, false, rootOrg);
+	}
+
+	private Department getMyCurrentDepartment(List<String> roleNames, String userId) throws Exception {
+		List<UserDepartmentRole> userList = userDepartmentRoleRepo.findAllByUserIdAndIsActiveAndIsBlocked(userId, true,
+				false);
+		if (DataValidator.isCollectionEmpty(userList)) {
+			throw new Exception("No records exist for UserId: " + userId);
+		}
+		List<Integer> deptIds = userList.stream().map(i -> i.getDeptId()).collect(Collectors.toList());
+		logger.info("List of User Records -> " + userList.size() + ", DeptIds: " + deptIds.toString());
+
+		Iterable<Department> deptList = deptRepo.findAllById(deptIds);
+		Department myDept = null;
+		Map<Integer, Department> deptMap = new HashMap<Integer, Department>();
+		if (!DataValidator.isCollectionEmpty(deptList)) {
+			for (Department dept : deptList) {
+				deptMap.put(dept.getDeptId(), dept);
+			}
+		}
+
+		for (UserDepartmentRole user : userList) {
+			Iterable<Role> roles = roleRepo.findAllById(Arrays.asList(user.getRoleIds()));
+			for (Role r : roles) {
+				if (roleNames.contains(r.getRoleName())) {
+					if (myDept != null) {
+						if (myDept.getDeptId() != (deptMap.get(user.getDeptId()).getDeptId())) {
+							throw new Exception("More than one Department is available with Role: " + r.getRoleName());
+						}
+					} else {
+						myDept = deptMap.get(user.getDeptId());
+					}
+				}
+			}
+		}
+		return myDept;
 	}
 
 	private Department getMyCurrentDepartment(String roleName, String userId) throws Exception {
@@ -348,7 +388,7 @@ public class PortalServiceImpl implements PortalService {
 			existingDept.setLogo(deptInfo.getLogo());
 			existingDept.setDeptName(deptInfo.getDeptName());
 			existingDept.setDeptTypeIds(deptInfo.getDeptTypeIds());
-			if(deptInfo.getSourceId() != null) {
+			if (deptInfo.getSourceId() != null) {
 				existingDept.setSourceId(deptInfo.getSourceId());
 			}
 			logger.info("Updating Department with existing record -> " + existingDept);
