@@ -80,10 +80,16 @@ public class AssessmentServiceImpl implements AssessmentService {
 		persist.put("blank", blank);
 		persist.put("incorrect", inCorrect);
 
-		if (data.isAssessment()) {
+		if (data.isAssessment() && !"".equals(parentId)) {
 			// get parent data for assessment
-			// TODO - Get parentContentType details by calling Hierarchy API
-			persist.put("parentContentType", "");
+			try {
+				SunbirdApiResp contentHierarchy = contentService.getHeirarchyResponse(parentId);
+				if (contentHierarchy != null) {
+					persist.put("parentContentType", contentHierarchy.getResult().getContent().getContentType());
+				}
+			} catch (Exception e) {
+				logger.error(e);
+			}
 		} else {
 			persist.put("parentContentType", "");
 		}
