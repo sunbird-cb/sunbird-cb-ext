@@ -64,7 +64,7 @@ public class OutboundRequestHandlerServiceImpl {
 			StringBuilder str = new StringBuilder(this.getClass().getCanonicalName())
 					.append(Constants.FETCH_RESULT_CONSTANT).append(System.lineSeparator());
 			str.append(Constants.URI_CONSTANT).append(uri).append(System.lineSeparator());
-			log.debug(str.toString());
+			log.info(str.toString());
 			response = restTemplate.getForObject(uri, Map.class);
 		} catch (HttpClientErrorException e) {
 			log.error(e);

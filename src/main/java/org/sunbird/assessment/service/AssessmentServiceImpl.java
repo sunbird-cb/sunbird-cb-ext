@@ -59,12 +59,16 @@ public class AssessmentServiceImpl implements AssessmentService {
 
 		// Fetch parent of an assessment with status live
 		String parentId = "";
-		SunbirdApiResp contentHierarchy = contentService.getHeirarchyResponse(data.getIdentifier());
-		if (contentHierarchy != null) {
-			try {
+		try {
+			SunbirdApiResp contentHierarchy = contentService.getHeirarchyResponse(data.getIdentifier());
+			if (contentHierarchy != null) {
 				parentId = contentHierarchy.getResult().getContent().getParent();
-			} catch (Exception e) {
 			}
+		} catch (Exception e) {
+			logger.error(e);
+		}
+		if (parentId == null) {
+			parentId = "";
 		}
 		persist.put("parent", parentId);
 		persist.put("result", result);
