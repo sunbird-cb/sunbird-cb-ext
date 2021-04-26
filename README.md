@@ -113,6 +113,10 @@ CREATE TABLE user_department_role_audit
 **Cassandra table list**
 
 - mandatory_user_content
+- user_assessment_summary
+- user_assessment_master
+- user_quiz_master
+- user_quiz_summary
 
 **Queries to create the cassandra table**
 
@@ -125,5 +129,90 @@ CREATE TABLE mandatory_user_content(
     content_type text,
     minprogressforcompletion float,
     PRIMARY KEY (root_org, org, content_id)
+);
+```
+
+```sh
+CREATE TABLE sunbird.user_assessment_summary (
+    root_org text,
+    user_id text,
+    content_id text,
+    first_passed_score float,
+    first_passed_score_date timestamp,
+    max_score float,
+    max_score_date timestamp,
+    PRIMARY KEY ((root_org, user_id), content_id)
+);
+```
+
+```sh
+CREATE TABLE sunbird.user_assessment_master (
+    root_org text,
+    ts_created timestamp,
+    parent_source_id text,
+    result_percent decimal,
+    id uuid,
+    correct_count int,
+    date_created timestamp,
+    incorrect_count int,
+    not_answered_count int,
+    parent_content_type text,
+    pass_percent decimal,
+    source_id text,
+    source_title text,
+    user_id text,
+    PRIMARY KEY ((root_org, ts_created), parent_source_id, result_percent, id)
+);
+```
+
+```sh
+CREATE MATERIALIZED VIEW sunbird.user_assessment_top_performer AS
+    SELECT root_org, parent_source_id, ts_created, result_percent, id, pass_percent, source_id, source_title, user_id
+    FROM sunbird.user_assessment_master
+    WHERE root_org IS NOT NULL AND ts_created IS NOT NULL AND parent_source_id IS NOT NULL AND id IS NOT NULL AND result_percent IS NOT NULL AND result_percent >= 90
+    PRIMARY KEY ((root_org, parent_source_id), ts_created, result_percent, id);
+```
+
+```sh
+CREATE MATERIALIZED VIEW sunbird.user_assessment_by_date AS
+    SELECT root_org, date_created, ts_created, parent_source_id, result_percent, id, parent_content_type, pass_percent, source_id, user_id
+    FROM sunbird.user_assessment_master
+    WHERE root_org IS NOT NULL AND date_created IS NOT NULL AND ts_created IS NOT NULL AND parent_source_id IS NOT NULL AND id IS NOT NULL AND result_percent IS NOT NULL
+    PRIMARY KEY ((root_org, date_created), ts_created, parent_source_id, result_percent, id);
+```
+
+```sh
+CREATE MATERIALIZED VIEW sunbird.assessment_by_content_user AS
+    SELECT root_org, user_id, parent_source_id, ts_created, result_percent, id, correct_count, incorrect_count, not_answered_count, pass_percent, source_id, source_title
+    FROM sunbird.user_assessment_master
+    WHERE root_org IS NOT NULL AND ts_created IS NOT NULL AND parent_source_id IS NOT NULL AND id IS NOT NULL AND result_percent IS NOT NULL AND user_id IS NOT NULL
+    PRIMARY KEY ((root_org, user_id, parent_source_id), ts_created, result_percent, id);
+```
+
+```sh
+CREATE TABLE sunbird.user_quiz_master (
+    root_org text,
+    ts_created timestamp,
+    result_percent decimal,
+    id uuid,
+    correct_count int,
+    date_created timestamp,
+    incorrect_count int,
+    not_answered_count int,
+    pass_percent decimal,
+    source_id text,
+    source_title text,
+    user_id text,
+    PRIMARY KEY ((root_org, ts_created), result_percent, id)
+);
+```
+
+```sh
+CREATE TABLE sunbird.user_quiz_summary (
+    root_org text,
+    user_id text,
+    content_id text,
+    date_updated timestamp,
+    PRIMARY KEY ((root_org, user_id), content_id)
 );
 ```
