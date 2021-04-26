@@ -16,9 +16,12 @@ import org.sunbird.common.service.ContentService;
 import org.sunbird.common.service.UserUtilityService;
 import org.sunbird.core.exception.ApplicationLogicError;
 import org.sunbird.core.exception.BadRequestException;
+import org.sunbird.core.logger.CbExtLogger;
 
 @Service
 public class AssessmentServiceImpl implements AssessmentService {
+
+	private CbExtLogger logger = new CbExtLogger(getClass().getName());
 
 	@Autowired
 	AssessmentRepository repository;
@@ -35,6 +38,7 @@ public class AssessmentServiceImpl implements AssessmentService {
 	@Override
 	public Map<String, Object> submitAssessment(String rootOrg, AssessmentSubmissionDTO data, String userId)
 			throws Exception {
+		logger.info("Submit Assessment: rootOrg: " + rootOrg + ", userId: " + userId + ", data: " + data.toString());
 		// Check User exists
 		if (!userUtilService.validateUser(rootOrg, userId)) {
 			throw new BadRequestException("Invalid UserId.");
@@ -80,6 +84,7 @@ public class AssessmentServiceImpl implements AssessmentService {
 			persist.put("parentContentType", "");
 		}
 
+		logger.info("Trying to persist assessment data -> " + persist.toString());
 		// insert into assessment table
 		repository.insertQuizOrAssessment(persist, data.isAssessment());
 

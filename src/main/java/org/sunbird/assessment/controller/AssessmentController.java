@@ -21,7 +21,7 @@ public class AssessmentController {
 
 	@Autowired
 	AssessmentService assessmentService;
-	
+
 	/**
 	 * validates, submits and inserts assessments and quizzes into the db
 	 * 
@@ -31,14 +31,13 @@ public class AssessmentController {
 	 * @throws Exception
 	 */
 	@PostMapping("/v2/user/{userId}/assessment/submit")
-	public ResponseEntity<Map<String, Object>> submitAssessmentByCassandra(
-			@Valid @RequestBody AssessmentSubmissionDTO requestBody, @PathVariable("userId") String userId,
-			@RequestHeader("rootOrg") String rootOrg) throws Exception {
+	public ResponseEntity<Map<String, Object>> submitAssessment(@Valid @RequestBody AssessmentSubmissionDTO requestBody,
+			@PathVariable("userId") String userId, @RequestHeader("rootOrg") String rootOrg) throws Exception {
 
 		return new ResponseEntity<Map<String, Object>>(assessmentService.submitAssessment(rootOrg, requestBody, userId),
 				HttpStatus.CREATED);
 	}
-	
+
 	/**
 	 * Controller to a get request to Fetch AssessmentData the request requires
 	 * user_id and course_id returns a JSON of processesd data and list of

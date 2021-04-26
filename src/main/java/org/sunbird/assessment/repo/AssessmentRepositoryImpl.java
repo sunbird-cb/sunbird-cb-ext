@@ -11,12 +11,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.sunbird.assessment.dto.AssessmentSubmissionDTO;
 import org.sunbird.common.util.Constants;
+import org.sunbird.core.logger.CbExtLogger;
 
 import com.datastax.driver.core.utils.UUIDs;
 
 @Service
 public class AssessmentRepositoryImpl implements AssessmentRepository {
 
+	private CbExtLogger logger = new CbExtLogger(getClass().getName());
+	
 	@Autowired
 	UserAssessmentSummaryRepository userAssessmentSummaryRepo;
 
