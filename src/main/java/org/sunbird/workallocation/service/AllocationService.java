@@ -138,7 +138,7 @@ public class AllocationService {
         }
         response.put(Constants.DATA, restStatus);
         response.put(Constants.STATUS, HttpStatus.OK);
-        return new Response();
+        return response;
     }
 
     /**
@@ -482,6 +482,7 @@ public class AllocationService {
         wa.setUserPosition(dto.getUserPosition());
         wa.setUpdatedAt(currentMillis);
         wa.setUpdatedBy(userId);
+        wa.setStatus(dto.getStatus());
         return wa;
     }
 
