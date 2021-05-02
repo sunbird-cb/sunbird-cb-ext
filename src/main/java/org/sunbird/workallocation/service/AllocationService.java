@@ -161,12 +161,8 @@ public class AllocationService {
         if (CollectionUtils.isEmpty(existingRecord)) {
             throw new BadRequestException("No record found on given Id!");
         }
-        if (PUBLISHED_STATUS.equals(workAllocationDTO.getStatus())) {
-            workAllocation = mapper.convertValue(existingRecord, WorkAllocation.class);
-            workAllocation = waObjectTransition(userId, workAllocationDTO, workAllocation);
-        }else {
-            throw new BadRequestException(workAllocationDTO.getStatus() + " Status is not applicable in update!");
-        }
+        workAllocation = mapper.convertValue(existingRecord, WorkAllocation.class);
+        workAllocation = waObjectTransition(userId, workAllocationDTO, workAllocation);
         RestStatus restStatus = indexerService.updateEntity(index, indexType, workAllocation.getUserId(),
                 mapper.convertValue(workAllocation, Map.class));
         Response response = new Response();
@@ -509,6 +505,7 @@ public class AllocationService {
                 oldPublishObject.setUpdatedBy(userId);
                 workAllocation.addArchivedWAList(oldPublishObject);
                 workAllocation.setActiveWAObject(wa);
+                workAllocation.setDraftWAObject(null);
             } else {
                 wa.setCreatedBy(userId);
                 wa.setCreatedAt(currentMillis);
