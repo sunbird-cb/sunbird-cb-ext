@@ -504,14 +504,12 @@ public class AllocationService {
                 oldPublishObject.setUpdatedAt(currentMillis);
                 oldPublishObject.setUpdatedBy(userId);
                 workAllocation.addArchivedWAList(oldPublishObject);
-                workAllocation.setActiveWAObject(wa);
-                workAllocation.setDraftWAObject(null);
             } else {
                 wa.setCreatedBy(userId);
                 wa.setCreatedAt(currentMillis);
-                workAllocation.setActiveWAObject(wa);
-                workAllocation.setDraftWAObject(null);
             }
+            workAllocation.setActiveWAObject(wa);
+            workAllocation.setDraftWAObject(null);
         }
         return workAllocation;
     }
