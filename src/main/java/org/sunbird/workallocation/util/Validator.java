@@ -13,9 +13,9 @@ public class Validator {
 		if (StringUtils.isEmpty(criteria.getDepartmentName())) {
 			throw new BadRequestException("Department name can not be empty!");
 		}
-		if (StringUtils.isEmpty(criteria.getStatus())) {
-			throw new BadRequestException("Status can not be empty!");
-		}
+//		if (StringUtils.isEmpty(criteria.getStatus())) {
+//			throw new BadRequestException("Status can not be empty!");
+//		}
 		if (!WorkAllocationConstants.STATUS_LIST.contains(criteria.getStatus())) {
 			throw new BadRequestException("Trying to send wrong status!");
 		}
