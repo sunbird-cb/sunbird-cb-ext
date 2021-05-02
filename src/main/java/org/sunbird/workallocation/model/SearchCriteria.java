@@ -3,6 +3,7 @@ package org.sunbird.workallocation.model;
 public class SearchCriteria {
     private int pageSize;
     private int pageNo;
+    private String status;
     private String departmentName;
 
     public int getPageSize() {
@@ -27,5 +28,13 @@ public class SearchCriteria {
 
     public void setDepartmentName(String departmentName) {
         this.departmentName = departmentName;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }
