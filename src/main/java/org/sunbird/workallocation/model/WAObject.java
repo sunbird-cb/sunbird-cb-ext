@@ -6,112 +6,103 @@ import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class WAObject {
-    private String id;
-    private String deptId;
-    private String deptName;
-    private List<Role> roleDetails;
-    private CompetencyDetails competencyDetails;
-    private String userPosition;
-    private String positionId;
-    private long updatedAt;
-    private String updatedBy;
-    private long createdAt;
-    private String createdBy;
-    private String status;
+	private String id;
+	private String deptId;
+	private String deptName;
+	private List<RoleCompetency> roleCompetencyList;
+	private String userPosition;
+	private String positionId;
+	private long updatedAt;
+	private String updatedBy;
+	private long createdAt;
+	private String createdBy;
+	private String status;
 
-    public String getId() {
-        return id;
-    }
+	public String getId() {
+		return id;
+	}
 
-    public void setId(String id) {
-        this.id = id;
-    }
+	public void setId(String id) {
+		this.id = id;
+	}
 
-    public String getDeptId() {
-        return deptId;
-    }
+	public String getDeptId() {
+		return deptId;
+	}
 
-    public void setDeptId(String deptId) {
-        this.deptId = deptId;
-    }
+	public void setDeptId(String deptId) {
+		this.deptId = deptId;
+	}
 
-    public String getDeptName() {
-        return deptName;
-    }
+	public String getDeptName() {
+		return deptName;
+	}
 
-    public void setDeptName(String deptName) {
-        this.deptName = deptName;
-    }
+	public void setDeptName(String deptName) {
+		this.deptName = deptName;
+	}
 
-    public List<Role> getRoleDetails() {
-        return roleDetails;
-    }
+	public String getUserPosition() {
+		return userPosition;
+	}
 
-    public void setRoleDetails(List<Role> roleDetails) {
-        this.roleDetails = roleDetails;
-    }
+	public void setUserPosition(String userPosition) {
+		this.userPosition = userPosition;
+	}
 
-    public CompetencyDetails getCompetencyDetails() {
-        return competencyDetails;
-    }
+	public String getPositionId() {
+		return positionId;
+	}
 
-    public void setCompetencyDetails(CompetencyDetails competencyDetails) {
-        this.competencyDetails = competencyDetails;
-    }
+	public void setPositionId(String positionId) {
+		this.positionId = positionId;
+	}
 
-    public String getUserPosition() {
-        return userPosition;
-    }
+	public long getUpdatedAt() {
+		return updatedAt;
+	}
 
-    public void setUserPosition(String userPosition) {
-        this.userPosition = userPosition;
-    }
+	public void setUpdatedAt(long updatedAt) {
+		this.updatedAt = updatedAt;
+	}
 
-    public String getPositionId() {
-        return positionId;
-    }
+	public String getUpdatedBy() {
+		return updatedBy;
+	}
 
-    public void setPositionId(String positionId) {
-        this.positionId = positionId;
-    }
+	public void setUpdatedBy(String updatedBy) {
+		this.updatedBy = updatedBy;
+	}
 
-    public long getUpdatedAt() {
-        return updatedAt;
-    }
+	public long getCreatedAt() {
+		return createdAt;
+	}
 
-    public void setUpdatedAt(long updatedAt) {
-        this.updatedAt = updatedAt;
-    }
+	public void setCreatedAt(long createdAt) {
+		this.createdAt = createdAt;
+	}
 
-    public String getUpdatedBy() {
-        return updatedBy;
-    }
+	public String getCreatedBy() {
+		return createdBy;
+	}
 
-    public void setUpdatedBy(String updatedBy) {
-        this.updatedBy = updatedBy;
-    }
+	public void setCreatedBy(String createdBy) {
+		this.createdBy = createdBy;
+	}
 
-    public long getCreatedAt() {
-        return createdAt;
-    }
+	public String getStatus() {
+		return status;
+	}
 
-    public void setCreatedAt(long createdAt) {
-        this.createdAt = createdAt;
-    }
+	public void setStatus(String status) {
+		this.status = status;
+	}
 
-    public String getCreatedBy() {
-        return createdBy;
-    }
+	public List<RoleCompetency> getRoleCompetencyList() {
+		return roleCompetencyList;
+	}
 
-    public void setCreatedBy(String createdBy) {
-        this.createdBy = createdBy;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
+	public void setRoleCompetencyList(List<RoleCompetency> roleCompetencyList) {
+		this.roleCompetencyList = roleCompetencyList;
+	}
 }
