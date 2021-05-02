@@ -1,7 +1,9 @@
 package org.sunbird.workallocation.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.springframework.util.CollectionUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -68,5 +70,10 @@ public class WorkAllocation {
 
     public void setArchivedWAList(List<WAObject> archivedWAList) {
         this.archivedWAList = archivedWAList;
+    }
+    public void addArchivedWAList(WAObject archivedWAList) {
+        if(CollectionUtils.isEmpty(this.archivedWAList))
+            this.archivedWAList = new ArrayList<>();
+        this.archivedWAList.add(archivedWAList);
     }
 }

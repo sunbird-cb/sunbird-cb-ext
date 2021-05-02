@@ -16,7 +16,7 @@ public class WAObject {
     private long updatedAt;
     private String updatedBy;
     private long createdAt;
-    private long createdBy;
+    private String createdBy;
     private String status;
 
     public String getId() {
@@ -99,11 +99,11 @@ public class WAObject {
         this.createdAt = createdAt;
     }
 
-    public long getCreatedBy() {
+    public String getCreatedBy() {
         return createdBy;
     }
 
-    public void setCreatedBy(long createdBy) {
+    public void setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
     }
 

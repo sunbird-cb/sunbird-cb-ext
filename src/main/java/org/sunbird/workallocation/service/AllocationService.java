@@ -5,6 +5,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
@@ -83,68 +84,100 @@ public class AllocationService {
     ObjectMapper mapper = new ObjectMapper();
 
     /**
-     * @param userId         user id
-     * @param workAllocation work allocation object
+     * @param userId            user id
+     * @param workAllocationDTO work allocation object
      * @return response
      */
-    public Response addWorkAllocation(String userAuthToken, String userId, WorkAllocationDTO workAllocation) {
-//        validator.validateWorkAllocationReq(workAllocation, ADD);
-//        enrichmentService.enrichDates(userId, workAllocation, null, ADD);
-//        if (!CollectionUtils.isEmpty(workAllocation.getActiveList())) {
-//            verifyRoleActivity(userAuthToken, workAllocation);
-//        }
-//        if (StringUtils.isEmpty(workAllocation.getPositionId()) && !StringUtils.isEmpty(workAllocation.getUserPosition())) {
-//            workAllocation.setPositionId(createUserPosition(userAuthToken, workAllocation.getUserPosition()));
-//        }
-//        if (!StringUtils.isEmpty(workAllocation.getUserId())) {
-//			workAllocation.setId(workAllocation.getUserId());
-//        } else {
-//			workAllocation.setId(UUID.randomUUID().toString());
-//        }
-//        RestStatus restStatus = indexerService.addEntity(index, indexType, workAllocation.getId(),
-//                mapper.convertValue(workAllocation, Map.class));
-//        Response response = new Response();
-//        if (!ObjectUtils.isEmpty(restStatus)) {
-//            response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
-//        } else {
-//            response.put(Constants.MESSAGE, Constants.FAILED);
-//        }
-//        response.put(Constants.DATA, restStatus);
-//        response.put(Constants.STATUS, HttpStatus.OK);
+    public Response addWorkAllocation(String userAuthToken, String userId, WorkAllocationDTO workAllocationDTO) {
+        validator.validateWorkAllocationReq(workAllocationDTO, ADD);
+        if (DRAFT_STATUS.equals(workAllocationDTO.getStatus())) {
+            if (StringUtils.isEmpty(workAllocationDTO.getUserId())) {
+                workAllocationDTO.setUserId(UUID.randomUUID().toString());
+            }
+            if (StringUtils.isEmpty(workAllocationDTO.getWaId())) {
+                workAllocationDTO.setWaId(UUID.randomUUID().toString());
+            }
+        }
+        if (PUBLISHED_STATUS.equals(workAllocationDTO.getStatus())) {
+            validator.validateWorkAllocationReq(workAllocationDTO, UPDATE);
+        }
+        if (!CollectionUtils.isEmpty(workAllocationDTO.getRoleDetails())) {
+            verifyRoleActivity(userAuthToken, workAllocationDTO);
+        }
+        //To - Do
+        //Add competency to FRAC
+        if (StringUtils.isEmpty(workAllocationDTO.getPositionId()) && !StringUtils.isEmpty(workAllocationDTO.getUserPosition())) {
+            workAllocationDTO.setPositionId(createUserPosition(userAuthToken, workAllocationDTO.getUserPosition()));
+        }
+        Map<String, Object> existingRecord = indexerService.readEntity(index, indexType, workAllocationDTO.getUserId());
+        WorkAllocation workAllocation;
+        if (!ObjectUtils.isEmpty(existingRecord)) {
+            workAllocation = mapper.convertValue(existingRecord, WorkAllocation.class);
+            workAllocation = waObjectTransition(userId, workAllocationDTO, workAllocation);
+
+        } else {
+            workAllocation = new WorkAllocation();
+            workAllocation.setId(workAllocationDTO.getUserId());
+            workAllocation.setUserId(workAllocationDTO.getUserId());
+            workAllocation.setUserName(workAllocationDTO.getUserName());
+            workAllocation.setUserEmail(workAllocationDTO.getUserEmail());
+            WAObject draft = getWAObject(userId, workAllocationDTO);
+            draft.setCreatedAt(System.currentTimeMillis());
+            draft.setCreatedBy(userId);
+            workAllocation.setDraftWAObject(draft);
+            workAllocation.setActiveWAObject(null);
+            workAllocation.setArchivedWAList(null);
+        }
+        RestStatus restStatus = indexerService.addEntity(index, indexType, workAllocationDTO.getUserId(),
+                mapper.convertValue(workAllocation, Map.class));
+        Response response = new Response();
+        if (!ObjectUtils.isEmpty(restStatus)) {
+            response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
+        } else {
+            response.put(Constants.MESSAGE, Constants.FAILED);
+        }
+        response.put(Constants.DATA, restStatus);
+        response.put(Constants.STATUS, HttpStatus.OK);
         return new Response();
     }
 
     /**
-     * @param userId         user id
-     * @param workAllocation work allocation object
-     * @return response
+     *
+     * @param authUserToken
+     * @param userId
+     * @param workAllocationDTO
+     * @return
      */
-    public Response updateWorkAllocation(String authUserToken, String userId, WorkAllocationDTO workAllocation) {
-//        validator.validateWorkAllocationReq(workAllocation, UPDATE);
-//        if (!CollectionUtils.isEmpty(workAllocation.getActiveList())) {
-//            verifyRoleActivity(authUserToken, workAllocation);
-//        }
-//        if (StringUtils.isEmpty(workAllocation.getPositionId()) && !StringUtils.isEmpty(workAllocation.getUserPosition())) {
-//            workAllocation.setPositionId(createUserPosition(authUserToken, workAllocation.getUserPosition()));
-//        }
-//        Map<String, Object> existingRecord = indexerService.readEntity(index, indexType, workAllocation.getId());
-//        if (CollectionUtils.isEmpty(existingRecord)) {
-//            throw new BadRequestException("No record found on given Id!");
-//        }
-//        enrichmentService.enrichDates(userId, workAllocation, mapper.convertValue(existingRecord, WorkAllocationDTO.class),
-//                UPDATE);
-//        RestStatus restStatus = indexerService.updateEntity(index, indexType, workAllocation.getId(),
-//                mapper.convertValue(workAllocation, Map.class));
-//        Response response = new Response();
-//        if (!ObjectUtils.isEmpty(restStatus)) {
-//            response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
-//        } else {
-//            response.put(Constants.MESSAGE, Constants.FAILED);
-//        }
-//        response.put(Constants.DATA, restStatus);
-//        response.put(Constants.STATUS, HttpStatus.OK);
-//        return response;
-          return new Response();
+    public Response updateWorkAllocation(String authUserToken, String userId, WorkAllocationDTO workAllocationDTO) {
+          validator.validateWorkAllocationReq(workAllocationDTO, UPDATE);
+        if (!CollectionUtils.isEmpty(workAllocationDTO.getRoleDetails())) {
+            verifyRoleActivity(authUserToken, workAllocationDTO);
+        }
+        if (StringUtils.isEmpty(workAllocationDTO.getPositionId()) && !StringUtils.isEmpty(workAllocationDTO.getUserPosition())) {
+            workAllocationDTO.setPositionId(createUserPosition(authUserToken, workAllocationDTO.getUserPosition()));
+        }
+        Map<String, Object> existingRecord = indexerService.readEntity(index, indexType, workAllocationDTO.getUserId());
+        WorkAllocation workAllocation;
+        if (CollectionUtils.isEmpty(existingRecord)) {
+            throw new BadRequestException("No record found on given Id!");
+        }
+        if (PUBLISHED_STATUS.equals(workAllocationDTO.getStatus())) {
+            workAllocation = mapper.convertValue(existingRecord, WorkAllocation.class);
+            workAllocation = waObjectTransition(userId, workAllocationDTO, workAllocation);
+        }else {
+            throw new BadRequestException(workAllocationDTO.getStatus() + " Status is not applicable in update!");
+        }
+        RestStatus restStatus = indexerService.updateEntity(index, indexType, workAllocation.getUserId(),
+                mapper.convertValue(workAllocation, Map.class));
+        Response response = new Response();
+        if (!ObjectUtils.isEmpty(restStatus)) {
+            response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
+        } else {
+            response.put(Constants.MESSAGE, Constants.FAILED);
+        }
+        response.put(Constants.DATA, restStatus);
+        response.put(Constants.STATUS, HttpStatus.OK);
+        return response;
     }
 
     /**
@@ -164,7 +197,9 @@ public class AllocationService {
             query.must(QueryBuilders.matchQuery("activeWAObject.deptName", criteria.getDepartmentName()))
                     .must(QueryBuilders.matchQuery("activeWAObject.status", criteria.getStatus()));
         }
-        query.must(QueryBuilders.matchQuery("deptName", criteria.getDepartmentName()));
+        if (ARCHIVED_STATUS.equals(criteria.getStatus())){
+            query.must(QueryBuilders.nestedQuery("archivedWAList", QueryBuilders.matchQuery("archivedWAList.deptName", criteria.getDepartmentName()), ScoreMode.None));
+        }
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder().query(query);
         sourceBuilder.from(criteria.getPageNo());
         sourceBuilder.size(criteria.getPageSize());
@@ -172,6 +207,8 @@ public class AllocationService {
         sourceBuilder.sort(SortBuilders.fieldSort("draftWAObject.updatedAt").order(SortOrder.DESC));
         if (PUBLISHED_STATUS.equals(criteria.getStatus()))
             sourceBuilder.sort(SortBuilders.fieldSort("activeWAObject.updatedAt").order(SortOrder.DESC));
+        logger.info("Query ======> ");
+        logger.info(query.toString());
         List<WorkAllocation> allocationSearchList = new ArrayList<>();
         List<Map<String, Object>> finalRes = new ArrayList<>();
         Map<String, Object> result;
@@ -323,39 +360,39 @@ public class AllocationService {
     }
 
     private void verifyRoleActivity(String authUserToken, WorkAllocationDTO workAllocation) {
-//        List<Role> oldRoleList = workAllocation.getActiveList();
-//        List<Role> newRoleList = new ArrayList<>();
-//        try {
-//            for (Role r : oldRoleList) {
-//                if (StringUtils.isEmpty(r.getId())) {
-//                    Role newRole = fetchAddedRole(authUserToken, r, null);
-//                    newRoleList.add(newRole);
-//                } else {
-//                    // Role is from FRAC - No need to create new.
-//                    // However, we need to check Activity is from FRAC or not.
-//                    if (!CollectionUtils.isEmpty(r.getChildNodes())) {
-//                        List<ChildNode> newChildNodes = new ArrayList<>();
-//                        boolean isNewChildAdded = r.getChildNodes().stream().anyMatch(childNode -> StringUtils.isEmpty(childNode.getId()));
-//                        if (isNewChildAdded) {
-//                            Role newRole = fetchAddedRole(authUserToken, r, null);
-//                            newChildNodes.addAll(newRole.getChildNodes());
-//                        } else {
-//                            newChildNodes.addAll(r.getChildNodes());
-//                        }
-//                        r.setChildNodes(newChildNodes);
-//                    }
-//                    newRoleList.add(r);
-//                }
-//            }
-//        } catch (Exception e) {
-//            logger.error("Failed to Add Role / Activity. Excption: ", e);
-//        }
-//        if (oldRoleList.size() == newRoleList.size()) {
-//            workAllocation.setActiveList(newRoleList);
-//        } else {
-//            logger.error("Failed to create FRAC Roles / Activities. Old List Size: " + oldRoleList.size()
-//                    + ", New List Size: " + newRoleList.size());
-//        }
+        List<Role> oldRoleList = workAllocation.getRoleDetails();
+        List<Role> newRoleList = new ArrayList<>();
+        try {
+            for (Role r : oldRoleList) {
+                if (StringUtils.isEmpty(r.getId())) {
+                    Role newRole = fetchAddedRole(authUserToken, r, null);
+                    newRoleList.add(newRole);
+                } else {
+                    // Role is from FRAC - No need to create new.
+                    // However, we need to check Activity is from FRAC or not.
+                    if (!CollectionUtils.isEmpty(r.getChildNodes())) {
+                        List<ChildNode> newChildNodes = new ArrayList<>();
+                        boolean isNewChildAdded = r.getChildNodes().stream().anyMatch(childNode -> StringUtils.isEmpty(childNode.getId()));
+                        if (isNewChildAdded) {
+                            Role newRole = fetchAddedRole(authUserToken, r, null);
+                            newChildNodes.addAll(newRole.getChildNodes());
+                        } else {
+                            newChildNodes.addAll(r.getChildNodes());
+                        }
+                        r.setChildNodes(newChildNodes);
+                    }
+                    newRoleList.add(r);
+                }
+            }
+        } catch (Exception e) {
+            logger.error("Failed to Add Role / Activity. Excption: ", e);
+        }
+        if (oldRoleList.size() == newRoleList.size()) {
+            workAllocation.setRoleDetails(newRoleList);
+        } else {
+            logger.error("Failed to create FRAC Roles / Activities. Old List Size: " + oldRoleList.size()
+                    + ", New List Size: " + newRoleList.size());
+        }
     }
 
     private String createUserPosition(String authUserToken, String positionName) {
@@ -432,4 +469,53 @@ public class AllocationService {
         cn.setSource(child.getSource());
         return cn;
     }
+
+    private WAObject getWAObject(String userId, WorkAllocationDTO dto) {
+        long currentMillis = System.currentTimeMillis();
+        WAObject wa = new WAObject();
+        wa.setDeptId(dto.getDeptId());
+        wa.setDeptName(dto.getDeptName());
+        wa.setId(dto.getWaId());
+        wa.setPositionId(dto.getPositionId());
+        wa.setCompetencyDetails(dto.getCompetencyDetails());
+        wa.setRoleDetails(dto.getRoleDetails());
+        wa.setUserPosition(dto.getUserPosition());
+        wa.setUpdatedAt(currentMillis);
+        wa.setUpdatedBy(userId);
+        return wa;
+    }
+
+    private WorkAllocation waObjectTransition(String userId, WorkAllocationDTO dto, WorkAllocation workAllocation) {
+        WAObject wa = getWAObject(userId, dto);
+        WorkAllocation deepCopy = null;
+        try {
+            deepCopy = mapper.readValue(mapper.writeValueAsString(workAllocation), WorkAllocation.class);
+        } catch (IOException e) {
+            logger.error("Exception occurred while deserializing the data!");
+        }
+        long currentMillis = System.currentTimeMillis();
+        if (DRAFT_STATUS.equals(dto.getStatus())) {
+            if (ObjectUtils.isEmpty(deepCopy.getDraftWAObject())) {
+                wa.setCreatedBy(userId);
+                wa.setCreatedAt(currentMillis);
+                workAllocation.setDraftWAObject(wa);
+            }
+        }
+        if (PUBLISHED_STATUS.equals(dto.getStatus())) {
+            if (!ObjectUtils.isEmpty(deepCopy.getActiveWAObject())) {
+                WAObject oldPublishObject = deepCopy.getActiveWAObject();
+                oldPublishObject.setUpdatedAt(currentMillis);
+                oldPublishObject.setUpdatedBy(userId);
+                workAllocation.addArchivedWAList(oldPublishObject);
+                workAllocation.setActiveWAObject(wa);
+            } else {
+                wa.setCreatedBy(userId);
+                wa.setCreatedAt(currentMillis);
+                workAllocation.setActiveWAObject(wa);
+                workAllocation.setDraftWAObject(null);
+            }
+        }
+        return workAllocation;
+    }
+
 }
