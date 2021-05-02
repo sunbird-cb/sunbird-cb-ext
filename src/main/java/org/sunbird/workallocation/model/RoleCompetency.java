@@ -3,14 +3,14 @@ package org.sunbird.workallocation.model;
 import java.util.List;
 
 public class RoleCompetency {
-	private List<Role> roleDetails;
+	private Role roleDetails;
 	private List<CompetencyDetails> competencyDetails;
 
-	public List<Role> getRoleDetails() {
+	public Role getRoleDetails() {
 		return roleDetails;
 	}
 
-	public void setRoleDetails(List<Role> roleDetails) {
+	public void setRoleDetails(Role roleDetails) {
 		this.roleDetails = roleDetails;
 	}
 

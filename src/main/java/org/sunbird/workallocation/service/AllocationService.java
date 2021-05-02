@@ -96,7 +96,7 @@ public class AllocationService {
 	 * @return response
 	 */
 	public Response addWorkAllocation(String userAuthToken, String userId, WorkAllocationDTO workAllocationDTO) {
-		
+
 		validator.validateWorkAllocationReq(workAllocationDTO, WorkAllocationConstants.ADD);
 		if (WorkAllocationConstants.DRAFT_STATUS.equals(workAllocationDTO.getStatus())) {
 			if (StringUtils.isEmpty(workAllocationDTO.getUserId())) {
@@ -106,7 +106,7 @@ public class AllocationService {
 				workAllocationDTO.setWaId(UUID.randomUUID().toString());
 			}
 		}
-		
+
 		if (!CollectionUtils.isEmpty(workAllocationDTO.getRoleCompetencyList())) {
 			verifyRoleActivity(userAuthToken, workAllocationDTO);
 		}
@@ -353,7 +353,8 @@ public class AllocationService {
 			for (Map<String, Object> user : userData) {
 				result = new HashMap<>();
 				result.put(WorkAllocationConstants.USER_DETAILS, user);
-				result.put(WorkAllocationConstants.ALLOCATION_DETAILS, allocationSearchMap.getOrDefault(user.get("wid"), null));
+				result.put(WorkAllocationConstants.ALLOCATION_DETAILS,
+						allocationSearchMap.getOrDefault(user.get("wid"), null));
 				finalRes.add(result);
 			}
 		}
@@ -366,39 +367,31 @@ public class AllocationService {
 
 	private void verifyRoleActivity(String authUserToken, WorkAllocationDTO workAllocation) {
 		for (RoleCompetency roleCompetency : workAllocation.getRoleCompetencyList()) {
-			List<Role> oldRoleList = roleCompetency.getRoleDetails();
-			List<Role> newRoleList = new ArrayList<>();
+			Role oldRole = roleCompetency.getRoleDetails();
+			Role newRole = null;
 			try {
-				for (Role r : oldRoleList) {
-					if (StringUtils.isEmpty(r.getId())) {
-						Role newRole = fetchAddedRole(authUserToken, r, null);
-						newRoleList.add(newRole);
-					} else {
-						// Role is from FRAC - No need to create new.
-						// However, we need to check Activity is from FRAC or not.
-						if (!CollectionUtils.isEmpty(r.getChildNodes())) {
-							List<ChildNode> newChildNodes = new ArrayList<>();
-							boolean isNewChildAdded = r.getChildNodes().stream()
-									.anyMatch(childNode -> StringUtils.isEmpty(childNode.getId()));
-							if (isNewChildAdded) {
-								Role newRole = fetchAddedRole(authUserToken, r, null);
-								newChildNodes.addAll(newRole.getChildNodes());
-							} else {
-								newChildNodes.addAll(r.getChildNodes());
-							}
-							r.setChildNodes(newChildNodes);
+				if (StringUtils.isEmpty(oldRole.getId())) {
+					newRole = fetchAddedRole(authUserToken, oldRole, null);
+					roleCompetency.setRoleDetails(newRole);
+				} else {
+					// Role is from FRAC - No need to create new.
+					// However, we need to check Activity is from FRAC or not.
+					if (!CollectionUtils.isEmpty(oldRole.getChildNodes())) {
+						List<ChildNode> newChildNodes = new ArrayList<>();
+						boolean isNewChildAdded = oldRole.getChildNodes().stream()
+								.anyMatch(childNode -> StringUtils.isEmpty(childNode.getId()));
+						if (isNewChildAdded) {
+							newRole = fetchAddedRole(authUserToken, oldRole, null);
+							newChildNodes.addAll(newRole.getChildNodes());
+						} else {
+							newChildNodes.addAll(oldRole.getChildNodes());
 						}
-						newRoleList.add(r);
+						oldRole.setChildNodes(newChildNodes);
+						roleCompetency.setRoleDetails(oldRole);
 					}
 				}
 			} catch (Exception e) {
 				logger.error("Failed to Add Role / Activity. Excption: ", e);
-			}
-			if (oldRoleList.size() == newRoleList.size()) {
-				roleCompetency.setRoleDetails(newRoleList);
-			} else {
-				logger.error("Failed to create FRAC Roles / Activities. Old List Size: " + oldRoleList.size()
-						+ ", New List Size: " + newRoleList.size());
 			}
 		}
 	}
