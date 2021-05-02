@@ -222,6 +222,7 @@ public class AllocationService {
 			SearchResponse searchResponse = indexerService.getEsResult(index, indexType, sourceBuilder);
 			totalCount = searchResponse.getHits().getTotalHits();
 			for (SearchHit hit : searchResponse.getHits()) {
+				logger.info(mapper.writeValueAsString(hit.getSourceAsMap()));
 				allocationSearchList.add(mapper.convertValue(hit.getSourceAsMap(), WorkAllocation.class));
 			}
 			Set<String> userIds = allocationSearchList.stream().map(WorkAllocation::getUserId)
@@ -496,12 +497,10 @@ public class AllocationService {
 			logger.error("Exception occurred while deserializing the data!");
 		}
 		long currentMillis = System.currentTimeMillis();
-		if (WorkAllocationConstants.DRAFT_STATUS.equals(dto.getStatus())) {
-			if (ObjectUtils.isEmpty(deepCopy.getDraftWAObject())) {
-				wa.setCreatedBy(userId);
-				wa.setCreatedAt(currentMillis);
-				workAllocation.setDraftWAObject(wa);
-			}
+		if (WorkAllocationConstants.DRAFT_STATUS.equals(dto.getStatus()) && ObjectUtils.isEmpty(deepCopy.getDraftWAObject())) {
+			wa.setCreatedBy(userId);
+			wa.setCreatedAt(currentMillis);
+			workAllocation.setDraftWAObject(wa);
 		}
 		if (WorkAllocationConstants.PUBLISHED_STATUS.equals(dto.getStatus())) {
 			if (!ObjectUtils.isEmpty(deepCopy.getActiveWAObject())) {
