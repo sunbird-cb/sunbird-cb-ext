@@ -37,7 +37,9 @@ import org.sunbird.common.model.Response;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.core.exception.BadRequestException;
+import org.sunbird.workallocation.model.Child;
 import org.sunbird.workallocation.model.ChildNode;
+import org.sunbird.workallocation.model.CompetencyDetails;
 import org.sunbird.workallocation.model.FracRequest;
 import org.sunbird.workallocation.model.FracResponse;
 import org.sunbird.workallocation.model.Role;
@@ -109,6 +111,7 @@ public class AllocationService {
 
 		if (!CollectionUtils.isEmpty(workAllocationDTO.getRoleCompetencyList())) {
 			verifyRoleActivity(userAuthToken, workAllocationDTO);
+			verifyCompetencyDetails(userAuthToken, workAllocationDTO);
 		}
 		// To - Do
 		// Add competency to FRAC
@@ -497,7 +500,8 @@ public class AllocationService {
 			logger.error("Exception occurred while deserializing the data!");
 		}
 		long currentMillis = System.currentTimeMillis();
-		if (WorkAllocationConstants.DRAFT_STATUS.equals(dto.getStatus()) && ObjectUtils.isEmpty(deepCopy.getDraftWAObject())) {
+		if (WorkAllocationConstants.DRAFT_STATUS.equals(dto.getStatus())
+				&& ObjectUtils.isEmpty(deepCopy.getDraftWAObject())) {
 			wa.setCreatedBy(userId);
 			wa.setCreatedAt(currentMillis);
 			workAllocation.setDraftWAObject(wa);
@@ -518,4 +522,93 @@ public class AllocationService {
 		return workAllocation;
 	}
 
+	private void verifyCompetencyDetails(String authUserToken, WorkAllocationDTO workAllocation) {
+		for (RoleCompetency roleCompetency : workAllocation.getRoleCompetencyList()) {
+			List<CompetencyDetails> oldCompetencyDetails = roleCompetency.getCompetencyDetails();
+			List<CompetencyDetails> newCompetencyDetails = new ArrayList<CompetencyDetails>();
+
+			try {
+				for (CompetencyDetails c : oldCompetencyDetails) {
+					if (StringUtils.isEmpty(c.getId())) {
+						CompetencyDetails newCompetency = fetchAddedComptency(authUserToken, c, null);
+						newCompetencyDetails.add(newCompetency);
+					} else {
+						// Competency is from FRAC - No need to create new.
+						// However, we need to check children is from FRAC or not.
+						boolean isNewChildFound = false;
+						if (!CollectionUtils.isEmpty(c.getChildren())) {
+							isNewChildFound = c.getChildren().stream()
+									.anyMatch(childNode -> StringUtils.isEmpty(childNode.getId()));
+						} else {
+							isNewChildFound = true;
+						}
+
+						if (isNewChildFound) {
+							CompetencyDetails newCompetency = fetchAddedComptency(authUserToken, c, null);
+							newCompetencyDetails.add(newCompetency);
+						} else {
+							newCompetencyDetails.add(c);
+						}
+					}
+				}
+			} catch (Exception e) {
+				logger.error("Failed to Add Role / Activity. Excption: ", e);
+			}
+			if (oldCompetencyDetails.size() == newCompetencyDetails.size()) {
+				roleCompetency.setCompetencyDetails(newCompetencyDetails);
+			} else {
+				logger.error("Failed to create FRAC Competency / CompetencyLevel. Old List Size: "
+						+ oldCompetencyDetails.size() + ", New List Size: " + newCompetencyDetails.size());
+			}
+		}
+	}
+
+	private CompetencyDetails fetchAddedComptency(String authUserToken, CompetencyDetails competency, Child cn)
+			throws Exception {
+		logger.info("Adding Role into FRAC Service...");
+		ObjectMapper mapper = new ObjectMapper();
+
+		FracRequest request = competency.getFracRequest(getSourceValue(), cn);
+		HttpHeaders headers = new HttpHeaders();
+		headers.set("Authorization", authUserToken);
+		headers.add("Accept", MediaType.APPLICATION_JSON_VALUE);
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		HttpEntity<String> entity = new HttpEntity<>(mapper.writeValueAsString(request), headers);
+		FracResponse response = restTemplate.postForObject(
+				extServerProperties.getFracHost() + extServerProperties.getFracNodePath(), entity, FracResponse.class);
+		if (response != null && response.getStatusInfo().getStatusCode() == 200) {
+			return processCompetencyResponse(response);
+		}
+		return competency;
+	}
+
+	private CompetencyDetails processCompetencyResponse(FracResponse response) {
+		CompetencyDetails r = new CompetencyDetails();
+		r.setId(response.getResponseData().getId());
+		r.setName(response.getResponseData().getName());
+		r.setType(response.getResponseData().getType());
+		r.setStatus(response.getResponseData().getStatus());
+		r.setSource(response.getResponseData().getSource());
+		r.setAdditionalProperties(response.getResponseData().getAdditionalProperties());
+		List<ChildNode> children = response.getResponseData().getChildren();
+		if (children != null && !CollectionUtils.isEmpty(children)) {
+			List<Child> childNodes = new ArrayList<Child>();
+			for (ChildNode child : children) {
+				childNodes.add(processCompetencyLevel(child));
+			}
+			r.setChildren(childNodes);
+		}
+		return r;
+	}
+
+	private Child processCompetencyLevel(ChildNode child) {
+		Child cn = new Child();
+		cn.setId(child.getId());
+		cn.setType(child.getType());
+		cn.setName(child.getName());
+		cn.setStatus(child.getStatus());
+		cn.setSource(child.getSource());
+		cn.setLevel(child.getLevel());
+		return cn;
+	}
 }

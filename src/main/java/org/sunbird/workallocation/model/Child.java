@@ -1,58 +1,67 @@
 package org.sunbird.workallocation.model;
 
 public class Child {
-    private String type;
-    private String name;
-    private String description;
-    private Object status;
-    private String source;
-    private String level;
+	private String id;
+	private String type;
+	private String name;
+	private String description;
+	private Object status;
+	private String source;
+	private String level;
 
-    public String getType() {
-        return type;
-    }
+	public String getId() {
+		return id;
+	}
 
-    public void setType(String type) {
-        this.type = type;
-    }
+	public void setId(String id) {
+		this.id = id;
+	}
 
-    public String getName() {
-        return name;
-    }
+	public String getType() {
+		return type;
+	}
 
-    public void setName(String name) {
-        this.name = name;
-    }
+	public void setType(String type) {
+		this.type = type;
+	}
 
-    public String getDescription() {
-        return description;
-    }
+	public String getName() {
+		return name;
+	}
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
+	public void setName(String name) {
+		this.name = name;
+	}
 
-    public Object getStatus() {
-        return status;
-    }
+	public String getDescription() {
+		return description;
+	}
 
-    public void setStatus(Object status) {
-        this.status = status;
-    }
+	public void setDescription(String description) {
+		this.description = description;
+	}
 
-    public String getSource() {
-        return source;
-    }
+	public Object getStatus() {
+		return status;
+	}
 
-    public void setSource(String source) {
-        this.source = source;
-    }
+	public void setStatus(Object status) {
+		this.status = status;
+	}
 
-    public String getLevel() {
-        return level;
-    }
+	public String getSource() {
+		return source;
+	}
 
-    public void setLevel(String level) {
-        this.level = level;
-    }
+	public void setSource(String source) {
+		this.source = source;
+	}
+
+	public String getLevel() {
+		return level;
+	}
+
+	public void setLevel(String level) {
+		this.level = level;
+	}
 }

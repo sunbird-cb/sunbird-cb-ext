@@ -7,7 +7,9 @@ public class FracRequest {
 	private String name;
 	private String source;
 	private String id;
+	private String description;
 	private List<ChildNode> children;
+	private AdditionalProperties additionalProperties;
 
 	public String getType() {
 		return type;
@@ -49,4 +51,19 @@ public class FracRequest {
 		this.id = id;
 	}
 
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public AdditionalProperties getAdditionalProperties() {
+		return additionalProperties;
+	}
+
+	public void setAdditionalProperties(AdditionalProperties additionalProperties) {
+		this.additionalProperties = additionalProperties;
+	}
 }
