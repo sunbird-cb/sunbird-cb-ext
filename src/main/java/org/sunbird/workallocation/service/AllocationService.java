@@ -509,6 +509,7 @@ public class AllocationService {
 		if (WorkAllocationConstants.PUBLISHED_STATUS.equals(dto.getStatus())) {
 			if (!ObjectUtils.isEmpty(deepCopy.getActiveWAObject())) {
 				WAObject oldPublishObject = deepCopy.getActiveWAObject();
+				oldPublishObject.setStatus(WorkAllocationConstants.ARCHIVED_STATUS);
 				oldPublishObject.setUpdatedAt(currentMillis);
 				oldPublishObject.setUpdatedBy(userId);
 				workAllocation.addArchivedWAList(oldPublishObject);
