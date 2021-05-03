@@ -11,6 +11,7 @@ public class ResponseData {
 	private String status;
 	private String source;
 	private List<ChildNode> children;
+	private AdditionalProperties additionalProperties;
 
 	public String getType() {
 		return type;
@@ -66,5 +67,13 @@ public class ResponseData {
 
 	public void setChildren(List<ChildNode> children) {
 		this.children = children;
+	}
+
+	public AdditionalProperties getAdditionalProperties() {
+		return additionalProperties;
+	}
+
+	public void setAdditionalProperties(AdditionalProperties additionalProperties) {
+		this.additionalProperties = additionalProperties;
 	}
 }

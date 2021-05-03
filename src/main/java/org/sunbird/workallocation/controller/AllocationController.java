@@ -6,7 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.sunbird.common.model.Response;
 import org.sunbird.workallocation.model.SearchCriteria;
-import org.sunbird.workallocation.model.WorkAllocation;
+import org.sunbird.workallocation.model.WorkAllocationDTO;
 import org.sunbird.workallocation.service.AllocationService;
 
 @RestController
@@ -18,14 +18,14 @@ public class AllocationController {
 
 	@PostMapping("/add")
 	public ResponseEntity<Response> add(@RequestHeader("Authorization") String authUserToken,
-			@RequestHeader("userId") String userId, @RequestBody WorkAllocation workAllocation) {
+			@RequestHeader("userId") String userId, @RequestBody WorkAllocationDTO workAllocation) {
 		Response response = allocationService.addWorkAllocation(authUserToken, userId, workAllocation);
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
 	@PostMapping("/update")
 	public ResponseEntity<Response> update(@RequestHeader("Authorization") String authUserToken,
-			@RequestHeader("userId") String userId, @RequestBody WorkAllocation workAllocation) {
+			@RequestHeader("userId") String userId, @RequestBody WorkAllocationDTO workAllocation) {
 		Response response = allocationService.updateWorkAllocation(authUserToken, userId, workAllocation);
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}

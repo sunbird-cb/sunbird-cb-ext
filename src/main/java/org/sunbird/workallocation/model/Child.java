@@ -1,25 +1,13 @@
 package org.sunbird.workallocation.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class ChildNode {
-	private String type;
+public class Child {
 	private String id;
+	private String type;
 	private String name;
 	private String description;
-	private String status;
+	private Object status;
 	private String source;
-	private String parentRole;
 	private String level;
-
-	public String getType() {
-		return type;
-	}
-
-	public void setType(String type) {
-		this.type = type;
-	}
 
 	public String getId() {
 		return id;
@@ -27,6 +15,14 @@ public class ChildNode {
 
 	public void setId(String id) {
 		this.id = id;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
 	}
 
 	public String getName() {
@@ -45,11 +41,11 @@ public class ChildNode {
 		this.description = description;
 	}
 
-	public String getStatus() {
+	public Object getStatus() {
 		return status;
 	}
 
-	public void setStatus(String status) {
+	public void setStatus(Object status) {
 		this.status = status;
 	}
 
@@ -61,27 +57,11 @@ public class ChildNode {
 		this.source = source;
 	}
 
-	public String getParentRole() {
-		return parentRole;
-	}
-
-	public void setParentRole(String parentRole) {
-		this.parentRole = parentRole;
-	}
-
 	public String getLevel() {
 		return level;
 	}
 
 	public void setLevel(String level) {
 		this.level = level;
-	}
-
-	public ChildNode getFracRequest(String source) {
-		ChildNode newCN = new ChildNode();
-		newCN.setName(name);
-		newCN.setSource(source);
-		newCN.setType("ACTIVITY");
-		return newCN;
 	}
 }
