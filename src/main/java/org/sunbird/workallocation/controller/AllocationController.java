@@ -41,4 +41,9 @@ public class AllocationController {
 		Response response = allocationService.userAutoComplete(searchTerm);
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
+	@GetMapping("/getWAPdf/{userId}/{waId}")
+	public ResponseEntity<Response> getWAPdf(@PathVariable("userId") String userId, @PathVariable("waId") String waId) {
+		Response response = allocationService.getWaPdf(userId, waId);
+		return new ResponseEntity<>(response, HttpStatus.OK);
+	}
 }

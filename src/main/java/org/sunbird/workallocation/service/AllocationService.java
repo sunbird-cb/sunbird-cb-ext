@@ -613,4 +613,22 @@ public class AllocationService {
 		cn.setLevel(child.getLevel());
 		return cn;
 	}
+
+	public Response getWaPdf(String userId, String waId) {
+		Map<String, Object> existingRecord = indexerService.readEntity(index, indexType, userId);
+		if (CollectionUtils.isEmpty(existingRecord))
+			throw new BadRequestException("No records found on given criteria!");
+		WorkAllocation workAllocation = mapper.convertValue(existingRecord, WorkAllocation.class);
+		WAObject waObject = null;
+		if (!ObjectUtils.isEmpty(workAllocation.getActiveWAObject()) && waId.equals(workAllocation.getActiveWAObject().getId()))
+			waObject = workAllocation.getActiveWAObject();
+		if (!ObjectUtils.isEmpty(workAllocation.getDraftWAObject()) && waId.equals(workAllocation.getDraftWAObject().getId()))
+			waObject = workAllocation.getDraftWAObject();
+		if (ObjectUtils.isEmpty(waObject))
+			throw new BadRequestException("No records found on given Id!");
+		Response response = new Response();
+		response.put(Constants.DATA, waObject);
+		response.put(Constants.STATUS, HttpStatus.OK);
+		return response;
+	}
 }
