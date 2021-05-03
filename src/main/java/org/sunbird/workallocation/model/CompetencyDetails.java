@@ -116,11 +116,12 @@ public class CompetencyDetails {
 							newCN.setDescription(cn.getDescription());
 							newCN.setLevel(cn.getLevel());
 							childNodeList.add(newCN);
+							req.setChildren(childNodeList);
 						}
 					}
 				}
 		
-				if (req.getChildren().size() < 5) {
+				if (req.getChildren() != null && req.getChildren().size() < 5) {
 					Set<String> levelSet = children.stream().map(Child::getLevel).collect(Collectors.toSet());
 					// We need to add more children
 					for (int i = 1; i <= 5; i++) {

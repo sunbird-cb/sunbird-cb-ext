@@ -500,10 +500,11 @@ public class AllocationService {
 			logger.error("Exception occurred while deserializing the data!");
 		}
 		long currentMillis = System.currentTimeMillis();
-		if (WorkAllocationConstants.DRAFT_STATUS.equals(dto.getStatus())
-				&& ObjectUtils.isEmpty(deepCopy.getDraftWAObject())) {
-			wa.setCreatedBy(userId);
-			wa.setCreatedAt(currentMillis);
+		if (WorkAllocationConstants.DRAFT_STATUS.equals(dto.getStatus())) {
+			if (ObjectUtils.isEmpty(deepCopy.getDraftWAObject())) {
+				wa.setCreatedBy(userId);
+				wa.setCreatedAt(currentMillis);
+			}
 			workAllocation.setDraftWAObject(wa);
 		}
 		if (WorkAllocationConstants.PUBLISHED_STATUS.equals(dto.getStatus())) {
@@ -526,7 +527,7 @@ public class AllocationService {
 	private void verifyCompetencyDetails(String authUserToken, WorkAllocationDTO workAllocation) {
 		for (RoleCompetency roleCompetency : workAllocation.getRoleCompetencyList()) {
 			List<CompetencyDetails> oldCompetencyDetails = roleCompetency.getCompetencyDetails();
-			List<CompetencyDetails> newCompetencyDetails = new ArrayList<CompetencyDetails>();
+			List<CompetencyDetails> newCompetencyDetails = new ArrayList<>();
 
 			try {
 				for (CompetencyDetails c : oldCompetencyDetails) {
@@ -553,7 +554,7 @@ public class AllocationService {
 					}
 				}
 			} catch (Exception e) {
-				logger.error("Failed to Add Role / Activity. Excption: ", e);
+				logger.error("Failed to Add Competency / Competency area. Exception: ", e);
 			}
 			if (oldCompetencyDetails.size() == newCompetencyDetails.size()) {
 				roleCompetency.setCompetencyDetails(newCompetencyDetails);
@@ -566,7 +567,7 @@ public class AllocationService {
 
 	private CompetencyDetails fetchAddedComptency(String authUserToken, CompetencyDetails competency, Child cn)
 			throws Exception {
-		logger.info("Adding Role into FRAC Service...");
+		logger.info("Adding Competency into FRAC Service...");
 		ObjectMapper mapper = new ObjectMapper();
 
 		FracRequest request = competency.getFracRequest(getSourceValue(), cn);
