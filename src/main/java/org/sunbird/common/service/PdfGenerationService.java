@@ -181,6 +181,7 @@ public class PdfGenerationService {
 				{
 					JSONArray deptLogoImage = new JSONArray();
 					deptLogoImage.add("image");
+					baseUrl = baseUrl.concat(wa.getUserId()).concat("/").concat(waObj.getId());
 					File qrCodeFile = QRCode.from(baseUrl).to(ImageType.PNG).file();
 
 					deptLogoImage.add(qrCodeFile.getAbsolutePath());
