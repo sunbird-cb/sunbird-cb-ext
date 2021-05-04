@@ -194,20 +194,22 @@ public class AllocationService {
 	 * @return return the user's list based on search criterias
 	 */
 	public Response getUsers(SearchCriteria criteria) {
-		validator.validateCriteria(criteria);
 		final BoolQueryBuilder query = QueryBuilders.boolQuery();
-		if (WorkAllocationConstants.DRAFT_STATUS.equals(criteria.getStatus())) {
-			query.must(QueryBuilders.matchQuery("draftWAObject.deptName", criteria.getDepartmentName()))
-					.must(QueryBuilders.matchQuery("draftWAObject.status", criteria.getStatus()));
-		}
-		if (WorkAllocationConstants.PUBLISHED_STATUS.equals(criteria.getStatus())) {
-			query.must(QueryBuilders.matchQuery("activeWAObject.deptName", criteria.getDepartmentName()))
-					.must(QueryBuilders.matchQuery("activeWAObject.status", criteria.getStatus()));
-		}
-		if (WorkAllocationConstants.ARCHIVED_STATUS.equals(criteria.getStatus())) {
-			query.must(QueryBuilders.nestedQuery("archivedWAList",
-					QueryBuilders.matchQuery("archivedWAList.deptName", criteria.getDepartmentName()), ScoreMode.None));
-		}
+			if (WorkAllocationConstants.DRAFT_STATUS.equals(criteria.getStatus())) {
+				query.must(QueryBuilders.matchQuery("draftWAObject.deptName", criteria.getDepartmentName()))
+						.must(QueryBuilders.matchQuery("draftWAObject.status", criteria.getStatus()));
+			}
+			if (WorkAllocationConstants.PUBLISHED_STATUS.equals(criteria.getStatus())) {
+				query.must(QueryBuilders.matchQuery("activeWAObject.deptName", criteria.getDepartmentName()))
+						.must(QueryBuilders.matchQuery("activeWAObject.status", criteria.getStatus()));
+			}
+			if (WorkAllocationConstants.ARCHIVED_STATUS.equals(criteria.getStatus())) {
+				query.must(QueryBuilders.nestedQuery("archivedWAList",
+						QueryBuilders.matchQuery("archivedWAList.deptName", criteria.getDepartmentName()), ScoreMode.None));
+			}
+			if(!StringUtils.isEmpty(criteria.getUserId())){
+				query.must(QueryBuilders.matchQuery("userId", criteria.getUserId()));
+			}
 		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder().query(query);
 		sourceBuilder.from(criteria.getPageNo());
 		sourceBuilder.size(criteria.getPageSize());
@@ -215,8 +217,6 @@ public class AllocationService {
 			sourceBuilder.sort(SortBuilders.fieldSort("draftWAObject.updatedAt").order(SortOrder.DESC));
 		if (WorkAllocationConstants.PUBLISHED_STATUS.equals(criteria.getStatus()))
 			sourceBuilder.sort(SortBuilders.fieldSort("activeWAObject.updatedAt").order(SortOrder.DESC));
-		logger.info("Query ======> ");
-		logger.info(query.toString());
 		List<WorkAllocation> allocationSearchList = new ArrayList<>();
 		List<Map<String, Object>> finalRes = new ArrayList<>();
 		Map<String, Object> result;

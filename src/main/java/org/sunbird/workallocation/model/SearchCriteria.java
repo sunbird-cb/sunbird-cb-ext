@@ -4,6 +4,7 @@ public class SearchCriteria {
     private int pageSize;
     private int pageNo;
     private String status;
+    private String userId;
     private String departmentName;
 
     public int getPageSize() {
@@ -36,5 +37,13 @@ public class SearchCriteria {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 }
