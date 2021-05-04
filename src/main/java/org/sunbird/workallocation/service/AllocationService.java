@@ -619,10 +619,12 @@ public class AllocationService {
 		return cn;
 	}
 
-	public ByteArrayOutputStream getWaPdf(String userId, String waId) {
+	public ByteArrayOutputStream getWaPdf(String userId, String waId) throws Exception {
 		Map<String, Object> existingRecord = indexerService.readEntity(index, indexType, userId);
-		if (CollectionUtils.isEmpty(existingRecord))
-			throw new BadRequestException("No records found on given criteria!");
+		if (CollectionUtils.isEmpty(existingRecord)) {
+			logger.error("No records found on given criteria!");
+			return null;
+		}
 		String statusSelected = null;
 
 		WorkAllocation wa = mapper.convertValue(existingRecord, WorkAllocation.class);

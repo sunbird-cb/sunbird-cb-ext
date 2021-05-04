@@ -1,9 +1,20 @@
 package org.sunbird.workallocation.controller;
 
+import java.io.ByteArrayOutputStream;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.sunbird.common.model.Response;
 import org.sunbird.workallocation.model.SearchCriteria;
 import org.sunbird.workallocation.model.WorkAllocationDTO;
@@ -40,8 +51,24 @@ public class AllocationController {
 		return new ResponseEntity<>(allocationService.userAutoComplete(searchTerm), HttpStatus.OK);
 	}
 
-	@GetMapping("/getWAPdf/{userId}/{waId}")
+	@GetMapping(value = "/getWAPdf/{userId}/{waId}", produces = MediaType.APPLICATION_PDF_VALUE)
 	public ResponseEntity<?> getWAPdf(@PathVariable("userId") String userId, @PathVariable("waId") String waId) {
-		return new ResponseEntity<>(allocationService.getWaPdf(userId, waId), HttpStatus.OK);
+		ByteArrayOutputStream out = null;
+		try {
+			out = allocationService.getWaPdf(userId, waId);
+		} catch (Exception e) {
+		}
+
+		if (out == null) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Failed to find data for given Ids.");
+		}
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_PDF);
+		headers.add("Content-Disposition", "inline; filename=wa_report.pdf");
+
+		ResponseEntity<?> response = new ResponseEntity<>(out.toByteArray(), headers, HttpStatus.OK);
+
+		return response;
 	}
 }
