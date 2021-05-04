@@ -619,7 +619,7 @@ public class AllocationService {
 		return cn;
 	}
 
-	public ByteArrayOutputStream getWaPdf(String userId, String waId) throws Exception {
+	public byte[] getWaPdf(String userId, String waId) throws Exception {
 		Map<String, Object> existingRecord = indexerService.readEntity(index, indexType, userId);
 		if (CollectionUtils.isEmpty(existingRecord)) {
 			logger.error("No records found on given criteria!");

@@ -31,7 +31,7 @@ public class PdfGenerationService {
 	@Value("${domain.host.name}")
 	public String baseUrl;
 
-	public ByteArrayOutputStream getWAPdf(WorkAllocation wa, String statusSelected) {
+	public byte[] getWAPdf(WorkAllocation wa, String statusSelected) {
 		JSONArray pageTable = new JSONArray();
 		JSONObject jPages = new JSONObject();
 		jPages.put("pages", true);
@@ -47,10 +47,10 @@ public class PdfGenerationService {
 
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		JsonPDF.writeToStream((new ByteArrayInputStream(pageTable.toJSONString().getBytes())), out, null);
-		return out;
+		return out.toByteArray();
 	}
 
-	public ByteArrayOutputStream getWaExpiredError(WorkAllocation wa, String oldWaId) {
+	public byte[] getWaExpiredError(WorkAllocation wa, String oldWaId) {
 		if (ObjectUtils.isEmpty(wa.getActiveWAObject())) {
 			// There is no active WA object found. We can not create QR Code for
 			// redirection.

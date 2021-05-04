@@ -51,9 +51,9 @@ public class AllocationController {
 		return new ResponseEntity<>(allocationService.userAutoComplete(searchTerm), HttpStatus.OK);
 	}
 
-	@GetMapping(value = "/getWAPdf/{userId}/{waId}", produces = MediaType.APPLICATION_PDF_VALUE)
+	@GetMapping(value = "/getWAPdf/{userId}/{waId}")
 	public ResponseEntity<?> getWAPdf(@PathVariable("userId") String userId, @PathVariable("waId") String waId) {
-		ByteArrayOutputStream out = null;
+		byte[] out = null;
 		try {
 			out = allocationService.getWaPdf(userId, waId);
 		} catch (Exception e) {
@@ -67,7 +67,7 @@ public class AllocationController {
 		headers.setContentType(MediaType.APPLICATION_PDF);
 		headers.add("Content-Disposition", "inline; filename=wa_report.pdf");
 
-		ResponseEntity<?> response = new ResponseEntity<>(out.toByteArray(), headers, HttpStatus.OK);
+		ResponseEntity<?> response = new ResponseEntity<>(out, headers, HttpStatus.OK);
 
 		return response;
 	}
