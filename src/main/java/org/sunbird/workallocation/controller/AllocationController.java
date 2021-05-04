@@ -19,31 +19,29 @@ public class AllocationController {
 	@PostMapping("/add")
 	public ResponseEntity<Response> add(@RequestHeader("Authorization") String authUserToken,
 			@RequestHeader("userId") String userId, @RequestBody WorkAllocationDTO workAllocation) {
-		Response response = allocationService.addWorkAllocation(authUserToken, userId, workAllocation);
-		return new ResponseEntity<>(response, HttpStatus.OK);
+		return new ResponseEntity<>(allocationService.addWorkAllocation(authUserToken, userId, workAllocation),
+				HttpStatus.OK);
 	}
 
 	@PostMapping("/update")
 	public ResponseEntity<Response> update(@RequestHeader("Authorization") String authUserToken,
 			@RequestHeader("userId") String userId, @RequestBody WorkAllocationDTO workAllocation) {
-		Response response = allocationService.updateWorkAllocation(authUserToken, userId, workAllocation);
-		return new ResponseEntity<>(response, HttpStatus.OK);
+		return new ResponseEntity<>(allocationService.updateWorkAllocation(authUserToken, userId, workAllocation),
+				HttpStatus.OK);
 	}
 
 	@PostMapping("/getUsers")
 	public ResponseEntity<Response> getUsers(@RequestBody SearchCriteria searchCriteria) {
-		Response response = allocationService.getUsers(searchCriteria);
-		return new ResponseEntity<>(response, HttpStatus.OK);
+		return new ResponseEntity<>(allocationService.getUsers(searchCriteria), HttpStatus.OK);
 	}
 
 	@GetMapping("/users/autocomplete")
 	public ResponseEntity<Response> userAutoComplete(@RequestParam("searchTerm") String searchTerm) {
-		Response response = allocationService.userAutoComplete(searchTerm);
-		return new ResponseEntity<>(response, HttpStatus.OK);
+		return new ResponseEntity<>(allocationService.userAutoComplete(searchTerm), HttpStatus.OK);
 	}
+
 	@GetMapping("/getWAPdf/{userId}/{waId}")
-	public ResponseEntity<Response> getWAPdf(@PathVariable("userId") String userId, @PathVariable("waId") String waId) {
-		Response response = allocationService.getWaPdf(userId, waId);
-		return new ResponseEntity<>(response, HttpStatus.OK);
+	public ResponseEntity<?> getWAPdf(@PathVariable("userId") String userId, @PathVariable("waId") String waId) {
+		return new ResponseEntity<>(allocationService.getWaPdf(userId, waId), HttpStatus.OK);
 	}
 }

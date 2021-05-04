@@ -1,5 +1,6 @@
 package org.sunbird.workallocation.service;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,6 +35,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 import org.sunbird.common.model.Response;
+import org.sunbird.common.service.PdfGenerationService;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.core.exception.BadRequestException;
@@ -89,6 +91,9 @@ public class AllocationService {
 
 	@Value("${workallocation.index.type}")
 	public String indexType;
+
+	@Autowired
+	private PdfGenerationService pdfService;
 
 	ObjectMapper mapper = new ObjectMapper();
 
@@ -614,21 +619,31 @@ public class AllocationService {
 		return cn;
 	}
 
-	public Response getWaPdf(String userId, String waId) {
+	public ByteArrayOutputStream getWaPdf(String userId, String waId) {
 		Map<String, Object> existingRecord = indexerService.readEntity(index, indexType, userId);
 		if (CollectionUtils.isEmpty(existingRecord))
 			throw new BadRequestException("No records found on given criteria!");
-		WorkAllocation workAllocation = mapper.convertValue(existingRecord, WorkAllocation.class);
-		WAObject waObject = null;
-		if (!ObjectUtils.isEmpty(workAllocation.getActiveWAObject()) && waId.equals(workAllocation.getActiveWAObject().getId()))
-			waObject = workAllocation.getActiveWAObject();
-		if (!ObjectUtils.isEmpty(workAllocation.getDraftWAObject()) && waId.equals(workAllocation.getDraftWAObject().getId()))
-			waObject = workAllocation.getDraftWAObject();
-		if (ObjectUtils.isEmpty(waObject))
-			throw new BadRequestException("No records found on given Id!");
-		Response response = new Response();
-		response.put(Constants.DATA, waObject);
-		response.put(Constants.STATUS, HttpStatus.OK);
-		return response;
+		String statusSelected = null;
+
+		WorkAllocation wa = mapper.convertValue(existingRecord, WorkAllocation.class);
+		WAObject waObj = null;
+		if (!ObjectUtils.isEmpty(wa.getActiveWAObject()) && waId.equals(wa.getActiveWAObject().getId())) {
+			waObj = wa.getActiveWAObject();
+			statusSelected = WorkAllocationConstants.PUBLISHED_STATUS;
+		} else if (!ObjectUtils.isEmpty(wa.getDraftWAObject()) && waId.equals(wa.getDraftWAObject().getId())) {
+			waObj = wa.getDraftWAObject();
+			statusSelected = WorkAllocationConstants.DRAFT_STATUS;
+		}
+
+		if (ObjectUtils.isEmpty(waObj)) {
+			return pdfService.getWaExpiredError(wa, waId);
+		}
+
+		// If status Draft
+		if (WorkAllocationConstants.DRAFT_STATUS.equalsIgnoreCase(waObj.getStatus())) {
+			// TODO -- need to validate the requested user is MDO Admin. If not throw Error.
+		}
+		
+		return pdfService.getWAPdf(wa, statusSelected);
 	}
 }
