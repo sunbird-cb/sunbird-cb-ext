@@ -20,4 +20,5 @@ public class PortalConstants {
 	public static final List<String> CBP_ROLES = Arrays.asList("EDITOR", "REVIEWER", "PUBLISHER", "CONTENT_CREATOR");
 	public static final List<String> FRAC_ROLES = Arrays.asList("IFUMember", "fracAdmin", "fracReviewerOne",
 			"fracReviewerTwo", "fracAccessCompetency");
+	public static final List<String> CBC_ROLE_LIST = Arrays.asList(CBC_ROLE_NAME);
 }
