@@ -105,6 +105,7 @@ public class CohortsServiceImpl implements CohortsService {
 					user.setFirst_name(userProfile.getPersonalDetails().getFirstname());
 					user.setLast_name(userProfile.getPersonalDetails().getSurname());
 					userNames.add(userProfile.getPersonalDetails().getPrimaryEmail());
+					topPerformers.add(user);
 					if (counter == count)
 						break;
 					counter++;
