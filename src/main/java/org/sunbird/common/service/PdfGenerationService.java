@@ -13,6 +13,7 @@ import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
+import org.sunbird.core.logger.CbExtLogger;
 import org.sunbird.workallocation.model.ChildNode;
 import org.sunbird.workallocation.model.CompetencyDetails;
 import org.sunbird.workallocation.model.RoleCompetency;
@@ -27,6 +28,8 @@ import net.glxn.qrgen.javase.QRCode;
 @Service
 @SuppressWarnings("unchecked")
 public class PdfGenerationService {
+
+	private CbExtLogger logger = new CbExtLogger(getClass().getName());
 
 	@Value("${domain.host.name}")
 	public String baseUrl;
@@ -46,7 +49,13 @@ public class PdfGenerationService {
 		pageTable.add(getUserRoleActivities(wa, statusSelected));
 
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		JsonPDF.writeToStream((new ByteArrayInputStream(pageTable.toJSONString().getBytes())), out, null);
+		try {
+			JsonPDF.writeToStream((new ByteArrayInputStream(pageTable.toJSONString().getBytes())), out, null);
+		} catch (Exception e) {
+			logger.warn("Failed to generate PDF from JSON Object.");
+			logger.error(e);
+		}
+
 		return out.toByteArray();
 	}
 
@@ -125,17 +134,15 @@ public class PdfGenerationService {
 				deptLogoArray.add(firstColProperties);
 				// Add image
 				{
-//					JSONArray deptLogoImage = new JSONArray();
-//					deptLogoImage.add("image");
-//					deptLogoImage.add(
-//							"https://igot.blob.core.windows.net/public/content/do_11326711517301964818/artifact/do_113253147251425280141_1617815925639_controller_general_of_defence_accounts_logo.thumb.jpg");
-//					deptLogoArray.add(deptLogoImage);
-
-					JSONArray deptLogo = new JSONArray();
-					deptLogo.add("paragraph");
-					deptLogo.add("Image Not Found");
-
-					deptLogoArray.add(deptLogo);
+					// TODO check the DeptRepo for Dept Image details.
+					JSONArray deptLogoImage = new JSONArray();
+					deptLogoImage.add("image");
+					JSONObject imageProperties = new JSONObject();
+					imageProperties.put("width", 100);
+					imageProperties.put("height", 100);
+					deptLogoImage.add(imageProperties);
+					deptLogoImage.add("classpath:government-of-india.jpg");
+					deptLogoArray.add(deptLogoImage);
 				}
 
 				singleRow.add(deptLogoArray);
