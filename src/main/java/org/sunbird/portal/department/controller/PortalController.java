@@ -222,6 +222,49 @@ public class PortalController {
 	}
 	// ----------------- END OF CBP APIs -----------------------
 
+	// ----------------- CBC APIs -----------------------
+	@GetMapping("/portal/cbc/isAdmin")
+	public ResponseEntity<Boolean> isCBCAdmin(@RequestHeader("wid") String wid) throws Exception {
+		return new ResponseEntity<Boolean>(
+				portalService.isAdmin(PortalConstants.CBC_DEPT_TYPE, PortalConstants.CBC_ROLE_NAME, wid),
+				HttpStatus.OK);
+	}
+
+	@GetMapping("/portal/cbc/mydepartment")
+	public ResponseEntity<?> getMyCBCDepartment(@RequestHeader("wid") String wid,
+												@RequestParam(name = "allUsers", required = false) boolean isUserInfoRequired,
+												@RequestHeader("rootOrg") String rootOrg) throws Exception {
+		validateUserAccess(PortalConstants.CBC_DEPT_TYPE, PortalConstants.CBC_ROLE_NAME, wid);
+		return new ResponseEntity<>(mdoPortalService.getMyCBCDepartment(wid, isUserInfoRequired, rootOrg), HttpStatus.OK);
+	}
+
+	@PatchMapping("/portal/cbc/department")
+	public ResponseEntity<DepartmentInfo> updateCBCDepartment(@RequestHeader("wid") String wid,
+															  @RequestBody DepartmentInfo deptInfo, @RequestHeader("rootOrg") String rootOrg) throws Exception {
+		validateUserAccess(PortalConstants.CBC_DEPT_TYPE, PortalConstants.CBC_ROLE_NAME, wid, deptInfo.getId());
+		return new ResponseEntity<DepartmentInfo>(mdoPortalService.updateDepartment(deptInfo, rootOrg), HttpStatus.OK);
+	}
+
+	@PostMapping("/portal/cbc/userrole")
+	public ResponseEntity<UserDepartmentInfo> addUserRoleInDepartmentByCBC(@RequestBody UserDepartmentRole userDeptRole,
+																		   @RequestHeader("rootOrg") String rootOrg, @RequestHeader("org") String org,
+																		   @RequestHeader("wid") String wid) throws Exception {
+		validateUserAccess(PortalConstants.CBC_DEPT_TYPE, PortalConstants.CBC_ROLE_NAME, wid, userDeptRole.getDeptId());
+		return new ResponseEntity<UserDepartmentInfo>(
+				portalService.addUserRoleInDepartment(userDeptRole, wid, rootOrg, org), HttpStatus.OK);
+	}
+
+	@PatchMapping("/portal/cbc/userrole")
+	public ResponseEntity<UserDepartmentInfo> updateUserRoleInDepartmentByCBC(
+			@RequestBody UserDepartmentRole userDeptRole, @RequestHeader("rootOrg") String rootOrg,
+			@RequestHeader("org") String org, @RequestHeader("wid") String wid) throws Exception {
+		validateUserAccess(PortalConstants.CBC_DEPT_TYPE, PortalConstants.CBC_ROLE_NAME, wid, userDeptRole.getDeptId());
+		return new ResponseEntity<UserDepartmentInfo>(
+				portalService.updateUserRoleInDepartment(userDeptRole, wid, rootOrg, org), HttpStatus.OK);
+	}
+
+	// ----------------- CBC APIs Ends-----------------------
+
 	@GetMapping("/portal/department/{dept_id}")
 	public ResponseEntity<DepartmentInfo> getDepartmentById(@PathVariable("dept_id") Integer deptId,
 			@RequestParam(name = "allUsers", required = false) boolean isUserInfoRequired,
@@ -288,4 +331,5 @@ public class PortalController {
 	public ResponseEntity<Boolean> isUserActive(@RequestHeader("userId") String userId) {
 		return new ResponseEntity<Boolean>(portalService.isUserActive(userId), HttpStatus.OK);
 	}
+
 }
