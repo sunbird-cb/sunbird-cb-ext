@@ -1,5 +1,7 @@
 package org.sunbird.common.model;
 
+import java.util.List;
+
 public class SunbirdApiHierarchyResultContent {
 	private String parent;
 	private String identifier;
@@ -15,6 +17,7 @@ public class SunbirdApiHierarchyResultContent {
 	private String name;
 	private String code;
 	private String streamingUrl;
+	private List<SunbirdApiHierarchyResultContent> children;
 
 	public String getParent() {
 		return parent;
@@ -126,5 +129,13 @@ public class SunbirdApiHierarchyResultContent {
 
 	public void setStreamingUrl(String streamingUrl) {
 		this.streamingUrl = streamingUrl;
+	}
+
+	public List<SunbirdApiHierarchyResultContent> getChildren() {
+		return children;
+	}
+
+	public void setChildren(List<SunbirdApiHierarchyResultContent> children) {
+		this.children = children;
 	}
 }

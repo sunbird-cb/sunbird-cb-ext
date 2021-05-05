@@ -40,7 +40,7 @@ public class AssessmentController {
 
 	/**
 	 * Controller to a get request to Fetch AssessmentData the request requires
-	 * user_id and course_id returns a JSON of processesd data and list of
+	 * user_id and course_id returns a JSON of processed data and list of
 	 * Assessments Given
 	 * 
 	 * @param courseId
