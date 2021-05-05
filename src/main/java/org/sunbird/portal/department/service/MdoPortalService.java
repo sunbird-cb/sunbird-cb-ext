@@ -8,4 +8,6 @@ public interface MdoPortalService {
 	DepartmentInfo getMyDepartment(String userId, boolean isUserInfoRequired,String rootOrg) throws Exception;
 	
 	DepartmentInfo getMyFracDepartment(String userId, boolean isUserInfoRequired, String rootOrg) throws Exception;
+
+	DepartmentInfo getMyCBCDepartment(String userId, boolean isUserInfoRequired, String rootOrg) throws Exception;
 }
