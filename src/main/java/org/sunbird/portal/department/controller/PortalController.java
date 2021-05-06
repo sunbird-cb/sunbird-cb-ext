@@ -269,6 +269,15 @@ public class PortalController {
 		return new ResponseEntity<List<DepartmentInfo>>(spvPortalService.getAllDepartments(rootOrg), HttpStatus.OK);
 	}
 
+	@GetMapping("/portal/cbc/department/{dept_id}")
+	public ResponseEntity<DepartmentInfo> getDepartmentByIdForCBC(@PathVariable("dept_id") Integer deptId,
+															@RequestParam(name = "allUsers", required = false) boolean isUserInfoRequired,
+															@RequestHeader("wid") String wid, @RequestHeader("rootOrg") String rootOrg) throws Exception {
+		validateUserAccess(PortalConstants.CBC_DEPT_TYPE, PortalConstants.CBC_ROLE_NAME, wid);
+		return new ResponseEntity<DepartmentInfo>(
+				spvPortalService.getDepartmentById(deptId, isUserInfoRequired, rootOrg), HttpStatus.OK);
+	}
+
 	// ----------------- CBC APIs Ends-----------------------
 
 	@GetMapping("/portal/department/{dept_id}")
