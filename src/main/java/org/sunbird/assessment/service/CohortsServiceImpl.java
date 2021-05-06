@@ -17,6 +17,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.sunbird.assessment.repo.CohortUsers;
 import org.sunbird.assessment.repo.UserAssessmentTopPerformerRepository;
+import org.sunbird.common.model.OpenSaberApiUserProfile;
 import org.sunbird.common.model.SunbirdApiHierarchyResultContent;
 import org.sunbird.common.model.SunbirdApiResp;
 import org.sunbird.common.service.ContentService;
@@ -34,7 +35,7 @@ public class CohortsServiceImpl implements CohortsService {
 
 	@Autowired
 	ContentService contentService;
-	
+
 	@Autowired
 	UserAssessmentTopPerformerRepository userAssessmentTopPerformerRepo;
 
@@ -86,23 +87,25 @@ public class CohortsServiceImpl implements CohortsService {
 			logger.info("enrichDepartmentInfo UserIds -> " + topLearnierIdList.toString() + ", fetched Information -> "
 					+ learnerUUIDEmailMap.size());
 		}
-		
+
 		List<String> userNames = new ArrayList<String>();
 		List<CohortUsers> topPerformers = new ArrayList<CohortUsers>();
 		for (Map<String, Object> topLearnerRow : topLearnerRecords) {
 			// Same Logic as before
 			String topLearnerUUID = topLearnerRow.get("user_id").toString();
-			if (learnerUUIDEmailMap.containsKey(topLearnerUUID) && learnerUUIDEmailMap.get(topLearnerUUID) != null
-					&& learnerUUIDEmailMap.get(topLearnerUUID).toString().contains("@")) {
-				String topLearnerEmail = learnerUUIDEmailMap.get(topLearnerUUID).toString();
-				String userName = topLearnerEmail.toLowerCase().substring(0, topLearnerEmail.indexOf("@"));
-				if (!userNames.contains(userName) && !topLearnerUUID.toLowerCase().equals(userId)) {
+
+			if (learnerUUIDEmailMap != null && learnerUUIDEmailMap.containsKey(topLearnerUUID)) {
+				OpenSaberApiUserProfile userProfile = (OpenSaberApiUserProfile) learnerUUIDEmailMap.get(topLearnerUUID);
+				if (!userNames.contains(userProfile.getPersonalDetails().getPrimaryEmail())
+						&& !topLearnerUUID.toLowerCase().equals(userId)) {
 					CohortUsers user = new CohortUsers();
 					user.setDesc("Top Learner");
-					user.setUser_id(topLearnerUUID);
-					user.setEmail(topLearnerEmail);
+					user.setUser_id(userProfile.getPersonalDetails().getPrimaryEmail());
+					user.setEmail(userProfile.getPersonalDetails().getPrimaryEmail());
+					user.setFirst_name(userProfile.getPersonalDetails().getFirstname());
+					user.setLast_name(userProfile.getPersonalDetails().getSurname());
+					userNames.add(userProfile.getPersonalDetails().getPrimaryEmail());
 					topPerformers.add(user);
-					userNames.add(userName);
 					if (counter == count)
 						break;
 					counter++;
