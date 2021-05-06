@@ -622,8 +622,7 @@ public class AllocationService {
 	public byte[] getWaPdf(String userId, String waId) throws Exception {
 		Map<String, Object> existingRecord = indexerService.readEntity(index, indexType, userId);
 		if (CollectionUtils.isEmpty(existingRecord)) {
-			logger.error("No records found on given criteria!");
-			return null;
+			return pdfService.getWaErrorPdf("Failed to find Work Allocation details for given User.");
 		}
 		String statusSelected = null;
 
@@ -638,7 +637,7 @@ public class AllocationService {
 		}
 
 		if (ObjectUtils.isEmpty(waObj)) {
-			return pdfService.getWaExpiredError(wa, waId);
+			return pdfService.getWaErrorPdf("Work allocation details not found or superseded by new order. Please contact Department Administrator.");
 		}
 
 		// If status Draft

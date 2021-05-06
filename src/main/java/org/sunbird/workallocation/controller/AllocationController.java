@@ -51,8 +51,9 @@ public class AllocationController {
 		return new ResponseEntity<>(allocationService.userAutoComplete(searchTerm), HttpStatus.OK);
 	}
 
-	@GetMapping(value = "/getWAPdf/{userId}/{waId}")
-	public ResponseEntity<?> getWAPdf(@PathVariable("userId") String userId, @PathVariable("waId") String waId) {
+	@GetMapping(value = "/getWAPdf/{userId}/{waId}", produces = MediaType.APPLICATION_PDF_VALUE)
+	public ResponseEntity<?> getWAPdf(@PathVariable("userId") String userId, @PathVariable("waId") String waId)
+			throws Exception {
 		byte[] out = null;
 		try {
 			out = allocationService.getWaPdf(userId, waId);
@@ -60,7 +61,7 @@ public class AllocationController {
 		}
 
 		if (out == null) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Failed to find data for given Ids.");
+			throw new InternalError("Failed to generate PDF file.");
 		}
 
 		HttpHeaders headers = new HttpHeaders();

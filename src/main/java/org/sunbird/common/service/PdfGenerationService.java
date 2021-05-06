@@ -52,8 +52,10 @@ public class PdfGenerationService {
 		try {
 			JsonPDF.writeToStream((new ByteArrayInputStream(pageTable.toJSONString().getBytes())), out, null);
 		} catch (Exception e) {
-			logger.warn("Failed to generate PDF from JSON Object.");
+			String errorMessage = "Failed to generate PDF from JSON Object. Exception: " + e.getMessage();
+			logger.warn(errorMessage);
 			logger.error(e);
+			return getWaErrorPdf(errorMessage);
 		}
 
 		return out.toByteArray();
@@ -66,6 +68,35 @@ public class PdfGenerationService {
 			// TODO - Construct Error pdf and return.
 		}
 
+		return null;
+	}
+
+	public byte[] getWaErrorPdf(String errorMessage) {
+		JSONArray pageTable = new JSONArray();
+		JSONObject jPages = new JSONObject();
+		jPages.put("pages", true);
+		jPages.put("size", "a4");
+		jPages.put("title", "Work Allocation Summary");
+		jPages.put("top-margin", 50);
+		pageTable.add(jPages);
+
+		JSONObject paragraphSpacing = new JSONObject();
+		paragraphSpacing.put("spacing-after", 5);
+
+		JSONArray headerArray = new JSONArray();
+		headerArray.add("paragraph");
+		headerArray.add(paragraphSpacing);
+		headerArray.add(errorMessage);
+
+		pageTable.add(headerArray);
+		
+		try {
+			ByteArrayOutputStream out = new ByteArrayOutputStream();
+			JsonPDF.writeToStream((new ByteArrayInputStream(pageTable.toJSONString().getBytes())), out, null);
+			return out.toByteArray();
+		} catch (Exception e) {
+			logger.error(e);
+		}
 		return null;
 	}
 
