@@ -481,15 +481,13 @@ public class PortalServiceImpl implements PortalService {
 			throw new Exception("Failed to identify User details for UserId: " + userDeptRole.getUserId());
 		}
 		Iterator<Role> roles = roleRepo.findAll().iterator();
-		Set<Integer> roleIds = new HashSet<Integer>();
-
+		List<Role> roleList = new ArrayList<>();
+		roles.forEachRemaining(roleList::add);
+		Set<Integer> roleIds = new HashSet<>();
+		Map<String, Role> roleMap = roleList.stream().collect(Collectors.toMap(Role::getRoleName, role -> role));
 		for (String r : userDeptRole.getRoles()) {
-			while (roles.hasNext()) {
-				Role role = roles.next();
-				if (role.getRoleName().equalsIgnoreCase(r)) {
-					roleIds.add(role.getId());
-					continue;
-				}
+			if(roleMap.containsKey(r)){
+				roleIds.add(roleMap.get(r).getId());
 			}
 		}
 
