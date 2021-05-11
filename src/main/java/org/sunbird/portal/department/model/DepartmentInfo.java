@@ -16,8 +16,7 @@ public class DepartmentInfo implements Comparable<DepartmentInfo> {
 	private String description;
 	private long noOfUsers;
 	private String headquarters;
-	private byte[] logo;
-	private String logoString;
+	private String logo;
 	private long creationDate;
 	private String createdBy;
 	private List<UserDepartmentRole> adminUserList;
@@ -27,12 +26,12 @@ public class DepartmentInfo implements Comparable<DepartmentInfo> {
 	private List<String> currentUserRoles;
 	private Integer sourceId;
 
-	public String getLogoString() {
-		return logoString;
+	public String getLogo() {
+		return logo;
 	}
 
-	public void setLogoString(String logoString) {
-		this.logoString = logoString;
+	public void setLogo(String logo) {
+		this.logo = logo;
 	}
 
 	public Integer getId() {
@@ -105,14 +104,6 @@ public class DepartmentInfo implements Comparable<DepartmentInfo> {
 
 	public void setHeadquarters(String headquarters) {
 		this.headquarters = headquarters;
-	}
-
-	public byte[] getLogo() {
-		return logo;
-	}
-
-	public void setLogo(byte[] logo) {
-		this.logo = logo;
 	}
 
 	public List<UserDepartmentRole> getAdminUserList() {

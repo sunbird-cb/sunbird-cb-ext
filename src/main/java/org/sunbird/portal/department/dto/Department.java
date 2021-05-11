@@ -35,12 +35,10 @@ public class Department {
 
 	@Column(name = "headquarters")
 	private String headquarters;
-	
-	@Lob
-	@Type(type="org.hibernate.type.BinaryType")
+
 	@Column(name = "logo")
-	private byte[] logo;
-	
+	private String logo;
+
 	@Column(name="creation_date")
 	private Long creationDate;
 	
@@ -59,6 +57,14 @@ public class Department {
 		this.deptName = dept;
 		this.deptTypeId = deptTypeId;
 		this.description = description;
+	}
+
+	public String getLogo() {
+		return logo;
+	}
+
+	public void setLogo(String logo) {
+		this.logo = logo;
 	}
 
 	public Integer getDeptId() {
@@ -109,14 +115,6 @@ public class Department {
 		this.headquarters = headquarters;
 	}
 
-	public byte[] getLogo() {
-		return logo;
-	}
-
-	public void setLogo(byte[] logo) {
-		this.logo = logo;
-	}
-	
 	public Long getCreationDate() {
 		return creationDate;
 	}
