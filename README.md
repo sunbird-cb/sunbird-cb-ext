@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS departments (
   dept_type_ids integer[] NOT NULL,
   description TEXT,
   headquarters VARCHAR(64),
-  logo bytea,
+  logo text,
   creation_date bigint,
   source_id integer,
   created_by text
