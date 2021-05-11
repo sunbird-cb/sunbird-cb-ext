@@ -1,11 +1,6 @@
 package org.sunbird.portal.department.dto;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.Type;
@@ -40,7 +35,9 @@ public class Department {
 
 	@Column(name = "headquarters")
 	private String headquarters;
-
+	
+	@Lob
+	@Type(type="org.hibernate.type.BinaryType")
 	@Column(name = "logo")
 	private byte[] logo;
 	

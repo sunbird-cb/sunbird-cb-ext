@@ -18,6 +18,8 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 import org.sunbird.common.model.OpenSaberApiUserProfile;
 import org.sunbird.common.service.UserUtilityService;
@@ -314,7 +316,9 @@ public class PortalServiceImpl implements PortalService {
 	public DepartmentInfo addDepartment(String authUserToken, String userId, String userRoleName,
 			DepartmentInfo deptInfo, String rootOrg) throws Exception {
 		validateDepartmentInfo(deptInfo);
-
+		if(!StringUtils.isEmpty(deptInfo.getLogoString())){
+			deptInfo.setLogo(deptInfo.getLogoString().getBytes());
+		}
 		if (deptInfo.getDeptTypeIds() == null) {
 			validateDepartmentTypeInfo(deptInfo.getDeptTypeInfos());
 
@@ -383,9 +387,11 @@ public class PortalServiceImpl implements PortalService {
 		if (department.isPresent()) {
 			Department existingDept = department.get();
 			logger.info("Updating Department record -> " + existingDept);
+			if(!StringUtils.isEmpty(deptInfo.getLogoString())){
+				existingDept.setLogo(deptInfo.getLogoString().getBytes());
+			}
 			existingDept.setDescription(deptInfo.getDescription());
 			existingDept.setHeadquarters(deptInfo.getHeadquarters());
-			existingDept.setLogo(deptInfo.getLogo());
 			existingDept.setDeptName(deptInfo.getDeptName());
 			existingDept.setDeptTypeIds(deptInfo.getDeptTypeIds());
 			if (deptInfo.getSourceId() != null) {
@@ -669,13 +675,17 @@ public class PortalServiceImpl implements PortalService {
 		DepartmentInfo deptInfo = null;
 		if (dept != null) {
 			deptInfo = new DepartmentInfo();
+			if(!ObjectUtils.isEmpty(dept.getLogo())){
+				String logoStr = new String(dept.getLogo());
+				deptInfo.setLogoString(logoStr);
+				deptInfo.setLogo(null);
+			}
 			deptInfo.setDeptName(dept.getDeptName());
 			deptInfo.setDescription(dept.getDescription());
 			deptInfo.setId(dept.getDeptId());
 			deptInfo.setRootOrg(dept.getRootOrg());
 			deptInfo.setDeptTypeIds(dept.getDeptTypeIds());
 			deptInfo.setHeadquarters(dept.getHeadquarters());
-			deptInfo.setLogo(dept.getLogo());
 			deptInfo.setCreationDate(dept.getCreationDate());
 			deptInfo.setCreatedBy(dept.getCreatedBy());
 			if (dept.getSourceId() != null) {
