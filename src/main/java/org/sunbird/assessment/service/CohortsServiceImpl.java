@@ -121,7 +121,7 @@ public class CohortsServiceImpl implements CohortsService {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public List<CohortUsers> getActiveUsers(String rootOrg, String contentId, String userId, int count,
+	public List<CohortUsers> getActiveUsers(String xAuthUser, String rootOrg, String contentId, String userId, int count,
 			Boolean toFilter) throws Exception {
 		// Check User exists
 		if (!userUtilService.validateUser(rootOrg, userId)) {
@@ -132,7 +132,7 @@ public class CohortsServiceImpl implements CohortsService {
 		if (CollectionUtils.isEmpty(batchIdList)) {
 			return Collections.EMPTY_LIST;
 		}
-		List<CohortUsers> activeUserCollection = fetchParticipantsList(rootOrg, batchIdList, count);
+		List<CohortUsers> activeUserCollection = fetchParticipantsList(xAuthUser, rootOrg, batchIdList, count);
 
 		return activeUserCollection;
 	}
@@ -185,8 +185,8 @@ public class CohortsServiceImpl implements CohortsService {
 		return Collections.emptyList();
 	}
 
-	private List<CohortUsers> fetchParticipantsList(String rootOrg, List<String> batchIdList, int count) {
-		List<String> participantList = contentService.getParticipantsList(batchIdList);
+	private List<CohortUsers> fetchParticipantsList(String xAuthUser, String rootOrg, List<String> batchIdList, int count) {
+		List<String> participantList = contentService.getParticipantsList(xAuthUser, batchIdList);
 
 		try {
 			if (!CollectionUtils.isEmpty(participantList)) {

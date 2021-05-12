@@ -7,6 +7,6 @@ import org.sunbird.assessment.repo.CohortUsers;
 public interface CohortsService {
 	List<CohortUsers> getTopPerformers(String rootOrg, String resourceId, String userUUID, int count) throws Exception;
 
-	List<CohortUsers> getActiveUsers(String rootOrg, String contentId, String userUUID, int count, Boolean toFilter)
+	List<CohortUsers> getActiveUsers(String xAuthUser, String rootOrg, String contentId, String userUUID, int count, Boolean toFilter)
 			throws Exception;
 }
