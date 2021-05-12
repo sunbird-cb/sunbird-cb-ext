@@ -102,6 +102,9 @@ public class CbExtServerProperties {
 	@Value("${content-hierarchy-endpoint}")
 	private String hierarchyEndPoint;
 	
+	@Value("${participants.api.endpoint}")
+	private String participantsEndPoint;
+	
     public String getContentHost() {
 		return contentHost;
 	}
@@ -357,8 +360,16 @@ public class CbExtServerProperties {
     public void setUserRoleAuditTopic(String userRoleAuditTopic) {
         this.userRoleAuditTopic = userRoleAuditTopic;
     }
+    
+    public String getParticipantsEndPoint() {
+		return participantsEndPoint;
+	}
 
-    @Override
+	public void setParticipantsEndPoint(String participantsEndPoint) {
+		this.participantsEndPoint = participantsEndPoint;
+	}
+
+	@Override
     public String toString() {
         StringBuilder str = new StringBuilder("SB-CB-Ext Server Properties: ");
         str.append("[wfServiceHost=").append(wfServiceHost).append("],");

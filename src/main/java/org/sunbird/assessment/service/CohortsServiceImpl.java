@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,7 @@ import org.springframework.util.StringUtils;
 import org.sunbird.assessment.repo.CohortUsers;
 import org.sunbird.assessment.repo.UserAssessmentTopPerformerRepository;
 import org.sunbird.common.model.OpenSaberApiUserProfile;
+import org.sunbird.common.model.SunbirdApiBatchResp;
 import org.sunbird.common.model.SunbirdApiHierarchyResultContent;
 import org.sunbird.common.model.SunbirdApiResp;
 import org.sunbird.common.service.ContentService;
@@ -30,6 +32,7 @@ import org.sunbird.core.logger.CbExtLogger;
 public class CohortsServiceImpl implements CohortsService {
 
 	private CbExtLogger logger = new CbExtLogger(getClass().getName());
+
 	@Autowired
 	UserUtilityService userUtilService;
 
@@ -116,6 +119,24 @@ public class CohortsServiceImpl implements CohortsService {
 		return topPerformers;
 	}
 
+	@Override
+	@SuppressWarnings("unchecked")
+	public List<CohortUsers> getActiveUsers(String rootOrg, String contentId, String userId, int count,
+			Boolean toFilter) throws Exception {
+		// Check User exists
+		if (!userUtilService.validateUser(rootOrg, userId)) {
+			throw new BadRequestException("Invalid UserId.");
+		}
+
+		List<String> batchIdList = fetchBatchIdDetails(contentId);
+		if (CollectionUtils.isEmpty(batchIdList)) {
+			return Collections.EMPTY_LIST;
+		}
+		List<CohortUsers> activeUserCollection = fetchParticipantsList(rootOrg, batchIdList, count);
+
+		return activeUserCollection;
+	}
+
 	private void processChildContentId(String givenContentId, List<String> assessmentIdList) {
 		try {
 			SunbirdApiResp contentHierarchy = contentService.getHeirarchyResponse(givenContentId);
@@ -144,5 +165,64 @@ public class CohortsServiceImpl implements CohortsService {
 		} catch (Exception e) {
 			logger.error(e);
 		}
+	}
+
+	private List<String> fetchBatchIdDetails(String contentId) {
+		try {
+			SunbirdApiResp contentHierarchy = contentService.getHeirarchyResponse(contentId);
+			if (contentHierarchy != null) {
+				if ("successful".equalsIgnoreCase(contentHierarchy.getParams().getStatus())) {
+					List<SunbirdApiBatchResp> batches = contentHierarchy.getResult().getContent().getBatches();
+					if (!CollectionUtils.isEmpty(batches)) {
+						return batches.stream().map(SunbirdApiBatchResp::getBatchId).collect(Collectors.toList());
+					}
+				}
+			}
+		} catch (Exception e) {
+			logger.error(e);
+		}
+
+		return Collections.emptyList();
+	}
+
+	private List<CohortUsers> fetchParticipantsList(String rootOrg, List<String> batchIdList, int count) {
+		List<String> participantList = contentService.getParticipantsList(batchIdList);
+
+		try {
+			if (!CollectionUtils.isEmpty(participantList)) {
+				Map<String, Object> participantMap = userUtilService.getUsersDataFromUserIds(rootOrg, participantList,
+						new ArrayList<>(Arrays.asList(Constants.FIRST_NAME, Constants.LAST_NAME, Constants.EMAIL,
+								Constants.DEPARTMENT_NAME)));
+				logger.info("enrichDepartmentInfo UserIds -> " + participantList.toString()
+						+ ", fetched Information -> " + participantMap.size());
+
+				if (participantMap != null) {
+					List<CohortUsers> activeUserCollection = new ArrayList<CohortUsers>();
+					int currentCount = 0;
+					String desc = "Started learning this course";
+					for (String userId : participantList) {
+						if (participantMap.containsKey(userId)) {
+							OpenSaberApiUserProfile userProfile = (OpenSaberApiUserProfile) participantMap.get(userId);
+							CohortUsers user = new CohortUsers();
+							user.setUser_id(userProfile.getPersonalDetails().getPrimaryEmail());
+							user.setEmail(userProfile.getPersonalDetails().getPrimaryEmail());
+							user.setFirst_name(userProfile.getPersonalDetails().getFirstname());
+							user.setLast_name(userProfile.getPersonalDetails().getSurname());
+							user.setDesc(desc);
+							activeUserCollection.add(user);
+							currentCount++;
+							if (currentCount == count) {
+								break;
+							}
+						}
+					}
+					return activeUserCollection;
+				}
+			}
+		} catch (Exception e) {
+			logger.error(e);
+		}
+
+		return Collections.emptyList();
 	}
 }

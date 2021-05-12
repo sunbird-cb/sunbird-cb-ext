@@ -36,4 +36,23 @@ public class CohortsController {
 		return new ResponseEntity<List<CohortUsers>>(cohortsServ.getTopPerformers(rootOrg, resourceId, userUUID, count),
 				HttpStatus.OK);
 	}
+	
+	/**
+	 * gets all active users
+	 * 
+	 * @param resourceId
+	 * @param userEmail
+	 * @param count
+	 * @return
+	 * @throws Exception
+	 */
+	@GetMapping("/v2/resources/{resourceId}/user/{userUUID}/cohorts/activeusers")
+	public ResponseEntity<List<CohortUsers>> getActiveUsers(@PathVariable("resourceId") String contentId,
+			@RequestHeader("rootOrg") String rootOrg, @PathVariable("userUUID") String userUUID,
+			@RequestParam(value = "count", required = false, defaultValue = "50") Integer count,
+			@RequestParam(value = "filter",required = false,defaultValue = "false")Boolean toFilter) throws Exception {
+			return new ResponseEntity<List<CohortUsers>>(cohortsServ.getActiveUsers(rootOrg, contentId, userUUID, count, toFilter),
+					HttpStatus.OK);
+		
+	}
 }
