@@ -56,7 +56,7 @@ public class CohortsController {
 		if (authUserToken.contains(" ")) {
 			authUserToken = authUserToken.split(" ")[1];
 		}
-		return new ResponseEntity<List<CohortUsers>>(
+		return new ResponseEntity<>(
 				cohortsServ.getActiveUsers(authUserToken, rootOrg, contentId, userUUID, count, toFilter),
 				HttpStatus.OK);
 

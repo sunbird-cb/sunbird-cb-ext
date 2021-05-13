@@ -124,7 +124,7 @@ public class AssessmentServiceImpl implements AssessmentService {
 			Integer noOfAttemptsForMaxScore = 0;
 			boolean passed = false;
 			Object firstPassTs = null;
-			BigDecimal max = new BigDecimal(-Double.MIN_VALUE);
+			BigDecimal max = BigDecimal.valueOf(-Double.MIN_VALUE);
 			Object maxScoreTs = null;
 
 			/*

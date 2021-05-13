@@ -9,7 +9,7 @@ public class MandatoryContentResponse {
 
     public void addContentInfo(String contentId, MandatoryContentInfo contentInfo) {
         if (contentDetails == null) {
-            contentDetails = new HashMap<String, MandatoryContentInfo>();
+            contentDetails = new HashMap<>();
         }
         contentDetails.put(contentId, contentInfo);
     }
