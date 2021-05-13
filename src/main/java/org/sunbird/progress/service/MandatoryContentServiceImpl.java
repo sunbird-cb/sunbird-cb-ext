@@ -1,20 +1,26 @@
 package org.sunbird.progress.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
 import org.sunbird.common.util.CbExtServerProperties;
-import org.sunbird.common.util.OutboundReqService;
 import org.sunbird.core.logger.CbExtLogger;
 import org.sunbird.progress.cassandraRepo.MandatoryContentModel;
 import org.sunbird.progress.cassandraRepo.MandatoryContentRepository;
 import org.sunbird.progress.model.MandatoryContentInfo;
 import org.sunbird.progress.model.MandatoryContentResponse;
 
-import java.math.BigDecimal;
-import java.util.*;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class MandatoryContentServiceImpl implements MandatoryContentService {
@@ -23,7 +29,7 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
     private MandatoryContentRepository mandatoryContentRepository;
 
     @Autowired
-    private OutboundReqService outboundReqService;
+	private OutboundRequestHandlerServiceImpl outboundReqService;
 
     @Autowired
     private CbExtServerProperties cbExtServerProperties;

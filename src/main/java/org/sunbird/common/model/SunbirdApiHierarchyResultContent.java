@@ -18,6 +18,7 @@ public class SunbirdApiHierarchyResultContent {
 	private String code;
 	private String streamingUrl;
 	private List<SunbirdApiHierarchyResultContent> children;
+	private List<SunbirdApiBatchResp> batches;
 
 	public String getParent() {
 		return parent;
@@ -137,5 +138,13 @@ public class SunbirdApiHierarchyResultContent {
 
 	public void setChildren(List<SunbirdApiHierarchyResultContent> children) {
 		this.children = children;
+	}
+
+	public List<SunbirdApiBatchResp> getBatches() {
+		return batches;
+	}
+
+	public void setBatches(List<SunbirdApiBatchResp> batches) {
+		this.batches = batches;
 	}
 }
