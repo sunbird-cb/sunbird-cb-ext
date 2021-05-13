@@ -53,7 +53,7 @@ public class AssessmentRepositoryImpl implements AssessmentRepository {
 		if (isAssessment) {
 			UserAssessmentMasterModel assessment = new UserAssessmentMasterModel(
 					new UserAssessmentMasterPrimaryKeyModel(persist.get("rootOrg").toString(), record,
-							persist.get("parent").toString(), new BigDecimal((Double) persist.get("result")),
+							persist.get("parent").toString(), BigDecimal.valueOf((Double) persist.get("result")),
 							UUIDs.timeBased()),
 					Integer.parseInt(persist.get("correct").toString()), formatter.parse(formatter.format(record)),
 					Integer.parseInt(persist.get("incorrect").toString()),
@@ -96,7 +96,7 @@ public class AssessmentRepositoryImpl implements AssessmentRepository {
 		else {
 			UserQuizMasterModel quiz = new UserQuizMasterModel(
 					new UserQuizMasterPrimaryKeyModel(persist.get("rootOrg").toString(), record,
-							new BigDecimal((Double) persist.get("result")), UUIDs.timeBased()),
+							BigDecimal.valueOf((Double) persist.get("result")), UUIDs.timeBased()),
 					Integer.parseInt(persist.get("correct").toString()), formatter.parse(formatter.format(record)),
 					Integer.parseInt(persist.get("incorrect").toString()),
 					Integer.parseInt(persist.get("blank").toString()), new BigDecimal(60),
