@@ -793,7 +793,7 @@ public class PortalServiceImpl implements PortalService {
 	}
 
 	private List<DepartmentInfo> enrichDepartmentInfo(List<Department> depts, boolean enrichData, String rootOrg) {
-		List<DepartmentInfo> deptInfoList = new ArrayList<DepartmentInfo>();
+		List<DepartmentInfo> deptInfoList = new ArrayList<>();
 		for (Department dept : depts) {
 			try {
 				deptInfoList.add(enrichDepartmentInfo(dept, false, enrichData, rootOrg));
@@ -1054,6 +1054,40 @@ public class PortalServiceImpl implements PortalService {
 			}
 		}
 
+		return false;
+	}
+
+	@Override
+	public boolean validateUserLoginForDepartment(String userId, String departmentType) {
+		List<UserDepartmentRole> userDeptRoleList = userDepartmentRoleRepo
+				.findAllByUserIdAndIsActiveAndIsBlocked(userId, true, false);
+		DepartmentRole departmentRole = deptRoleRepo.findByDeptTypeIgnoreCase(departmentType);
+		Set<Integer> departmentRoleIds = new HashSet<>();
+		if (departmentRole != null) {
+			departmentRoleIds.addAll(Arrays.asList(departmentRole.getRoleIds()));
+		}
+		if (!DataValidator.isCollectionEmpty(userDeptRoleList)) {
+			for (UserDepartmentRole userDeptRole : userDeptRoleList) {
+				Optional<Department> dept = deptRepo.findById(userDeptRole.getDeptId());
+				if (dept.isPresent()) {
+					Iterable<DepartmentType> deptTypeList = deptTypeRepo
+							.findAllById(Arrays.asList(dept.get().getDeptTypeIds()));
+					if (!DataValidator.isCollectionEmpty(deptTypeList)) {
+						for (DepartmentType deptType : deptTypeList) {
+							if (deptType.getDeptType().equalsIgnoreCase(departmentType)) {
+								for (Integer uRoleId : userDeptRole.getRoleIds()) {
+									if (departmentRoleIds.contains(uRoleId)) {
+										return true;
+									}
+								}
+							} else {
+								continue;
+							}
+						}
+					}
+				}
+			}
+		}
 		return false;
 	}
 

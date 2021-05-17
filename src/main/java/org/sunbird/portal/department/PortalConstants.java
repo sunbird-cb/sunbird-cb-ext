@@ -16,9 +16,10 @@ public class PortalConstants {
 	public static final String CBP_DEPT_TYPE = "CBP";
 	public static final String CBP_ROLE_NAME = "CBP ADMIN";
 	public static final String CBC_ROLE_NAME = "CBC ADMIN";
+	public static final String CBC_MEMBER_NAME = "CBC_MEMBER";
 	public static final String CBC_DEPT_TYPE = "CBC";
 	public static final List<String> CBP_ROLES = Arrays.asList("EDITOR", "REVIEWER", "PUBLISHER", "CONTENT_CREATOR");
 	public static final List<String> FRAC_ROLES = Arrays.asList("IFUMember", "fracAdmin", "fracReviewerOne",
 			"fracReviewerTwo", "fracAccessCompetency");
-	public static final List<String> CBC_ROLE_LIST = Arrays.asList(CBC_ROLE_NAME);
+	public static final List<String> CBC_ROLE_LIST = Arrays.asList(CBC_ROLE_NAME, CBC_MEMBER_NAME);
 }

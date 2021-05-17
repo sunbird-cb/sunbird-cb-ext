@@ -233,7 +233,7 @@ public class PortalController {
 	public ResponseEntity<?> getMyCBCDepartment(@RequestHeader("wid") String wid,
 												@RequestParam(name = "allUsers", required = false) boolean isUserInfoRequired,
 												@RequestHeader("rootOrg") String rootOrg) throws Exception {
-		validateUserAccess(PortalConstants.CBC_DEPT_TYPE, PortalConstants.CBC_ROLE_NAME, wid);
+		validateUserLoginForDepartment(wid);
 		return new ResponseEntity<>(mdoPortalService.getMyCBCDepartment(wid, isUserInfoRequired, rootOrg), HttpStatus.OK);
 	}
 
@@ -339,6 +339,12 @@ public class PortalController {
 	private void validateCBPUserAccess(String userId) throws Exception {
 		if (!portalService.validateCBPUserLogin(userId)) {
 			throw new Exception("User is not assigned with any CBP related roles.");
+		}
+	}
+
+	private void validateUserLoginForDepartment(String userId) throws Exception {
+		if (!portalService.validateUserLoginForDepartment(userId, PortalConstants.CBC_DEPT_TYPE)) {
+			throw new Exception("User is not assigned with any " + PortalConstants.CBC_DEPT_TYPE + " related roles.");
 		}
 	}
 

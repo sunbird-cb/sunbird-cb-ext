@@ -42,6 +42,8 @@ public interface PortalService {
 
 	boolean validateFracUserLogin(String userId);
 
+	boolean validateUserLoginForDepartment(String userId, String departmentType);
+
 	DepartmentInfo addDepartment(String authUserToken, String userId, String userRoleName, DepartmentInfo deptInfo,
 			String rootOrg) throws Exception;
 
