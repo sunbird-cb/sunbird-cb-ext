@@ -782,13 +782,7 @@ public class PortalServiceImpl implements PortalService {
 				logger.error(e);
 			}
 		}
-
-		if (deptInfoList.isEmpty()) {
-			return Collections.emptyList();
-		} else {
-			Collections.sort(deptInfoList);
-			return deptInfoList;
-		}
+		return deptInfoList;
 	}
 
 	private List<DeptTypeInfo> enrichDepartmentTypeInfo(Integer[] deptTypeId) {
