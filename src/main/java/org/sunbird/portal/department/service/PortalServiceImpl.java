@@ -112,7 +112,7 @@ public class PortalServiceImpl implements PortalService {
 
 	@Override
 	public List<DepartmentInfo> getAllDepartments(String rootOrg) {
-		return enrichDepartmentInfo(deptRepo.findAll(), true, rootOrg);
+		return enrichDepartmentInfo(deptRepo.findAllByOrderByDeptNameAsc(), true, rootOrg);
 	}
 
 	@Override
@@ -999,7 +999,7 @@ public class PortalServiceImpl implements PortalService {
 	@Override
 	public boolean validateFracUserLogin(String userId) {
 		List<Role> roleList = roleRepo.findAllByRoleNameIn(PortalConstants.FRAC_ROLES);
-		Set<Integer> fracRoleIds = new HashSet<Integer>();
+		Set<Integer> fracRoleIds = new HashSet<>();
 		for (Role r : roleList) {
 			fracRoleIds.add(r.getId());
 		}

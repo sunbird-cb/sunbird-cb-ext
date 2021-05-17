@@ -12,6 +12,8 @@ public interface DepartmentRepository extends CrudRepository<Department, Integer
 
 	List<Department> findAll();
 
+	List<Department> findAllByOrderByDeptNameAsc();
+
 	boolean existsByDeptNameIgnoreCase(String deptName);
 
 	List<Department> findAllByIdIn(Iterable<Integer> deptTypeIds);
