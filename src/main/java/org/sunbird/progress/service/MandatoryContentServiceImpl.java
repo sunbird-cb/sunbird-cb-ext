@@ -101,7 +101,7 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
                 reqObj.put("batchId", infoMap.getValue().getBatchId());
                 reqObj.put("fields", fields);
                 req.put("request", reqObj);
-                Map response = outboundReqService.fetchResultUsingPost(cbExtServerProperties.getCourseServiceHost()+cbExtServerProperties.getProgressReadEndPoint(), req, headersValues);
+                Map<String, Object> response = outboundReqService.fetchResultUsingPost(cbExtServerProperties.getCourseServiceHost()+cbExtServerProperties.getProgressReadEndPoint(), req, headersValues);
                 if (response.get("responseCode").equals("OK")) {
                     List<Object> result = (List<Object>) ((HashMap<String, Object>) response.get("result")).get("contentList");
                     if (!CollectionUtils.isEmpty(result)) {

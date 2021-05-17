@@ -69,7 +69,7 @@ public class Constants {
 	public static final boolean SKIP_ACCESS_CHECK = true;
 	public static final List<String> MINIMUL_FIELDS = Collections
 			.unmodifiableList(Arrays.asList("identifier", "duration", "downloadUrl", "description", "mimeType",
-					"artifactUrl", "name", "status", "resourceType", "categoryType", "category"));
+					"artifactUrl", "name", STATUS, "resourceType", "categoryType", "category"));
 	public static final String FETCH_RESULT_CONSTANT = ".fetchResult:";
 	public static final String URI_CONSTANT = "URI: ";
 	public static final String REQUEST_CONSTANT = "Request: ";
