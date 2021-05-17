@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.sunbird.catalog.model.Catalog;
 import org.sunbird.catalog.service.CatalogServiceImpl;
 
 @RestController
@@ -17,8 +18,8 @@ public class CatalogController {
 	private CatalogServiceImpl catalogService;
 
 	@GetMapping("/")
-	public ResponseEntity<?> getCatalog(@RequestHeader("xAuthUser") String authUserToken,
-			@RequestParam(name = "consumption", required = false) boolean isEnrichConsumption) throws Exception {
+	public ResponseEntity<Catalog> getCatalog(@RequestHeader("xAuthUser") String authUserToken,
+											  @RequestParam(name = "consumption", required = false) boolean isEnrichConsumption){
 		return new ResponseEntity<>(catalogService.getCatalog(authUserToken, isEnrichConsumption), HttpStatus.OK);
 	}
 }

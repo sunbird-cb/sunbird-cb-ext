@@ -34,24 +34,26 @@ public class AssessmentController {
 	public ResponseEntity<Map<String, Object>> submitAssessment(@Valid @RequestBody AssessmentSubmissionDTO requestBody,
 			@PathVariable("userId") String userId, @RequestHeader("rootOrg") String rootOrg) throws Exception {
 
-		return new ResponseEntity<Map<String, Object>>(assessmentService.submitAssessment(rootOrg, requestBody, userId),
+		return new ResponseEntity<>(assessmentService.submitAssessment(rootOrg, requestBody, userId),
 				HttpStatus.CREATED);
 	}
+
 
 	/**
 	 * Controller to a get request to Fetch AssessmentData the request requires
 	 * user_id and course_id returns a JSON of processed data and list of
 	 * Assessments Given
-	 * 
+	 *
 	 * @param courseId
-	 * @param user_id
+	 * @param userId
+	 * @param rootOrg
 	 * @return
 	 * @throws Exception
 	 */
 	@GetMapping("/v2/content/{courseId}/user/{userId}/assessment")
 	public ResponseEntity<Map<String, Object>> getAssessmentByContentUser(@PathVariable String courseId,
 			@PathVariable("userId") String userId, @RequestHeader("rootOrg") String rootOrg) throws Exception {
-		return new ResponseEntity<Map<String, Object>>(
+		return new ResponseEntity<>(
 				assessmentService.getAssessmentByContentUser(rootOrg, courseId, userId), HttpStatus.OK);
 	}
 

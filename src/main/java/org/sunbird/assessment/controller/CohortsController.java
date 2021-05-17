@@ -21,7 +21,7 @@ public class CohortsController {
 
 	/**
 	 * gets all top-performers
-	 * 
+	 *
 	 * @param resourceId
 	 * @param userEmail
 	 * @param count
@@ -30,10 +30,10 @@ public class CohortsController {
 	 */
 	@GetMapping("/v2/resources/{resourceId}/user/{userUUID}/cohorts/top-performers")
 	public ResponseEntity<List<CohortUsers>> getTopPerformers(@PathVariable("resourceId") String resourceId,
-			@RequestHeader("rootOrg") String rootOrg, @PathVariable("userUUID") String userUUID,
-			@RequestParam(value = "count", defaultValue = "20", required = false) Integer count) throws Exception {
+															  @RequestHeader("rootOrg") String rootOrg, @PathVariable("userUUID") String userUUID,
+															  @RequestParam(value = "count", defaultValue = "20", required = false) Integer count) throws Exception {
 
-		return new ResponseEntity<List<CohortUsers>>(cohortsServ.getTopPerformers(rootOrg, resourceId, userUUID, count),
+		return new ResponseEntity<>(cohortsServ.getTopPerformers(rootOrg, resourceId, userUUID, count),
 				HttpStatus.OK);
 	}
 
@@ -56,7 +56,7 @@ public class CohortsController {
 		if (authUserToken.contains(" ")) {
 			authUserToken = authUserToken.split(" ")[1];
 		}
-		return new ResponseEntity<List<CohortUsers>>(
+		return new ResponseEntity<>(
 				cohortsServ.getActiveUsers(authUserToken, rootOrg, contentId, userUUID, count, toFilter),
 				HttpStatus.OK);
 

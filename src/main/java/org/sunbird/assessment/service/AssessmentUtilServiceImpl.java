@@ -13,7 +13,7 @@ import org.sunbird.core.exception.ApplicationLogicError;
 public class AssessmentUtilServiceImpl implements AssessmentUtilService {
 
 	private Map<String, Object> getAnswers(List<Map<String, Object>> questions) {
-		Map<String, Object> ret = new HashMap<String, Object>();
+		Map<String, Object> ret = new HashMap<>();
 
 		for (Map<String, Object> question : questions) {
 			List<String> correctOption = new ArrayList<String>();

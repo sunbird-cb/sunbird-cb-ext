@@ -1,7 +1,5 @@
 package org.sunbird.portal.department.service;
 
-import java.util.Arrays;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.sunbird.portal.department.PortalConstants;

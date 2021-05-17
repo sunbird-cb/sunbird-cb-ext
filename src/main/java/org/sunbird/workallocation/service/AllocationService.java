@@ -506,14 +506,14 @@ public class AllocationService {
 		}
 		long currentMillis = System.currentTimeMillis();
 		if (WorkAllocationConstants.DRAFT_STATUS.equals(dto.getStatus())) {
-			if (ObjectUtils.isEmpty(deepCopy.getDraftWAObject())) {
+			if (!ObjectUtils.isEmpty(deepCopy) && ObjectUtils.isEmpty(deepCopy.getDraftWAObject())) {
 				wa.setCreatedBy(userId);
 				wa.setCreatedAt(currentMillis);
 			}
 			workAllocation.setDraftWAObject(wa);
 		}
 		if (WorkAllocationConstants.PUBLISHED_STATUS.equals(dto.getStatus())) {
-			if (!ObjectUtils.isEmpty(deepCopy.getActiveWAObject())) {
+			if (!ObjectUtils.isEmpty(deepCopy) && !ObjectUtils.isEmpty(deepCopy.getActiveWAObject())) {
 				WAObject oldPublishObject = deepCopy.getActiveWAObject();
 				oldPublishObject.setStatus(WorkAllocationConstants.ARCHIVED_STATUS);
 				oldPublishObject.setUpdatedAt(currentMillis);

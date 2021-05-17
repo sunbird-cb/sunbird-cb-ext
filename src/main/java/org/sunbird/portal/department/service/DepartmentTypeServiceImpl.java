@@ -4,6 +4,7 @@ import java.util.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.sunbird.core.exception.BadRequestException;
 import org.sunbird.portal.department.dto.DepartmentType;
 import org.sunbird.portal.department.repo.DepartmentTypeRepository;
 
@@ -20,14 +21,14 @@ public class DepartmentTypeServiceImpl implements DepartmentTypeService {
 
 		Iterable<DepartmentType> deptTypes = deptTypeRepo.findAll();
 		if (!DataValidator.isCollectionEmpty(deptTypes)) {
-			Map<String, List<DepartmentType>> retValue = new HashMap<String, List<DepartmentType>>();
+			Map<String, List<DepartmentType>> retValue = new HashMap<>();
 			Iterator<DepartmentType> it = deptTypes.iterator();
 			while (it.hasNext()) {
 				DepartmentType dType = it.next();
 				if (retValue.containsKey(dType.getDeptType())) {
 					retValue.get(dType.getDeptType()).add(dType);
 				} else {
-					List<DepartmentType> deptTypeList = new ArrayList<DepartmentType>();
+					List<DepartmentType> deptTypeList = new ArrayList<>();
 					deptTypeList.add(dType);
 					retValue.put(dType.getDeptType(), deptTypeList);
 				}
@@ -50,7 +51,7 @@ public class DepartmentTypeServiceImpl implements DepartmentTypeService {
 		if (departmentType.isPresent()) {
 			return departmentType.get();
 		} else {
-			throw new Exception("Failed to get the Department type . On Id : " + id);
+			throw new BadRequestException("Failed to get the Department type . On Id : " + id);
 		}
 	}
 
@@ -58,7 +59,7 @@ public class DepartmentTypeServiceImpl implements DepartmentTypeService {
 	public Map<String, List<String>> getDepartmentTypeNames() {
 		Iterable<DepartmentType> deptTypes = deptTypeRepo.findAll();
 		if (!DataValidator.isCollectionEmpty(deptTypes)) {
-			Map<String, List<String>> retValue = new HashMap<String, List<String>>();
+			Map<String, List<String>> retValue = new HashMap<>();
 //			for (Object o : deptTypes) {
 //				Object[] dTypes = (Object[]) o;
 //				String deptType = (String) dTypes[0];
@@ -75,7 +76,7 @@ public class DepartmentTypeServiceImpl implements DepartmentTypeService {
 				if (retValue.containsKey(dType.getDeptType())) {
 					retValue.get(dType.getDeptType()).add(dType.getDeptSubType());
 				} else {
-					List<String> deptTypeList = new ArrayList<String>();
+					List<String> deptTypeList = new ArrayList<>();
 					deptTypeList.add(dType.getDeptSubType());
 					retValue.put(dType.getDeptType(), deptTypeList);
 				}

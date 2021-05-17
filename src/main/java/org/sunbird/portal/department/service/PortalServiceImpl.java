@@ -1,50 +1,33 @@
 package org.sunbird.portal.department.service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 import org.sunbird.common.model.OpenSaberApiUserProfile;
 import org.sunbird.common.service.UserUtilityService;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.common.util.DataValidator;
+import org.sunbird.core.exception.BadRequestException;
 import org.sunbird.core.logger.CbExtLogger;
 import org.sunbird.core.producer.Producer;
 import org.sunbird.portal.department.PortalConstants;
 import org.sunbird.portal.department.dto.*;
-import org.sunbird.portal.department.model.DepartmentInfo;
-import org.sunbird.portal.department.model.DeptPublicInfo;
-import org.sunbird.portal.department.model.DeptTypeInfo;
-import org.sunbird.portal.department.model.PortalUserInfo;
-import org.sunbird.portal.department.model.SearchUserInfo;
-import org.sunbird.portal.department.model.UserDepartmentInfo;
-import org.sunbird.portal.department.repo.DepartmentRepository;
-import org.sunbird.portal.department.repo.DepartmentRoleRepository;
-import org.sunbird.portal.department.repo.DepartmentTypeRepository;
-import org.sunbird.portal.department.repo.RoleRepository;
-import org.sunbird.portal.department.repo.UserDepartmentRoleRepository;
+import org.sunbird.portal.department.model.*;
+import org.sunbird.portal.department.repo.*;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class PortalServiceImpl implements PortalService {
 
+	public static final String NO_RECORDS_EXIST_FOR_USER_ID = "No records exist for UserId: ";
+	public static final String LIST_OF_USER_RECORDS = "List of User Records -> ";
+	public static final String DEPT_IDS = ", DeptIds: ";
 	private CbExtLogger logger = new CbExtLogger(getClass().getName());
 
 	@Autowired
@@ -81,7 +64,7 @@ public class PortalServiceImpl implements PortalService {
 	public List<String> getDeptNameList() {
 		Iterable<Department> deptList = deptRepo.findAll();
 		if (!DataValidator.isCollectionEmpty(deptList)) {
-			List<String> deptNameList = new ArrayList<String>();
+			List<String> deptNameList = new ArrayList<>();
 			for (Department dept : deptList) {
 				List<Integer> deptTypeIdList = Arrays.asList(dept.getDeptTypeIds());
 				Iterable<DepartmentType> deptTypeList = deptTypeRepo.findAllById(deptTypeIdList);
@@ -102,14 +85,14 @@ public class PortalServiceImpl implements PortalService {
 			return deptNameList;
 		}
 
-		return Collections.emptyList();
+			return Collections.emptyList();
 	}
 
 	@Override
 	public List<DeptPublicInfo> getAllDept() {
 		List<Department> deptList = deptRepo.findAll();
 		if (!DataValidator.isCollectionEmpty(deptList)) {
-			List<DeptPublicInfo> publicDeptList = new ArrayList<DeptPublicInfo>(deptList.size());
+			List<DeptPublicInfo> publicDeptList = new ArrayList<>(deptList.size());
 			for (Department dept : deptList) {
 				publicDeptList.add(dept.getPublicInfo());
 			}
@@ -160,30 +143,28 @@ public class PortalServiceImpl implements PortalService {
 		List<UserDepartmentRole> userList = userDepartmentRoleRepo.findAllByUserIdAndIsActiveAndIsBlocked(userId, true,
 				false);
 		if (DataValidator.isCollectionEmpty(userList)) {
-			throw new Exception("No records exist for UserId: " + userId);
+			throw new Exception(NO_RECORDS_EXIST_FOR_USER_ID + userId);
 		}
-		List<Integer> deptIds = userList.stream().map(i -> i.getDeptId()).collect(Collectors.toList());
+		List<Integer> deptIds = userList.stream().map(UserDepartmentRole::getDeptId).collect(Collectors.toList());
 //		Map<Integer, Integer[]> userDeptRoles = userList.stream()
 //				.collect(Collectors.toMap(UserDepartmentRole::getDeptId, UserDepartmentRole::getRoleIds));
 
 //		Iterable<Role> cbpRoles = roleRepo.findAllById(
 //				Arrays.asList(deptRoleRepo.findByDeptTypeIgnoreCase(PortalConstants.CBP_DEPT_TYPE).getRoleIds()));
-		logger.info("List of User Records -> " + userList.size() + ", DeptIds: " + deptIds.toString());
+		logger.info(LIST_OF_USER_RECORDS + userList.size() + DEPT_IDS + deptIds.toString());
 
 		Iterable<Department> deptList = deptRepo.findAllById(deptIds);
 
 		for (Department dept : deptList) {
 			Iterable<DepartmentType> deptTypeList = deptTypeRepo.findAllById(Arrays.asList(dept.getDeptTypeIds()));
 			for (DepartmentType deptType : deptTypeList) {
-				if (deptType.getDeptType().equalsIgnoreCase(PortalConstants.CBP_DEPT_TYPE)) {
+				if (deptType.getDeptType().equalsIgnoreCase(PortalConstants.CBP_DEPT_TYPE) && hasCBPRole(dept, userList)) {
 					// We found a CBP Type department which user is mapped... Now need to check user
 					// has any roles related CBP Portal in this department
-					if (hasCBPRole(dept, userList)) {
 						if (myDept != null) {
-							throw new Exception("More than one CBP Department is available for the User. ");
+							throw new BadRequestException("More than one CBP Department is available for the User. ");
 						} else {
 							myDept = dept;
-						}
 					}
 				}
 			}
@@ -196,10 +177,10 @@ public class PortalServiceImpl implements PortalService {
 		List<UserDepartmentRole> userList = userDepartmentRoleRepo.findAllByUserIdAndIsActiveAndIsBlocked(userId, true,
 				false);
 		if (DataValidator.isCollectionEmpty(userList)) {
-			throw new Exception("No records exist for UserId: " + userId);
+			throw new Exception(NO_RECORDS_EXIST_FOR_USER_ID + userId);
 		}
-		List<Integer> deptIds = userList.stream().map(i -> i.getDeptId()).collect(Collectors.toList());
-		logger.info("List of User Records -> " + userList.size() + ", DeptIds: " + deptIds.toString());
+		List<Integer> deptIds = userList.stream().map(UserDepartmentRole::getDeptId).collect(Collectors.toList());
+		logger.info(LIST_OF_USER_RECORDS + userList.size() + DEPT_IDS + deptIds.toString());
 
 		Iterable<Department> deptList = deptRepo.findAllById(deptIds);
 		Department myDept = null;
@@ -215,7 +196,7 @@ public class PortalServiceImpl implements PortalService {
 			for (Role r : roles) {
 				if (roleNames.contains(r.getRoleName())) {
 					if (myDept != null) {
-						if (myDept.getDeptId() != (deptMap.get(user.getDeptId()).getDeptId())) {
+						if (!myDept.getDeptId().equals(deptMap.get(user.getDeptId()).getDeptId())) {
 							throw new Exception("More than one Department is available with Role: " + r.getRoleName());
 						}
 					} else {
@@ -231,10 +212,10 @@ public class PortalServiceImpl implements PortalService {
 		List<UserDepartmentRole> userList = userDepartmentRoleRepo.findAllByUserIdAndIsActiveAndIsBlocked(userId, true,
 				false);
 		if (DataValidator.isCollectionEmpty(userList)) {
-			throw new Exception("No records exist for UserId: " + userId);
+			throw new Exception(NO_RECORDS_EXIST_FOR_USER_ID + userId);
 		}
-		List<Integer> deptIds = userList.stream().map(i -> i.getDeptId()).collect(Collectors.toList());
-		logger.info("List of User Records -> " + userList.size() + ", DeptIds: " + deptIds.toString());
+		List<Integer> deptIds = userList.stream().map(UserDepartmentRole::getDeptId).collect(Collectors.toList());
+		logger.info(LIST_OF_USER_RECORDS + userList.size() + DEPT_IDS + deptIds.toString());
 
 		Iterable<Department> deptList = deptRepo.findAllById(deptIds);
 		Department myDept = null;
@@ -279,10 +260,10 @@ public class PortalServiceImpl implements PortalService {
 		List<UserDepartmentRole> userList = userDepartmentRoleRepo.findAllByUserIdAndIsActiveAndIsBlocked(userId, true,
 				false);
 		if (DataValidator.isCollectionEmpty(userList)) {
-			throw new Exception("No records exist for UserId: " + userId);
+			throw new Exception(NO_RECORDS_EXIST_FOR_USER_ID + userId);
 		}
-		List<Integer> deptIds = userList.stream().map(i -> i.getDeptId()).collect(Collectors.toList());
-		logger.info("List of User Records -> " + userList.size() + ", DeptIds: " + deptIds.toString());
+		List<Integer> deptIds = userList.stream().map(UserDepartmentRole::getDeptId).collect(Collectors.toList());
+		logger.info(LIST_OF_USER_RECORDS + userList.size() + DEPT_IDS + deptIds.toString());
 
 		Iterable<Department> deptList = deptRepo.findAllById(deptIds);
 		Department myDept = null;
@@ -565,7 +546,7 @@ public class PortalServiceImpl implements PortalService {
 
 			List<Integer> deptTypeIds = new ArrayList<Integer>();
 			if (!DataValidator.isCollectionEmpty(deptTypes)) {
-				deptTypeIds = deptTypes.stream().map(i -> i.getId()).collect(Collectors.toList());
+				deptTypeIds = deptTypes.stream().map(DepartmentType::getId).collect(Collectors.toList());
 			}
 
 			List<Department> depts = deptRepo.findAllByIdIn(deptTypeIds);
