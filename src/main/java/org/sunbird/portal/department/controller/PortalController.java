@@ -15,9 +15,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.sunbird.core.exception.BadRequestException;
 import org.sunbird.portal.department.PortalConstants;
 import org.sunbird.portal.department.dto.UserDepartmentRole;
 import org.sunbird.portal.department.model.DepartmentInfo;
+import org.sunbird.portal.department.model.DeptPublicInfo;
+import org.sunbird.portal.department.model.SearchUserInfo;
 import org.sunbird.portal.department.model.UserDepartmentInfo;
 import org.sunbird.portal.department.service.MdoPortalService;
 import org.sunbird.portal.department.service.PortalService;
@@ -36,31 +39,31 @@ public class PortalController {
 
 	// ----------------- Public APIs --------------------
 	@GetMapping("/portal/listDeptNames")
-	public ResponseEntity<?> getDeptNameList() throws Exception {
+	public ResponseEntity<List<String>> getDeptNameList(){
 		return new ResponseEntity<>(portalService.getDeptNameList(), HttpStatus.OK);
 	}
 
 	@GetMapping("/portal/getAllDept")
-	public ResponseEntity<?> getAllDepartment() throws Exception {
+	public ResponseEntity<List<DeptPublicInfo>> getAllDepartment(){
 		return new ResponseEntity<>(portalService.getAllDept(), HttpStatus.OK);
 	}
 	
 	@GetMapping("/portal/deptSearch")
-	public ResponseEntity<?> searchDepartment(@RequestParam(name = "friendlyName", required = true) String deptName) throws Exception {
+	public ResponseEntity<?> searchDepartment(@RequestParam(name = "friendlyName", required = true) String deptName){
 		return new ResponseEntity<>(portalService.searchDept(deptName), HttpStatus.OK);
 	}
 
 	// ----------------- END of Public APIs --------------------
 	// ----------------- SPV APIs -----------------------
 	@GetMapping("/portal/spv/isAdmin")
-	public ResponseEntity<Boolean> isSpvAdmin(@RequestHeader("wid") String wid) throws Exception {
-		return new ResponseEntity<Boolean>(
+	public ResponseEntity<Boolean> isSpvAdmin(@RequestHeader("wid") String wid){
+		return new ResponseEntity<>(
 				portalService.isAdmin(PortalConstants.SPV_DEPT_TYPE, PortalConstants.SPV_ROLE_NAME, wid),
 				HttpStatus.OK);
 	}
 
 	@GetMapping("/portal/spv/mydepartment")
-	public ResponseEntity<?> getMyDepartments(@RequestHeader("wid") String wid,
+	public ResponseEntity<DepartmentInfo> getMyDepartments(@RequestHeader("wid") String wid,
 			@RequestParam(name = "allUsers", required = false) boolean isUserInfoRequired,
 			@RequestHeader("rootOrg") String rootOrg) throws Exception {
 		validateUserAccess(PortalConstants.SPV_DEPT_TYPE, PortalConstants.SPV_ROLE_NAME, wid);
@@ -71,7 +74,7 @@ public class PortalController {
 	public ResponseEntity<DepartmentInfo> addDepartment(@RequestHeader("xAuthUser") String authUserToken, @RequestHeader("wid") String wid,
 			@RequestBody DepartmentInfo deptInfo, @RequestHeader("rootOrg") String rootOrg) throws Exception {
 		validateUserAccess(PortalConstants.SPV_DEPT_TYPE, PortalConstants.SPV_ROLE_NAME, wid);
-		return new ResponseEntity<DepartmentInfo>(spvPortalService.addDepartment(authUserToken, wid, deptInfo, rootOrg),
+		return new ResponseEntity<>(spvPortalService.addDepartment(authUserToken, wid, deptInfo, rootOrg),
 				HttpStatus.OK);
 	}
 
@@ -79,14 +82,14 @@ public class PortalController {
 	public ResponseEntity<DepartmentInfo> updateDepartment(@RequestHeader("wid") String wid,
 			@RequestBody DepartmentInfo deptInfo, @RequestHeader("rootOrg") String rootOrg) throws Exception {
 		validateUserAccess(PortalConstants.SPV_DEPT_TYPE, PortalConstants.SPV_ROLE_NAME, wid);
-		return new ResponseEntity<DepartmentInfo>(spvPortalService.updateDepartment(deptInfo, rootOrg), HttpStatus.OK);
+		return new ResponseEntity<>(spvPortalService.updateDepartment(deptInfo, rootOrg), HttpStatus.OK);
 	}
 
 	@GetMapping("/portal/spv/department")
 	public ResponseEntity<List<DepartmentInfo>> getAllDepartments(@RequestHeader("wid") String wid,
 			@RequestHeader("rootOrg") String rootOrg) throws Exception {
 		validateUserAccess(PortalConstants.SPV_DEPT_TYPE, PortalConstants.SPV_ROLE_NAME, wid);
-		return new ResponseEntity<List<DepartmentInfo>>(spvPortalService.getAllDepartments(rootOrg), HttpStatus.OK);
+		return new ResponseEntity<>(spvPortalService.getAllDepartments(rootOrg), HttpStatus.OK);
 	}
 
 	@GetMapping("/portal/spv/department/{dept_id}")
@@ -94,7 +97,7 @@ public class PortalController {
 			@RequestParam(name = "allUsers", required = false) boolean isUserInfoRequired,
 			@RequestHeader("wid") String wid, @RequestHeader("rootOrg") String rootOrg) throws Exception {
 		validateUserAccess(PortalConstants.SPV_DEPT_TYPE, PortalConstants.SPV_ROLE_NAME, wid);
-		return new ResponseEntity<DepartmentInfo>(
+		return new ResponseEntity<>(
 				spvPortalService.getDepartmentById(deptId, isUserInfoRequired, rootOrg), HttpStatus.OK);
 	}
 
@@ -112,23 +115,23 @@ public class PortalController {
 			@RequestBody UserDepartmentRole userDeptRole, @RequestHeader("rootOrg") String rootOrg,
 			@RequestHeader("org") String org, @RequestHeader("wid") String wid) throws Exception {
 		validateUserAccess(PortalConstants.SPV_DEPT_TYPE, PortalConstants.SPV_ROLE_NAME, wid);
-		return new ResponseEntity<UserDepartmentInfo>(
+		return new ResponseEntity<>(
 				portalService.updateUserRoleInDepartment(userDeptRole, wid, rootOrg, org), HttpStatus.OK);
 	}
 
 	@GetMapping("/portal/spv/role")
-	public ResponseEntity<?> getSpvRoles(@RequestHeader("rootOrg") String rootOrg) {
+	public ResponseEntity<List<DepartmentInfo>> getSpvRoles(@RequestHeader("rootOrg") String rootOrg) {
 		return new ResponseEntity<>(portalService.getAllDepartments(rootOrg), HttpStatus.OK);
 	}
 	// ----------------- SPV APIs -----------------------
 	
 	// ----------------- FRAC APIs ----------------------
 	@GetMapping("/portal/frac/mydepartment")
-	public ResponseEntity<?> getMyFracDepartment(@RequestHeader("wid") String wid,
+	public ResponseEntity<DepartmentInfo> getMyFracDepartment(@RequestHeader("wid") String wid,
 			@RequestParam(name = "allUsers", required = false) boolean isUserInfoRequired,
 			@RequestHeader("rootOrg") String rootOrg) throws Exception {
 		if (!portalService.validateFracUserLogin(wid)) {
-			throw new Exception("User is not assigned with any FRAC related roles.");
+			throw new BadRequestException("User is not assigned with any FRAC related roles.");
 		}
 		return new ResponseEntity<>(mdoPortalService.getMyFracDepartment(wid, isUserInfoRequired, rootOrg), HttpStatus.OK);
 	}
@@ -136,14 +139,14 @@ public class PortalController {
 
 	// ----------------- MDO APIs -----------------------
 	@GetMapping("/portal/mdo/isAdmin")
-	public ResponseEntity<Boolean> isMdoAdmin(@RequestHeader("wid") String wid) throws Exception {
-		return new ResponseEntity<Boolean>(
+	public ResponseEntity<Boolean> isMdoAdmin(@RequestHeader("wid") String wid){
+		return new ResponseEntity<>(
 				portalService.isAdmin(PortalConstants.MDO_DEPT_TYPE, PortalConstants.MDO_ROLE_NAME, wid),
 				HttpStatus.OK);
 	}
 
 	@GetMapping("/portal/mdo/mydepartment")
-	public ResponseEntity<?> getMyMdoDepartment(@RequestHeader("wid") String wid,
+	public ResponseEntity<DepartmentInfo> getMyMdoDepartment(@RequestHeader("wid") String wid,
 			@RequestParam(name = "allUsers", required = false) boolean isUserInfoRequired,
 			@RequestHeader("rootOrg") String rootOrg) throws Exception {
 		validateUserAccess(PortalConstants.MDO_DEPT_TYPE, PortalConstants.MDO_ROLE_NAME, wid);
@@ -154,7 +157,7 @@ public class PortalController {
 	public ResponseEntity<DepartmentInfo> updateMdoDepartment(@RequestHeader("wid") String wid,
 			@RequestBody DepartmentInfo deptInfo, @RequestHeader("rootOrg") String rootOrg) throws Exception {
 		validateUserAccess(PortalConstants.MDO_DEPT_TYPE, PortalConstants.MDO_ROLE_NAME, wid, deptInfo.getId());
-		return new ResponseEntity<DepartmentInfo>(mdoPortalService.updateDepartment(deptInfo, rootOrg), HttpStatus.OK);
+		return new ResponseEntity<>(mdoPortalService.updateDepartment(deptInfo, rootOrg), HttpStatus.OK);
 	}
 
 	@PostMapping("/portal/mdo/userrole")
@@ -162,7 +165,7 @@ public class PortalController {
 			@RequestHeader("rootOrg") String rootOrg, @RequestHeader("org") String org,
 			@RequestHeader("wid") String wid) throws Exception {
 		validateUserAccess(PortalConstants.MDO_DEPT_TYPE, PortalConstants.MDO_ROLE_NAME, wid, userDeptRole.getDeptId());
-		return new ResponseEntity<UserDepartmentInfo>(
+		return new ResponseEntity<>(
 				portalService.addUserRoleInDepartment(userDeptRole, wid, rootOrg, org), HttpStatus.OK);
 	}
 
@@ -171,7 +174,7 @@ public class PortalController {
 			@RequestBody UserDepartmentRole userDeptRole, @RequestHeader("rootOrg") String rootOrg,
 			@RequestHeader("org") String org, @RequestHeader("wid") String wid) throws Exception {
 		validateUserAccess(PortalConstants.MDO_DEPT_TYPE, PortalConstants.MDO_ROLE_NAME, wid, userDeptRole.getDeptId());
-		return new ResponseEntity<UserDepartmentInfo>(
+		return new ResponseEntity<>(
 				portalService.updateUserRoleInDepartment(userDeptRole, wid, rootOrg, org), HttpStatus.OK);
 	}
 
@@ -179,12 +182,12 @@ public class PortalController {
 
 	// ----------------- CBP APIs -----------------------
 	@GetMapping("/portal/cbp/isAdmin")
-	public ResponseEntity<Boolean> isCBPAdmin(@RequestHeader("wid") String wid) throws Exception {
-		return new ResponseEntity<Boolean>(portalService.validateCBPUserLogin(wid), HttpStatus.OK);
+	public ResponseEntity<Boolean> isCBPAdmin(@RequestHeader("wid") String wid){
+		return new ResponseEntity<>(portalService.validateCBPUserLogin(wid), HttpStatus.OK);
 	}
 
 	@GetMapping("/portal/cbp/mydepartment")
-	public ResponseEntity<?> getMyCbpDepartment(@RequestHeader("wid") String wid,
+	public ResponseEntity<DepartmentInfo> getMyCbpDepartment(@RequestHeader("wid") String wid,
 			@RequestHeader("rootOrg") String rootOrg) throws Exception {
 		validateCBPUserAccess(wid);
 		return new ResponseEntity<>(portalService.getMyCbpDepartment(wid, rootOrg), HttpStatus.OK);
@@ -194,7 +197,7 @@ public class PortalController {
 	public ResponseEntity<DepartmentInfo> updateCbpDepartment(@RequestHeader("wid") String wid,
 			@RequestBody DepartmentInfo deptInfo, @RequestHeader("rootOrg") String rootOrg) throws Exception {
 		validateUserAccess(PortalConstants.CBP_DEPT_TYPE, PortalConstants.CBP_ROLE_NAME, wid);
-		return new ResponseEntity<DepartmentInfo>(mdoPortalService.updateDepartment(deptInfo, rootOrg), HttpStatus.OK);
+		return new ResponseEntity<>(mdoPortalService.updateDepartment(deptInfo, rootOrg), HttpStatus.OK);
 	}
 
 	@PostMapping("/portal/cbp/userrole")
@@ -202,7 +205,7 @@ public class PortalController {
 			@RequestHeader("rootOrg") String rootOrg, @RequestHeader("org") String org,
 			@RequestHeader("wid") String wid) throws Exception {
 		validateUserAccess(PortalConstants.CBP_DEPT_TYPE, PortalConstants.CBP_ROLE_NAME, wid, userDeptRole.getDeptId());
-		return new ResponseEntity<UserDepartmentInfo>(
+		return new ResponseEntity<>(
 				portalService.addUserRoleInDepartment(userDeptRole, wid, rootOrg, org), HttpStatus.OK);
 	}
 
@@ -211,26 +214,26 @@ public class PortalController {
 			@RequestBody UserDepartmentRole userDeptRole, @RequestHeader("rootOrg") String rootOrg,
 			@RequestHeader("org") String org, @RequestHeader("wid") String wid) throws Exception {
 		validateUserAccess(PortalConstants.CBP_DEPT_TYPE, PortalConstants.CBP_ROLE_NAME, wid, userDeptRole.getDeptId());
-		return new ResponseEntity<UserDepartmentInfo>(
+		return new ResponseEntity<>(
 				portalService.updateUserRoleInDepartment(userDeptRole, wid, rootOrg, org), HttpStatus.OK);
 	}
 
 	@GetMapping("/portal/cbp/searchUser/deptId/{dept_id}/role/{role_name}/userlike/{username}")
-	public ResponseEntity<?> searchUserForRole(@PathVariable("dept_id") Integer deptId,
-			@PathVariable("role_name") String roleName, @PathVariable("username") String userName) throws Exception {
+	public ResponseEntity<List<SearchUserInfo>> searchUserForRole(@PathVariable("dept_id") Integer deptId,
+																  @PathVariable("role_name") String roleName, @PathVariable("username") String userName) throws Exception {
 		return new ResponseEntity<>(portalService.searchUserForRole(deptId, roleName, userName), HttpStatus.OK);
 	}
 	// ----------------- END OF CBP APIs -----------------------
 
 	// ----------------- CBC APIs -----------------------
 	@GetMapping("/portal/cbc/isAdmin")
-	public ResponseEntity<Boolean> isCBCAdmin(@RequestHeader("wid") String wid) throws Exception {
-		return new ResponseEntity<Boolean>(
+	public ResponseEntity<Boolean> isCBCAdmin(@RequestHeader("wid") String wid){
+		return new ResponseEntity<>(
 				portalService.isAdmin(PortalConstants.CBC_DEPT_TYPE, PortalConstants.CBC_ROLE_NAME, wid),
 				HttpStatus.OK);
 	}
 	@GetMapping("/portal/cbc/mydepartment")
-	public ResponseEntity<?> getMyCBCDepartment(@RequestHeader("wid") String wid,
+	public ResponseEntity<DepartmentInfo> getMyCBCDepartment(@RequestHeader("wid") String wid,
 												@RequestParam(name = "allUsers", required = false) boolean isUserInfoRequired,
 												@RequestHeader("rootOrg") String rootOrg) throws Exception {
 		validateUserLoginForDepartment(wid, PortalConstants.CBC_DEPT_TYPE);
@@ -241,7 +244,7 @@ public class PortalController {
 	public ResponseEntity<DepartmentInfo> updateCBCDepartment(@RequestHeader("wid") String wid,
 															  @RequestBody DepartmentInfo deptInfo, @RequestHeader("rootOrg") String rootOrg) throws Exception {
 		validateUserAccess(PortalConstants.CBC_DEPT_TYPE, PortalConstants.CBC_ROLE_NAME, wid, deptInfo.getId());
-		return new ResponseEntity<DepartmentInfo>(mdoPortalService.updateDepartment(deptInfo, rootOrg), HttpStatus.OK);
+		return new ResponseEntity<>(mdoPortalService.updateDepartment(deptInfo, rootOrg), HttpStatus.OK);
 	}
 
 	@PostMapping("/portal/cbc/userrole")
@@ -249,7 +252,7 @@ public class PortalController {
 																		   @RequestHeader("rootOrg") String rootOrg, @RequestHeader("org") String org,
 																		   @RequestHeader("wid") String wid) throws Exception {
 		validateUserAccess(PortalConstants.CBC_DEPT_TYPE, PortalConstants.CBC_ROLE_NAME, wid, userDeptRole.getDeptId());
-		return new ResponseEntity<UserDepartmentInfo>(
+		return new ResponseEntity<>(
 				portalService.addUserRoleInDepartment(userDeptRole, wid, rootOrg, org), HttpStatus.OK);
 	}
 
@@ -258,7 +261,7 @@ public class PortalController {
 			@RequestBody UserDepartmentRole userDeptRole, @RequestHeader("rootOrg") String rootOrg,
 			@RequestHeader("org") String org, @RequestHeader("wid") String wid) throws Exception {
 		validateUserAccess(PortalConstants.CBC_DEPT_TYPE, PortalConstants.CBC_ROLE_NAME, wid, userDeptRole.getDeptId());
-		return new ResponseEntity<UserDepartmentInfo>(
+		return new ResponseEntity<>(
 				portalService.updateUserRoleInDepartment(userDeptRole, wid, rootOrg, org), HttpStatus.OK);
 	}
 
@@ -266,7 +269,7 @@ public class PortalController {
 	public ResponseEntity<List<DepartmentInfo>> getAllDepartmentsForCBC(@RequestHeader("wid") String wid,
 																  @RequestHeader("rootOrg") String rootOrg) throws Exception {
 		validateUserLoginForDepartment(wid, PortalConstants.CBC_DEPT_TYPE);
-		return new ResponseEntity<List<DepartmentInfo>>(spvPortalService.getAllDepartments(rootOrg), HttpStatus.OK);
+		return new ResponseEntity<>(spvPortalService.getAllDepartments(rootOrg), HttpStatus.OK);
 	}
 
 	@GetMapping("/portal/cbc/department/{dept_id}")
@@ -274,7 +277,7 @@ public class PortalController {
 															@RequestParam(name = "allUsers", required = false) boolean isUserInfoRequired,
 															@RequestHeader("wid") String wid, @RequestHeader("rootOrg") String rootOrg) throws Exception {
 		validateUserAccess(PortalConstants.CBC_DEPT_TYPE, PortalConstants.CBC_ROLE_NAME, wid);
-		return new ResponseEntity<DepartmentInfo>(
+		return new ResponseEntity<>(
 				spvPortalService.getDepartmentById(deptId, isUserInfoRequired, rootOrg), HttpStatus.OK);
 	}
 
@@ -284,28 +287,28 @@ public class PortalController {
 	public ResponseEntity<DepartmentInfo> getDepartmentById(@PathVariable("dept_id") Integer deptId,
 			@RequestParam(name = "allUsers", required = false) boolean isUserInfoRequired,
 			@RequestHeader("rootOrg") String rootOrg) {
-		return new ResponseEntity<DepartmentInfo>(portalService.getDepartmentById(deptId, isUserInfoRequired, rootOrg),
+		return new ResponseEntity<>(portalService.getDepartmentById(deptId, isUserInfoRequired, rootOrg),
 				HttpStatus.OK);
 	}
 
 	@GetMapping("/portal/mydepartment")
 	public ResponseEntity<DepartmentInfo> getMyDepartmentDetails(@RequestHeader("wid") String userId,
 			@RequestParam(name = "allUsers", required = false) boolean isUserInfoRequired) throws Exception {
-		return new ResponseEntity<DepartmentInfo>(portalService.getMyDepartmentDetails(userId, isUserInfoRequired),
+		return new ResponseEntity<>(portalService.getMyDepartmentDetails(userId, isUserInfoRequired),
 				HttpStatus.OK);
 	}
 
 	@PatchMapping("/portal/department")
 	public ResponseEntity<DepartmentInfo> updateDepartment(@RequestBody DepartmentInfo deptInfo,
 			@RequestHeader("rootOrg") String rootOrg) throws Exception {
-		return new ResponseEntity<DepartmentInfo>(portalService.updateDepartment(deptInfo, rootOrg), HttpStatus.OK);
+		return new ResponseEntity<>(portalService.updateDepartment(deptInfo, rootOrg), HttpStatus.OK);
 	}
 
 	@PostMapping("/portal/userrole")
 	public ResponseEntity<UserDepartmentInfo> updateUserRoleInDepartment(
 			@Valid @RequestBody UserDepartmentRole userDeptRole, @RequestHeader("rootOrg") String rootOrg,
 			@RequestHeader("org") String org, @RequestHeader("wid") String wid) throws Exception {
-		return new ResponseEntity<UserDepartmentInfo>(
+		return new ResponseEntity<>(
 				portalService.addUserRoleInDepartment(userDeptRole, wid, rootOrg, org), HttpStatus.OK);
 	}
 
@@ -317,7 +320,7 @@ public class PortalController {
 	@GetMapping("/portal/department/{dept_id}/user/{user_id}/isAdmin")
 	public ResponseEntity<Boolean> checkAdminPrivilage(@PathVariable("dept_id") Integer deptId,
 			@PathVariable("user_id") String userId, @RequestHeader("rootOrg") String rootOrg) throws Exception {
-		return new ResponseEntity<Boolean>(portalService.checkAdminPrivilage(deptId, userId, rootOrg), HttpStatus.OK);
+		return new ResponseEntity<>(portalService.checkAdminPrivilage(deptId, userId, rootOrg), HttpStatus.OK);
 	}
 
 //	@GetMapping("/portal/{dept_key}/isAdmin")
@@ -350,7 +353,7 @@ public class PortalController {
 
 	@GetMapping("/portal/isUserActive")
 	public ResponseEntity<Boolean> isUserActive(@RequestHeader("userId") String userId) {
-		return new ResponseEntity<Boolean>(portalService.isUserActive(userId), HttpStatus.OK);
+		return new ResponseEntity<>(portalService.isUserActive(userId), HttpStatus.OK);
 	}
 
 }
