@@ -49,7 +49,7 @@ public class PortalController {
 	}
 	
 	@GetMapping("/portal/deptSearch")
-	public ResponseEntity<?> searchDepartment(@RequestParam(name = "friendlyName", required = true) String deptName){
+	public ResponseEntity<DeptPublicInfo> searchDepartment(@RequestParam(name = "friendlyName", required = true) String deptName){
 		return new ResponseEntity<>(portalService.searchDept(deptName), HttpStatus.OK);
 	}
 
@@ -106,7 +106,7 @@ public class PortalController {
 			@RequestHeader("rootOrg") String rootOrg, @RequestHeader("org") String org,
 			@RequestHeader("wid") String wid) throws Exception {
 		validateUserAccess(PortalConstants.SPV_DEPT_TYPE, PortalConstants.SPV_ROLE_NAME, wid);
-		return new ResponseEntity<UserDepartmentInfo>(
+		return new ResponseEntity<>(
 				portalService.addUserRoleInDepartment(userDeptRole, wid, rootOrg, org), HttpStatus.OK);
 	}
 
@@ -329,25 +329,25 @@ public class PortalController {
 //		return new ResponseEntity<Boolean>(portalService.checkMdoAdminPrivilage(deptKey, wid), HttpStatus.OK);
 //	}
 
-	private void validateUserAccess(String deptType, String roleName, String wid) throws Exception {
+	private void validateUserAccess(String deptType, String roleName, String wid){
 		validateUserAccess(deptType, roleName, wid, -1);
 	}
 
-	private void validateUserAccess(String deptType, String roleName, String wid, Integer deptId) throws Exception {
+	private void validateUserAccess(String deptType, String roleName, String wid, Integer deptId) throws BadRequestException {
 		if (!portalService.isAdmin(deptType, roleName, wid)) {
-			throw new Exception("User is not assigned with Role: '" + roleName + "'.");
+			throw new BadRequestException("User is not assigned with Role: '" + roleName + "'.");
 		}
 	}
 
-	private void validateCBPUserAccess(String userId) throws Exception {
+	private void validateCBPUserAccess(String userId) throws BadRequestException {
 		if (!portalService.validateCBPUserLogin(userId)) {
-			throw new Exception("User is not assigned with any CBP related roles.");
+			throw new BadRequestException("User is not assigned with any CBP related roles.");
 		}
 	}
 
-	private void validateUserLoginForDepartment(String userId, String departmentType) throws Exception {
+	private void validateUserLoginForDepartment(String userId, String departmentType) throws BadRequestException {
 		if (!portalService.validateUserLoginForDepartment(userId, departmentType)) {
-			throw new Exception("User is not assigned with any " + departmentType + " related roles.");
+			throw new BadRequestException("User is not assigned with any " + departmentType + " related roles.");
 		}
 	}
 

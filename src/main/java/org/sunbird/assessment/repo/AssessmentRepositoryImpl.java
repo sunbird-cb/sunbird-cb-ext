@@ -2,10 +2,7 @@ package org.sunbird.assessment.repo;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,6 +15,10 @@ import com.datastax.driver.core.utils.UUIDs;
 @Service
 public class AssessmentRepositoryImpl implements AssessmentRepository {
 
+	public static final String ROOT_ORG = "rootOrg";
+	public static final String RESULT = "result";
+	public static final String SOURCE_ID = "sourceId";
+	public static final String USER_ID = "userId";
 	private CbExtLogger logger = new CbExtLogger(getClass().getName());
 	
 	@Autowired
@@ -47,45 +48,45 @@ public class AssessmentRepositoryImpl implements AssessmentRepository {
 	public Map<String, Object> insertQuizOrAssessment(Map<String, Object> persist, Boolean isAssessment)
 			throws Exception {
 		Map<String, Object> response = new HashMap<>();
-		Date record = new Date();
+		Date date = new Date();
 
 		// insert assessment and assessment summary
-		if (isAssessment) {
+		if (Boolean.TRUE.equals(isAssessment)) {
 			UserAssessmentMasterModel assessment = new UserAssessmentMasterModel(
-					new UserAssessmentMasterPrimaryKeyModel(persist.get("rootOrg").toString(), record,
-							persist.get("parent").toString(), BigDecimal.valueOf((Double) persist.get("result")),
+					new UserAssessmentMasterPrimaryKeyModel(persist.get(ROOT_ORG).toString(), date,
+							persist.get("parent").toString(), BigDecimal.valueOf((Double) persist.get(RESULT)),
 							UUIDs.timeBased()),
-					Integer.parseInt(persist.get("correct").toString()), formatter.parse(formatter.format(record)),
+					Integer.parseInt(persist.get("correct").toString()), formatter.parse(formatter.format(date)),
 					Integer.parseInt(persist.get("incorrect").toString()),
 					Integer.parseInt(persist.get("blank").toString()), persist.get("parentContentType").toString(),
-					new BigDecimal(60), persist.get("sourceId").toString(), persist.get("title").toString(),
-					persist.get("userId").toString());
+					new BigDecimal(60), persist.get(SOURCE_ID).toString(), persist.get("title").toString(),
+					persist.get(USER_ID).toString());
 			UserAssessmentSummaryModel summary = new UserAssessmentSummaryModel();
 			UserAssessmentSummaryModel data = userAssessmentSummaryRepo
-					.findById(new UserAssessmentSummaryPrimaryKeyModel(persist.get("rootOrg").toString(),
-							persist.get("userId").toString(), persist.get("sourceId").toString()))
+					.findById(new UserAssessmentSummaryPrimaryKeyModel(persist.get(ROOT_ORG).toString(),
+							persist.get(USER_ID).toString(), persist.get(SOURCE_ID).toString()))
 					.orElse(null);
 
-			if (persist.get("parentContentType").toString().toLowerCase().equals("course")) {
+			if (persist.get("parentContentType").toString().equalsIgnoreCase("course")) {
 				if (data != null) {
-					if (data.getFirstMaxScore() < Float.parseFloat(persist.get("result").toString())) {
+					if (data.getFirstMaxScore() < Float.parseFloat(persist.get(RESULT).toString())) {
 						summary = new UserAssessmentSummaryModel(
-								new UserAssessmentSummaryPrimaryKeyModel(persist.get("rootOrg").toString(),
-										persist.get("userId").toString(), persist.get("sourceId").toString()),
-								Float.parseFloat(persist.get("result").toString()), record, data.getFirstPassesScore(),
+								new UserAssessmentSummaryPrimaryKeyModel(persist.get(ROOT_ORG).toString(),
+										persist.get(USER_ID).toString(), persist.get(SOURCE_ID).toString()),
+								Float.parseFloat(persist.get(RESULT).toString()), date, data.getFirstPassesScore(),
 								data.getFirstPassesScoreDate());
 					}
-				} else if (Float.parseFloat(persist.get("result").toString()) > Constants.ASSESSMENT_PASS_SCORE) {
+				} else if (Float.parseFloat(persist.get(RESULT).toString()) > Constants.ASSESSMENT_PASS_SCORE) {
 					summary = new UserAssessmentSummaryModel(
-							new UserAssessmentSummaryPrimaryKeyModel(persist.get("rootOrg").toString(),
-									persist.get("userId").toString(), persist.get("sourceId").toString()),
-							Float.parseFloat(persist.get("result").toString()), record,
-							Float.parseFloat(persist.get("result").toString()), record);
+							new UserAssessmentSummaryPrimaryKeyModel(persist.get(ROOT_ORG).toString(),
+									persist.get(USER_ID).toString(), persist.get(SOURCE_ID).toString()),
+							Float.parseFloat(persist.get(RESULT).toString()), date,
+							Float.parseFloat(persist.get(RESULT).toString()), date);
 				} else {
 					summary = new UserAssessmentSummaryModel(
-							new UserAssessmentSummaryPrimaryKeyModel(persist.get("rootOrg").toString(),
-									persist.get("userId").toString(), persist.get("sourceId").toString()),
-							Float.parseFloat(persist.get("result").toString()), record, null, null);
+							new UserAssessmentSummaryPrimaryKeyModel(persist.get(ROOT_ORG).toString(),
+									persist.get(USER_ID).toString(), persist.get(SOURCE_ID).toString()),
+							Float.parseFloat(persist.get(RESULT).toString()), date, null, null);
 					userAssessmentSummaryRepo.save(summary);
 
 				}
@@ -95,17 +96,17 @@ public class AssessmentRepositoryImpl implements AssessmentRepository {
 		// insert quiz and quiz summary
 		else {
 			UserQuizMasterModel quiz = new UserQuizMasterModel(
-					new UserQuizMasterPrimaryKeyModel(persist.get("rootOrg").toString(), record,
-							BigDecimal.valueOf((Double) persist.get("result")), UUIDs.timeBased()),
-					Integer.parseInt(persist.get("correct").toString()), formatter.parse(formatter.format(record)),
+					new UserQuizMasterPrimaryKeyModel(persist.get(ROOT_ORG).toString(), date,
+							BigDecimal.valueOf((Double) persist.get(RESULT)), UUIDs.timeBased()),
+					Integer.parseInt(persist.get("correct").toString()), formatter.parse(formatter.format(date)),
 					Integer.parseInt(persist.get("incorrect").toString()),
 					Integer.parseInt(persist.get("blank").toString()), new BigDecimal(60),
-					persist.get("sourceId").toString(), persist.get("title").toString(),
-					persist.get("userId").toString());
+					persist.get(SOURCE_ID).toString(), persist.get("title").toString(),
+					persist.get(USER_ID).toString());
 			UserQuizSummaryModel summary = new UserQuizSummaryModel(
-					new UserQuizSummaryPrimaryKeyModel(persist.get("rootOrg").toString(),
-							persist.get("userId").toString(), persist.get("sourceId").toString()),
-					record);
+					new UserQuizSummaryPrimaryKeyModel(persist.get(ROOT_ORG).toString(),
+							persist.get(USER_ID).toString(), persist.get(SOURCE_ID).toString()),
+					date);
 
 			userQuizMasterRepo.updateQuiz(quiz, summary);
 		}
@@ -118,6 +119,6 @@ public class AssessmentRepositoryImpl implements AssessmentRepository {
 	public List<Map<String, Object>> getAssessmetbyContentUser(String rootOrg, String courseId, String userId)
 			throws Exception {
 		// TODO Auto-generated method stub
-		return null;
+		return Collections.emptyList();
 	}
 }

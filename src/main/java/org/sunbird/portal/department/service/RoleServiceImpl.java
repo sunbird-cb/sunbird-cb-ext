@@ -1,12 +1,11 @@
 package org.sunbird.portal.department.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.sunbird.common.util.DataValidator;
-import org.sunbird.core.logger.CbExtLogger;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.sunbird.common.util.DataValidator;
+import org.sunbird.core.exception.BadRequestException;
+import org.sunbird.core.logger.CbExtLogger;
 import org.sunbird.portal.department.dto.DepartmentRole;
 import org.sunbird.portal.department.dto.Role;
 import org.sunbird.portal.department.dto.UserDepartmentRole;
@@ -41,7 +40,7 @@ public class RoleServiceImpl implements RoleService {
 		if (role.isPresent()) {
 			return role.get();
 		} else {
-			throw new Exception("No Role exist with id - " + roleId);
+			throw new BadRequestException("No Role exist with id - " + roleId);
 		}
 	}
 
@@ -51,7 +50,7 @@ public class RoleServiceImpl implements RoleService {
 	public Role addRole(Role role) throws Exception {
 		Role existingRole = roleRepo.findRoleByRoleName(role.getRoleName());
 		if (existingRole != null) {
-			throw new Exception("Role exist with name - " + role.getRoleName());
+			throw new BadRequestException("Role exist with name - " + role.getRoleName());
 		} else {
 			return roleRepo.save(role);
 		}
@@ -65,7 +64,7 @@ public class RoleServiceImpl implements RoleService {
 			existingRole.get().setDescription(role.getDescription());
 			return roleRepo.save(existingRole.get());
 		} else {
-			throw new Exception("Role doesn't exist with Id - " + role.getId());
+			throw new BadRequestException("Role doesn't exist with Id - " + role.getId());
 		}
 	}
 
@@ -134,9 +133,9 @@ public class RoleServiceImpl implements RoleService {
 			if (CollectionUtils.isEmpty(userDepartmentRoles))
 				return Collections.emptyList();
 			List<Integer> roleIds = new ArrayList<>();
-			userDepartmentRoles.forEach(userDepartmentRole -> {
-				roleIds.addAll(Arrays.asList(userDepartmentRole.getRoleIds()));
-			});
+			userDepartmentRoles.forEach(userDepartmentRole ->
+				roleIds.addAll(Arrays.asList(userDepartmentRole.getRoleIds()))
+			);
 
 			if (roleIds.isEmpty())
 				return Collections.emptyList();
