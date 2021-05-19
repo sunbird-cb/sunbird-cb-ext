@@ -1,16 +1,7 @@
 package org.sunbird.workallocation.service;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -39,27 +30,20 @@ import org.sunbird.common.service.PdfGenerationService;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.core.exception.BadRequestException;
-import org.sunbird.workallocation.model.Child;
-import org.sunbird.workallocation.model.ChildNode;
-import org.sunbird.workallocation.model.CompetencyDetails;
-import org.sunbird.workallocation.model.FracRequest;
-import org.sunbird.workallocation.model.FracResponse;
-import org.sunbird.workallocation.model.Role;
-import org.sunbird.workallocation.model.RoleCompetency;
-import org.sunbird.workallocation.model.SearchCriteria;
-import org.sunbird.workallocation.model.WAObject;
-import org.sunbird.workallocation.model.WorkAllocation;
-import org.sunbird.workallocation.model.WorkAllocationDTO;
+import org.sunbird.workallocation.model.*;
 import org.sunbird.workallocation.util.FRACReqBuilder;
 import org.sunbird.workallocation.util.Validator;
 import org.sunbird.workallocation.util.WorkAllocationConstants;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class AllocationService {
 
+	public static final String AUTHORIZATION = "Authorization";
+	public static final String ACCEPT = "Accept";
 	private Logger logger = LoggerFactory.getLogger(AllocationService.class);
 
 	final String[] includeFields = { "personalDetails.firstname", "personalDetails.surname",
@@ -178,9 +162,9 @@ public class AllocationService {
 			throw new BadRequestException("No record found on given Id!");
 		}
 		workAllocation = mapper.convertValue(existingRecord, WorkAllocation.class);
-		workAllocation = waObjectTransition(userId, workAllocationDTO, workAllocation);
+		WorkAllocation finalObj = waObjectTransition(userId, workAllocationDTO, workAllocation);
 		RestStatus restStatus = indexerService.updateEntity(index, indexType, workAllocation.getUserId(),
-				mapper.convertValue(workAllocation, Map.class));
+				mapper.convertValue(finalObj, Map.class));
 		Response response = new Response();
 		if (!ObjectUtils.isEmpty(restStatus)) {
 			response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
@@ -230,7 +214,6 @@ public class AllocationService {
 			SearchResponse searchResponse = indexerService.getEsResult(index, indexType, sourceBuilder);
 			totalCount = searchResponse.getHits().getTotalHits();
 			for (SearchHit hit : searchResponse.getHits()) {
-				logger.info(mapper.writeValueAsString(hit.getSourceAsMap()));
 				allocationSearchList.add(mapper.convertValue(hit.getSourceAsMap(), WorkAllocation.class));
 			}
 			Set<String> userIds = allocationSearchList.stream().map(WorkAllocation::getUserId)
@@ -410,8 +393,8 @@ public class AllocationService {
 		String positionId = null;
 		FracRequest request = fracReqBuilder.getPositionRequest(getSourceValue(), positionName);
 		HttpHeaders headers = new HttpHeaders();
-		headers.set("Authorization", authUserToken);
-		headers.add("Accept", MediaType.APPLICATION_JSON_VALUE);
+		headers.set(AUTHORIZATION, authUserToken);
+		headers.add(ACCEPT, MediaType.APPLICATION_JSON_VALUE);
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		HttpEntity<String> entity = null;
 		try {
@@ -429,14 +412,13 @@ public class AllocationService {
 		return positionId;
 	}
 
-	private Role fetchAddedRole(String authUserToken, Role role, ChildNode cn) throws Exception {
+	private Role fetchAddedRole(String authUserToken, Role role, ChildNode cn) throws JsonProcessingException {
 		logger.info("Adding Role into FRAC Service...");
-		ObjectMapper mapper = new ObjectMapper();
 
 		FracRequest request = role.getFracRequest(getSourceValue(), cn);
 		HttpHeaders headers = new HttpHeaders();
-		headers.set("Authorization", authUserToken);
-		headers.add("Accept", MediaType.APPLICATION_JSON_VALUE);
+		headers.set(AUTHORIZATION, authUserToken);
+		headers.add(ACCEPT, MediaType.APPLICATION_JSON_VALUE);
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		HttpEntity<String> entity = new HttpEntity<>(mapper.writeValueAsString(request), headers);
 		FracResponse response = restTemplate.postForObject(
@@ -448,8 +430,6 @@ public class AllocationService {
 	}
 
 	private String getSourceValue() {
-		// TODO -- Check useDeptName config value. If TRUE then get the current
-		// department.
 		return extServerProperties.getFracSource();
 	}
 
@@ -462,7 +442,7 @@ public class AllocationService {
 		r.setSource(response.getResponseData().getSource());
 		List<ChildNode> children = response.getResponseData().getChildren();
 		if (children != null && !CollectionUtils.isEmpty(children)) {
-			List<ChildNode> childNodes = new ArrayList<ChildNode>();
+			List<ChildNode> childNodes = new ArrayList<>();
 			for (ChildNode child : children) {
 				childNodes.add(processActivity(child));
 			}
@@ -533,52 +513,52 @@ public class AllocationService {
 		for (RoleCompetency roleCompetency : workAllocation.getRoleCompetencyList()) {
 			List<CompetencyDetails> oldCompetencyDetails = roleCompetency.getCompetencyDetails();
 			List<CompetencyDetails> newCompetencyDetails = new ArrayList<>();
-
-			try {
-				for (CompetencyDetails c : oldCompetencyDetails) {
-					if (StringUtils.isEmpty(c.getId())) {
-						CompetencyDetails newCompetency = fetchAddedComptency(authUserToken, c, null);
-						newCompetencyDetails.add(newCompetency);
-					} else {
-						// Competency is from FRAC - No need to create new.
-						// However, we need to check children is from FRAC or not.
-						boolean isNewChildFound = false;
-						if (!CollectionUtils.isEmpty(c.getChildren())) {
-							isNewChildFound = c.getChildren().stream()
-									.anyMatch(childNode -> StringUtils.isEmpty(childNode.getId()));
-						} else {
-							isNewChildFound = true;
-						}
-
-						if (isNewChildFound) {
-							CompetencyDetails newCompetency = fetchAddedComptency(authUserToken, c, null);
-							newCompetencyDetails.add(newCompetency);
-						} else {
-							newCompetencyDetails.add(c);
-						}
-					}
-				}
-			} catch (Exception e) {
-				logger.error("Failed to Add Competency / Competency area. Exception: ", e);
-			}
+			addOrUpdateCompetencyToFrac(authUserToken, oldCompetencyDetails, newCompetencyDetails);
 			if (oldCompetencyDetails.size() == newCompetencyDetails.size()) {
 				roleCompetency.setCompetencyDetails(newCompetencyDetails);
 			} else {
-				logger.error("Failed to create FRAC Competency / CompetencyLevel. Old List Size: "
-						+ oldCompetencyDetails.size() + ", New List Size: " + newCompetencyDetails.size());
+				logger.error("Failed to create FRAC Competency / CompetencyLevel. Old List Size: {} , New List Size: {}", oldCompetencyDetails.size(), newCompetencyDetails.size());
 			}
 		}
 	}
 
-	private CompetencyDetails fetchAddedComptency(String authUserToken, CompetencyDetails competency, Child cn)
-			throws Exception {
+	private void addOrUpdateCompetencyToFrac(String authUserToken, List<CompetencyDetails> oldCompetencyDetails, List<CompetencyDetails> newCompetencyDetails) {
+		try {
+			for (CompetencyDetails c : oldCompetencyDetails) {
+				if (StringUtils.isEmpty(c.getId())) {
+					CompetencyDetails newCompetency = fetchAddedComptency(authUserToken, c, null);
+					newCompetencyDetails.add(newCompetency);
+				} else {
+					// Competency is from FRAC - No need to create new.
+					// However, we need to check children is from FRAC or not.
+					boolean isNewChildFound = false;
+					if (!CollectionUtils.isEmpty(c.getChildren())) {
+						isNewChildFound = c.getChildren().stream()
+								.anyMatch(childNode -> StringUtils.isEmpty(childNode.getId()));
+					} else {
+						isNewChildFound = true;
+					}
+
+					if (isNewChildFound) {
+						CompetencyDetails newCompetency = fetchAddedComptency(authUserToken, c, null);
+						newCompetencyDetails.add(newCompetency);
+					} else {
+						newCompetencyDetails.add(c);
+					}
+				}
+			}
+		} catch (Exception e) {
+			logger.error("Failed to Add Competency / Competency area. Exception: ", e);
+		}
+	}
+
+	private CompetencyDetails fetchAddedComptency(String authUserToken, CompetencyDetails competency, Child cn) throws JsonProcessingException {
 		logger.info("Adding Competency into FRAC Service...");
-		ObjectMapper mapper = new ObjectMapper();
 
 		FracRequest request = competency.getFracRequest(getSourceValue(), cn);
 		HttpHeaders headers = new HttpHeaders();
-		headers.set("Authorization", authUserToken);
-		headers.add("Accept", MediaType.APPLICATION_JSON_VALUE);
+		headers.set(AUTHORIZATION, authUserToken);
+		headers.add(ACCEPT, MediaType.APPLICATION_JSON_VALUE);
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		HttpEntity<String> entity = new HttpEntity<>(mapper.writeValueAsString(request), headers);
 		FracResponse response = restTemplate.postForObject(
@@ -599,7 +579,7 @@ public class AllocationService {
 		r.setAdditionalProperties(response.getResponseData().getAdditionalProperties());
 		List<ChildNode> children = response.getResponseData().getChildren();
 		if (children != null && !CollectionUtils.isEmpty(children)) {
-			List<Child> childNodes = new ArrayList<Child>();
+			List<Child> childNodes = new ArrayList<>();
 			for (ChildNode child : children) {
 				childNodes.add(processCompetencyLevel(child));
 			}
@@ -619,7 +599,7 @@ public class AllocationService {
 		return cn;
 	}
 
-	public byte[] getWaPdf(String userId, String waId) throws Exception {
+	public byte[] getWaPdf(String userId, String waId){
 		Map<String, Object> existingRecord = indexerService.readEntity(index, indexType, userId);
 		if (CollectionUtils.isEmpty(existingRecord)) {
 			return pdfService.getWaErrorPdf("Failed to find Work Allocation details for given User.");
@@ -642,7 +622,6 @@ public class AllocationService {
 
 		// If status Draft
 		if (WorkAllocationConstants.DRAFT_STATUS.equalsIgnoreCase(waObj.getStatus())) {
-			// TODO -- need to validate the requested user is MDO Admin. If not throw Error.
 		}
 		
 		return pdfService.getWAPdf(wa, statusSelected);

@@ -9,6 +9,7 @@ import java.util.TreeMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.sunbird.assessment.dto.AssessmentSubmissionDTO;
 import org.sunbird.assessment.repo.AssessmentRepository;
 import org.sunbird.common.model.SunbirdApiResp;
@@ -21,6 +22,10 @@ import org.sunbird.core.logger.CbExtLogger;
 @Service
 public class AssessmentServiceImpl implements AssessmentService {
 
+	public static final String RESULT = "result";
+	public static final String CORRECT = "correct";
+	public static final String BLANK = "blank";
+	public static final String TAKEN_ON = "takenOn";
 	private CbExtLogger logger = new CbExtLogger(getClass().getName());
 
 	@Autowired
@@ -44,18 +49,18 @@ public class AssessmentServiceImpl implements AssessmentService {
 			throw new BadRequestException("Invalid UserId.");
 		}
 
-		Map<String, Object> ret = new HashMap<String, Object>();
+		Map<String, Object> ret = new HashMap<>();
 
 		// TODO - Need to get the Assessment ContentMeta Data
 		// Get the assessment-key.json file. Current version has both the answers
 
 		Map<String, Object> resultMap = assessUtilServ.validateAssessment(data.getQuestions());
-		Double result = (Double) resultMap.get("result");
-		Integer correct = (Integer) resultMap.get("correct");
-		Integer blank = (Integer) resultMap.get("blank");
+		Double result = (Double) resultMap.get(RESULT);
+		Integer correct = (Integer) resultMap.get(CORRECT);
+		Integer blank = (Integer) resultMap.get(BLANK);
 		Integer inCorrect = (Integer) resultMap.get("incorrect");
 
-		Map<String, Object> persist = new HashMap<String, Object>();
+		Map<String, Object> persist = new HashMap<>();
 
 		// Fetch parent of an assessment with status live
 		String parentId = "";
@@ -71,16 +76,16 @@ public class AssessmentServiceImpl implements AssessmentService {
 			parentId = "";
 		}
 		persist.put("parent", parentId);
-		persist.put("result", result);
+		persist.put(RESULT, result);
 		persist.put("sourceId", data.getIdentifier());
 		persist.put("title", data.getTitle());
 		persist.put("rootOrg", rootOrg);
 		persist.put("userId", userId);
-		persist.put("correct", correct);
-		persist.put("blank", blank);
+		persist.put(CORRECT, correct);
+		persist.put(BLANK, blank);
 		persist.put("incorrect", inCorrect);
 
-		if (data.isAssessment() && !"".equals(parentId)) {
+		if (Boolean.TRUE.equals(data.isAssessment()) && !"".equals(parentId)) {
 			// get parent data for assessment
 			try {
 				SunbirdApiResp contentHierarchy = contentService.getHeirarchyResponse(parentId);
@@ -98,10 +103,10 @@ public class AssessmentServiceImpl implements AssessmentService {
 		// insert into assessment table
 		repository.insertQuizOrAssessment(persist, data.isAssessment());
 
-		ret.put("result", result);
-		ret.put("correct", correct);
+		ret.put(RESULT, result);
+		ret.put(CORRECT, correct);
 		ret.put("inCorrect", inCorrect);
-		ret.put("blank", blank);
+		ret.put(BLANK, blank);
 		ret.put("total", blank + inCorrect + correct);
 		ret.put("passPercent", 60);
 
@@ -133,7 +138,7 @@ public class AssessmentServiceImpl implements AssessmentService {
 			 */
 			for (int i = assessments.size() - 1; i > -1; i--) {
 				Map<String, Object> row = assessments.get(i);
-				BigDecimal percentage = (BigDecimal) row.get("result");
+				BigDecimal percentage = (BigDecimal) row.get(RESULT);
 				/*
 				 * Logic to Obtain the First Pass using a Passed flag to attain the Attempts as
 				 * well as the first Time passed Time Stamp
@@ -142,7 +147,7 @@ public class AssessmentServiceImpl implements AssessmentService {
 					noOfAttemptsForPass++;
 					if (percentage.doubleValue() >= 60.0) {
 						passed = true;
-						firstPassTs = row.get("takenOn");
+						firstPassTs = row.get(TAKEN_ON);
 					}
 				}
 
@@ -151,14 +156,14 @@ public class AssessmentServiceImpl implements AssessmentService {
 				 * as well as the Max Scored Assessment Time Stamp
 				 */
 				if (max.compareTo(percentage) < 0) {
-					max = (BigDecimal) row.get("result");
-					maxScoreTs = row.get("takenOn");
+					max = (BigDecimal) row.get(RESULT);
+					maxScoreTs = row.get(TAKEN_ON);
 					noOfAttemptsForMaxScore = (assessments.size() - i);
 				}
 			}
 
 			/* Populating the Response to give Processed Data to Front End */
-			if (assessments.size() > 0) {
+			if (!CollectionUtils.isEmpty(assessments)) {
 				if (passed) {
 					result.put("firstPassOn", firstPassTs);
 					result.put("attemptsToPass", noOfAttemptsForPass);
@@ -187,11 +192,11 @@ public class AssessmentServiceImpl implements AssessmentService {
 		for (Map<String, Object> map : result) {
 			Map<String, Object> assessmentData = new HashMap<>();
 			String res = map.get("result_percent").toString();
-			assessmentData.put("result", new BigDecimal(res).setScale(2, BigDecimal.ROUND_UP));
+			assessmentData.put(RESULT, new BigDecimal(res).setScale(2, BigDecimal.ROUND_UP));
 			assessmentData.put("correctlyAnswered", map.get("correct_count"));
 			assessmentData.put("wronglyAnswered", map.get("incorrect_count"));
 			assessmentData.put("notAttempted", map.get("not_answered_count"));
-			assessmentData.put("takenOn", map.get("ts_created"));
+			assessmentData.put(TAKEN_ON, map.get("ts_created"));
 			assessments.add(assessmentData);
 		}
 		return assessments;
