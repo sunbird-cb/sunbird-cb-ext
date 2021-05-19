@@ -22,19 +22,18 @@ public interface PortalService {
 
 	List<Department> getDepartmentsByUserId(String userId);
 
-	UserDepartmentInfo addUserRoleInDepartment(UserDepartmentRole userDeptRole, String wid, String rootOrg, String org)
-			throws Exception;
+	UserDepartmentInfo addUserRoleInDepartment(UserDepartmentRole userDeptRole, String wid, String rootOrg, String org);
 
 	UserDepartmentInfo updateUserRoleInDepartment(UserDepartmentRole userDeptRole, String wid, String rootOrg,
-			String org) throws Exception;
+			String org);
 
-	Boolean checkAdminPrivilage(Integer deptId, String userId, String rootOrg) throws Exception;
+	Boolean checkAdminPrivilage(Integer deptId, String userId, String rootOrg);
 
-	Boolean checkMdoAdminPrivilage(String deptKey, String userId) throws Exception;
+	Boolean checkMdoAdminPrivilage(String deptKey, String userId);
 
-	DepartmentInfo getMyDepartmentDetails(String userId, boolean isUserInfoRequired) throws Exception;
+	DepartmentInfo getMyDepartmentDetails(String userId, boolean isUserInfoRequired);
 
-	DepartmentInfo updateDepartment(DepartmentInfo deptInfo, String rootOrg) throws Exception;
+	DepartmentInfo updateDepartment(DepartmentInfo deptInfo, String rootOrg);
 
 	boolean isAdmin(String strDeptType, String roleName, String userId);
 
@@ -45,22 +44,20 @@ public interface PortalService {
 	boolean validateUserLoginForDepartment(String userId, String departmentType);
 
 	DepartmentInfo addDepartment(String authUserToken, String userId, String userRoleName, DepartmentInfo deptInfo,
-			String rootOrg) throws Exception;
+			String rootOrg);
 
-	DepartmentInfo getMyDepartment(String userId, String rootOrg) throws Exception;
+	DepartmentInfo getMyDepartment(String userId, String rootOrg);
 
-	DepartmentInfo getMyDepartment(String deptType, String userId, boolean isUserInfoRequired, String rootOrg)
-			throws Exception;
+	DepartmentInfo getMyDepartment(String deptType, String userId, boolean isUserInfoRequired, String rootOrg);
 
-	DepartmentInfo getMyCbpDepartment(String userId, String rootOrg) throws Exception;
+	DepartmentInfo getMyCbpDepartment(String userId, String rootOrg);
 
-	DepartmentInfo getMyDepartmentForRole(String roleName, String userId, boolean isUserInfoRequired, String rootOrg)
-			throws Exception;
+	DepartmentInfo getMyDepartmentForRole(String roleName, String userId, boolean isUserInfoRequired, String rootOrg);
 
 	DepartmentInfo getMyDepartmentForRoles(List<String> roleNames, String userId, boolean isUserInfoRequired,
-			String rootOrg) throws Exception;
+			String rootOrg);
 
-	List<SearchUserInfo> searchUserForRole(Integer deptId, String roleName, String userName) throws Exception;
+	List<SearchUserInfo> searchUserForRole(Integer deptId, String roleName, String userName);
 
 	Boolean isUserActive(String userId);
 }
