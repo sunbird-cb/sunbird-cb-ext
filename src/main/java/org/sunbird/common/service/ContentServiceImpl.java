@@ -51,9 +51,9 @@ public class ContentServiceImpl implements ContentService {
 		headerValues.put("Authorization", serverConfig.getSbApiKey());
 		headerValues.put("Content-Type", "application/json");
 
-		Map<String, Object> requestBody = new HashMap<String, Object>();
-		Map<String, Object> request = new HashMap<String, Object>();
-		Map<String, Object> batch = new HashMap<String, Object>();
+		Map<String, Object> requestBody = new HashMap<>();
+		Map<String, Object> request = new HashMap<>();
+		Map<String, Object> batch = new HashMap<>();
 		batch.put("active", true);
 		request.put("batch", batch);
 		requestBody.put("request", request);

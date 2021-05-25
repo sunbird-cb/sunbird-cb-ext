@@ -104,6 +104,16 @@ public class CbExtServerProperties {
 	
 	@Value("${participants.api.endpoint}")
 	private String participantsEndPoint;
+
+    @Value("${course.batch.create.endpoint}")
+    private String courseBatchCreateEndpoint;
+
+    @Value("${user.course.list}")
+    private String userCoursesList;
+
+
+    @Value("${user.course.enroll}")
+    private String userCourseEnroll;
 	
     public String getContentHost() {
 		return contentHost;
@@ -369,7 +379,15 @@ public class CbExtServerProperties {
 		this.participantsEndPoint = participantsEndPoint;
 	}
 
-	@Override
+    public String getCourseBatchCreateEndpoint() {
+        return courseBatchCreateEndpoint;
+    }
+
+    public void setCourseBatchCreateEndpoint(String courseBatchCreateEndpoint) {
+        this.courseBatchCreateEndpoint = courseBatchCreateEndpoint;
+    }
+
+    @Override
     public String toString() {
         StringBuilder str = new StringBuilder("SB-CB-Ext Server Properties: ");
         str.append("[wfServiceHost=").append(wfServiceHost).append("],");
@@ -378,5 +396,21 @@ public class CbExtServerProperties {
         str.append("[sbUrl=").append(sbUrl).append("],");
         str.append("[sbHubGraphServiceUrl=").append(sbHubGraphServiceUrl).append("]");
         return str.toString();
+    }
+
+    public String getUserCoursesList() {
+        return userCoursesList;
+    }
+
+    public void setUserCoursesList(String userCoursesList) {
+        this.userCoursesList = userCoursesList;
+    }
+
+    public String getUserCourseEnroll() {
+        return userCourseEnroll;
+    }
+
+    public void setUserCourseEnroll(String userCourseEnroll) {
+        this.userCourseEnroll = userCourseEnroll;
     }
 }

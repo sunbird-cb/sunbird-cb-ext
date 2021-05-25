@@ -12,18 +12,21 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import clojure.lang.Obj;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.sunbird.assessment.repo.CohortUsers;
 import org.sunbird.assessment.repo.UserAssessmentTopPerformerRepository;
-import org.sunbird.common.model.OpenSaberApiUserProfile;
-import org.sunbird.common.model.SunbirdApiBatchResp;
-import org.sunbird.common.model.SunbirdApiHierarchyResultContent;
-import org.sunbird.common.model.SunbirdApiResp;
+import org.sunbird.common.model.*;
 import org.sunbird.common.service.ContentService;
+import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
 import org.sunbird.common.service.UserUtilityService;
+import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.core.exception.BadRequestException;
 import org.sunbird.core.logger.CbExtLogger;
@@ -42,6 +45,12 @@ public class CohortsServiceImpl implements CohortsService {
 
 	@Autowired
 	UserAssessmentTopPerformerRepository userAssessmentTopPerformerRepo;
+
+	@Autowired
+	OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
+
+	@Autowired
+	CbExtServerProperties cbExtServerProperties;
 
 	@Override
 	public List<CohortUsers> getTopPerformers(String rootOrg, String contentId, String userId, int count){
@@ -132,6 +141,66 @@ public class CohortsServiceImpl implements CohortsService {
 		return fetchParticipantsList(xAuthUser, rootOrg, batchIdList, count);
 	}
 
+	@Override
+	public Response autoEnrollmentInCourse(String authUserToken, String rootOrg, String contentId, String userUUID) throws Exception {
+		List<String> batchIdList = fetchBatchIdDetails(contentId);
+		Map<String, String> headers = new HashMap<>();
+		headers.put("x-authenticated-user-token", authUserToken);
+		headers.put("authorization", cbExtServerProperties.getSbApiKey());
+		Response finalResponse = null;
+		if (CollectionUtils.isEmpty(batchIdList)) {
+			Map<String, Object> batchCreationRes = createBatchForCourse(contentId, userUUID, headers);
+			Map<String, Object> batchCreationResult = (Map<String, Object>) batchCreationRes.get("result");
+			String batchId = (String) batchCreationResult.get("batchId");
+			if (!StringUtils.isEmpty(batchId)) {
+				finalResponse = enrollInCourse(contentId, userUUID, headers, batchId);
+			}
+		} else {
+			List<String> participantList = contentService.getParticipantsList(authUserToken, batchIdList);
+			if (!CollectionUtils.isEmpty(participantList) && participantList.contains(userUUID)) {
+				finalResponse = new Response();
+				finalResponse.put(Constants.MESSAGE, "USER ALREADY ENROLLED IN A COURSE!");
+				finalResponse.put(Constants.STATUS, HttpStatus.OK);
+			} else {
+				finalResponse = enrollInCourse(contentId, userUUID, headers, batchIdList.get(0));
+			}
+		}
+		return finalResponse;
+	}
+
+	private Map<String, Object> createBatchForCourse(String contentId, String userUUID, Map<String, String> headers) {
+		HashMap<String, Object> batchObj = new HashMap<>();
+		HashMap<String, Object> req = new HashMap<>();
+		batchObj.put("courseId", contentId);
+		batchObj.put("name", "Open Batch");
+		batchObj.put("description", "Open Batch");
+		batchObj.put("enrollmentType", "open");
+		batchObj.put("startDate", "open");
+		batchObj.put("createdBy", userUUID);
+		req.put("request", batchObj);
+		Map<String, Object> batchCreationRes = outboundRequestHandlerService.fetchResultUsingPost(cbExtServerProperties.getCourseServiceHost() + cbExtServerProperties.getCourseBatchCreateEndpoint(), req, headers);
+		return batchCreationRes;
+	}
+
+	private Response enrollInCourse(String contentId, String userUUID, Map<String, String> headers, String batchId) {
+		Response response = new Response();
+		HashMap<String, Object> req;
+		req = new HashMap<>();
+		HashMap<String, Object> enrollObj = new HashMap<>();
+		enrollObj.put("userId", userUUID);
+		enrollObj.put("courseId", contentId);
+		enrollObj.put("batchId", batchId);
+		req.put("request", enrollObj);
+		Map<String, Object> enrollMentResponse = outboundRequestHandlerService.fetchResultUsingPost(cbExtServerProperties.getCourseServiceHost() + cbExtServerProperties.getUserCourseEnroll(), req, headers);
+		Map<String, Object> enrollmentresul = (Map<String, Object>) enrollMentResponse.get("result");
+		if(enrollmentresul.get("response").equals("SUCCESS")){
+			response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
+		}else{
+			response.put(Constants.MESSAGE, "FAILED TO ENROLL IN COURSE!");
+		}
+		response.put(Constants.STATUS, HttpStatus.OK);
+		return response;
+	}
 	private void processChildContentId(String givenContentId, List<String> assessmentIdList) {
 		try {
 			SunbirdApiResp contentHierarchy = contentService.getHeirarchyResponse(givenContentId);
