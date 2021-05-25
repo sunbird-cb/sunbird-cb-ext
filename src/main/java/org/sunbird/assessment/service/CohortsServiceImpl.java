@@ -159,10 +159,26 @@ public class CohortsServiceImpl implements CohortsService {
 			List<String> participantList = contentService.getParticipantsList(authUserToken, batchIdList);
 			if (!CollectionUtils.isEmpty(participantList) && participantList.contains(userUUID)) {
 				finalResponse = new Response();
-				finalResponse.put(Constants.MESSAGE, "USER ALREADY ENROLLED IN A COURSE!");
+				finalResponse.put(Constants.MESSAGE, "USER ALREADY ENROLLED IN COURSE!");
 				finalResponse.put(Constants.STATUS, HttpStatus.OK);
 			} else {
-				finalResponse = enrollInCourse(contentId, userUUID, headers, batchIdList.get(0));
+				List<SunbirdApiBatchResp> batchResps = fetchBatchsDetails(contentId);
+				boolean isUserEnrolled = false;
+				for (SunbirdApiBatchResp batch : batchResps) {
+					if (StringUtils.isEmpty(batch.getEndDate())) {
+						finalResponse = enrollInCourse(contentId, userUUID, headers, batch.getBatchId());
+						isUserEnrolled = true;
+						break;
+					}
+				}
+				if (!isUserEnrolled) {
+					Map<String, Object> batchCreationRes = createBatchForCourse(contentId, userUUID, headers);
+					Map<String, Object> batchCreationResult = (Map<String, Object>) batchCreationRes.get("result");
+					String batchId = (String) batchCreationResult.get("batchId");
+					if (!StringUtils.isEmpty(batchId)) {
+						finalResponse = enrollInCourse(contentId, userUUID, headers, batchId);
+					}
+				}
 			}
 		}
 		return finalResponse;
@@ -244,6 +260,18 @@ public class CohortsServiceImpl implements CohortsService {
 			logger.error(e);
 		}
 
+		return Collections.emptyList();
+	}
+
+	private List<SunbirdApiBatchResp> fetchBatchsDetails(String contentId) {
+		try {
+			SunbirdApiResp contentHierarchy = contentService.getHeirarchyResponse(contentId);
+			if (contentHierarchy != null && "successful".equalsIgnoreCase(contentHierarchy.getParams().getStatus())) {
+				return contentHierarchy.getResult().getContent().getBatches();
+			}
+		} catch (Exception e) {
+			logger.error(e);
+		}
 		return Collections.emptyList();
 	}
 
