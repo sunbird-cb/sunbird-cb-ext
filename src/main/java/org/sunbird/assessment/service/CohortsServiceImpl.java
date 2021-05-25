@@ -1,5 +1,6 @@
 package org.sunbird.assessment.service;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -187,11 +188,12 @@ public class CohortsServiceImpl implements CohortsService {
 	private Map<String, Object> createBatchForCourse(String contentId, String userUUID, Map<String, String> headers) {
 		HashMap<String, Object> batchObj = new HashMap<>();
 		HashMap<String, Object> req = new HashMap<>();
+		String date =new SimpleDateFormat("yyyy-MM-dd").format(new Date());
 		batchObj.put("courseId", contentId);
 		batchObj.put("name", "Open Batch");
 		batchObj.put("description", "Open Batch");
 		batchObj.put("enrollmentType", "open");
-		batchObj.put("startDate", "open");
+		batchObj.put("startDate", date);
 		batchObj.put("createdBy", userUUID);
 		req.put("request", batchObj);
 		Map<String, Object> batchCreationRes = outboundRequestHandlerService.fetchResultUsingPost(cbExtServerProperties.getCourseServiceHost() + cbExtServerProperties.getCourseBatchCreateEndpoint(), req, headers);
