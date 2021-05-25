@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.sunbird.assessment.repo.CohortUsers;
 import org.sunbird.assessment.service.CohortsService;
+import org.sunbird.common.model.Response;
 
 @RestController
 public class CohortsController {
@@ -59,6 +60,26 @@ public class CohortsController {
 		return new ResponseEntity<>(
 				cohortsServ.getActiveUsers(authUserToken, rootOrg, contentId, userUUID, count, toFilter),
 				HttpStatus.OK);
+	}
 
+	/**
+	 *
+	 * @param authUserToken
+	 * @param contentId
+	 * @param rootOrg
+	 * @param userUUID
+	 * @return
+	 * @throws Exception
+	 */
+	@GetMapping("/v1/autoenrollment/{userUUID}/{courseId}")
+	public ResponseEntity<Response> autoEnrollmentInCourse(@RequestHeader("Authorization") String authUserToken,
+														   @PathVariable("courseId") String contentId, @RequestHeader("rootOrg") String rootOrg,
+														   @PathVariable("userUUID") String userUUID)throws Exception {
+		if (authUserToken.contains(" ")) {
+			authUserToken = authUserToken.split(" ")[1];
+		}
+		return new ResponseEntity<>(
+				cohortsServ.autoEnrollmentInCourse(authUserToken, rootOrg, contentId, userUUID),
+				HttpStatus.OK);
 	}
 }
