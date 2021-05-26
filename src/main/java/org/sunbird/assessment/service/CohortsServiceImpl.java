@@ -144,7 +144,10 @@ public class CohortsServiceImpl implements CohortsService {
 
 	@Override
 	public Response autoEnrollmentInCourse(String authUserToken, String rootOrg, String contentId, String userUUID) throws Exception {
-		List<String> batchIdList = fetchBatchIdDetails(contentId);
+		List<SunbirdApiBatchResp> batchResp = fetchBatchsDetails(contentId);
+		List<String> batchIdList = null;
+		if(!CollectionUtils.isEmpty(batchResp))
+			batchIdList = batchResp.stream().map(SunbirdApiBatchResp::getBatchId).collect(Collectors.toList());
 		Map<String, String> headers = new HashMap<>();
 		headers.put("x-authenticated-user-token", authUserToken);
 		headers.put("authorization", cbExtServerProperties.getSbApiKey());
@@ -163,9 +166,8 @@ public class CohortsServiceImpl implements CohortsService {
 				finalResponse.put(Constants.MESSAGE, "USER ALREADY ENROLLED IN COURSE!");
 				finalResponse.put(Constants.STATUS, HttpStatus.OK);
 			} else {
-				List<SunbirdApiBatchResp> batchResps = fetchBatchsDetails(contentId);
 				boolean isUserEnrolled = false;
-				for (SunbirdApiBatchResp batch : batchResps) {
+				for (SunbirdApiBatchResp batch : batchResp) {
 					if (StringUtils.isEmpty(batch.getEndDate())) {
 						finalResponse = enrollInCourse(contentId, userUUID, headers, batch.getBatchId());
 						isUserEnrolled = true;
