@@ -6,13 +6,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.sunbird.common.util.Constants;
-import org.sunbird.workallocation.model.ChildNode;
-import org.sunbird.workallocation.model.Role;
-import org.sunbird.workallocation.model.WorkAllocationDTO;
+import org.sunbird.workallocation.model.*;
+import org.sunbird.workallocation.util.WorkAllocationConstants;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -99,5 +99,35 @@ public class EnrichmentService {
 //
 //        }
 
+    }
+
+    public void enrichWorkOrder(WorkOrderDTO workOrderDTO, String userId) {
+        long currentMillis = System.currentTimeMillis();
+        if (StringUtils.isEmpty(workOrderDTO.getStatus()) || WorkAllocationConstants.DRAFT_STATUS.equals(workOrderDTO.getStatus())) {
+            workOrderDTO.setStatus(WorkAllocationConstants.DRAFT_STATUS);
+            workOrderDTO.setId(UUID.randomUUID().toString());
+            workOrderDTO.setCreatedBy(userId);
+            workOrderDTO.setCreatedAt(currentMillis);
+            workOrderDTO.setUpdatedBy(userId);
+            workOrderDTO.setUpdatedAt(currentMillis);
+            workOrderDTO.setUserIds(null);
+        }
+        if (WorkAllocationConstants.PUBLISHED_STATUS.equals(workOrderDTO.getStatus())) {
+            workOrderDTO.setUpdatedBy(userId);
+            workOrderDTO.setUpdatedAt(currentMillis);
+        }
+    }
+
+    public void enrichWorkAllocation(WorkAllocationDTOV2 workAllocationDTOV2, String userId) {
+        long currentMillis = System.currentTimeMillis();
+        if (StringUtils.isEmpty(workAllocationDTOV2.getCreatedBy())) {
+            workAllocationDTOV2.setCreatedBy(userId);
+            workAllocationDTOV2.setCreatedAt(currentMillis);
+            workAllocationDTOV2.setUpdatedBy(userId);
+            workAllocationDTOV2.setUpdatedAt(currentMillis);
+        } else {
+            workAllocationDTOV2.setUpdatedBy(userId);
+            workAllocationDTOV2.setUpdatedAt(currentMillis);
+        }
     }
 }
