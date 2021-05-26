@@ -4,7 +4,7 @@ This service created to manage portal module, work allocation tool and many othe
 
 ## Features
 
-- Portal module (MDO, SPV and CBP)
+- Portal module (MDO, SPV, CBP, CBC)
 - Work allocation tool
 - Mandatory content check
 
