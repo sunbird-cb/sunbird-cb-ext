@@ -73,4 +73,12 @@ public class Validator {
 			throw new BadRequestException("User name should not be empty!");
 		}
 	}
+	public void validateSearchCriteria(SearchCriteria criteria) {
+		if(StringUtils.isEmpty(criteria.getStatus())){
+			throw new BadRequestException("Status should not be empty!");
+		}
+		if(StringUtils.isEmpty(criteria.getDepartmentName())){
+			throw new BadRequestException("Department should not be empty!");
+		}
+	}
 }

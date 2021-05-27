@@ -5,9 +5,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.sunbird.common.model.Response;
+import org.sunbird.workallocation.model.SearchCriteria;
 import org.sunbird.workallocation.model.WorkAllocationDTOV2;
 import org.sunbird.workallocation.model.WorkOrderDTO;
 import org.sunbird.workallocation.service.AllocationServiceV2;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/v2/workallocation")
@@ -33,6 +36,16 @@ public class AllocationControllerV2 {
     public ResponseEntity<Response> updateWorkOrder(@RequestHeader("userId") String userId, @RequestBody WorkOrderDTO workOrder) {
         return new ResponseEntity<>(allocationServiceV2.updateWorkOrder(userId, workOrder),
                 HttpStatus.OK);
+    }
+
+    @PostMapping("/getWorkOrders")
+    public ResponseEntity<Response> getWorkOrders(@RequestBody SearchCriteria searchCriteria) throws IOException {
+        return new ResponseEntity<>(allocationServiceV2.getWorkOrders(searchCriteria),HttpStatus.OK);
+    }
+
+    @GetMapping("/getWorkOrderById/{workOrderId}")
+    public ResponseEntity<Response> getWorkOrderById(@PathVariable("workOrderId") String workOrderId) throws IOException {
+        return new ResponseEntity<>(allocationServiceV2.getWorkOrderById(workOrderId),HttpStatus.OK);
     }
 
 }

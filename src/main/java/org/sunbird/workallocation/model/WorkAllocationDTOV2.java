@@ -1,7 +1,6 @@
 package org.sunbird.workallocation.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 
