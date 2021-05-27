@@ -171,10 +171,7 @@ public class CohortsServiceImpl implements CohortsService {
 				}
 			}
 			if (isUserEnrolledInBatch) {
-				finalResponse = new Response();
-				finalResponse.put("courseId", contentId);
-				finalResponse.put("batchId", enrolledBatchId);
-				finalResponse.put("userId", userUUID);
+				finalResponse = getAutoEnrollResponse(contentId, enrolledBatchId, batchResp);
 				finalResponse.put(Constants.STATUS, HttpStatus.OK);
 			} else {
 				boolean isUserEnrolled = false;
@@ -214,7 +211,7 @@ public class CohortsServiceImpl implements CohortsService {
 	}
 
 	private Response enrollInCourse(String contentId, String userUUID, Map<String, String> headers, String batchId) {
-		Response response = new Response();
+		Response response = null;
 		HashMap<String, Object> req;
 		req = new HashMap<>();
 		HashMap<String, Object> enrollObj = new HashMap<>();
@@ -225,13 +222,29 @@ public class CohortsServiceImpl implements CohortsService {
 		Map<String, Object> enrollMentResponse = outboundRequestHandlerService.fetchResultUsingPost(cbExtServerProperties.getCourseServiceHost() + cbExtServerProperties.getUserCourseEnroll(), req, headers);
 		Map<String, Object> enrollmentresul = (Map<String, Object>) enrollMentResponse.get("result");
 		if(enrollmentresul.get("response").equals("SUCCESS")){
-			response.put("courseId", contentId);
-			response.put("batchId", batchId);
-			response.put("userId", userUUID);
+			response = getAutoEnrollResponse(contentId, batchId, null);
 		}else{
 			response.put(Constants.MESSAGE, "FAILED TO ENROLL IN COURSE!");
 		}
 		response.put(Constants.STATUS, HttpStatus.OK);
+		return response;
+	}
+
+	private Response getAutoEnrollResponse(String contentId, String batchId, List<SunbirdApiBatchResp> batchResponse) {
+		Response response = new Response();
+		List<SunbirdApiBatchResp> batchResps = null;
+		if(CollectionUtils.isEmpty(batchResponse))
+			 batchResps = fetchBatchsDetails(contentId);
+		SunbirdApiBatchResp selectedBatch = batchResps.stream().filter(batch -> batch.getBatchId().equals(batchId)).findAny().get();
+		HashMap<String, Object> result = new HashMap<>();
+		result.put("batchId", selectedBatch.getBatchId());
+		result.put("endDate", selectedBatch.getEndDate());
+		result.put("enrollmentEndDate", selectedBatch.getEnrollmentEndDate());
+		result.put("enrollmentType", selectedBatch.getEnrollmentType());
+		result.put("name", selectedBatch.getName());
+		result.put("startDate", selectedBatch.getStartDate());
+		result.put("status", selectedBatch.getStatus());
+		response.put("result", result);
 		return response;
 	}
 	private void processChildContentId(String givenContentId, List<String> assessmentIdList) {
