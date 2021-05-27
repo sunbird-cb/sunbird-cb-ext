@@ -42,7 +42,7 @@ public class ContentServiceImpl implements ContentService {
 	}
 
 	public List<String> getParticipantsList(String xAuthUser, List<String> batchIdList) {
-		List<String> participantList = new ArrayList<String>();
+		List<String> participantList = new ArrayList<>();
 		StringBuilder url = new StringBuilder();
 		url.append(serverConfig.getCourseServiceHost()).append(serverConfig.getParticipantsEndPoint());
 
@@ -78,6 +78,43 @@ public class ContentServiceImpl implements ContentService {
 			}
 		}
 
+		return participantList;
+	}
+
+	@Override
+	public List<String> getParticipantsForBatch(String xAuthUser, String batchId) {
+		List<String> participantList = new ArrayList<>();
+		StringBuilder url = new StringBuilder();
+		url.append(serverConfig.getCourseServiceHost()).append(serverConfig.getParticipantsEndPoint());
+
+		HashMap<String, String> headerValues = new HashMap<>();
+		headerValues.put("X-Authenticated-User-Token", xAuthUser);
+		headerValues.put("Authorization", serverConfig.getSbApiKey());
+		headerValues.put("Content-Type", "application/json");
+
+		Map<String, Object> requestBody = new HashMap<>();
+		Map<String, Object> request = new HashMap<>();
+		Map<String, Object> batch = new HashMap<>();
+		batch.put("active", true);
+		request.put("batch", batch);
+		requestBody.put("request", request);
+		try {
+			batch.put("batchId", batchId);
+			SunbirdApiResp response = mapper.convertValue(
+					outboundRequestHandlerService.fetchResultUsingPost(url.toString(), requestBody, headerValues),
+					SunbirdApiResp.class);
+			if (response.getResponseCode().equalsIgnoreCase("Ok")) {
+				SunbirdApiHierarchyResultBatch batchResp = response.getResult().getBatch();
+				if (batchResp != null && batchResp.getCount() > 0) {
+					participantList.addAll(batchResp.getParticipants());
+				}
+			} else {
+				logger.warn("Failed to get participants for BatchId - " + batchId);
+				logger.warn("Error Response -> " + mapper.writeValueAsString(response));
+			}
+		} catch (Exception e) {
+			logger.error(e);
+		}
 		return participantList;
 	}
 }

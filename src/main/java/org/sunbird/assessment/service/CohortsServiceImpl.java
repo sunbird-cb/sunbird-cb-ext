@@ -146,7 +146,7 @@ public class CohortsServiceImpl implements CohortsService {
 	public Response autoEnrollmentInCourse(String authUserToken, String rootOrg, String contentId, String userUUID) throws Exception {
 		List<SunbirdApiBatchResp> batchResp = fetchBatchsDetails(contentId);
 		List<String> batchIdList = null;
-		if(!CollectionUtils.isEmpty(batchResp))
+		if (!CollectionUtils.isEmpty(batchResp))
 			batchIdList = batchResp.stream().map(SunbirdApiBatchResp::getBatchId).collect(Collectors.toList());
 		Map<String, String> headers = new HashMap<>();
 		headers.put("x-authenticated-user-token", authUserToken);
@@ -160,10 +160,21 @@ public class CohortsServiceImpl implements CohortsService {
 				finalResponse = enrollInCourse(contentId, userUUID, headers, batchId);
 			}
 		} else {
-			List<String> participantList = contentService.getParticipantsList(authUserToken, batchIdList);
-			if (!CollectionUtils.isEmpty(participantList) && participantList.contains(userUUID)) {
+			boolean isUserEnrolledInBatch = false;
+			String enrolledBatchId = null;
+			for (String batchId : batchIdList) {
+				List<String> batchParticipants = contentService.getParticipantsForBatch(authUserToken, batchId);
+				if (!CollectionUtils.isEmpty(batchParticipants) && batchParticipants.contains(userUUID)) {
+					isUserEnrolledInBatch = true;
+					enrolledBatchId = batchId;
+					break;
+				}
+			}
+			if (isUserEnrolledInBatch) {
 				finalResponse = new Response();
-				finalResponse.put(Constants.MESSAGE, "USER ALREADY ENROLLED IN COURSE!");
+				finalResponse.put("courseId", contentId);
+				finalResponse.put("batchId", enrolledBatchId);
+				finalResponse.put("userId", userUUID);
 				finalResponse.put(Constants.STATUS, HttpStatus.OK);
 			} else {
 				boolean isUserEnrolled = false;
@@ -214,7 +225,9 @@ public class CohortsServiceImpl implements CohortsService {
 		Map<String, Object> enrollMentResponse = outboundRequestHandlerService.fetchResultUsingPost(cbExtServerProperties.getCourseServiceHost() + cbExtServerProperties.getUserCourseEnroll(), req, headers);
 		Map<String, Object> enrollmentresul = (Map<String, Object>) enrollMentResponse.get("result");
 		if(enrollmentresul.get("response").equals("SUCCESS")){
-			response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
+			response.put("courseId", contentId);
+			response.put("batchId", batchId);
+			response.put("userId", userUUID);
 		}else{
 			response.put(Constants.MESSAGE, "FAILED TO ENROLL IN COURSE!");
 		}
