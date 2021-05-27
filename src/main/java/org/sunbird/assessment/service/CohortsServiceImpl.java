@@ -232,10 +232,9 @@ public class CohortsServiceImpl implements CohortsService {
 
 	private Response getAutoEnrollResponse(String contentId, String batchId, List<SunbirdApiBatchResp> batchResponse) {
 		Response response = new Response();
-		List<SunbirdApiBatchResp> batchResps = null;
 		if(CollectionUtils.isEmpty(batchResponse))
-			 batchResps = fetchBatchsDetails(contentId);
-		SunbirdApiBatchResp selectedBatch = batchResps.stream().filter(batch -> batch.getBatchId().equals(batchId)).findAny().get();
+			batchResponse = fetchBatchsDetails(contentId);
+		SunbirdApiBatchResp selectedBatch = batchResponse.stream().filter(batch -> batch.getBatchId().equals(batchId)).findAny().get();
 		HashMap<String, Object> result = new HashMap<>();
 		result.put("batchId", selectedBatch.getBatchId());
 		result.put("endDate", selectedBatch.getEndDate());
