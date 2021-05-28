@@ -4,7 +4,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -13,13 +12,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import clojure.lang.Obj;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.sunbird.assessment.repo.CohortUsers;
 import org.sunbird.assessment.repo.UserAssessmentTopPerformerRepository;
@@ -153,51 +148,58 @@ public class CohortsServiceImpl implements CohortsService {
 		headers.put("authorization", cbExtServerProperties.getSbApiKey());
 		Response finalResponse = null;
 		if (CollectionUtils.isEmpty(batchIdList)) {
-			Map<String, Object> batchCreationRes = createBatchForCourse(contentId, userUUID, headers);
-			Map<String, Object> batchCreationResult = (Map<String, Object>) batchCreationRes.get("result");
-			String batchId = (String) batchCreationResult.get("batchId");
-			if (!StringUtils.isEmpty(batchId)) {
-				finalResponse = enrollInCourse(contentId, userUUID, headers, batchId);
-			}
+			finalResponse = createBatchAndEnroll(contentId, userUUID, headers);
 		} else {
-			boolean isUserEnrolledInBatch = false;
-			String enrolledBatchId = null;
-			for (String batchId : batchIdList) {
-				List<String> batchParticipants = contentService.getParticipantsForBatch(authUserToken, batchId);
-				if (!CollectionUtils.isEmpty(batchParticipants) && batchParticipants.contains(userUUID)) {
-					isUserEnrolledInBatch = true;
-					enrolledBatchId = batchId;
-					break;
+			List<SunbirdApiUserCourse> userCourseList = fetchUserEnrolledBatches(authUserToken, userUUID);
+			if (!CollectionUtils.isEmpty(userCourseList)) {
+				List<String> userBatchIds = userCourseList.stream().map(SunbirdApiUserCourse::getBatchId).collect(Collectors.toList());
+				Map<String, SunbirdApiBatchResp> batchMap = batchResp.stream().collect(Collectors.toMap(SunbirdApiBatchResp::getBatchId,
+						sunbirdApiBatchResp -> sunbirdApiBatchResp, (oldValue, newValue) -> oldValue,
+						HashMap::new));
+				boolean isUserAlreadyEnrolled = false;
+				for (String userBatchId : userBatchIds) {
+					if (batchIdList.contains(userBatchId)) {
+						finalResponse = constructAutoEnrollResponse(batchMap.get(userBatchId));
+						isUserAlreadyEnrolled = true;
+						break;
+					}
 				}
-			}
-			if (isUserEnrolledInBatch) {
-				finalResponse = getAutoEnrollResponse(contentId, enrolledBatchId, batchResp);
+				if (!isUserAlreadyEnrolled) {
+					boolean isUserEnrolled = false;
+					for (SunbirdApiBatchResp batch : batchResp) {
+						if (StringUtils.isEmpty(batch.getEndDate())) {
+							enrollInCourse(contentId, userUUID, headers, batch.getBatchId());
+							finalResponse = constructAutoEnrollResponse(batch);
+							isUserEnrolled = true;
+							break;
+						}
+					}
+					if (!isUserEnrolled) {
+						finalResponse = createBatchAndEnroll(contentId, userUUID, headers);
+					}
+				}
 			} else {
 				boolean isUserEnrolled = false;
 				for (SunbirdApiBatchResp batch : batchResp) {
 					if (StringUtils.isEmpty(batch.getEndDate())) {
-						finalResponse = enrollInCourse(contentId, userUUID, headers, batch.getBatchId());
+						enrollInCourse(contentId, userUUID, headers, batch.getBatchId());
+						finalResponse = constructAutoEnrollResponse(batch);
 						isUserEnrolled = true;
 						break;
 					}
 				}
 				if (!isUserEnrolled) {
-					Map<String, Object> batchCreationRes = createBatchForCourse(contentId, userUUID, headers);
-					Map<String, Object> batchCreationResult = (Map<String, Object>) batchCreationRes.get("result");
-					String batchId = (String) batchCreationResult.get("batchId");
-					if (!StringUtils.isEmpty(batchId)) {
-						finalResponse = enrollInCourse(contentId, userUUID, headers, batchId);
-					}
+					finalResponse = createBatchAndEnroll(contentId, userUUID, headers);
 				}
 			}
 		}
 		return finalResponse;
 	}
 
-	private Map<String, Object> createBatchForCourse(String contentId, String userUUID, Map<String, String> headers) {
+	private Response createBatchAndEnroll(String contentId, String userUUID, Map<String, String> headers) {
 		HashMap<String, Object> batchObj = new HashMap<>();
 		HashMap<String, Object> req = new HashMap<>();
-		String date =new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+		String date = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
 		batchObj.put("courseId", contentId);
 		batchObj.put("name", "Open Batch");
 		batchObj.put("description", "Open Batch");
@@ -206,10 +208,37 @@ public class CohortsServiceImpl implements CohortsService {
 		batchObj.put("createdBy", userUUID);
 		req.put("request", batchObj);
 		Map<String, Object> batchCreationRes = outboundRequestHandlerService.fetchResultUsingPost(cbExtServerProperties.getCourseServiceHost() + cbExtServerProperties.getCourseBatchCreateEndpoint(), req, headers);
-		return batchCreationRes;
+		Map<String, Object> batchCreationResult = (Map<String, Object>) batchCreationRes.get("result");
+		String batchId = (String) batchCreationResult.get("batchId");
+		if (!StringUtils.isEmpty(batchId)) {
+			enrollInCourse(contentId, userUUID, headers, batchId);
+		}
+		SunbirdApiBatchResp selectedBatch = new SunbirdApiBatchResp();
+		selectedBatch.setBatchId(batchId);
+		selectedBatch.setEndDate(null);
+		selectedBatch.setCreatedFor(new ArrayList<>());
+		selectedBatch.setEnrollmentEndDate(null);
+		selectedBatch.setEnrollmentType("open");
+		selectedBatch.setName("Open Batch");
+		selectedBatch.setStartDate(date);
+		selectedBatch.setStatus(1);
+		selectedBatch.setBatchId(batchId);
+		Response response = constructAutoEnrollResponse(selectedBatch);
+		return response;
 	}
 
-	private Response enrollInCourse(String contentId, String userUUID, Map<String, String> headers, String batchId) {
+	private Response constructAutoEnrollResponse(SunbirdApiBatchResp selectedBatch) {
+		Response response = new Response();
+		List<SunbirdApiBatchResp> content = new ArrayList<>();
+		HashMap<String, Object> result = new HashMap<>();
+		content.add(selectedBatch);
+		result.put("content", content);
+		result.put("count", 1);
+		response.put("response", result);
+		return response;
+	}
+
+	private void enrollInCourse(String contentId, String userUUID, Map<String, String> headers, String batchId) {
 		Response response = null;
 		HashMap<String, Object> req;
 		req = new HashMap<>();
@@ -220,27 +249,8 @@ public class CohortsServiceImpl implements CohortsService {
 		req.put("request", enrollObj);
 		Map<String, Object> enrollMentResponse = outboundRequestHandlerService.fetchResultUsingPost(cbExtServerProperties.getCourseServiceHost() + cbExtServerProperties.getUserCourseEnroll(), req, headers);
 		Map<String, Object> enrollmentresul = (Map<String, Object>) enrollMentResponse.get("result");
-		if(enrollmentresul.get("response").equals("SUCCESS")){
-			response = getAutoEnrollResponse(contentId, batchId, null);
-		}else{
-			response.put(Constants.MESSAGE, "FAILED TO ENROLL IN COURSE!");
-		}
-		return response;
 	}
 
-	private Response getAutoEnrollResponse(String contentId, String batchId, List<SunbirdApiBatchResp> batchResponse) {
-		Response response = new Response();
-		if (CollectionUtils.isEmpty(batchResponse))
-			batchResponse = fetchBatchsDetails(contentId);
-		SunbirdApiBatchResp selectedBatch = batchResponse.stream().filter(batch -> batch.getBatchId().equals(batchId)).findAny().get();
-		HashMap<String, Object> result = new HashMap<>();
-		List<SunbirdApiBatchResp> content = new ArrayList<>();
-		content.add(selectedBatch);
-		result.put("content", content);
-		result.put("count", 1);
-		response.put("response", result);
-		return response;
-	}
 	private void processChildContentId(String givenContentId, List<String> assessmentIdList) {
 		try {
 			SunbirdApiResp contentHierarchy = contentService.getHeirarchyResponse(givenContentId);
@@ -292,6 +302,18 @@ public class CohortsServiceImpl implements CohortsService {
 			SunbirdApiResp contentHierarchy = contentService.getHeirarchyResponse(contentId);
 			if (contentHierarchy != null && "successful".equalsIgnoreCase(contentHierarchy.getParams().getStatus())) {
 				return contentHierarchy.getResult().getContent().getBatches();
+			}
+		} catch (Exception e) {
+			logger.error(e);
+		}
+		return Collections.emptyList();
+	}
+
+	private List<SunbirdApiUserCourse> fetchUserEnrolledBatches(String authToken, String userId) {
+		try {
+			SunbirdApiUserCourseListResp userCourseListResponse = contentService.getUserCourseListResponse(authToken, userId);
+			if (userCourseListResponse != null) {
+				return userCourseListResponse.getResult().getCourses();
 			}
 		} catch (Exception e) {
 			logger.error(e);

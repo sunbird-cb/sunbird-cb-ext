@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.sunbird.common.model.SunbirdApiHierarchyResultBatch;
 import org.sunbird.common.model.SunbirdApiResp;
+import org.sunbird.common.model.SunbirdApiUserCourse;
+import org.sunbird.common.model.SunbirdApiUserCourseListResp;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.core.logger.CbExtLogger;
 
@@ -38,6 +40,20 @@ public class ContentServiceImpl implements ContentService {
 			return response;
 		}
 
+		return null;
+	}
+
+	public SunbirdApiUserCourseListResp getUserCourseListResponse(String authToken, String userId) {
+		StringBuilder url = new StringBuilder();
+		String endPoint = serverConfig.getUserCoursesList().replace("{userUUID}", userId);
+		url.append(serverConfig.getCourseServiceHost()).append(endPoint);
+		Map<String, String> headers = new HashMap<>();
+		headers.put("x-authenticated-user-token", authToken);
+		SunbirdApiUserCourseListResp response = mapper.convertValue(outboundRequestHandlerService.fetchUsingGetWithHeaders(url.toString(), headers),
+				SunbirdApiUserCourseListResp.class);
+		if (response.getResponseCode().equalsIgnoreCase("Ok")) {
+			return response;
+		}
 		return null;
 	}
 

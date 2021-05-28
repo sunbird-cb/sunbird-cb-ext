@@ -3,9 +3,7 @@ package org.sunbird.common.service;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.HttpClientErrorException;
@@ -75,6 +73,35 @@ public class OutboundRequestHandlerServiceImpl {
 			log.error(e);
 		}
 		return response;
+	}
+
+	/**
+	 * @param uri
+	 * @return
+	 * @throws Exception
+	 */
+	public Object fetchUsingGetWithHeaders(String uri, Map<String, String> headersValues) {
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+		ResponseEntity<Map> response = null;
+		try {
+			StringBuilder str = new StringBuilder(this.getClass().getCanonicalName())
+					.append(Constants.FETCH_RESULT_CONSTANT).append(System.lineSeparator());
+			str.append(Constants.URI_CONSTANT).append(uri).append(System.lineSeparator());
+			log.info(str.toString());
+			HttpHeaders headers = new HttpHeaders();
+			if (!CollectionUtils.isEmpty(headersValues)) {
+				headersValues.forEach((k, v) -> headers.set(k, v));
+			}
+			HttpEntity entity = new HttpEntity(headers);
+			response = restTemplate.exchange(
+					uri, HttpMethod.GET, entity, Map.class);
+		} catch (HttpClientErrorException e) {
+			log.error(e);
+		} catch (Exception e) {
+			log.error(e);
+		}
+		return response.getBody();
 	}
 
 	public Map<String, Object> fetchResultUsingPost(String uri, Object request, Map<String, String> headersValues) {
