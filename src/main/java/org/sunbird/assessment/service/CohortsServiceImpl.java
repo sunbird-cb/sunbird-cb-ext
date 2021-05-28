@@ -172,7 +172,6 @@ public class CohortsServiceImpl implements CohortsService {
 			}
 			if (isUserEnrolledInBatch) {
 				finalResponse = getAutoEnrollResponse(contentId, enrolledBatchId, batchResp);
-				finalResponse.put(Constants.STATUS, HttpStatus.OK);
 			} else {
 				boolean isUserEnrolled = false;
 				for (SunbirdApiBatchResp batch : batchResp) {
@@ -226,24 +225,20 @@ public class CohortsServiceImpl implements CohortsService {
 		}else{
 			response.put(Constants.MESSAGE, "FAILED TO ENROLL IN COURSE!");
 		}
-		response.put(Constants.STATUS, HttpStatus.OK);
 		return response;
 	}
 
 	private Response getAutoEnrollResponse(String contentId, String batchId, List<SunbirdApiBatchResp> batchResponse) {
 		Response response = new Response();
-		if(CollectionUtils.isEmpty(batchResponse))
+		if (CollectionUtils.isEmpty(batchResponse))
 			batchResponse = fetchBatchsDetails(contentId);
 		SunbirdApiBatchResp selectedBatch = batchResponse.stream().filter(batch -> batch.getBatchId().equals(batchId)).findAny().get();
 		HashMap<String, Object> result = new HashMap<>();
-		result.put("batchId", selectedBatch.getBatchId());
-		result.put("endDate", selectedBatch.getEndDate());
-		result.put("enrollmentEndDate", selectedBatch.getEnrollmentEndDate());
-		result.put("enrollmentType", selectedBatch.getEnrollmentType());
-		result.put("name", selectedBatch.getName());
-		result.put("startDate", selectedBatch.getStartDate());
-		result.put("status", selectedBatch.getStatus());
-		response.put("result", result);
+		List<SunbirdApiBatchResp> content = new ArrayList<>();
+		content.add(selectedBatch);
+		result.put("content", content);
+		result.put("count", 1);
+		response.put("response", result);
 		return response;
 	}
 	private void processChildContentId(String givenContentId, List<String> assessmentIdList) {
