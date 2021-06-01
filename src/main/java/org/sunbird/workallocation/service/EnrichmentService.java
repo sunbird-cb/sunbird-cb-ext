@@ -1,11 +1,13 @@
 package org.sunbird.workallocation.service;
 
+import clojure.lang.Obj;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.sunbird.common.util.Constants;
 import org.sunbird.workallocation.model.*;
@@ -21,6 +23,9 @@ public class EnrichmentService {
 
     @Autowired
     private AllocationService allocationService;
+
+    ObjectMapper mapper = new ObjectMapper();
+
 
     public void enrichWorkOrder(WorkOrderDTO workOrderDTO, String userId) {
         long currentMillis = System.currentTimeMillis();
@@ -59,32 +64,40 @@ public class EnrichmentService {
         userIds.add(workOrderDTO.getCreatedBy());
         userIds.add(workOrderDTO.getUpdatedBy());
         try {
-            ObjectMapper mapper = new ObjectMapper();
-            logger.info("user Ids : {}",mapper.writeValueAsString(userIds));
+            logger.info("user Ids : {}", mapper.writeValueAsString(userIds));
             Map<String, Object> usersMap = allocationService.getUserDetails(userIds);
-            logger.info("user Map : {}",mapper.writeValueAsString(usersMap));
-            Map<String, Object> createdByDetails = allocationService.extractUserDetails((Map<String, Object>) usersMap.get(workOrderDTO.getCreatedBy()));
-            Map<String, Object> updatedByDetails = allocationService.extractUserDetails((Map<String, Object>) usersMap.get(workOrderDTO.getUpdatedBy()));
-            String createdByName = (createdByDetails.get("first_name") == null ? "" : (String) createdByDetails.get("first_name")) + (createdByDetails.get("last_name") == null ? "" : (String) createdByDetails.get("last_name"));
-            String updatedByName = (updatedByDetails.get("first_name") == null ? "" : (String) updatedByDetails.get("first_name")) + (updatedByDetails.get("last_name") == null ? "" : (String) updatedByDetails.get("last_name"));
-            workOrderDTO.setCreatedByName(createdByName);
-            workOrderDTO.setUpdatedByName(updatedByName);
+            logger.info("user Map : {}", mapper.writeValueAsString(usersMap));
+            if (!ObjectUtils.isEmpty(usersMap.get(workOrderDTO.getCreatedBy()))) {
+                UserBasicInfo userBasicInfo = mapper.convertValue(usersMap.get(workOrderDTO.getCreatedBy()), UserBasicInfo.class);
+                String name = userBasicInfo.getFirst_name() == null ? "" : userBasicInfo.getFirst_name() + " " + userBasicInfo.getLast_name() == null ? "" : userBasicInfo.getLast_name();
+                workOrderDTO.setCreatedByName(name);
+            }
+            if (!ObjectUtils.isEmpty(usersMap.get(workOrderDTO.getUpdatedBy()))) {
+                UserBasicInfo userBasicInfo = mapper.convertValue(usersMap.get(workOrderDTO.getUpdatedBy()), UserBasicInfo.class);
+                String name = userBasicInfo.getFirst_name() == null ? "" : userBasicInfo.getFirst_name() + " " + userBasicInfo.getLast_name() == null ? "" : userBasicInfo.getLast_name();
+                workOrderDTO.setUpdatedByName(name);
+            }
         } catch (IOException e) {
             logger.error("Error while fetching the user details", e);
         }
     }
+
     private void enrichUserNamesToWorkAllocation(WorkAllocationDTOV2 workAllocationDTOV2) {
         Set<String> userIds = new HashSet<>();
         userIds.add(workAllocationDTOV2.getCreatedBy());
         userIds.add(workAllocationDTOV2.getUpdatedBy());
         try {
             Map<String, Object> usersMap = allocationService.getUserDetails(userIds);
-            Map<String, Object> createdByDetails = allocationService.extractUserDetails((Map<String, Object>) usersMap.get(workAllocationDTOV2.getCreatedBy()));
-            Map<String, Object> updatedByDetails = allocationService.extractUserDetails((Map<String, Object>) usersMap.get(workAllocationDTOV2.getUpdatedBy()));
-            String createdByName = (createdByDetails.get("first_name") == null ? "" : (String) createdByDetails.get("first_name")) + (createdByDetails.get("last_name") == null ? "" : (String) createdByDetails.get("last_name"));
-            String updatedByName = (updatedByDetails.get("first_name") == null ? "" : (String) updatedByDetails.get("first_name")) + (updatedByDetails.get("last_name") == null ? "" : (String) updatedByDetails.get("last_name"));
-            workAllocationDTOV2.setCreatedByName(createdByName);
-            workAllocationDTOV2.setUpdatedByName(updatedByName);
+            if (!ObjectUtils.isEmpty(usersMap.get(workAllocationDTOV2.getCreatedBy()))) {
+                UserBasicInfo userBasicInfo = mapper.convertValue(usersMap.get(workAllocationDTOV2.getCreatedBy()), UserBasicInfo.class);
+                String name = userBasicInfo.getFirst_name() == null ? "" : userBasicInfo.getFirst_name() + " " + userBasicInfo.getLast_name() == null ? "" : userBasicInfo.getLast_name();
+                workAllocationDTOV2.setCreatedByName(name);
+            }
+            if (!ObjectUtils.isEmpty(usersMap.get(workAllocationDTOV2.getUpdatedBy()))) {
+                UserBasicInfo userBasicInfo = mapper.convertValue(usersMap.get(workAllocationDTOV2.getUpdatedBy()), UserBasicInfo.class);
+                String name = userBasicInfo.getFirst_name() == null ? "" : userBasicInfo.getFirst_name() + " " + userBasicInfo.getLast_name() == null ? "" : userBasicInfo.getLast_name();
+                workAllocationDTOV2.setUpdatedByName(name);
+            }
         } catch (IOException e) {
             logger.error("Error while fetching the user details", e);
         }
