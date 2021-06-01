@@ -388,7 +388,7 @@ public class AllocationService {
 		}
 	}
 
-	private String createUserPosition(String authUserToken, String positionName) {
+	public String createUserPosition(String authUserToken, String positionName) {
 		logger.info("Adding Position into FRAC System...");
 		String positionId = null;
 		FracRequest request = fracReqBuilder.getPositionRequest(getSourceValue(), positionName);
@@ -412,7 +412,7 @@ public class AllocationService {
 		return positionId;
 	}
 
-	private Role fetchAddedRole(String authUserToken, Role role, ChildNode cn) throws JsonProcessingException {
+	public Role fetchAddedRole(String authUserToken, Role role, ChildNode cn) throws JsonProcessingException {
 		logger.info("Adding Role into FRAC Service...");
 
 		FracRequest request = role.getFracRequest(getSourceValue(), cn);
@@ -522,7 +522,7 @@ public class AllocationService {
 		}
 	}
 
-	private void addOrUpdateCompetencyToFrac(String authUserToken, List<CompetencyDetails> oldCompetencyDetails, List<CompetencyDetails> newCompetencyDetails) {
+	public void addOrUpdateCompetencyToFrac(String authUserToken, List<CompetencyDetails> oldCompetencyDetails, List<CompetencyDetails> newCompetencyDetails) {
 		try {
 			for (CompetencyDetails c : oldCompetencyDetails) {
 				if (StringUtils.isEmpty(c.getId())) {

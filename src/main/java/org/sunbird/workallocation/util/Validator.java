@@ -5,6 +5,8 @@ import org.springframework.util.StringUtils;
 import org.sunbird.core.exception.BadRequestException;
 import org.sunbird.workallocation.model.SearchCriteria;
 import org.sunbird.workallocation.model.WorkAllocationDTO;
+import org.sunbird.workallocation.model.WorkAllocationDTOV2;
+import org.sunbird.workallocation.model.WorkOrderDTO;
 
 @Component
 public class Validator {
@@ -44,6 +46,39 @@ public class Validator {
 		}
 		if (StringUtils.isEmpty(workAllocation.getDeptName())) {
 			throw new BadRequestException("Department name can not be empty!");
+		}
+	}
+
+	public void validateWorkOrder(WorkOrderDTO workOrderDTO, String reqType) {
+		if (StringUtils.isEmpty(workOrderDTO.getDeptId()) || StringUtils.isEmpty(workOrderDTO.getDeptName())) {
+			throw new BadRequestException("Department id/name should not be empty!");
+		}
+		if (StringUtils.isEmpty(workOrderDTO.getName())) {
+			throw new BadRequestException("Work order name should not be empty!");
+		}
+		if (WorkAllocationConstants.UPDATE.equalsIgnoreCase(reqType)) {
+			if (StringUtils.isEmpty(workOrderDTO.getId())) {
+				throw new BadRequestException("Work order Id should not be empty!");
+			}
+			if (StringUtils.isEmpty(workOrderDTO.getStatus())) {
+				throw new BadRequestException("Work order status should not be empty!");
+			}
+		}
+	}
+	public void addWorkAllocation(WorkAllocationDTOV2 workAllocationDTOV2) {
+		if(StringUtils.isEmpty(workAllocationDTOV2.getWorkOrderId())){
+		throw new BadRequestException("Work order Id should not be empty!");
+		}
+		if(StringUtils.isEmpty(workAllocationDTOV2.getUserName())){
+			throw new BadRequestException("User name should not be empty!");
+		}
+	}
+	public void validateSearchCriteria(SearchCriteria criteria) {
+		if(StringUtils.isEmpty(criteria.getStatus())){
+			throw new BadRequestException("Status should not be empty!");
+		}
+		if(StringUtils.isEmpty(criteria.getDepartmentName())){
+			throw new BadRequestException("Department should not be empty!");
 		}
 	}
 }
