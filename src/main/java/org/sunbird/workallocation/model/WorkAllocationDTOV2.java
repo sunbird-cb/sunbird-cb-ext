@@ -11,14 +11,18 @@ public class WorkAllocationDTOV2 {
     private String userName;
     private String userEmail;
     private List<RoleCompetency> roleCompetencyList;
+    private List<ChildNode> unmappedActivities;
+    private List<CompetencyDetails> unmappedCompetencies;
     private String userPosition;
     private String positionId;
     private String positionDescription;
     private String workOrderId;
     private long updatedAt;
     private String updatedBy;
+    private String updatedByName;
     private long createdAt;
     private String createdBy;
+    private String createdByName;
 
     public String getUserId() {
         return userId;
@@ -122,5 +126,37 @@ public class WorkAllocationDTOV2 {
 
     public void setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
+    }
+
+    public String getUpdatedByName() {
+        return updatedByName;
+    }
+
+    public void setUpdatedByName(String updatedByName) {
+        this.updatedByName = updatedByName;
+    }
+
+    public String getCreatedByName() {
+        return createdByName;
+    }
+
+    public void setCreatedByName(String createdByName) {
+        this.createdByName = createdByName;
+    }
+
+    public List<ChildNode> getUnmappedActivities() {
+        return unmappedActivities;
+    }
+
+    public void setUnmappedActivities(List<ChildNode> unmappedActivities) {
+        this.unmappedActivities = unmappedActivities;
+    }
+
+    public List<CompetencyDetails> getUnmappedCompetencies() {
+        return unmappedCompetencies;
+    }
+
+    public void setUnmappedCompetencies(List<CompetencyDetails> unmappedCompetencies) {
+        this.unmappedCompetencies = unmappedCompetencies;
     }
 }

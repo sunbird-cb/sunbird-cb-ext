@@ -199,6 +199,8 @@ public class AllocationServiceV2 {
         }
         if (!StringUtils.isEmpty(criteria.getDepartmentName())) {
             query.must(QueryBuilders.matchQuery("deptName", criteria.getDepartmentName()));
+        }if(!StringUtils.isEmpty(criteria.getQuery())){
+            query.must(QueryBuilders.matchPhrasePrefixQuery("name", criteria.getQuery()));
         }
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder().query(query);
         sourceBuilder.from(criteria.getPageNo());
@@ -246,5 +248,33 @@ public class AllocationServiceV2 {
         response.put(Constants.DATA, workOrderObject);
         response.put(Constants.STATUS, HttpStatus.OK);
         return response;
+    }
+
+    private void enrichUserNames(List<WorkOrderDTO> workOrderDTOList) {
+        if (!CollectionUtils.isEmpty(workOrderDTOList)) {
+            Set<String> userIds = new HashSet<>();
+            workOrderDTOList.forEach(workOrderDTO -> {
+                userIds.add(workOrderDTO.getCreatedBy());
+                userIds.add(workOrderDTO.getUpdatedBy());
+            });
+            try {
+                Map<String, Object> usersMap = allocationService.getUserDetails(userIds);
+                workOrderDTOList.forEach(workOrderDTO -> {
+                    if (!StringUtils.isEmpty(workOrderDTO.getCreatedBy()) && usersMap.get(workOrderDTO.getCreatedBy()) != null) {
+                        Map<String, Object> userDetails = allocationService.extractUserDetails((Map<String, Object>) usersMap.get(workOrderDTO.getCreatedBy()));
+                        String name = (userDetails.get("first_name") == null ? "" : (String) userDetails.get("first_name")) + (userDetails.get("last_name") == null ? "" : (String) userDetails.get("last_name"));
+                        workOrderDTO.setCreatedBy(name);
+                    }
+                    if (!StringUtils.isEmpty(workOrderDTO.getUpdatedBy()) && usersMap.get(workOrderDTO.getUpdatedBy()) != null) {
+                        Map<String, Object> userDetails = allocationService.extractUserDetails((Map<String, Object>) usersMap.get(workOrderDTO.getUpdatedBy()));
+                        String name = (userDetails.get("first_name") == null ? "" : (String) userDetails.get("first_name")) + (userDetails.get("last_name") == null ? "" : (String) userDetails.get("last_name"));
+                        workOrderDTO.setUpdatedBy(name);
+                    }
+                });
+
+            } catch (IOException e) {
+                logger.error("Error while fetching the user details", e);
+            }
+        }
     }
 }
