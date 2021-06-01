@@ -39,7 +39,7 @@ public class AllocationControllerV2 {
     }
 
     @PostMapping("/getWorkOrders")
-    public ResponseEntity<Response> getWorkOrders(@RequestBody SearchCriteria searchCriteria) throws IOException {
+    public ResponseEntity<Response> getWorkOrders(@RequestBody SearchCriteria searchCriteria) {
         return new ResponseEntity<>(allocationServiceV2.getWorkOrders(searchCriteria),HttpStatus.OK);
     }
 

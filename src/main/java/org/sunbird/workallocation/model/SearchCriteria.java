@@ -6,6 +6,7 @@ public class SearchCriteria {
     private String status;
     private String userId;
     private String departmentName;
+    private String query;
 
     public int getPageSize() {
         return pageSize;
@@ -45,5 +46,13 @@ public class SearchCriteria {
 
     public void setUserId(String userId) {
         this.userId = userId;
+    }
+
+    public String getQuery() {
+        return query;
+    }
+
+    public void setQuery(String query) {
+        this.query = query;
     }
 }

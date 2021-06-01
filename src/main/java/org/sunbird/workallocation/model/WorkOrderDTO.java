@@ -13,12 +13,17 @@ public class WorkOrderDTO {
     private String deptId;
     private String deptName;
     private String status;
-    private String woQRCode;
     private List<String> userIds;
     private String createdBy;
+    private String createdByName;
     private long createdAt;
     private String updatedBy;
+    private String updatedByName;
     private long updatedAt;
+    private int progress;
+    private int errorCount;
+    private String publishedPdfLink;
+    private String signedPdfLink;
 
     public String getId() {
         return id;
@@ -58,14 +63,6 @@ public class WorkOrderDTO {
 
     public void setStatus(String status) {
         this.status = status;
-    }
-
-    public String getWoQRCode() {
-        return woQRCode;
-    }
-
-    public void setWoQRCode(String woQRCode) {
-        this.woQRCode = woQRCode;
     }
 
     public List<String> getUserIds() {
@@ -112,5 +109,53 @@ public class WorkOrderDTO {
         if (CollectionUtils.isEmpty(this.userIds))
             this.userIds = new ArrayList<>();
         this.userIds.add(userId);
+    }
+
+    public String getCreatedByName() {
+        return createdByName;
+    }
+
+    public void setCreatedByName(String createdByName) {
+        this.createdByName = createdByName;
+    }
+
+    public String getUpdatedByName() {
+        return updatedByName;
+    }
+
+    public void setUpdatedByName(String updatedByName) {
+        this.updatedByName = updatedByName;
+    }
+
+    public int getProgress() {
+        return progress;
+    }
+
+    public void setProgress(int progress) {
+        this.progress = progress;
+    }
+
+    public int getErrorCount() {
+        return errorCount;
+    }
+
+    public void setErrorCount(int errorCount) {
+        this.errorCount = errorCount;
+    }
+
+    public String getPublishedPdfLink() {
+        return publishedPdfLink;
+    }
+
+    public void setPublishedPdfLink(String publishedPdfLink) {
+        this.publishedPdfLink = publishedPdfLink;
+    }
+
+    public String getSignedPdfLink() {
+        return signedPdfLink;
+    }
+
+    public void setSignedPdfLink(String signedPdfLink) {
+        this.signedPdfLink = signedPdfLink;
     }
 }

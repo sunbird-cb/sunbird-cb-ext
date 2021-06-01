@@ -2,11 +2,7 @@
   "mappings" : {
     "_doc" : {
       "properties" : {
-        "createdAt" : {
-          "type" : "date",
-          "format" : "epoch_millis"
-        },
-        "createdBy" : {
+        "id" : {
           "type" : "text",
           "fields" : {
             "keyword" : {
@@ -33,7 +29,7 @@
             }
           }
         },
-        "id" : {
+        "userIds" : {
           "type" : "text",
           "fields" : {
             "keyword" : {
@@ -60,6 +56,52 @@
             }
           }
         },
+        "progress" : {
+          "type" : "integer"
+        },
+        "errorCount" : {
+          "type" : "integer"
+        },
+        "publishedPdfLink" : {
+          "type" : "text",
+          "fields" : {
+            "keyword" : {
+              "type" : "keyword",
+              "ignore_above" : 256
+            }
+          }
+        },
+        "signedPdfLink" : {
+          "type" : "text",
+          "fields" : {
+            "keyword" : {
+              "type" : "keyword",
+              "ignore_above" : 256
+            }
+          }
+        },
+        "createdAt" : {
+          "type" : "date",
+          "format" : "epoch_millis"
+        },
+        "createdBy" : {
+          "type" : "text",
+          "fields" : {
+            "keyword" : {
+              "type" : "keyword",
+              "ignore_above" : 256
+            }
+          }
+        },
+        "createdByName" : {
+          "type" : "text",
+          "fields" : {
+            "keyword" : {
+              "type" : "keyword",
+              "ignore_above" : 256
+            }
+          }
+        },
         "updatedAt" : {
           "type" : "date",
           "format" : "epoch_millis"
@@ -73,16 +115,7 @@
             }
           }
         },
-        "userIds" : {
-          "type" : "text",
-          "fields" : {
-            "keyword" : {
-              "type" : "keyword",
-              "ignore_above" : 256
-            }
-          }
-        },
-        "woQRCode" : {
+        "updatedByName" : {
           "type" : "text",
           "fields" : {
             "keyword" : {
