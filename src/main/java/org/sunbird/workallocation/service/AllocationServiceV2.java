@@ -52,7 +52,7 @@ public class AllocationServiceV2 {
     @Value("${workorder.index.type}")
     public String workOrderIndexType;
 
-    @Value("${workallocation.index.name}")
+    @Value("${workallocationv2.index.name}")
     public String workAllocationIndex;
 
     @Value("${workallocation.index.type}")
