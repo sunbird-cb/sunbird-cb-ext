@@ -1,5 +1,6 @@
 package org.sunbird.workallocation.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,7 +59,10 @@ public class EnrichmentService {
         userIds.add(workOrderDTO.getCreatedBy());
         userIds.add(workOrderDTO.getUpdatedBy());
         try {
+            ObjectMapper mapper = new ObjectMapper();
+            logger.info("user Ids : {}",mapper.writeValueAsString(userIds));
             Map<String, Object> usersMap = allocationService.getUserDetails(userIds);
+            logger.info("user Map : {}",mapper.writeValueAsString(usersMap));
             Map<String, Object> createdByDetails = allocationService.extractUserDetails((Map<String, Object>) usersMap.get(workOrderDTO.getCreatedBy()));
             Map<String, Object> updatedByDetails = allocationService.extractUserDetails((Map<String, Object>) usersMap.get(workOrderDTO.getUpdatedBy()));
             String createdByName = (createdByDetails.get("first_name") == null ? "" : (String) createdByDetails.get("first_name")) + (createdByDetails.get("last_name") == null ? "" : (String) createdByDetails.get("last_name"));
