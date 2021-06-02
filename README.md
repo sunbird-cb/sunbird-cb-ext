@@ -58,7 +58,8 @@ CREATE TABLE IF NOT EXISTS departments (
   logo text,
   creation_date bigint,
   source_id integer,
-  created_by text
+  created_by text,
+  isdeleted boolean NOT NULL
 );
 ```
 ```sh
