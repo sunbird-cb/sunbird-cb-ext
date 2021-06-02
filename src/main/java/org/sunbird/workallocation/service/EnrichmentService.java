@@ -34,14 +34,10 @@ public class EnrichmentService {
             workOrderDTO.setId(UUID.randomUUID().toString());
             workOrderDTO.setCreatedBy(userId);
             workOrderDTO.setCreatedAt(currentMillis);
-            workOrderDTO.setUpdatedBy(userId);
-            workOrderDTO.setUpdatedAt(currentMillis);
             workOrderDTO.setUserIds(null);
         }
-        if (WorkAllocationConstants.PUBLISHED_STATUS.equals(workOrderDTO.getStatus())) {
-            workOrderDTO.setUpdatedBy(userId);
-            workOrderDTO.setUpdatedAt(currentMillis);
-        }
+        workOrderDTO.setUpdatedBy(userId);
+        workOrderDTO.setUpdatedAt(currentMillis);
         enrichUserNamesToWorkOrder(workOrderDTO);
     }
 
@@ -50,12 +46,9 @@ public class EnrichmentService {
         if (StringUtils.isEmpty(workAllocationDTOV2.getCreatedBy())) {
             workAllocationDTOV2.setCreatedBy(userId);
             workAllocationDTOV2.setCreatedAt(currentMillis);
-            workAllocationDTOV2.setUpdatedBy(userId);
-            workAllocationDTOV2.setUpdatedAt(currentMillis);
-        } else {
-            workAllocationDTOV2.setUpdatedBy(userId);
-            workAllocationDTOV2.setUpdatedAt(currentMillis);
         }
+        workAllocationDTOV2.setUpdatedBy(userId);
+        workAllocationDTOV2.setUpdatedAt(currentMillis);
         enrichUserNamesToWorkAllocation(workAllocationDTOV2);
     }
 
@@ -90,12 +83,12 @@ public class EnrichmentService {
             Map<String, Object> usersMap = allocationService.getUserDetails(userIds);
             if (!ObjectUtils.isEmpty(usersMap.get(workAllocationDTOV2.getCreatedBy()))) {
                 UserBasicInfo userBasicInfo = mapper.convertValue(usersMap.get(workAllocationDTOV2.getCreatedBy()), UserBasicInfo.class);
-                String name = userBasicInfo.getFirst_name() == null ? "" : userBasicInfo.getFirst_name() + " " + userBasicInfo.getLast_name() == null ? "" : userBasicInfo.getLast_name();
+                String name = (userBasicInfo.getFirst_name() == null ? "" : userBasicInfo.getFirst_name() + " " + userBasicInfo.getLast_name() == null ? "" : userBasicInfo.getLast_name());
                 workAllocationDTOV2.setCreatedByName(name);
             }
             if (!ObjectUtils.isEmpty(usersMap.get(workAllocationDTOV2.getUpdatedBy()))) {
                 UserBasicInfo userBasicInfo = mapper.convertValue(usersMap.get(workAllocationDTOV2.getUpdatedBy()), UserBasicInfo.class);
-                String name = userBasicInfo.getFirst_name() == null ? "" : userBasicInfo.getFirst_name() + " " + userBasicInfo.getLast_name() == null ? "" : userBasicInfo.getLast_name();
+                String name = (userBasicInfo.getFirst_name() == null ? "" : userBasicInfo.getFirst_name() + " " + userBasicInfo.getLast_name() == null ? "" : userBasicInfo.getLast_name());
                 workAllocationDTOV2.setUpdatedByName(name);
             }
         } catch (IOException e) {

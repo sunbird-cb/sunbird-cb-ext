@@ -250,31 +250,34 @@ public class AllocationServiceV2 {
         return response;
     }
 
-    private void enrichUserNames(List<WorkOrderDTO> workOrderDTOList) {
-        if (!CollectionUtils.isEmpty(workOrderDTOList)) {
-            Set<String> userIds = new HashSet<>();
-            workOrderDTOList.forEach(workOrderDTO -> {
-                userIds.add(workOrderDTO.getCreatedBy());
-                userIds.add(workOrderDTO.getUpdatedBy());
-            });
-            try {
-                Map<String, Object> usersMap = allocationService.getUserDetails(userIds);
-                workOrderDTOList.forEach(workOrderDTO -> {
-                    if (!StringUtils.isEmpty(workOrderDTO.getCreatedBy()) && usersMap.get(workOrderDTO.getCreatedBy()) != null) {
-                        Map<String, Object> userDetails = allocationService.extractUserDetails((Map<String, Object>) usersMap.get(workOrderDTO.getCreatedBy()));
-                        String name = (userDetails.get("first_name") == null ? "" : (String) userDetails.get("first_name")) + (userDetails.get("last_name") == null ? "" : (String) userDetails.get("last_name"));
-                        workOrderDTO.setCreatedBy(name);
-                    }
-                    if (!StringUtils.isEmpty(workOrderDTO.getUpdatedBy()) && usersMap.get(workOrderDTO.getUpdatedBy()) != null) {
-                        Map<String, Object> userDetails = allocationService.extractUserDetails((Map<String, Object>) usersMap.get(workOrderDTO.getUpdatedBy()));
-                        String name = (userDetails.get("first_name") == null ? "" : (String) userDetails.get("first_name")) + (userDetails.get("last_name") == null ? "" : (String) userDetails.get("last_name"));
-                        workOrderDTO.setUpdatedBy(name);
-                    }
-                });
-
-            } catch (IOException e) {
-                logger.error("Error while fetching the user details", e);
-            }
+    /**
+     *
+     * @param userId user Id of the user
+     * @param workOrder work order object
+     * @return response message as success of failed
+     */
+    public Response copyWorkOrder(String userId, WorkOrderDTO workOrder) {
+        validator.validateWorkOrder(workOrder, WorkAllocationConstants.ADD);
+        workOrder.setStatus(null);
+        enrichmentService.enrichWorkOrder(workOrder, userId);
+        RestStatus restStatus = indexerService.addEntity(workOrderIndex, workOrderIndexType, workOrder.getId(),
+                mapper.convertValue(workOrder, Map.class));
+        for(String id : workOrder.getUserIds()){
+            WorkAllocationDTOV2 workAllocationDTO = mapper.convertValue(indexerService.readEntity(workAllocationIndex, workOrderIndexType, id), WorkAllocationDTOV2.class);
+            workAllocationDTO.setCreatedBy(null);
+            enrichmentService.enrichWorkAllocation(workAllocationDTO, userId);
+            workAllocationDTO.setId(UUID.randomUUID().toString());
+            workAllocationDTO.setWorkOrderId(workOrder.getId());
+            indexerService.addEntity(workAllocationIndex, workOrderIndexType, workAllocationDTO.getId(), mapper.convertValue(workAllocationDTO, Map.class));
         }
+        Response response = new Response();
+        if (!ObjectUtils.isEmpty(restStatus)) {
+            response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
+        } else {
+            response.put(Constants.MESSAGE, Constants.FAILED);
+        }
+        response.put(Constants.DATA, restStatus);
+        response.put(Constants.STATUS, HttpStatus.OK);
+        return response;
     }
 }
