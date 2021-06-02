@@ -8,17 +8,17 @@ import org.sunbird.portal.department.dto.Department;
 
 public interface DepartmentRepository extends CrudRepository<Department, Integer> {
 
-	Optional<Department> findById(Integer id);
+	Optional<Department> findByIdAndIsDeleted(Integer id, boolean isDeleted);
 
 	List<Department> findAll();
 
-	List<Department> findAllByOrderByDeptNameAsc();
+	List<Department> findAllByIsDeletedOrderByDeptNameAsc(boolean isDeleted);
 
 	boolean existsByDeptNameIgnoreCase(String deptName);
 
 	List<Department> findAllByIdIn(Iterable<Integer> deptTypeIds);
 
-	Department findByDeptNameIgnoreCase(String deptKey);
+	Department findByDeptNameIgnoreCaseAndIsDeleted(String deptKey, boolean isDeleted);
 
 //	@Query("select dept from departments where dept.dept_type_id in (select id from department_types where dept_type = ?0)")
 //	List<Department> findDeptUsingType(String deptTypeKey);

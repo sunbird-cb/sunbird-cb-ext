@@ -63,7 +63,7 @@ public class PortalServiceImpl implements PortalService {
 
 	@Override
 	public List<String> getDeptNameList() {
-		Iterable<Department> deptList = deptRepo.findAll();
+		Iterable<Department> deptList = deptRepo.findAllByIsDeletedOrderByDeptNameAsc(false);
 		if (!DataValidator.isCollectionEmpty(deptList)) {
 			List<String> deptNameList = new ArrayList<>();
 			for (Department dept : deptList) {
@@ -91,7 +91,7 @@ public class PortalServiceImpl implements PortalService {
 
 	@Override
 	public List<DeptPublicInfo> getAllDept() {
-		List<Department> deptList = deptRepo.findAll();
+		List<Department> deptList = deptRepo.findAllByIsDeletedOrderByDeptNameAsc(false);
 		if (!DataValidator.isCollectionEmpty(deptList)) {
 			List<DeptPublicInfo> publicDeptList = new ArrayList<>(deptList.size());
 			for (Department dept : deptList) {
@@ -104,7 +104,7 @@ public class PortalServiceImpl implements PortalService {
 
 	@Override
 	public DeptPublicInfo searchDept(String deptName) {
-		Department dept = deptRepo.findByDeptNameIgnoreCase(deptName);
+		Department dept = deptRepo.findByDeptNameIgnoreCaseAndIsDeleted(deptName, false);
 		if (dept != null) {
 			return dept.getPublicInfo();
 		}
@@ -113,7 +113,7 @@ public class PortalServiceImpl implements PortalService {
 
 	@Override
 	public List<DepartmentInfo> getAllDepartments(String rootOrg) {
-		return enrichDepartmentInfo(deptRepo.findAllByOrderByDeptNameAsc(), true, rootOrg);
+		return enrichDepartmentInfo(deptRepo.findAllByIsDeletedOrderByDeptNameAsc(false), true, rootOrg);
 	}
 
 	@Override
@@ -354,7 +354,7 @@ public class PortalServiceImpl implements PortalService {
 
 	@Override
 	public DepartmentInfo updateDepartment(DepartmentInfo deptInfo, String rootOrg){
-		Optional<Department> department = deptRepo.findById(deptInfo.getId());
+		Optional<Department> department = deptRepo.findByIdAndIsDeleted(deptInfo.getId(), false);
 		if (department.isPresent()) {
 			Department existingDept = department.get();
 			logger.info("Updating Department record -> " + existingDept);
@@ -422,7 +422,7 @@ public class PortalServiceImpl implements PortalService {
 		// Try to get existing dept if available
 		String prevDeptName = "";
 		if (prevDeptId != 0) {
-			Optional<Department> optionalPrevDept = deptRepo.findById(prevDeptId);
+			Optional<Department> optionalPrevDept = deptRepo.findByIdAndIsDeleted(prevDeptId, false);
 			if (optionalPrevDept.isPresent()) {
 				prevDeptName = optionalPrevDept.get().getDeptName();
 			}
@@ -488,7 +488,7 @@ public class PortalServiceImpl implements PortalService {
 		// Try to get existing dept if available
 		String prevDeptName = "";
 		if (prevDeptId != 0) {
-			Optional<Department> optionalPrevDept = deptRepo.findById(prevDeptId);
+			Optional<Department> optionalPrevDept = deptRepo.findByIdAndIsDeleted(prevDeptId, false);
 			if (optionalPrevDept.isPresent()) {
 				prevDeptName = optionalPrevDept.get().getDeptName();
 			}
@@ -588,7 +588,7 @@ public class PortalServiceImpl implements PortalService {
 					for (Role role : roles) {
 						if (role.getRoleName().contains(roleName)) {
 							// Just check this department type is equal to given roleName
-							Optional<Department> dept = deptRepo.findById(userDeptRole.getDeptId());
+							Optional<Department> dept = deptRepo.findByIdAndIsDeleted(userDeptRole.getDeptId(), false);
 
 							if (dept.isPresent()) {
 								str.append("Found Department with Id: ").append(dept.get().getDeptId())
@@ -626,7 +626,7 @@ public class PortalServiceImpl implements PortalService {
 
 	private DepartmentInfo enrichDepartmentInfo(Integer deptId, boolean isUserInfoRequired, boolean enrichData,
 			String rootOrg) {
-		Optional<Department> dept = deptRepo.findById(deptId);
+		Optional<Department> dept = deptRepo.findByIdAndIsDeleted(deptId, false);
 		if (dept.isPresent()) {
 			return enrichDepartmentInfo(dept.get(), isUserInfoRequired, enrichData, rootOrg);
 		}
@@ -833,7 +833,7 @@ public class PortalServiceImpl implements PortalService {
 			throw new BadRequestException("Invalid UserId.");
 		}
 		// Check department exist
-		Optional<Department> dept = deptRepo.findById(userDeptRole.getDeptId());
+		Optional<Department> dept = deptRepo.findByIdAndIsDeleted(userDeptRole.getDeptId(), false);
 		if (!dept.isPresent()) {
 			throw new BadRequestException("Invalid Department");
 		}
@@ -936,7 +936,7 @@ public class PortalServiceImpl implements PortalService {
 					continue;
 				}
 				// Just check this department type is "SPV"
-				Optional<Department> dept = deptRepo.findById(userDeptRole.getDeptId());
+				Optional<Department> dept = deptRepo.findByIdAndIsDeleted(userDeptRole.getDeptId(), false);
 				if (dept.isPresent()) {
 					Iterable<DepartmentType> deptTypeList = deptTypeRepo
 							.findAllById(Arrays.asList(dept.get().getDeptTypeIds()));
@@ -975,7 +975,7 @@ public class PortalServiceImpl implements PortalService {
 					continue;
 				}
 				// Just check this department type is "SPV"
-				Optional<Department> dept = deptRepo.findById(userDeptRole.getDeptId());
+				Optional<Department> dept = deptRepo.findByIdAndIsDeleted(userDeptRole.getDeptId(), false);
 				if (dept.isPresent()) {
 					Iterable<DepartmentType> deptTypeList = deptTypeRepo
 							.findAllById(Arrays.asList(dept.get().getDeptTypeIds()));
@@ -1010,7 +1010,7 @@ public class PortalServiceImpl implements PortalService {
 		}
 		if (!DataValidator.isCollectionEmpty(userDeptRoleList)) {
 			for (UserDepartmentRole userDeptRole : userDeptRoleList) {
-				Optional<Department> dept = deptRepo.findById(userDeptRole.getDeptId());
+				Optional<Department> dept = deptRepo.findByIdAndIsDeleted(userDeptRole.getDeptId(), false);
 				if (dept.isPresent()) {
 					Iterable<DepartmentType> deptTypeList = deptTypeRepo
 							.findAllById(Arrays.asList(dept.get().getDeptTypeIds()));

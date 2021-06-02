@@ -47,6 +47,9 @@ public class Department {
 	
 	@Column(name="source_id")
 	private Integer sourceId;
+	
+	@Column(name="isdeleted")
+	private boolean isDeleted;
 
 	public Department() {
 	}
@@ -154,6 +157,14 @@ public class Department {
 	public void setSourceId(Integer sourceId) {
 		this.sourceId = sourceId;
 	}
+	
+	public boolean getIsDeleted() {
+		return isDeleted;
+	}
+
+	public void setIsDeleted(boolean isDeleted) {
+		this.isDeleted = isDeleted;
+	}
 
 	public static Department clone(DepartmentInfo deptInfo) {
 		Department dept = new Department();
@@ -163,6 +174,7 @@ public class Department {
 		dept.setHeadquarters(deptInfo.getHeadquarters());
 		dept.setRootOrg(deptInfo.getRootOrg());
 		dept.setLogo(deptInfo.getLogo());
+		dept.setIsDeleted(false);
 		if(deptInfo.getSourceId() != null) {
 			dept.setSourceId(deptInfo.getSourceId());
 		}
