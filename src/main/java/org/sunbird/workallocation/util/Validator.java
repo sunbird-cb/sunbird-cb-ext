@@ -1,15 +1,32 @@
 package org.sunbird.workallocation.util;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.sunbird.core.exception.BadRequestException;
 import org.sunbird.workallocation.model.SearchCriteria;
 import org.sunbird.workallocation.model.WorkAllocationDTO;
 import org.sunbird.workallocation.model.WorkAllocationDTOV2;
 import org.sunbird.workallocation.model.WorkOrderDTO;
+import org.sunbird.workallocation.service.IndexerService;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 @Component
 public class Validator {
+
+	@Autowired
+	private IndexerService indexerService;
+
+	@Value("${workorder.index.name}")
+	public String workOrderIndex;
+
+	@Value("${workorder.index.type}")
+	public String workOrderIndexType;
 
 	public void validateCriteria(SearchCriteria criteria) {
 		if (StringUtils.isEmpty(criteria.getDepartmentName())) {
@@ -60,8 +77,23 @@ public class Validator {
 			if (StringUtils.isEmpty(workOrderDTO.getId())) {
 				throw new BadRequestException("Work order Id should not be empty!");
 			}
+			Map<String, Object> existingRecord = indexerService.readEntity(workOrderIndex, workOrderIndexType, workOrderDTO.getId());
+			if (CollectionUtils.isEmpty(existingRecord)) {
+				throw new BadRequestException("No record found on given work order Id!");
+			}
 			if (StringUtils.isEmpty(workOrderDTO.getStatus())) {
 				throw new BadRequestException("Work order status should not be empty!");
+			}
+			String prevStatus = (String) existingRecord.get("status");
+			if (workOrderDTO.getStatus().equals(prevStatus)) {
+				throw new BadRequestException("Work order already in the " + prevStatus + " status!");
+			}
+			if (WorkAllocationConstants.ARCHIVED_STATUS.equals(prevStatus)) {
+				throw new BadRequestException("Work order in the " + WorkAllocationConstants.ARCHIVED_STATUS + " status!, can not move further!");
+			}
+			List<String> statusCheck = Arrays.asList(WorkAllocationConstants.PUBLISHED_STATUS, WorkAllocationConstants.ARCHIVED_STATUS);
+			if (!statusCheck.contains(workOrderDTO.getStatus())) {
+				throw new BadRequestException("Work order status should be " + WorkAllocationConstants.PUBLISHED_STATUS + "/" + WorkAllocationConstants.ARCHIVED_STATUS);
 			}
 		}
 	}

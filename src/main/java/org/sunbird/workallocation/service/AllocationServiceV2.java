@@ -21,6 +21,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 import org.sunbird.common.model.Response;
 import org.sunbird.common.util.Constants;
+import org.sunbird.core.exception.BadRequestException;
 import org.sunbird.workallocation.model.*;
 import org.sunbird.workallocation.util.Validator;
 import org.sunbird.workallocation.util.WorkAllocationConstants;
@@ -79,7 +80,9 @@ public class AllocationServiceV2 {
         } else {
             response.put(Constants.MESSAGE, Constants.FAILED);
         }
-        response.put(Constants.DATA, restStatus);
+        HashMap<String, Object> data = new HashMap<>();
+        data.put("id", workOrder.getId());
+        response.put(Constants.DATA, data);
         response.put(Constants.STATUS, HttpStatus.OK);
         return response;
     }
