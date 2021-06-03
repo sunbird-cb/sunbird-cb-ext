@@ -1,10 +1,17 @@
 package org.sunbird.portal.department.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
+import org.sunbird.common.model.Response;
+import org.sunbird.common.util.Constants;
+import org.sunbird.core.exception.BadRequestException;
 import org.sunbird.portal.department.PortalConstants;
+import org.sunbird.portal.department.dto.Department;
 import org.sunbird.portal.department.model.DepartmentInfo;
 import org.sunbird.portal.department.repo.DepartmentRepository;
 import org.sunbird.portal.department.repo.DepartmentTypeRepository;
@@ -52,5 +59,22 @@ public class SpvPortalServiceImpl implements SpvPortalService {
 	public DepartmentInfo getDepartmentById(Integer deptId, boolean isUserInfoRequired, String rootOrg)
 			throws Exception {
 		return portalService.getDepartmentById(deptId, isUserInfoRequired, rootOrg);
+	}
+
+	@Override
+	public Response deleteDepartment(String userId, Integer deptId) {
+		Optional<Department> dept = deptRepo.findByIdAndIsDeleted(deptId, false);
+		if (dept.isPresent()) {
+			Department department = dept.get();
+			department.setIsDeleted(true);
+			deptRepo.save(department);
+		}
+		else {
+			throw new BadRequestException("No department exists on given id!");
+		}
+		Response response = new Response();
+		response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
+		response.put(Constants.STATUS, HttpStatus.OK);
+		return response;
 	}
 }

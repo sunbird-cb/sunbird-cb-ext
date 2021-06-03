@@ -7,14 +7,8 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.sunbird.common.model.Response;
 import org.sunbird.core.exception.BadRequestException;
 import org.sunbird.portal.department.PortalConstants;
 import org.sunbird.portal.department.dto.UserDepartmentRole;
@@ -123,6 +117,13 @@ public class PortalController {
 	public ResponseEntity<List<DepartmentInfo>> getSpvRoles(@RequestHeader("rootOrg") String rootOrg) {
 		return new ResponseEntity<>(portalService.getAllDepartments(rootOrg), HttpStatus.OK);
 	}
+
+	@DeleteMapping("/portal/spv/{dept_id}")
+	public ResponseEntity<Response> deleteMyDepartments(@PathVariable("dept_id") Integer deptId, @RequestHeader("wid") String wid) {
+		validateUserAccess(PortalConstants.SPV_DEPT_TYPE, PortalConstants.SPV_ROLE_NAME, wid);
+		return new ResponseEntity<>(spvPortalService.deleteDepartment(wid, deptId), HttpStatus.OK);
+	}
+
 	// ----------------- SPV APIs -----------------------
 	
 	// ----------------- FRAC APIs ----------------------
