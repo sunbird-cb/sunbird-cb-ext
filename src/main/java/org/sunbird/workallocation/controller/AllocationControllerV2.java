@@ -54,4 +54,9 @@ public class AllocationControllerV2 {
                 HttpStatus.OK);
     }
 
+    @GetMapping("/user/basicInfo/{userId}")
+    public ResponseEntity<Response> getUserBasicInfo(@PathVariable("userId") String userId) throws IOException {
+        return new ResponseEntity<>(allocationServiceV2.getUserBasicDetails(userId), HttpStatus.OK);
+    }
+
 }

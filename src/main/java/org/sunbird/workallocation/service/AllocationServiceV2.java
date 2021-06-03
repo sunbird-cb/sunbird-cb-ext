@@ -280,4 +280,13 @@ public class AllocationServiceV2 {
         response.put(Constants.STATUS, HttpStatus.OK);
         return response;
     }
+    public Response getUserBasicDetails(String userId) throws IOException {
+        Response response = new Response();
+        response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
+        Set<String> userIds = new HashSet<>();
+        userIds.add(userId);
+        response.put("Result", allocationService.getUserDetails(userIds).get(userId));
+        response.put(Constants.STATUS, HttpStatus.OK);
+        return response;
+    }
 }
