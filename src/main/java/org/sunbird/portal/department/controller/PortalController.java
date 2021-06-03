@@ -119,7 +119,7 @@ public class PortalController {
 	}
 
 	@DeleteMapping("/portal/spv/{dept_id}")
-	public ResponseEntity<Response> deleteMyDepartments(@PathVariable("dept_id") Integer deptId, @RequestHeader("wid") String wid) {
+	public ResponseEntity<Response> deleteDepartment(@PathVariable("dept_id") Integer deptId, @RequestHeader("wid") String wid) {
 		validateUserAccess(PortalConstants.SPV_DEPT_TYPE, PortalConstants.SPV_ROLE_NAME, wid);
 		return new ResponseEntity<>(spvPortalService.deleteDepartment(wid, deptId), HttpStatus.OK);
 	}
