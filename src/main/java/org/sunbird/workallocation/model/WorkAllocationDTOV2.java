@@ -20,6 +20,8 @@ public class WorkAllocationDTOV2 {
     private long updatedAt;
     private String updatedBy;
     private String updatedByName;
+    private int errorCount;
+    private int progress;
     private long createdAt;
     private String createdBy;
     private String createdByName;
@@ -158,5 +160,21 @@ public class WorkAllocationDTOV2 {
 
     public void setUnmappedCompetencies(List<CompetencyDetails> unmappedCompetencies) {
         this.unmappedCompetencies = unmappedCompetencies;
+    }
+
+    public int getErrorCount() {
+        return errorCount;
+    }
+
+    public void setErrorCount(int errorCount) {
+        this.errorCount = errorCount;
+    }
+
+    public int getProgress() {
+        return progress;
+    }
+
+    public void setProgress(int progress) {
+        this.progress = progress;
     }
 }

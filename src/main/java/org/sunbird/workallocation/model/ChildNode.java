@@ -91,30 +91,6 @@ public class ChildNode {
 		return newCN;
 	}
 
-	public String getSubmittedById() {
-		return submittedToId;
-	}
-
-	public void setSubmittedById(String submittedById) {
-		this.submittedToId = submittedById;
-	}
-
-	public String getSubmittedByName() {
-		return submittedToName;
-	}
-
-	public void setSubmittedByName(String submittedByName) {
-		this.submittedToName = submittedByName;
-	}
-
-	public String getSubmittedByEmail() {
-		return submittedToEmail;
-	}
-
-	public void setSubmittedByEmail(String submittedByEmail) {
-		this.submittedToEmail = submittedByEmail;
-	}
-
 	public String getSubmittedFromId() {
 		return submittedFromId;
 	}
@@ -137,5 +113,29 @@ public class ChildNode {
 
 	public void setSubmittedFromEmail(String submittedFromEmail) {
 		this.submittedFromEmail = submittedFromEmail;
+	}
+
+	public String getSubmittedToId() {
+		return submittedToId;
+	}
+
+	public void setSubmittedToId(String submittedToId) {
+		this.submittedToId = submittedToId;
+	}
+
+	public String getSubmittedToName() {
+		return submittedToName;
+	}
+
+	public void setSubmittedToName(String submittedToName) {
+		this.submittedToName = submittedToName;
+	}
+
+	public String getSubmittedToEmail() {
+		return submittedToEmail;
+	}
+
+	public void setSubmittedToEmail(String submittedToEmail) {
+		this.submittedToEmail = submittedToEmail;
 	}
 }

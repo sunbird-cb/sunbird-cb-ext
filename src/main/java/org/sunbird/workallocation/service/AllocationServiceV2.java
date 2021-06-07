@@ -133,13 +133,10 @@ public class AllocationServiceV2 {
                 mapper.convertValue(workAllocationDTO, Map.class));
         Map<String, Object> workOrderObject = indexerService.readEntity(workOrderIndex, workOrderIndexType, workAllocationDTO.getWorkOrderId());
         WorkOrderDTO workOrder = mapper.convertValue(workOrderObject, WorkOrderDTO.class);
-        if(CollectionUtils.isEmpty(workOrder.getUserIds()))workOrder.setUserIds(new ArrayList<>());
-        if (!workOrder.getUserIds().contains(workAllocationDTO.getId())) {
-            workOrder.addUserId(workAllocationDTO.getId());
-            updateCount(workOrder);
-            indexerService.updateEntity(workOrderIndex, workOrderIndexType, workOrder.getId(),
-                    mapper.convertValue(workOrder, Map.class));
-        }
+        if(CollectionUtils.isEmpty(workOrder.getUserIds())){workOrder.setUserIds(new ArrayList<>());}
+        workOrder.addUserId(workAllocationDTO.getId());
+        updateWorkOderCount(workOrder);
+        indexerService.updateEntity(workOrderIndex, workOrderIndexType, workOrder.getId(),mapper.convertValue(workOrder, Map.class));
         Response response = new Response();
         if (!ObjectUtils.isEmpty(restStatus)) {
             response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
@@ -299,10 +296,12 @@ public class AllocationServiceV2 {
         return response;
     }
 
-    private void updateCount(WorkOrderDTO workOrderDTO) {
+    private void updateWorkOderCount(WorkOrderDTO workOrderDTO) {
         int rolesCount = 0;
         int activitiesCount = 0;
         int competenciesCount = 0;
+        int errorCount = 0;
+        int progress = 0;
         List<WorkAllocationDTOV2> workAllocationList = new ArrayList<>();
         try {
             SearchResponse searchResponse = getSearchResponseForWorkOrder(workOrderDTO.getId());
@@ -326,11 +325,18 @@ public class AllocationServiceV2 {
                 activitiesCount = activitiesCount + workAllocationDTOV2.getUnmappedActivities().size();
             }
             if (!CollectionUtils.isEmpty(workAllocationDTOV2.getUnmappedCompetencies())) {
-                competenciesCount = competenciesCount + workAllocationDTOV2.getRoleCompetencyList().size();
+                competenciesCount = competenciesCount + workAllocationDTOV2.getUnmappedCompetencies().size();
             }
+            errorCount = errorCount + workAllocationDTOV2.getErrorCount();
+            progress = progress + workAllocationDTOV2.getProgress();
+        }
+        if (!CollectionUtils.isEmpty(workAllocationList)) {
+            progress = progress / workAllocationList.size();
         }
         workOrderDTO.setRolesCount(rolesCount);
         workOrderDTO.setActivitiesCount(activitiesCount);
         workOrderDTO.setCompetenciesCount(competenciesCount);
+        workOrderDTO.setErrorCount(errorCount);
+        workOrderDTO.setProgress(progress);
     }
 }

@@ -655,6 +655,12 @@
             }
           }
         },
+        "errorCount" : {
+          "type" : "integer"
+        },
+        "progress" : {
+          "type" : "integer"
+        },
         "userEmail": {
           "type": "text",
           "fields": {
