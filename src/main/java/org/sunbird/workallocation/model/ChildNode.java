@@ -14,9 +14,9 @@ public class ChildNode {
 	private String submittedFromId;
 	private String submittedFromName;
 	private String submittedFromEmail;
-	private String submittedById;
-	private String submittedByName;
-	private String submittedByEmail;
+	private String submittedToId;
+	private String submittedToName;
+	private String submittedToEmail;
 	private String level;
 
 	public String getType() {
@@ -92,27 +92,27 @@ public class ChildNode {
 	}
 
 	public String getSubmittedById() {
-		return submittedById;
+		return submittedToId;
 	}
 
 	public void setSubmittedById(String submittedById) {
-		this.submittedById = submittedById;
+		this.submittedToId = submittedById;
 	}
 
 	public String getSubmittedByName() {
-		return submittedByName;
+		return submittedToName;
 	}
 
 	public void setSubmittedByName(String submittedByName) {
-		this.submittedByName = submittedByName;
+		this.submittedToName = submittedByName;
 	}
 
 	public String getSubmittedByEmail() {
-		return submittedByEmail;
+		return submittedToEmail;
 	}
 
 	public void setSubmittedByEmail(String submittedByEmail) {
-		this.submittedByEmail = submittedByEmail;
+		this.submittedToEmail = submittedByEmail;
 	}
 
 	public String getSubmittedFromId() {

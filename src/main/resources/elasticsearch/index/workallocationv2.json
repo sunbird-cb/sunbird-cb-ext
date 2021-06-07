@@ -267,7 +267,7 @@
                         }
                       }
                     },
-                    "submittedById": {
+                    "submittedFromId": {
                       "type": "text",
                       "fields": {
                         "keyword": {
@@ -276,7 +276,7 @@
                         }
                       }
                     },
-                    "submittedByName": {
+                    "submittedFromName": {
                       "type": "text",
                       "fields": {
                         "keyword": {
@@ -285,7 +285,34 @@
                         }
                       }
                     },
-                    "submittedByEmail": {
+                    "submittedFromEmail": {
+                      "type": "text",
+                      "fields": {
+                        "keyword": {
+                          "type": "keyword",
+                          "ignore_above": 256
+                        }
+                      }
+                    },
+                    "submittedToId": {
+                      "type": "text",
+                      "fields": {
+                        "keyword": {
+                          "type": "keyword",
+                          "ignore_above": 256
+                        }
+                      }
+                    },
+                    "submittedToName": {
+                      "type": "text",
+                      "fields": {
+                        "keyword": {
+                          "type": "keyword",
+                          "ignore_above": 256
+                        }
+                      }
+                    },
+                    "submittedToEmail": {
                       "type": "text",
                       "fields": {
                         "keyword": {
@@ -572,7 +599,7 @@
                 }
               }
             },
-            "submittedById": {
+            "submittedFromId": {
               "type": "text",
               "fields": {
                 "keyword": {
@@ -581,7 +608,7 @@
                 }
               }
             },
-            "submittedByName": {
+            "submittedFromName": {
               "type": "text",
               "fields": {
                 "keyword": {
@@ -590,7 +617,34 @@
                 }
               }
             },
-            "submittedByEmail": {
+            "submittedFromEmail": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "submittedToId": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "submittedToName": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "submittedToEmail": {
               "type": "text",
               "fields": {
                 "keyword": {

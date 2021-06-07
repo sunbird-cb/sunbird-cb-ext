@@ -22,6 +22,9 @@ public class WorkOrderDTO {
     private long updatedAt;
     private int progress;
     private int errorCount;
+    private int rolesCount;
+    private int activitiesCount;
+    private int competenciesCount;
     private String publishedPdfLink;
     private String signedPdfLink;
 
@@ -157,5 +160,29 @@ public class WorkOrderDTO {
 
     public void setSignedPdfLink(String signedPdfLink) {
         this.signedPdfLink = signedPdfLink;
+    }
+
+    public int getRolesCount() {
+        return rolesCount;
+    }
+
+    public void setRolesCount(int rolesCount) {
+        this.rolesCount = rolesCount;
+    }
+
+    public int getActivitiesCount() {
+        return activitiesCount;
+    }
+
+    public void setActivitiesCount(int activitiesCount) {
+        this.activitiesCount = activitiesCount;
+    }
+
+    public int getCompetenciesCount() {
+        return competenciesCount;
+    }
+
+    public void setCompetenciesCount(int competenciesCount) {
+        this.competenciesCount = competenciesCount;
     }
 }

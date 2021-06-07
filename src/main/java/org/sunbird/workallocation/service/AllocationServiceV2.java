@@ -136,6 +136,7 @@ public class AllocationServiceV2 {
         if(CollectionUtils.isEmpty(workOrder.getUserIds()))workOrder.setUserIds(new ArrayList<>());
         if (!workOrder.getUserIds().contains(workAllocationDTO.getId())) {
             workOrder.addUserId(workAllocationDTO.getId());
+            updateCount(workOrder);
             indexerService.updateEntity(workOrderIndex, workOrderIndexType, workOrder.getId(),
                     mapper.convertValue(workOrder, Map.class));
         }
@@ -234,11 +235,7 @@ public class AllocationServiceV2 {
         List<Object> userList = null;
         if (!CollectionUtils.isEmpty((Collection<?>) workOrderObject.get("userIds"))) {
             userList = new ArrayList<>();
-            final BoolQueryBuilder query = QueryBuilders.boolQuery();
-            query.must(QueryBuilders.matchQuery("workOrderId", workOrderId));
-            SearchSourceBuilder sourceBuilder = new SearchSourceBuilder().query(query);
-            System.out.println(sourceBuilder.query().toString());
-            SearchResponse searchResponse = indexerService.getEsResult(workAllocationIndex, workAllocationIndexType, sourceBuilder);
+            SearchResponse searchResponse = getSearchResponseForWorkOrder(workOrderId);
             for (SearchHit hit : searchResponse.getHits()) {
                 userList.add(hit.getSourceAsMap());
             }
@@ -251,6 +248,15 @@ public class AllocationServiceV2 {
         response.put(Constants.DATA, workOrderObject);
         response.put(Constants.STATUS, HttpStatus.OK);
         return response;
+    }
+
+    private SearchResponse getSearchResponseForWorkOrder(String workOrderId) throws IOException {
+        final BoolQueryBuilder query = QueryBuilders.boolQuery();
+        query.must(QueryBuilders.matchQuery("workOrderId", workOrderId));
+        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder().query(query);
+        System.out.println(sourceBuilder.query().toString());
+        SearchResponse searchResponse = indexerService.getEsResult(workAllocationIndex, workAllocationIndexType, sourceBuilder);
+        return searchResponse;
     }
 
     /**
@@ -291,5 +297,40 @@ public class AllocationServiceV2 {
         response.put(Constants.DATA, allocationService.getUserDetails(userIds).get(userId));
         response.put(Constants.STATUS, HttpStatus.OK);
         return response;
+    }
+
+    private void updateCount(WorkOrderDTO workOrderDTO) {
+        int rolesCount = 0;
+        int activitiesCount = 0;
+        int competenciesCount = 0;
+        List<WorkAllocationDTOV2> workAllocationList = new ArrayList<>();
+        try {
+            SearchResponse searchResponse = getSearchResponseForWorkOrder(workOrderDTO.getId());
+            for (SearchHit hit : searchResponse.getHits()) {
+                workAllocationList.add(mapper.convertValue(hit.getSourceAsMap(), WorkAllocationDTOV2.class));
+            }
+        } catch (IOException e) {
+            logger.error("Exception occurred while searching the users for work order!");
+        }
+        for (WorkAllocationDTOV2 workAllocationDTOV2 : workAllocationList) {
+            if (!CollectionUtils.isEmpty(workAllocationDTOV2.getRoleCompetencyList())) {
+                rolesCount = rolesCount + workAllocationDTOV2.getRoleCompetencyList().size();
+                for (RoleCompetency roleCompetency : workAllocationDTOV2.getRoleCompetencyList()) {
+                    if (!ObjectUtils.isEmpty(roleCompetency.getRoleDetails()) && !CollectionUtils.isEmpty(roleCompetency.getRoleDetails().getChildNodes()))
+                        activitiesCount = activitiesCount + roleCompetency.getRoleDetails().getChildNodes().size();
+                    if (!ObjectUtils.isEmpty(roleCompetency.getRoleDetails()) && !CollectionUtils.isEmpty(roleCompetency.getCompetencyDetails()))
+                        competenciesCount = competenciesCount + roleCompetency.getCompetencyDetails().size();
+                }
+            }
+            if (!CollectionUtils.isEmpty(workAllocationDTOV2.getUnmappedActivities())) {
+                activitiesCount = activitiesCount + workAllocationDTOV2.getUnmappedActivities().size();
+            }
+            if (!CollectionUtils.isEmpty(workAllocationDTOV2.getUnmappedCompetencies())) {
+                competenciesCount = competenciesCount + workAllocationDTOV2.getRoleCompetencyList().size();
+            }
+        }
+        workOrderDTO.setRolesCount(rolesCount);
+        workOrderDTO.setActivitiesCount(activitiesCount);
+        workOrderDTO.setCompetenciesCount(competenciesCount);
     }
 }

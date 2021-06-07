@@ -62,6 +62,15 @@
         "errorCount" : {
           "type" : "integer"
         },
+        "rolesCount" : {
+          "type" : "integer"
+        },
+        "activitiesCount" : {
+          "type" : "integer"
+        },
+        "competenciesCount" : {
+          "type" : "integer"
+        },
         "publishedPdfLink" : {
           "type" : "text",
           "fields" : {
