@@ -276,13 +276,15 @@ public class AllocationServiceV2 {
         enrichmentService.enrichWorkOrder(workOrder, userId);
         RestStatus restStatus = indexerService.addEntity(workOrderIndex, workOrderIndexType, workOrder.getId(),
                 mapper.convertValue(workOrder, Map.class));
-        for(String id : workOrder.getUserIds()){
-            WorkAllocationDTOV2 workAllocationDTO = mapper.convertValue(indexerService.readEntity(workAllocationIndex, workOrderIndexType, id), WorkAllocationDTOV2.class);
-            workAllocationDTO.setCreatedBy(null);
-            enrichmentService.enrichWorkAllocation(workAllocationDTO, userId);
-            workAllocationDTO.setId(UUID.randomUUID().toString());
-            workAllocationDTO.setWorkOrderId(workOrder.getId());
-            indexerService.addEntity(workAllocationIndex, workOrderIndexType, workAllocationDTO.getId(), mapper.convertValue(workAllocationDTO, Map.class));
+        if(!CollectionUtils.isEmpty(workOrder.getUserIds())){
+            for(String id : workOrder.getUserIds()){
+                WorkAllocationDTOV2 workAllocationDTO = mapper.convertValue(indexerService.readEntity(workAllocationIndex, workOrderIndexType, id), WorkAllocationDTOV2.class);
+                workAllocationDTO.setCreatedBy(null);
+                enrichmentService.enrichWorkAllocation(workAllocationDTO, userId);
+                workAllocationDTO.setId(UUID.randomUUID().toString());
+                workAllocationDTO.setWorkOrderId(workOrder.getId());
+                indexerService.addEntity(workAllocationIndex, workOrderIndexType, workAllocationDTO.getId(), mapper.convertValue(workAllocationDTO, Map.class));
+            }
         }
         Response response = new Response();
         if (!ObjectUtils.isEmpty(restStatus)) {
@@ -290,7 +292,9 @@ public class AllocationServiceV2 {
         } else {
             response.put(Constants.MESSAGE, Constants.FAILED);
         }
-        response.put(Constants.DATA, restStatus);
+        HashMap<String, Object> data = new HashMap<>();
+        data.put("id", workOrder.getId());
+        response.put(Constants.DATA, data);
         response.put(Constants.STATUS, HttpStatus.OK);
         return response;
     }
