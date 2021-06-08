@@ -48,9 +48,9 @@ public class AllocationControllerV2 {
         return new ResponseEntity<>(allocationServiceV2.getWorkOrderById(workOrderId),HttpStatus.OK);
     }
 
-    @PostMapping("/copy/workOrder")
-    public ResponseEntity<Response> copyWorkOrder(@RequestHeader("userId") String userId, @RequestBody WorkOrderDTO workOrder){
-        return new ResponseEntity<>(allocationServiceV2.copyWorkOrder(userId, workOrder),
+    @GetMapping("/copy/workOrder/{workOrderId}")
+    public ResponseEntity<Response> copyWorkOrder(@RequestHeader("userId") String userId, @PathVariable("workOrderId") String workOrderId){
+        return new ResponseEntity<>(allocationServiceV2.copyWorkOrder(userId, workOrderId),
                 HttpStatus.OK);
     }
 

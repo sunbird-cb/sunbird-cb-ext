@@ -262,7 +262,15 @@ public class AllocationServiceV2 {
      * @param workOrder work order object
      * @return response message as success of failed
      */
-    public Response copyWorkOrder(String userId, WorkOrderDTO workOrder) {
+    public Response copyWorkOrder(String userId, String workOrderId) {
+        Map<String, Object> workOrderObject = indexerService.readEntity(workOrderIndex, workOrderIndexType, workOrderId);
+        if(ObjectUtils.isEmpty(workOrderObject)){
+            throw new BadRequestException("No work order found on given Id!");
+        }
+        WorkOrderDTO workOrder = mapper.convertValue(workOrderObject, WorkOrderDTO.class);
+        if(!WorkAllocationConstants.PUBLISHED_STATUS.equals(workOrder.getStatus())){
+            throw new BadRequestException("Can not copy the work order, work order is not in published status!");
+        }
         validator.validateWorkOrder(workOrder, WorkAllocationConstants.ADD);
         workOrder.setStatus(null);
         enrichmentService.enrichWorkOrder(workOrder, userId);
