@@ -62,13 +62,15 @@ public class EnrichmentService {
             logger.info("user Map : {}", mapper.writeValueAsString(usersMap));
             if (!ObjectUtils.isEmpty(usersMap.get(workOrderDTO.getCreatedBy()))) {
                 UserBasicInfo userBasicInfo = mapper.convertValue(usersMap.get(workOrderDTO.getCreatedBy()), UserBasicInfo.class);
-                String name = userBasicInfo.getFirst_name() == null ? "" : userBasicInfo.getFirst_name() + " " + userBasicInfo.getLast_name() == null ? "" : userBasicInfo.getLast_name();
-                workOrderDTO.setCreatedByName(name);
+                String firstName = userBasicInfo.getFirst_name() == null ? "" : userBasicInfo.getFirst_name();
+                String lastName  = userBasicInfo.getLast_name() == null ? "" : userBasicInfo.getLast_name();
+                workOrderDTO.setCreatedByName(firstName +" "+lastName);
             }
             if (!ObjectUtils.isEmpty(usersMap.get(workOrderDTO.getUpdatedBy()))) {
                 UserBasicInfo userBasicInfo = mapper.convertValue(usersMap.get(workOrderDTO.getUpdatedBy()), UserBasicInfo.class);
-                String name = userBasicInfo.getFirst_name() == null ? "" : userBasicInfo.getFirst_name() + " " + userBasicInfo.getLast_name() == null ? "" : userBasicInfo.getLast_name();
-                workOrderDTO.setUpdatedByName(name);
+                String firstName = userBasicInfo.getFirst_name() == null ? "" : userBasicInfo.getFirst_name();
+                String lastName  = userBasicInfo.getLast_name() == null ? "" : userBasicInfo.getLast_name();
+                workOrderDTO.setUpdatedByName(firstName +" "+lastName);
             }
         } catch (IOException e) {
             logger.error("Error while fetching the user details", e);

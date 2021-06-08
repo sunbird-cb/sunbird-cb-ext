@@ -458,6 +458,8 @@ public class AllocationService {
 		cn.setName(child.getName());
 		cn.setStatus(child.getStatus());
 		cn.setSource(child.getSource());
+		cn.setDescription(child.getDescription());
+		cn.setLevel(child.getLevel());
 		return cn;
 	}
 

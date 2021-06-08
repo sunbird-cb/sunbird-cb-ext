@@ -148,6 +148,12 @@ public class Role {
 					newCN.setType(cn.getType());
 					newCN.setSource(source);
 					newCN.setDescription(cn.getDescription());
+					newCN.setSubmittedFromEmail(cn.getSubmittedFromEmail());
+					newCN.setSubmittedFromId(cn.getSubmittedFromId());
+					newCN.setSubmittedFromName(cn.getSubmittedFromName());
+					newCN.setSubmittedToEmail(cn.getSubmittedToEmail());
+					newCN.setSubmittedToId(cn.getSubmittedToId());
+					newCN.setSubmittedToName(cn.getSubmittedToName());
 					children.add(newCN);
 				}
 				req.setChildren(children);

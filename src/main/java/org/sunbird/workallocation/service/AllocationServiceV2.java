@@ -156,6 +156,7 @@ public class AllocationServiceV2 {
             try {
                 if (StringUtils.isEmpty(oldRole.getId())) {
                     newRole = allocationService.fetchAddedRole(authUserToken, oldRole, null);
+                    maintainExtraRoleInfo(newRole, roleCompetency);
                     roleCompetency.setRoleDetails(newRole);
                 } else {
                     // Role is from FRAC - No need to create new.
@@ -171,11 +172,31 @@ public class AllocationServiceV2 {
                             newChildNodes.addAll(oldRole.getChildNodes());
                         }
                         oldRole.setChildNodes(newChildNodes);
+                        maintainExtraRoleInfo(oldRole, roleCompetency);
                         roleCompetency.setRoleDetails(oldRole);
                     }
                 }
             } catch (Exception e) {
                 logger.error("Failed to Add Role / Activity. Excption: ", e);
+            }
+        }
+    }
+
+    private void maintainExtraRoleInfo(Role role, RoleCompetency roleCompetency) {
+        if (!CollectionUtils.isEmpty(role.getChildNodes())) {
+            for (ChildNode childNode : role.getChildNodes()) {
+                if (!StringUtils.isEmpty(childNode.getName())) {
+                    for (ChildNode childNode1 : roleCompetency.getRoleDetails().getChildNodes()) {
+                        if (childNode.getName().equals(childNode1.getName())) {
+                            childNode.setSubmittedFromId(childNode1.getSubmittedFromId());
+                            childNode.setSubmittedFromName(childNode1.getSubmittedFromName());
+                            childNode.setSubmittedFromEmail(childNode1.getSubmittedFromEmail());
+                            childNode.setSubmittedToId(childNode1.getSubmittedToId());
+                            childNode.setSubmittedToName(childNode1.getSubmittedToName());
+                            childNode.setSubmittedToEmail(childNode1.getSubmittedToEmail());
+                        }
+                    }
+                }
             }
         }
     }
