@@ -9,6 +9,7 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
+import org.hibernate.jdbc.Work;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -259,11 +260,14 @@ public class AllocationServiceV2 {
     /**
      *
      * @param userId user Id of the user
-     * @param workOrder work order object
+     * @param workOrderDTO work order object
      * @return response message as success of failed
      */
-    public Response copyWorkOrder(String userId, String workOrderId) {
-        Map<String, Object> workOrderObject = indexerService.readEntity(workOrderIndex, workOrderIndexType, workOrderId);
+    public Response copyWorkOrder(String userId, WorkOrderDTO workOrderDTO) {
+        if(StringUtils.isEmpty(workOrderDTO.getId())){
+            throw new BadRequestException("Work Order Id should not be empty!");
+        }
+        Map<String, Object> workOrderObject = indexerService.readEntity(workOrderIndex, workOrderIndexType, workOrderDTO.getId());
         if(ObjectUtils.isEmpty(workOrderObject)){
             throw new BadRequestException("No work order found on given Id!");
         }
@@ -273,6 +277,9 @@ public class AllocationServiceV2 {
         }
         validator.validateWorkOrder(workOrder, WorkAllocationConstants.ADD);
         workOrder.setStatus(null);
+        if(!StringUtils.isEmpty(workOrderDTO.getName())){
+            workOrder.setName(workOrderDTO.getName());
+        }
         enrichmentService.enrichWorkOrder(workOrder, userId);
         RestStatus restStatus = indexerService.addEntity(workOrderIndex, workOrderIndexType, workOrder.getId(),
                 mapper.convertValue(workOrder, Map.class));
