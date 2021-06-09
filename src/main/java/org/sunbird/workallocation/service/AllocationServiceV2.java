@@ -9,7 +9,6 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
-import org.hibernate.jdbc.Work;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +26,8 @@ import org.sunbird.workallocation.model.*;
 import org.sunbird.workallocation.util.Validator;
 import org.sunbird.workallocation.util.WorkAllocationConstants;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.*;
 
@@ -72,7 +73,7 @@ public class AllocationServiceV2 {
      */
     public Response addWorkOrder(String userId, WorkOrderDTO workOrder) {
         validator.validateWorkOrder(workOrder, WorkAllocationConstants.ADD);
-        enrichmentService.enrichWorkOrder(workOrder, userId);
+        enrichmentService.enrichWorkOrder(workOrder, userId, WorkAllocationConstants.ADD);
         RestStatus restStatus = indexerService.addEntity(workOrderIndex, workOrderIndexType, workOrder.getId(),
                 mapper.convertValue(workOrder, Map.class));
         Response response = new Response();
@@ -96,7 +97,7 @@ public class AllocationServiceV2 {
      */
     public Response updateWorkOrder(String userId, WorkOrderDTO workOrder) {
         validator.validateWorkOrder(workOrder, WorkAllocationConstants.UPDATE);
-        enrichmentService.enrichWorkOrder(workOrder, userId);
+        enrichmentService.enrichWorkOrder(workOrder, userId, WorkAllocationConstants.UPDATE);
         RestStatus restStatus = indexerService.updateEntity(workOrderIndex, workOrderIndexType, workOrder.getId(),
                 mapper.convertValue(workOrder, Map.class));
         Response response = new Response();
@@ -301,7 +302,7 @@ public class AllocationServiceV2 {
         if(!StringUtils.isEmpty(workOrderDTO.getName())){
             workOrder.setName(workOrderDTO.getName());
         }
-        enrichmentService.enrichWorkOrder(workOrder, userId);
+        enrichmentService.enrichWorkOrder(workOrder, userId, WorkAllocationConstants.ADD);
         RestStatus restStatus = indexerService.addEntity(workOrderIndex, workOrderIndexType, workOrder.getId(),
                 mapper.convertValue(workOrder, Map.class));
         if(!CollectionUtils.isEmpty(workOrder.getUserIds())){
@@ -379,4 +380,5 @@ public class AllocationServiceV2 {
         workOrderDTO.setErrorCount(errorCount);
         workOrderDTO.setProgress(progress);
     }
+
 }

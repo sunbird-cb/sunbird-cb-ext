@@ -27,9 +27,9 @@ public class EnrichmentService {
     ObjectMapper mapper = new ObjectMapper();
 
 
-    public void enrichWorkOrder(WorkOrderDTO workOrderDTO, String userId) {
+    public void enrichWorkOrder(WorkOrderDTO workOrderDTO, String userId, String reqType) {
         long currentMillis = System.currentTimeMillis();
-        if (StringUtils.isEmpty(workOrderDTO.getStatus()) || WorkAllocationConstants.DRAFT_STATUS.equals(workOrderDTO.getStatus())) {
+        if (WorkAllocationConstants.ADD.equals(reqType)) {
             workOrderDTO.setStatus(WorkAllocationConstants.DRAFT_STATUS);
             workOrderDTO.setId(UUID.randomUUID().toString());
             workOrderDTO.setCreatedBy(userId);

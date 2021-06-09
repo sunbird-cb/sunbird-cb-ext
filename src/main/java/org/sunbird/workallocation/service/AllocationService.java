@@ -320,24 +320,10 @@ public class AllocationService {
 	 */
 	public Response userAutoComplete(String searchTerm) {
 		List<Map<String, Object>> userData = null;
-		Map<String, Object> allocationSearchMap = new HashMap<>();
 		try {
 			userData = getUserSearchData(searchTerm);
 		} catch (IOException e) {
 			logger.error("Exception occurred while searching the user's from user registry", e);
-		}
-		if (!CollectionUtils.isEmpty(userData)) {
-			Set<String> userIds = userData.stream().map(data -> (String) data.get("wid")).collect(Collectors.toSet());
-			final QueryBuilder query = QueryBuilders.termsQuery("userId.keyword", userIds);
-			SearchSourceBuilder sourceBuilder = new SearchSourceBuilder().query(query);
-			try {
-				SearchResponse searchResponse = indexerService.getEsResult(index, indexType, sourceBuilder);
-				for (SearchHit hit : searchResponse.getHits()) {
-					allocationSearchMap.put((String) hit.getSourceAsMap().get("userId"), hit.getSourceAsMap());
-				}
-			} catch (IOException e) {
-				logger.error("Exception occurred while searching the user's from work allocation", e);
-			}
 		}
 		List<Map<String, Object>> finalRes = new ArrayList<>();
 		Map<String, Object> result;
@@ -345,8 +331,7 @@ public class AllocationService {
 			for (Map<String, Object> user : userData) {
 				result = new HashMap<>();
 				result.put(WorkAllocationConstants.USER_DETAILS, user);
-				result.put(WorkAllocationConstants.ALLOCATION_DETAILS,
-						allocationSearchMap.getOrDefault(user.get("wid"), null));
+				result.put(WorkAllocationConstants.ALLOCATION_DETAILS, null);
 				finalRes.add(result);
 			}
 		}

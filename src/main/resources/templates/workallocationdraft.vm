@@ -1,0 +1,274 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+    <style>
+        .card-3 {
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+        }
+
+        .logo {
+            background: url(${waterMark}) no-repeat;
+            height: 70px;
+            display: block;
+            text-indent: -9999px;
+        }
+
+        th {
+            background-color: #f5f5f5;
+            cursor: pointer;
+            text-align: left;
+            /* border: none; */
+            padding: 6px;
+            color: rgba(0, 0, 0, 0.6);
+            font-weight: normal;
+        }
+
+        .table-activity {
+            width: 70%;
+            margin-right: 3em;
+            padding: 0;
+        }
+
+        .activityname {
+            width: 52%;
+            padding: 0 4em 0 0;
+        }
+
+        .span {
+            background: #FDECDE !important;
+            margin: 2px 2px 8px;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            padding: 1px 8px;
+            border-radius: 4px;
+            word-break: break-word;
+            display: block
+        }
+
+        .submittd {
+            width: 24% !important;
+            padding: 0.3em 0.6em;
+        }
+
+        .td {
+            border-bottom: 1px solid black !important
+        }
+
+        .activityname {
+            width: 52%;
+            padding: 0 4em 0 0;
+        }
+
+        .activityspan {
+            background: #FDECDE !important;
+            margin: 2px 2px 8px;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            padding: 1px 8px;
+            border-radius: 4px;
+            word-break: break-word;
+            display: block
+        }
+
+        .allocation-table {
+
+            width: 100%;
+        }
+
+        .th {
+            background-color: #f5f5f5;
+            cursor: pointer;
+            text-align: left;
+            border: none;
+            padding: 6px;
+            color: rgba(0, 0, 0, 0.6);
+            font-weight: normal;
+        }
+
+        .table-role {
+            width: 22%;
+            margin-right: 1em;
+            padding: 0 !important;
+        }
+
+        .userName {
+            padding: 10px;
+            text-align: left;
+            border: 2px solid #f2f2f2;
+            border-bottom: none;
+        }
+
+        th:nth-child(1) {
+            width: 38%
+        }
+
+        th:nth-child(2) {
+            width: 32%
+        }
+
+        th:nth-child(3) {
+            width: 15%
+        }
+
+        th:nth-child(4) {
+            width: 18%
+        }
+
+        td:nth-child(1) {
+            width: 20%
+        }
+
+        td:nth-child(2) {
+            width: 33%
+        }
+
+        td:nth-child(3) {
+            width: 15%
+        }
+
+        td:nth-child(4) {
+            width: 18%
+        }
+
+        .table-role {
+            width: 22%;
+            margin-right: 1em;
+            padding: 0 !important;
+        }
+
+        .table-role b {
+            margin-left: 2px;
+        }
+
+        .table-role span {
+            padding: 5px 32px;
+            word-break: break-word;
+            display: inline-block;
+        }
+
+        .table-activity {
+            width: 70%;
+            margin-right: 3em;
+            padding: 0;
+        }
+
+        .table-activity .activityname {
+            width: 52%;
+            padding: 0 4em 0 0;
+        }
+
+        td.submittd {
+            width: 24% !important;
+            padding: 0.3em 0.6em;
+        }
+
+        ul {
+            list-style-type: none;
+            padding-left: 0 !important;
+            margin: 0 !important;
+        }
+
+        li {
+            border-bottom: 1px solid rgba(0, 0, 0, 0.16);
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+        }
+
+        td {
+            text-align: left;
+        }
+
+        .outer-table {
+            margin: 1% 3% 1% 3%;
+        }
+
+        #custom-table {
+            font-family: Arial, Helvetica, sans-serif;
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        #custom-table td,
+        #custom-table th {
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+
+<body style="text-align: center;background-color: #f0f3f4">
+    <div class="card-3" style="background-color: white;margin: 2% 4% 2% 4%;">
+        <div>
+            <h3 style="text-align: center; max-width: 20%;color: #303030;margin-left: 30%;">$deptName</h3>
+        </div>
+        <div style="border-style: dashed hidden;text-align: left;border-width: 2px;background-color: #fff4f0;">
+            <h3 style="color: #2d2d2d;margin-left: 3%;">$name (draft for approval)</h3>
+            <p style="color: #2d2d2d;margin-left: 3%;">Printed at 05:25 PM 28 May 2021</p>
+
+        </div>
+        <div class="outer-table">
+            #foreach( $user in $users )
+            <table class="allocation-table">
+                <tr>
+                    <div class="userName"><b>$foreach.count . $user.userName</b></div>
+                    <table id="custom-table">
+                        <tr>
+                            <th>Roles and competencies</th>
+                            <th>Activities</th>
+                            <th>Submit to</th>
+                            <th>Submission from</th>
+                        </tr>
+                        <tr>
+                            <td colspan="4">
+                                <ul>
+                                    #foreach($rc in $user.roleCompetencyList)
+                                    <ul>
+                                        <table id="custom-table">
+                                            <tr>
+                                                <td class="table-role">
+                                                    <b>$rc.roleDetails.name</b>
+                                                    <div class="margin-top-xs">
+                                                        #foreach($c in $rc.competencyDetails)
+                                                        <span><b style="padding: 2px;">.</b>$c.name</span>
+                                                        #end
+                                                    </div>
+                                                </td>
+                                                <td class="table-activity">
+                                                    <table id="custom-table">
+                                                        #foreach($a in $rc.roleDetails.childNodes)
+                                                        <tr>
+                                                            <td class="activityname">
+                                                                <span>$a.name</span>
+                                                            </td>
+                                                            <td class="submittd">
+                                                                $a.submittedToName
+                                                            </td>
+                                                            <td class="submittd">
+                                                                $a.submittedFromName
+                                                            </td>
+                                                        </tr>
+                                                        #end
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </ul>
+                                    #end
+                                </ul>
+                            </td>
+                        </tr>
+                    </table>
+                </tr>
+            </table>
+            <div style="margin: 4% 0% 8% 0%;">
+                <span style="float: left;width: 230px;">
+                    <hr style="border: solid 1px black;">
+                    Approved on</span>
+                <span style="float:right; width: 230px;">
+                    <hr style="border: solid 1px black;">
+                    Signature</span>
+            </div>
+            #end
+        </div>
+    </div>
+</body>
+
+</html>
