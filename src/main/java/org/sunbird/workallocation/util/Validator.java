@@ -85,15 +85,11 @@ public class Validator {
 				throw new BadRequestException("Work order status should not be empty!");
 			}
 			String prevStatus = (String) existingRecord.get("status");
-			if (workOrderDTO.getStatus().equals(prevStatus)) {
-				throw new BadRequestException("Work order already in the " + prevStatus + " status!");
+			if (WorkAllocationConstants.PUBLISHED_STATUS.equals(prevStatus) && WorkAllocationConstants.DRAFT_STATUS.equals(workOrderDTO.getStatus())) {
+				throw new BadRequestException("Work order in the " + prevStatus + " status!, can't move to "+ WorkAllocationConstants.DRAFT_STATUS +" status");
 			}
 			if (WorkAllocationConstants.ARCHIVED_STATUS.equals(prevStatus)) {
-				throw new BadRequestException("Work order in the " + WorkAllocationConstants.ARCHIVED_STATUS + " status!, can not move further!");
-			}
-			List<String> statusCheck = Arrays.asList(WorkAllocationConstants.PUBLISHED_STATUS, WorkAllocationConstants.ARCHIVED_STATUS);
-			if (!statusCheck.contains(workOrderDTO.getStatus())) {
-				throw new BadRequestException("Work order status should be " + WorkAllocationConstants.PUBLISHED_STATUS + "/" + WorkAllocationConstants.ARCHIVED_STATUS);
+				throw new BadRequestException("Work order in the " + WorkAllocationConstants.ARCHIVED_STATUS + " status!, can't move further!");
 			}
 		}
 	}
