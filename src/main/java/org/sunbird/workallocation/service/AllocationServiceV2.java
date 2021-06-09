@@ -185,9 +185,9 @@ public class AllocationServiceV2 {
     private void maintainExtraRoleInfo(Role role, RoleCompetency roleCompetency) {
         if (!CollectionUtils.isEmpty(role.getChildNodes())) {
             for (ChildNode childNode : role.getChildNodes()) {
-                if (!StringUtils.isEmpty(childNode.getName())) {
+                if (!StringUtils.isEmpty(childNode.getDescription())) {
                     for (ChildNode childNode1 : roleCompetency.getRoleDetails().getChildNodes()) {
-                        if (childNode.getName().equals(childNode1.getName())) {
+                        if (childNode.getDescription().equals(childNode1.getDescription())) {
                             childNode.setSubmittedFromId(childNode1.getSubmittedFromId());
                             childNode.setSubmittedFromName(childNode1.getSubmittedFromName());
                             childNode.setSubmittedFromEmail(childNode1.getSubmittedFromEmail());
