@@ -131,8 +131,11 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
             return null;
         }
         StringBuffer commandLine = new StringBuffer();
-        commandLine.append(" wkhtmltopdf ");
-
+    //    commandLine.append(" wkhtmltopdf ");
+        commandLine.append(" wkhtmltopdf --margin-top 30.0 --margin-left 25.0 --margin-right 25.0 --footer-spacing 5 --header-spacing 5 --footer-font-size 8 ");
+        commandLine.append("--orientation Portrait --page-size A4 --load-error-handling ignore --load-media-error-handling ignore --no-header-line --no-footer-line --enable-forms ");
+        commandLine.append("--minimum-font-size 11 --footer-html /home/amit/Desktop/pdf-footer.html ");
+        commandLine.append("--header-right [page]/[toPage]  --header-html /home/amit/Desktop/pdf-header.html ");
 
         for (Map.Entry<String, String> entry : paramMap.entrySet()) {
             // ud stands for user defined. All the parameters which are not the
@@ -162,7 +165,7 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
             commandLine.append(" " + htmlFilePath);
             commandLine.append(" " + pdfFilePath + " \n");
             String command = commandLine.toString();
-            command = command.replace("--header-html", "");
+           // command = command.replace("--header-html", "");
             BufferedReader brCleanUp = null;
             Process process = null;
             try {

@@ -78,10 +78,10 @@
             background-color: #f5f5f5;
             cursor: pointer;
             text-align: left;
-            border: none;
             padding: 6px;
             color: rgba(0, 0, 0, 0.6);
             font-weight: normal;
+            height: 31px;
         }
 
         .table-role {
@@ -93,20 +93,20 @@
         .userName {
             padding: 10px;
             text-align: left;
-            border: 2px solid #f2f2f2;
+            border: 2px solid #ddd;
             border-bottom: none;
         }
 
         th:nth-child(1) {
-            width: 38%
+            width: 37.8%;
         }
 
         th:nth-child(2) {
-            width: 32%
+            width: 32.2%;
         }
 
         th:nth-child(3) {
-            width: 15%
+            width: 15.1%;
         }
 
         th:nth-child(4) {
@@ -132,18 +132,18 @@
         .table-role {
             width: 22%;
             margin-right: 1em;
-            padding: 0 !important;
+            padding-left: 20px !important;
         }
 
         .table-role b {
             margin-left: 2px;
         }
 
-        .table-role span {
-            padding: 5px 32px;
+        /* .table-role span {
+            padding: 15px 35px;
             word-break: break-word;
             display: inline-block;
-        }
+        } */
 
         .table-activity {
             width: 70%;
@@ -153,7 +153,7 @@
 
         .table-activity .activityname {
             width: 52%;
-            padding: 0 4em 0 0;
+            padding: 1.5em 1em 1.5em 1em;
         }
 
         td.submittd {
@@ -175,27 +175,29 @@
 
         td {
             text-align: left;
+            padding: 0px;
         }
 
         .outer-table {
+            padding: 1%;
             margin: 1% 3% 1% 3%;
         }
 
-        #custom-table {
+        table {
             font-family: Arial, Helvetica, sans-serif;
             border-collapse: collapse;
             width: 100%;
         }
 
-        #custom-table td,
-        #custom-table th {
+        table td,
+        table th {
             border: 1px solid #ddd;
         }
     </style>
 </head>
 
 <body style="text-align: center;background-color: #f0f3f4">
-    <div class="card-3" style="background-color: white;margin: 2% 4% 2% 4%;">
+    <div class="card-3" style="background-color: white;margin: 2% 4% 2% 4%;padding: 5px 0px 5px 0px;">
         <div>
             <h3 style="text-align: center; max-width: 20%;color: #303030;margin-left: 30%;">$deptName</h3>
         </div>
@@ -208,8 +210,10 @@
             #foreach( $user in $users )
             <table class="allocation-table">
                 <tr>
-                    <div class="userName"><b>$foreach.count . $user.userName</b></div>
-                    <table id="custom-table">
+                    <div class="userName"><b>$foreach.count . $user.userName</b>
+                        <p style="margin: auto;padding: 8px;">Director - co-ordination</p>
+                    </div>
+                    <table id="custom-table" style="margin-bottom: 3% !important;">
                         <tr>
                             <th>Roles and competencies</th>
                             <th>Activities</th>
@@ -225,7 +229,7 @@
                                             <tr>
                                                 <td class="table-role">
                                                     <b>$rc.roleDetails.name</b>
-                                                    <div class="margin-top-xs">
+                                                    <div style="padding: 10px !important">
                                                         #foreach($c in $rc.competencyDetails)
                                                         <span><b style="padding: 2px;">.</b>$c.name</span>
                                                         #end
@@ -258,14 +262,29 @@
                     </table>
                 </tr>
             </table>
-            <div style="margin: 4% 0% 8% 0%;">
+            #if($foreach.hasNext)
+            <!-- <div style="padding: 4% 1% 6% 1%;">
                 <span style="float: left;width: 230px;">
                     <hr style="border: solid 1px black;">
                     Approved on</span>
                 <span style="float:right; width: 230px;">
                     <hr style="border: solid 1px black;">
                     Signature</span>
+            </div> -->
+            #else
+            <div style="padding: 3% 0% 1% 0%;">
+                <p>------------------------------------------------- End of document
+                    ------------------------------------------------</p>
             </div>
+            <!-- <div style="padding: 4% 1% 8% 1%;">
+                <span style="float: left;width: 230px;">
+                    <hr style="border: solid 1px black;">
+                    Approved on</span>
+                <span style="float:right; width: 230px;">
+                    <hr style="border: solid 1px black;">
+                    Signature</span>
+            </div> -->
+            #end
             #end
         </div>
     </div>
