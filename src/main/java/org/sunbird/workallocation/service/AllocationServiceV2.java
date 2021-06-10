@@ -250,8 +250,17 @@ public class AllocationServiceV2 {
         return response;
     }
 
-    public Response getWorkOrderById(String workOrderId) throws IOException {
-        Map<String, Object> workOrderObject = indexerService.readEntity(workOrderIndex, workOrderIndexType, workOrderId);
+    public Response getWorkOrderById(String workOrderId) throws Exception {
+        Response response = new Response();
+        response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
+        response.put(Constants.DATA, getWorkOrderObject(workOrderId));
+        response.put(Constants.STATUS, HttpStatus.OK);
+        return response;
+    }
+    
+    public Map<String, Object> getWorkOrderObject(String workOrderId) throws Exception
+    {
+    	Map<String, Object> workOrderObject = indexerService.readEntity(workOrderIndex, workOrderIndexType, workOrderId);
         List<Object> userList = null;
         if (!CollectionUtils.isEmpty((Collection<?>) workOrderObject.get("userIds"))) {
             userList = new ArrayList<>();
@@ -263,11 +272,7 @@ public class AllocationServiceV2 {
         } else {
             workOrderObject.put("users", new ArrayList<>());
         }
-        Response response = new Response();
-        response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
-        response.put(Constants.DATA, workOrderObject);
-        response.put(Constants.STATUS, HttpStatus.OK);
-        return response;
+        return workOrderObject;
     }
 
     private SearchResponse getSearchResponseForWorkOrder(String workOrderId) throws IOException {
