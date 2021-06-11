@@ -4,13 +4,13 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.StringWriter;
-import java.net.URL;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -57,15 +57,36 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 
 	private Logger log = LoggerFactory.getLogger(PdfGeneratorServiceImpl.class);
 
-	public byte[] generatePdf(PdfGeneratorRequest request) throws IOException {
+	public byte[] generatePdf(PdfGeneratorRequest request) throws Exception {
 		if (StringUtils.isEmpty(request.getTemplateId())) {
 			throw new BadRequestException("Template Id is mandatory!");
 		}
+		String footerTemplateName = "templates/pdf-draft-footer.html";
+		Map<String, Object> headerDetails = new HashMap<String, Object>();
+		String deptId = (String) request.getTagValuePair().get("deptId");
+		headerDetails.put("deptName", (String) request.getTagValuePair().get("deptName"));
+		headerDetails.put("deptImgUrl", (String) request.getTagValuePair().get("deptImgUrl"));
+		String headerMessage = readVm("pdf-header.vm", headerDetails);
+		String headerHtmlFilePath = createHTMLFile("pdf-header", headerMessage);
+
 		String message = readVm(request.getTemplateId() + ".vm", request.getTagValuePair());
 		String htmlFilePath = createHTMLFile(request.getTemplateId(), message);
 		Map<String, String> paramMap = new HashMap<>();
 		paramMap.put("ud_htmlFilePath", htmlFilePath);
 		paramMap.put("ud_fileName", htmlFilePath.replace(".html", ".pdf"));
+		paramMap.put("ud_htmlHeaderFilePath", headerHtmlFilePath);
+
+		InputStream inputStream = getClass().getClassLoader().getResourceAsStream(footerTemplateName);
+
+		byte[] buffer = new byte[inputStream.available()];
+		inputStream.read(buffer);
+
+		File htmlFooterPath = new File("/tmp/" + deptId + "pdf-draft-footer.html");
+		OutputStream outStream = new FileOutputStream(htmlFooterPath);
+		outStream.write(buffer);
+
+		paramMap.put("ud_htmlFooterFilePath", htmlFooterPath.getAbsolutePath());
+
 		String pdfFilePath = "";
 		try {
 			pdfFilePath = makePdf(paramMap);
@@ -83,8 +104,11 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 	public byte[] generatePdf(String woId) throws Exception {
 		try {
 			Map<String, Object> workOrder = allocationService.getWorkOrderObject(woId);
-
+			if (workOrder == null) {
+				return null;
+			}
 			String status = (String) workOrder.get("status");
+			String deptId = (String) workOrder.get("deptId");
 			String templateName = null;
 			String footerTemplateName = null;
 			if (WorkAllocationConstants.DRAFT_STATUS.equalsIgnoreCase(status)) {
@@ -111,8 +135,15 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 			paramMap.put("ud_fileName", htmlFilePath.replace(".html", ".pdf"));
 			paramMap.put("ud_htmlHeaderFilePath", headerHtmlFilePath);
 
-			URL res = getClass().getClassLoader().getResource(footerTemplateName);
-			File htmlFooterPath = new File(res.toURI());
+			InputStream inputStream = getClass().getClassLoader().getResourceAsStream(footerTemplateName);
+
+			byte[] buffer = new byte[inputStream.available()];
+			inputStream.read(buffer);
+
+			File htmlFooterPath = new File("/tmp/" + deptId + "pdf-draft-footer.html");
+			OutputStream outStream = new FileOutputStream(htmlFooterPath);
+			outStream.write(buffer);
+
 			paramMap.put("ud_htmlFooterFilePath", htmlFooterPath.getAbsolutePath());
 
 			String pdfFilePath = "";

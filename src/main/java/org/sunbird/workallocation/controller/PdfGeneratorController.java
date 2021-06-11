@@ -13,15 +13,13 @@ import org.springframework.web.bind.annotation.RestController;
 import org.sunbird.workallocation.model.PdfGeneratorRequest;
 import org.sunbird.workallocation.service.PdfGeneratorService;
 
-import java.io.IOException;
-
 @RestController
 public class PdfGeneratorController {
     @Autowired
     private PdfGeneratorService pdfGeneratorService;
     
     @PostMapping("/generatePdf")
-    public ResponseEntity<byte[]> generatePdf(@RequestBody PdfGeneratorRequest request) throws IOException {
+    public ResponseEntity<byte[]> generatePdf(@RequestBody PdfGeneratorRequest request) throws Exception {
         return new ResponseEntity<>(pdfGeneratorService.generatePdf(request), HttpStatus.OK);
     }
     
