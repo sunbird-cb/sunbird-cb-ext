@@ -49,7 +49,6 @@ public class EnrichmentService {
         workOrderDTO.setCreatedAt(currentMillis);
         workOrderDTO.setUpdatedBy(userId);
         workOrderDTO.setUpdatedAt(currentMillis);
-        workOrderDTO.setStatus(null);
         workOrderDTO.setPublishedPdfLink(null);
         workOrderDTO.setSignedPdfLink(null);
         enrichUserNamesToWorkOrder(workOrderDTO);
