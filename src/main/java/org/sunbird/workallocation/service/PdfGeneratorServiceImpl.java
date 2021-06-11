@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
+import java.net.URL;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -84,19 +86,35 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 
 			String status = (String) workOrder.get("status");
 			String templateName = null;
+			String footerTemplateName = null;
 			if (WorkAllocationConstants.DRAFT_STATUS.equalsIgnoreCase(status)) {
 				templateName = draftTemplateName;
+				footerTemplateName = "templates/pdf-draft-footer.html";
 			} else if (WorkAllocationConstants.PUBLISHED_STATUS.equalsIgnoreCase(status)) {
 				templateName = publishedTemplateName;
+				footerTemplateName = "templates/pdf-published-footer.html";
 			} else {
 				log.error("Invalid WorkOrder object status. Failed to generate PDF file.");
 				return null;
 			}
+
+			Map<String, Object> headerDetails = new HashMap<String, Object>();
+			headerDetails.put("deptName", (String) workOrder.get("deptName"));
+			headerDetails.put("deptImgUrl", (String) workOrder.get("deptImgUrl"));
+			String headerMessage = readVm("pdf-header.vm", headerDetails);
+			String headerHtmlFilePath = createHTMLFile("pdf-header", headerMessage);
+
 			String message = readVm(templateName + ".vm", workOrder);
 			String htmlFilePath = createHTMLFile(templateName, message);
 			Map<String, String> paramMap = new HashMap<>();
 			paramMap.put("ud_htmlFilePath", htmlFilePath);
 			paramMap.put("ud_fileName", htmlFilePath.replace(".html", ".pdf"));
+			paramMap.put("ud_htmlHeaderFilePath", headerHtmlFilePath);
+
+			URL res = getClass().getClassLoader().getResource(footerTemplateName);
+			File htmlFooterPath = Paths.get(res.toURI()).toFile();
+			paramMap.put("ud_htmlFooterFilePath", htmlFooterPath.getAbsolutePath());
+
 			String pdfFilePath = "";
 			try {
 				pdfFilePath = makePdf(paramMap);
@@ -187,13 +205,12 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 			return null;
 		}
 		StringBuffer commandLine = new StringBuffer();
-		// commandLine.append(" wkhtmltopdf ");
-		commandLine.append(
-				" wkhtmltopdf --margin-top 30.0 --margin-left 25.0 --margin-right 25.0 --footer-spacing 5 --header-spacing 5 --footer-font-size 8 ");
-		commandLine.append(
-				"--orientation Portrait --page-size A4 --load-error-handling ignore --load-media-error-handling ignore --no-header-line --no-footer-line --enable-forms ");
-		commandLine.append("--minimum-font-size 11 --footer-html /home/amit/Desktop/pdf-footer.html ");
-		commandLine.append("--header-right [page]/[toPage]  --header-html /home/amit/Desktop/pdf-header.html ");
+		commandLine.append(" wkhtmltopdf --margin-top 30.0 --margin-left 25.0 --margin-right 25.0 --footer-spacing 5 ");
+		commandLine.append("--header-spacing 5  --footer-font-size 8 --orientation Portrait --page-size A4 ");
+		commandLine.append("--load-media-error-handling ignore  --no-header-line --no-footer-line --enable-forms ");
+		commandLine.append("--load-error-handling ignore --header-right [page]/[toPage] ");
+		commandLine.append("--minimum-font-size 11 --footer-html ").append(paramMap.get("ud_htmlFooterFilePath"));
+		commandLine.append(" --header-html ").append(paramMap.get("ud_htmlHeaderFilePath")).append(" ");
 
 		for (Map.Entry<String, String> entry : paramMap.entrySet()) {
 			// ud stands for user defined. All the parameters which are not the
