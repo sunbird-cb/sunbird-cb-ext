@@ -294,7 +294,7 @@ public class AllocationServiceV2 {
 
     private SearchResponse getSearchResponseForWorkOrder(String workOrderId) throws IOException {
         final BoolQueryBuilder query = QueryBuilders.boolQuery();
-        query.must(QueryBuilders.matchQuery("workOrderId", workOrderId));
+        query.must(QueryBuilders.termQuery("workOrderId.keyword", workOrderId));
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder().query(query);
         logger.info(sourceBuilder.query().toString());
         SearchResponse searchResponse = indexerService.getEsResult(workAllocationIndex, workAllocationIndexType, sourceBuilder);
@@ -369,6 +369,7 @@ public class AllocationServiceV2 {
         int progress = 0;
         try {
             logger.info("Work order Object ::: , {}", mapper.writeValueAsString(workOrderDTO));
+            logger.info("Work allocation Object ::: , {}", mapper.writeValueAsString(indexerService.readEntity(workAllocationIndex, workAllocationIndexType, workOrderDTO.getUserIds().get(0))));
         } catch (JsonProcessingException e) {
             logger.error(e.toString());
         }
