@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+table{
+    width:100%;
+}
+img{
+      display:block; width:50%; height:auto;
+}
+</style>
+</head>
+<body>
+<table width="100">
+  <tr>
+    <td class="item" style="width:30%"><img src="$deptImgUrl"/></td>
+    <td style="text-align:left" style="width:70%">$deptName</td>
+  </tr>
+</table>
+</body>
+</html>
+
