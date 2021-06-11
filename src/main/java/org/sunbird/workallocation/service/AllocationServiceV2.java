@@ -220,10 +220,10 @@ public class AllocationServiceV2 {
         validator.validateSearchCriteria(criteria);
         final BoolQueryBuilder query = QueryBuilders.boolQuery();
         if (!StringUtils.isEmpty(criteria.getStatus())) {
-            query.must(QueryBuilders.matchQuery("status", criteria.getStatus()));
+            query.must(QueryBuilders.termQuery("status.keyword", criteria.getStatus()));
         }
         if (!StringUtils.isEmpty(criteria.getDepartmentName())) {
-            query.must(QueryBuilders.matchQuery("deptName", criteria.getDepartmentName()));
+            query.must(QueryBuilders.termQuery("deptName.keyword", criteria.getDepartmentName()));
         }if(!StringUtils.isEmpty(criteria.getQuery())){
             query.must(QueryBuilders.matchPhrasePrefixQuery("name", criteria.getQuery()));
         }
