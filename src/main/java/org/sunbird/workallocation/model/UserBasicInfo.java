@@ -1,11 +1,16 @@
 package org.sunbird.workallocation.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class UserBasicInfo {
     private String wid;
     private String department_name;
     private String last_name;
     private String first_name;
     private String email;
+    private String designation;
 
     public String getWid() {
         return wid;
@@ -45,5 +50,13 @@ public class UserBasicInfo {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getDesignation() {
+        return designation;
+    }
+
+    public void setDesignation(String designation) {
+        this.designation = designation;
     }
 }
