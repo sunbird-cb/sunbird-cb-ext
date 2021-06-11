@@ -1,5 +1,6 @@
 package org.sunbird.workallocation.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -119,6 +120,11 @@ public class AllocationServiceV2 {
      * @return
      */
     public Response addWorkAllocation(String authUserToken, String userId, WorkAllocationDTOV2 workAllocationDTO) {
+        try {
+            logger.info("Adding work allocation, {}", mapper.writeValueAsString(workAllocationDTO));
+        } catch (JsonProcessingException e) {
+            logger.error(e.toString());
+        }
         validator.addWorkAllocation(workAllocationDTO);
         enrichmentService.enrichWorkAllocation(workAllocationDTO, userId);
         if (StringUtils.isEmpty(workAllocationDTO.getId()))
@@ -216,6 +222,7 @@ public class AllocationServiceV2 {
     }
 
     public Response getWorkOrders(SearchCriteria criteria) {
+        logger.info("Searching work order ....");
         validator.validateSearchCriteria(criteria);
         final BoolQueryBuilder query = QueryBuilders.boolQuery();
         if (!StringUtils.isEmpty(criteria.getStatus())) {
@@ -242,6 +249,7 @@ public class AllocationServiceV2 {
         } catch (IOException e) {
             logger.error("Elastic Search Exception", e);
         }
+        logger.info("Searching work order completed!");
         Response response = new Response();
         response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
         response.put(Constants.DATA, workOrderDTOList);
@@ -270,11 +278,20 @@ public class AllocationServiceV2 {
         return response;
     }
 
+    public Response getWorkAllocationById(String workAllocationId){
+        Map<String, Object> workAllocationObject = indexerService.readEntity(workAllocationIndex, workAllocationIndexType, workAllocationId);
+        Response response = new Response();
+        response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
+        response.put(Constants.DATA, workAllocationObject);
+        response.put(Constants.STATUS, HttpStatus.OK);
+        return response;
+    }
+
     private SearchResponse getSearchResponseForWorkOrder(String workOrderId) throws IOException {
         final BoolQueryBuilder query = QueryBuilders.boolQuery();
         query.must(QueryBuilders.matchQuery("workOrderId", workOrderId));
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder().query(query);
-        System.out.println(sourceBuilder.query().toString());
+        logger.info(sourceBuilder.query().toString());
         SearchResponse searchResponse = indexerService.getEsResult(workAllocationIndex, workAllocationIndexType, sourceBuilder);
         return searchResponse;
     }
@@ -299,6 +316,8 @@ public class AllocationServiceV2 {
         }
         validator.validateWorkOrder(workOrder, WorkAllocationConstants.ADD);
         workOrder.setStatus(null);
+        workOrder.setPublishedPdfLink(null);
+        workOrder.setSignedPdfLink(null);
         if(!StringUtils.isEmpty(workOrderDTO.getName())){
             workOrder.setName(workOrderDTO.getName());
         }
@@ -312,7 +331,7 @@ public class AllocationServiceV2 {
                 enrichmentService.enrichWorkAllocation(workAllocationDTO, userId);
                 workAllocationDTO.setId(UUID.randomUUID().toString());
                 workAllocationDTO.setWorkOrderId(workOrder.getId());
-                indexerService.addEntity(workAllocationIndex, workOrderIndexType, workAllocationDTO.getId(), mapper.convertValue(workAllocationDTO, Map.class));
+                indexerService.addEntity(workAllocationIndex, workAllocationIndexType, workAllocationDTO.getId(), mapper.convertValue(workAllocationDTO, Map.class));
             }
         }
         Response response = new Response();
@@ -343,6 +362,11 @@ public class AllocationServiceV2 {
         int competenciesCount = 0;
         int errorCount = 0;
         int progress = 0;
+        try {
+            logger.info("Work order Object ::: , {}", mapper.writeValueAsString(workOrderDTO));
+        } catch (JsonProcessingException e) {
+            logger.error(e.toString());
+        }
         List<WorkAllocationDTOV2> workAllocationList = new ArrayList<>();
         try {
             SearchResponse searchResponse = getSearchResponseForWorkOrder(workOrderDTO.getId());
@@ -351,6 +375,12 @@ public class AllocationServiceV2 {
             }
         } catch (IOException e) {
             logger.error("Exception occurred while searching the users for work order!");
+        }
+        logger.info("Search Response for work order to update the count");
+        try {
+            logger.info(mapper.writeValueAsString(workAllocationList));
+        } catch (JsonProcessingException e) {
+            logger.error(e.toString());
         }
         for (WorkAllocationDTOV2 workAllocationDTOV2 : workAllocationList) {
             if (!CollectionUtils.isEmpty(workAllocationDTOV2.getRoleCompetencyList())) {

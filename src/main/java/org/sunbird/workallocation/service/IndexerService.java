@@ -1,5 +1,7 @@
 package org.sunbird.workallocation.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
@@ -37,7 +39,12 @@ public class IndexerService {
      * @return status
      */
     public RestStatus addEntity(String index, String indexType, String entityId, Map<String, Object> indexDocument) {
-        logger.debug("addEntity starts with index {} and entityId {}", index, entityId);
+        logger.info("addEntity starts with index {} and entityId {}", index, entityId);
+        try {
+            logger.info("Adding Entity , {}", new ObjectMapper().writeValueAsString(indexDocument));
+        } catch (JsonProcessingException e) {
+            logger.error(e.toString());
+        }
         IndexResponse response = null;
         try {
             if(!StringUtils.isEmpty(entityId)){
@@ -62,7 +69,12 @@ public class IndexerService {
      * @return status
      */
     public RestStatus updateEntity(String index, String indexType, String entityId, Map<String, ?> indexDocument) {
-        logger.debug("updateEntity starts with index {} and entityId {}", index, entityId);
+        logger.info("updateEntity starts with index {} and entityId {}", index, entityId);
+        try {
+            logger.info("Updating Entity , {}", new ObjectMapper().writeValueAsString(indexDocument));
+        } catch (JsonProcessingException e) {
+            logger.error(e.toString());
+        }
         UpdateResponse response = null;
         try {
             response = esClient.update(new UpdateRequest(index.toLowerCase(), indexType, entityId).doc(indexDocument), RequestOptions.DEFAULT);

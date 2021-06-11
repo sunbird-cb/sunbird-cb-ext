@@ -47,7 +47,7 @@ public class AllocationService {
 	private Logger logger = LoggerFactory.getLogger(AllocationService.class);
 
 	final String[] includeFields = { "personalDetails.firstname", "personalDetails.surname",
-			"personalDetails.primaryEmail", "id", "professionalDetails.name" };
+			"personalDetails.primaryEmail", "id", "professionalDetails.name", "professionalDetails.designation" };
 
 	@Autowired
 	private CbExtServerProperties extServerProperties;
@@ -270,10 +270,12 @@ public class AllocationService {
 		List<Map<String, Object>> professionalDetails = (List<Map<String, Object>>) searObjectMap
 				.get("professionalDetails");
 		String depName = null;
+		String designation = null;
 		if (!CollectionUtils.isEmpty(professionalDetails)) {
 			Optional<Map<String, Object>> propDetails = professionalDetails.stream().findFirst();
 			if (propDetails.isPresent()) {
 				depName = CollectionUtils.isEmpty(propDetails.get()) ? "" : (String) propDetails.get().get("name");
+				designation = CollectionUtils.isEmpty(propDetails.get()) ? "" : (String) propDetails.get().get("designation");
 			}
 		}
 		HashMap<String, Object> result = new HashMap<>();
@@ -282,6 +284,7 @@ public class AllocationService {
 		result.put("email", personalDetails.get("primaryEmail"));
 		result.put("wid", searObjectMap.get("id"));
 		result.put("department_name", depName);
+		result.put("designation", designation);
 		return result;
 	}
 
