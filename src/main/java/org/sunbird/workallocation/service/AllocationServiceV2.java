@@ -220,10 +220,10 @@ public class AllocationServiceV2 {
         validator.validateSearchCriteria(criteria);
         final BoolQueryBuilder query = QueryBuilders.boolQuery();
         if (!StringUtils.isEmpty(criteria.getStatus())) {
-            query.must(QueryBuilders.matchQuery("status", criteria.getStatus()));
+            query.must(QueryBuilders.termQuery("status.keyword", criteria.getStatus()));
         }
         if (!StringUtils.isEmpty(criteria.getDepartmentName())) {
-            query.must(QueryBuilders.matchQuery("deptName", criteria.getDepartmentName()));
+            query.must(QueryBuilders.termQuery("deptName.keyword", criteria.getDepartmentName()));
         }if(!StringUtils.isEmpty(criteria.getQuery())){
             query.must(QueryBuilders.matchPhrasePrefixQuery("name", criteria.getQuery()));
         }
@@ -338,11 +338,13 @@ public class AllocationServiceV2 {
         if(!CollectionUtils.isEmpty(workOrder.getUserIds())){
             for(String id : workOrder.getUserIds()){
                 WorkAllocationDTOV2 workAllocationDTO = mapper.convertValue(indexerService.readEntity(workAllocationIndex, workOrderIndexType, id), WorkAllocationDTOV2.class);
-                workAllocationDTO.setCreatedBy(null);
-                enrichmentService.enrichWorkAllocation(workAllocationDTO, userId);
-                workAllocationDTO.setId(UUID.randomUUID().toString());
-                workAllocationDTO.setWorkOrderId(workOrder.getId());
-                indexerService.addEntity(workAllocationIndex, workAllocationIndexType, workAllocationDTO.getId(), mapper.convertValue(workAllocationDTO, Map.class));
+                if(!ObjectUtils.isEmpty(workAllocationDTO)){
+                    workAllocationDTO.setCreatedBy(null);
+                    enrichmentService.enrichWorkAllocation(workAllocationDTO, userId);
+                    workAllocationDTO.setId(UUID.randomUUID().toString());
+                    workAllocationDTO.setWorkOrderId(workOrder.getId());
+                    indexerService.addEntity(workAllocationIndex, workAllocationIndexType, workAllocationDTO.getId(), mapper.convertValue(workAllocationDTO, Map.class));
+                }
             }
         }
         Response response = new Response();
