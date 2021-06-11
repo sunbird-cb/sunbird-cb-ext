@@ -22,10 +22,6 @@
 
 	<repositories>
 		<repository>
-			<id>clojars.org</id>
-			<url>http://clojars.org/repo</url>
-		</repository>
-		<repository>
 			<id>jitpack.io</id>
 			<url>https://jitpack.io</url>
 		</repository>
@@ -129,11 +125,6 @@
 			<groupId>com.googlecode.json-simple</groupId>
 			<artifactId>json-simple</artifactId>
 			<version>1.1.1</version>
-		</dependency>
-		<dependency>
-			<groupId>json-to-pdf</groupId>
-			<artifactId>json-to-pdf</artifactId>
-			<version>0.8.1</version>
 		</dependency>
 		<dependency>
 			<groupId>com.github.kenglxn.qrgen</groupId>
