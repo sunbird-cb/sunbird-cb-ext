@@ -338,11 +338,13 @@ public class AllocationServiceV2 {
         if(!CollectionUtils.isEmpty(workOrder.getUserIds())){
             for(String id : workOrder.getUserIds()){
                 WorkAllocationDTOV2 workAllocationDTO = mapper.convertValue(indexerService.readEntity(workAllocationIndex, workOrderIndexType, id), WorkAllocationDTOV2.class);
-                workAllocationDTO.setCreatedBy(null);
-                enrichmentService.enrichWorkAllocation(workAllocationDTO, userId);
-                workAllocationDTO.setId(UUID.randomUUID().toString());
-                workAllocationDTO.setWorkOrderId(workOrder.getId());
-                indexerService.addEntity(workAllocationIndex, workAllocationIndexType, workAllocationDTO.getId(), mapper.convertValue(workAllocationDTO, Map.class));
+                if(!ObjectUtils.isEmpty(workAllocationDTO)){
+                    workAllocationDTO.setCreatedBy(null);
+                    enrichmentService.enrichWorkAllocation(workAllocationDTO, userId);
+                    workAllocationDTO.setId(UUID.randomUUID().toString());
+                    workAllocationDTO.setWorkOrderId(workOrder.getId());
+                    indexerService.addEntity(workAllocationIndex, workAllocationIndexType, workAllocationDTO.getId(), mapper.convertValue(workAllocationDTO, Map.class));
+                }
             }
         }
         Response response = new Response();
