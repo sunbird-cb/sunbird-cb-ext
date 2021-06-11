@@ -112,7 +112,7 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 			paramMap.put("ud_htmlHeaderFilePath", headerHtmlFilePath);
 
 			URL res = getClass().getClassLoader().getResource(footerTemplateName);
-			File htmlFooterPath = Paths.get(res.toURI()).toFile();
+			File htmlFooterPath = new File(res.toURI());
 			paramMap.put("ud_htmlFooterFilePath", htmlFooterPath.getAbsolutePath());
 
 			String pdfFilePath = "";
