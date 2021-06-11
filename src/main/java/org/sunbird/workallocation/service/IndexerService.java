@@ -40,11 +40,6 @@ public class IndexerService {
      */
     public RestStatus addEntity(String index, String indexType, String entityId, Map<String, Object> indexDocument) {
         logger.info("addEntity starts with index {} and entityId {}", index, entityId);
-        try {
-            logger.info("Adding Entity , {}", new ObjectMapper().writeValueAsString(indexDocument));
-        } catch (JsonProcessingException e) {
-            logger.error(e.toString());
-        }
         IndexResponse response = null;
         try {
             if(!StringUtils.isEmpty(entityId)){
@@ -52,7 +47,6 @@ public class IndexerService {
             }else{
                 response = esClient.index(new IndexRequest(index, indexType).source(indexDocument), RequestOptions.DEFAULT);
             }
-            logger.info("response for entityId {} is {}", entityId, response);
         } catch (IOException e) {
             logger.error("Exception in adding record to ElasticSearch", e);
         }
@@ -70,11 +64,6 @@ public class IndexerService {
      */
     public RestStatus updateEntity(String index, String indexType, String entityId, Map<String, ?> indexDocument) {
         logger.info("updateEntity starts with index {} and entityId {}", index, entityId);
-        try {
-            logger.info("Updating Entity , {}", new ObjectMapper().writeValueAsString(indexDocument));
-        } catch (JsonProcessingException e) {
-            logger.error(e.toString());
-        }
         UpdateResponse response = null;
         try {
             response = esClient.update(new UpdateRequest(index.toLowerCase(), indexType, entityId).doc(indexDocument), RequestOptions.DEFAULT);

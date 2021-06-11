@@ -120,11 +120,6 @@ public class AllocationServiceV2 {
      * @return
      */
     public Response addWorkAllocation(String authUserToken, String userId, WorkAllocationDTOV2 workAllocationDTO) {
-        try {
-            logger.info("Adding work allocation, {}", mapper.writeValueAsString(workAllocationDTO));
-        } catch (JsonProcessingException e) {
-            logger.error(e.toString());
-        }
         validator.addWorkAllocation(workAllocationDTO);
         enrichmentService.enrichWorkAllocation(workAllocationDTO, userId);
         if (StringUtils.isEmpty(workAllocationDTO.getId()))
@@ -222,7 +217,6 @@ public class AllocationServiceV2 {
     }
 
     public Response getWorkOrders(SearchCriteria criteria) {
-        logger.info("Searching work order ....");
         validator.validateSearchCriteria(criteria);
         final BoolQueryBuilder query = QueryBuilders.boolQuery();
         if (!StringUtils.isEmpty(criteria.getStatus())) {
@@ -249,7 +243,6 @@ public class AllocationServiceV2 {
         } catch (IOException e) {
             logger.error("Elastic Search Exception", e);
         }
-        logger.info("Searching work order completed!");
         Response response = new Response();
         response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
         response.put(Constants.DATA, workOrderDTOList);
@@ -380,12 +373,6 @@ public class AllocationServiceV2 {
         int competenciesCount = 0;
         int errorCount = 0;
         int progress = 0;
-        try {
-            logger.info("Work order Object ::: , {}", mapper.writeValueAsString(workOrderDTO));
-            logger.info("Work allocation Object ::: , {}", mapper.writeValueAsString(indexerService.readEntity(workAllocationIndex, workAllocationIndexType, workOrderDTO.getUserIds().get(0))));
-        } catch (JsonProcessingException e) {
-            logger.error(e.toString());
-        }
         //Need to remove this once the search issue is fixed
         List<WorkAllocationDTOV2> workAllocationList =  getWorkAllocationListByIds(workOrderDTO.getUserIds());
 //        try {
@@ -396,7 +383,6 @@ public class AllocationServiceV2 {
 //        } catch (IOException e) {
 //            logger.error("Exception occurred while searching the users for work order!");
 //        }
-        logger.info("Search Response for work order to update the count");
         try {
             logger.info(mapper.writeValueAsString(workAllocationList));
         } catch (JsonProcessingException e) {
