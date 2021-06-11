@@ -269,14 +269,15 @@ public class AllocationServiceV2 {
     public Map<String, Object> getWorkOrderObject(String workOrderId) throws Exception
     {
     	Map<String, Object> workOrderObject = indexerService.readEntity(workOrderIndex, workOrderIndexType, workOrderId);
-        List<Object> userList = null;
+//        List<Object> userList = null;
         if (!CollectionUtils.isEmpty((Collection<?>) workOrderObject.get("userIds"))) {
-            userList = new ArrayList<>();
-            SearchResponse searchResponse = getSearchResponseForWorkOrder(workOrderId);
-            for (SearchHit hit : searchResponse.getHits()) {
-                userList.add(hit.getSourceAsMap());
-            }
-            workOrderObject.put("users", userList);
+            List<WorkAllocationDTOV2> workAllocationDTOV2List =  getWorkAllocationListByIds((List<String>)workOrderObject.get("userIds"));
+//            userList = new ArrayList<>();
+//            SearchResponse searchResponse = getSearchResponseForWorkOrder((List<String>)workOrderObject.get("userIds"));
+//            for (SearchHit hit : searchResponse.getHits()) {
+//                userList.add(hit.getSourceAsMap());
+//            }
+            workOrderObject.put("users", workAllocationDTOV2List);
         } else {
             workOrderObject.put("users", new ArrayList<>());
         }
@@ -292,13 +293,28 @@ public class AllocationServiceV2 {
         return response;
     }
 
-    private SearchResponse getSearchResponseForWorkOrder(String workOrderId) throws IOException {
+    private SearchResponse getSearchResponseForWorkOrder(List<String> workAllocationIds) throws IOException {
         final BoolQueryBuilder query = QueryBuilders.boolQuery();
-        query.must(QueryBuilders.termQuery("workOrderId.keyword", workOrderId));
+        query.must(QueryBuilders.termsQuery("id.keyword", workAllocationIds));
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder().query(query);
         logger.info(sourceBuilder.query().toString());
         SearchResponse searchResponse = indexerService.getEsResult(workAllocationIndex, workAllocationIndexType, sourceBuilder);
         return searchResponse;
+    }
+
+    private List<WorkAllocationDTOV2> getWorkAllocationListByIds(List<String> workAllocationIds){
+        List<WorkAllocationDTOV2> workAllocationDTOV2List = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(workAllocationIds)) {
+            workAllocationIds.forEach(id -> {
+                try {
+                    WorkAllocationDTOV2 workAllocationDTOV2 = mapper.convertValue(indexerService.readEntity(workAllocationIndex, workAllocationIndexType, id), WorkAllocationDTOV2.class);
+                    workAllocationDTOV2List.add(workAllocationDTOV2);
+                } catch (Exception ex) {
+                    logger.error("Exception occurred while reading the work allocation for id, {}", id);
+                }
+            });
+        }
+        return workAllocationDTOV2List;
     }
 
     /**
@@ -320,13 +336,10 @@ public class AllocationServiceV2 {
             throw new BadRequestException("Can not copy the work order, work order is not in published status!");
         }
         validator.validateWorkOrder(workOrder, WorkAllocationConstants.ADD);
-        workOrder.setStatus(null);
-        workOrder.setPublishedPdfLink(null);
-        workOrder.setSignedPdfLink(null);
         if(!StringUtils.isEmpty(workOrderDTO.getName())){
             workOrder.setName(workOrderDTO.getName());
         }
-        enrichmentService.enrichWorkOrder(workOrder, userId, WorkAllocationConstants.ADD);
+        enrichmentService.enrichCopyWorkOrder(workOrder, userId);
         RestStatus restStatus = indexerService.addEntity(workOrderIndex, workOrderIndexType, workOrder.getId(),
                 mapper.convertValue(workOrder, Map.class));
         if(!CollectionUtils.isEmpty(workOrder.getUserIds())){
@@ -373,15 +386,16 @@ public class AllocationServiceV2 {
         } catch (JsonProcessingException e) {
             logger.error(e.toString());
         }
-        List<WorkAllocationDTOV2> workAllocationList = new ArrayList<>();
-        try {
-            SearchResponse searchResponse = getSearchResponseForWorkOrder(workOrderDTO.getId());
-            for (SearchHit hit : searchResponse.getHits()) {
-                workAllocationList.add(mapper.convertValue(hit.getSourceAsMap(), WorkAllocationDTOV2.class));
-            }
-        } catch (IOException e) {
-            logger.error("Exception occurred while searching the users for work order!");
-        }
+        //Need to remove this once the search issue is fixed
+        List<WorkAllocationDTOV2> workAllocationList =  getWorkAllocationListByIds(workOrderDTO.getUserIds());
+//        try {
+//            SearchResponse searchResponse = getSearchResponseForWorkOrder(workOrderDTO.getUserIds());
+//            for (SearchHit hit : searchResponse.getHits()) {
+//                workAllocationList.add(mapper.convertValue(hit.getSourceAsMap(), WorkAllocationDTOV2.class));
+//            }
+//        } catch (IOException e) {
+//            logger.error("Exception occurred while searching the users for work order!");
+//        }
         logger.info("Search Response for work order to update the count");
         try {
             logger.info(mapper.writeValueAsString(workAllocationList));

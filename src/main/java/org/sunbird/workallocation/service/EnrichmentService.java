@@ -41,6 +41,20 @@ public class EnrichmentService {
         enrichUserNamesToWorkOrder(workOrderDTO);
     }
 
+    public void enrichCopyWorkOrder(WorkOrderDTO workOrderDTO, String userId) {
+        long currentMillis = System.currentTimeMillis();
+        workOrderDTO.setStatus(WorkAllocationConstants.DRAFT_STATUS);
+        workOrderDTO.setId(UUID.randomUUID().toString());
+        workOrderDTO.setCreatedBy(userId);
+        workOrderDTO.setCreatedAt(currentMillis);
+        workOrderDTO.setUpdatedBy(userId);
+        workOrderDTO.setUpdatedAt(currentMillis);
+        workOrderDTO.setStatus(null);
+        workOrderDTO.setPublishedPdfLink(null);
+        workOrderDTO.setSignedPdfLink(null);
+        enrichUserNamesToWorkOrder(workOrderDTO);
+    }
+
     public void enrichWorkAllocation(WorkAllocationDTOV2 workAllocationDTOV2, String userId) {
         long currentMillis = System.currentTimeMillis();
         if (StringUtils.isEmpty(workAllocationDTOV2.getCreatedBy())) {

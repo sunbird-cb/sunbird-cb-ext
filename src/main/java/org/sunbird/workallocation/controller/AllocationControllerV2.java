@@ -48,7 +48,7 @@ public class AllocationControllerV2 {
         return new ResponseEntity<>(allocationServiceV2.getWorkOrderById(workOrderId),HttpStatus.OK);
     }
     @GetMapping("/getWorkAllocationById/{allocationId}")
-    public ResponseEntity<Response> getWorkAllocationById(@PathVariable("allocationId") String allocationId) throws IOException {
+    public ResponseEntity<Response> getWorkAllocationById(@PathVariable("allocationId") String allocationId){
         return new ResponseEntity<>(allocationServiceV2.getWorkAllocationById(allocationId),HttpStatus.OK);
     }
 
