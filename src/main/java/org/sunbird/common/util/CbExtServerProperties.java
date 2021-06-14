@@ -114,6 +114,12 @@ public class CbExtServerProperties {
 
     @Value("${user.course.enroll}")
     private String userCourseEnroll;
+
+    @Value("${content-create-endpoint}")
+    private String contentCreateEndPoint;
+
+    @Value("${content-upload-endpoint}")
+    private String contentUploadEndPoint;
 	
     public String getContentHost() {
 		return contentHost;
@@ -412,5 +418,21 @@ public class CbExtServerProperties {
 
     public void setUserCourseEnroll(String userCourseEnroll) {
         this.userCourseEnroll = userCourseEnroll;
+    }
+
+    public String getContentCreateEndPoint() {
+        return contentCreateEndPoint;
+    }
+
+    public void setContentCreateEndPoint(String contentCreateEndPoint) {
+        this.contentCreateEndPoint = contentCreateEndPoint;
+    }
+
+    public String getContentUploadEndPoint() {
+        return contentUploadEndPoint;
+    }
+
+    public void setContentUploadEndPoint(String contentUploadEndPoint) {
+        this.contentUploadEndPoint = contentUploadEndPoint;
     }
 }

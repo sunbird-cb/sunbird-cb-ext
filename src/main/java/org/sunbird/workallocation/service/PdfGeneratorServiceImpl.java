@@ -101,7 +101,7 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 		return bytes;
 	}
 
-	public byte[] generatePdf(String woId) throws Exception {
+	public byte[] generatePdf(String woId) {
 		try {
 			Map<String, Object> workOrder = allocationService.getWorkOrderObject(woId);
 			if (workOrder == null) {
@@ -122,7 +122,7 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 				return null;
 			}
 
-			Map<String, Object> headerDetails = new HashMap<String, Object>();
+			Map<String, Object> headerDetails = new HashMap<>();
 			headerDetails.put("deptName", (String) workOrder.get("deptName"));
 			headerDetails.put("deptImgUrl", (String) workOrder.get("deptImgUrl"));
 			String headerMessage = readVm("pdf-header.vm", headerDetails);
@@ -164,6 +164,65 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 		}
 
 		return null;
+	}
+
+	@Override
+	public String generatePdfAndGetFilePath(String woId) {
+		String pdfFilePath = null;
+		try {
+			Map<String, Object> workOrder = allocationService.getWorkOrderObject(woId);
+			if (workOrder == null) {
+				return null;
+			}
+			String status = (String) workOrder.get("status");
+			String deptId = (String) workOrder.get("deptId");
+			String templateName = null;
+			String footerTemplateName = null;
+			if (WorkAllocationConstants.DRAFT_STATUS.equalsIgnoreCase(status)) {
+				templateName = draftTemplateName;
+				footerTemplateName = "templates/pdf-draft-footer.html";
+			} else if (WorkAllocationConstants.PUBLISHED_STATUS.equalsIgnoreCase(status)) {
+				templateName = publishedTemplateName;
+				footerTemplateName = "templates/pdf-published-footer.html";
+			} else {
+				log.error("Invalid WorkOrder object status. Failed to generate PDF file.");
+				return null;
+			}
+
+			Map<String, Object> headerDetails = new HashMap<>();
+			headerDetails.put("deptName", (String) workOrder.get("deptName"));
+			headerDetails.put("deptImgUrl", (String) workOrder.get("deptImgUrl"));
+			String headerMessage = readVm("pdf-header.vm", headerDetails);
+			String headerHtmlFilePath = createHTMLFile("pdf-header", headerMessage);
+
+			String message = readVm(templateName + ".vm", workOrder);
+			String htmlFilePath = createHTMLFile(templateName, message);
+			Map<String, String> paramMap = new HashMap<>();
+			paramMap.put("ud_htmlFilePath", htmlFilePath);
+			paramMap.put("ud_fileName", htmlFilePath.replace(".html", ".pdf"));
+			paramMap.put("ud_htmlHeaderFilePath", headerHtmlFilePath);
+
+			InputStream inputStream = getClass().getClassLoader().getResourceAsStream(footerTemplateName);
+
+			byte[] buffer = new byte[inputStream.available()];
+			inputStream.read(buffer);
+
+			File htmlFooterPath = new File("/tmp/" + deptId + "pdf-draft-footer.html");
+			OutputStream outStream = new FileOutputStream(htmlFooterPath);
+			outStream.write(buffer);
+
+			paramMap.put("ud_htmlFooterFilePath", htmlFooterPath.getAbsolutePath());
+			
+			try {
+				pdfFilePath = makePdf(paramMap);
+			} catch (Exception exception) {
+				log.error("Exception occurred while creating the pdf", exception);
+			}
+
+		} catch (Exception e) {
+			log.error("Failed to retrieve WorkOrder object for pdf generation.", e);
+		}
+		return pdfFilePath;
 	}
 
 	public String createHTMLFile(String fName, String htmlContent) throws IOException {

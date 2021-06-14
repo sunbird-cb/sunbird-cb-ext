@@ -14,21 +14,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
+import org.springframework.util.*;
 import org.springframework.web.client.RestTemplate;
 import org.sunbird.common.model.Response;
+import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
+import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.core.exception.BadRequestException;
 import org.sunbird.workallocation.model.*;
 import org.sunbird.workallocation.util.Validator;
 import org.sunbird.workallocation.util.WorkAllocationConstants;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.*;
 
@@ -50,6 +49,15 @@ public class AllocationServiceV2 {
     @Autowired
     private RestTemplate restTemplate;
 
+    @Autowired
+    private PdfGeneratorService pdfGeneratorService;
+
+    @Autowired
+    private OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
+
+    @Autowired
+    private CbExtServerProperties cbExtServerProperties;
+
     @Value("${workorder.index.name}")
     public String workOrderIndex;
 
@@ -61,6 +69,7 @@ public class AllocationServiceV2 {
 
     @Value("${workallocation.index.type}")
     public String workAllocationIndexType;
+
 
     ObjectMapper mapper = new ObjectMapper();
 
@@ -96,11 +105,17 @@ public class AllocationServiceV2 {
      * @param workOrder work order object
      * @return response message as success of failed
      */
-    public Response updateWorkOrder(String userId, WorkOrderDTO workOrder) {
+    public Response updateWorkOrder(String userId, WorkOrderDTO workOrder, String xAuthUser) {
         validator.validateWorkOrder(workOrder, WorkAllocationConstants.UPDATE);
         enrichmentService.enrichWorkOrder(workOrder, userId, WorkAllocationConstants.UPDATE);
         RestStatus restStatus = indexerService.updateEntity(workOrderIndex, workOrderIndexType, workOrder.getId(),
                 mapper.convertValue(workOrder, Map.class));
+        String  publishedPdfLink = uploadPdfToContentService(workOrder, xAuthUser);
+       if(!StringUtils.isEmpty(publishedPdfLink)){
+           workOrder.setPublishedPdfLink(publishedPdfLink);
+           indexerService.updateEntity(workOrderIndex, workOrderIndexType, workOrder.getId(),
+                   mapper.convertValue(workOrder, Map.class));
+       }
         Response response = new Response();
         if (!ObjectUtils.isEmpty(restStatus)) {
             response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
@@ -417,6 +432,80 @@ public class AllocationServiceV2 {
         workOrderDTO.setCompetenciesCount(competenciesCount);
         workOrderDTO.setErrorCount(errorCount);
         workOrderDTO.setProgress(progress);
+    }
+
+    private String uploadPdfToContentService(WorkOrderDTO workOrderDTO, String xAuthUser) {
+        String pdfLink = null;
+        try {
+            String pdfFilePath = pdfGeneratorService.generatePdfAndGetFilePath(workOrderDTO.getId());
+            String identifier = contentIdentifier(workOrderDTO, xAuthUser);
+            if (StringUtils.isEmpty(identifier)) {
+                logger.error("Fail to generate the pdf asset");
+                return pdfLink;
+            }
+            pdfLink = getArtifactURL(identifier, xAuthUser, pdfFilePath);
+
+        } catch (Exception ex) {
+            logger.error("Exception occurred while creating the pdf link for published work order!", ex);
+        }
+        return pdfLink;
+    }
+
+    private String contentIdentifier(WorkOrderDTO workOrderDTO, String xAuthUser) {
+        String identifier = null;
+        ContentCreateRequest contentCreateRequest = new ContentCreateRequest();
+        contentCreateRequest.setName("PDF Asset");
+        contentCreateRequest.setCreator(workOrderDTO.getUpdatedByName());
+        contentCreateRequest.setCreatedBy(workOrderDTO.getUpdatedBy());
+        contentCreateRequest.setCode("pdf asset");
+        contentCreateRequest.setMimeType("application/pdf");
+        contentCreateRequest.setContentType("Asset");
+        contentCreateRequest.setPrimaryCategory("Asset");
+        contentCreateRequest.setOrganisation(Arrays.asList("igot-karmayogi"));
+        contentCreateRequest.setCreatedFor(Arrays.asList("0131397178949058560"));
+        HashMap<String, Object> request = new HashMap<>();
+        HashMap<String, Object> contentReq = new HashMap<>();
+        contentReq.put("content", contentCreateRequest);
+        request.put("request", contentReq);
+        HashMap<String, String> headers = new HashMap<>();
+        headers.put("x-channel-id", "0131397178949058560");
+        headers.put("X-Authenticated-User-Token", xAuthUser);
+        headers.put("Authorization", cbExtServerProperties.getSbApiKey());
+        headers.put("Content-Type", "application/json");
+        Map<String, Object> response = outboundRequestHandlerService.fetchResultUsingPost(cbExtServerProperties.getCourseServiceHost().concat(cbExtServerProperties.getContentCreateEndPoint()), request, headers);
+        try {
+            logger.info("Pdf Asset Creation Response", mapper.writeValueAsString(response));
+        } catch (JsonProcessingException e) {
+            logger.error("Parsing issue happened while creating the pdf asset for work order !");
+        }
+        if (!ObjectUtils.isEmpty(response.get("result")))
+            identifier = (String) ((Map<String, Object>) response.get("result")).get("identifier");
+        return identifier;
+    }
+
+    private String getArtifactURL(String identifier, String xAuthUser, String filePath) {
+        String downloadableLink = null;
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("X-Authenticated-User-Token", xAuthUser);
+        headers.set("Authorization", cbExtServerProperties.getSbApiKey());
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+        FileSystemResource resource = new FileSystemResource(filePath);
+        body.add("data", resource);
+        HttpEntity<MultiValueMap<String, Object>> requestEntity
+                = new HttpEntity<>(body, headers);
+        String uploadURL = cbExtServerProperties.getContentUploadEndPoint().replace("{identifier}", identifier);
+        logger.info("Upload content url {}", cbExtServerProperties.getContentHost().concat(uploadURL));
+        ResponseEntity<Map> response = restTemplate
+                .postForEntity(cbExtServerProperties.getContentHost().concat(uploadURL), requestEntity, Map.class);
+        try {
+            logger.info("Pdf upload Response", mapper.writeValueAsString(response.getBody()));
+        } catch (JsonProcessingException e) {
+            logger.error("Parsing issue happened while uploading the pdf asset for work order !");
+        }
+        if (!ObjectUtils.isEmpty(response.getBody().get("result")))
+            downloadableLink = (String) ((Map<String, Object>) response.getBody().get("result")).get("artifactUrl");
+        return downloadableLink;
     }
 
 }

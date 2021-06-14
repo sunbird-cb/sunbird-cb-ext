@@ -33,8 +33,8 @@ public class AllocationControllerV2 {
     }
 
     @PostMapping("/update/workorder")
-    public ResponseEntity<Response> updateWorkOrder(@RequestHeader("userId") String userId, @RequestBody WorkOrderDTO workOrder) {
-        return new ResponseEntity<>(allocationServiceV2.updateWorkOrder(userId, workOrder),
+    public ResponseEntity<Response> updateWorkOrder(@RequestHeader("Authorization") String authUserToken, @RequestHeader("userId") String userId, @RequestBody WorkOrderDTO workOrder) {
+        return new ResponseEntity<>(allocationServiceV2.updateWorkOrder(userId, workOrder, authUserToken.split(" ")[1]),
                 HttpStatus.OK);
     }
 
