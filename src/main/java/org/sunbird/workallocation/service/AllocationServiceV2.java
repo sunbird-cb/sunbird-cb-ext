@@ -472,7 +472,7 @@ public class AllocationServiceV2 {
         headers.put("X-Authenticated-User-Token", xAuthUser);
         headers.put("Authorization", cbExtServerProperties.getSbApiKey());
         headers.put("Content-Type", "application/json");
-        Map<String, Object> response = outboundRequestHandlerService.fetchResultUsingPost(cbExtServerProperties.getCourseServiceHost().concat(cbExtServerProperties.getContentCreateEndPoint()), request, headers);
+        Map<String, Object> response = outboundRequestHandlerService.fetchResultUsingPost(cbExtServerProperties.getContentHost().concat(cbExtServerProperties.getContentCreateEndPoint()), request, headers);
         try {
             logger.info("Pdf Asset Creation Response", mapper.writeValueAsString(response));
         } catch (JsonProcessingException e) {
