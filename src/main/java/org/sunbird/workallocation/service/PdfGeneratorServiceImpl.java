@@ -25,9 +25,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.client.RestTemplate;
 import org.sunbird.core.exception.BadRequestException;
 import org.sunbird.workallocation.model.PdfGeneratorRequest;
 import org.sunbird.workallocation.util.WorkAllocationConstants;
@@ -54,6 +57,9 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 
 	@Autowired
 	private ObjectMapper mapper;
+
+	@Autowired
+	private RestTemplate restTemplate;
 
 	@Autowired
 	private AllocationServiceV2 allocationService;
@@ -122,6 +128,24 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 			log.error("Failed to retrieve WorkOrder object for pdf generation.", e);
 		}
 
+		return null;
+	}
+
+	@Override
+	public byte[] getPublishedPdf(String woId) {
+		try {
+			Map<String, Object> workOrder = allocationService.getWorkOrderObject(woId);
+			if (!ObjectUtils.isEmpty(workOrder.get("publishedPdfLink"))) {
+				HttpHeaders headers = new HttpHeaders();
+				headers.setAccept(Arrays.asList(MediaType.APPLICATION_PDF, MediaType.APPLICATION_OCTET_STREAM));
+				HttpEntity<String> entity = new HttpEntity<>(headers);
+				ResponseEntity<byte[]> result =
+						restTemplate.exchange((String) workOrder.get("publishedPdfLink"), HttpMethod.GET, entity, byte[].class);
+				return result.getBody();
+			}
+		} catch (Exception e) {
+			log.error("Failed to retrieve published pdf.", e);
+		}
 		return null;
 	}
 

@@ -5,5 +5,6 @@ import org.sunbird.workallocation.model.PdfGeneratorRequest;
 public interface PdfGeneratorService {
     public byte[] generatePdf(PdfGeneratorRequest request) throws Exception;
     public byte[] generatePdf(String woId) throws Exception;
+    public byte[] getPublishedPdf(String woId);
     public String generatePdfAndGetFilePath(String woId);
 }
