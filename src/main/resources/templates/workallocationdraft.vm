@@ -178,8 +178,7 @@
             padding: 0px;
         }
 
-        .outer-table {
-        }
+
 
         table {
             font-family: Arial, Helvetica, sans-serif;
@@ -197,10 +196,10 @@
 <body style="text-align: center;">
         <div style="border-style: dashed hidden;text-align: left;border-width: 2px;background-color: #fff4f0;">
             <h3 style="color: #2d2d2d;margin-left: 3%;">$name (draft for approval)</h3>
-            <p style="color: #2d2d2d;margin-left: 3%;">Printed at 05:25 PM 28 May 2021</p>
+            <p style="color: #2d2d2d;margin-left: 3%;">Printed at $printedTime</p>
         </div>
         <br>
-        <div class="outer-table">
+        <div>
             #foreach( $user in $users )
             <table class="allocation-table">
                 <tr>
@@ -225,7 +224,7 @@
                                                     <b>$rc.roleDetails.name</b>
                                                     <div style="padding: 10px !important">
                                                         #foreach($c in $rc.competencyDetails)
-                                                        <span><b style="padding: 2px;">.</b>$c.name</span>
+                                                        <span>$c.name</span>
                                                         #end
                                                     </div>
                                                 </td>
@@ -234,13 +233,17 @@
                                                         #foreach($a in $rc.roleDetails.childNodes)
                                                         <tr>
                                                             <td class="activityname">
-                                                                <span>$a.name</span>
+                                                                <span>$a.description</span>
                                                             </td>
                                                             <td class="submittd">
-                                                                $a.submittedToName
+                                                                #if($a.submittedToName)
+                                                                  $a.submittedToName
+                                                                #end
                                                             </td>
                                                             <td class="submittd">
+                                                                #if($a.submittedFromName)
                                                                 $a.submittedFromName
+                                                               #end
                                                             </td>
                                                         </tr>
                                                         #end
@@ -257,27 +260,11 @@
                 </tr>
             </table>
             #if($foreach.hasNext)
-            <!-- <div style="padding: 4% 1% 6% 1%;">
-                <span style="float: left;width: 230px;">
-                    <hr style="border: solid 1px black;">
-                    Approved on</span>
-                <span style="float:right; width: 230px;">
-                    <hr style="border: solid 1px black;">
-                    Signature</span>
-            </div> -->
             #else
             <div style="padding: 3% 0% 1% 0%;">
                 <p>------------------------------------------------- End of document
                     ------------------------------------------------</p>
             </div>
-            <!-- <div style="padding: 4% 1% 8% 1%;">
-                <span style="float: left;width: 230px;">
-                    <hr style="border: solid 1px black;">
-                    Approved on</span>
-                <span style="float:right; width: 230px;">
-                    <hr style="border: solid 1px black;">
-                    Signature</span>
-            </div> -->
             #end
             #end
         </div>

@@ -167,8 +167,8 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 			templateName = draftTemplateName;
 			footerTemplateName = "templates/pdf-draft-footer.html";
 		} else if (WorkAllocationConstants.PUBLISHED_STATUS.equalsIgnoreCase(status)) {
-			baseUrl = baseUrl.concat((String)workOrder.get("id"));
-			File qrCodeFile = QRCode.from(baseUrl).to(ImageType.PNG).file();
+			String qrImageUrl = baseUrl + (String)workOrder.get("id");
+			File qrCodeFile = QRCode.from(qrImageUrl).to(ImageType.PNG).file();
 			workOrder.put("qrcodeurl", qrCodeFile.getAbsolutePath());
 			templateName = publishedTemplateName;
 			footerTemplateName = "templates/pdf-published-footer.html";
@@ -179,7 +179,7 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 
 		Map<String, Object> headerDetails = new HashMap<>();
 		headerDetails.put("deptName", (String) workOrder.get("deptName"));
-		headerDetails.put("deptImgUrl", (String) workOrder.get("deptImgUrl"));
+		headerDetails.put("deptImgUrl",  (String) workOrder.get("deptImgUrl"));
 		String headerMessage = readVm("pdf-header.vm", headerDetails);
 		String headerHtmlFilePath = createHTMLFile("pdf-header", headerMessage);
 
@@ -272,7 +272,7 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 			template.merge(context, writer);
 			body = writer.toString();
 		} catch (Exception e) {
-			log.error("Exception occured while loading the template file", e);
+			log.error("Exception occurred while loading the template file", e);
 		} finally {
 			if (writer != null) {
 				try {
@@ -290,7 +290,7 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 			return null;
 		}
 		StringBuffer commandLine = new StringBuffer();
-		commandLine.append(" wkhtmltopdf --enable-local-file-access --margin-top 30.0 --margin-left 25.0 --margin-right 25.0 --footer-spacing 5 ");
+		commandLine.append(" wkhtmltopdf --enable-local-file-access --margin-top 20.0 --margin-left 10.0 --margin-right 10.0 --footer-spacing 5 ");
 		commandLine.append("--header-spacing 5  --footer-font-size 8 --orientation Portrait --page-size A4 ");
 		commandLine.append("--load-media-error-handling ignore  --no-header-line --no-footer-line --enable-forms ");
 		commandLine.append("--load-error-handling ignore --header-right [page]/[toPage] ");

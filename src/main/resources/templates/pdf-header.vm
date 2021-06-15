@@ -13,8 +13,8 @@ img{
 <body>
 <table width="100">
   <tr>
-    <td class="item" style="width:30%"><img src="$deptImgUrl"/></td>
-    <td style="text-align:left" style="width:70%">$deptName</td>
+    <td class="item" style="width:10%"><img src="$deptImgUrl"/></td>
+    <td style="text-align:center" style="width:100%">$deptName</td>
   </tr>
 </table>
 </body>
