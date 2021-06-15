@@ -193,6 +193,11 @@
         table th {
             border: 1px solid #ddd;
         }
+        #stripParent{ width:100%;}
+        #stripParent div{ display:inline-block; width:33.3%;}
+        #stripfirstDiv{ text-align:left;width: 50% !important;}
+        #stripsecondDiv{ text-align:center;width: 15% !important; }
+        #stripthirdDiv{ text-align:right; width: 28% !important;}
     </style>
 </head>
 
@@ -201,10 +206,17 @@
         <div>
             <h3 style="text-align: center; max-width: 20%;color: #303030;margin-left: 30%;">$deptName</h3>
         </div>
-        <div style="border-style: dashed hidden;text-align: left;border-width: 2px;background-color: #fff4f0;">
-            <h3 style="color: #2d2d2d;margin-left: 3%;">$name (draft for approval)</h3>
-            <p style="color: #2d2d2d;margin-left: 3%;">Printed at 05:25 PM 28 May 2021</p>
-
+        <div id="stripParent" style="border-style: dashed hidden;text-align: left;border-width: 2px;background-color: #f5f5f5;">
+            <div id="stripfirstDiv">
+            <h3 style="color: #2d2d2d;margin-left: 3%;">$name </h3>
+            <p style="color: #2d2d2d;margin-left: 3%;">Printed at $printedTime</p>
+            </div>
+            <div id="stripsecondDiv">
+                <span>Scan this QR code for the latest version</span>
+            </div>
+            <div id="stripthirdDiv">
+                <span><img src=$qrcodeurl alt="QR code"></span>
+            </div>
         </div>
         <div class="outer-table">
             #foreach( $user in $users )
@@ -243,10 +255,14 @@
                                                                 <span>$a.name</span>
                                                             </td>
                                                             <td class="submittd">
-                                                                $a.submittedToName
+                                                                #if($a.submittedToName)
+                                                                  $a.submittedToName
+                                                                #end
                                                             </td>
                                                             <td class="submittd">
-                                                                $a.submittedFromName
+                                                                #if($a.submittedFromName)
+                                                                 $a.submittedFromName
+                                                                #end
                                                             </td>
                                                         </tr>
                                                         #end
@@ -263,31 +279,14 @@
                 </tr>
             </table>
             #if($foreach.hasNext)
-            <!-- <div style="padding: 4% 1% 6% 1%;">
-                <span style="float: left;width: 230px;">
-                    <hr style="border: solid 1px black;">
-                    Approved on</span>
-                <span style="float:right; width: 230px;">
-                    <hr style="border: solid 1px black;">
-                    Signature</span>
-            </div> -->
             #else
             <div style="padding: 3% 0% 1% 0%;">
                 <p>------------------------------------------------- End of document
                     ------------------------------------------------</p>
             </div>
-            <!-- <div style="padding: 4% 1% 8% 1%;">
-                <span style="float: left;width: 230px;">
-                    <hr style="border: solid 1px black;">
-                    Approved on</span>
-                <span style="float:right; width: 230px;">
-                    <hr style="border: solid 1px black;">
-                    Signature</span>
-            </div> -->
             #end
             #end
         </div>
     </div>
 </body>
-
 </html>

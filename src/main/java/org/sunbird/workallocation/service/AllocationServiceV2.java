@@ -438,12 +438,12 @@ public class AllocationServiceV2 {
         String pdfLink = null;
         try {
             String pdfFilePath = pdfGeneratorService.generatePdfAndGetFilePath(workOrderDTO.getId());
-            String identifier = contentIdentifier(workOrderDTO, xAuthUser);
+            String identifier = createContentAndGetIdentifier(workOrderDTO, xAuthUser);
             if (StringUtils.isEmpty(identifier)) {
                 logger.error("Fail to generate the pdf asset");
                 return pdfLink;
             }
-            pdfLink = getArtifactURL(identifier, xAuthUser, pdfFilePath);
+            pdfLink = uploadPdfAndgetArtifactURL(identifier, xAuthUser, pdfFilePath);
 
         } catch (Exception ex) {
             logger.error("Exception occurred while creating the pdf link for published work order!", ex);
@@ -451,30 +451,24 @@ public class AllocationServiceV2 {
         return pdfLink;
     }
 
-    private String contentIdentifier(WorkOrderDTO workOrderDTO, String xAuthUser) {
+    private String createContentAndGetIdentifier(WorkOrderDTO workOrderDTO, String xAuthUser) {
         String identifier = null;
-        ContentCreateRequest contentCreateRequest = new ContentCreateRequest();
-        contentCreateRequest.setName("PDF Asset");
-        contentCreateRequest.setCreator(workOrderDTO.getUpdatedByName());
-        contentCreateRequest.setCreatedBy(workOrderDTO.getUpdatedBy());
-        contentCreateRequest.setCode("pdf asset");
-        contentCreateRequest.setMimeType("application/pdf");
-        contentCreateRequest.setContentType("Asset");
-        contentCreateRequest.setPrimaryCategory("Asset");
-        contentCreateRequest.setOrganisation(Arrays.asList("igot-karmayogi"));
-        contentCreateRequest.setCreatedFor(Arrays.asList("0131397178949058560"));
+        ContentCreateRequest contentCreateRequest = new ContentCreateRequest(
+                "PDF Asset", workOrderDTO.getUpdatedByName(), workOrderDTO.getUpdatedBy(), "pdf asset", "application/pdf",
+                "Asset", "Asset", Arrays.asList(cbExtServerProperties.getContentDefaultOrgId()), Arrays.asList(cbExtServerProperties.getContentDefaultChannelId()));
         HashMap<String, Object> request = new HashMap<>();
         HashMap<String, Object> contentReq = new HashMap<>();
         contentReq.put("content", contentCreateRequest);
         request.put("request", contentReq);
         HashMap<String, String> headers = new HashMap<>();
-        headers.put("x-channel-id", "0131397178949058560");
+        headers.put("x-channel-id", cbExtServerProperties.getContentDefaultChannelId());
         headers.put("X-Authenticated-User-Token", xAuthUser);
         headers.put("Authorization", cbExtServerProperties.getSbApiKey());
         headers.put("Content-Type", "application/json");
         Map<String, Object> response = outboundRequestHandlerService.fetchResultUsingPost(cbExtServerProperties.getContentHost().concat(cbExtServerProperties.getContentCreateEndPoint()), request, headers);
         try {
-            logger.info("Pdf Asset Creation Response", mapper.writeValueAsString(response));
+            logger.info("Pdf Asset Creation Response ============>");
+            logger.info(mapper.writeValueAsString(response));
         } catch (JsonProcessingException e) {
             logger.error("Parsing issue happened while creating the pdf asset for work order !");
         }
@@ -483,7 +477,7 @@ public class AllocationServiceV2 {
         return identifier;
     }
 
-    private String getArtifactURL(String identifier, String xAuthUser, String filePath) {
+    private String uploadPdfAndgetArtifactURL(String identifier, String xAuthUser, String filePath) {
         String downloadableLink = null;
         HttpHeaders headers = new HttpHeaders();
         headers.set("X-Authenticated-User-Token", xAuthUser);
@@ -495,11 +489,11 @@ public class AllocationServiceV2 {
         HttpEntity<MultiValueMap<String, Object>> requestEntity
                 = new HttpEntity<>(body, headers);
         String uploadURL = cbExtServerProperties.getContentUploadEndPoint().replace("{identifier}", identifier);
-        logger.info("Upload content url {}", cbExtServerProperties.getContentHost().concat(uploadURL));
         ResponseEntity<Map> response = restTemplate
                 .postForEntity(cbExtServerProperties.getContentHost().concat(uploadURL), requestEntity, Map.class);
         try {
-            logger.info("Pdf upload Response", mapper.writeValueAsString(response.getBody()));
+            logger.info("Pdf upload Response =========>");
+            logger.info(mapper.writeValueAsString(response.getBody()));
         } catch (JsonProcessingException e) {
             logger.error("Parsing issue happened while uploading the pdf asset for work order !");
         }

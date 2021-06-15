@@ -1,7 +1,6 @@
 package org.sunbird.workallocation.model;
 
 import java.util.List;
-
 public class ContentCreateRequest {
     private String name;
     private String creator;
@@ -11,6 +10,22 @@ public class ContentCreateRequest {
     private String contentType;
     private String primaryCategory;
     private List<String> organisation;
+
+    public ContentCreateRequest(String name, String creator, String createdBy, String code, String mimeType, String contentType, String primaryCategory, List<String> organisation, List<String> createdFor) {
+        this.name = name;
+        this.creator = creator;
+        this.createdBy = createdBy;
+        this.code = code;
+        this.mimeType = mimeType;
+        this.contentType = contentType;
+        this.primaryCategory = primaryCategory;
+        this.organisation = organisation;
+        this.createdFor = createdFor;
+    }
+    public ContentCreateRequest () {
+
+    }
+
     private List<String> createdFor;
 
     public String getName() {

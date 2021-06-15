@@ -120,6 +120,12 @@ public class CbExtServerProperties {
 
     @Value("${content-upload-endpoint}")
     private String contentUploadEndPoint;
+
+    @Value("${content.default.channelId}")
+    private String contentDefaultChannelId;
+
+    @Value("${content.default.orgId}")
+    private String contentDefaultOrgId;
 	
     public String getContentHost() {
 		return contentHost;
@@ -434,5 +440,21 @@ public class CbExtServerProperties {
 
     public void setContentUploadEndPoint(String contentUploadEndPoint) {
         this.contentUploadEndPoint = contentUploadEndPoint;
+    }
+
+    public String getContentDefaultChannelId() {
+        return contentDefaultChannelId;
+    }
+
+    public void setContentDefaultChannelId(String contentDefaultChannelId) {
+        this.contentDefaultChannelId = contentDefaultChannelId;
+    }
+
+    public String getContentDefaultOrgId() {
+        return contentDefaultOrgId;
+    }
+
+    public void setContentDefaultOrgId(String contentDefaultOrgId) {
+        this.contentDefaultOrgId = contentDefaultOrgId;
     }
 }
