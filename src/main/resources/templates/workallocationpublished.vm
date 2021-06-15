@@ -201,7 +201,7 @@
     </style>
 </head>
 
-<body style="text-align: center;background-color: #f0f3f4">
+<body style="text-align: center">
     <div class="card-3" style="background-color: white;margin: 2% 4% 2% 4%;padding: 5px 0px 5px 0px;">
         <div>
             <h3 style="text-align: center; max-width: 20%;color: #303030;margin-left: 30%;">$deptName</h3>
