@@ -428,6 +428,7 @@ public class AllocationService {
 		r.setType(response.getResponseData().getType());
 		r.setStatus(response.getResponseData().getStatus());
 		r.setSource(response.getResponseData().getSource());
+		r.setDescription(response.getResponseData().getDescription());
 		List<ChildNode> children = response.getResponseData().getChildren();
 		if (children != null && !CollectionUtils.isEmpty(children)) {
 			List<ChildNode> childNodes = new ArrayList<>();
