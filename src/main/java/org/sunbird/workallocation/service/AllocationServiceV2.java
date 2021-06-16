@@ -135,7 +135,7 @@ public class AllocationServiceV2 {
      * @return
      */
     public Response addWorkAllocation(String authUserToken, String userId, WorkAllocationDTOV2 workAllocationDTO) {
-        validator.addWorkAllocation(workAllocationDTO);
+        validator.validateWorkAllocation(workAllocationDTO, WorkAllocationConstants.ADD);
         enrichmentService.enrichWorkAllocation(workAllocationDTO, userId);
         if (StringUtils.isEmpty(workAllocationDTO.getId()))
             workAllocationDTO.setId(UUID.randomUUID().toString());
@@ -155,6 +155,45 @@ public class AllocationServiceV2 {
         workOrder.addUserId(workAllocationDTO.getId());
         updateWorkOderCount(workOrder);
         indexerService.updateEntity(workOrderIndex, workOrderIndexType, workOrder.getId(),mapper.convertValue(workOrder, Map.class));
+        Response response = new Response();
+        if (!ObjectUtils.isEmpty(restStatus)) {
+            response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
+        } else {
+            response.put(Constants.MESSAGE, Constants.FAILED);
+        }
+        response.put(Constants.DATA, restStatus);
+        response.put(Constants.STATUS, HttpStatus.OK);
+        return response;
+    }
+
+    /**
+     *
+     * @param authUserToken auth token
+     * @param userId user Id
+     * @param workAllocationDTO work allocation object
+     * @return
+     */
+    public Response updateWorkAllocation(String authUserToken, String userId, WorkAllocationDTOV2 workAllocationDTO) {
+        validator.validateWorkAllocation(workAllocationDTO, WorkAllocationConstants.UPDATE);
+        enrichmentService.enrichWorkAllocation(workAllocationDTO, userId);
+        if (!CollectionUtils.isEmpty(workAllocationDTO.getRoleCompetencyList())) {
+            verifyRoleActivity(authUserToken, workAllocationDTO);
+            verifyCompetencyDetails(authUserToken, workAllocationDTO);
+        }
+        if (StringUtils.isEmpty(workAllocationDTO.getPositionId())
+                && !StringUtils.isEmpty(workAllocationDTO.getUserPosition())) {
+            workAllocationDTO.setPositionId(allocationService.createUserPosition(authUserToken, workAllocationDTO.getUserPosition()));
+        }
+        RestStatus restStatus = indexerService.updateEntity(workAllocationIndex, workAllocationIndexType, workAllocationDTO.getId(),
+                mapper.convertValue(workAllocationDTO, Map.class));
+        Map<String, Object> workOrderObject = indexerService.readEntity(workOrderIndex, workOrderIndexType, workAllocationDTO.getWorkOrderId());
+        WorkOrderDTO workOrder = mapper.convertValue(workOrderObject, WorkOrderDTO.class);
+        if (CollectionUtils.isEmpty(workOrder.getUserIds())) {
+            workOrder.setUserIds(new ArrayList<>());
+        }
+        workOrder.addUserId(workAllocationDTO.getId());
+        updateWorkOderCount(workOrder);
+        indexerService.updateEntity(workOrderIndex, workOrderIndexType, workOrder.getId(), mapper.convertValue(workOrder, Map.class));
         Response response = new Response();
         if (!ObjectUtils.isEmpty(restStatus)) {
             response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
@@ -239,7 +278,8 @@ public class AllocationServiceV2 {
         }
         if (!StringUtils.isEmpty(criteria.getDepartmentName())) {
             query.must(QueryBuilders.termQuery("deptName.keyword", criteria.getDepartmentName()));
-        }if(!StringUtils.isEmpty(criteria.getQuery())){
+        }
+        if(!StringUtils.isEmpty(criteria.getQuery())){
             query.must(QueryBuilders.matchPhrasePrefixQuery("name", criteria.getQuery()));
         }
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder().query(query);

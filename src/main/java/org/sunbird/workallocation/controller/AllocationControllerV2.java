@@ -26,6 +26,13 @@ public class AllocationControllerV2 {
                 HttpStatus.OK);
     }
 
+    @PostMapping("/update")
+    public ResponseEntity<Response> updateWorkAllocation(@RequestHeader("Authorization") String authUserToken,
+                                                      @RequestHeader("userId") String userId, @RequestBody WorkAllocationDTOV2 workAllocation) {
+        return new ResponseEntity<>(allocationServiceV2.updateWorkAllocation(authUserToken, userId, workAllocation),
+                HttpStatus.OK);
+    }
+
     @PostMapping("/add/workorder")
     public ResponseEntity<Response> addWorkOrder(@RequestHeader("userId") String userId, @RequestBody WorkOrderDTO workOrder) {
         return new ResponseEntity<>(allocationServiceV2.addWorkOrder(userId, workOrder),
