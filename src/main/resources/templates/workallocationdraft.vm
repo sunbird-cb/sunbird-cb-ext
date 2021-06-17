@@ -3,6 +3,10 @@
 
 <head>
     <style>
+        html {font-size: 16px;font-family: Arial, Helvetica, sans-serif;line-height: 22px;}
+        h3 {font-size: 22px;font-weight: 600;line-height: 1.3;}
+        h4 {font-size: 18px;font-weight: 600;line-height: 1.3;}
+        p {font-size: 16px;margin:0;line-height: 22px;}
         .card-3 {
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
         }
@@ -13,22 +17,37 @@
             display: block;
             text-indent: -9999px;
         }
-
-        th {
+        .tableMainDiv {
+            width: 100%;
+            margin-top: 20px;
+            margin-bottom: 0;
+            /* border:2px solid #ddd; */
+        }
+        tr.tableHeadRow {
+            border:0;
+            border-top:2px solid #ddd;
+            border-bottom:2px solid #ddd;
+        }
+        tr.tableHeadRow th {
             background-color: #f5f5f5;
             cursor: pointer;
             text-align: left;
-            /* border: none; */
-            padding: 6px;
+            padding: 15px 15px;
             color: rgba(0, 0, 0, 0.6);
             font-weight: normal;
+            border-right: 2px solid #ddd;
+            border-top: 0;
+            border-bottom: 0;
+        }
+        tr.tableHeadRow th:last-child {
+            border-right: none;
         }
 
-        .table-activity {
+        /* .table-activity {
             width: 70%;
             margin-right: 3em;
             padding: 0;
-        }
+        } */
 
         .activityname {
             width: 52%;
@@ -84,34 +103,47 @@
             height: 31px;
         }
 
-        .table-role {
+        /* .table-role {
             width: 22%;
             margin-right: 1em;
             padding: 0 !important;
-        }
+        } */
 
-        .userName {
-            padding: 10px;
+        .userNameDiv {
+            padding: 15px 15px;
             text-align: left;
+
             border: 2px solid #ddd;
             border-bottom: none;
         }
+        h4.userName {
+            padding: 0;
+            font-size: 18px;
+            font-weight: 600;
+            text-align: left;
+            margin:0;
+        }
+        p.userDesg {
+            font-size: 16px;
+        }
 
         th:nth-child(1) {
-            width: 37.8%;
+            /* width: 37.8%; */
+            width: 37.3%;
         }
 
         th:nth-child(2) {
-            width: 32.2%;
+            /* width: 32.2%; */
+            width: 39.2%;
         }
 
         th:nth-child(3) {
-            width: 15.1%;
+            width: 16.5%;
         }
 
-        th:nth-child(4) {
-            width: 18%
-        }
+        /* th:nth-child(4) {
+            width: -1%;
+        } */
 
         td:nth-child(1) {
             width: 20%
@@ -131,8 +163,10 @@
 
         .table-role {
             width: 22%;
-            margin-right: 1em;
-            padding-left: 20px !important;
+            padding: 15px 15px;
+            vertical-align: top;
+            /* margin-right: 1em;
+            padding-left: 20px !important; */
         }
 
         .table-role b {
@@ -145,20 +179,24 @@
             display: inline-block;
         } */
 
-        .table-activity {
+        /* .table-activity {
             width: 70%;
             margin-right: 3em;
             padding: 0;
-        }
+        } */
 
         .table-activity .activityname {
             width: 52%;
-            padding: 1.5em 1em 1.5em 1em;
+            /* padding: 1.5em 1em 1.5em 1em; */
+            padding:15px 15px;
+            vertical-align: top;
         }
 
         td.submittd {
             width: 24% !important;
-            padding: 0.3em 0.6em;
+            padding:15px 15px;
+            vertical-align: top;
+            /* padding: 0.3em 0.6em; */
         }
 
         ul {
@@ -178,17 +216,42 @@
             padding: 0px;
         }
 
+        /* .outer-table {
 
+        } */
 
         table {
             font-family: Arial, Helvetica, sans-serif;
             border-collapse: collapse;
             width: 100%;
         }
+        tr.tableContentRow {
+            border-bottom: 2px solid #ddd;
+        }
+        tr.tableContentRow:last-child {
+            border-bottom: 0;
+        }
+        .roleBox {
+            padding-left:30px;
+            padding-top: 15px;
+        }
 
-        table td,
-        table th {
-            border: 1px solid #ddd;
+        table.mainTable {
+            border:2px solid #ddd;
+        }
+        table.customInnerTable tr {
+            border-bottom: 2px solid #ddd;
+        }
+        table.customInnerTable tr:last-child {
+            border-bottom: 0;
+        }
+        table.customInnerTable tr td {
+            border:2px solid #ddd;
+            border-top: 0;
+            border-bottom: 0;
+        }
+        table.customInnerTable tr td:last-child {
+            border-right: 0;
         }
     </style>
 </head>
@@ -196,24 +259,25 @@
 <body style="text-align: center;">
         <div style="border-style: dashed hidden;text-align: left;border-width: 2px;background-color: #fff4f0;">
             <h3 style="color: #2d2d2d;margin-left: 3%;">$name (draft for approval)</h3>
-            <p style="color: #2d2d2d;margin-left: 3%;">Printed at $printedTime</p>
+            <p style="color: #2d2d2d;margin-left: 3%;margin-bottom: 2%;">Printed at $printedTime</p>
         </div>
         <br>
-        <div>
+        <div class="tableMainDiv">
             #foreach( $user in $users )
             <table class="allocation-table">
                 <tr>
-                    <div class="userName"><b>$foreach.count . $user.userName</b>
-                        <p style="margin: auto;padding: 8px;">Director - co-ordination</p>
+                    <div class="userNameDiv">
+                        <h4 class="userName">$foreach.count . $user.userName</h4>
+                        <p class="userDesg">Director - co-ordination</p>
                     </div>
-                    <table id="custom-table" style="margin-bottom: 3% !important;">
-                        <tr>
+                    <table id="custom-table" class="mainTable">
+                        <tr class="tableHeadRow">
                             <th>Roles and competencies</th>
                             <th>Activities</th>
                             <th>Submit to</th>
                             <th>Submission from</th>
                         </tr>
-                        <tr>
+                        <tr class="tableContentRow">
                             <td colspan="4">
                                 <ul>
                                     #foreach($rc in $user.roleCompetencyList)
@@ -222,14 +286,15 @@
                                             <tr>
                                                 <td class="table-role">
                                                     <b>$rc.roleDetails.name</b>
-                                                    <div style="padding: 10px !important">
+                                                    <div class="roleBox">
                                                         #foreach($c in $rc.competencyDetails)
                                                         <span>$c.name</span>
+                                                    <br>
                                                         #end
                                                     </div>
                                                 </td>
                                                 <td class="table-activity">
-                                                    <table id="custom-table">
+                                                    <table id="custom-table" class="customInnerTable">
                                                         #foreach($a in $rc.roleDetails.childNodes)
                                                         <tr>
                                                             <td class="activityname">
@@ -242,8 +307,8 @@
                                                             </td>
                                                             <td class="submittd">
                                                                 #if($a.submittedFromName)
-                                                                $a.submittedFromName
-                                                               #end
+                                                                 $a.submittedFromName
+                                                                #end
                                                             </td>
                                                         </tr>
                                                         #end
@@ -262,8 +327,7 @@
             #if($foreach.hasNext)
             #else
             <div style="padding: 3% 0% 1% 0%;">
-                <p>------------------------------------------------- End of document
-                    ------------------------------------------------</p>
+                <p>------------------------------------------------------ End of document ------------------------------------------------------</p>
             </div>
             #end
             #end
