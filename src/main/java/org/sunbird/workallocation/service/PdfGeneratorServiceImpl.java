@@ -316,7 +316,6 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 		}
 		log.info("Saving the file content as PDF");
 		String htmlFilePath = paramMap.get("ud_htmlFilePath");
-        //String htmlFilePath = "/home/amit/Desktop/pdfGeneration/htmlfiles/test1.html";
 		String pdfFileName = paramMap.get("ud_fileName");
 		if (!pdfFileName.endsWith(".pdf")) {
 			pdfFileName = pdfFileName + ".pdf";
