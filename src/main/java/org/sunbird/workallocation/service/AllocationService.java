@@ -568,6 +568,7 @@ public class AllocationService {
 		r.setStatus(response.getResponseData().getStatus());
 		r.setSource(response.getResponseData().getSource());
 		r.setAdditionalProperties(response.getResponseData().getAdditionalProperties());
+		r.setDescription(response.getResponseData().getDescription());
 		List<ChildNode> children = response.getResponseData().getChildren();
 		if (children != null && !CollectionUtils.isEmpty(children)) {
 			List<Child> childNodes = new ArrayList<>();
@@ -587,6 +588,7 @@ public class AllocationService {
 		cn.setStatus(child.getStatus());
 		cn.setSource(child.getSource());
 		cn.setLevel(child.getLevel());
+		cn.setDescription(child.getDescription());
 		return cn;
 	}
 
