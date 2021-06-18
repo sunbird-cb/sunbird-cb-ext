@@ -179,8 +179,15 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 		}
 
 		Map<String, Object> headerDetails = new HashMap<>();
+		try {
+			ClassLoader classLoader = getClass().getClassLoader();
+			File file = new File(classLoader.getResource("government-of-india.jpg").getFile());
+			headerDetails.put("deptImgUrl",  file.getAbsolutePath());
+		}catch (Exception ex){
+			log.error("Exception occurred while loading the default department logo");
+		}
 		headerDetails.put("deptName", (String) workOrder.get("deptName"));
-		headerDetails.put("deptImgUrl",  (String) workOrder.get("deptImgUrl"));
+//		headerDetails.put("deptImgUrl",  (String) workOrder.get("deptImgUrl"));
 		String headerMessage = readVm("pdf-header.vm", headerDetails);
 		String headerHtmlFilePath = createHTMLFile("pdf-header", headerMessage);
 
@@ -309,7 +316,7 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 		}
 		log.info("Saving the file content as PDF");
 		String htmlFilePath = paramMap.get("ud_htmlFilePath");
-		
+        //String htmlFilePath = "/home/amit/Desktop/pdfGeneration/htmlfiles/test1.html";
 		String pdfFileName = paramMap.get("ud_fileName");
 		if (!pdfFileName.endsWith(".pdf")) {
 			pdfFileName = pdfFileName + ".pdf";

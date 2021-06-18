@@ -4,29 +4,17 @@
 <head>
     <style>
         html {font-size: 16px;font-family: Arial, Helvetica, sans-serif;line-height: 22px;}
-        h3 {font-size: 22px;font-weight: 600;line-height: 1.3;}
+        h3 {font-size: 20px;font-weight: 600;line-height: 1.3;}
         h4 {font-size: 18px;font-weight: 600;line-height: 1.3;}
         p {font-size: 16px;margin:0;line-height: 22px;}
-        .card-3 {
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
-        }
 
-        .logo {
-            background: url(${waterMark}) no-repeat;
-            height: 70px;
-            display: block;
-            text-indent: -9999px;
-        }
         .tableMainDiv {
-            width: 100%;
-            margin-top: 20px;
-            margin-bottom: 0;
-            /* border:2px solid #ddd; */
+            width: 95%;
         }
         tr.tableHeadRow {
-            border:0;
-            border-top:2px solid #ddd;
-            border-bottom:2px solid #ddd;
+            border:0px !important;
+            border-top:1px solid #d5d5d5 !important;
+            border-bottom:1px solid #d5d5d5 !important;
         }
         tr.tableHeadRow th {
             background-color: #f5f5f5;
@@ -35,9 +23,9 @@
             padding: 15px 15px;
             color: rgba(0, 0, 0, 0.6);
             font-weight: normal;
-            border-right: 2px solid #ddd;
-            border-top: 0;
-            border-bottom: 0;
+            border-right: 1px solid #d5d5d5 !important;
+            border-top: 0px !important;
+            border-bottom: 0px !important;
         }
         tr.tableHeadRow th:last-child {
             border-right: none;
@@ -88,10 +76,10 @@
             display: block
         }
 
-        .allocation-table {
+        /* .allocation-table {
 
             width: 100%;
-        }
+        } */
 
         .th {
             background-color: #f5f5f5;
@@ -112,9 +100,9 @@
         .userNameDiv {
             padding: 15px 15px;
             text-align: left;
-
-            border: 2px solid #ddd;
-            border-bottom: none;
+            margin-top: 5%;
+            border: 1px solid #d5d5d5;
+            border-bottom: 0px !important;
         }
         h4.userName {
             padding: 0;
@@ -126,31 +114,28 @@
         p.userDesg {
             font-size: 16px;
         }
-
         th:nth-child(1) {
-            /* width: 37.8%; */
-            width: 37.3%;
+            width: 29.5% !important;
         }
 
         th:nth-child(2) {
-            /* width: 32.2%; */
-            width: 39.2%;
+            width: 37.06% !important;
         }
 
         th:nth-child(3) {
-            width: 16.5%;
+            width: 17.1%;
         }
 
-        /* th:nth-child(4) {
-            width: -1%;
-        } */
+        th:nth-child(4) {
+            /* width: 18% */
+        }
 
         td:nth-child(1) {
-            width: 20%
+            width: 15%
         }
 
         td:nth-child(2) {
-            width: 33%
+            width: 37%
         }
 
         td:nth-child(3) {
@@ -160,11 +145,20 @@
         td:nth-child(4) {
             width: 18%
         }
+        .custom-table-ul li {
+            border-bottom: 1px solid #d5d5d5 !important;
+            padding: 0px !important;
+            margin: 0px !important;
+        }
+        .custom-table-ul li:last-child {
+            border-bottom: 0 !important;
+        }
 
         .table-role {
             width: 22%;
             padding: 15px 15px;
             vertical-align: top;
+            /* border-bottom:2px solid #ddd; */
             /* margin-right: 1em;
             padding-left: 20px !important; */
         }
@@ -222,44 +216,68 @@
 
         table {
             font-family: Arial, Helvetica, sans-serif;
-            border-collapse: collapse;
+            border-collapse: collapse !important;
             width: 100%;
         }
         tr.tableContentRow {
-            border-bottom: 2px solid #ddd;
+            border-bottom: 1px solid #d5d5d5 !important;
         }
         tr.tableContentRow:last-child {
-            border-bottom: 0;
+            border-bottom: 0px !important;
         }
         .roleBox {
             padding-left:30px;
             padding-top: 15px;
         }
+        #stripParent{ width:100%;}
+
+        /* #stripParent div{ display:inline-block; width:33.3%;} */
+        #stripfirstDiv{ display:inline-block; text-align:left;width: 60% !important; padding: 15px 15px;}
+        #stripfirstDiv h3 {margin:0}
+        #stripfirstDiv p {margin-top:10px; margin-bottom:0}
+        #stripsecondDiv{ display:inline-block; text-align:right;width: 18% !important; padding: 15px 15px;vertical-align: top;}
+        #stripsecondDiv span {position: relative;vertical-align: -webkit-baseline-middle;}
+        #stripthirdDiv { display:inline-block; width: 10% !important;padding: 4px 15px;vertical-align: top;}
+        #stripthirdDiv span { vertical-align: -webkit-baseline-middle;position: relative;}
+        #stripthirdDiv img {
+            border: 1px solid #d5d5d5 !important;
+            width: 75px;
+            height: 75px;
+            display: block;
+            font-size: 10px;
+        }
+
+        .strip-content {width: 96%; margin: 0 auto;}
 
         table.mainTable {
-            border:2px solid #ddd;
+            border:1px solid #d5d5d5 !important;
         }
         table.customInnerTable tr {
-            border-bottom: 2px solid #ddd;
+            border-bottom: 1px solid #d5d5d5 !important;
         }
         table.customInnerTable tr:last-child {
-            border-bottom: 0;
+            border-bottom: 0px !important;
         }
-        table.customInnerTable tr td {
-            border:2px solid #ddd;
-            border-top: 0;
+        /* table.customInnerTable tr:last-child {
             border-bottom: 0;
+        } */
+        table.customInnerTable tr td {
+            border:1px solid #d5d5d5 !important;
+            border-top: 0px !important;
+            border-bottom: 0px !important;
         }
         table.customInnerTable tr td:last-child {
-            border-right: 0;
+            border-right: 0px !important;
         }
     </style>
 </head>
 
 <body style="text-align: center;">
         <div style="border-style: dashed hidden;text-align: left;border-width: 2px;background-color: #fff4f0;">
+            <div class="strip-content">
             <h3 style="color: #2d2d2d;margin-left: 3%;">$name (draft for approval)</h3>
             <p style="color: #2d2d2d;margin-left: 3%;margin-bottom: 2%;">Printed at $printedTime</p>
+            </div>
         </div>
         <br>
         <div class="tableMainDiv">
@@ -279,9 +297,9 @@
                         </tr>
                         <tr class="tableContentRow">
                             <td colspan="4">
-                                <ul>
+                                <ul class="custom-table-ul">
                                     #foreach($rc in $user.roleCompetencyList)
-                                    <ul>
+                                    <li>
                                         <table id="custom-table">
                                             <tr>
                                                 <td class="table-role">
@@ -316,7 +334,7 @@
                                                 </td>
                                             </tr>
                                         </table>
-                                    </ul>
+                                    </li>
                                     #end
                                 </ul>
                             </td>
