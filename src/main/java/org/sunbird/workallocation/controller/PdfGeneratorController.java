@@ -44,22 +44,9 @@ public class PdfGeneratorController {
 		return response;
 	}
 
-	@GetMapping(value = "/getWOPublishedPdf/{woId}", produces = MediaType.APPLICATION_PDF_VALUE)
-	public ResponseEntity<?> getWOPublishedPdf(@PathVariable("woId") String woId)
-			throws Exception {
-		byte[] out = null;
-		try {
-			out = pdfGeneratorService.getPublishedPdf(woId);
-		} catch (Exception e) {
-		}
-		if (out == null) {
-			throw new InternalError("Failed to generate PDF file.");
-		}
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.APPLICATION_PDF);
-		headers.add("Content-Disposition", "inline; filename=wo_report.pdf");
-		ResponseEntity<?> response = new ResponseEntity<>(out, headers, HttpStatus.OK);
-		return response;
+	@GetMapping(value = "/getWOPublishedPdf/{woId}")
+	public ResponseEntity<String> getWOPublishedPdf(@PathVariable("woId") String woId) {
+		return new ResponseEntity<>(pdfGeneratorService.getPublishedPdfLink(woId), HttpStatus.OK);
 	}
 
 }

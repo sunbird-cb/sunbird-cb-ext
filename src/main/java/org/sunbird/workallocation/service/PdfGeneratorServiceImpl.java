@@ -132,17 +132,18 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 	}
 
 	@Override
-	public byte[] getPublishedPdf(String woId) {
+	public String getPublishedPdfLink(String woId) {
 		try {
 			Map<String, Object> workOrder = allocationService.getWorkOrderObject(woId);
-			if (!ObjectUtils.isEmpty(workOrder.get("publishedPdfLink"))) {
-				HttpHeaders headers = new HttpHeaders();
-				headers.setAccept(Arrays.asList(MediaType.APPLICATION_PDF, MediaType.APPLICATION_OCTET_STREAM));
-				HttpEntity<String> entity = new HttpEntity<>(headers);
-				ResponseEntity<byte[]> result =
-						restTemplate.exchange((String) workOrder.get("publishedPdfLink"), HttpMethod.GET, entity, byte[].class);
-				return result.getBody();
-			}
+			return (String) workOrder.get("publishedPdfLink");
+//			if (!ObjectUtils.isEmpty(workOrder.get("publishedPdfLink"))) {
+//				HttpHeaders headers = new HttpHeaders();
+//				headers.setAccept(Arrays.asList(MediaType.APPLICATION_PDF, MediaType.APPLICATION_OCTET_STREAM));
+//				HttpEntity<String> entity = new HttpEntity<>(headers);
+//				ResponseEntity<byte[]> result =
+//						restTemplate.exchange((String) workOrder.get("publishedPdfLink"), HttpMethod.GET, entity, byte[].class);
+//				return result.getBody();
+//			}
 		} catch (Exception e) {
 			log.error("Failed to retrieve published pdf.", e);
 		}
@@ -308,7 +309,7 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 		}
 		log.info("Saving the file content as PDF");
 		String htmlFilePath = paramMap.get("ud_htmlFilePath");
-
+		
 		String pdfFileName = paramMap.get("ud_fileName");
 		if (!pdfFileName.endsWith(".pdf")) {
 			pdfFileName = pdfFileName + ".pdf";

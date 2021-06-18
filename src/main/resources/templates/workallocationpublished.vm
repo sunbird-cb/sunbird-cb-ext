@@ -272,10 +272,10 @@
             <p>Published at $printedTime</p>
             </div>
             <div id="stripsecondDiv">
-                <!-- <span>Scan this QR code for the latest version</span> -->
+                <span>Scan this QR code for the latest version</span>
             </div>
             <div id="stripthirdDiv">
-                <!-- <span><img src=$qrcodeurl alt="QR code"></span> -->
+                <span><img src=$qrcodeurl alt="QR code"></span>
             </div>
         </div>
         <div class="tableMainDiv">
@@ -302,12 +302,6 @@
                                             <tr>
                                                 <td class="table-role">
                                                     <b>$rc.roleDetails.name</b>
-                                                    <div class="roleBox">
-                                                        #foreach($c in $rc.competencyDetails)
-                                                        <span>$c.name</span>
-                                                    <br>
-                                                        #end
-                                                    </div>
                                                 </td>
                                                 <td class="table-activity">
                                                     <table id="custom-table" class="customInnerTable">
