@@ -122,6 +122,7 @@ public class Role {
 		FracRequest req = new FracRequest();
 		req.setName(source);
 		req.setName(name);
+		req.setDescription(description);
 		req.setType("ROLE");
 		if ("".equals(id)) {
 			req.setId(null);

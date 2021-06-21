@@ -15,11 +15,20 @@ public class CompetencyDetails {
 	private String description;
 	private String source;
 	private String status;
+	private String level;
 	private AdditionalProperties additionalProperties;
 	private List<Child> children;
 
 	public String getType() {
 		return type;
+	}
+
+	public String getLevel() {
+		return level;
+	}
+
+	public void setLevel(String level) {
+		this.level = level;
 	}
 
 	public void setType(String type) {

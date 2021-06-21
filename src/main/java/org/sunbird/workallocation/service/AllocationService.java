@@ -518,6 +518,7 @@ public class AllocationService {
 			for (CompetencyDetails c : oldCompetencyDetails) {
 				if (StringUtils.isEmpty(c.getId())) {
 					CompetencyDetails newCompetency = fetchAddedComptency(authUserToken, c, null);
+					newCompetency.setLevel(c.getLevel());
 					newCompetencyDetails.add(newCompetency);
 				} else {
 					// Competency is from FRAC - No need to create new.
@@ -532,6 +533,7 @@ public class AllocationService {
 
 					if (isNewChildFound) {
 						CompetencyDetails newCompetency = fetchAddedComptency(authUserToken, c, null);
+						newCompetency.setLevel(c.getLevel());
 						newCompetencyDetails.add(newCompetency);
 					} else {
 						newCompetencyDetails.add(c);
