@@ -10,6 +10,7 @@
 
         .tableMainDiv {
             width: 95%;
+            margin: 0 auto;
         }
         tr.tableHeadRow {
             border:0px !important;
@@ -76,10 +77,10 @@
             display: block
         }
 
-        /* .allocation-table {
+        .allocation-table {
 
             width: 100%;
-        } */
+        }
 
         .th {
             background-color: #f5f5f5;
@@ -293,7 +294,7 @@
                 <tr>
                     <div class="userNameDiv">
                         <h4 class="userName">$foreach.count . $user.userName</h4>
-                        <p class="userDesg">Director - co-ordination</p>
+                        <p class="userDesg">$user.userPosition</p>
                     </div>
                     <table id="custom-table" class="mainTable">
                         <tr class="tableHeadRow">

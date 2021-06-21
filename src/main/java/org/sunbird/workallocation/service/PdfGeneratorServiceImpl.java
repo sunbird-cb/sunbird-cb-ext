@@ -1,23 +1,10 @@
 package org.sunbird.workallocation.service;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.StringWriter;
-import java.text.SimpleDateFormat;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
 import net.glxn.qrgen.core.image.ImageType;
 import net.glxn.qrgen.javase.QRCode;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
@@ -25,17 +12,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.*;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 import org.sunbird.core.exception.BadRequestException;
 import org.sunbird.workallocation.model.PdfGeneratorRequest;
 import org.sunbird.workallocation.util.WorkAllocationConstants;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.*;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 @Service
 public class PdfGeneratorServiceImpl implements PdfGeneratorService {
@@ -156,6 +145,7 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 			return null;
 		}
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("hh:mm a");
+		simpleDateFormat.setTimeZone(TimeZone.getTimeZone("IST"));
 		String printedTime = simpleDateFormat.format(new Date());
 		simpleDateFormat = new SimpleDateFormat("dd MMM yyyy");
 		printedTime = printedTime + " " + simpleDateFormat.format(new Date());
@@ -180,9 +170,18 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 
 		Map<String, Object> headerDetails = new HashMap<>();
 		try {
-			ClassLoader classLoader = getClass().getClassLoader();
-			File file = new File(classLoader.getResource("government-of-india.jpg").getFile());
-			headerDetails.put("deptImgUrl",  file.getAbsolutePath());
+			ClassPathResource classPathResource = new ClassPathResource("government-of-india.jpg");
+			InputStream inputStream = classPathResource.getInputStream();
+			File tempFile = File.createTempFile("government-of-india", ".jpg");
+			OutputStream outStream = new FileOutputStream(tempFile);
+			byte[] buffer = new byte[8 * 1024];
+			int bytesRead;
+			while ((bytesRead = inputStream.read(buffer)) != -1) {
+				outStream.write(buffer, 0, bytesRead);
+			}
+			IOUtils.closeQuietly(inputStream);
+			IOUtils.closeQuietly(outStream);
+			headerDetails.put("deptImgUrl",  tempFile.getAbsolutePath());
 		}catch (Exception ex){
 			log.error("Exception occurred while loading the default department logo");
 		}
