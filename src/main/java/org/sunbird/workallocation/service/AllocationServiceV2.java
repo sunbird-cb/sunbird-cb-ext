@@ -285,7 +285,7 @@ public class AllocationServiceV2 {
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder().query(query);
         sourceBuilder.from(criteria.getPageNo());
         sourceBuilder.size(criteria.getPageSize());
-        sourceBuilder.sort(SortBuilders.fieldSort("createdAt").order(SortOrder.DESC));
+        sourceBuilder.sort(SortBuilders.fieldSort("updatedAt").order(SortOrder.DESC));
 
         List<WorkOrderDTO> workOrderDTOList = new ArrayList<>();
         long totalCount = 0;
