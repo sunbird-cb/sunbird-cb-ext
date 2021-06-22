@@ -270,6 +270,20 @@
         table.customInnerTable tr td:last-child {
             border-right: 0px !important;
         }
+        thead {
+                            display: table-row-group !important;
+                        }
+                        tr {
+                            page-break-before: always !important;
+                            page-break-after: always !important;
+                            page-break-inside: avoid !important;
+                        }
+                        table {
+                            word-wrap: break-word !important;
+                        }
+                        table td {
+                            word-break: break-word !important;
+                        }
     </style>
 </head>
 
