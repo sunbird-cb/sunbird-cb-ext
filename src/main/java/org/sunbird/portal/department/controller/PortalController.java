@@ -131,7 +131,7 @@ public class PortalController {
 	public ResponseEntity<DepartmentInfo> getMyFracDepartment(@RequestHeader("wid") String wid,
 			@RequestParam(name = "allUsers", required = false) boolean isUserInfoRequired,
 			@RequestHeader("rootOrg") String rootOrg) throws Exception {
-		if (!portalService.validateFracUserLogin(wid)) {
+		if (!portalService.validateUserLogin(wid, PortalConstants.FRAC_ROLES, PortalConstants.MDO_DEPT_TYPE)) {
 			throw new BadRequestException("User is not assigned with any FRAC related roles.");
 		}
 		return new ResponseEntity<>(mdoPortalService.getMyFracDepartment(wid, isUserInfoRequired, rootOrg), HttpStatus.OK);
@@ -150,7 +150,9 @@ public class PortalController {
 	public ResponseEntity<DepartmentInfo> getMyMdoDepartment(@RequestHeader("wid") String wid,
 			@RequestParam(name = "allUsers", required = false) boolean isUserInfoRequired,
 			@RequestHeader("rootOrg") String rootOrg) throws Exception {
-		validateUserAccess(PortalConstants.MDO_DEPT_TYPE, PortalConstants.MDO_ROLE_NAME, wid);
+		if (!portalService.validateUserLogin(wid, PortalConstants.MDO_ROLES, PortalConstants.MDO_DEPT_TYPE)) {
+			throw new BadRequestException("User is not assigned with any MDO related roles.");
+		}
 		return new ResponseEntity<>(mdoPortalService.getMyDepartment(wid, isUserInfoRequired, rootOrg), HttpStatus.OK);
 	}
 

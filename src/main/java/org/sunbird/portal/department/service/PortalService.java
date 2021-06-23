@@ -39,7 +39,7 @@ public interface PortalService {
 
 	boolean validateCBPUserLogin(String userId);
 
-	boolean validateFracUserLogin(String userId);
+	boolean validateUserLogin(String userId, List<String> roles, String departmentType);
 
 	boolean validateUserLoginForDepartment(String userId, String departmentType);
 

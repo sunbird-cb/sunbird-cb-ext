@@ -18,6 +18,7 @@ public class PortalConstants {
 	public static final String CBC_ROLE_NAME = "CBC ADMIN";
 	public static final String CBC_MEMBER_NAME = "CBC_MEMBER";
 	public static final String CBC_DEPT_TYPE = "CBC";
+	public static final List<String> MDO_ROLES = Arrays.asList(MDO_ROLE_NAME, "WAT_USER");
 	public static final List<String> CBP_ROLES = Arrays.asList("EDITOR", "REVIEWER", "PUBLISHER", "CONTENT_CREATOR");
 	public static final List<String> FRAC_ROLES = Arrays.asList("IFUMember", "fracAdmin", "fracReviewerOne",
 			"fracReviewerTwo", "fracAccessCompetency", "competencyReviewer");

@@ -960,8 +960,8 @@ public class PortalServiceImpl implements PortalService {
 	}
 
 	@Override
-	public boolean validateFracUserLogin(String userId) {
-		List<Role> roleList = roleRepo.findAllByRoleNameIn(PortalConstants.FRAC_ROLES);
+	public boolean validateUserLogin(String userId, List<String> roles, String departmentType) {
+		List<Role> roleList = roleRepo.findAllByRoleNameIn(roles);
 		Set<Integer> fracRoleIds = new HashSet<>();
 		for (Role r : roleList) {
 			fracRoleIds.add(r.getId());
@@ -974,14 +974,13 @@ public class PortalServiceImpl implements PortalService {
 				if (!Boolean.TRUE.equals(userDeptRole.getIsActive()) || Boolean.TRUE.equals(userDeptRole.getIsBlocked())) {
 					continue;
 				}
-				// Just check this department type is "SPV"
 				Optional<Department> dept = deptRepo.findByIdAndIsDeleted(userDeptRole.getDeptId(), false);
 				if (dept.isPresent()) {
 					Iterable<DepartmentType> deptTypeList = deptTypeRepo
 							.findAllById(Arrays.asList(dept.get().getDeptTypeIds()));
 					if (!DataValidator.isCollectionEmpty(deptTypeList)) {
 						for (DepartmentType deptType : deptTypeList) {
-							if (deptType.getDeptType().equalsIgnoreCase(PortalConstants.MDO_DEPT_TYPE)) {
+							if (deptType.getDeptType().equalsIgnoreCase(departmentType)) {
 								// We have found the expected Department.
 								// Let's check user has at least one Role.
 								for (Integer uRoleId : userDeptRole.getRoleIds()) {
