@@ -17,7 +17,7 @@ public class MdoPortalServiceImpl implements MdoPortalService {
 
 	@Override
 	public DepartmentInfo getMyDepartment(String userId, boolean isUserInfoRequired, String rootOrg) throws Exception {
-		return portalService.getMyDepartmentForRole(PortalConstants.MDO_ROLE_NAME, userId, isUserInfoRequired, rootOrg);
+		return portalService.getMyDepartmentForRoles(PortalConstants.MDO_ROLES, userId, isUserInfoRequired, rootOrg);
 	}
 
 	public DepartmentInfo getMyFracDepartment(String userId, boolean isUserInfoRequired, String rootOrg)
