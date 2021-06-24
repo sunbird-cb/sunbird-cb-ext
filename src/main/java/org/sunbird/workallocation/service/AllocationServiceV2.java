@@ -390,8 +390,7 @@ public class AllocationServiceV2 {
             workOrder.setName(workOrderDTO.getName());
         }
         enrichmentService.enrichCopyWorkOrder(workOrder, userId);
-        RestStatus restStatus = indexerService.addEntity(workOrderIndex, workOrderIndexType, workOrder.getId(),
-                mapper.convertValue(workOrder, Map.class));
+        ArrayList<String> workallocationIds = new ArrayList<>();
         if(!CollectionUtils.isEmpty(workOrder.getUserIds())){
             for(String id : workOrder.getUserIds()){
                 WorkAllocationDTOV2 workAllocationDTO = mapper.convertValue(indexerService.readEntity(workAllocationIndex, workOrderIndexType, id), WorkAllocationDTOV2.class);
@@ -400,10 +399,14 @@ public class AllocationServiceV2 {
                     enrichmentService.enrichWorkAllocation(workAllocationDTO, userId);
                     workAllocationDTO.setId(UUID.randomUUID().toString());
                     workAllocationDTO.setWorkOrderId(workOrder.getId());
+                    workallocationIds.add(workAllocationDTO.getId());
                     indexerService.addEntity(workAllocationIndex, workAllocationIndexType, workAllocationDTO.getId(), mapper.convertValue(workAllocationDTO, Map.class));
                 }
             }
         }
+        workOrder.setUserIds(workallocationIds);
+        RestStatus restStatus = indexerService.addEntity(workOrderIndex, workOrderIndexType, workOrder.getId(),
+                mapper.convertValue(workOrder, Map.class));
         Response response = new Response();
         if (!ObjectUtils.isEmpty(restStatus)) {
             response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
