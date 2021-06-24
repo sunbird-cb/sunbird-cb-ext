@@ -11,7 +11,7 @@
             float: left;
         }
         .deptlogo h3 {
-            margin: 1% 0;
+            margin: 2.5% 0;
         }
 </style>
 </head>
