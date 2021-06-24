@@ -66,13 +66,15 @@ public class EnrichmentService {
 
     private void enrichUserNamesToWorkOrder(WorkOrderDTO workOrderDTO) {
         Set<String> userIds = new HashSet<>();
-        userIds.add(workOrderDTO.getCreatedBy());
+        if(StringUtils.isEmpty(workOrderDTO.getCreatedByName())){
+            userIds.add(workOrderDTO.getCreatedBy());
+        }
         userIds.add(workOrderDTO.getUpdatedBy());
         try {
             logger.info("user Ids : {}", mapper.writeValueAsString(userIds));
             Map<String, Object> usersMap = allocationService.getUserDetails(userIds);
             logger.info("user Map : {}", mapper.writeValueAsString(usersMap));
-            if (!ObjectUtils.isEmpty(usersMap.get(workOrderDTO.getCreatedBy()))) {
+            if (StringUtils.isEmpty(workOrderDTO.getCreatedByName()) && !ObjectUtils.isEmpty(usersMap.get(workOrderDTO.getCreatedBy()))) {
                 UserBasicInfo userBasicInfo = mapper.convertValue(usersMap.get(workOrderDTO.getCreatedBy()), UserBasicInfo.class);
                 String firstName = userBasicInfo.getFirst_name() == null ? "" : userBasicInfo.getFirst_name();
                 String lastName  = userBasicInfo.getLast_name() == null ? "" : userBasicInfo.getLast_name();
@@ -91,11 +93,13 @@ public class EnrichmentService {
 
     private void enrichUserNamesToWorkAllocation(WorkAllocationDTOV2 workAllocationDTOV2) {
         Set<String> userIds = new HashSet<>();
-        userIds.add(workAllocationDTOV2.getCreatedBy());
+        if(StringUtils.isEmpty(workAllocationDTOV2.getCreatedByName())){
+            userIds.add(workAllocationDTOV2.getCreatedBy());
+        }
         userIds.add(workAllocationDTOV2.getUpdatedBy());
         try {
             Map<String, Object> usersMap = allocationService.getUserDetails(userIds);
-            if (!ObjectUtils.isEmpty(usersMap.get(workAllocationDTOV2.getCreatedBy()))) {
+            if (StringUtils.isEmpty(workAllocationDTOV2.getCreatedByName()) && !ObjectUtils.isEmpty(usersMap.get(workAllocationDTOV2.getCreatedBy()))) {
                 UserBasicInfo userBasicInfo = mapper.convertValue(usersMap.get(workAllocationDTOV2.getCreatedBy()), UserBasicInfo.class);
                 String firstName = userBasicInfo.getFirst_name() == null ? "" : userBasicInfo.getFirst_name();
                 String lastName  = userBasicInfo.getLast_name() == null ? "" : userBasicInfo.getLast_name();

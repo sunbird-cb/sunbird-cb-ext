@@ -154,6 +154,7 @@ public class AllocationServiceV2 {
         if(CollectionUtils.isEmpty(workOrder.getUserIds())){workOrder.setUserIds(new ArrayList<>());}
         workOrder.addUserId(workAllocationDTO.getId());
         updateWorkOderCount(workOrder);
+        enrichmentService.enrichWorkOrder(workOrder, userId, WorkAllocationConstants.UPDATE);
         indexerService.updateEntity(workOrderIndex, workOrderIndexType, workOrder.getId(),mapper.convertValue(workOrder, Map.class));
         Response response = new Response();
         if (!ObjectUtils.isEmpty(restStatus)) {
@@ -193,6 +194,7 @@ public class AllocationServiceV2 {
         }
         workOrder.addUserId(workAllocationDTO.getId());
         updateWorkOderCount(workOrder);
+        enrichmentService.enrichWorkOrder(workOrder, userId, WorkAllocationConstants.UPDATE);
         indexerService.updateEntity(workOrderIndex, workOrderIndexType, workOrder.getId(), mapper.convertValue(workOrder, Map.class));
         Response response = new Response();
         if (!ObjectUtils.isEmpty(restStatus)) {
