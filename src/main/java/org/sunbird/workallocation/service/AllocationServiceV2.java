@@ -1,6 +1,5 @@
 package org.sunbird.workallocation.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -34,6 +33,7 @@ import java.util.*;
 @Service
 public class AllocationServiceV2 {
 
+    public static final String RESULT = "result";
     @Autowired
     private IndexerService indexerService;
 
@@ -308,7 +308,7 @@ public class AllocationServiceV2 {
         return response;
     }
 
-    public Response getWorkOrderById(String workOrderId) throws Exception {
+    public Response getWorkOrderById(String workOrderId){
         Response response = new Response();
         response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
         response.put(Constants.DATA, getWorkOrderObject(workOrderId));
@@ -316,17 +316,11 @@ public class AllocationServiceV2 {
         return response;
     }
     
-    public Map<String, Object> getWorkOrderObject(String workOrderId) throws Exception
+    public Map<String, Object> getWorkOrderObject(String workOrderId)
     {
     	Map<String, Object> workOrderObject = indexerService.readEntity(workOrderIndex, workOrderIndexType, workOrderId);
-//        List<Object> userList = null;
         if (!CollectionUtils.isEmpty((Collection<?>) workOrderObject.get("userIds"))) {
             List<WorkAllocationDTOV2> workAllocationDTOV2List =  getWorkAllocationListByIds((List<String>)workOrderObject.get("userIds"));
-//            userList = new ArrayList<>();
-//            SearchResponse searchResponse = getSearchResponseForWorkOrder((List<String>)workOrderObject.get("userIds"));
-//            for (SearchHit hit : searchResponse.getHits()) {
-//                userList.add(hit.getSourceAsMap());
-//            }
             workOrderObject.put("users", workAllocationDTOV2List);
         } else {
             workOrderObject.put("users", new ArrayList<>());
@@ -347,9 +341,7 @@ public class AllocationServiceV2 {
         final BoolQueryBuilder query = QueryBuilders.boolQuery();
         query.must(QueryBuilders.termsQuery("id.keyword", workAllocationIds));
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder().query(query);
-        logger.info(sourceBuilder.query().toString());
-        SearchResponse searchResponse = indexerService.getEsResult(workAllocationIndex, workAllocationIndexType, sourceBuilder);
-        return searchResponse;
+        return indexerService.getEsResult(workAllocationIndex, workAllocationIndexType, sourceBuilder);
     }
 
     private List<WorkAllocationDTOV2> getWorkAllocationListByIds(List<String> workAllocationIds){
@@ -435,21 +427,7 @@ public class AllocationServiceV2 {
         int competenciesCount = 0;
         int errorCount = 0;
         int progress = 0;
-        //Need to remove this once the search issue is fixed
         List<WorkAllocationDTOV2> workAllocationList =  getWorkAllocationListByIds(workOrderDTO.getUserIds());
-//        try {
-//            SearchResponse searchResponse = getSearchResponseForWorkOrder(workOrderDTO.getUserIds());
-//            for (SearchHit hit : searchResponse.getHits()) {
-//                workAllocationList.add(mapper.convertValue(hit.getSourceAsMap(), WorkAllocationDTOV2.class));
-//            }
-//        } catch (IOException e) {
-//            logger.error("Exception occurred while searching the users for work order!");
-//        }
-        try {
-            logger.info(mapper.writeValueAsString(workAllocationList));
-        } catch (JsonProcessingException e) {
-            logger.error(e.toString());
-        }
         for (WorkAllocationDTOV2 workAllocationDTOV2 : workAllocationList) {
             if (!CollectionUtils.isEmpty(workAllocationDTOV2.getRoleCompetencyList())) {
                 rolesCount = rolesCount + workAllocationDTOV2.getRoleCompetencyList().size();
@@ -511,14 +489,8 @@ public class AllocationServiceV2 {
         headers.put("Authorization", cbExtServerProperties.getSbApiKey());
         headers.put("Content-Type", "application/json");
         Map<String, Object> response = outboundRequestHandlerService.fetchResultUsingPost(cbExtServerProperties.getContentHost().concat(cbExtServerProperties.getContentCreateEndPoint()), request, headers);
-        try {
-            logger.info("Pdf Asset Creation Response ============>");
-            logger.info(mapper.writeValueAsString(response));
-        } catch (JsonProcessingException e) {
-            logger.error("Parsing issue happened while creating the pdf asset for work order !");
-        }
-        if (!ObjectUtils.isEmpty(response.get("result")))
-            identifier = (String) ((Map<String, Object>) response.get("result")).get("identifier");
+        if (!ObjectUtils.isEmpty(response.get(RESULT)))
+            identifier = (String) ((Map<String, Object>) response.get(RESULT)).get("identifier");
         return identifier;
     }
 
@@ -536,14 +508,9 @@ public class AllocationServiceV2 {
         String uploadURL = cbExtServerProperties.getContentUploadEndPoint().replace("{identifier}", identifier);
         ResponseEntity<Map> response = restTemplate
                 .postForEntity(cbExtServerProperties.getContentHost().concat(uploadURL), requestEntity, Map.class);
-        try {
-            logger.info("Pdf upload Response =========>");
-            logger.info(mapper.writeValueAsString(response.getBody()));
-        } catch (JsonProcessingException e) {
-            logger.error("Parsing issue happened while uploading the pdf asset for work order !");
+        if (!ObjectUtils.isEmpty(response.getBody())){
+            downloadableLink = (String) ((Map<String, Object>) response.getBody().get(RESULT)).get("artifactUrl");
         }
-        if (!ObjectUtils.isEmpty(response.getBody().get("result")))
-            downloadableLink = (String) ((Map<String, Object>) response.getBody().get("result")).get("artifactUrl");
         return downloadableLink;
     }
 
