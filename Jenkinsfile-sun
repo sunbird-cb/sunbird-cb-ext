@@ -36,7 +36,7 @@ node('build-slave') {
                 env.NODE_ENV = "build"
                 print "Environment will be : ${env.NODE_ENV}"
                 sh('chmod 777 build.sh')
-                sh("bash -x build.sh ${build_tag} ${env.NODE_NAME} ${hub_org}")
+                sh("bash -x build.sh ${build_tag} ${env.NODE_NAME} ${docker_server}")
             }
         stage('ArchiveArtifacts') {
                     archiveArtifacts "metadata.json"
