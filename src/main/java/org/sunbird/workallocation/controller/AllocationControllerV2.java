@@ -20,15 +20,17 @@ public class AllocationControllerV2 {
     private AllocationServiceV2 allocationServiceV2;
 
     @PostMapping("/add")
-    public ResponseEntity<Response> addWorkAllocation(@RequestHeader("Authorization") String authUserToken,
+    public ResponseEntity<Response> addWorkAllocation(@RequestHeader("x-authenticated-user-token") String authUserToken,
                                                       @RequestHeader("userId") String userId, @RequestBody WorkAllocationDTOV2 workAllocation) {
+        authUserToken = "bearer "+authUserToken;
         return new ResponseEntity<>(allocationServiceV2.addWorkAllocation(authUserToken, userId, workAllocation),
                 HttpStatus.OK);
     }
 
     @PostMapping("/update")
-    public ResponseEntity<Response> updateWorkAllocation(@RequestHeader("Authorization") String authUserToken,
+    public ResponseEntity<Response> updateWorkAllocation(@RequestHeader("x-authenticated-user-token") String authUserToken,
                                                       @RequestHeader("userId") String userId, @RequestBody WorkAllocationDTOV2 workAllocation) {
+        authUserToken = "bearer "+authUserToken;
         return new ResponseEntity<>(allocationServiceV2.updateWorkAllocation(authUserToken, userId, workAllocation),
                 HttpStatus.OK);
     }
@@ -40,8 +42,8 @@ public class AllocationControllerV2 {
     }
 
     @PostMapping("/update/workorder")
-    public ResponseEntity<Response> updateWorkOrder(@RequestHeader("Authorization") String authUserToken, @RequestHeader("userId") String userId, @RequestBody WorkOrderDTO workOrder) {
-        return new ResponseEntity<>(allocationServiceV2.updateWorkOrder(userId, workOrder, authUserToken.split(" ")[1]),
+    public ResponseEntity<Response> updateWorkOrder(@RequestHeader("x-authenticated-user-token") String authUserToken, @RequestHeader("userId") String userId, @RequestBody WorkOrderDTO workOrder) {
+        return new ResponseEntity<>(allocationServiceV2.updateWorkOrder(userId, workOrder, authUserToken),
                 HttpStatus.OK);
     }
 
