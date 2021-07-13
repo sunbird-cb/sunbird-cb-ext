@@ -102,6 +102,7 @@ public class AllocationServiceV2 {
             restStatus = indexerService.addEntity(workOrderIndex, workOrderIndexType, workOrder.getId(),
                     mapper.convertValue(workOrder, Map.class));
         }catch (Exception ex){
+            logger.error("Exception occurred while creating the work order", ex);
             throw new ApplicationLogicError("Exception occurred while creating the work order", ex);
         }
         Response response = new Response();
@@ -141,6 +142,7 @@ public class AllocationServiceV2 {
                         mapper.convertValue(workOrder, Map.class));
             }
         } catch (Exception ex) {
+            logger.error("Exception occurred while updating the work order", ex);
             throw new ApplicationLogicError("Exception occurred while updating the work order", ex);
         }
         Response response = new Response();
@@ -192,6 +194,7 @@ public class AllocationServiceV2 {
             workOrderRepo.save(workOrderCassandraModel);
             indexerService.updateEntity(workOrderIndex, workOrderIndexType, workOrder.getId(), mapper.convertValue(workOrder, Map.class));
         }catch (Exception ex){
+            logger.error("Exception occurred while saving the work allocation!!", ex);
             throw new ApplicationLogicError("Exception occurred while saving the work allocation!!", ex);
         }
 
@@ -242,6 +245,7 @@ public class AllocationServiceV2 {
             workOrderRepo.save(workOrderCassandraModel);
             indexerService.updateEntity(workOrderIndex, workOrderIndexType, workOrder.getId(), mapper.convertValue(workOrder, Map.class));
         }catch (Exception ex){
+            logger.error("Exception occurred while saving the work allocation!!", ex);
             throw new ApplicationLogicError("Exception occurred while saving the work allocation!!", ex);
         }
         Response response = new Response();
@@ -447,6 +451,7 @@ public class AllocationServiceV2 {
             restStatus = indexerService.addEntity(workOrderIndex, workOrderIndexType, workOrder.getId(),
                     mapper.convertValue(workOrder, Map.class));
         } catch (JsonProcessingException e) {
+            logger.error("Exception occurred while saving the work order!!", e);
             throw new ApplicationLogicError("Exception occurred while saving the work order!!", e);
         }
         Response response = new Response();
@@ -484,6 +489,7 @@ public class AllocationServiceV2 {
                 }
             }
         } catch (JsonProcessingException e) {
+            logger.error("Exception occurred while preparing the copy work allocation!", e);
             throw new ApplicationLogicError("Exception occurred while preparing the copy work allocation!", e);
         }
     }
