@@ -2,6 +2,8 @@ package org.sunbird.workallocation.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.elasticsearch.action.bulk.BulkRequest;
+import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
@@ -18,9 +20,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -111,5 +115,21 @@ public class IndexerService {
         searchRequest.source(searchSourceBuilder);
         return esClient.search(searchRequest, RequestOptions.DEFAULT);
 
+    }
+
+    public RestStatus BulkInsert(List<IndexRequest> indexRequestList) {
+        BulkResponse restStatus = null;
+        if (!CollectionUtils.isEmpty(indexRequestList)) {
+            BulkRequest bulkRequest = new BulkRequest();
+            indexRequestList.forEach(bulkRequest::add);
+            try {
+                restStatus = esClient.bulk(bulkRequest, RequestOptions.DEFAULT);
+            } catch (IOException e) {
+                logger.error("Exception while doing the bulk operation in ElasticSearch", e);
+            }
+        }
+        if(null == restStatus)
+            return null;
+        return restStatus.status();
     }
 }
