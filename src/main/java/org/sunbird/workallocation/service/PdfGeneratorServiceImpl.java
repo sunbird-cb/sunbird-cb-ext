@@ -3,7 +3,6 @@ package org.sunbird.workallocation.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.glxn.qrgen.core.image.ImageType;
 import net.glxn.qrgen.javase.QRCode;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
@@ -13,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -29,6 +27,14 @@ import java.util.*;
 @Service
 public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 
+	public static final String DEPT_NAME = "deptName";
+	public static final String DEPT_IMG_URL = "deptImgUrl";
+	public static final String UD_HTML_FILE_PATH = "ud_htmlFilePath";
+	public static final String UD_FILE_NAME = "ud_fileName";
+	public static final String UD_HTML_HEADER_FILE_PATH = "ud_htmlHeaderFilePath";
+	public static final String HTML = ".html";
+	public static final String UD_HTML_FOOTER_FILE_PATH = "ud_htmlFooterFilePath";
+	public static final String EXCEPTION_OCCURRED_WHILE_CREATING_THE_PDF = "Exception occurred while creating the pdf";
 	@Value("${html.store.path}")
 	public String htmlFolderPath;
 
@@ -62,19 +68,19 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 			throw new BadRequestException("Template Id is mandatory!");
 		}
 		String footerTemplateName = "templates/pdf-draft-footer.html";
-		Map<String, Object> headerDetails = new HashMap<String, Object>();
+		Map<String, Object> headerDetails = new HashMap<>();
 		String deptId = (String) request.getTagValuePair().get("deptId");
-		headerDetails.put("deptName", (String) request.getTagValuePair().get("deptName"));
-		headerDetails.put("deptImgUrl", (String) request.getTagValuePair().get("deptImgUrl"));
+		headerDetails.put(DEPT_NAME, request.getTagValuePair().get(DEPT_NAME));
+		headerDetails.put(DEPT_IMG_URL, request.getTagValuePair().get(DEPT_IMG_URL));
 		String headerMessage = readVm("pdf-header.vm", headerDetails);
 		String headerHtmlFilePath = createHTMLFile("pdf-header", headerMessage);
 
 		String message = readVm(request.getTemplateId() + ".vm", request.getTagValuePair());
 		String htmlFilePath = createHTMLFile(request.getTemplateId(), message);
 		Map<String, String> paramMap = new HashMap<>();
-		paramMap.put("ud_htmlFilePath", htmlFilePath);
-		paramMap.put("ud_fileName", htmlFilePath.replace(".html", ".pdf"));
-		paramMap.put("ud_htmlHeaderFilePath", headerHtmlFilePath);
+		paramMap.put(UD_HTML_FILE_PATH, htmlFilePath);
+		paramMap.put(UD_FILE_NAME, htmlFilePath.replace(HTML, ".pdf"));
+		paramMap.put(UD_HTML_HEADER_FILE_PATH, headerHtmlFilePath);
 
 		InputStream inputStream = getClass().getClassLoader().getResourceAsStream(footerTemplateName);
 
@@ -82,16 +88,16 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 		inputStream.read(buffer);
 
 		File htmlFooterPath = new File("/tmp/" + deptId + "pdf-draft-footer.html");
-		OutputStream outStream = new FileOutputStream(htmlFooterPath);
-		outStream.write(buffer);
-
-		paramMap.put("ud_htmlFooterFilePath", htmlFooterPath.getAbsolutePath());
+		try(OutputStream outStream = new FileOutputStream(htmlFooterPath)){
+			outStream.write(buffer);
+		}
+		paramMap.put(UD_HTML_FOOTER_FILE_PATH, htmlFooterPath.getAbsolutePath());
 
 		String pdfFilePath = "";
 		try {
 			pdfFilePath = makePdf(paramMap);
 		} catch (Exception exception) {
-			log.error("Exception occurred while creating the pdf", exception);
+			log.error(EXCEPTION_OCCURRED_WHILE_CREATING_THE_PDF, exception);
 		}
 		File file = new File(pdfFilePath);
 		byte[] bytes = new byte[(int) file.length()];
@@ -104,7 +110,7 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 	public byte[] generatePdf(String woId) {
 		try {
 			String pdfFilePath = getPDFFilePath(woId);
-			if (pdfFilePath == null) return null;
+			if (pdfFilePath == null) return new byte[0];
 			File file = new File(pdfFilePath);
 			byte[] bytes = new byte[(int) file.length()];
 			try (FileInputStream fis = new FileInputStream(file)) {
@@ -116,8 +122,7 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 		catch (Exception e) {
 			log.error("Failed to retrieve WorkOrder object for pdf generation.", e);
 		}
-
-		return null;
+		return new byte[0];
 	}
 
 	@Override
@@ -125,14 +130,6 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 		try {
 			Map<String, Object> workOrder = allocationService.getWorkOrderObject(woId);
 			return (String) workOrder.get("publishedPdfLink");
-//			if (!ObjectUtils.isEmpty(workOrder.get("publishedPdfLink"))) {
-//				HttpHeaders headers = new HttpHeaders();
-//				headers.setAccept(Arrays.asList(MediaType.APPLICATION_PDF, MediaType.APPLICATION_OCTET_STREAM));
-//				HttpEntity<String> entity = new HttpEntity<>(headers);
-//				ResponseEntity<byte[]> result =
-//						restTemplate.exchange((String) workOrder.get("publishedPdfLink"), HttpMethod.GET, entity, byte[].class);
-//				return result.getBody();
-//			}
 		} catch (Exception e) {
 			log.error("Failed to retrieve published pdf.", e);
 		}
@@ -173,19 +170,20 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 			ClassPathResource classPathResource = new ClassPathResource("government-of-india.jpg");
 			InputStream inputStream = classPathResource.getInputStream();
 			File tempFile = File.createTempFile("government-of-india", ".jpg");
-			OutputStream outStream = new FileOutputStream(tempFile);
-			byte[] buffer = new byte[8 * 1024];
-			int bytesRead;
-			while ((bytesRead = inputStream.read(buffer)) != -1) {
-				outStream.write(buffer, 0, bytesRead);
+			try(OutputStream outStream = new FileOutputStream(tempFile)){
+				byte[] buffer = new byte[8 * 1024];
+				int bytesRead;
+				while ((bytesRead = inputStream.read(buffer)) != -1) {
+					outStream.write(buffer, 0, bytesRead);
+				}
+				IOUtils.closeQuietly(inputStream);
+				IOUtils.closeQuietly(outStream);
 			}
-			IOUtils.closeQuietly(inputStream);
-			IOUtils.closeQuietly(outStream);
-			headerDetails.put("deptImgUrl",  tempFile.getAbsolutePath());
+			headerDetails.put(DEPT_IMG_URL,  tempFile.getAbsolutePath());
 		}catch (Exception ex){
 			log.error("Exception occurred while loading the default department logo");
 		}
-		headerDetails.put("deptName", (String) workOrder.get("deptName"));
+		headerDetails.put(DEPT_NAME,  workOrder.get(DEPT_NAME));
 //		headerDetails.put("deptImgUrl",  (String) workOrder.get("deptImgUrl"));
 		String headerMessage = readVm("pdf-header.vm", headerDetails);
 		String headerHtmlFilePath = createHTMLFile("pdf-header", headerMessage);
@@ -193,9 +191,9 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 		String message = readVm(templateName + ".vm", workOrder);
 		String htmlFilePath = createHTMLFile(templateName, message);
 		Map<String, String> paramMap = new HashMap<>();
-		paramMap.put("ud_htmlFilePath", htmlFilePath);
-		paramMap.put("ud_fileName", htmlFilePath.replace(".html", ".pdf"));
-		paramMap.put("ud_htmlHeaderFilePath", headerHtmlFilePath);
+		paramMap.put(UD_HTML_FILE_PATH, htmlFilePath);
+		paramMap.put(UD_FILE_NAME, htmlFilePath.replace(HTML, ".pdf"));
+		paramMap.put(UD_HTML_HEADER_FILE_PATH, headerHtmlFilePath);
 
 		InputStream inputStream = getClass().getClassLoader().getResourceAsStream(footerTemplateName);
 
@@ -203,16 +201,16 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 		inputStream.read(buffer);
 
 		File htmlFooterPath = new File("/tmp/" + deptId + "pdf-draft-footer.html");
-		OutputStream outStream = new FileOutputStream(htmlFooterPath);
-		outStream.write(buffer);
-
-		paramMap.put("ud_htmlFooterFilePath", htmlFooterPath.getAbsolutePath());
+		try(OutputStream outStream = new FileOutputStream(htmlFooterPath)){
+			outStream.write(buffer);
+		}
+		paramMap.put(UD_HTML_FOOTER_FILE_PATH, htmlFooterPath.getAbsolutePath());
 
 		String pdfFilePath = "";
 		try {
 			pdfFilePath = makePdf(paramMap);
 		} catch (Exception exception) {
-			log.error("Exception occurred while creating the pdf", exception);
+			log.error(EXCEPTION_OCCURRED_WHILE_CREATING_THE_PDF, exception);
 		}
 		return pdfFilePath;
 	}
@@ -222,14 +220,14 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 		try {
 			return getPDFFilePath(woId);
 		} catch (Exception exception) {
-			log.error("Exception occurred while creating the pdf", exception);
+			log.error(EXCEPTION_OCCURRED_WHILE_CREATING_THE_PDF, exception);
 		}
 		return null;
 	}
 
 	public String createHTMLFile(String fName, String htmlContent) throws IOException {
 		String prefix = UUID.randomUUID().toString().toUpperCase() + "-" + System.currentTimeMillis();
-		String htmlFilePath = htmlFolderPath + "/" + prefix + "_" + fName + ".html";
+		String htmlFilePath = htmlFolderPath + "/" + prefix + "_" + fName + HTML;
 		File theDir = new File(htmlFolderPath);
 		if (!theDir.exists()) {
 			theDir.mkdirs();
@@ -241,8 +239,7 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 			htmlContent = htmlContent.replaceAll("â€™", "'");
 		}
 		BufferedWriter out = null;
-		try {
-			FileWriter fstream = new FileWriter(htmlFilePath);
+		try (FileWriter fstream = new FileWriter(htmlFilePath)){
 			out = new BufferedWriter(fstream);
 			out.write(htmlContent);
 			out.close();
@@ -285,6 +282,7 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 				try {
 					writer.close();
 				} catch (IOException e) {
+					log.error(e.toString());
 				}
 			}
 		}
@@ -293,16 +291,16 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 	}
 
 	public String makePdf(Map<String, String> paramMap) throws IOException {
-		if (null == paramMap.get("ud_htmlFilePath")) {
+		if (null == paramMap.get(UD_HTML_FILE_PATH)) {
 			return null;
 		}
-		StringBuffer commandLine = new StringBuffer();
+		StringBuilder commandLine = new StringBuilder();
 		commandLine.append(" wkhtmltopdf --enable-local-file-access --margin-top 20.0 --margin-left 10.0 --margin-right 10.0 --footer-spacing 5 ");
 		commandLine.append("--header-spacing 5  --footer-font-size 8 --orientation Portrait --page-size A4 ");
 		commandLine.append("--load-media-error-handling ignore  --no-header-line --no-footer-line --enable-forms ");
 		commandLine.append("--load-error-handling ignore --header-right [page]/[toPage] ");
-		commandLine.append("--minimum-font-size 11 --footer-html ").append(paramMap.get("ud_htmlFooterFilePath"));
-		commandLine.append(" --header-html ").append(paramMap.get("ud_htmlHeaderFilePath")).append(" ");
+		commandLine.append("--minimum-font-size 11 --footer-html ").append(paramMap.get(UD_HTML_FOOTER_FILE_PATH));
+		commandLine.append(" --header-html ").append(paramMap.get(UD_HTML_HEADER_FILE_PATH)).append(" ");
 
 		for (Map.Entry<String, String> entry : paramMap.entrySet()) {
 			// ud stands for user defined. All the parameters which are not the
@@ -314,8 +312,8 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 			}
 		}
 		log.info("Saving the file content as PDF");
-		String htmlFilePath = paramMap.get("ud_htmlFilePath");
-		String pdfFileName = paramMap.get("ud_fileName");
+		String htmlFilePath = paramMap.get(UD_HTML_FILE_PATH);
+		String pdfFileName = paramMap.get(UD_FILE_NAME);
 		if (!pdfFileName.endsWith(".pdf")) {
 			pdfFileName = pdfFileName + ".pdf";
 		}
@@ -331,7 +329,6 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 			commandLine.append(" " + htmlFilePath);
 			commandLine.append(" " + pdfFilePath + " \n");
 			String command = commandLine.toString();
-			// command = command.replace("--header-html", "");
 			BufferedReader brCleanUp = null;
 			Process process = null;
 			try {
@@ -354,7 +351,7 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 				}
 			}
 		} else {
-			log.info("Failed to create PDF file for filename ===> " + htmlFilePath);
+			log.info("Failed to create PDF file for filename ===> {}", htmlFilePath);
 		}
 		return pdfFilePath;
 	}
