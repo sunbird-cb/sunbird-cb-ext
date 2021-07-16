@@ -1,6 +1,8 @@
 package org.sunbird.workallocation.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -22,8 +24,11 @@ import org.sunbird.common.model.Response;
 import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
+import org.sunbird.core.exception.ApplicationLogicError;
 import org.sunbird.core.exception.BadRequestException;
 import org.sunbird.workallocation.model.*;
+import org.sunbird.workallocation.repo.WorkAllocationRepo;
+import org.sunbird.workallocation.repo.WorkOrderRepo;
 import org.sunbird.workallocation.util.Validator;
 import org.sunbird.workallocation.util.WorkAllocationConstants;
 
@@ -58,6 +63,12 @@ public class AllocationServiceV2 {
     @Autowired
     private CbExtServerProperties cbExtServerProperties;
 
+    @Autowired
+    private WorkAllocationRepo workAllocationRepo;
+
+    @Autowired
+    private WorkOrderRepo workOrderRepo;
+
     @Value("${workorder.index.name}")
     public String workOrderIndex;
 
@@ -84,8 +95,16 @@ public class AllocationServiceV2 {
     public Response addWorkOrder(String userId, WorkOrderDTO workOrder) {
         validator.validateWorkOrder(workOrder, WorkAllocationConstants.ADD);
         enrichmentService.enrichWorkOrder(workOrder, userId, WorkAllocationConstants.ADD);
-        RestStatus restStatus = indexerService.addEntity(workOrderIndex, workOrderIndexType, workOrder.getId(),
-                mapper.convertValue(workOrder, Map.class));
+        RestStatus restStatus = null;
+        try {
+            WorkOrderCassandraModel workOrderCassandraModel = new WorkOrderCassandraModel(workOrder.getId(), mapper.writeValueAsString(workOrder));
+            workOrderRepo.save(workOrderCassandraModel);
+            restStatus = indexerService.addEntity(workOrderIndex, workOrderIndexType, workOrder.getId(),
+                    mapper.convertValue(workOrder, Map.class));
+        }catch (Exception ex){
+            logger.error("Exception occurred while creating the work order", ex);
+            throw new ApplicationLogicError("Exception occurred while creating the work order", ex);
+        }
         Response response = new Response();
         if (!ObjectUtils.isEmpty(restStatus)) {
             response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
@@ -108,14 +127,24 @@ public class AllocationServiceV2 {
     public Response updateWorkOrder(String userId, WorkOrderDTO workOrder, String xAuthUser) {
         validator.validateWorkOrder(workOrder, WorkAllocationConstants.UPDATE);
         enrichmentService.enrichWorkOrder(workOrder, userId, WorkAllocationConstants.UPDATE);
-        RestStatus restStatus = indexerService.updateEntity(workOrderIndex, workOrderIndexType, workOrder.getId(),
-                mapper.convertValue(workOrder, Map.class));
-        String  publishedPdfLink = uploadPdfToContentService(workOrder, xAuthUser);
-       if(!StringUtils.isEmpty(publishedPdfLink)){
-           workOrder.setPublishedPdfLink(publishedPdfLink);
-           indexerService.updateEntity(workOrderIndex, workOrderIndexType, workOrder.getId(),
-                   mapper.convertValue(workOrder, Map.class));
-       }
+        RestStatus restStatus = null;
+        try {
+            WorkOrderCassandraModel workOrderCassandraModel = new WorkOrderCassandraModel(workOrder.getId(), mapper.writeValueAsString(workOrder));
+            workOrderRepo.save(workOrderCassandraModel);
+            restStatus = indexerService.updateEntity(workOrderIndex, workOrderIndexType, workOrder.getId(),
+                    mapper.convertValue(workOrder, Map.class));
+            String publishedPdfLink = uploadPdfToContentService(workOrder, xAuthUser);
+            if (!StringUtils.isEmpty(publishedPdfLink)) {
+                workOrder.setPublishedPdfLink(publishedPdfLink);
+                workOrderCassandraModel = new WorkOrderCassandraModel(workOrder.getId(), mapper.writeValueAsString(workOrder));
+                workOrderRepo.save(workOrderCassandraModel);
+                indexerService.updateEntity(workOrderIndex, workOrderIndexType, workOrder.getId(),
+                        mapper.convertValue(workOrder, Map.class));
+            }
+        } catch (Exception ex) {
+            logger.error("Exception occurred while updating the work order", ex);
+            throw new ApplicationLogicError("Exception occurred while updating the work order", ex);
+        }
         Response response = new Response();
         if (!ObjectUtils.isEmpty(restStatus)) {
             response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
@@ -137,6 +166,7 @@ public class AllocationServiceV2 {
     public Response addWorkAllocation(String authUserToken, String userId, WorkAllocationDTOV2 workAllocationDTO) {
         validator.validateWorkAllocation(workAllocationDTO, WorkAllocationConstants.ADD);
         enrichmentService.enrichWorkAllocation(workAllocationDTO, userId);
+        RestStatus restStatus = null;
         if (StringUtils.isEmpty(workAllocationDTO.getId()))
             workAllocationDTO.setId(UUID.randomUUID().toString());
         if (!CollectionUtils.isEmpty(workAllocationDTO.getRoleCompetencyList())) {
@@ -147,15 +177,27 @@ public class AllocationServiceV2 {
                 && !StringUtils.isEmpty(workAllocationDTO.getUserPosition())) {
             workAllocationDTO.setPositionId(allocationService.createUserPosition(authUserToken, workAllocationDTO.getUserPosition()));
         }
-        RestStatus restStatus = indexerService.addEntity(workAllocationIndex, workAllocationIndexType, workAllocationDTO.getId(),
-                mapper.convertValue(workAllocationDTO, Map.class));
-        Map<String, Object> workOrderObject = indexerService.readEntity(workOrderIndex, workOrderIndexType, workAllocationDTO.getWorkOrderId());
-        WorkOrderDTO workOrder = mapper.convertValue(workOrderObject, WorkOrderDTO.class);
-        if(CollectionUtils.isEmpty(workOrder.getUserIds())){workOrder.setUserIds(new ArrayList<>());}
-        workOrder.addUserId(workAllocationDTO.getId());
-        updateWorkOderCount(workOrder);
-        enrichmentService.enrichWorkOrder(workOrder, userId, WorkAllocationConstants.UPDATE);
-        indexerService.updateEntity(workOrderIndex, workOrderIndexType, workOrder.getId(),mapper.convertValue(workOrder, Map.class));
+        try {
+            WorkAllocationCassandraModel workAllocationCassandraModel = new WorkAllocationCassandraModel(workAllocationDTO.getId(), mapper.writeValueAsString(workAllocationDTO));
+            workAllocationRepo.save(workAllocationCassandraModel);
+            restStatus = indexerService.addEntity(workAllocationIndex, workAllocationIndexType, workAllocationDTO.getId(),
+                    mapper.convertValue(workAllocationDTO, Map.class));
+            Map<String, Object> workOrderObject = indexerService.readEntity(workOrderIndex, workOrderIndexType, workAllocationDTO.getWorkOrderId());
+            WorkOrderDTO workOrder = mapper.convertValue(workOrderObject, WorkOrderDTO.class);
+            if (CollectionUtils.isEmpty(workOrder.getUserIds())) {
+                workOrder.setUserIds(new ArrayList<>());
+            }
+            workOrder.addUserId(workAllocationDTO.getId());
+            updateWorkOderCount(workOrder);
+            enrichmentService.enrichWorkOrder(workOrder, userId, WorkAllocationConstants.UPDATE);
+            WorkOrderCassandraModel  workOrderCassandraModel = new WorkOrderCassandraModel(workOrder.getId(), mapper.writeValueAsString(workOrder));
+            workOrderRepo.save(workOrderCassandraModel);
+            indexerService.updateEntity(workOrderIndex, workOrderIndexType, workOrder.getId(), mapper.convertValue(workOrder, Map.class));
+        }catch (Exception ex){
+            logger.error("Exception occurred while saving the work allocation!!", ex);
+            throw new ApplicationLogicError("Exception occurred while saving the work allocation!!", ex);
+        }
+
         Response response = new Response();
         if (!ObjectUtils.isEmpty(restStatus)) {
             response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
@@ -177,6 +219,7 @@ public class AllocationServiceV2 {
     public Response updateWorkAllocation(String authUserToken, String userId, WorkAllocationDTOV2 workAllocationDTO) {
         validator.validateWorkAllocation(workAllocationDTO, WorkAllocationConstants.UPDATE);
         enrichmentService.enrichWorkAllocation(workAllocationDTO, userId);
+        RestStatus restStatus = null;
         if (!CollectionUtils.isEmpty(workAllocationDTO.getRoleCompetencyList())) {
             verifyRoleActivity(authUserToken, workAllocationDTO);
             verifyCompetencyDetails(authUserToken, workAllocationDTO);
@@ -185,17 +228,26 @@ public class AllocationServiceV2 {
                 && !StringUtils.isEmpty(workAllocationDTO.getUserPosition())) {
             workAllocationDTO.setPositionId(allocationService.createUserPosition(authUserToken, workAllocationDTO.getUserPosition()));
         }
-        RestStatus restStatus = indexerService.updateEntity(workAllocationIndex, workAllocationIndexType, workAllocationDTO.getId(),
-                mapper.convertValue(workAllocationDTO, Map.class));
-        Map<String, Object> workOrderObject = indexerService.readEntity(workOrderIndex, workOrderIndexType, workAllocationDTO.getWorkOrderId());
-        WorkOrderDTO workOrder = mapper.convertValue(workOrderObject, WorkOrderDTO.class);
-        if (CollectionUtils.isEmpty(workOrder.getUserIds())) {
-            workOrder.setUserIds(new ArrayList<>());
+        try {
+            WorkAllocationCassandraModel workAllocationCassandraModel = new WorkAllocationCassandraModel(workAllocationDTO.getId(), mapper.writeValueAsString(workAllocationDTO));
+            workAllocationRepo.save(workAllocationCassandraModel);
+            restStatus = indexerService.updateEntity(workAllocationIndex, workAllocationIndexType, workAllocationDTO.getId(),
+                    mapper.convertValue(workAllocationDTO, Map.class));
+            Map<String, Object> workOrderObject = indexerService.readEntity(workOrderIndex, workOrderIndexType, workAllocationDTO.getWorkOrderId());
+            WorkOrderDTO workOrder = mapper.convertValue(workOrderObject, WorkOrderDTO.class);
+            if (CollectionUtils.isEmpty(workOrder.getUserIds())) {
+                workOrder.setUserIds(new ArrayList<>());
+            }
+            workOrder.addUserId(workAllocationDTO.getId());
+            updateWorkOderCount(workOrder);
+            enrichmentService.enrichWorkOrder(workOrder, userId, WorkAllocationConstants.UPDATE);
+            WorkOrderCassandraModel  workOrderCassandraModel = new WorkOrderCassandraModel(workOrder.getId(), mapper.writeValueAsString(workOrder));
+            workOrderRepo.save(workOrderCassandraModel);
+            indexerService.updateEntity(workOrderIndex, workOrderIndexType, workOrder.getId(), mapper.convertValue(workOrder, Map.class));
+        }catch (Exception ex){
+            logger.error("Exception occurred while saving the work allocation!!", ex);
+            throw new ApplicationLogicError("Exception occurred while saving the work allocation!!", ex);
         }
-        workOrder.addUserId(workAllocationDTO.getId());
-        updateWorkOderCount(workOrder);
-        enrichmentService.enrichWorkOrder(workOrder, userId, WorkAllocationConstants.UPDATE);
-        indexerService.updateEntity(workOrderIndex, workOrderIndexType, workOrder.getId(), mapper.convertValue(workOrder, Map.class));
         Response response = new Response();
         if (!ObjectUtils.isEmpty(restStatus)) {
             response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
@@ -315,10 +367,10 @@ public class AllocationServiceV2 {
         response.put(Constants.STATUS, HttpStatus.OK);
         return response;
     }
-    
+
     public Map<String, Object> getWorkOrderObject(String workOrderId)
     {
-    	Map<String, Object> workOrderObject = indexerService.readEntity(workOrderIndex, workOrderIndexType, workOrderId);
+        Map<String, Object> workOrderObject = indexerService.readEntity(workOrderIndex, workOrderIndexType, workOrderId);
         if (!CollectionUtils.isEmpty((Collection<?>) workOrderObject.get("userIds"))) {
             List<WorkAllocationDTOV2> workAllocationDTOV2List =  getWorkAllocationListByIds((List<String>)workOrderObject.get("userIds"));
             workOrderObject.put("users", workAllocationDTOV2List);
@@ -382,23 +434,26 @@ public class AllocationServiceV2 {
             workOrder.setName(workOrderDTO.getName());
         }
         enrichmentService.enrichCopyWorkOrder(workOrder, userId);
-        ArrayList<String> workallocationIds = new ArrayList<>();
-        if(!CollectionUtils.isEmpty(workOrder.getUserIds())){
-            for(String id : workOrder.getUserIds()){
-                WorkAllocationDTOV2 workAllocationDTO = mapper.convertValue(indexerService.readEntity(workAllocationIndex, workOrderIndexType, id), WorkAllocationDTOV2.class);
-                if(!ObjectUtils.isEmpty(workAllocationDTO)){
-                    workAllocationDTO.setCreatedBy(null);
-                    enrichmentService.enrichWorkAllocation(workAllocationDTO, userId);
-                    workAllocationDTO.setId(UUID.randomUUID().toString());
-                    workAllocationDTO.setWorkOrderId(workOrder.getId());
-                    workallocationIds.add(workAllocationDTO.getId());
-                    indexerService.addEntity(workAllocationIndex, workAllocationIndexType, workAllocationDTO.getId(), mapper.convertValue(workAllocationDTO, Map.class));
-                }
-            }
+        ArrayList<String> workAllocationIds = new ArrayList<>();
+        List<IndexRequest> indexRequestList = new ArrayList<>();
+        List<WorkAllocationCassandraModel> cassandraModelList = new ArrayList<>();
+        prepareWorkAllocations(userId, workOrder, workAllocationIds, indexRequestList, cassandraModelList);
+        RestStatus restStatus = null;
+        if(!CollectionUtils.isEmpty(indexRequestList)){
+            workAllocationRepo.saveAll(cassandraModelList);
+            indexerService.BulkInsert(indexRequestList);
         }
-        workOrder.setUserIds(workallocationIds);
-        RestStatus restStatus = indexerService.addEntity(workOrderIndex, workOrderIndexType, workOrder.getId(),
-                mapper.convertValue(workOrder, Map.class));
+        workOrder.setUserIds(workAllocationIds);
+        WorkOrderCassandraModel workOrderCassandraModel = null;
+        try {
+            workOrderCassandraModel = new WorkOrderCassandraModel(workOrder.getId(), mapper.writeValueAsString(workOrder));
+            workOrderRepo.save(workOrderCassandraModel);
+            restStatus = indexerService.addEntity(workOrderIndex, workOrderIndexType, workOrder.getId(),
+                    mapper.convertValue(workOrder, Map.class));
+        } catch (JsonProcessingException e) {
+            logger.error("Exception occurred while saving the work order!!", e);
+            throw new ApplicationLogicError("Exception occurred while saving the work order!!", e);
+        }
         Response response = new Response();
         if (!ObjectUtils.isEmpty(restStatus)) {
             response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
@@ -411,6 +466,34 @@ public class AllocationServiceV2 {
         response.put(Constants.STATUS, HttpStatus.OK);
         return response;
     }
+
+    private void prepareWorkAllocations(String userId, WorkOrderDTO workOrder, ArrayList<String> workAllocationIds,
+                                        List<IndexRequest> indexRequestList, List<WorkAllocationCassandraModel> cassandraModelList) {
+        try {
+            if (!CollectionUtils.isEmpty(workOrder.getUserIds())) {
+                for (String id : workOrder.getUserIds()) {
+                    WorkAllocationDTOV2 workAllocationDTO = mapper.convertValue(indexerService.readEntity(workAllocationIndex, workOrderIndexType, id), WorkAllocationDTOV2.class);
+                    if (!ObjectUtils.isEmpty(workAllocationDTO)) {
+                        workAllocationDTO.setCreatedBy(null);
+                        enrichmentService.enrichWorkAllocation(workAllocationDTO, userId);
+                        workAllocationDTO.setId(UUID.randomUUID().toString());
+                        workAllocationDTO.setWorkOrderId(workOrder.getId());
+                        workAllocationIds.add(workAllocationDTO.getId());
+                        WorkAllocationCassandraModel workAllocationCassandraModel = null;
+                        workAllocationCassandraModel = new WorkAllocationCassandraModel(workAllocationDTO.getId(), mapper.writeValueAsString(workAllocationDTO));
+                        cassandraModelList.add(workAllocationCassandraModel);
+                        IndexRequest indexRequest = new IndexRequest(workAllocationIndex, workAllocationIndexType, workAllocationDTO.getId()).
+                                source(mapper.convertValue(workAllocationDTO, Map.class));
+                        indexRequestList.add(indexRequest);
+                    }
+                }
+            }
+        } catch (JsonProcessingException e) {
+            logger.error("Exception occurred while preparing the copy work allocation!", e);
+            throw new ApplicationLogicError("Exception occurred while preparing the copy work allocation!", e);
+        }
+    }
+
     public Response getUserBasicDetails(String userId) throws IOException {
         Response response = new Response();
         response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
