@@ -148,7 +148,14 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 		printedTime = printedTime + " " + simpleDateFormat.format(new Date());
 		workOrder.put("printedTime", printedTime);
 		String status = (String) workOrder.get("status");
-		String deptId = (String) workOrder.get("deptId");
+		String deptId = "";
+		if(workOrder.get("deptId") instanceof Integer){
+			deptId = String.valueOf(workOrder.get("deptId"));
+		}
+		else if(workOrder.get("deptId") instanceof String)
+		{
+			deptId = (String)workOrder.get("deptId");
+		}
 		String templateName = null;
 		String footerTemplateName = null;
 		if (WorkAllocationConstants.DRAFT_STATUS.equalsIgnoreCase(status)) {
