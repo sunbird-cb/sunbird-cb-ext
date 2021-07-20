@@ -71,7 +71,7 @@ public class AllocationControllerV2 {
     }
     
     @GetMapping("/check/headers")
-    public ResponseEntity<String> checkHeaders(@RequestHeader("nodebb_authorization_token") String nodeBBToken) throws Exception {
+    public ResponseEntity<String> checkHeaders(@RequestHeader("Authorization") String nodeBBToken) throws Exception {
         System.out.println(nodeBBToken);
         return new ResponseEntity<>("success", HttpStatus.OK);
     }
