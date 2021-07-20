@@ -69,5 +69,11 @@ public class AllocationControllerV2 {
     public ResponseEntity<Response> getUserBasicInfo(@PathVariable("userId") String userId) throws IOException {
         return new ResponseEntity<>(allocationServiceV2.getUserBasicDetails(userId), HttpStatus.OK);
     }
+    
+    @GetMapping("/check/headers")
+    public ResponseEntity<String> checkHeaders(@RequestHeader("nodebb_authorization_token") String nodeBBToken) throws Exception {
+        System.out.println(nodeBBToken);
+        return new ResponseEntity<>("success", HttpStatus.OK);
+    }
 
 }
