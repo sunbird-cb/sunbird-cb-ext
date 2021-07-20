@@ -18,7 +18,7 @@ public class CatalogController {
 	private CatalogServiceImpl catalogService;
 
 	@GetMapping("/")
-	public ResponseEntity<Catalog> getCatalog(@RequestHeader("xAuthUser") String authUserToken,
+	public ResponseEntity<Catalog> getCatalog(@RequestHeader("x-authenticated-user-token") String authUserToken,
 											  @RequestParam(name = "consumption", required = false) boolean isEnrichConsumption){
 		return new ResponseEntity<>(catalogService.getCatalog(authUserToken, isEnrichConsumption), HttpStatus.OK);
 	}

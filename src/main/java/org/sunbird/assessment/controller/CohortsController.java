@@ -82,4 +82,67 @@ public class CohortsController {
 				cohortsServ.autoEnrollmentInCourse(authUserToken, rootOrg, contentId, userUUID),
 				HttpStatus.OK);
 	}
+
+
+//	====================================
+//	KONG API ROUTES CHANGES
+	/**
+	 *
+	 * @param resourceId
+	 * @param rootOrg
+	 * @param userUUID
+	 * @param count
+	 * @return
+	 * @throws Exception
+	 */
+	@GetMapping("/v2/resources/user/cohorts/top-performers")
+	public ResponseEntity<List<CohortUsers>> getTopPerformersForResource(@RequestHeader("resourceId") String resourceId,
+															  @RequestHeader("rootOrg") String rootOrg, @RequestHeader("userUUID") String userUUID,
+															  @RequestParam(value = "count", defaultValue = "20", required = false) Integer count) throws Exception {
+
+		return new ResponseEntity<>(cohortsServ.getTopPerformers(rootOrg, resourceId, userUUID, count),
+				HttpStatus.OK);
+	}
+
+	/**
+	 * gets all active users
+	 *
+	 * @param authUserToken
+	 * @param contentId
+	 * @param rootOrg
+	 * @param userUUID
+	 * @param count
+	 * @param toFilter
+	 * @return
+	 * @throws Exception
+	 */
+	@GetMapping("/v2/resources/user/cohorts/activeusers")
+	public ResponseEntity<List<CohortUsers>> getActiveUsersForResource(@RequestHeader("x-authenticated-user-token") String authUserToken,
+															@RequestHeader("resourceId") String contentId, @RequestHeader("rootOrg") String rootOrg,
+															@RequestHeader("userUUID") String userUUID,
+															@RequestParam(value = "count", required = false, defaultValue = "50") Integer count,
+															@RequestParam(value = "filter", required = false, defaultValue = "false") Boolean toFilter)
+			throws Exception {
+		return new ResponseEntity<>(
+				cohortsServ.getActiveUsers(authUserToken, rootOrg, contentId, userUUID, count, toFilter),
+				HttpStatus.OK);
+	}
+
+	/**
+	 *
+	 * @param authUserToken
+	 * @param contentId
+	 * @param rootOrg
+	 * @param userUUID
+	 * @return
+	 * @throws Exception
+	 */
+	@GetMapping("/v1/autoenrollment")
+	public ResponseEntity<Response> userAutoEnrollment(@RequestHeader("x-authenticated-user-token") String authUserToken,
+														   @RequestHeader("courseId") String contentId, @RequestHeader("rootOrg") String rootOrg,
+														   @RequestHeader("userUUID") String userUUID)throws Exception {
+		return new ResponseEntity<>(
+				cohortsServ.autoEnrollmentInCourse(authUserToken, rootOrg, contentId, userUUID),
+				HttpStatus.OK);
+	}
 }
