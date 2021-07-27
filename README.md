@@ -118,6 +118,8 @@ CREATE TABLE user_department_role_audit
 - user_assessment_master
 - user_quiz_master
 - user_quiz_summary
+- work_order
+- work_allocation
 
 **Queries to create the cassandra table**
 
@@ -215,5 +217,20 @@ CREATE TABLE sunbird.user_quiz_summary (
     content_id text,
     date_updated timestamp,
     PRIMARY KEY ((root_org, user_id), content_id)
+);
+```
+
+```sh
+CREATE TABLE work_order(
+    id text,
+    data text,
+    PRIMARY KEY (id)
+);
+```
+```sh
+CREATE TABLE work_allocation(
+    id text,
+    data text,
+    PRIMARY KEY (id)
 );
 ```
