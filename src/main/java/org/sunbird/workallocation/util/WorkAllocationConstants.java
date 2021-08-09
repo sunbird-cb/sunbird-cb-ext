@@ -15,4 +15,24 @@ public class WorkAllocationConstants {
 			.unmodifiableList(Arrays.asList(DRAFT_STATUS, PUBLISHED_STATUS, ARCHIVED_STATUS));
 	public static final String ADD = "add";
 	public static final String UPDATE = "update";
+
+	//WAT telemetry const
+
+	public static final String AUDIT_CONST = "AUDIT";
+
+	public static final String MDO_ADMIN_CONST = "MDO ADMIN";
+
+	public static final String VERSION = "3.0";
+
+	public static final String WAT_NAME = "WAT";
+
+	public static final String EVENTS_NAME = "events";
+
+	public static final String WORK_ORDER_ID_CONST = "work order id";
+
+	public static final String MDO_PORTAL_CONST = "dev.mdo.portal";
+
+	public static final String MDO_NAME_CONST = "mdo";
+
+	public static final String VERSION_TYPE = "1.0";
 }

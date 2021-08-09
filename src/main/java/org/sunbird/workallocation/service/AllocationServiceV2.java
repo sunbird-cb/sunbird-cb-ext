@@ -26,6 +26,7 @@ import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.core.exception.ApplicationLogicError;
 import org.sunbird.core.exception.BadRequestException;
+import org.sunbird.core.producer.Producer;
 import org.sunbird.workallocation.model.*;
 import org.sunbird.workallocation.repo.WorkAllocationRepo;
 import org.sunbird.workallocation.repo.WorkOrderRepo;
@@ -81,6 +82,9 @@ public class AllocationServiceV2 {
     @Value("${workallocation.index.type}")
     public String workAllocationIndexType;
 
+    @Autowired
+    Producer producer;
+
 
     ObjectMapper mapper = new ObjectMapper();
 
@@ -111,6 +115,9 @@ public class AllocationServiceV2 {
         } else {
             response.put(Constants.MESSAGE, Constants.FAILED);
         }
+        HashMap<String, String> watEventData = new HashMap<>();
+        watEventData.put("workorderId", workOrder.getId());
+        producer.push(cbExtServerProperties.getKafkaTopicWatEvent(), watEventData);
         HashMap<String, Object> data = new HashMap<>();
         data.put("id", workOrder.getId());
         response.put(Constants.DATA, data);
@@ -145,6 +152,9 @@ public class AllocationServiceV2 {
             logger.error("Exception occurred while updating the work order", ex);
             throw new ApplicationLogicError("Exception occurred while updating the work order", ex);
         }
+        HashMap<String, String> watEventData = new HashMap<>();
+        watEventData.put("workorderId", workOrder.getId());
+        producer.push(cbExtServerProperties.getKafkaTopicWatEvent(), watEventData);
         Response response = new Response();
         if (!ObjectUtils.isEmpty(restStatus)) {
             response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
