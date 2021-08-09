@@ -45,7 +45,7 @@ public class WATConsumer {
 
     private static final String[] ignorableFieldsForPublishedState = {"userName", "userEmail", "submittedFromName", "submittedFromEmail", "submittedToName", "submittedToEmail"};
 
-    @KafkaListener(id = "id0", groupId = "watTelemetryTopic-consumer", topicPartitions = {
+    @KafkaListener(id = "id2", groupId = "watTelemetryTopic-consumer", topicPartitions = {
             @TopicPartition(topic = "${kafka.topics.wat.telemetry.event}", partitions = {"0", "1", "2", "3"})})
     public void processMessage(ConsumerRecord<String, String> data) {
         try {
