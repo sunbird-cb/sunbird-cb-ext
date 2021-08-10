@@ -136,6 +136,10 @@ public class CbExtServerProperties {
     @Value("${sunbird.telemetry.endpoint}")
     private String telemetryEndpoint;
 
+    @Value("${wat.telemetry.env}")
+    private String watTelemetryEnv;
+
+
     public String getContentHost() {
         return contentHost;
     }
@@ -489,5 +493,13 @@ public class CbExtServerProperties {
 
     public void setTelemetryEndpoint(String telemetryEndpoint) {
         this.telemetryEndpoint = telemetryEndpoint;
+    }
+
+    public String getWatTelemetryEnv() {
+        return watTelemetryEnv;
+    }
+
+    public void setWatTelemetryEnv(String watTelemetryEnv) {
+        this.watTelemetryEnv = watTelemetryEnv;
     }
 }

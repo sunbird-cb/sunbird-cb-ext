@@ -1,7 +1,6 @@
 package org.sunbird.workallocation.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.ser.FilterProvider;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
@@ -10,28 +9,33 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.TopicPartition;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.core.logger.CbExtLogger;
 import org.sunbird.workallocation.model.PropertyFilterMixIn;
+import org.sunbird.workallocation.model.WorkAllocationCassandraModel;
 import org.sunbird.workallocation.model.WorkOrderCassandraModel;
 import org.sunbird.workallocation.model.WorkOrderPrimaryKeyModel;
 import org.sunbird.workallocation.model.telemetryEvent.*;
+import org.sunbird.workallocation.repo.WorkAllocationRepo;
 import org.sunbird.workallocation.repo.WorkOrderRepo;
 import org.sunbird.workallocation.util.WorkAllocationConstants;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class WATConsumer {
 
     @Autowired
     private WorkOrderRepo workOrderRepo;
+
+
+    @Autowired
+    private WorkAllocationRepo workAllocationRepo;
+
 
     @Autowired
     private OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
@@ -58,12 +62,30 @@ public class WATConsumer {
             if (workOrderCassandraModelOptional.isPresent()) {
                 WorkOrderCassandraModel workOrderCassandraModel = workOrderCassandraModelOptional.get();
                 Map<String, Object> watObj = mapper.readValue(workOrderCassandraModel.getData(), Map.class);
+                logger.info("consumed record for WAT ...");
+                logger.info(mapper.writeValueAsString(watObj));
+                List<String> userIds = (List<String>)watObj.get("userIds");
+                if(!CollectionUtils.isEmpty(userIds)){
+                   List<WorkAllocationCassandraModel> workAllocationList = workAllocationRepo.findByIdIn(userIds);
+                   List<Map<String, Object>> workAllocations = new ArrayList<>();
+                    workAllocationList.forEach(workAllocationCassandraModel -> {
+                        try {
+                            workAllocations.add(mapper.readValue(workAllocationCassandraModel.getData(), Map.class));
+                        } catch (IOException e) {
+                            logger.error(e);
+                        }
+                    });
+                    watObj.put("users", workAllocations);
+                }
                 if (WorkAllocationConstants.PUBLISHED_STATUS.equals(watObj.get("status"))) {
-                    mapper.addMixIn(Object.class, PropertyFilterMixIn.class);
-                    FilterProvider filters = new SimpleFilterProvider().addFilter("filter properties by name", SimpleBeanPropertyFilter.serializeAllExcept(ignorableFieldsForPublishedState));
-                    ObjectWriter writer = mapper.writer(filters);
-                    watObj = mapper.readValue(writer.writeValueAsString(watObj), Map.class);
+                    ObjectMapper mapper1 = new ObjectMapper();
+                    mapper1.addMixIn(Object.class, PropertyFilterMixIn.class);
+                    FilterProvider filters = new SimpleFilterProvider().addFilter("PropertyFilter", SimpleBeanPropertyFilter.serializeAllExcept(ignorableFieldsForPublishedState));
+                    String writer = mapper1.writer(filters).writeValueAsString(watObj);
+                    watObj = mapper1.readValue(writer, Map.class);
                     Event event = getTelemetryEvent(watObj);
+                    logger.info("Posting WAT event to telemetry ...");
+                    logger.info(mapper.writeValueAsString(event));
                     postTelemetryEvent(event);
                 }
             }
@@ -78,10 +100,11 @@ public class WATConsumer {
     }
 
     private Event getTelemetryEvent(Map<String, Object> watObject) {
+        watObject.put("mdo_name", watObject.get("deptName"));
         Event event = new Event();
         Actor actor = new Actor();
         actor.setId((String) watObject.get("id"));
-        actor.setType(WorkAllocationConstants.MDO_ADMIN_CONST);
+        actor.setType(WorkAllocationConstants.USER_CONST);
         event.setActor(actor);
         event.setEid(WorkAllocationConstants.AUDIT_CONST);
         event.setEdata(watObject);
@@ -89,10 +112,10 @@ public class WATConsumer {
         event.setTimestamp(dateFormat.format(new Date((Long) watObject.get("updatedAt"))));
         event.setEts((Long) watObject.get("updatedAt"));
         Context context = new Context();
-        context.setChannel("");
+        context.setChannel((String) watObject.get("deptId"));
         context.setEnv(WorkAllocationConstants.WAT_NAME);
         Pdata pdata = new Pdata();
-        pdata.setId(WorkAllocationConstants.MDO_PORTAL_CONST);
+        pdata.setId(cbExtServerProperties.getWatTelemetryEnv());
         pdata.setPid(WorkAllocationConstants.MDO_NAME_CONST);
         pdata.setVer(WorkAllocationConstants.VERSION_TYPE);
         context.setPdata(pdata);

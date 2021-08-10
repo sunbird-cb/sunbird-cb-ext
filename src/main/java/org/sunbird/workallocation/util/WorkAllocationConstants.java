@@ -20,7 +20,7 @@ public class WorkAllocationConstants {
 
 	public static final String AUDIT_CONST = "AUDIT";
 
-	public static final String MDO_ADMIN_CONST = "MDO ADMIN";
+	public static final String USER_CONST = "User";
 
 	public static final String VERSION = "3.0";
 
@@ -29,8 +29,6 @@ public class WorkAllocationConstants {
 	public static final String EVENTS_NAME = "events";
 
 	public static final String WORK_ORDER_ID_CONST = "work order id";
-
-	public static final String MDO_PORTAL_CONST = "dev.mdo.portal";
 
 	public static final String MDO_NAME_CONST = "mdo";
 
