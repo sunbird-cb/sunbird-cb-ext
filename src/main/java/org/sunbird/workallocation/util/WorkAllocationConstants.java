@@ -1,5 +1,6 @@
 package org.sunbird.workallocation.util;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -33,4 +34,10 @@ public class WorkAllocationConstants {
 	public static final String MDO_NAME_CONST = "mdo";
 
 	public static final String VERSION_TYPE = "1.0";
+
+	public static final String EID = "CB_AUDIT";
+
+	public static List<String> PROPS = Collections.unmodifiableList(Arrays.asList("WAT"));
+
+
 }

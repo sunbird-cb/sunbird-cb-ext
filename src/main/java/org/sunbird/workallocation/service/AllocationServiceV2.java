@@ -207,7 +207,9 @@ public class AllocationServiceV2 {
             logger.error("Exception occurred while saving the work allocation!!", ex);
             throw new ApplicationLogicError("Exception occurred while saving the work allocation!!", ex);
         }
-
+        HashMap<String, String> watEventData = new HashMap<>();
+        watEventData.put("workorderId", workAllocationDTO.getWorkOrderId());
+        producer.push(cbExtServerProperties.getKafkaTopicWatEvent(), watEventData);
         Response response = new Response();
         if (!ObjectUtils.isEmpty(restStatus)) {
             response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
@@ -258,6 +260,9 @@ public class AllocationServiceV2 {
             logger.error("Exception occurred while saving the work allocation!!", ex);
             throw new ApplicationLogicError("Exception occurred while saving the work allocation!!", ex);
         }
+        HashMap<String, String> watEventData = new HashMap<>();
+        watEventData.put("workorderId", workAllocationDTO.getWorkOrderId());
+        producer.push(cbExtServerProperties.getKafkaTopicWatEvent(), watEventData);
         Response response = new Response();
         if (!ObjectUtils.isEmpty(restStatus)) {
             response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
