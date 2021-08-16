@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.TopicPartition;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,7 @@ import org.springframework.util.CollectionUtils;
 import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.core.logger.CbExtLogger;
+import org.sunbird.core.producer.Producer;
 import org.sunbird.workallocation.model.PropertyFilterMixIn;
 import org.sunbird.workallocation.model.WorkAllocationCassandraModel;
 import org.sunbird.workallocation.model.WorkOrderCassandraModel;
@@ -40,6 +42,12 @@ public class WATConsumer {
 
     @Autowired
     private CbExtServerProperties cbExtServerProperties;
+
+    @Autowired
+    private Producer producer;
+
+    @Value("${kafka.topics.parent.telemetry.event}")
+    public String telemetryEventTopicName;
 
     private CbExtLogger logger = new CbExtLogger(getClass().getName());
 
@@ -79,7 +87,8 @@ public class WATConsumer {
                 Event event = getTelemetryEvent(watObj);
                 logger.info("Posting WAT event to telemetry ...");
                 logger.info(mapper.writeValueAsString(event));
-                postTelemetryEvent(event);
+                //postTelemetryEvent(event);
+                producer.push(telemetryEventTopicName, event);
             }
         } catch (IOException e) {
             logger.error(e);

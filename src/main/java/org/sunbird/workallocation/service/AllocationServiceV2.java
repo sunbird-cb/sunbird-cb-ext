@@ -475,6 +475,9 @@ public class AllocationServiceV2 {
         } else {
             response.put(Constants.MESSAGE, Constants.FAILED);
         }
+        HashMap<String, String> watEventData = new HashMap<>();
+        watEventData.put("workorderId", workOrder.getId());
+        producer.push(cbExtServerProperties.getKafkaTopicWatEvent(), watEventData);
         HashMap<String, Object> data = new HashMap<>();
         data.put("id", workOrder.getId());
         response.put(Constants.DATA, data);
