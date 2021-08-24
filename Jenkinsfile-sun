@@ -38,13 +38,13 @@ node('build-slave') {
                 sh('chmod 777 build.sh')
                 sh("bash -x build.sh ${build_tag} ${env.NODE_NAME} ${docker_server}")
             }
-        stage('ArchiveArtifacts') {
+                        stage('ArchiveArtifacts') {
                     archiveArtifacts "metadata.json"
                     currentBuild.description = "${build_tag}"
                 }
 
       }
-  
+        
 	}
     catch (err) {
         currentBuild.result = "FAILURE"
