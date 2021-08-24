@@ -1,5 +1,5 @@
 @Library('deploy-conf') _
-node('build-slave') {
+node() {
     try {
         String ANSI_GREEN = "\u001B[32m"
         String ANSI_NORMAL = "\u001B[0m"
@@ -24,7 +24,6 @@ node('build-slave') {
         
         stage('docker-pre-build') {
             sh '''
-				
 				docker build -f ./Dockerfile.build -t $docker_pre_build .
 				docker run --name $docker_pre_build $docker_pre_build:latest && docker cp $docker_pre_build:/opt/target/sb-cb-ext-0.0.1-SNAPSHOT.jar .
 				sleep 30
