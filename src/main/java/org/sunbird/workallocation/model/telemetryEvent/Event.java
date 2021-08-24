@@ -13,9 +13,7 @@ public class Event {
     private String timestamp;
     private long ets;
     private Context context;
-    private Flags flags;
     private String mid;
-    private String type;
     private ObjectData object;
 
     public Actor getActor() {
@@ -67,13 +65,6 @@ public class Event {
         this.context = context;
     }
 
-    public Flags getFlags() {
-        return flags;
-    }
-
-    public void setFlags(Flags flags) {
-        this.flags = flags;
-    }
 
     public String getMid() {
         return mid;
@@ -81,14 +72,6 @@ public class Event {
 
     public void setMid(String mid) {
         this.mid = mid;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
     }
 
     public ObjectData getObject() {

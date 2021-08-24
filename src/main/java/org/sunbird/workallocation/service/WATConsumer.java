@@ -110,16 +110,26 @@ public class WATConsumer {
     }
 
     private Event getTelemetryEvent(Map<String, Object> watObject) {
-        watObject.put("mdo_name", watObject.get("deptName"));
-        watObject.put("state", watObject.get("status"));
-        watObject.put("props", WorkAllocationConstants.PROPS);
+        HashMap<String, Object> eData = new HashMap<>();
+        eData.put("state", watObject.get("status"));
+        eData.put("props", WorkAllocationConstants.PROPS);
+        HashMap<String, Object> cbObject = new HashMap<>();
+        cbObject.put("id", watObject.get("id"));
+        cbObject.put("type", WorkAllocationConstants.TYPE);
+        cbObject.put("ver", 1.0);
+        cbObject.put("name", watObject.get("name"));
+        cbObject.put("org", watObject.get("deptName"));
+        eData.put("cb_object", cbObject);
+        HashMap<String, Object> data = new HashMap<>();
+        data.put("data", watObject);
+        eData.put("cb_data", data);
         Event event = new Event();
         Actor actor = new Actor();
         actor.setId((String) watObject.get("id"));
         actor.setType(WorkAllocationConstants.USER_CONST);
         event.setActor(actor);
         event.setEid(WorkAllocationConstants.EID);
-        event.setEdata(watObject);
+        event.setEdata(eData);
         event.setVer(WorkAllocationConstants.VERSION);
         event.setTimestamp(dateFormat.format(new Date((Long) watObject.get("updatedAt"))));
         event.setEts((Long) watObject.get("updatedAt"));
@@ -133,20 +143,13 @@ public class WATConsumer {
         pdata.setVer(WorkAllocationConstants.VERSION_TYPE);
         context.setPdata(pdata);
         event.setContext(context);
-        Flags flags = new Flags();
-        flags.setPp_duplicate_skipped(true);
-        flags.setPp_validation_processed(true);
-        event.setFlags(flags);
+
+
         ObjectData objectData = new ObjectData();
         objectData.setId((String) watObject.get("id"));
         objectData.setType(WorkAllocationConstants.WORK_ORDER_ID_CONST);
-        if (WorkAllocationConstants.DRAFT_STATUS.equals(watObject.get("status"))) {
-            objectData.setName((String) watObject.get("name"));
-            objectData.setOrg((String) watObject.get("deptName"));
-            objectData.setType("");
-        }
         event.setObject(objectData);
-        event.setType(WorkAllocationConstants.EVENTS_NAME);
+//      event.setType(WorkAllocationConstants.EVENTS_NAME);
         return event;
     }
 }

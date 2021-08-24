@@ -37,6 +37,8 @@ public class WorkAllocationConstants {
 
 	public static final String EID = "CB_AUDIT";
 
+	public static final String TYPE = "WorkOrder";
+
 	public static List<String> PROPS = Collections.unmodifiableList(Arrays.asList("WAT"));
 
 
