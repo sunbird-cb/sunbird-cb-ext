@@ -116,7 +116,7 @@ public class WATConsumer {
         HashMap<String, Object> cbObject = new HashMap<>();
         cbObject.put("id", watObject.get("id"));
         cbObject.put("type", WorkAllocationConstants.TYPE);
-        cbObject.put("ver", 1.0);
+        cbObject.put("ver", String.valueOf(1.0));
         cbObject.put("name", watObject.get("name"));
         cbObject.put("org", watObject.get("deptName"));
         eData.put("cb_object", cbObject);
