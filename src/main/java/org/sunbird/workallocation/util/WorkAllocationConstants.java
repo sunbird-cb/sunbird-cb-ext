@@ -29,13 +29,16 @@ public class WorkAllocationConstants {
 
 	public static final String EVENTS_NAME = "events";
 
-	public static final String WORK_ORDER_ID_CONST = "work order id";
+	public static final String WORK_ORDER_ID_CONST = "WorkOrder";
 
 	public static final String MDO_NAME_CONST = "mdo";
 
 	public static final String VERSION_TYPE = "1.0";
 
 	public static final String EID = "CB_AUDIT";
+
+	public static final String CB_NAME = "CB";
+
 
 	public static final String TYPE = "WorkOrder";
 

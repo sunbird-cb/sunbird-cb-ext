@@ -9,8 +9,6 @@ public class Event {
     private String eid;
     private Map<String, Object> edata;
     private String ver;
-    @JsonProperty("@timestamp")
-    private String timestamp;
     private long ets;
     private Context context;
     private String mid;
@@ -41,13 +39,6 @@ public class Event {
         this.ver = ver;
     }
 
-    public String getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(String timestamp) {
-        this.timestamp = timestamp;
-    }
 
     public long getEts() {
         return ets;

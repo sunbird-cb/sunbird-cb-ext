@@ -131,9 +131,8 @@ public class WATConsumer {
         event.setEid(WorkAllocationConstants.EID);
         event.setEdata(eData);
         event.setVer(WorkAllocationConstants.VERSION);
-        event.setTimestamp(dateFormat.format(new Date((Long) watObject.get("updatedAt"))));
         event.setEts((Long) watObject.get("updatedAt"));
-        event.setMid(WorkAllocationConstants.EID+"."+UUID.randomUUID());
+        event.setMid(WorkAllocationConstants.CB_NAME+"."+UUID.randomUUID());
         Context context = new Context();
         context.setChannel((String) watObject.get("deptId"));
         context.setEnv(WorkAllocationConstants.WAT_NAME);
