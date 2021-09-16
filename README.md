@@ -235,7 +235,7 @@ CREATE TABLE work_allocation(
 );
 ```
 ```sh
-CREATE TABLE sunbird.user_work_allocation_mapping(
+CREATE TABLE user_work_allocation_mapping(
     userid text,
     workallocationid text,
     workorderid text,
