@@ -11,17 +11,16 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.TopicPartition;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.core.logger.CbExtLogger;
 import org.sunbird.core.producer.Producer;
-import org.sunbird.workallocation.model.PropertyFilterMixIn;
-import org.sunbird.workallocation.model.WorkAllocationCassandraModel;
-import org.sunbird.workallocation.model.WorkOrderCassandraModel;
-import org.sunbird.workallocation.model.WorkOrderPrimaryKeyModel;
+import org.sunbird.workallocation.model.*;
 import org.sunbird.workallocation.model.telemetryEvent.*;
 import org.sunbird.workallocation.repo.WorkAllocationRepo;
 import org.sunbird.workallocation.repo.WorkOrderRepo;
+import org.sunbird.workallocation.repo.UserWorkAllocationMappingRepo;
 import org.sunbird.workallocation.util.WorkAllocationConstants;
 
 import java.io.IOException;
@@ -45,6 +44,9 @@ public class WATConsumer {
 
     @Autowired
     private Producer producer;
+
+    @Autowired
+    private UserWorkAllocationMappingRepo userWorkAllocationMappingRepo;
 
     @Value("${kafka.topics.parent.telemetry.event}")
     public String telemetryEventTopicName;
@@ -73,15 +75,18 @@ public class WATConsumer {
                 List<String> userIds = (List<String>) watObj.get("userIds");
                 if (!CollectionUtils.isEmpty(userIds)) {
                     List<WorkAllocationCassandraModel> workAllocationList = workAllocationRepo.findByIdIn(userIds);
-                    List<Map<String, Object>> workAllocations = new ArrayList<>();
+                    List<WorkAllocationDTOV2> workAllocations = new ArrayList<>();
                     workAllocationList.forEach(workAllocationCassandraModel -> {
                         try {
-                            workAllocations.add(mapper.readValue(workAllocationCassandraModel.getData(), Map.class));
+                            workAllocations.add(mapper.readValue(workAllocationCassandraModel.getData(), WorkAllocationDTOV2.class));
                         } catch (IOException e) {
                             logger.error(e);
                         }
                     });
                     watObj.put("users", workAllocations);
+
+                    //update the user_workorder_mapping table
+                    updateUserWorkOrderMappings(watObj, workAllocations);
                 }
                 watObj = getFilterObject(watObj);
                 Event event = getTelemetryEvent(watObj);
@@ -132,7 +137,7 @@ public class WATConsumer {
         event.setEdata(eData);
         event.setVer(WorkAllocationConstants.VERSION);
         event.setEts((Long) watObject.get("updatedAt"));
-        event.setMid(WorkAllocationConstants.CB_NAME+"."+UUID.randomUUID());
+        event.setMid(WorkAllocationConstants.CB_NAME + "." + UUID.randomUUID());
         Context context = new Context();
         context.setChannel((String) watObject.get("deptId"));
         context.setEnv(WorkAllocationConstants.WAT_NAME);
@@ -142,8 +147,6 @@ public class WATConsumer {
         pdata.setVer(WorkAllocationConstants.VERSION_TYPE);
         context.setPdata(pdata);
         event.setContext(context);
-
-
         ObjectData objectData = new ObjectData();
         objectData.setId((String) watObject.get("id"));
         objectData.setType(WorkAllocationConstants.WORK_ORDER_ID_CONST);
@@ -151,4 +154,24 @@ public class WATConsumer {
 //      event.setType(WorkAllocationConstants.EVENTS_NAME);
         return event;
     }
+
+    public void updateUserWorkOrderMappings(Map<String, Object> workOrderMap, List<WorkAllocationDTOV2> workAllocationDTOV2List) {
+        try {
+            String workOrderId = (String) workOrderMap.get("id");
+            String status = (String) workOrderMap.get("status");
+            if (!CollectionUtils.isEmpty(workAllocationDTOV2List) && !StringUtils.isEmpty(status)) {
+                List<UserWorkAllocationMapping> userWorkAllocationMappings = new ArrayList<>();
+                workAllocationDTOV2List.forEach(workAllocationDTOV2 -> {
+                    if (!StringUtils.isEmpty(workAllocationDTOV2.getUserId()) && !StringUtils.isEmpty(workAllocationDTOV2.getId())) {
+                        UserWorkAllocationMapping userWorkAllocationMapping = new UserWorkAllocationMapping(workAllocationDTOV2.getUserId(), workAllocationDTOV2.getId(), workOrderId, status);
+                        userWorkAllocationMappings.add(userWorkAllocationMapping);
+                    }
+                });
+                userWorkAllocationMappingRepo.saveAll(userWorkAllocationMappings);
+            }
+        } catch (Exception ex) {
+            logger.error(ex);
+        }
+    }
+
 }

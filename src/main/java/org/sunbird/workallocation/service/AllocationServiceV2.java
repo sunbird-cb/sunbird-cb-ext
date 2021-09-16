@@ -1,6 +1,7 @@
 package org.sunbird.workallocation.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchResponse;
@@ -30,11 +31,13 @@ import org.sunbird.core.producer.Producer;
 import org.sunbird.workallocation.model.*;
 import org.sunbird.workallocation.repo.WorkAllocationRepo;
 import org.sunbird.workallocation.repo.WorkOrderRepo;
+import org.sunbird.workallocation.repo.UserWorkAllocationMappingRepo;
 import org.sunbird.workallocation.util.Validator;
 import org.sunbird.workallocation.util.WorkAllocationConstants;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class AllocationServiceV2 {
@@ -83,12 +86,17 @@ public class AllocationServiceV2 {
     public String workAllocationIndexType;
 
     @Autowired
+    private UserWorkAllocationMappingRepo userWorkAllocationMappingRepo;
+
+    @Autowired
     Producer producer;
 
 
     ObjectMapper mapper = new ObjectMapper();
 
     private Logger logger = LoggerFactory.getLogger(AllocationServiceV2.class);
+
+    final String[] includeFields = { "roleCompetencyList.competencyDetails"};
 
     /**
      *
@@ -615,4 +623,39 @@ public class AllocationServiceV2 {
         return downloadableLink;
     }
 
+    public Response getUserCompetencies(String userId) {
+        HashSet<CompetencyDetails> competencyDetails = new HashSet<>();
+        List<UserWorkAllocationMapping> userWorkAllocationMappings = userWorkAllocationMappingRepo.findByUserId(userId);
+        if (!CollectionUtils.isEmpty(userWorkAllocationMappings)) {
+            List<String> workAllocationIds = userWorkAllocationMappings.stream().
+                    filter(allocationDetails -> WorkAllocationConstants.PUBLISHED_STATUS.equals(allocationDetails.getStatus())).
+                    map(userWorkAllocationMapping -> userWorkAllocationMapping.getPrimaryKey().getWorkAllocationId()).collect(Collectors.toList());
+            if (!CollectionUtils.isEmpty(workAllocationIds)) {
+                final BoolQueryBuilder query = QueryBuilders.boolQuery();
+                query.must(QueryBuilders.termsQuery("id.keyword", workAllocationIds));
+                SearchSourceBuilder sourceBuilder = new SearchSourceBuilder().query(query);
+                sourceBuilder.fetchSource(includeFields, new String[]{});
+                try {
+                    SearchResponse searchResponse = indexerService.getEsResult(workAllocationIndex, workAllocationIndexType, sourceBuilder);
+                    for (SearchHit hit : searchResponse.getHits()) {
+                        Map<String, Object> sourceAsMap = hit.getSourceAsMap();
+                        List<RoleCompetency> roleCompetencies = mapper.convertValue(sourceAsMap.get("roleCompetencyList"), new TypeReference<List<RoleCompetency>>() {
+                        });
+                        if (!CollectionUtils.isEmpty(roleCompetencies)) {
+                            List<CompetencyDetails> competencyDetailsList = roleCompetencies.stream().map(roleCompetency -> roleCompetency.getCompetencyDetails()).
+                                    flatMap(competencyList -> competencyList.stream()).collect(Collectors.toList());
+                            competencyDetails.addAll(competencyDetailsList);
+                        }
+                    }
+                } catch (IOException e) {
+                    logger.error("Elastic Search Exception", e);
+                }
+            }
+        }
+        Response response = new Response();
+        response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
+        response.put(Constants.DATA, competencyDetails);
+        response.put(Constants.STATUS, HttpStatus.OK);
+        return response;
+    }
 }
