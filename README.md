@@ -234,3 +234,12 @@ CREATE TABLE work_allocation(
     PRIMARY KEY (id)
 );
 ```
+```sh
+CREATE TABLE user_work_allocation_mapping(
+    userid text,
+    workallocationid text,
+    workorderid text,
+    status text,
+    PRIMARY KEY (userid, workallocationid)
+);
+```

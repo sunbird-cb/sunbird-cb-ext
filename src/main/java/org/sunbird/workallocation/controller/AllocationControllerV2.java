@@ -72,4 +72,9 @@ public class AllocationControllerV2 {
         return new ResponseEntity<>(allocationServiceV2.getUserBasicDetails(userId), HttpStatus.OK);
     }
 
+    @GetMapping("/user/competencies/{userId}")
+    public ResponseEntity<Response> getUserCompetencies(@PathVariable("userId") String userId) throws IOException {
+        return new ResponseEntity<>(allocationServiceV2.getUserCompetencies(userId), HttpStatus.OK);
+    }
+
 }
