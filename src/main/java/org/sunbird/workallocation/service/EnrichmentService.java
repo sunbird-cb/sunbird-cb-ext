@@ -5,18 +5,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
-import org.sunbird.workallocation.model.UserBasicInfo;
-import org.sunbird.workallocation.model.WorkAllocationDTOV2;
-import org.sunbird.workallocation.model.WorkOrderDTO;
+import org.sunbird.common.util.Constants;
+import org.sunbird.workallocation.model.*;
 import org.sunbird.workallocation.util.WorkAllocationConstants;
 
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class EnrichmentService {
