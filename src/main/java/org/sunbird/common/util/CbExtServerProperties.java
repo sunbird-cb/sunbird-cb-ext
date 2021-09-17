@@ -18,6 +18,9 @@ public class CbExtServerProperties {
     @Value("${sb.service.url}")
     private String sbUrl;
 
+    @Value("${sunbird.user.search.endpoint}")
+    private String userSearchEndPoint;
+
     @Value("${sb.hub.graph.service.url}")
     private String sbHubGraphServiceUrl;
 
@@ -461,6 +464,14 @@ public class CbExtServerProperties {
 
     public void setContentDefaultChannelId(String contentDefaultChannelId) {
         this.contentDefaultChannelId = contentDefaultChannelId;
+    }
+
+    public String getUserSearchEndPoint() {
+        return userSearchEndPoint;
+    }
+
+    public void setUserSearchEndPoint(String userSearchEndPoint) {
+        this.userSearchEndPoint = userSearchEndPoint;
     }
 
     public String getContentDefaultOrgId() {

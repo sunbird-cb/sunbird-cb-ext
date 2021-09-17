@@ -525,7 +525,7 @@ public class AllocationServiceV2 {
         response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
         Set<String> userIds = new HashSet<>();
         userIds.add(userId);
-        response.put(Constants.DATA, allocationService.getUserDetails(userIds).get(userId));
+        response.put(Constants.DATA, getUsersResult(userIds).get(userId));
         response.put(Constants.STATUS, HttpStatus.OK);
         return response;
     }
@@ -621,6 +621,56 @@ public class AllocationServiceV2 {
             downloadableLink = (String) ((Map<String, Object>) response.getBody().get(RESULT)).get("artifactUrl");
         }
         return downloadableLink;
+    }
+    public HashMap<String, Object> getUsersResult(Set<String> userIds) {
+        HashMap<String, Object> userResult = new HashMap<>();
+        Map<String, Object> request = getSearchObject(userIds);
+        Map<String, Object> record;
+        HashMap<String, String> headersValue = new HashMap<>();
+        headersValue.put("Content-Type", "application/json");
+        try {
+            StringBuilder builder = new StringBuilder();
+            builder.append(cbExtServerProperties.getSbUrl()).append(cbExtServerProperties.getUserSearchEndPoint());
+            Map<String, Object> profileResponse = outboundRequestHandlerService.fetchResultUsingPost(builder.toString(), request, headersValue);
+            if (profileResponse != null && "OK".equalsIgnoreCase((String) profileResponse.get("responseCode"))) {
+                Map<String, Object> map = (Map<String, Object>) profileResponse.get("result");
+                if(map.get("response") != null){
+                    Map<String, Object> profiles = (Map<String, Object>) map.get("response");
+                    List<Map<String, Object>> userProfiles = (List<Map<String, Object>>) profiles.get("content");
+                    if (!CollectionUtils.isEmpty(userProfiles)) {
+                        for (Map<String, Object> userProfile : userProfiles) {
+                            if(userProfile.get("profileDetails") != null){
+                                HashMap<String, Object> profileDetails =  (HashMap<String, Object>) userProfile.get("profileDetails");
+                                HashMap<String, Object> personalDetails = (HashMap<String, Object>)profileDetails.get("personalDetails");
+                                record = new HashMap<>();
+                                record.put("wid", userProfile.get("userId"));
+                                record.put("first_name", personalDetails.get("firstname"));
+                                record.put("last_name", personalDetails.get("surname"));
+                                record.put("email", personalDetails.get("primaryEmail"));
+                                if(profileDetails.get("employmentDetails") != null){
+                                    record.put("department_name", ((HashMap<String, Object>)profileDetails.get("employmentDetails")).get("departmentName"));
+                                }
+                                userResult.put(record.get("wid").toString(), record);
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            logger.error(e.toString());
+        }
+        return userResult;
+    }
+
+    private Map<String, Object> getSearchObject(Set<String> userIds) {
+        Map<String, Object> request = new HashMap<>();
+        Map<String, Object> filters = new HashMap<>();
+        filters.put("userId", userIds);
+        request.put("filters", filters);
+        request.put("query", "");
+        Map<String, Object> requestWrapper = new HashMap<>();
+        requestWrapper.put("request", request);
+        return requestWrapper;
     }
 
     public Response getUserCompetencies(String userId) {

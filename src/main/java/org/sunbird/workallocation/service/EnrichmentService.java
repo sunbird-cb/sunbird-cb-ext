@@ -23,7 +23,7 @@ public class EnrichmentService {
     private Logger logger = LoggerFactory.getLogger(EnrichmentService.class);
 
     @Autowired
-    private AllocationService allocationService;
+    private AllocationServiceV2 allocationServiceV2;
 
     ObjectMapper mapper = new ObjectMapper();
 
@@ -74,7 +74,7 @@ public class EnrichmentService {
         userIds.add(workOrderDTO.getUpdatedBy());
         try {
             logger.info("user Ids : {}", mapper.writeValueAsString(userIds));
-            Map<String, Object> usersMap = allocationService.getUserDetails(userIds);
+            Map<String, Object> usersMap = allocationServiceV2.getUsersResult(userIds);
             logger.info("user Map : {}", mapper.writeValueAsString(usersMap));
             if (StringUtils.isEmpty(workOrderDTO.getCreatedByName()) && !ObjectUtils.isEmpty(usersMap.get(workOrderDTO.getCreatedBy()))) {
                 UserBasicInfo userBasicInfo = mapper.convertValue(usersMap.get(workOrderDTO.getCreatedBy()), UserBasicInfo.class);
@@ -100,7 +100,7 @@ public class EnrichmentService {
         }
         userIds.add(workAllocationDTOV2.getUpdatedBy());
         try {
-            Map<String, Object> usersMap = allocationService.getUserDetails(userIds);
+            Map<String, Object> usersMap = allocationServiceV2.getUsersResult(userIds);
             if (StringUtils.isEmpty(workAllocationDTOV2.getCreatedByName()) && !ObjectUtils.isEmpty(usersMap.get(workAllocationDTOV2.getCreatedBy()))) {
                 UserBasicInfo userBasicInfo = mapper.convertValue(usersMap.get(workAllocationDTOV2.getCreatedBy()), UserBasicInfo.class);
                 String firstName = userBasicInfo.getFirst_name() == null ? "" : userBasicInfo.getFirst_name();
@@ -113,7 +113,7 @@ public class EnrichmentService {
                 String lastName  = userBasicInfo.getLast_name() == null ? "" : userBasicInfo.getLast_name();
                 workAllocationDTOV2.setUpdatedByName(firstName +" "+lastName);
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             logger.error("Error while fetching the user details", e);
         }
     }
