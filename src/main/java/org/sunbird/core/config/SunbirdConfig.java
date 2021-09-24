@@ -18,7 +18,7 @@ import com.datastax.driver.core.PlainTextAuthProvider;
 @Configuration
 @ConfigurationProperties("spring.data.cassandra.sb")
 @EnableCassandraRepositories(basePackages = { "org.sunbird.progress.cassandraRepo", "org.sunbird.assessment.repo",
-		"org.sunbird.workallocation.repo" }, cassandraTemplateRef = "sunbirdTemplate")
+		"org.sunbird.workallocation.repo", "org.sunbird.staff.repo", "org.sunbird.budget.repo", "org.sunbird.staff.budget.repo" }, cassandraTemplateRef = "sunbirdTemplate")
 public class SunbirdConfig extends CassandraConfig {
 
 	private Logger logger = LoggerFactory.getLogger(SunbirdConfig.class);
