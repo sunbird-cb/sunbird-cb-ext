@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.sunbird.storage.service.StorageServiceImpl;
-import org.sunbird.workallocation.model.WorkAllocationDTO;
+
 
 
 import java.io.IOException;

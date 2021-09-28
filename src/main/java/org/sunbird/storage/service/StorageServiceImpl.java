@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.sunbird.cloud.storage.BaseStorageService;
 import org.sunbird.cloud.storage.factory.StorageServiceFactory;
-import org.sunbird.core.logger.CbExtLogger;
 import org.sunbird.storage.models.StorageService;
 import org.sunbird.cloud.storage.factory.StorageConfig;
 import scala.Option;
