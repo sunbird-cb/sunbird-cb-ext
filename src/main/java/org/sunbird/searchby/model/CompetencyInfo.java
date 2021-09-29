@@ -9,7 +9,7 @@ public class CompetencyInfo {
 	private String source;
 	private String competencyType;
 	private String competencyArea;
-	private int count;
+	private int contentCount;
 
 	public String getName() {
 		return name;
@@ -19,12 +19,12 @@ public class CompetencyInfo {
 		this.name = name;
 	}
 
-	public int getCount() {
-		return count;
+	public int getContentCount() {
+		return contentCount;
 	}
 
-	public void setCount(int count) {
-		this.count = count;
+	public void setContentCount(int contentCount) {
+		this.contentCount = contentCount;
 	}
 
 	public String getId() {

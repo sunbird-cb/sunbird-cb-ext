@@ -88,7 +88,7 @@ public class SearchByService {
 					if (!CollectionUtils.isEmpty(facetValueList)) {
 						for (Map<String, Object> facetValueObj : facetValueList) {
 							CompetencyInfo compInfo = new CompetencyInfo();
-							compInfo.setCount((int) facetValueObj.get("count"));
+							compInfo.setContentCount((int) facetValueObj.get("count"));
 							competencyMap.put((String) facetValueObj.get("name"), compInfo);
 						}
 					}
