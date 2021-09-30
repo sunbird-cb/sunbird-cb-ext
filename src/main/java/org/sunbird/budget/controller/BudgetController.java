@@ -18,37 +18,38 @@ import org.springframework.web.bind.annotation.RestController;
 import org.sunbird.budget.model.BudgetInfo;
 import org.sunbird.budget.service.BudgetService;
 import org.sunbird.common.model.Response;
-import org.sunbird.staff.model.StaffInfo;
 
 @RestController
-@RequestMapping("/v8/budget/scheme")
+@RequestMapping("/budget/scheme")
 public class BudgetController {
-	
+
 	@Autowired
 	BudgetService budgetService;
 
-	@PostMapping 
-    public ResponseEntity<Response> createBudgetDetails(@RequestHeader("userId") String userId,
-    		@Valid @RequestBody BudgetInfo requestBody) throws Exception {
-		return new ResponseEntity<>(budgetService.submitBudgetDetails(requestBody, userId),HttpStatus.CREATED);
-    }
-	
+	@PostMapping
+	public ResponseEntity<Response> createBudgetDetails(@RequestHeader("userId") String userId,
+			@Valid @RequestBody BudgetInfo requestBody) throws Exception {
+		return new ResponseEntity<>(budgetService.submitBudgetDetails(requestBody, userId), HttpStatus.CREATED);
+	}
+
 	@GetMapping("/{orgId}")
-    public ResponseEntity<Response> getStaffDetails(@PathVariable("orgId") String orgId) throws Exception {
-        return new ResponseEntity<Response>(budgetService.getBudgetDetails(orgId),HttpStatus.OK);
-    }
-	
+	public ResponseEntity<Response> getStaffDetails(@PathVariable("orgId") String orgId) throws Exception {
+		return new ResponseEntity<Response>(budgetService.getBudgetDetails(orgId), HttpStatus.OK);
+	}
+
 	@PatchMapping
-    public ResponseEntity<Response> updateBudgetDetails(@RequestHeader("userId") String userId,
-    		@Valid @RequestBody BudgetInfo requestBody) throws Exception {
-        return new ResponseEntity<>(budgetService.updateBudgetDetails(requestBody, userId),
-                HttpStatus.OK);
-    }
-    
-    @DeleteMapping
-    public ResponseEntity<Response> deleteBudgetDetails(@RequestParam String orgId,
-    		@RequestParam(name = "id", required = true) String budgetDetailsId, @RequestParam String budgetYear ) throws Exception {
-        return new ResponseEntity<>(budgetService.deleteBudgetDetails(orgId, budgetDetailsId, budgetYear),HttpStatus.OK);
-    }
-        
+	public ResponseEntity<Response> updateBudgetDetails(@RequestHeader("userId") String userId,
+			@Valid @RequestBody BudgetInfo requestBody) throws Exception {
+		return new ResponseEntity<>(budgetService.updateBudgetDetails(requestBody, userId), HttpStatus.OK);
+	}
+
+	@DeleteMapping
+	public ResponseEntity<Response> deleteBudgetDetails(@RequestParam String orgId,
+			@RequestParam(name = "id", required = true) String budgetDetailsId, @RequestParam String budgetYear)
+			throws Exception {
+		return new ResponseEntity<>(budgetService.deleteBudgetDetails(orgId, budgetDetailsId, budgetYear),
+				HttpStatus.OK);
+	}
+
 }
+

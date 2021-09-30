@@ -1,4 +1,4 @@
-package org.sunbird.staff.budget.model;
+package org.sunbird.audit.repo;
 
 import org.springframework.data.cassandra.core.mapping.Column;
 import org.springframework.data.cassandra.core.mapping.PrimaryKey;

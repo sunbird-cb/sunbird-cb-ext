@@ -7,7 +7,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import org.hibernate.mapping.Map;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.slf4j.Logger;
@@ -16,64 +15,67 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.sunbird.audit.repo.Audit;
+import org.sunbird.audit.repo.AuditModel;
+import org.sunbird.audit.repo.AuditRepository;
 import org.sunbird.common.model.Response;
 import org.sunbird.common.util.Constants;
 import org.sunbird.core.exception.ApplicationLogicError;
-import org.sunbird.staff.budget.model.Audit;
-import org.sunbird.staff.budget.model.AuditModel;
 import org.sunbird.staff.model.StaffInfo;
 import org.sunbird.staff.model.StaffInfoModel;
-import org.sunbird.staff.budget.repo.AuditRepository;
 import org.sunbird.staff.repo.StaffRepository;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+//import aj.org.objectweb.asm.TypeReference;
+
 @Service
-public class StaffServiceImpl implements StaffService{
-	
+public class StaffServiceImpl implements StaffService {
+
 	public static final String STAFF = "staff";
-	
+
 	ObjectMapper mapper = new ObjectMapper();
-	
+
 	@Autowired
-    private StaffRepository staffRepository;
-	
+	private StaffRepository staffRepository;
+
 	@Autowired
-    private AuditRepository auditRepository;
-	
+	private AuditRepository auditRepository;
+
 	private Logger logger = LoggerFactory.getLogger(StaffServiceImpl.class);
-	
+
 	@Override
 	public Response submitStaffDetails(StaffInfo data, String userId) throws Exception {
-		//validation for position - no multiple position name
+		// validation for position - no multiple position name
 		Response response = new Response();
-		try {  
-	        String id = generateUniqueId();
+		try {
+			String id = generateUniqueId();
 			StaffInfoModel staffInfoModel = new StaffInfoModel(data.getOrgId(), id, data.getPosition(),
 					data.getTotalPositionsFilled(), data.getTotalPositionsVacant());
 			staffRepository.save(staffInfoModel);
-			
+
 			data.setId(id);
-			
+
 //			StaffInfo info = new StaffInfo();
 //			info.setId();
 
 			String date = generateDate();
-			
+
 //			String json = mapper.writeValueAsString(staffInfoModel);
 			String jsonData = mapper.writeValueAsString(data);
-			
+
 			Audit audit = new Audit(data.getOrgId(), STAFF, date, userId, "", "", jsonData);
 			auditRepository.save(audit);
-			
+
 			response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
-		}catch (Exception ex){
-            logger.error("Exception occurred while saving the staff details!!", ex);
+		} catch (Exception ex) {
+			logger.error("Exception occurred while saving the staff details!!", ex);
 			response.put(Constants.MESSAGE, Constants.FAILED);
-            throw new ApplicationLogicError("Exception occurred while saving the staff details!!", ex);
-        }
-		
+			throw new ApplicationLogicError("Exception occurred while saving the staff details!!", ex);
+		}
+
 		response.put(Constants.STATUS, HttpStatus.OK);
 		return response;
 	}
@@ -82,17 +84,18 @@ public class StaffServiceImpl implements StaffService{
 	public Response updateStaffDetails(StaffInfo data, String userId) throws Exception {
 		Response response = new Response();
 		try {
-			staffRepository.updateStaffDetails(data.getTotalPositionsFilled(), data.getTotalPositionsVacant(), data.getOrgId(), data.getId());
-			
+			staffRepository.updateStaffDetails(data.getTotalPositionsFilled(), data.getTotalPositionsVacant(),
+					data.getOrgId(), data.getId());
+
 			String date = generateDate();
 			String jsonData = mapper.writeValueAsString(data);
-			
-			Audit audit = new Audit(data.getOrgId(), STAFF, "" , "", date, userId, jsonData);
+
+			Audit audit = new Audit(data.getOrgId(), STAFF, "", "", date, userId, jsonData);
 			auditRepository.save(audit);
-		}catch(Exception ex) {
+		} catch (Exception ex) {
 			logger.error("Exception occurred while updating the staff details!!", ex);
 			response.put(Constants.MESSAGE, Constants.FAILED);
-            throw new ApplicationLogicError("Exception occurred while updating the staff details!!", ex);
+			throw new ApplicationLogicError("Exception occurred while updating the staff details!!", ex);
 		}
 		response.put(Constants.STATUS, HttpStatus.OK);
 		return response;
@@ -102,13 +105,13 @@ public class StaffServiceImpl implements StaffService{
 	public Response getStaffDetails(String orgId) throws Exception {
 		Response response = new Response();
 		List<StaffInfoModel> staffDetails = staffRepository.getStaffDetails(orgId);
-		
+
 		if (CollectionUtils.isEmpty(staffDetails)) {
-          logger.info("There are no data in DB.");
-          return response;
+			logger.info("There are no data in DB.");
+			return response;
 		}
 		List<StaffInfo> staffResponse = new ArrayList<>();
-		for(StaffInfoModel staff : staffDetails) {
+		for (StaffInfoModel staff : staffDetails) {
 			StaffInfo info = new StaffInfo();
 			info.setId(staff.getPrimaryKey().getId());
 			info.setOrgId(staff.getPrimaryKey().getOrgId());
@@ -117,39 +120,39 @@ public class StaffServiceImpl implements StaffService{
 			info.setTotalPositionsVacant(staff.getTotalPositionsVacant());
 			staffResponse.add(info);
 		}
-		
-        response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
-        response.put(Constants.RESPONSE, staffResponse);
-        response.put(Constants.STATUS, HttpStatus.OK);
-        return response;
+
+		response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
+		response.put(Constants.RESPONSE, staffResponse);
+		response.put(Constants.STATUS, HttpStatus.OK);
+		return response;
 	}
 
 	@Override
 	public Response deleteStaffDetails(String orgId, String staffInfoId) throws Exception {
 		Response response = new Response();
-		
+
 		try {
 			staffRepository.deleteStaffDetails(orgId, staffInfoId);
 			response.put(Constants.RESPONSE, Constants.SUCCESSFUL);
-	        response.put(Constants.STATUS, HttpStatus.OK);
-			
+			response.put(Constants.STATUS, HttpStatus.OK);
+
 		} catch (Exception ex) {
 			logger.error("Exception occurred while deleting the staff details!!", ex);
 			ex.printStackTrace();
 			response.put(Constants.MESSAGE, Constants.FAILED);
-            throw new ApplicationLogicError("Exception occurred while deleting the staff details!!", ex);
+			throw new ApplicationLogicError("Exception occurred while deleting the staff details!!", ex);
 		}
 		return response;
 	}
-	
+
 	@Override
-	public Response getStaffAudit(String orgId, String auditType) throws Exception {
+	public Response getAudit(String orgId, String auditType) throws Exception {
 		Response response = new Response();
 		List<Audit> auditDetails = auditRepository.getAudit(orgId, auditType);
-		
+
 		List<AuditModel> auditResponse = new ArrayList<>();
 		JSONParser parser = new JSONParser();
-		for(Audit audit : auditDetails) {
+		for (Audit audit : auditDetails) {
 			AuditModel info = new AuditModel();
 			info.setAuditType(audit.getPrimaryKey().getAuditType());
 			info.setOrgId(audit.getPrimaryKey().getOrgId());
@@ -157,32 +160,37 @@ public class StaffServiceImpl implements StaffService{
 			info.setCreatedBy(audit.getCreatedBy());
 			info.setUpdatedDate(audit.getPrimaryKey().getUpdatedDate());
 			info.setUpdatedBy(audit.getUpdatedBy());
-			
-			  
-			JSONObject json = (JSONObject) parser.parse(audit.getTransactionDetails()); 
+
+			JSONObject json = (JSONObject) parser.parse(audit.getTransactionDetails());
+			String transactionDetails = audit.getTransactionDetails();
+//			StaffInfo staffModel = (new ObjectMapper()).convertValue(transactionDetails, new TypeReference<StaffInfo>( ) { } );
+			StaffInfo sInfo = (mapper.convertValue(transactionDetails, new TypeReference<StaffInfo>() {
+			}));
+			info.setPosition(sInfo.getPosition());
+			info.setTotalPositionsFilled(sInfo.getTotalPositionsFilled());
+			info.setTotalPositionsVacant(sInfo.getTotalPositionsVacant());
+
 			info.setTransactionDetails(json);
-			
+//			
 			auditResponse.add(info);
 		}
-		 
-		response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
-        response.put(Constants.RESPONSE, auditResponse);
-//        response.put(Constants.RESPONSE, auditDetails);
-        response.put(Constants.STATUS, HttpStatus.OK);
-        return response;
+		response.put(Constants.STATUS, HttpStatus.OK);
+		response.put(Constants.RESPONSE, auditResponse);
+		return response;
 	}
-	
+
 	public String generateUniqueId() {
 		UUID uuid = UUID.randomUUID();
-        String uuidAsString = uuid.toString();
-        return uuidAsString;
+		String uuidAsString = uuid.toString();
+		return uuidAsString;
 	}
-	
+
 	public String generateDate() {
 		Date date = new Date();
-		DateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd hh:mm:ss"); 
+		DateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd hh:mm:ss");
 		String dateStr = dateFormat.format(date);
 		return dateStr;
 	}
 
 }
+

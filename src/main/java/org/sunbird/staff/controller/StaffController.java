@@ -21,46 +21,39 @@ import org.sunbird.staff.model.StaffInfo;
 import org.sunbird.staff.service.StaffService;
 
 @RestController
-@RequestMapping("/v8")
 public class StaffController {
-	
+
 	@Autowired
-    StaffService staffService;
-	
-	@PostMapping ("/staff/position")
-    public ResponseEntity<Response> createStaffDetails(@RequestHeader("userId") String userId,@Valid @RequestBody StaffInfo requestBody) throws Exception {
-		return new ResponseEntity<>(staffService.submitStaffDetails(requestBody, userId),
-              HttpStatus.CREATED);
-    }
-	
+	StaffService staffService;
+
+	@PostMapping("/staff/position")
+	public ResponseEntity<Response> createStaffDetails(@RequestHeader("userId") String userId,
+			@Valid @RequestBody StaffInfo requestBody) throws Exception {
+		return new ResponseEntity<>(staffService.submitStaffDetails(requestBody, userId), HttpStatus.CREATED);
+	}
+
 	@GetMapping("/staff/position/{orgId}")
-    public ResponseEntity<Response> getStaffDetails(@PathVariable("orgId") String orgId) throws Exception {
-        return new ResponseEntity<Response>(staffService.getStaffDetails(orgId),HttpStatus.OK);
-    }
-    
-    @PatchMapping ("/staff/position")
-    public ResponseEntity<Response> updateStaffDetails(@RequestHeader("userId") String userId,
-    		@Valid @RequestBody StaffInfo requestBody) throws Exception {
-        return new ResponseEntity<>(staffService.updateStaffDetails(requestBody, userId),
-                HttpStatus.OK);
-    }
-    
-    @DeleteMapping ("/staff/position")
-    public ResponseEntity<Response> deleteStaffDetails(@RequestParam String orgId,
-    		@RequestParam(name = "id", required = true) String staffDetailsId ) throws Exception {
-        return new ResponseEntity<>(staffService.deleteStaffDetails(orgId, staffDetailsId),
-                HttpStatus.OK);
-    }
-    
-    @GetMapping("/orghistory/{orgId}/{auditType}")
-    public ResponseEntity<Response> getStaffDetails(@PathVariable("orgId") String orgId, @PathVariable("auditType") String auditType) 
-    		throws Exception {
-        return new ResponseEntity<Response>(staffService.getStaffAudit(orgId, auditType),HttpStatus.OK);
-    }
-    
-//    @GetMapping("/orghistory/{orgId}/{auditType}")
-//    public String getStaffDetails(@PathVariable("orgId") String orgId, @PathVariable("auditType") String auditType) 
-//    		throws Exception {
-//        return "return";
-//    }
+	public ResponseEntity<Response> getStaffDetails(@PathVariable("orgId") String orgId) throws Exception {
+		return new ResponseEntity<Response>(staffService.getStaffDetails(orgId), HttpStatus.OK);
+	}
+
+	@PatchMapping("/staff/position")
+	public ResponseEntity<Response> updateStaffDetails(@RequestHeader("userId") String userId,
+			@Valid @RequestBody StaffInfo requestBody) throws Exception {
+		return new ResponseEntity<>(staffService.updateStaffDetails(requestBody, userId), HttpStatus.OK);
+	}
+
+	@DeleteMapping("/staff/position")
+	public ResponseEntity<Response> deleteStaffDetails(@RequestParam String orgId,
+			@RequestParam(name = "id", required = true) String staffDetailsId) throws Exception {
+		return new ResponseEntity<>(staffService.deleteStaffDetails(orgId, staffDetailsId), HttpStatus.OK);
+	}
+
+	@GetMapping("/orghistory/{orgId}/{auditType}")
+	public ResponseEntity<Response> getStaffDetails(@PathVariable("orgId") String orgId,
+			@PathVariable("auditType") String auditType) throws Exception {
+		return new ResponseEntity<Response>(staffService.getAudit(orgId, auditType), HttpStatus.OK);
+	}
+
 }
+
