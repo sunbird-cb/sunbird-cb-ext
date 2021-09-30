@@ -37,6 +37,5 @@ public class StorageController {
             fos.close();
             Map<String, String> uploadedFile = storageService.uploadFile(folderName, file);
             file.delete();
-        return new ResponseEntity<>(HttpStatus.OK);
-
+        return new ResponseEntity<>(uploadedFile, HttpStatus.OK);
     }}

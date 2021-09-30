@@ -145,6 +145,18 @@ public class CbExtServerProperties {
     @Value("${azure.container.name}")
     private String azureContainerName;
 
+    @Value("${azure.type.name}")
+    private String azureTypeName;
+
+
+    public String getAzureTypeName() {
+        return azureTypeName;
+    }
+
+    public void setAzureTypeName(String azureTypeName) {
+        this.azureTypeName = azureTypeName;
+    }
+
     public String getAzureStorageKey() {
         return azureStorageKey;
     }
