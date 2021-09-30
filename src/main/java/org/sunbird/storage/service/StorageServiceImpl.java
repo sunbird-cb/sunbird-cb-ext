@@ -8,9 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.sunbird.cloud.storage.BaseStorageService;
-import org.sunbird.cloud.storage.factory.StorageServiceFactory;
-import org.sunbird.storage.models.StorageService;
-import org.sunbird.cloud.storage.factory.StorageConfig;
+import org.sunbird.common.util.CbExtServerProperties;
 import scala.Option;
 
 import java.io.File;
@@ -25,25 +23,21 @@ public class StorageServiceImpl {
     @Autowired
     RestTemplate restTemplate;
 
+    @Autowired
+    private CbExtServerProperties cbExtServerProperties;
+
+
     private static BaseStorageService storageService = null;
-    private static StorageService storageConfig = new StorageService();
-
-    static {
-        storageConfig = getStorageService();//This statement is used to access bucket credentials
-        storageService = StorageServiceFactory.getStorageService(new StorageConfig("getProvider()",
-                "getIdentity()", "getCredential()", null));
-
-    }
 
     public static BaseStorageService getCloudStoreService() {
         return storageService;
     }
-
     public Map<String, String> uploadFile(String folderName, File file) {
         try {
             String objectKey = "";
                 objectKey = folderName + "/" + "_" + file.getName();
-            String url = storageService.upload("getContainer()", file.getAbsolutePath(), objectKey,
+            String url = storageService.upload(cbExtServerProperties.getAzureStorageKey()
+                    , file.getAbsolutePath(), objectKey,
                     Option.apply(false), Option.apply(1), Option.apply(5), Option.empty());
             Map<String, String> uploadedFile = new HashMap<>();
             uploadedFile.put("name", objectKey);

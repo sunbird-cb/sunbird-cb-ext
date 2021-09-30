@@ -142,6 +142,27 @@ public class CbExtServerProperties {
     @Value("${wat.telemetry.env}")
     private String watTelemetryEnv;
 
+    @Value("${azure.container.name}")
+    private String azureContainerName;
+
+    public String getAzureStorageKey() {
+        return azureStorageKey;
+    }
+
+    public void setAzureStorageKey(String azureStorageKey) {
+        this.azureStorageKey = azureStorageKey;
+    }
+
+    @Value("${azure.storage.key}")
+    private String azureStorageKey;
+
+    public String getAzureContainerName() {
+        return azureContainerName;
+    }
+
+    public void setAzureContainerName(String azureContainerName) {
+        this.azureContainerName = azureContainerName;
+    }
 
     public String getContentHost() {
         return contentHost;
