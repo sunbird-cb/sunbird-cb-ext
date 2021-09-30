@@ -148,6 +148,16 @@ public class CbExtServerProperties {
     @Value("${azure.type.name}")
     private String azureTypeName;
 
+    @Value("${azure.identity.name}")
+    private String azureIdentityName;
+
+    public String getAzureIdentityName() {
+        return azureIdentityName;
+    }
+
+    public void setAzureIdentityName(String azureIdentityName) {
+        this.azureIdentityName = azureIdentityName;
+    }
 
     public String getAzureTypeName() {
         return azureTypeName;

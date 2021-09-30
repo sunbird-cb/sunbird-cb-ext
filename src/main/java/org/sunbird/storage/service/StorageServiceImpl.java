@@ -37,8 +37,7 @@ public class StorageServiceImpl {
         return storageService;
     }
     public Map<String, String> uploadFile(String folderName, File file) {
-        storageService = StorageServiceFactory.getStorageService(new StorageConfig(cbExtServerProperties.getAzureTypeName(),
-                "igot", cbExtServerProperties.getAzureStorageKey(), null));
+        storageService = StorageServiceFactory.getStorageService(new StorageConfig(cbExtServerProperties.getAzureTypeName(), cbExtServerProperties.getAzureIdentityName(), cbExtServerProperties.getAzureStorageKey(), null));
 
         try {
             String objectKey = "";
