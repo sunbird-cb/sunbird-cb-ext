@@ -337,6 +337,7 @@ public class CohortsServiceImpl implements CohortsService {
 					if (participantMap.containsKey(userId)) {
 						OpenSaberApiUserProfile userProfile = (OpenSaberApiUserProfile) participantMap.get(userId);
 						CohortUsers user = new CohortUsers();
+						user.setUserId(userProfile.getUserId());
 						user.setUser_id(userProfile.getPersonalDetails().getPrimaryEmail());
 						user.setEmail(userProfile.getPersonalDetails().getPrimaryEmail());
 						user.setFirst_name(userProfile.getPersonalDetails().getFirstname());
