@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,7 @@ import org.sunbird.cache.CacheManager;
 import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.core.logger.CbExtLogger;
+import org.sunbird.searchby.dto.SearchByFilter;
 import org.sunbird.searchby.model.CompetencyInfo;
 import org.sunbird.searchby.model.ProviderInfo;
 
@@ -42,8 +44,47 @@ public class SearchByService {
 			logger.info("Initializing/Refreshing the Cache Value.");
 			updateCompetencyDetails(authUserToken);
 		}
-
+		updateCompetencyDetails(authUserToken);
 		return (Collection<CompetencyInfo>) cacheManager.getCache(COMETENTY_CACHE_NAME);
+	}
+
+	public Collection<CompetencyInfo> getCompetencyDetailsByFilter(String authUserToken, SearchByFilter filter) throws Exception {
+		Object object = cacheManager.getCache(COMETENTY_CACHE_NAME);
+		if (object == null) {
+			logger.info("Initializing/Refreshing the Cache Value.");
+			updateCompetencyDetails(authUserToken);
+		}
+		Collection<CompetencyInfo> beforeFilter=(Collection<CompetencyInfo>) cacheManager.getCache(COMETENTY_CACHE_NAME);
+		Collection<CompetencyInfo> afterFilter = new ArrayList<>();
+		if(filter.getCompetencyName().isEmpty()&& filter.getCompetencyType().isEmpty() && filter.getCompetencyArea().isEmpty()){
+			return beforeFilter;
+		}else{
+			for(CompetencyInfo eachInfo: beforeFilter){
+				if(!filter.getCompetencyName().isEmpty()){
+					if (this.listToLowerCase(filter.getCompetencyName()).contains(this.stringToLowerCase(eachInfo.getName()))){
+						afterFilter.add(eachInfo);
+					}
+				}
+				if(!filter.getCompetencyType().isEmpty()){
+					if ((this.listToLowerCase(filter.getCompetencyType()).contains(this.stringToLowerCase(eachInfo.getCompetencyType())))){
+						afterFilter.add(eachInfo);
+					}
+				}
+				if(!filter.getCompetencyArea().isEmpty()){
+					if ((this.listToLowerCase(filter.getCompetencyArea()).contains(this.stringToLowerCase(eachInfo.getCompetencyArea())))){
+						afterFilter.add(eachInfo);
+					}
+				}
+			}
+		}
+		return afterFilter;
+	}
+	private List<String> listToLowerCase(List<String> convertString){
+		return  convertString.stream().map(String::toLowerCase).map(String::trim).collect(Collectors.toList());
+	}
+
+	private String stringToLowerCase(String convertString){
+		return convertString.toLowerCase().trim();
 	}
 
 	public Collection<ProviderInfo> getProviderDetails(String authUserToken) throws Exception {
