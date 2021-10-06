@@ -41,7 +41,7 @@ public class StorageServiceImpl {
 
         try {
             String objectKey = "";
-            objectKey = folderName + "/" + "_" + file.getName();
+            objectKey = folderName + "/" + file.getName();
             String url = storageService.upload(cbExtServerProperties.getAzureContainerName(), file.getAbsolutePath(), objectKey,
                     Option.apply(false), Option.apply(1), Option.apply(5), Option.empty());
             Map<String, String> uploadedFile = new HashMap<>();

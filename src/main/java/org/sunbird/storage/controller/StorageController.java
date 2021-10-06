@@ -10,7 +10,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.sunbird.common.util.CbExtServerProperties;
+import org.sunbird.common.util.Constants;
 import org.sunbird.storage.service.StorageServiceImpl;
+import org.sunbird.common.model.Response;
 
 
 
@@ -30,30 +32,58 @@ public class StorageController {
     private CbExtServerProperties cbExtServerProperties;
 
     @PostMapping("/upload")
-    public ResponseEntity<Map<String, String>> upload(@RequestParam(value = "file", required = true) MultipartFile multipartFile
+    public Response upload(@RequestParam(value = "file", required = true) MultipartFile multipartFile
     ) throws IOException {
-        String folderName = cbExtServerProperties.getAzureContainerName();
-        File file = new File(multipartFile.getOriginalFilename());
-        file.createNewFile();
-        FileOutputStream fos = new FileOutputStream(file);
-        fos.write(multipartFile.getBytes());
-        fos.close();
-        Map<String, String> uploadedFile = storageService.uploadFile(folderName, file);
-        file.delete();
-        return new ResponseEntity<>(uploadedFile, HttpStatus.OK);
+        Response response = new Response();
+        try {
+//        String folderName = cbExtServerProperties.getAzureContainerName();
+            File file = new File(multipartFile.getOriginalFilename());
+            file.createNewFile();
+            FileOutputStream fos = new FileOutputStream(file);
+            fos.write(multipartFile.getBytes());
+            fos.close();
+            Map<String, String> uploadedFile = storageService.uploadFile(cbExtServerProperties.getAzureContainerName(), file);
+            file.delete();
+
+            if (uploadedFile != null) {
+                response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
+                response.put("value", uploadedFile);
+//        return new ResponseEntity<>(uploadedFile, HttpStatus.OK);
+
+            }
+        } catch (IOException e) {
+            response.put(Constants.MESSAGE, Constants.FAILED);
+            response.put("value", "file not uploaded");
+        }
+        return response;
     }
 
     @DeleteMapping("/delete")
-    public ResponseEntity<Map<String, String>>  deleteCloudFile(@RequestParam(value = "fileName", required = true) String fileName)
+    public Response deleteCloudFile(@RequestParam(value = "fileName", required = true) String fileName)
             throws JsonProcessingException {
-            Boolean deleted = storageService.deleteFile(fileName);
+        Response response = new Response();
         Map<String, String> deleteFile = new HashMap<>();
-        deleteFile.put("name", fileName);
+            Boolean deleted = storageService.deleteFile(fileName);
+//            Map<String, String> deleteFile = new HashMap<>();
+            deleteFile.put("name", fileName);
             if (deleted) {
                 deleteFile.put("status", "deleted");
-                return new ResponseEntity<>(deleteFile,HttpStatus.OK);
+                response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
+                response.put("value", deleteFile);
+
+//                return new ResponseEntity<>(deleteFile, HttpStatus.OK);
+            } else {
+
+                deleteFile.put("status", "not deleted");
+                response.put(Constants.MESSAGE, Constants.FAILED);
+                response.put("value", deleteFile);
+
             }
-        deleteFile.put("status", "not deleted");
-        return new ResponseEntity<>(deleteFile,HttpStatus.FAILED_DEPENDENCY);
+
+
+//            return new ResponseEntity<>(deleteFile, HttpStatus.FAILED_DEPENDENCY);
+
+
+        return response;
     }
 }

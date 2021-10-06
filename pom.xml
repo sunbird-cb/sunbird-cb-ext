@@ -61,18 +61,6 @@
 			<artifactId>postgresql</artifactId>
 			<scope>runtime</scope>
 		</dependency>
-		
-		<dependency>
-    <groupId>org.hibernate</groupId>
-    <artifactId>hibernate-core</artifactId>
-    <version>4.1.4.Final</version>
-</dependency>
-
-<dependency>
-    <groupId>org.hibernate</groupId>
-    <artifactId>hibernate-entitymanager</artifactId>
-    <version>5.2.3.Final</version>
-</dependency>
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -159,9 +147,9 @@
 			<version>2.0</version>
 		</dependency>
 		<dependency>
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
-			<version>1.16.16</version>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-core</artifactId>
+			<version>5.2.17.Final</version>
 		</dependency>
 		<!-- End of PDF and QR Code dependency -->
 	</dependencies>
