@@ -24,7 +24,7 @@ public class StaffController {
 	StaffService staffService;
 
 	@PostMapping("/staff/position")
-	public ResponseEntity<?> createStaffDetails(@RequestHeader("userId") String userId,
+	public ResponseEntity<?> createStaffDetails(@RequestHeader("x-authenticated-userid") String userId,
 			@Valid @RequestBody StaffInfo requestBody) throws Exception {
 		SBApiResponse response = staffService.submitStaffDetails(requestBody, userId);
 		return new ResponseEntity<>(response, response.getResponseCode());
@@ -37,7 +37,7 @@ public class StaffController {
 	}
 
 	@PatchMapping("/staff/position")
-	public ResponseEntity<?> updateStaffDetails(@RequestHeader("userId") String userId,
+	public ResponseEntity<?> updateStaffDetails(@RequestHeader("x-authenticated-userid") String userId,
 			@Valid @RequestBody StaffInfo requestBody) throws Exception {
 		SBApiResponse response = staffService.updateStaffDetails(requestBody, userId);
 		return new ResponseEntity<>(response, response.getResponseCode());
