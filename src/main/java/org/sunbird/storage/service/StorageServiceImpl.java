@@ -55,7 +55,6 @@ public class StorageServiceImpl {
 
     }
 
-
     public Boolean deleteFile(String fileName) {
         try {
             storageService.deleteObject(cbExtServerProperties.getAzureContainerName(), fileName, Option.apply(Boolean.FALSE));

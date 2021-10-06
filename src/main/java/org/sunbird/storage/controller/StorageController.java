@@ -6,14 +6,12 @@ import java.io.FileOutputStream;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.storage.service.StorageServiceImpl;
-import org.sunbird.common.model.Response;
-
 
 
 import java.io.IOException;
@@ -30,13 +28,13 @@ public class StorageController {
 
     @Autowired
     private CbExtServerProperties cbExtServerProperties;
-
+    SBApiResponse response = new SBApiResponse();
     @PostMapping("/upload")
-    public Response upload(@RequestParam(value = "file", required = true) MultipartFile multipartFile
+    public SBApiResponse upload(@RequestParam(value = "file", required = true) MultipartFile multipartFile
     ) throws IOException {
-        Response response = new Response();
+        response.setId("api.file.upload");
+
         try {
-//        String folderName = cbExtServerProperties.getAzureContainerName();
             File file = new File(multipartFile.getOriginalFilename());
             file.createNewFile();
             FileOutputStream fos = new FileOutputStream(file);
@@ -44,46 +42,37 @@ public class StorageController {
             fos.close();
             Map<String, String> uploadedFile = storageService.uploadFile(cbExtServerProperties.getAzureContainerName(), file);
             file.delete();
-
             if (uploadedFile != null) {
-                response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
-                response.put("value", uploadedFile);
-//        return new ResponseEntity<>(uploadedFile, HttpStatus.OK);
-
+                response.getParams().setStatus(Constants.SUCCESSFUL);
+                response.setResponseCode(HttpStatus.OK);
+                response.getResult().putAll(uploadedFile);
             }
         } catch (IOException e) {
-            response.put(Constants.MESSAGE, Constants.FAILED);
-            response.put("value", "file not uploaded");
+            response.getParams().setStatus(Constants.FAILED);
+            response.getParams().setErrmsg("file not found");
+            response.setResponseCode(HttpStatus.BAD_REQUEST);
         }
         return response;
     }
 
     @DeleteMapping("/delete")
-    public Response deleteCloudFile(@RequestParam(value = "fileName", required = true) String fileName)
+    public SBApiResponse deleteCloudFile(@RequestParam(value = "fileName", required = true) String fileName)
             throws JsonProcessingException {
-        Response response = new Response();
         Map<String, String> deleteFile = new HashMap<>();
             Boolean deleted = storageService.deleteFile(fileName);
-//            Map<String, String> deleteFile = new HashMap<>();
             deleteFile.put("name", fileName);
-            if (deleted) {
+        response.setId("api.file.delete");
+        if (deleted) {
                 deleteFile.put("status", "deleted");
-                response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
-                response.put("value", deleteFile);
-
-//                return new ResponseEntity<>(deleteFile, HttpStatus.OK);
+                response.getParams().setStatus(Constants.SUCCESSFUL);
+                response.setResponseCode(HttpStatus.OK);
+                response.getResult().putAll(deleteFile);
             } else {
-
-                deleteFile.put("status", "not deleted");
-                response.put(Constants.MESSAGE, Constants.FAILED);
-                response.put("value", deleteFile);
-
+                deleteFile.put("error", "file not found");
+                response.getParams().setStatus(Constants.FAILED);
+                response.getParams().setErrmsg("file not found");
+                response.setResponseCode(HttpStatus.NOT_FOUND);
             }
-
-
-//            return new ResponseEntity<>(deleteFile, HttpStatus.FAILED_DEPENDENCY);
-
-
         return response;
     }
 }
