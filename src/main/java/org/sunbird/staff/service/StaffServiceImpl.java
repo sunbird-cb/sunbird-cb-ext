@@ -42,6 +42,8 @@ public class StaffServiceImpl implements StaffService {
 	public SBApiResponse submitStaffDetails(StaffInfo data, String userId) throws Exception {
 		SBApiResponse response = new SBApiResponse(Constants.API_STAFF_POSITION_ADD);
 		try {
+			validateAddStaffInfo(data);
+
 			List<StaffInfoModel> existingList = staffRepository.getAllByOrgIdAndPosition(data.getOrgId(),
 					data.getPosition());
 
@@ -83,6 +85,7 @@ public class StaffServiceImpl implements StaffService {
 	public SBApiResponse updateStaffDetails(StaffInfo data, String userId) throws Exception {
 		SBApiResponse response = new SBApiResponse(Constants.API_STAFF_POSITION_UPDATE);
 		try {
+			validateUpdateStaffInfo(data);
 			Optional<StaffInfoModel> existingStaffInfo = staffRepository
 					.findById(new StaffInfoPrimaryKeyModel(data.getOrgId(), data.getId()));
 			if (!existingStaffInfo.isPresent()) {
@@ -93,32 +96,34 @@ public class StaffServiceImpl implements StaffService {
 				return response;
 			}
 
-			List<StaffInfoModel> existingList = staffRepository.getAllByOrgIdAndPosition(data.getOrgId(),
-					data.getPosition());
+			if (data.getPosition() != null) {
+				List<StaffInfoModel> existingList = staffRepository.getAllByOrgIdAndPosition(data.getOrgId(),
+						data.getPosition());
 
-			if (CollectionUtils.isEmpty(existingList)) {
-				boolean isAnyOtherRecordExist = false;
-				for (StaffInfoModel sModel : existingList) {
-					if (!sModel.getPrimaryKey().getId().equalsIgnoreCase(data.getId())) {
-						if (sModel.getPosition().equalsIgnoreCase(data.getPosition())) {
-							isAnyOtherRecordExist = true;
+				if (CollectionUtils.isEmpty(existingList)) {
+					boolean isAnyOtherRecordExist = false;
+					for (StaffInfoModel sModel : existingList) {
+						if (!sModel.getPrimaryKey().getId().equalsIgnoreCase(data.getId())) {
+							if (sModel.getPosition().equalsIgnoreCase(data.getPosition())) {
+								isAnyOtherRecordExist = true;
+							}
 						}
 					}
+					if (isAnyOtherRecordExist) {
+						// Return error
+						String errMsg = "Position exist for given name. Failed to create StaffInfo for OrgId: "
+								+ data.getOrgId() + ", Position: " + data.getPosition();
+						logger.error(errMsg);
+						response.getParams().setErrmsg(errMsg);
+						response.setResponseCode(HttpStatus.BAD_REQUEST);
+						return response;
+					}
 				}
-				if (isAnyOtherRecordExist) {
-					// Return error
-					String errMsg = "Position exist for given name. Failed to create StaffInfo for OrgId: "
-							+ data.getOrgId() + ", Position: " + data.getPosition();
-					logger.error(errMsg);
-					response.getParams().setErrmsg(errMsg);
-					response.setResponseCode(HttpStatus.BAD_REQUEST);
-					return response;
+				if (data.getPosition() != null) {
+					existingStaffInfo.get().setPosition(data.getPosition());
 				}
 			}
 
-			if (data.getPosition() != null) {
-				existingStaffInfo.get().setPosition(data.getPosition());
-			}
 			if (data.getTotalPositionsFilled() != null) {
 				existingStaffInfo.get().setTotalPositionsFilled(data.getTotalPositionsFilled());
 			}
@@ -202,7 +207,7 @@ public class StaffServiceImpl implements StaffService {
 	public SBApiResponse getStaffAudit(String orgId, String auditType) throws Exception {
 		SBApiResponse response = new SBApiResponse(Constants.API_STAFF_POSITION_HISTORY_READ);
 		List<Audit> auditDetails = auditRepository.getAudit(orgId, auditType);
-		if(CollectionUtils.isEmpty(auditDetails)) {
+		if (CollectionUtils.isEmpty(auditDetails)) {
 			String errMsg = "Staff Position History details not found for Org: " + orgId;
 			logger.info(errMsg);
 			response.getParams().setErrmsg(errMsg);
@@ -228,5 +233,76 @@ public class StaffServiceImpl implements StaffService {
 		response.setResponseCode(HttpStatus.OK);
 		response.put(Constants.DATA, auditResponse);
 		return response;
+	}
+
+	private void validateAddStaffInfo(StaffInfo staffInfo) throws Exception {
+		List<String> errObjList = new ArrayList<String>();
+		if (StringUtils.isEmpty(staffInfo.getOrgId())) {
+			errObjList.add(Constants.ORG_ID);
+		}
+		if (StringUtils.isEmpty(staffInfo.getPosition())) {
+			errObjList.add(Constants.POSITION);
+		}
+		if (staffInfo.getTotalPositionsFilled() == null || staffInfo.getTotalPositionsFilled() <= 0) {
+			errObjList.add(Constants.TOTAL_POSITION_FILLED);
+		}
+		if (staffInfo.getTotalPositionsVacant() == null || staffInfo.getTotalPositionsVacant() <= 0) {
+			errObjList.add(Constants.TOTAL_POSITION_VACANT);
+		}
+
+		if (!CollectionUtils.isEmpty(errObjList)) {
+			throw new Exception("One or more required fields are empty. Empty fields " + errObjList.toString());
+		}
+	}
+
+	private void validateUpdateStaffInfo(StaffInfo staffInfo) throws Exception {
+		List<String> errObjList = new ArrayList<String>();
+		if (StringUtils.isEmpty(staffInfo.getOrgId())) {
+			errObjList.add(Constants.ORG_ID);
+		}
+		if (StringUtils.isEmpty(staffInfo.getId())) {
+			errObjList.add(Constants.ID);
+		}
+		boolean position = false, filled = false, vacant = false;
+		if (staffInfo.getPosition() != null) {
+			if (StringUtils.isEmpty(staffInfo.getPosition())) {
+				errObjList.add(Constants.POSITION);
+			}
+		} else {
+			errObjList.add(Constants.POSITION);
+			position = true;
+		}
+		if (staffInfo.getTotalPositionsFilled() != null) {
+			if (staffInfo.getTotalPositionsFilled() <= 0) {
+				errObjList.add(Constants.TOTAL_POSITION_FILLED);
+			}
+		} else {
+			errObjList.add(Constants.TOTAL_POSITION_FILLED);
+			filled = true;
+		}
+
+		if (staffInfo.getTotalPositionsVacant() != null) {
+			if (staffInfo.getTotalPositionsVacant() <= 0) {
+				errObjList.add(Constants.TOTAL_POSITION_VACANT);
+			}
+		} else {
+			errObjList.add(Constants.TOTAL_POSITION_VACANT);
+			vacant = true;
+		}
+
+		if (position && filled && vacant) {
+			throw new Exception("One or more required fields are empty. Empty fields " + errObjList.toString());
+		} else {
+			if (position)
+				errObjList.remove(Constants.POSITION);
+			if (filled)
+				errObjList.remove(Constants.TOTAL_POSITION_FILLED);
+			if (vacant)
+				errObjList.remove(Constants.TOTAL_POSITION_VACANT);
+		}
+
+		if (!CollectionUtils.isEmpty(errObjList)) {
+			throw new Exception("One or more required fields are empty. Empty fields " + errObjList.toString());
+		}
 	}
 }

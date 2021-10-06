@@ -80,7 +80,7 @@ public class Constants {
 
 	// User assessment pass mark
 	public static final Float ASSESSMENT_PASS_SCORE = 60.0f;
-	
+
 	public static final String DATE_FORMAT = "yyyy-mm-dd hh:mm:ss";
 
 	public static final String RESPONSE = "response";
@@ -90,4 +90,10 @@ public class Constants {
 	public static final String API_STAFF_POSITION_READ = "api.staff.position.read";
 	public static final String API_STAFF_POSITION_DELETE = "api.staff.position.delete";
 	public static final String API_STAFF_POSITION_HISTORY_READ = "api.staff.position.history.read";
+
+	public static final String ID = "id";
+	public static final String ORG_ID = "orgId";
+	public static final String POSITION = "position";
+	public static final String TOTAL_POSITION_FILLED = "totalPositionsFilled";
+	public static final String TOTAL_POSITION_VACANT = "totalPositionsVacant";
 }
