@@ -90,10 +90,15 @@ public class Constants {
 	public static final String API_STAFF_POSITION_READ = "api.staff.position.read";
 	public static final String API_STAFF_POSITION_DELETE = "api.staff.position.delete";
 	public static final String API_STAFF_POSITION_HISTORY_READ = "api.staff.position.history.read";
-
+	public static final String API_FILE_UPLOAD = "api.file.upload";
+	public static final String API_FILE_DELETE = "api.file.delete";
+	
 	public static final String ID = "id";
 	public static final String ORG_ID = "orgId";
 	public static final String POSITION = "position";
 	public static final String TOTAL_POSITION_FILLED = "totalPositionsFilled";
 	public static final String TOTAL_POSITION_VACANT = "totalPositionsVacant";
+	public static final String NAME = "name";
+	public static final String URL = "url";
+	public static final String DELETED = "deleted";
 }
