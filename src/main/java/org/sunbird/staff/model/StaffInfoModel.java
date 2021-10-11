@@ -3,6 +3,7 @@ package org.sunbird.staff.model;
 import org.springframework.data.cassandra.core.mapping.Column;
 import org.springframework.data.cassandra.core.mapping.PrimaryKey;
 import org.springframework.data.cassandra.core.mapping.Table;
+import org.sunbird.common.util.Constants;
 
 @Table("org_staff_position")
 public class StaffInfoModel {
@@ -10,13 +11,13 @@ public class StaffInfoModel {
 	@PrimaryKey
 	private StaffInfoPrimaryKeyModel primaryKey;
 
-	@Column("position")
+	@Column(Constants.POSITION)
 	private String position;
 
-	@Column("totalPositionsFilled")
+	@Column(Constants.TOTAL_POSITION_FILLED)
 	private int totalPositionsFilled;
 
-	@Column("totalPositionsVacant")
+	@Column(Constants.TOTAL_POSITION_VACANT)
 	private int totalPositionsVacant;
 
 	public StaffInfoModel() {
@@ -26,6 +27,7 @@ public class StaffInfoModel {
 	public StaffInfoModel(StaffInfoPrimaryKeyModel primaryKey) {
 		this.primaryKey = primaryKey;
 	}
+
 	public StaffInfoModel(StaffInfoPrimaryKeyModel primaryKey, String position, int totalPositionsFilled,
 			int totalPositionsVacant) {
 		this.primaryKey = primaryKey;

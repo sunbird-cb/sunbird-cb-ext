@@ -148,6 +148,11 @@
 			<version>2.0</version>
 		</dependency>
 		<!-- End of PDF and QR Code dependency -->
+		<dependency>
+			<groupId>org.sunbird</groupId>
+			<artifactId>cloud-store-sdk</artifactId>
+			<version>1.3.0</version>
+		</dependency>
 	</dependencies>
 
 	<build>

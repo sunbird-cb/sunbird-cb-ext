@@ -162,41 +162,9 @@ public class CbExtServerProperties {
 
     @Value("${azure.identity.name}")
     private String azureIdentityName;
-
-    public String getAzureIdentityName() {
-        return azureIdentityName;
-    }
-
-    public void setAzureIdentityName(String azureIdentityName) {
-        this.azureIdentityName = azureIdentityName;
-    }
-
-    public String getAzureTypeName() {
-        return azureTypeName;
-    }
-
-    public void setAzureTypeName(String azureTypeName) {
-        this.azureTypeName = azureTypeName;
-    }
-
-    public String getAzureStorageKey() {
-        return azureStorageKey;
-    }
-
-    public void setAzureStorageKey(String azureStorageKey) {
-        this.azureStorageKey = azureStorageKey;
-    }
-
+    
     @Value("${azure.storage.key}")
     private String azureStorageKey;
-
-    public String getAzureContainerName() {
-        return azureContainerName;
-    }
-
-    public void setAzureContainerName(String azureContainerName) {
-        this.azureContainerName = azureContainerName;
-    }
 
     public String getContentHost() {
         return contentHost;
@@ -469,7 +437,7 @@ public class CbExtServerProperties {
     public void setCourseBatchCreateEndpoint(String courseBatchCreateEndpoint) {
         this.courseBatchCreateEndpoint = courseBatchCreateEndpoint;
     }
-
+    
     @Override
     public String toString() {
         StringBuilder str = new StringBuilder("SB-CB-Ext Server Properties: ");
@@ -599,5 +567,37 @@ public class CbExtServerProperties {
 
 	public void setCacheMaxTTL(long cacheMaxTTL) {
 		this.cacheMaxTTL = cacheMaxTTL;
+	}
+
+	public String getAzureContainerName() {
+		return azureContainerName;
+	}
+
+	public void setAzureContainerName(String azureContainerName) {
+		this.azureContainerName = azureContainerName;
+	}
+
+	public String getAzureTypeName() {
+		return azureTypeName;
+	}
+
+	public void setAzureTypeName(String azureTypeName) {
+		this.azureTypeName = azureTypeName;
+	}
+
+	public String getAzureIdentityName() {
+		return azureIdentityName;
+	}
+
+	public void setAzureIdentityName(String azureIdentityName) {
+		this.azureIdentityName = azureIdentityName;
+	}
+
+	public String getAzureStorageKey() {
+		return azureStorageKey;
+	}
+
+	public void setAzureStorageKey(String azureStorageKey) {
+		this.azureStorageKey = azureStorageKey;
 	}
 }
