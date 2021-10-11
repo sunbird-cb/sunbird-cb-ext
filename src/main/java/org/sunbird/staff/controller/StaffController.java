@@ -50,10 +50,9 @@ public class StaffController {
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
 
-	@GetMapping("/orghistory/{orgId}/{auditType}")
-	public ResponseEntity<?> getStaffDetails(@PathVariable("orgId") String orgId,
-			@PathVariable("auditType") String auditType) throws Exception {
-		SBApiResponse response = staffService.getStaffAudit(orgId, auditType);
+	@GetMapping("/orghistory/{orgId}/staff")
+	public ResponseEntity<?> getStaffHistoryDetails(@PathVariable("orgId") String orgId) throws Exception {
+		SBApiResponse response = staffService.getStaffAudit(orgId);
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
 }
