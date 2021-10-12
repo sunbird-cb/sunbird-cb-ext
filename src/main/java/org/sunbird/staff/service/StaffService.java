@@ -13,6 +13,6 @@ public interface StaffService {
 
 	public SBApiResponse deleteStaffDetails(String orgId, String staffDetailsId) throws Exception;
 	
-	public SBApiResponse getStaffAudit(String orgId, String auditType)throws Exception;
+	public SBApiResponse getStaffAudit(String orgId)throws Exception;
 
 }
