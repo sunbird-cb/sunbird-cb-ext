@@ -57,7 +57,7 @@ public class SearchByService {
         Object objectAreaCache = cacheManager.getCache(COMETENTY_CACHE_NAME_BY_AREA);
         Object objectTypeCache = cacheManager.getCache(COMETENTY_CACHE_NAME_BY_TYPE);
         Collection<CompetencyInfo> wholeCache = (Collection<CompetencyInfo>) objectNameCache;
-        Collection<CompetencyInfo> afterFilter = new ArrayList<>();
+        Map<String, CompetencyInfo> afterFilter = new HashMap<>();
         if (filter.getCompetencyName().isEmpty() && filter.getCompetencyType().isEmpty() && filter.getCompetencyArea().isEmpty()) {
             return wholeCache;
         } else {
@@ -65,32 +65,33 @@ public class SearchByService {
             if (!filter.getCompetencyName().isEmpty()) {
                 for (CompetencyInfo eachInfo : wholeCache) {
                     if (this.listToLowerCase(filter.getCompetencyName()).contains(this.stringToLowerCase(eachInfo.getName()))) {
-                        afterFilter.add(eachInfo);
+                        afterFilter.put(eachInfo.getId(), eachInfo);
                     }
                 }
             }
             if (!filter.getCompetencyType().isEmpty()) {
-                List<ComInfoCache> typeCache = (List<ComInfoCache>) objectTypeCache;
-                for (ComInfoCache eachInfo : typeCache) {
-                    if (this.listToLowerCase(filter.getCompetencyType()).contains(this.stringToLowerCase(eachInfo.getKeyName()))) {
-                        afterFilter.addAll(eachInfo.getValueList());
+                 Map<String, List<CompetencyInfo>>  typeCache = ( Map<String, List<CompetencyInfo>> ) objectTypeCache;
+                for (Map.Entry<String, List<CompetencyInfo>>  eachInfo : typeCache.entrySet()) {
+                    if (this.listToLowerCase(filter.getCompetencyType()).contains(this.stringToLowerCase(eachInfo.getKey()))) {
+                       for (CompetencyInfo competencyInfo: eachInfo.getValue())
+                        afterFilter.put(competencyInfo.getId(), competencyInfo);
                     }
                 }
 
             }
             if (!filter.getCompetencyArea().isEmpty()) {
-                List<ComInfoCache> areaCache = (List<ComInfoCache>) objectAreaCache;
-                for (ComInfoCache eachInfo : areaCache) {
-                    if (this.listToLowerCase(filter.getCompetencyArea()).contains(this.stringToLowerCase(eachInfo.getKeyName()))) {
-                        afterFilter.addAll(eachInfo.getValueList());
+                Map<String, List<CompetencyInfo>>  areaCache = ( Map<String, List<CompetencyInfo>> ) objectAreaCache;
+                for (Map.Entry<String, List<CompetencyInfo>>  eachInfo : areaCache.entrySet()) {
+                    if (this.listToLowerCase(filter.getCompetencyArea()).contains(this.stringToLowerCase(eachInfo.getKey()))) {
+                        for (CompetencyInfo competencyInfo: eachInfo.getValue())
+                            afterFilter.put(competencyInfo.getId(), competencyInfo);
                     }
                 }
 
             }
 
         }
-        afterFilter = new ArrayList<>(new LinkedHashSet<>(afterFilter));
-        return afterFilter;
+        return afterFilter.values();
     }
 
     private List<String> listToLowerCase(List<String> convertString) {
@@ -112,8 +113,11 @@ public class SearchByService {
 
     private void updateCompetencyDetails(String authUserToken) throws Exception {
         Map<String, CompetencyInfo> competencyMap = null;
-        List<ComInfoCache> competencyTypeCache = new ArrayList<>();
-        List<ComInfoCache> competencyAreaCache = new ArrayList<>();
+//        List<ComInfoCache> competencyTypeCache = new ArrayList<>();
+//        List<ComInfoCache> competencyAreaCache = new ArrayList<>();
+
+        Map<String, List<CompetencyInfo>> comInfoByType = new HashMap<>();
+        Map<String, List<CompetencyInfo>> comInfoByArea = new HashMap<>();
 
         // Get facets from Composite Search
         Map<String, String> headers = new HashMap<>();
@@ -183,8 +187,7 @@ public class SearchByService {
         List<Map<String, Object>> fracResponseList = (List<Map<String, Object>>) fracSearchRes.get("responseData");
 
         if (!CollectionUtils.isEmpty(fracResponseList)) {
-            Map<String, List<CompetencyInfo>> comInfoByType = new HashMap<>();
-            Map<String, List<CompetencyInfo>> comInfoByArea = new HashMap<>();
+
             for (Map<String, Object> respObj : fracResponseList) {
                 String compName = ((String) respObj.get("name")).toLowerCase();
                 if (competencyMap.containsKey(compName)) {
@@ -227,21 +230,21 @@ public class SearchByService {
                 }
 
             }
-            // Catch for Competency Type
-
-            for (Map.Entry<String, List<CompetencyInfo>> entry : comInfoByType.entrySet()) {
-                ComInfoCache areaCache = new ComInfoCache();
-                areaCache.setKeyName(this.stringToLowerCase(entry.getKey()));
-                areaCache.setValueList(entry.getValue());
-                competencyTypeCache.add(areaCache);
-            }
-            // Catch for Competency Area
-            for (Map.Entry<String, List<CompetencyInfo>> entry : comInfoByArea.entrySet()) {
-                ComInfoCache typeCache = new ComInfoCache();
-                typeCache.setKeyName(this.stringToLowerCase(entry.getKey()));
-                typeCache.setValueList(entry.getValue());
-                competencyAreaCache.add(typeCache);
-            }
+//            // Catch for Competency Type
+//
+//            for (Map.Entry<String, List<CompetencyInfo>> entry : comInfoByType.entrySet()) {
+//                ComInfoCache areaCache = new ComInfoCache();
+//                areaCache.setKeyName(this.stringToLowerCase(entry.getKey()));
+//                areaCache.setValueList(entry.getValue());
+//                competencyTypeCache.add(areaCache);
+//            }
+//            // Catch for Competency Area
+//            for (Map.Entry<String, List<CompetencyInfo>> entry : comInfoByArea.entrySet()) {
+//                ComInfoCache typeCache = new ComInfoCache();
+//                typeCache.setKeyName(this.stringToLowerCase(entry.getKey()));
+//                typeCache.setValueList(entry.getValue());
+//                competencyAreaCache.add(typeCache);
+//            }
         } else {
             Exception err = new Exception("Failed to get competency info from FRAC API.");
             logger.error(err);
@@ -253,8 +256,8 @@ public class SearchByService {
         }
 
         cacheManager.putCache(COMETENTY_CACHE_NAME, competencyMap.values());
-        cacheManager.putCache(COMETENTY_CACHE_NAME_BY_TYPE, competencyTypeCache);
-        cacheManager.putCache(COMETENTY_CACHE_NAME_BY_AREA, competencyAreaCache);
+        cacheManager.putCache(COMETENTY_CACHE_NAME_BY_TYPE, comInfoByType);
+        cacheManager.putCache(COMETENTY_CACHE_NAME_BY_AREA, comInfoByArea);
     }
 
     private void updateProviderDetails(String authUserToken) throws Exception {
