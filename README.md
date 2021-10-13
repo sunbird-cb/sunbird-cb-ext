@@ -120,6 +120,9 @@ CREATE TABLE user_department_role_audit
 - user_quiz_summary
 - work_order
 - work_allocation
+- org_staff_position
+- org_budget_scheme
+- org_audit
 
 **Queries to create the cassandra table**
 
@@ -241,5 +244,42 @@ CREATE TABLE user_work_allocation_mapping(
     workorderid text,
     status text,
     PRIMARY KEY (userid, workallocationid)
+);
+```
+```sh
+CREATE TABLE sunbird.org_staff_position (
+	orgId text,
+	id text,
+	position text, 
+	totalPositionsFilled int,
+	totalPositionsVacant int,
+	PRIMARY KEY (orgId, id)
+);
+CREATE INDEX IF NOT EXISTS staff_position_index on sunbird.org_staff_position (position);
+```
+```sh
+CREATE TABLE sunbird.org_budget_scheme (
+	orgId text,
+	budgetYear text,
+	id text,
+	schemeName text,
+	salaryBudgetAllocated bigint,
+	trainingBudgetAllocated bigint, 
+	trainingBudgetUtilization bigint, 
+	proofDocs frozen<list<map<text,text>>>,
+	PRIMARY KEY (orgId, budgetYear, id)
+);
+CREATE INDEX IF NOT EXISTS budget_schemeName_index on sunbird.org_budget_scheme (schemeName);
+```
+```sh
+CREATE TABLE sunbird.org_audit (
+	orgId text,
+	auditType text,
+	createdBy text,
+	createdDate text,
+	updatedBy text,
+	updatedDate text,
+	transactionDetails text,
+	PRIMARY KEY (orgId, auditType, createdDate, updatedDate)
 );
 ```
