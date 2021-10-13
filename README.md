@@ -29,8 +29,8 @@ SB-CB-EXT uses a number of open source projects:
 
 **ES Index Details**
 - Need to create indexes 
-   work_allocation_v2 with alias - work_allocation
-   work_order_v1 with alias - work_order
+  - work_allocation_v2 with alias - work_allocation
+  - work_order_v1 with alias - work_order
 
 - Update the work_allocation mapping using file @ https://github.com/sunbird-cb/sunbird-cb-ext/blob/cbrelease-3.0.1/src/main/resources/elasticsearch/index/workallocationv2.json
 
