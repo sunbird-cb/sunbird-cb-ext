@@ -27,7 +27,7 @@ SB-CB-EXT uses a number of open source projects:
 - orgCreation - Used to create SB Org object when new Department is created
 - userRoleAuditTopic - Used to update the user_department_role record in Audit table 
 
-** ES Index Details **
+**ES Index Details**
 - Need to create indexes 
    work_allocation_v2 with alias - work_allocation
    work_order_v1 with alias - work_order
