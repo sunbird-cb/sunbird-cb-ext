@@ -239,7 +239,6 @@ public class CohortsServiceImpl implements CohortsService {
 	}
 
 	private void enrollInCourse(String contentId, String userUUID, Map<String, String> headers, String batchId) {
-		Response response = null;
 		HashMap<String, Object> req;
 		req = new HashMap<>();
 		HashMap<String, Object> enrollObj = new HashMap<>();

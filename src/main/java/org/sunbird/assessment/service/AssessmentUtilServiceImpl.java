@@ -78,12 +78,13 @@ public class AssessmentUtilServiceImpl implements AssessmentUtilService {
 			Map<String, Object> resultMap = new HashMap<>();
 			Map<String, Object> answers = getAnswers(questions);
 			for (Map<String, Object> question : questions) {
+				List<Map<String, Object>> optionsList= (List<Map<String, Object>>) question.get(OPTIONS);
 				List<String> marked = new ArrayList<>();
 				if (question.containsKey(QUESTION_TYPE)) {
 					String questionType = (String) question.get(QUESTION_TYPE);
 					switch (questionType) {
 					case "mtf":
-						for (Map<String, Object> options : (List<Map<String, Object>>) question.get(OPTIONS)) {
+						for (Map<String, Object> options : optionsList) {
 							if (options.containsKey(RESPONSE) && !options.get(RESPONSE).toString().isEmpty())
 								marked.add(options.get(OPTION_ID).toString() + "-"
 										+ options.get("text").toString().toLowerCase() + "-"
@@ -91,7 +92,7 @@ public class AssessmentUtilServiceImpl implements AssessmentUtilService {
 						}
 						break;
 					case "fitb":
-						for (Map<String, Object> options : (List<Map<String, Object>>) question.get(OPTIONS)) {
+						for (Map<String, Object> options : optionsList) {
 							if (options.containsKey(RESPONSE) && !options.get(RESPONSE).toString().isEmpty())
 								marked.add(options.get(OPTION_ID).toString() + "-"
 										+ options.get(RESPONSE).toString().toLowerCase());
@@ -99,7 +100,7 @@ public class AssessmentUtilServiceImpl implements AssessmentUtilService {
 						break;
 						case MCQ_SCA:
 					case MCQ_MCA:
-						for (Map<String, Object> options : (List<Map<String, Object>>) question.get(OPTIONS)) {
+						for (Map<String, Object> options : optionsList) {
 							if ((boolean) options.get(USER_SELECTED))
 								marked.add(options.get(OPTION_ID).toString());
 						}
@@ -108,7 +109,7 @@ public class AssessmentUtilServiceImpl implements AssessmentUtilService {
 							break;
 					}
 				} else {
-					for (Map<String, Object> options : (List<Map<String, Object>>) question.get(OPTIONS)) {
+					for (Map<String, Object> options : optionsList) {
 						if ((boolean) options.get(USER_SELECTED))
 							marked.add(options.get(OPTION_ID).toString());
 					}
