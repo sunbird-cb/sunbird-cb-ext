@@ -244,7 +244,6 @@ public class CohortsServiceImpl implements CohortsService {
 	}
 
 	private void enrollInCourse(String contentId, String userUUID, Map<String, String> headers, String batchId) {
-		Response response = null;
 		HashMap<String, Object> req;
 		req = new HashMap<>();
 		HashMap<String, Object> enrollObj = new HashMap<>();
@@ -342,6 +341,7 @@ public class CohortsServiceImpl implements CohortsService {
 					if (participantMap.containsKey(userId)) {
 						OpenSaberApiUserProfile userProfile = (OpenSaberApiUserProfile) participantMap.get(userId);
 						CohortUsers user = new CohortUsers();
+						user.setUserId(userProfile.getUserId());
 						user.setUser_id(userProfile.getPersonalDetails().getPrimaryEmail());
 						user.setEmail(userProfile.getPersonalDetails().getPrimaryEmail());
 						user.setFirst_name(userProfile.getPersonalDetails().getFirstname());

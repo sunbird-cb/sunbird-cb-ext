@@ -12,26 +12,17 @@ public interface AssessmentService {
 	 * @return
 	 * @throws Exception
 	 */
-	public Map<String, Object> submitAssessment(String rootOrg, AssessmentSubmissionDTO data, String userEmail)
+	 Map<String, Object> submitAssessment(String rootOrg, AssessmentSubmissionDTO data, String userEmail)
 			throws Exception;
 
 	/**
 	 * gets assessments given a content id and user id
 	 * 
-	 * @param course_id
-	 * @param user_id
+	 * @param courseId
+	 * @param userId
 	 * @return
 	 * @throws Exception
 	 */
 	Map<String, Object> getAssessmentByContentUser(String rootOrg, String courseId, String userId) throws Exception;
-
-	/**
-	 * submits assessments coming from iframe
-	 * 
-	 * @param request
-	 * @return
-	 * @throws Exception
-	 */
-	Map<String, Object> submitAssessmentByIframe(String rootOrg, Map<String, Object> request) throws Exception;
 
 }

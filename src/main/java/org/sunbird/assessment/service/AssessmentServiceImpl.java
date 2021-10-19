@@ -179,13 +179,6 @@ public class AssessmentServiceImpl implements AssessmentService {
 		}
 		return result;
 	}
-
-	@Override
-	public Map<String, Object> submitAssessmentByIframe(String rootOrg, Map<String, Object> request) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 	// A method to Format Data in the FrontEndFormat
 	private List<Map<String, Object>> getAssessments(List<Map<String, Object>> result) {
 		List<Map<String, Object>> assessments = new ArrayList<>();

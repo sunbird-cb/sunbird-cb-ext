@@ -24,7 +24,7 @@ public class CohortsController {
 	 * gets all top-performers
 	 *
 	 * @param resourceId
-	 * @param userEmail
+	 * @param userUUID
 	 * @param count
 	 * @return
 	 * @throws Exception
@@ -41,8 +41,8 @@ public class CohortsController {
 	/**
 	 * gets all active users
 	 * 
-	 * @param resourceId
-	 * @param userEmail
+	 * @param authUserToken
+	 * @param userUUID
 	 * @param count
 	 * @return
 	 * @throws Exception

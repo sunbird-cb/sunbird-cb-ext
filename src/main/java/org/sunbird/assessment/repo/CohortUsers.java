@@ -4,11 +4,21 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CohortUsers {
+	private String userId;
 	private String first_name;
     private String last_name;
     private String email;
     private String desc;
-    private String user_id;
+
+	public String getUserId() {
+		return userId;
+	}
+
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
+
+	private String user_id;
     private String department;
     private String phone_No;
     private String designation;
