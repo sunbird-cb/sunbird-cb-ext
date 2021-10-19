@@ -87,7 +87,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		try {
 			String reqBodyData = new ObjectMapper().writeValueAsString(request);
 			HttpEntity<String> requestEnty = new HttpEntity<>(reqBodyData, headers);
-			String serverUrl = props.getSbHubGraphServiceUrl() + "/v1/user/search/profile";
+			String serverUrl = props.getSbUrl() + props.getUserSearchEndPoint();
 			OpenSaberApiResp openSaberApiResp = restTemplate.postForObject(serverUrl, requestEnty,
 					OpenSaberApiResp.class);
 			if (openSaberApiResp != null && "OK".equalsIgnoreCase(openSaberApiResp.getResponseCode())

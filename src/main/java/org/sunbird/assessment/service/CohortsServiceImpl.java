@@ -324,6 +324,7 @@ public class CohortsServiceImpl implements CohortsService {
 		List<String> participantList = contentService.getParticipantsList(xAuthUser, batchIdList);
 		List<CohortUsers> activeUserCollection = new ArrayList<>();
 		try {
+			// Hub service
 			Map<String, Object> participantMap = userUtilService.getUsersDataFromUserIds(rootOrg, participantList,
 					new ArrayList<>(Arrays.asList(Constants.FIRST_NAME, Constants.LAST_NAME, Constants.EMAIL,
 							Constants.DEPARTMENT_NAME)));
