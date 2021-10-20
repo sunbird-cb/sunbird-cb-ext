@@ -15,35 +15,35 @@ import org.springframework.web.client.RestTemplate;
 @SpringBootApplication
 public class SbCbExtApplication {
 
-	/**
-	 * Runs The application
-	 * 
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		SpringApplication.run(SbCbExtApplication.class, args);
-	}
-	
-	/**
-	 * Initializes the rest template
-	 * 
-	 * @return
-	 * @throws Exception
-	 */
+    /**
+     * Runs The application
+     *
+     * @param args
+     */
+    public static void main(String[] args) {
+        SpringApplication.run(SbCbExtApplication.class, args);
+    }
 
-	@Bean
-	public RestTemplate restTemplate() throws Exception {
+    /**
+     * Initializes the rest template
+     *
+     * @return
+     * @throws Exception
+     */
 
-		return new RestTemplate(getClientHttpRequestFactory());
-	}
+    @Bean
+    public RestTemplate restTemplate() throws Exception {
 
-	private ClientHttpRequestFactory getClientHttpRequestFactory() {
+        return new RestTemplate(getClientHttpRequestFactory());
+    }
 
-		int timeout = 5000;
-              RequestConfig config = RequestConfig.custom().setConnectTimeout(timeout).setConnectionRequestTimeout(timeout)
-                           .setSocketTimeout(timeout).build();
-              CloseableHttpClient client = HttpClientBuilder.create().setMaxConnTotal(2000).setMaxConnPerRoute(500)
-                           .setDefaultRequestConfig(config).build();
-              return new HttpComponentsClientHttpRequestFactory(client);
-	}
+    private ClientHttpRequestFactory getClientHttpRequestFactory() {
+
+        int timeout = 5000;
+        RequestConfig config = RequestConfig.custom().setConnectTimeout(timeout).setConnectionRequestTimeout(timeout)
+                .setSocketTimeout(timeout).build();
+        CloseableHttpClient client = HttpClientBuilder.create().setMaxConnTotal(2000).setMaxConnPerRoute(500)
+                .setDefaultRequestConfig(config).build();
+        return new HttpComponentsClientHttpRequestFactory(client);
+    }
 }

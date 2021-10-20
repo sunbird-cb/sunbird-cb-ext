@@ -141,16 +141,16 @@ public class CbExtServerProperties {
 
     @Value("${wat.telemetry.env}")
     private String watTelemetryEnv;
-    
+
     @Value("${sb.org.search.path}")
     private String sbOrgSearchPath;
-    
+
     @Value("${km.base.composite.search.path}")
     private String kmCompositeSearchPath;
-    
+
     @Value("${frac.search.path}")
     private String fracSearchPath;
-    
+
     @Value("${cache.max.ttl}")
     private long cacheMaxTTL;
 
@@ -526,35 +526,35 @@ public class CbExtServerProperties {
         this.watTelemetryEnv = watTelemetryEnv;
     }
 
-	public String getSbOrgSearchPath() {
-		return sbOrgSearchPath;
-	}
+    public String getSbOrgSearchPath() {
+        return sbOrgSearchPath;
+    }
 
-	public void setSbOrgSearchPath(String sbOrgSearchPath) {
-		this.sbOrgSearchPath = sbOrgSearchPath;
-	}
+    public void setSbOrgSearchPath(String sbOrgSearchPath) {
+        this.sbOrgSearchPath = sbOrgSearchPath;
+    }
 
-	public String getKmCompositeSearchPath() {
-		return kmCompositeSearchPath;
-	}
+    public String getKmCompositeSearchPath() {
+        return kmCompositeSearchPath;
+    }
 
-	public void setKmCompositeSearchPath(String kmCompositeSearchPath) {
-		this.kmCompositeSearchPath = kmCompositeSearchPath;
-	}
+    public void setKmCompositeSearchPath(String kmCompositeSearchPath) {
+        this.kmCompositeSearchPath = kmCompositeSearchPath;
+    }
 
-	public String getFracSearchPath() {
-		return fracSearchPath;
-	}
+    public String getFracSearchPath() {
+        return fracSearchPath;
+    }
 
-	public void setFracSearchPath(String fracSearchPath) {
-		this.fracSearchPath = fracSearchPath;
-	}
+    public void setFracSearchPath(String fracSearchPath) {
+        this.fracSearchPath = fracSearchPath;
+    }
 
-	public long getCacheMaxTTL() {
-		return cacheMaxTTL;
-	}
+    public long getCacheMaxTTL() {
+        return cacheMaxTTL;
+    }
 
-	public void setCacheMaxTTL(long cacheMaxTTL) {
-		this.cacheMaxTTL = cacheMaxTTL;
-	}
+    public void setCacheMaxTTL(long cacheMaxTTL) {
+        this.cacheMaxTTL = cacheMaxTTL;
+    }
 }

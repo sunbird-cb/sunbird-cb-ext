@@ -1,6 +1,7 @@
 package org.sunbird.workallocation.model;
 
 import java.util.List;
+
 public class ContentCreateRequest {
     private String name;
     private String creator;
@@ -22,7 +23,8 @@ public class ContentCreateRequest {
         this.organisation = organisation;
         this.createdFor = createdFor;
     }
-    public ContentCreateRequest () {
+
+    public ContentCreateRequest() {
 
     }
 

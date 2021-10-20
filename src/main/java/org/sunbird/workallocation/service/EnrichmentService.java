@@ -68,7 +68,7 @@ public class EnrichmentService {
 
     private void enrichUserNamesToWorkOrder(WorkOrderDTO workOrderDTO) {
         Set<String> userIds = new HashSet<>();
-        if(StringUtils.isEmpty(workOrderDTO.getCreatedByName())){
+        if (StringUtils.isEmpty(workOrderDTO.getCreatedByName())) {
             userIds.add(workOrderDTO.getCreatedBy());
         }
         userIds.add(workOrderDTO.getUpdatedBy());
@@ -79,14 +79,14 @@ public class EnrichmentService {
             if (StringUtils.isEmpty(workOrderDTO.getCreatedByName()) && !ObjectUtils.isEmpty(usersMap.get(workOrderDTO.getCreatedBy()))) {
                 UserBasicInfo userBasicInfo = mapper.convertValue(usersMap.get(workOrderDTO.getCreatedBy()), UserBasicInfo.class);
                 String firstName = userBasicInfo.getFirst_name() == null ? "" : userBasicInfo.getFirst_name();
-                String lastName  = userBasicInfo.getLast_name() == null ? "" : userBasicInfo.getLast_name();
-                workOrderDTO.setCreatedByName(firstName +" "+lastName);
+                String lastName = userBasicInfo.getLast_name() == null ? "" : userBasicInfo.getLast_name();
+                workOrderDTO.setCreatedByName(firstName + " " + lastName);
             }
             if (!ObjectUtils.isEmpty(usersMap.get(workOrderDTO.getUpdatedBy()))) {
                 UserBasicInfo userBasicInfo = mapper.convertValue(usersMap.get(workOrderDTO.getUpdatedBy()), UserBasicInfo.class);
                 String firstName = userBasicInfo.getFirst_name() == null ? "" : userBasicInfo.getFirst_name();
-                String lastName  = userBasicInfo.getLast_name() == null ? "" : userBasicInfo.getLast_name();
-                workOrderDTO.setUpdatedByName(firstName +" "+lastName);
+                String lastName = userBasicInfo.getLast_name() == null ? "" : userBasicInfo.getLast_name();
+                workOrderDTO.setUpdatedByName(firstName + " " + lastName);
             }
         } catch (IOException e) {
             logger.error("Error while fetching the user details", e);
@@ -95,7 +95,7 @@ public class EnrichmentService {
 
     private void enrichUserNamesToWorkAllocation(WorkAllocationDTOV2 workAllocationDTOV2) {
         Set<String> userIds = new HashSet<>();
-        if(StringUtils.isEmpty(workAllocationDTOV2.getCreatedByName())){
+        if (StringUtils.isEmpty(workAllocationDTOV2.getCreatedByName())) {
             userIds.add(workAllocationDTOV2.getCreatedBy());
         }
         userIds.add(workAllocationDTOV2.getUpdatedBy());
@@ -104,14 +104,14 @@ public class EnrichmentService {
             if (StringUtils.isEmpty(workAllocationDTOV2.getCreatedByName()) && !ObjectUtils.isEmpty(usersMap.get(workAllocationDTOV2.getCreatedBy()))) {
                 UserBasicInfo userBasicInfo = mapper.convertValue(usersMap.get(workAllocationDTOV2.getCreatedBy()), UserBasicInfo.class);
                 String firstName = userBasicInfo.getFirst_name() == null ? "" : userBasicInfo.getFirst_name();
-                String lastName  = userBasicInfo.getLast_name() == null ? "" : userBasicInfo.getLast_name();
-                workAllocationDTOV2.setCreatedByName(firstName +" "+lastName);
+                String lastName = userBasicInfo.getLast_name() == null ? "" : userBasicInfo.getLast_name();
+                workAllocationDTOV2.setCreatedByName(firstName + " " + lastName);
             }
             if (!ObjectUtils.isEmpty(usersMap.get(workAllocationDTOV2.getUpdatedBy()))) {
                 UserBasicInfo userBasicInfo = mapper.convertValue(usersMap.get(workAllocationDTOV2.getUpdatedBy()), UserBasicInfo.class);
                 String firstName = userBasicInfo.getFirst_name() == null ? "" : userBasicInfo.getFirst_name();
-                String lastName  = userBasicInfo.getLast_name() == null ? "" : userBasicInfo.getLast_name();
-                workAllocationDTOV2.setUpdatedByName(firstName +" "+lastName);
+                String lastName = userBasicInfo.getLast_name() == null ? "" : userBasicInfo.getLast_name();
+                workAllocationDTOV2.setUpdatedByName(firstName + " " + lastName);
             }
         } catch (Exception e) {
             logger.error("Error while fetching the user details", e);

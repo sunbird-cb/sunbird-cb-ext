@@ -11,67 +11,67 @@ import javax.validation.constraints.NotNull;
 @Entity
 @Table(name = "department_types", schema = "wingspan")
 public class DepartmentType {
-	@Id
-	@Column(name = "id")
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	Integer id;
+    @Id
+    @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    Integer id;
 
-	@Column(name = "dept_type")
-	@NotNull
-	private String deptType;
+    @Column(name = "dept_type")
+    @NotNull
+    private String deptType;
 
-	@Column(name = "dept_subtype")
-	@NotNull
-	private String deptSubType;
+    @Column(name = "dept_subtype")
+    @NotNull
+    private String deptSubType;
 
-	@Column(name = "description")
-	@NotNull
-	private String description;
+    @Column(name = "description")
+    @NotNull
+    private String description;
 
-	public DepartmentType() {
-	}
+    public DepartmentType() {
+    }
 
-	public DepartmentType(Integer id, String deptType, String deptSubType, String description) {
-		this.id = id;
-		this.deptType = deptType;
-		this.deptSubType = deptSubType;
-		this.description = description;
-	}
+    public DepartmentType(Integer id, String deptType, String deptSubType, String description) {
+        this.id = id;
+        this.deptType = deptType;
+        this.deptSubType = deptSubType;
+        this.description = description;
+    }
 
-	public Integer getId() {
-		return id;
-	}
+    public Integer getId() {
+        return id;
+    }
 
-	public void setId(Integer id) {
-		this.id = id;
-	}
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
-	public String getDeptType() {
-		return deptType;
-	}
+    public String getDeptType() {
+        return deptType;
+    }
 
-	public void setDeptType(String deptType) {
-		this.deptType = deptType;
-	}
+    public void setDeptType(String deptType) {
+        this.deptType = deptType;
+    }
 
-	public String getDeptSubType() {
-		return deptSubType;
-	}
+    public String getDeptSubType() {
+        return deptSubType;
+    }
 
-	public void setDeptSubType(String deptSubType) {
-		this.deptSubType = deptSubType;
-	}
+    public void setDeptSubType(String deptSubType) {
+        this.deptSubType = deptSubType;
+    }
 
-	public String getDescription() {
-		return description;
-	}
+    public String getDescription() {
+        return description;
+    }
 
-	public void setDescription(String description) {
-		this.description = description;
-	}
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
-	public String toString() {
-		return "[DepartmentType=id:" + id + ", deptType: " + deptType + ", deptSubType: " + deptSubType
-				+ ", description: " + description + "]";
-	}
+    public String toString() {
+        return "[DepartmentType=id:" + id + ", deptType: " + deptType + ", deptSubType: " + deptSubType
+                + ", description: " + description + "]";
+    }
 }

@@ -71,8 +71,9 @@ public class WorkAllocation {
     public void setArchivedWAList(List<WAObject> archivedWAList) {
         this.archivedWAList = archivedWAList;
     }
+
     public void addArchivedWAList(WAObject archivedWAList) {
-        if(CollectionUtils.isEmpty(this.archivedWAList))
+        if (CollectionUtils.isEmpty(this.archivedWAList))
             this.archivedWAList = new ArrayList<>();
         this.archivedWAList.add(archivedWAList);
     }

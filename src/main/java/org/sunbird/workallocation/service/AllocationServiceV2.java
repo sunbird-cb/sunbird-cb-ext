@@ -96,11 +96,10 @@ public class AllocationServiceV2 {
 
     private Logger logger = LoggerFactory.getLogger(AllocationServiceV2.class);
 
-    final String[] includeFields = { "roleCompetencyList.competencyDetails"};
+    final String[] includeFields = {"roleCompetencyList.competencyDetails"};
 
     /**
-     *
-     * @param userId user Id of the user
+     * @param userId    user Id of the user
      * @param workOrder work order object
      * @return response message as success of failed
      */
@@ -113,7 +112,7 @@ public class AllocationServiceV2 {
             workOrderRepo.save(workOrderCassandraModel);
             restStatus = indexerService.addEntity(workOrderIndex, workOrderIndexType, workOrder.getId(),
                     mapper.convertValue(workOrder, Map.class));
-        }catch (Exception ex){
+        } catch (Exception ex) {
             logger.error("Exception occurred while creating the work order", ex);
             throw new ApplicationLogicError("Exception occurred while creating the work order", ex);
         }
@@ -134,8 +133,7 @@ public class AllocationServiceV2 {
     }
 
     /**
-     *
-     * @param userId user Id of the user
+     * @param userId    user Id of the user
      * @param workOrder work order object
      * @return response message as success of failed
      */
@@ -175,9 +173,8 @@ public class AllocationServiceV2 {
     }
 
     /**
-     *
-     * @param authUserToken auth token
-     * @param userId user Id
+     * @param authUserToken     auth token
+     * @param userId            user Id
      * @param workAllocationDTO work allocation object
      * @return
      */
@@ -208,10 +205,10 @@ public class AllocationServiceV2 {
             workOrder.addUserId(workAllocationDTO.getId());
             updateWorkOderCount(workOrder);
             enrichmentService.enrichWorkOrder(workOrder, userId, WorkAllocationConstants.UPDATE);
-            WorkOrderCassandraModel  workOrderCassandraModel = new WorkOrderCassandraModel(workOrder.getId(), mapper.writeValueAsString(workOrder));
+            WorkOrderCassandraModel workOrderCassandraModel = new WorkOrderCassandraModel(workOrder.getId(), mapper.writeValueAsString(workOrder));
             workOrderRepo.save(workOrderCassandraModel);
             indexerService.updateEntity(workOrderIndex, workOrderIndexType, workOrder.getId(), mapper.convertValue(workOrder, Map.class));
-        }catch (Exception ex){
+        } catch (Exception ex) {
             logger.error("Exception occurred while saving the work allocation!!", ex);
             throw new ApplicationLogicError("Exception occurred while saving the work allocation!!", ex);
         }
@@ -230,9 +227,8 @@ public class AllocationServiceV2 {
     }
 
     /**
-     *
-     * @param authUserToken auth token
-     * @param userId user Id
+     * @param authUserToken     auth token
+     * @param userId            user Id
      * @param workAllocationDTO work allocation object
      * @return
      */
@@ -261,10 +257,10 @@ public class AllocationServiceV2 {
             workOrder.addUserId(workAllocationDTO.getId());
             updateWorkOderCount(workOrder);
             enrichmentService.enrichWorkOrder(workOrder, userId, WorkAllocationConstants.UPDATE);
-            WorkOrderCassandraModel  workOrderCassandraModel = new WorkOrderCassandraModel(workOrder.getId(), mapper.writeValueAsString(workOrder));
+            WorkOrderCassandraModel workOrderCassandraModel = new WorkOrderCassandraModel(workOrder.getId(), mapper.writeValueAsString(workOrder));
             workOrderRepo.save(workOrderCassandraModel);
             indexerService.updateEntity(workOrderIndex, workOrderIndexType, workOrder.getId(), mapper.convertValue(workOrder, Map.class));
-        }catch (Exception ex){
+        } catch (Exception ex) {
             logger.error("Exception occurred while saving the work allocation!!", ex);
             throw new ApplicationLogicError("Exception occurred while saving the work allocation!!", ex);
         }
@@ -356,7 +352,7 @@ public class AllocationServiceV2 {
         if (!StringUtils.isEmpty(criteria.getDepartmentName())) {
             query.must(QueryBuilders.termQuery("deptName.keyword", criteria.getDepartmentName()));
         }
-        if(!StringUtils.isEmpty(criteria.getQuery())){
+        if (!StringUtils.isEmpty(criteria.getQuery())) {
             query.must(QueryBuilders.matchPhrasePrefixQuery("name", criteria.getQuery()));
         }
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder().query(query);
@@ -383,7 +379,7 @@ public class AllocationServiceV2 {
         return response;
     }
 
-    public Response getWorkOrderById(String workOrderId){
+    public Response getWorkOrderById(String workOrderId) {
         Response response = new Response();
         response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
         response.put(Constants.DATA, getWorkOrderObject(workOrderId));
@@ -391,11 +387,10 @@ public class AllocationServiceV2 {
         return response;
     }
 
-    public Map<String, Object> getWorkOrderObject(String workOrderId)
-    {
+    public Map<String, Object> getWorkOrderObject(String workOrderId) {
         Map<String, Object> workOrderObject = indexerService.readEntity(workOrderIndex, workOrderIndexType, workOrderId);
         if (!CollectionUtils.isEmpty((Collection<?>) workOrderObject.get("userIds"))) {
-            List<WorkAllocationDTOV2> workAllocationDTOV2List =  getWorkAllocationListByIds((List<String>)workOrderObject.get("userIds"));
+            List<WorkAllocationDTOV2> workAllocationDTOV2List = getWorkAllocationListByIds((List<String>) workOrderObject.get("userIds"));
             workOrderObject.put("users", workAllocationDTOV2List);
         } else {
             workOrderObject.put("users", new ArrayList<>());
@@ -403,7 +398,7 @@ public class AllocationServiceV2 {
         return workOrderObject;
     }
 
-    public Response getWorkAllocationById(String workAllocationId){
+    public Response getWorkAllocationById(String workAllocationId) {
         Map<String, Object> workAllocationObject = indexerService.readEntity(workAllocationIndex, workAllocationIndexType, workAllocationId);
         Response response = new Response();
         response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
@@ -419,7 +414,7 @@ public class AllocationServiceV2 {
         return indexerService.getEsResult(workAllocationIndex, workAllocationIndexType, sourceBuilder);
     }
 
-    private List<WorkAllocationDTOV2> getWorkAllocationListByIds(List<String> workAllocationIds){
+    private List<WorkAllocationDTOV2> getWorkAllocationListByIds(List<String> workAllocationIds) {
         List<WorkAllocationDTOV2> workAllocationDTOV2List = new ArrayList<>();
         if (!CollectionUtils.isEmpty(workAllocationIds)) {
             workAllocationIds.forEach(id -> {
@@ -435,25 +430,24 @@ public class AllocationServiceV2 {
     }
 
     /**
-     *
-     * @param userId user Id of the user
+     * @param userId       user Id of the user
      * @param workOrderDTO work order object
      * @return response message as success of failed
      */
     public Response copyWorkOrder(String userId, WorkOrderDTO workOrderDTO) {
-        if(StringUtils.isEmpty(workOrderDTO.getId())){
+        if (StringUtils.isEmpty(workOrderDTO.getId())) {
             throw new BadRequestException("Work Order Id should not be empty!");
         }
         Map<String, Object> workOrderObject = indexerService.readEntity(workOrderIndex, workOrderIndexType, workOrderDTO.getId());
-        if(ObjectUtils.isEmpty(workOrderObject)){
+        if (ObjectUtils.isEmpty(workOrderObject)) {
             throw new BadRequestException("No work order found on given Id!");
         }
         WorkOrderDTO workOrder = mapper.convertValue(workOrderObject, WorkOrderDTO.class);
-        if(!WorkAllocationConstants.PUBLISHED_STATUS.equals(workOrder.getStatus())){
+        if (!WorkAllocationConstants.PUBLISHED_STATUS.equals(workOrder.getStatus())) {
             throw new BadRequestException("Can not copy the work order, work order is not in published status!");
         }
         validator.validateWorkOrder(workOrder, WorkAllocationConstants.ADD);
-        if(!StringUtils.isEmpty(workOrderDTO.getName())){
+        if (!StringUtils.isEmpty(workOrderDTO.getName())) {
             workOrder.setName(workOrderDTO.getName());
         }
         enrichmentService.enrichCopyWorkOrder(workOrder, userId);
@@ -462,7 +456,7 @@ public class AllocationServiceV2 {
         List<WorkAllocationCassandraModel> cassandraModelList = new ArrayList<>();
         prepareWorkAllocations(userId, workOrder, workAllocationIds, indexRequestList, cassandraModelList);
         RestStatus restStatus = null;
-        if(!CollectionUtils.isEmpty(indexRequestList)){
+        if (!CollectionUtils.isEmpty(indexRequestList)) {
             workAllocationRepo.saveAll(cassandraModelList);
             indexerService.BulkInsert(indexRequestList);
         }
@@ -536,7 +530,7 @@ public class AllocationServiceV2 {
         int competenciesCount = 0;
         int errorCount = 0;
         int progress = 0;
-        List<WorkAllocationDTOV2> workAllocationList =  getWorkAllocationListByIds(workOrderDTO.getUserIds());
+        List<WorkAllocationDTOV2> workAllocationList = getWorkAllocationListByIds(workOrderDTO.getUserIds());
         for (WorkAllocationDTOV2 workAllocationDTOV2 : workAllocationList) {
             if (!CollectionUtils.isEmpty(workAllocationDTOV2.getRoleCompetencyList())) {
                 rolesCount = rolesCount + workAllocationDTOV2.getRoleCompetencyList().size();
@@ -617,11 +611,12 @@ public class AllocationServiceV2 {
         String uploadURL = cbExtServerProperties.getContentUploadEndPoint().replace("{identifier}", identifier);
         ResponseEntity<Map> response = restTemplate
                 .postForEntity(cbExtServerProperties.getContentHost().concat(uploadURL), requestEntity, Map.class);
-        if (!ObjectUtils.isEmpty(response.getBody())){
+        if (!ObjectUtils.isEmpty(response.getBody())) {
             downloadableLink = (String) ((Map<String, Object>) response.getBody().get(RESULT)).get("artifactUrl");
         }
         return downloadableLink;
     }
+
     public HashMap<String, Object> getUsersResult(Set<String> userIds) {
         HashMap<String, Object> userResult = new HashMap<>();
         Map<String, Object> request = getSearchObject(userIds);
@@ -634,21 +629,21 @@ public class AllocationServiceV2 {
             Map<String, Object> profileResponse = outboundRequestHandlerService.fetchResultUsingPost(builder.toString(), request, headersValue);
             if (profileResponse != null && "OK".equalsIgnoreCase((String) profileResponse.get("responseCode"))) {
                 Map<String, Object> map = (Map<String, Object>) profileResponse.get("result");
-                if(map.get("response") != null){
+                if (map.get("response") != null) {
                     Map<String, Object> profiles = (Map<String, Object>) map.get("response");
                     List<Map<String, Object>> userProfiles = (List<Map<String, Object>>) profiles.get("content");
                     if (!CollectionUtils.isEmpty(userProfiles)) {
                         for (Map<String, Object> userProfile : userProfiles) {
-                            if(userProfile.get("profileDetails") != null){
-                                HashMap<String, Object> profileDetails =  (HashMap<String, Object>) userProfile.get("profileDetails");
-                                HashMap<String, Object> personalDetails = (HashMap<String, Object>)profileDetails.get("personalDetails");
+                            if (userProfile.get("profileDetails") != null) {
+                                HashMap<String, Object> profileDetails = (HashMap<String, Object>) userProfile.get("profileDetails");
+                                HashMap<String, Object> personalDetails = (HashMap<String, Object>) profileDetails.get("personalDetails");
                                 record = new HashMap<>();
                                 record.put("wid", userProfile.get("userId"));
                                 record.put("first_name", personalDetails.get("firstname"));
                                 record.put("last_name", personalDetails.get("surname"));
                                 record.put("email", personalDetails.get("primaryEmail"));
-                                if(profileDetails.get("employmentDetails") != null){
-                                    record.put("department_name", ((HashMap<String, Object>)profileDetails.get("employmentDetails")).get("departmentName"));
+                                if (profileDetails.get("employmentDetails") != null) {
+                                    record.put("department_name", ((HashMap<String, Object>) profileDetails.get("employmentDetails")).get("departmentName"));
                                 }
                                 userResult.put(record.get("wid").toString(), record);
                             }

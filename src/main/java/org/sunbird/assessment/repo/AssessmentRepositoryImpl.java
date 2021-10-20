@@ -15,110 +15,110 @@ import com.datastax.driver.core.utils.UUIDs;
 @Service
 public class AssessmentRepositoryImpl implements AssessmentRepository {
 
-	public static final String ROOT_ORG = "rootOrg";
-	public static final String RESULT = "result";
-	public static final String SOURCE_ID = "sourceId";
-	public static final String USER_ID = "userId";
-	private CbExtLogger logger = new CbExtLogger(getClass().getName());
-	
-	@Autowired
-	UserAssessmentSummaryRepository userAssessmentSummaryRepo;
+    public static final String ROOT_ORG = "rootOrg";
+    public static final String RESULT = "result";
+    public static final String SOURCE_ID = "sourceId";
+    public static final String USER_ID = "userId";
+    private CbExtLogger logger = new CbExtLogger(getClass().getName());
 
-	@Autowired
-	UserAssessmentMasterRepository userAssessmentMasterRepo;
+    @Autowired
+    UserAssessmentSummaryRepository userAssessmentSummaryRepo;
 
-	@Autowired
-	UserQuizMasterRepository userQuizMasterRepo;
+    @Autowired
+    UserAssessmentMasterRepository userAssessmentMasterRepo;
 
-	SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+    @Autowired
+    UserQuizMasterRepository userQuizMasterRepo;
 
-	@Override
-	public Map<String, Object> getAssessmentAnswerKey(String artifactUrl) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 
-	@Override
-	public Map<String, Object> getQuizAnswerKey(AssessmentSubmissionDTO quizMap) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public Map<String, Object> getAssessmentAnswerKey(String artifactUrl) throws Exception {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
-	@Override
-	public Map<String, Object> insertQuizOrAssessment(Map<String, Object> persist, Boolean isAssessment)
-			throws Exception {
-		Map<String, Object> response = new HashMap<>();
-		Date date = new Date();
+    @Override
+    public Map<String, Object> getQuizAnswerKey(AssessmentSubmissionDTO quizMap) throws Exception {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
-		// insert assessment and assessment summary
-		if (Boolean.TRUE.equals(isAssessment)) {
-			UserAssessmentMasterModel assessment = new UserAssessmentMasterModel(
-					new UserAssessmentMasterPrimaryKeyModel(persist.get(ROOT_ORG).toString(), date,
-							persist.get("parent").toString(), BigDecimal.valueOf((Double) persist.get(RESULT)),
-							UUIDs.timeBased()),
-					Integer.parseInt(persist.get("correct").toString()), formatter.parse(formatter.format(date)),
-					Integer.parseInt(persist.get("incorrect").toString()),
-					Integer.parseInt(persist.get("blank").toString()), persist.get("parentContentType").toString(),
-					new BigDecimal(60), persist.get(SOURCE_ID).toString(), persist.get("title").toString(),
-					persist.get(USER_ID).toString());
-			UserAssessmentSummaryModel summary = new UserAssessmentSummaryModel();
-			UserAssessmentSummaryModel data = userAssessmentSummaryRepo
-					.findById(new UserAssessmentSummaryPrimaryKeyModel(persist.get(ROOT_ORG).toString(),
-							persist.get(USER_ID).toString(), persist.get(SOURCE_ID).toString()))
-					.orElse(null);
+    @Override
+    public Map<String, Object> insertQuizOrAssessment(Map<String, Object> persist, Boolean isAssessment)
+            throws Exception {
+        Map<String, Object> response = new HashMap<>();
+        Date date = new Date();
 
-			if (persist.get("parentContentType").toString().equalsIgnoreCase("course")) {
-				if (data != null) {
-					if (data.getFirstMaxScore() < Float.parseFloat(persist.get(RESULT).toString())) {
-						summary = new UserAssessmentSummaryModel(
-								new UserAssessmentSummaryPrimaryKeyModel(persist.get(ROOT_ORG).toString(),
-										persist.get(USER_ID).toString(), persist.get(SOURCE_ID).toString()),
-								Float.parseFloat(persist.get(RESULT).toString()), date, data.getFirstPassesScore(),
-								data.getFirstPassesScoreDate());
-					}
-				} else if (Float.parseFloat(persist.get(RESULT).toString()) > Constants.ASSESSMENT_PASS_SCORE) {
-					summary = new UserAssessmentSummaryModel(
-							new UserAssessmentSummaryPrimaryKeyModel(persist.get(ROOT_ORG).toString(),
-									persist.get(USER_ID).toString(), persist.get(SOURCE_ID).toString()),
-							Float.parseFloat(persist.get(RESULT).toString()), date,
-							Float.parseFloat(persist.get(RESULT).toString()), date);
-				} else {
-					summary = new UserAssessmentSummaryModel(
-							new UserAssessmentSummaryPrimaryKeyModel(persist.get(ROOT_ORG).toString(),
-									persist.get(USER_ID).toString(), persist.get(SOURCE_ID).toString()),
-							Float.parseFloat(persist.get(RESULT).toString()), date, null, null);
-					userAssessmentSummaryRepo.save(summary);
+        // insert assessment and assessment summary
+        if (Boolean.TRUE.equals(isAssessment)) {
+            UserAssessmentMasterModel assessment = new UserAssessmentMasterModel(
+                    new UserAssessmentMasterPrimaryKeyModel(persist.get(ROOT_ORG).toString(), date,
+                            persist.get("parent").toString(), BigDecimal.valueOf((Double) persist.get(RESULT)),
+                            UUIDs.timeBased()),
+                    Integer.parseInt(persist.get("correct").toString()), formatter.parse(formatter.format(date)),
+                    Integer.parseInt(persist.get("incorrect").toString()),
+                    Integer.parseInt(persist.get("blank").toString()), persist.get("parentContentType").toString(),
+                    new BigDecimal(60), persist.get(SOURCE_ID).toString(), persist.get("title").toString(),
+                    persist.get(USER_ID).toString());
+            UserAssessmentSummaryModel summary = new UserAssessmentSummaryModel();
+            UserAssessmentSummaryModel data = userAssessmentSummaryRepo
+                    .findById(new UserAssessmentSummaryPrimaryKeyModel(persist.get(ROOT_ORG).toString(),
+                            persist.get(USER_ID).toString(), persist.get(SOURCE_ID).toString()))
+                    .orElse(null);
 
-				}
-			}
-			userAssessmentMasterRepo.updateAssessment(assessment, summary);
-		}
-		// insert quiz and quiz summary
-		else {
-			UserQuizMasterModel quiz = new UserQuizMasterModel(
-					new UserQuizMasterPrimaryKeyModel(persist.get(ROOT_ORG).toString(), date,
-							BigDecimal.valueOf((Double) persist.get(RESULT)), UUIDs.timeBased()),
-					Integer.parseInt(persist.get("correct").toString()), formatter.parse(formatter.format(date)),
-					Integer.parseInt(persist.get("incorrect").toString()),
-					Integer.parseInt(persist.get("blank").toString()), new BigDecimal(60),
-					persist.get(SOURCE_ID).toString(), persist.get("title").toString(),
-					persist.get(USER_ID).toString());
-			UserQuizSummaryModel summary = new UserQuizSummaryModel(
-					new UserQuizSummaryPrimaryKeyModel(persist.get(ROOT_ORG).toString(),
-							persist.get(USER_ID).toString(), persist.get(SOURCE_ID).toString()),
-					date);
+            if (persist.get("parentContentType").toString().equalsIgnoreCase("course")) {
+                if (data != null) {
+                    if (data.getFirstMaxScore() < Float.parseFloat(persist.get(RESULT).toString())) {
+                        summary = new UserAssessmentSummaryModel(
+                                new UserAssessmentSummaryPrimaryKeyModel(persist.get(ROOT_ORG).toString(),
+                                        persist.get(USER_ID).toString(), persist.get(SOURCE_ID).toString()),
+                                Float.parseFloat(persist.get(RESULT).toString()), date, data.getFirstPassesScore(),
+                                data.getFirstPassesScoreDate());
+                    }
+                } else if (Float.parseFloat(persist.get(RESULT).toString()) > Constants.ASSESSMENT_PASS_SCORE) {
+                    summary = new UserAssessmentSummaryModel(
+                            new UserAssessmentSummaryPrimaryKeyModel(persist.get(ROOT_ORG).toString(),
+                                    persist.get(USER_ID).toString(), persist.get(SOURCE_ID).toString()),
+                            Float.parseFloat(persist.get(RESULT).toString()), date,
+                            Float.parseFloat(persist.get(RESULT).toString()), date);
+                } else {
+                    summary = new UserAssessmentSummaryModel(
+                            new UserAssessmentSummaryPrimaryKeyModel(persist.get(ROOT_ORG).toString(),
+                                    persist.get(USER_ID).toString(), persist.get(SOURCE_ID).toString()),
+                            Float.parseFloat(persist.get(RESULT).toString()), date, null, null);
+                    userAssessmentSummaryRepo.save(summary);
 
-			userQuizMasterRepo.updateQuiz(quiz, summary);
-		}
+                }
+            }
+            userAssessmentMasterRepo.updateAssessment(assessment, summary);
+        }
+        // insert quiz and quiz summary
+        else {
+            UserQuizMasterModel quiz = new UserQuizMasterModel(
+                    new UserQuizMasterPrimaryKeyModel(persist.get(ROOT_ORG).toString(), date,
+                            BigDecimal.valueOf((Double) persist.get(RESULT)), UUIDs.timeBased()),
+                    Integer.parseInt(persist.get("correct").toString()), formatter.parse(formatter.format(date)),
+                    Integer.parseInt(persist.get("incorrect").toString()),
+                    Integer.parseInt(persist.get("blank").toString()), new BigDecimal(60),
+                    persist.get(SOURCE_ID).toString(), persist.get("title").toString(),
+                    persist.get(USER_ID).toString());
+            UserQuizSummaryModel summary = new UserQuizSummaryModel(
+                    new UserQuizSummaryPrimaryKeyModel(persist.get(ROOT_ORG).toString(),
+                            persist.get(USER_ID).toString(), persist.get(SOURCE_ID).toString()),
+                    date);
 
-		response.put("response", "SUCCESS");
-		return response;
-	}
+            userQuizMasterRepo.updateQuiz(quiz, summary);
+        }
 
-	@Override
-	public List<Map<String, Object>> getAssessmetbyContentUser(String rootOrg, String courseId, String userId)
-			throws Exception {
-		// TODO Auto-generated method stub
-		return Collections.emptyList();
-	}
+        response.put("response", "SUCCESS");
+        return response;
+    }
+
+    @Override
+    public List<Map<String, Object>> getAssessmetbyContentUser(String rootOrg, String courseId, String userId)
+            throws Exception {
+        // TODO Auto-generated method stub
+        return Collections.emptyList();
+    }
 }

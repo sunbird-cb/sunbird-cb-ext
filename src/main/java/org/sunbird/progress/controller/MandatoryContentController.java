@@ -26,7 +26,7 @@ public class MandatoryContentController {
             @RequestHeader("xAuthUser") String authUserToken,
             @RequestHeader("rootOrg") String rootOrg,
             @RequestHeader("org") String org,
-            @RequestHeader("wid") String userId){
+            @RequestHeader("wid") String userId) {
         return new ResponseEntity<>(service.getMandatoryContentStatusForUser(authUserToken, rootOrg, org, userId), HttpStatus.OK);
     }
 }
