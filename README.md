@@ -27,6 +27,15 @@ SB-CB-EXT uses a number of open source projects:
 - orgCreation - Used to create SB Org object when new Department is created
 - userRoleAuditTopic - Used to update the user_department_role record in Audit table 
 
+**ES Index Details**
+- Need to create indexes 
+  - work_allocation_v2 with alias - work_allocation
+  - work_order_v1 with alias - work_order
+
+- Update the work_allocation mapping using file @ https://github.com/sunbird-cb/sunbird-cb-ext/blob/cbrelease-3.0.1/src/main/resources/elasticsearch/index/workallocationv2.json
+
+- Update the work_order mapping using file @ https://github.com/sunbird-cb/sunbird-cb-ext/blob/cbrelease-3.0.1/src/main/resources/elasticsearch/index/workorderv1.json
+
 **Postgresql table list**
 
 - department_types
@@ -120,6 +129,9 @@ CREATE TABLE user_department_role_audit
 - user_quiz_summary
 - work_order
 - work_allocation
+- org_staff_position
+- org_budget_scheme
+- org_audit
 
 **Queries to create the cassandra table**
 
@@ -241,5 +253,42 @@ CREATE TABLE user_work_allocation_mapping(
     workorderid text,
     status text,
     PRIMARY KEY (userid, workallocationid)
+);
+```
+```sh
+CREATE TABLE sunbird.org_staff_position (
+	orgId text,
+	id text,
+	position text, 
+	totalPositionsFilled int,
+	totalPositionsVacant int,
+	PRIMARY KEY (orgId, id)
+);
+CREATE INDEX IF NOT EXISTS staff_position_index on sunbird.org_staff_position (position);
+```
+```sh
+CREATE TABLE sunbird.org_budget_scheme (
+	orgId text,
+	budgetYear text,
+	id text,
+	schemeName text,
+	salaryBudgetAllocated bigint,
+	trainingBudgetAllocated bigint, 
+	trainingBudgetUtilization bigint, 
+	proofDocs frozen<list<map<text,text>>>,
+	PRIMARY KEY (orgId, budgetYear, id)
+);
+CREATE INDEX IF NOT EXISTS budget_schemeName_index on sunbird.org_budget_scheme (schemeName);
+```
+```sh
+CREATE TABLE sunbird.org_audit (
+	orgId text,
+	auditType text,
+	createdBy text,
+	createdDate text,
+	updatedBy text,
+	updatedDate text,
+	transactionDetails text,
+	PRIMARY KEY (orgId, auditType, createdDate, updatedDate)
 );
 ```
