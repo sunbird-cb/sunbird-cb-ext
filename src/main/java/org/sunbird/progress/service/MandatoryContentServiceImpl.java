@@ -29,11 +29,10 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
     private MandatoryContentRepository mandatoryContentRepository;
 
     @Autowired
-	private OutboundRequestHandlerServiceImpl outboundReqService;
+    private OutboundRequestHandlerServiceImpl outboundReqService;
 
     @Autowired
     private CbExtServerProperties cbExtServerProperties;
-
 
 
     private CbExtLogger logger = new CbExtLogger(getClass().getName());
@@ -101,12 +100,12 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
                 reqObj.put("batchId", infoMap.getValue().getBatchId());
                 reqObj.put("fields", fields);
                 req.put("request", reqObj);
-                Map<String, Object> response = outboundReqService.fetchResultUsingPost(cbExtServerProperties.getCourseServiceHost()+cbExtServerProperties.getProgressReadEndPoint(), req, headersValues);
+                Map<String, Object> response = outboundReqService.fetchResultUsingPost(cbExtServerProperties.getCourseServiceHost() + cbExtServerProperties.getProgressReadEndPoint(), req, headersValues);
                 if (response.get("responseCode").equals("OK")) {
                     List<Object> result = (List<Object>) ((HashMap<String, Object>) response.get("result")).get("contentList");
                     if (!CollectionUtils.isEmpty(result)) {
-                        Optional<Object> optionResult= result.stream().findFirst();
-                        if(optionResult.isPresent()){
+                        Optional<Object> optionResult = result.stream().findFirst();
+                        if (optionResult.isPresent()) {
                             Map<String, Object> content = (Map<String, Object>) optionResult.get();
                             BigDecimal progress = new BigDecimal(content.get("completionPercentage").toString());
                             mandatoryContentInfo.getContentDetails().get(infoMap.getKey()).setUserProgress(progress.floatValue());

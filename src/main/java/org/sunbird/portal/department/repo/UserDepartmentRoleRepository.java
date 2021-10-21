@@ -8,18 +8,18 @@ import java.util.List;
 
 public interface UserDepartmentRoleRepository extends JpaRepository<UserDepartmentRole, Integer> {
 
-	List<UserDepartmentRole> findByUserId(String userId);
-	
-	List<UserDepartmentRole> findAllByUserIdAndIsActiveAndIsBlocked(String userId, boolean isActive, boolean isBlocked);
+    List<UserDepartmentRole> findByUserId(String userId);
 
-	List<UserDepartmentRole> findByDeptId(Integer deptId);
+    List<UserDepartmentRole> findAllByUserIdAndIsActiveAndIsBlocked(String userId, boolean isActive, boolean isBlocked);
+
+    List<UserDepartmentRole> findByDeptId(Integer deptId);
 
 //	List<UserDepartmentRole> findByDeptRoleId(List<String> userDeptIds);
 
-	UserDepartmentRole findByUserIdAndDeptId(String userId, Integer deptId);
+    UserDepartmentRole findByUserIdAndDeptId(String userId, Integer deptId);
 
-	List<UserDepartmentRole> findAllByUserIdAndDeptId(String userId, List<Integer> deptIds);
+    List<UserDepartmentRole> findAllByUserIdAndDeptId(String userId, List<Integer> deptIds);
 
-	@Query(value = "SELECT count(*) FROM wingspan.user_department_role WHERE ?1 = ANY (role_ids) and dept_id = ?2", nativeQuery = true)
-	int getTotalUserCountOnRoleIdAndDeptId(Integer roleId, Integer deptId);
+    @Query(value = "SELECT count(*) FROM wingspan.user_department_role WHERE ?1 = ANY (role_ids) and dept_id = ?2", nativeQuery = true)
+    int getTotalUserCountOnRoleIdAndDeptId(Integer roleId, Integer deptId);
 }

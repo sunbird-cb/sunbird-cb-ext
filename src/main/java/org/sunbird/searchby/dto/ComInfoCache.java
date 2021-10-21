@@ -6,7 +6,7 @@ import java.util.List;
 
 public class ComInfoCache {
     public String keyName;
-    public List<CompetencyInfo>  valueList;
+    public List<CompetencyInfo> valueList;
 
     public String getKeyName() {
         return keyName;

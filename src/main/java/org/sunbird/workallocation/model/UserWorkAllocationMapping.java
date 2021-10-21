@@ -43,6 +43,7 @@ public class UserWorkAllocationMapping {
     public String getWorkOrderId() {
         return workOrderId;
     }
+
     public void setWorkOrderId(String workOrderId) {
         this.workOrderId = workOrderId;
     }

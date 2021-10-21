@@ -25,7 +25,7 @@ public class SearchByService {
     private static final String PROVIDER_CACHE_NAME = "provider";
     private static final String COMPETENCY_FACET_NAME = "competencies_v3.name";
     private static final String FILTERS = "filters";
-    private static final String FACETS ="facets";
+    private static final String FACETS = "facets";
     private CbExtLogger logger = new CbExtLogger(getClass().getName());
 
     @Autowired
@@ -71,20 +71,20 @@ public class SearchByService {
                 }
             }
             if (!filter.getCompetencyType().isEmpty()) {
-                 Map<String, List<CompetencyInfo>>  typeCache = ( Map<String, List<CompetencyInfo>> ) objectTypeCache;
-                for (Map.Entry<String, List<CompetencyInfo>>  eachInfo : typeCache.entrySet()) {
+                Map<String, List<CompetencyInfo>> typeCache = (Map<String, List<CompetencyInfo>>) objectTypeCache;
+                for (Map.Entry<String, List<CompetencyInfo>> eachInfo : typeCache.entrySet()) {
                     if (this.listToLowerCase(filter.getCompetencyType()).contains(this.stringToLowerCase(eachInfo.getKey()))) {
-                       for (CompetencyInfo competencyInfo: eachInfo.getValue())
-                        afterFilter.put(competencyInfo.getId(), competencyInfo);
+                        for (CompetencyInfo competencyInfo : eachInfo.getValue())
+                            afterFilter.put(competencyInfo.getId(), competencyInfo);
                     }
                 }
 
             }
             if (!filter.getCompetencyArea().isEmpty()) {
-                Map<String, List<CompetencyInfo>>  areaCache = ( Map<String, List<CompetencyInfo>> ) objectAreaCache;
-                for (Map.Entry<String, List<CompetencyInfo>>  eachInfo : areaCache.entrySet()) {
+                Map<String, List<CompetencyInfo>> areaCache = (Map<String, List<CompetencyInfo>>) objectAreaCache;
+                for (Map.Entry<String, List<CompetencyInfo>> eachInfo : areaCache.entrySet()) {
                     if (this.listToLowerCase(filter.getCompetencyArea()).contains(this.stringToLowerCase(eachInfo.getKey()))) {
-                        for (CompetencyInfo competencyInfo: eachInfo.getValue())
+                        for (CompetencyInfo competencyInfo : eachInfo.getValue())
                             afterFilter.put(competencyInfo.getId(), competencyInfo);
                     }
                 }

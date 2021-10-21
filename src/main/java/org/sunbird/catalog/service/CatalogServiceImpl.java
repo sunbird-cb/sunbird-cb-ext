@@ -20,52 +20,52 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Service
 public class CatalogServiceImpl {
 
-	private Logger log = LoggerFactory.getLogger(CatalogServiceImpl.class);
+    private Logger log = LoggerFactory.getLogger(CatalogServiceImpl.class);
 
-	@Autowired
-	RestTemplate restTemplate;
+    @Autowired
+    RestTemplate restTemplate;
 
-	@Autowired
-	private CbExtServerProperties extServerProperties;
+    @Autowired
+    private CbExtServerProperties extServerProperties;
 
-	public Catalog getCatalog(String authUserToken, boolean isEnrichConsumption) {
-		return fetchCatalog(authUserToken, isEnrichConsumption);
-	}
+    public Catalog getCatalog(String authUserToken, boolean isEnrichConsumption) {
+        return fetchCatalog(authUserToken, isEnrichConsumption);
+    }
 
-	private Catalog fetchCatalog(String authUserToken, boolean isEnrichConsumption) {
-		log.info("Fetching Framework details...");
-		ObjectMapper mapper = new ObjectMapper();
-		HttpHeaders headers = new HttpHeaders();
-		headers.set("X-Authenticated-User-Token", authUserToken);
-		headers.set("Authorization", extServerProperties.getSbApiKey());
-		HttpEntity<Object> entity = new HttpEntity<>(headers);
+    private Catalog fetchCatalog(String authUserToken, boolean isEnrichConsumption) {
+        log.info("Fetching Framework details...");
+        ObjectMapper mapper = new ObjectMapper();
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("X-Authenticated-User-Token", authUserToken);
+        headers.set("Authorization", extServerProperties.getSbApiKey());
+        HttpEntity<Object> entity = new HttpEntity<>(headers);
 
-		ResponseEntity<String> responseStr = restTemplate.exchange(extServerProperties.getKmBaseHost()
-				+ extServerProperties.getKmFrameWorkPath() + extServerProperties.getTaxonomyFrameWorkName(),
-				HttpMethod.GET, entity, String.class);
-		FrameworkResponse response;
-		try {
-			response = mapper.readValue(responseStr.getBody(), FrameworkResponse.class);
-			if (response != null && "successful".equalsIgnoreCase(response.getParams().getStatus())) {
-				return processResponse(response.getResult().getFramework(), isEnrichConsumption);
-			} else {
-				log.info("Some exception occurred while creating the org ....");
-			}
-		} catch (Exception e) {
-			log.error("Failed to read response data. Exception: ", e);
-		}
-		return new Catalog();
-	}
+        ResponseEntity<String> responseStr = restTemplate.exchange(extServerProperties.getKmBaseHost()
+                        + extServerProperties.getKmFrameWorkPath() + extServerProperties.getTaxonomyFrameWorkName(),
+                HttpMethod.GET, entity, String.class);
+        FrameworkResponse response;
+        try {
+            response = mapper.readValue(responseStr.getBody(), FrameworkResponse.class);
+            if (response != null && "successful".equalsIgnoreCase(response.getParams().getStatus())) {
+                return processResponse(response.getResult().getFramework(), isEnrichConsumption);
+            } else {
+                log.info("Some exception occurred while creating the org ....");
+            }
+        } catch (Exception e) {
+            log.error("Failed to read response data. Exception: ", e);
+        }
+        return new Catalog();
+    }
 
-	private Catalog processResponse(Framework framework, boolean isEnrichConsumption) {
-		Catalog catalog = new Catalog();
-		for (Category c : framework.getCategories()) {
-			if (c.getName() != null && c.getName().equalsIgnoreCase(extServerProperties.getTaxonomyCategoryName())) {
-				catalog.setTerms(c.getTerms());
-			}
-		}
+    private Catalog processResponse(Framework framework, boolean isEnrichConsumption) {
+        Catalog catalog = new Catalog();
+        for (Category c : framework.getCategories()) {
+            if (c.getName() != null && c.getName().equalsIgnoreCase(extServerProperties.getTaxonomyCategoryName())) {
+                catalog.setTerms(c.getTerms());
+            }
+        }
 
-		// TODO - Enrich Consumption details for the given term name.
-		return catalog;
-	}
+        // TODO - Enrich Consumption details for the given term name.
+        return catalog;
+    }
 }

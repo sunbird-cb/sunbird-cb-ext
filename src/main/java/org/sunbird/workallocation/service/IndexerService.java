@@ -46,9 +46,9 @@ public class IndexerService {
         logger.info("addEntity starts with index {} and entityId {}", index, entityId);
         IndexResponse response = null;
         try {
-            if(!StringUtils.isEmpty(entityId)){
+            if (!StringUtils.isEmpty(entityId)) {
                 response = esClient.index(new IndexRequest(index, indexType, entityId).source(indexDocument), RequestOptions.DEFAULT);
-            }else{
+            } else {
                 response = esClient.index(new IndexRequest(index, indexType).source(indexDocument), RequestOptions.DEFAULT);
             }
         } catch (IOException e) {
@@ -80,20 +80,20 @@ public class IndexerService {
     }
 
     /**
-     * @param index         name of index
-     * @param indexType     index type
-     * @param entityId      entity Id
+     * @param index     name of index
+     * @param indexType index type
+     * @param entityId  entity Id
      * @return status
      */
-    public Map<String, Object> readEntity(String index, String indexType, String entityId){
+    public Map<String, Object> readEntity(String index, String indexType, String entityId) {
         logger.info("readEntity starts with index {} and entityId {}", index, entityId);
         GetResponse response = null;
         try {
-        response = esClient.get(new GetRequest(index, indexType, entityId), RequestOptions.DEFAULT);
+            response = esClient.get(new GetRequest(index, indexType, entityId), RequestOptions.DEFAULT);
         } catch (IOException e) {
             logger.error("Exception in getting the record from ElasticSearch", e);
         }
-        if(null == response)
+        if (null == response)
             return null;
         return response.getSourceAsMap();
     }
@@ -128,7 +128,7 @@ public class IndexerService {
                 logger.error("Exception while doing the bulk operation in ElasticSearch", e);
             }
         }
-        if(null == restStatus)
+        if (null == restStatus)
             return null;
         return restStatus.status();
     }
