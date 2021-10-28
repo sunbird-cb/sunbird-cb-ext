@@ -1,10 +1,7 @@
 package org.sunbird.budget.service;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.UUID;
 
 import org.apache.commons.lang.StringUtils;
@@ -16,13 +13,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.sunbird.audit.model.Audit;
 import org.sunbird.audit.repo.AuditRepository;
-import org.sunbird.budget.model.BudgetAuditInfo;
-import org.sunbird.budget.model.BudgetInfo;
-import org.sunbird.budget.model.BudgetInfoModel;
-import org.sunbird.budget.model.BudgetInfoPrimaryKeyModel;
+import org.sunbird.budget.model.*;
 import org.sunbird.budget.repo.BudgetRepository;
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.util.Constants;
+import org.sunbird.budget.model.BudgetInfoModel;
+import org.sunbird.budget.model.BudgetDocInfoModel;
+import org.sunbird.budget.repo.BudgetRepo1;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -36,6 +33,9 @@ public class BudgetServiceImpl implements BudgetService {
 	private BudgetRepository budgetRepository;
 
 	@Autowired
+	private BudgetRepo1 budgetRepo1;
+
+	@Autowired
 	private AuditRepository auditRepository;
 
 	@Override
@@ -47,8 +47,7 @@ public class BudgetServiceImpl implements BudgetService {
 					data.getOrgId(), data.getBudgetYear(), data.getSchemeName());
 			if (!CollectionUtils.isEmpty(existingList)) {
 				String errMsg = "Budget Scheme exist for given name. Failed to create BudgetInfo for OrgId: "
-						+ data.getOrgId() + ", BudgetYear: " + data.getBudgetYear() + ", SchemeName: "
-						+ data.getSchemeName();
+						+", BudgetYear: " + ", SchemeName: ";
 				logger.error(errMsg);
 				response.getParams().setErr(errMsg);
 				response.setResponseCode(HttpStatus.BAD_REQUEST);
@@ -58,7 +57,7 @@ public class BudgetServiceImpl implements BudgetService {
 			BudgetInfoModel budgetInfoModel = new BudgetInfoModel(
 					new BudgetInfoPrimaryKeyModel(data.getOrgId(), UUID.randomUUID().toString(), data.getBudgetYear()),
 					data.getSchemeName(), data.getSalaryBudgetAllocated(), data.getTrainingBudgetAllocated(),
-					data.getTrainingBudgetUtilization());
+					data.getTrainingBudgetUtilization(), data.getProofdocs());
 			budgetInfoModel = budgetRepository.save(budgetInfoModel);
 
 			data.setId(budgetInfoModel.getPrimaryKey().getId());
@@ -204,6 +203,135 @@ public class BudgetServiceImpl implements BudgetService {
 	}
 
 	@Override
+	public SBApiResponse submitBudgetDocDetails(BudgetDocInfo data, String userId) throws Exception {
+		SBApiResponse response = new SBApiResponse(Constants.API_BUDGET_DOC_ADD);
+		try {
+			validateAddBudgetDocInfo(data);
+			List<BudgetInfoModel> existingList = budgetRepository.getAllByOrgIdAndBudgetYearAndSchemeName(
+					data.getOrgId(), data.getBudgetYear(), data.getSchemeName());
+			if (!CollectionUtils.isEmpty(existingList)) {
+				String errMsg = "Budget Scheme exist for given name. Failed to create BudgetInfo for OrgId: "
+						+", BudgetYear: " + ", SchemeName: ";
+				logger.error(errMsg);
+				response.getParams().setErr(errMsg);
+				response.setResponseCode(HttpStatus.BAD_REQUEST);
+				return response;
+			}
+
+			BudgetDocInfoModel budgetDocInfoModel = new BudgetDocInfoModel(
+					new BudgetDocInfoPrimaryKeyModel(data.getOrgId(), UUID.randomUUID().toString(), data.getBudgetYear()),
+					data.getSchemeName(), data.getProofdocs());
+			budgetDocInfoModel = budgetRepo1.save(budgetDocInfoModel);
+
+			data.setId(budgetDocInfoModel.getPrimaryKey().getId());
+
+			Audit audit = new Audit(data.getOrgId(), Constants.BUDGET, dateFormatter.format(new Date()), userId,
+					StringUtils.EMPTY, StringUtils.EMPTY, mapper.writeValueAsString(data));
+			audit = auditRepository.save(audit);
+
+			response.getParams().setStatus(Constants.SUCCESSFUL);
+			response.put(Constants.DATA, budgetDocInfoModel.getBudgetDocInfo());
+			response.setResponseCode(HttpStatus.CREATED);
+		} catch (Exception ex) {
+			String errMsg = "Exception occurred while saving the Budget details. Exception: " + ex.getMessage();
+			logger.error(errMsg, ex);
+			response.getParams().setErrmsg(errMsg);
+			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+			return response;
+		}
+
+		return response;
+	}
+
+	@Override
+	public SBApiResponse getBudgetDocDetails(String orgId, String budgetYear) throws Exception {
+		SBApiResponse response = new SBApiResponse(Constants.API_BUDGET_DOC_READ);
+		List<BudgetDocInfoModel> budgetDetails = budgetRepository.getAllProofByOrgIdAndBudgetYear(orgId, budgetYear);
+
+		if (CollectionUtils.isEmpty(budgetDetails)) {
+			String errMsg = "No Budget Scheme found for Org: " + orgId + ", BudgetYear: " + budgetYear;
+			logger.info(errMsg);
+			response.getParams().setErrmsg(errMsg);
+			response.setResponseCode(HttpStatus.NOT_FOUND);
+			return response;
+		}
+
+		List<BudgetDocInfo> budgetResponse = new ArrayList<>();
+		for (BudgetDocInfoModel budget : budgetDetails) {
+			BudgetDocInfo info = budget.getBudgetDocInfo();
+			budgetResponse.add(info);
+		}
+
+		response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
+		response.put(Constants.RESPONSE, budgetResponse);
+		response.setResponseCode(HttpStatus.OK);
+		return response;
+	}
+	@Override
+	public SBApiResponse updateBudgetDocDetails(BudgetDocInfo data, String userId) throws Exception {
+		SBApiResponse response = new SBApiResponse(Constants.API_BUDGET_DOC_UPDATE);
+		try {
+			Optional<BudgetDocInfoModel> existingBudgetInfo = budgetRepo1
+					.findById(new BudgetDocInfoPrimaryKeyModel(data.getOrgId(), data.getId(), data.getBudgetYear()));
+
+			if (!existingBudgetInfo.isPresent()) {
+				String errMsg = "Failed to find BudgetScheme for OrgId: " + data.getOrgId() + ", Id: " + data.getId()
+						+ ", BudgetYear: " + data.getBudgetYear();
+				logger.error(errMsg);
+				response.getParams().setErrmsg(errMsg);
+				response.setResponseCode(HttpStatus.NOT_FOUND);
+				return response;
+			}
+
+			if (data.getSchemeName() != null) {
+				// Validate for duplicate schemeNames
+				List<BudgetInfoModel> existingList = budgetRepository.getAllByOrgIdAndBudgetYearAndSchemeName(
+						data.getOrgId(), data.getBudgetYear(), data.getSchemeName());
+				if (!CollectionUtils.isEmpty(existingList)) {
+					boolean isOtherRecordExist = false;
+					for (BudgetInfoModel bModel : existingList) {
+						if (!bModel.getPrimaryKey().getId().equalsIgnoreCase(data.getId())) {
+							if (bModel.getSchemeName().equalsIgnoreCase(data.getSchemeName())) {
+								isOtherRecordExist = true;
+							}
+						}
+					}
+					if (isOtherRecordExist) {
+
+						String errMsg = "Budget Scheme exist for given name. Failed to update BudgetInfo for OrgId: "
+								+ data.getOrgId() + ", BudgetYear: " + data.getBudgetYear() + ", SchemeName: "
+								+ data.getSchemeName();
+						logger.error(errMsg);
+						response.getParams().setErr(errMsg);
+						response.setResponseCode(HttpStatus.BAD_REQUEST);
+						return response;
+					}
+				}
+				existingBudgetInfo.get().setSchemeName(data.getSchemeName());
+			}
+
+			if (data.getProofdocs() != null) {
+				existingBudgetInfo.get().setProofDocs(data.getProofdocs());
+			}
+
+			BudgetDocInfoModel updatedInfo = budgetRepo1.save(existingBudgetInfo.get());
+
+			Audit audit = new Audit(data.getOrgId(), Constants.BUDGET, "", "", dateFormatter.format(new Date()), userId,
+					mapper.writeValueAsString(updatedInfo.getBudgetDocInfo()));
+			audit = auditRepository.save(audit);
+
+			response.put(Constants.DATA, updatedInfo.getBudgetDocInfo());
+			response.getParams().setStatus(Constants.SUCCESSFUL);
+			response.setResponseCode(HttpStatus.OK);
+		} catch (Exception ex) {
+			String errMsg = "Exception occurred while updating the Budget details. Exception: " + ex.getMessage();
+			logger.error(errMsg, ex);
+			response.getParams().setErrmsg(errMsg);
+			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		return response;
+	}
+	@Override
 	public SBApiResponse getBudgetAudit(String orgId) throws Exception {
 		SBApiResponse response = new SBApiResponse(Constants.API_BUDGET_SCHEME_HISTORY_READ);
 		List<Audit> auditDetails = auditRepository.getAudit(orgId, Constants.BUDGET);
@@ -237,6 +365,7 @@ public class BudgetServiceImpl implements BudgetService {
 		response.put(Constants.DATA, auditResponse);
 		return response;
 	}
+
 
 	private void validateAddBudgetInfo(BudgetInfo budgetInfo) throws Exception {
 		List<String> errObjList = new ArrayList<String>();
@@ -333,4 +462,24 @@ public class BudgetServiceImpl implements BudgetService {
 			throw new Exception("One or more required fields are empty. Empty fields " + errObjList.toString());
 		}
 	}
+
+	private void validateAddBudgetDocInfo(BudgetDocInfo budgetDocInfo) throws Exception {
+		List<String> errObjList = new ArrayList<String>();
+		if (StringUtils.isEmpty(budgetDocInfo.getOrgId())) {
+			errObjList.add(Constants.ORG_ID);
+		}
+		if (StringUtils.isEmpty(budgetDocInfo.getBudgetYear())) {
+			errObjList.add(Constants.BUDGET_YEAR);
+		}
+		if (StringUtils.isEmpty(budgetDocInfo.getSchemeName())) {
+			errObjList.add(Constants.SCHEME_NAME);
+		}
+		if (budgetDocInfo.getProofdocs() == null) {
+			errObjList.add(Constants.PROOF_DOCS);
+		}
+		if (!CollectionUtils.isEmpty(errObjList)) {
+			throw new Exception("One or more required fields are empty. Empty fields " + errObjList.toString());
+		}
+	}
 }
+

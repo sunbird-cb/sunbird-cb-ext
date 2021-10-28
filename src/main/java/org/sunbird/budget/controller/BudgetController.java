@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.sunbird.budget.model.BudgetDocInfo;
 import org.sunbird.budget.model.BudgetInfo;
 import org.sunbird.budget.service.BudgetService;
 import org.sunbird.common.model.Response;
@@ -30,6 +31,13 @@ public class BudgetController {
 	public ResponseEntity<?> createBudgetDetails(@RequestHeader("x-authenticated-userid") String userId,
 			@Valid @RequestBody BudgetInfo requestBody) throws Exception {
 		SBApiResponse response = budgetService.submitBudgetDetails(requestBody, userId);
+		return new ResponseEntity<>(response, response.getResponseCode());
+	}
+
+	@PostMapping("/budget/doc")
+	public ResponseEntity<?> createBudgetDocDetails(@RequestHeader("x-authenticated-userid") String userId,
+													@Valid @RequestBody BudgetDocInfo requestBody) throws Exception {
+		SBApiResponse response = budgetService.submitBudgetDocDetails(requestBody, userId);
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
 
@@ -60,4 +68,21 @@ public class BudgetController {
 		SBApiResponse response = budgetService.getBudgetAudit(orgId);
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
+
+
+
+	@GetMapping("budget/doc/{orgId}/{budgetYear}")
+	public ResponseEntity<?> getBudgetDocDetails(@PathVariable("orgId") String orgId,
+											  @PathVariable("budgetYear") String budgetYear) throws Exception {
+		SBApiResponse response = budgetService.getBudgetDocDetails(orgId, budgetYear);
+		return new ResponseEntity<>(response, response.getResponseCode());
+	}
+
+	@PatchMapping("/budget/scheme")
+	public ResponseEntity<?> updateBudgetDocDetails(@RequestHeader("x-authenticated-userid") String userId,
+												 @Valid @RequestBody BudgetDocInfo requestBody) throws Exception {
+		SBApiResponse response = budgetService.updateBudgetDocDetails(requestBody, userId);
+		return new ResponseEntity<>(response, response.getResponseCode());
+	}
+
 }
