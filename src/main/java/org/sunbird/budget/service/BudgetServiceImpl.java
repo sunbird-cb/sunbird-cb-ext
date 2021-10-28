@@ -57,7 +57,7 @@ public class BudgetServiceImpl implements BudgetService {
 			BudgetInfoModel budgetInfoModel = new BudgetInfoModel(
 					new BudgetInfoPrimaryKeyModel(data.getOrgId(), UUID.randomUUID().toString(), data.getBudgetYear()),
 					data.getSchemeName(), data.getSalaryBudgetAllocated(), data.getTrainingBudgetAllocated(),
-					data.getTrainingBudgetUtilization(), data.getProofdocs());
+					data.getTrainingBudgetUtilization());
 			budgetInfoModel = budgetRepository.save(budgetInfoModel);
 
 			data.setId(budgetInfoModel.getPrimaryKey().getId());

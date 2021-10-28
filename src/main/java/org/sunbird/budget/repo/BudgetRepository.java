@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.data.cassandra.repository.CassandraRepository;
 import org.springframework.data.cassandra.repository.Query;
 import org.springframework.stereotype.Repository;
+import org.sunbird.budget.model.BudgetDocInfoModel;
 import org.sunbird.budget.model.BudgetInfoModel;
 import org.sunbird.budget.model.BudgetInfoPrimaryKeyModel;
 
@@ -21,5 +22,11 @@ public interface BudgetRepository extends CassandraRepository<BudgetInfoModel, B
 	@Query("select * from org_budget_scheme where orgId=?0 and budgetYear=?1 and schemeName=?2")
 	public List<BudgetInfoModel> getAllByOrgIdAndBudgetYearAndSchemeName(String orgId, String budgetYear,
 			String schemeName);
+
+	@Query(" select * from org_budget_proof where orgId=?0 and budgetYear=?1")
+	public List<BudgetDocInfoModel> getAllDocByOrgIdAndBudgetYear(String orgId, String budgetYear);
+
+	@Query(" select proofDocs from org_budget_scheme where orgId=?0 and budgetYear=?1")
+	public List<BudgetDocInfoModel> getAllProofByOrgIdAndBudgetYear(String orgId, String budgetYear);
 
 }
