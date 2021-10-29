@@ -11,9 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestTemplate;
-import org.sunbird.common.model.OpenSaberApiResp;
-import org.sunbird.common.model.OpenSaberApiUserProfile;
-import org.sunbird.common.model.SunbirdApiResp;
+import org.sunbird.common.model.*;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.core.exception.ApplicationLogicError;
@@ -87,18 +85,32 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		try {
 			String reqBodyData = new ObjectMapper().writeValueAsString(request);
 			HttpEntity<String> requestEnty = new HttpEntity<>(reqBodyData, headers);
-//			String serverUrl = props.getSbHubGraphServiceUrl() + "/v1/user/search/profile";
-			// New url changes for opensaber
-			String serverUrl = props.getSbUrl() + props.getUserSearchEndPoint();
-			OpenSaberApiResp openSaberApiResp = restTemplate.postForObject(serverUrl, requestEnty,
-					OpenSaberApiResp.class);
-			if (openSaberApiResp != null && "OK".equalsIgnoreCase(openSaberApiResp.getResponseCode())
-					&& !CollectionUtils.isEmpty(openSaberApiResp.getResult().getUserProfile()) ) {
-				for (OpenSaberApiUserProfile userProfile : openSaberApiResp.getResult().getUserProfile()) {
-					result.put(userProfile.getUserId(), userProfile);
+
+			// Old Code
+
+			//			String serverUrl = props.getSbHubGraphServiceUrl() + "/v1/user/search/profile";
+						// New url changes for opensaber
+			//			String serverUrl = props.getSbUrl() + props.getUserSearchEndPoint();
+			//			OpenSaberApiResp openSaberApiResp = restTemplate.postForObject(serverUrl, requestEnty,OpenSaberApiResp.class);
+			//			if (openSaberApiResp != null && "OK".equalsIgnoreCase(openSaberApiResp.getResponseCode())
+			//					&& !CollectionUtils.isEmpty(openSaberApiResp.getResult().getUserProfile()) ) {
+			//				for (OpenSaberApiUserProfile userProfile : openSaberApiResp.getResult().getUserProfile()) {
+			//					result.put(userProfile.getUserId(), userProfile);
+			//				}
+			//				return result;
+			//			}
+			String serverUrl = "https://igot-dev.in/api/user/v1/search";
+			SearchUserApiResp searchUserResult = restTemplate.postForObject(serverUrl, requestEnty, SearchUserApiResp.class);
+			logger.info("searchUserResult ---->"+ searchUserResult.toString());
+			if(searchUserResult !=null && "OK".equalsIgnoreCase(searchUserResult.getResponseCode())
+					&& searchUserResult.getResult().getResponse().getCount()>0){
+				for(SearchUserApiContent searchUserApiContent: searchUserResult.getResult().getResponse().getContent()){
+					result.put(searchUserApiContent.getUserId(), searchUserApiContent);
 				}
-				return result;
+
 			}
+
+
 		} catch (Exception e) {
 			throw new ApplicationLogicError("Sunbird Service ERROR: ", e);
 		}
