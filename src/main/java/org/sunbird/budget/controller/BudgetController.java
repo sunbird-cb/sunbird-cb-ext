@@ -34,13 +34,6 @@ public class BudgetController {
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
 
-	@PostMapping("/budget/doc")
-	public ResponseEntity<?> createBudgetDocDetails(@RequestHeader("x-authenticated-userid") String userId,
-													@Valid @RequestBody BudgetDocInfo requestBody) throws Exception {
-		SBApiResponse response = budgetService.submitBudgetDocDetails(requestBody, userId);
-		return new ResponseEntity<>(response, response.getResponseCode());
-	}
-
 	@GetMapping("budget/scheme/{orgId}/{budgetYear}")
 	public ResponseEntity<?> getBudgetDetails(@PathVariable("orgId") String orgId,
 			@PathVariable("budgetYear") String budgetYear) throws Exception {
@@ -69,7 +62,12 @@ public class BudgetController {
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
 
-
+	@PostMapping("/budget/doc")
+	public ResponseEntity<?> createBudgetDocDetails(@RequestHeader("x-authenticated-userid") String userId,
+													@Valid @RequestBody BudgetDocInfo requestBody) throws Exception {
+		SBApiResponse response = budgetService.submitBudgetDocDetails(requestBody, userId);
+		return new ResponseEntity<>(response, response.getResponseCode());
+	}
 
 	@GetMapping("budget/doc/{orgId}/{budgetYear}")
 	public ResponseEntity<?> getBudgetDocDetails(@PathVariable("orgId") String orgId,
@@ -78,7 +76,7 @@ public class BudgetController {
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
 
-	@PatchMapping("/budget/scheme")
+	@PatchMapping("/budget/doc")
 	public ResponseEntity<?> updateBudgetDocDetails(@RequestHeader("x-authenticated-userid") String userId,
 												 @Valid @RequestBody BudgetDocInfo requestBody) throws Exception {
 		SBApiResponse response = budgetService.updateBudgetDocDetails(requestBody, userId);

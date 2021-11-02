@@ -8,8 +8,6 @@ public interface BudgetService {
 
 	public SBApiResponse submitBudgetDetails(BudgetInfo data, String userId) throws Exception;
 
-//	public SBApiResponse submitBudgetDocDetails(BudgetInfo data, String userId) throws Exception;
-
 	public SBApiResponse getBudgetDetails(String orgId, String budgetYear) throws Exception;
 
 	public SBApiResponse updateBudgetDetails(BudgetInfo data, String userId) throws Exception;
@@ -19,11 +17,9 @@ public interface BudgetService {
 	public SBApiResponse getBudgetAudit(String orgId) throws Exception;
 
 	public SBApiResponse submitBudgetDocDetails(BudgetDocInfo data, String userId) throws Exception;
-//
+
 	public SBApiResponse getBudgetDocDetails(String orgId, String budgetYear) throws Exception;
 
 	public SBApiResponse updateBudgetDocDetails(BudgetDocInfo data, String userId) throws Exception;
-
-//
 
 }

@@ -56,10 +56,9 @@ public class BudgetServiceImpl implements BudgetService {
 
 			BudgetInfoModel budgetInfoModel = new BudgetInfoModel(
 					new BudgetInfoPrimaryKeyModel(data.getOrgId(), UUID.randomUUID().toString(), data.getBudgetYear()),
-					data.getSchemeName(), data.getSalaryBudgetAllocated(), data.getTrainingBudgetAllocated(),
+					data.getSchemeName(),data.getSalaryBudgetAllocated(), data.getTrainingBudgetAllocated(),
 					data.getTrainingBudgetUtilization());
 			budgetInfoModel = budgetRepository.save(budgetInfoModel);
-
 			data.setId(budgetInfoModel.getPrimaryKey().getId());
 
 			Audit audit = new Audit(data.getOrgId(), Constants.BUDGET, dateFormatter.format(new Date()), userId,
@@ -220,7 +219,7 @@ public class BudgetServiceImpl implements BudgetService {
 
 			BudgetDocInfoModel budgetDocInfoModel = new BudgetDocInfoModel(
 					new BudgetDocInfoPrimaryKeyModel(data.getOrgId(), UUID.randomUUID().toString(), data.getBudgetYear()),
-					data.getSchemeName(), data.getProofdocs());
+					data.getProofDocs());
 			budgetDocInfoModel = budgetRepo1.save(budgetDocInfoModel);
 
 			data.setId(budgetDocInfoModel.getPrimaryKey().getId());
@@ -310,8 +309,8 @@ public class BudgetServiceImpl implements BudgetService {
 				existingBudgetInfo.get().setSchemeName(data.getSchemeName());
 			}
 
-			if (data.getProofdocs() != null) {
-				existingBudgetInfo.get().setProofDocs(data.getProofdocs());
+			if (data.getProofDocs() != null) {
+				existingBudgetInfo.get().setProofDocs(data.getProofDocs());
 			}
 
 			BudgetDocInfoModel updatedInfo = budgetRepo1.save(existingBudgetInfo.get());
@@ -474,7 +473,7 @@ public class BudgetServiceImpl implements BudgetService {
 		if (StringUtils.isEmpty(budgetDocInfo.getSchemeName())) {
 			errObjList.add(Constants.SCHEME_NAME);
 		}
-		if (budgetDocInfo.getProofdocs() == null) {
+		if (budgetDocInfo.getProofDocs() == null) {
 			errObjList.add(Constants.PROOF_DOCS);
 		}
 		if (!CollectionUtils.isEmpty(errObjList)) {

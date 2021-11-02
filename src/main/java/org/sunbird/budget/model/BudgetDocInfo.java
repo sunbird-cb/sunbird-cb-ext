@@ -8,58 +8,15 @@ public class BudgetDocInfo {
     private String orgId;
     private String budgetYear;
     private String schemeName;
-    private String fileName;
-    private String fileType;
-    private String fileSize;
-    private String uploadedOn;
-    private String url;
-    private List<Map<String, String>> proofdocs;
 
-    public List<Map<String, String>> getProofdocs() {
-        return proofdocs;
+    private List<Map<String, String>> proofDocs;
+
+    public List<Map<String, String>> getProofDocs() {
+        return proofDocs;
     }
 
-    public void setProofdocs(List<Map<String, String>> proofdocs) {
-        this.proofdocs = proofdocs;
-    }
-    public String getUploadedOn() {
-        return uploadedOn;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
-    }
-
-    public void setUploadedOn(String uploadedOn) {
-        this.uploadedOn = uploadedOn;
-    }
-
-    public String getFileSize() {
-        return fileSize;
-    }
-
-    public void setFileSize(String fileSize) {
-        this.fileSize = fileSize;
-    }
-
-    public String getFileName() {
-        return fileName;
-    }
-
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
-    }
-
-    public String getFileType() {
-        return fileType;
-    }
-
-    public void setFileType(String fileType) {
-        this.fileType = fileType;
+    public void setProofDocs(List<Map<String, String>> proofDocs) {
+        this.proofDocs = proofDocs;
     }
 
     public String getId() {
