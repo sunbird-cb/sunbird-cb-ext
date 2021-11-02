@@ -18,13 +18,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.sunbird.assessment.repo.CohortUsers;
 import org.sunbird.assessment.repo.UserAssessmentTopPerformerRepository;
-import org.sunbird.common.model.OpenSaberApiUserProfile;
-import org.sunbird.common.model.Response;
-import org.sunbird.common.model.SunbirdApiBatchResp;
-import org.sunbird.common.model.SunbirdApiHierarchyResultContent;
-import org.sunbird.common.model.SunbirdApiResp;
-import org.sunbird.common.model.SunbirdApiUserCourse;
-import org.sunbird.common.model.SunbirdApiUserCourseListResp;
+import org.sunbird.common.model.*;
 import org.sunbird.common.service.ContentService;
 import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
 import org.sunbird.common.service.UserUtilityService;
@@ -340,13 +334,13 @@ public class CohortsServiceImpl implements CohortsService {
 				String desc = "Started learning this course";
 				for (String userId : participantList) {
 					if (participantMap.containsKey(userId)) {
-						OpenSaberApiUserProfile userProfile = (OpenSaberApiUserProfile) participantMap.get(userId);
+						SearchUserApiContent userInfo = (SearchUserApiContent) participantMap.get(userId);
 						CohortUsers user = new CohortUsers();
 						//User Id is assigning instead of email
-						user.setUser_id(userProfile.getUserId());
-						user.setEmail(userProfile.getPersonalDetails().getPrimaryEmail());
-						user.setFirst_name(userProfile.getPersonalDetails().getFirstname());
-						user.setLast_name(userProfile.getPersonalDetails().getSurname());
+						user.setUser_id(userInfo.getUserId());
+						user.setEmail(userInfo.getEmail());
+						user.setFirst_name(userInfo.getFirstName());
+						user.setLast_name(userInfo.getLastName());
 						user.setDesc(desc);
 						activeUserCollection.add(user);
 						currentCount++;
