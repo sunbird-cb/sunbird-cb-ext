@@ -1,13 +1,13 @@
 package org.sunbird.common.model;
 
 public class SearchUserApiRespResult {
-    private SearchUserApiResponse response;
+    private SearchUserAPIResponse response;
 
-    public SearchUserApiResponse getResponse() {
+    public SearchUserAPIResponse getResponse() {
         return response;
     }
 
-    public void setResponse(SearchUserApiResponse response) {
+    public void setResponse(SearchUserAPIResponse response) {
         this.response = response;
     }
 }
