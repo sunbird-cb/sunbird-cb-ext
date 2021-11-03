@@ -4,7 +4,7 @@ import java.util.List;
 
 public class SearchUserAPIResponse {
     private int count;
-    private List<SearchUserApiContent> content;
+    private List<SearchUserAPIResponse> content;
 
     public int getCount() {
         return count;
@@ -14,11 +14,11 @@ public class SearchUserAPIResponse {
         this.count = count;
     }
 
-    public List<SearchUserApiContent> getContent() {
+    public List<SearchUserAPIResponse> getContent() {
         return content;
     }
 
-    public void setContent(List<SearchUserApiContent> content) {
+    public void setContent(List<SearchUserAPIResponse> content) {
         this.content = content;
     }
 
