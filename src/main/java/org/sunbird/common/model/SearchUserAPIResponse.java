@@ -2,7 +2,7 @@ package org.sunbird.common.model;
 
 import java.util.List;
 
-public class SearchUserApiResponse {
+public class SearchUserAPIResponse {
     private int count;
     private List<SearchUserApiContent> content;
 
