@@ -82,20 +82,6 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		try {
 			HttpEntity<?> requestEnty = new HttpEntity<>(requestBody, headers);
-
-			// Old Code
-
-			//			String serverUrl = props.getSbHubGraphServiceUrl() + "/v1/user/search/profile";
-						// New url changes for opensaber
-			//			String serverUrl = props.getSbUrl() + props.getUserSearchEndPoint();
-			//			OpenSaberApiResp openSaberApiResp = restTemplate.postForObject(serverUrl, requestEnty,OpenSaberApiResp.class);
-			//			if (openSaberApiResp != null && "OK".equalsIgnoreCase(openSaberApiResp.getResponseCode())
-			//					&& !CollectionUtils.isEmpty(openSaberApiResp.getResult().getUserProfile()) ) {
-			//				for (OpenSaberApiUserProfile userProfile : openSaberApiResp.getResult().getUserProfile()) {
-			//					result.put(userProfile.getUserId(), userProfile);
-			//				}
-			//				return result;
-			//			}
 			String url = props.getSbUrl() + props.getUserSearchEndPoint();
 			SearchUserApiResp searchUserResult = restTemplate.postForObject(url, requestEnty, SearchUserApiResp.class);
 			logger.info("searchUserResult ---->"+ searchUserResult.toString());

@@ -8,6 +8,8 @@ public class SearchUserApiContent {
     private String firstName;
     private String lastName;
     private String desc;
+    private String channel;
+    private SunbirdUserProfileDetail profileDetails;
 
     public String getId() {
         return id;
@@ -56,8 +58,24 @@ public class SearchUserApiContent {
     public void setDesc(String desc) {
         this.desc = desc;
     }
+    
+    public String getChannel() {
+		return channel;
+	}
 
-    @Override
+	public void setChannel(String channel) {
+		this.channel = channel;
+	}
+
+	public SunbirdUserProfileDetail getProfileDetails() {
+		return profileDetails;
+	}
+
+	public void setProfileDetails(SunbirdUserProfileDetail profileDetails) {
+		this.profileDetails = profileDetails;
+	}
+
+	@Override
     public String toString() {
         return "SearchUserApiContent{" +
                 "id='" + id + '\'' +
