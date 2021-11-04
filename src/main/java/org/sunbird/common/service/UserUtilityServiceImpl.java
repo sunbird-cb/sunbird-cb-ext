@@ -69,22 +69,19 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 
 	@Override
 	public Map<String, Object> getUsersDataFromUserIds(String rootOrg, List<String> userIds, List<String> source) {
-
 		Map<String, Object> result = new HashMap<>();
 
+		Map<String, Object> requestBody = new HashMap<>();
 		Map<String, Object> request = new HashMap<>();
 		Map<String, Object> filters = new HashMap<>();
-		Map<String, Object> idKeyword = new HashMap<>();
-		idKeyword.put("or", userIds);
-		filters.put("id.keyword", idKeyword);
-		request.put("limit", userIds.size());
-		request.put("offset", 0);
+		filters.put("userId", userIds);
 		request.put("filters", filters);
+		requestBody.put("request", request);
+		
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		try {
-			String reqBodyData = new ObjectMapper().writeValueAsString(request);
-			HttpEntity<String> requestEnty = new HttpEntity<>(reqBodyData, headers);
+			HttpEntity<?> requestEnty = new HttpEntity<>(requestBody, headers);
 
 			// Old Code
 
@@ -99,18 +96,15 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 			//				}
 			//				return result;
 			//			}
-			String serverUrl = "https://igot-dev.in/api/user/v1/search";
-			SearchUserApiResp searchUserResult = restTemplate.postForObject(serverUrl, requestEnty, SearchUserApiResp.class);
+			String url = props.getSbUrl() + props.getUserSearchEndPoint();
+			SearchUserApiResp searchUserResult = restTemplate.postForObject(url, requestEnty, SearchUserApiResp.class);
 			logger.info("searchUserResult ---->"+ searchUserResult.toString());
 			if(searchUserResult !=null && "OK".equalsIgnoreCase(searchUserResult.getResponseCode())
 					&& searchUserResult.getResult().getResponse().getCount()>0){
 				for(SearchUserApiContent searchUserApiContent: searchUserResult.getResult().getResponse().getContent()){
 					result.put(searchUserApiContent.getUserId(), searchUserApiContent);
 				}
-
 			}
-
-
 		} catch (Exception e) {
 			throw new ApplicationLogicError("Sunbird Service ERROR: ", e);
 		}

@@ -323,6 +323,11 @@ public class CohortsServiceImpl implements CohortsService {
 	private List<CohortUsers> fetchParticipantsList(String xAuthUser, String rootOrg, List<String> batchIdList, int count) {
 		List<String> participantList = contentService.getParticipantsList(xAuthUser, batchIdList);
 		List<CohortUsers> activeUserCollection = new ArrayList<>();
+		if(participantList.size() > count) {
+			participantList = participantList.stream().limit(count).collect(Collectors.toList());
+		} else if (participantList.size() == 0) {
+			return activeUserCollection;
+		}
 		try {
 			Map<String, Object> participantMap = userUtilService.getUsersDataFromUserIds(rootOrg, participantList,
 					new ArrayList<>(Arrays.asList(Constants.FIRST_NAME, Constants.LAST_NAME, Constants.EMAIL,
