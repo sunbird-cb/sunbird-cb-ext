@@ -357,7 +357,8 @@ public class CohortsServiceImpl implements CohortsService {
 						user.setLast_name(userInfo.getLastName());
 						user.setDesc(desc);
 						user.setDepartment(userInfo.getChannel());
-						if (userInfo.getProfileDetails().getProfessionalDetails() != null) {
+						if (userInfo.getProfileDetails() != null
+								&& userInfo.getProfileDetails().getProfessionalDetails() != null) {
 							SunbirdUserProfessionalDetail profDetail = userInfo.getProfileDetails()
 									.getProfessionalDetails().get(0);
 							String designation = profDetail.getDesignation() != null ? profDetail.getDesignation()
