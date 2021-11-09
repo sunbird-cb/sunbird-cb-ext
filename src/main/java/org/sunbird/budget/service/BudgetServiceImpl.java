@@ -90,7 +90,7 @@ public class BudgetServiceImpl implements BudgetService {
 			String errMsg = "No Budget Scheme found for Org: " + orgId + ", BudgetYear: " + budgetYear;
 			logger.info(errMsg);
 			response.getParams().setErrmsg(errMsg);
-			response.setResponseCode(HttpStatus.NOT_FOUND);
+			response.setResponseCode(HttpStatus.BAD_REQUEST);
 			return response;
 		}
 
@@ -119,7 +119,7 @@ public class BudgetServiceImpl implements BudgetService {
 						+ ", BudgetYear: " + data.getBudgetYear();
 				logger.error(errMsg);
 				response.getParams().setErrmsg(errMsg);
-				response.setResponseCode(HttpStatus.NOT_FOUND);
+				response.setResponseCode(HttpStatus.BAD_REQUEST);
 				return response;
 			}
 
@@ -192,7 +192,7 @@ public class BudgetServiceImpl implements BudgetService {
 						+ budgetYear;
 				logger.error(errMsg);
 				response.getParams().setErrmsg(errMsg);
-				response.setResponseCode(HttpStatus.NOT_FOUND);
+				response.setResponseCode(HttpStatus.BAD_REQUEST);
 			}
 		} catch (Exception ex) {
 			String errMsg = "Exception occurred while deleting the Budget details. Exception: " + ex.getMessage();
@@ -211,7 +211,7 @@ public class BudgetServiceImpl implements BudgetService {
 			String errMsg = "Budget Scheme History details not found for Org: " + orgId;
 			logger.info(errMsg);
 			response.getParams().setErrmsg(errMsg);
-			response.setResponseCode(HttpStatus.NOT_FOUND);
+			response.setResponseCode(HttpStatus.BAD_REQUEST);
 			return response;
 		}
 

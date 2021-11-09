@@ -92,7 +92,7 @@ public class StaffServiceImpl implements StaffService {
 				String errMsg = "Failed to find StaffInfo for OrgId: " + data.getOrgId() + ", Id: " + data.getId();
 				logger.error(errMsg);
 				response.getParams().setErrmsg(errMsg);
-				response.setResponseCode(HttpStatus.NOT_FOUND);
+				response.setResponseCode(HttpStatus.BAD_REQUEST);
 				return response;
 			}
 
@@ -155,7 +155,7 @@ public class StaffServiceImpl implements StaffService {
 			String errMsg = "No Staff Position found for Org: " + orgId;
 			logger.info(errMsg);
 			response.getParams().setErrmsg(errMsg);
-			response.setResponseCode(HttpStatus.NOT_FOUND);
+			response.setResponseCode(HttpStatus.BAD_REQUEST);
 			return response;
 		}
 		List<StaffInfo> staffResponse = new ArrayList<>();
@@ -185,7 +185,7 @@ public class StaffServiceImpl implements StaffService {
 				String errMsg = "Staff Position doesn't exist for OrgId: " + orgId + ", Position: " + staffInfoId;
 				logger.error(errMsg);
 				response.getParams().setErrmsg(errMsg);
-				response.setResponseCode(HttpStatus.NOT_FOUND);
+				response.setResponseCode(HttpStatus.BAD_REQUEST);
 			}
 		} catch (Exception ex) {
 			String errMsg = "Exception occurred while deleting the staff details. Exception: " + ex.getMessage();
@@ -204,7 +204,7 @@ public class StaffServiceImpl implements StaffService {
 			String errMsg = "Staff Position History details not found for Org: " + orgId;
 			logger.info(errMsg);
 			response.getParams().setErrmsg(errMsg);
-			response.setResponseCode(HttpStatus.NOT_FOUND);
+			response.setResponseCode(HttpStatus.BAD_REQUEST);
 			return response;
 		}
 		List<StaffAuditInfo> auditResponse = new ArrayList<>();
