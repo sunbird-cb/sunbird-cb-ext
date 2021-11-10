@@ -2,6 +2,7 @@ package org.sunbird.budget.service;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -84,24 +85,24 @@ public class BudgetServiceImpl implements BudgetService {
 	@Override
 	public SBApiResponse getBudgetDetails(String orgId, String budgetYear) throws Exception {
 		SBApiResponse response = new SBApiResponse(Constants.API_BUDGET_SCHEME_READ);
-		List<BudgetInfoModel> budgetDetails = budgetRepository.getAllByOrgIdAndBudgetYear(orgId, budgetYear);
+		List<Object> budgetResponseList = null;
+		String errMsg = null;
+		if ("all".equalsIgnoreCase(budgetYear)) {
+			budgetResponseList = getAllBudgetYearDetails(orgId);
+			errMsg = "No Budget Year Collection found for Org: " + orgId;
+		} else {
+			budgetResponseList = getSpecificBudgetYearDetails(orgId, budgetYear);
+			errMsg = "No Budget Scheme found for Org: " + orgId + ", BudgetYear: " + budgetYear;
+		}
 
-		if (CollectionUtils.isEmpty(budgetDetails)) {
-			String errMsg = "No Budget Scheme found for Org: " + orgId + ", BudgetYear: " + budgetYear;
+		if (CollectionUtils.isEmpty(budgetResponseList)) {
 			logger.info(errMsg);
 			response.getParams().setErrmsg(errMsg);
 			response.setResponseCode(HttpStatus.BAD_REQUEST);
 			return response;
 		}
-
-		List<BudgetInfo> budgetResponse = new ArrayList<>();
-		for (BudgetInfoModel budget : budgetDetails) {
-			BudgetInfo info = budget.getBudgetInfo();
-			budgetResponse.add(info);
-		}
-
 		response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
-		response.put(Constants.RESPONSE, budgetResponse);
+		response.put(Constants.RESPONSE, budgetResponseList);
 		response.setResponseCode(HttpStatus.OK);
 		return response;
 	}
@@ -332,5 +333,31 @@ public class BudgetServiceImpl implements BudgetService {
 		if (!CollectionUtils.isEmpty(errObjList)) {
 			throw new Exception("One or more required fields are empty. Empty fields " + errObjList.toString());
 		}
+	}
+	
+	private List<Object> getAllBudgetYearDetails(String orgId) {
+		List<BudgetInfoModel> budgetDetails = budgetRepository.getDistinctBudgetYear();
+		if (CollectionUtils.isEmpty(budgetDetails)) {
+			return Collections.emptyList();
+		}
+		List<Object> budgetResponse = new ArrayList<>();
+		for (BudgetInfoModel budget : budgetDetails) {
+			if (budget.getPrimaryKey().getOrgId().equals(orgId)) {
+				budgetResponse.add(budget.getPrimaryKey().getBudgetYear());
+			}
+		}
+		return budgetResponse;
+	}
+	
+	private List<Object> getSpecificBudgetYearDetails(String orgId, String budgetYear) {
+		List<BudgetInfoModel> budgetDetails = budgetRepository.getAllByOrgIdAndBudgetYear(orgId, budgetYear);
+		if (CollectionUtils.isEmpty(budgetDetails)) {
+			return Collections.emptyList();
+		}
+		List<Object> budgetResponse = new ArrayList<>();
+		for (BudgetInfoModel budget : budgetDetails) {
+			budgetResponse.add(budget.getBudgetInfo());
+		}
+		return budgetResponse;
 	}
 }
