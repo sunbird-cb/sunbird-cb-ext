@@ -22,6 +22,6 @@ public interface BudgetRepository extends CassandraRepository<BudgetInfoModel, B
 	public List<BudgetInfoModel> getAllByOrgIdAndBudgetYearAndSchemeName(String orgId, String budgetYear,
 			String schemeName);
 
-	@Query(" select distinct orgId, budgetYear from org_budget_scheme")
+	@Query("select distinct orgId, budgetYear from org_budget_scheme")
 	public List<BudgetInfoModel> getDistinctBudgetYear();
 }
