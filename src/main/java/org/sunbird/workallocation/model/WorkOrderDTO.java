@@ -111,8 +111,8 @@ public class WorkOrderDTO {
     public void addUserId(String userId) {
         if (CollectionUtils.isEmpty(this.userIds))
             this.userIds = new ArrayList<>();
-        if(!this.userIds.contains(userId))
-                this.userIds.add(userId);
+        if (!this.userIds.contains(userId))
+            this.userIds.add(userId);
     }
 
     public String getCreatedByName() {

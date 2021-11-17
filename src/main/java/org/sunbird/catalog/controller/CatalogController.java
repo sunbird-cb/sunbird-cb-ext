@@ -14,12 +14,12 @@ import org.sunbird.catalog.service.CatalogServiceImpl;
 @RestController
 @RequestMapping("/v1/catalog")
 public class CatalogController {
-	@Autowired
-	private CatalogServiceImpl catalogService;
+    @Autowired
+    private CatalogServiceImpl catalogService;
 
-	@GetMapping("/")
-	public ResponseEntity<Catalog> getCatalog(@RequestHeader("x-authenticated-user-token") String authUserToken,
-											  @RequestParam(name = "consumption", required = false) boolean isEnrichConsumption){
-		return new ResponseEntity<>(catalogService.getCatalog(authUserToken, isEnrichConsumption), HttpStatus.OK);
-	}
+    @GetMapping("/")
+    public ResponseEntity<Catalog> getCatalog(@RequestHeader("x-authenticated-user-token") String authUserToken,
+                                              @RequestParam(name = "consumption", required = false) boolean isEnrichConsumption) {
+        return new ResponseEntity<>(catalogService.getCatalog(authUserToken, isEnrichConsumption), HttpStatus.OK);
+    }
 }

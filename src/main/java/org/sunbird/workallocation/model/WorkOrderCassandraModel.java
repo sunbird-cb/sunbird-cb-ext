@@ -7,11 +7,11 @@ import org.springframework.data.cassandra.core.mapping.Table;
 @Table("work_order")
 public class WorkOrderCassandraModel {
 
-    public WorkOrderCassandraModel(){
+    public WorkOrderCassandraModel() {
         super();
     }
 
-    public WorkOrderCassandraModel(String id, String data){
+    public WorkOrderCassandraModel(String id, String data) {
         this.primaryKey = new WorkOrderPrimaryKeyModel();
         this.primaryKey.setId(id);
         this.data = data;

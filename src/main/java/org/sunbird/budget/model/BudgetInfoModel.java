@@ -12,38 +12,35 @@ import org.sunbird.staff.model.StaffInfoPrimaryKeyModel;
 public class BudgetInfoModel {
 
 	public BudgetInfoModel() {
-        super();
-    }
+		super();
+	}
 
-    public BudgetInfoModel(String orgId, String id,String budgetYear, String schemeName, long salaryBudgetAllocated,
-    		long trainingBudgetAllocated, long trainingBudgetUtilization) {
-        this.primaryKey = new BudgetInfoPrimaryKeyModel();
-        this.primaryKey.setOrgId(orgId);
-        this.primaryKey.setId(id);
-        this.primaryKey.setBudgetYear(budgetYear);
-        this.schemeName = schemeName;
-        this.salaryBudgetAllocated = salaryBudgetAllocated;
-        this.trainingBudgetAllocated = trainingBudgetAllocated;
-        this.trainingBudgetUtilization = trainingBudgetUtilization;
-    }
+	public BudgetInfoModel(BudgetInfoPrimaryKeyModel primaryKey, String schemeName, long salaryBudgetAllocated,
+			long trainingBudgetAllocated, long trainingBudgetUtilization) {
+		this.primaryKey = primaryKey;
+		this.schemeName = schemeName;
+		this.salaryBudgetAllocated = salaryBudgetAllocated;
+		this.trainingBudgetAllocated = trainingBudgetAllocated;
+		this.trainingBudgetUtilization = trainingBudgetUtilization;
+	}
 
-    @PrimaryKey
-    private BudgetInfoPrimaryKeyModel primaryKey;
+	@PrimaryKey
+	private BudgetInfoPrimaryKeyModel primaryKey;
 
-    @Column("proofDocs")
-    private List<Map<String, String>> proofDocs;
-    
-    @Column("salaryBudgetAllocated")
-    private long salaryBudgetAllocated;
-    
-    @Column("schemeName")
-    private String schemeName;
-    
-    @Column("trainingBudgetAllocated")
-    private long trainingBudgetAllocated;
-    
-    @Column("trainingBudgetUtilization")
-    private long trainingBudgetUtilization;
+	@Column("proofDocs")
+	private List<Map<String, String>> proofDocs;
+
+	@Column("salaryBudgetAllocated")
+	private long salaryBudgetAllocated;
+
+	@Column("schemeName")
+	private String schemeName;
+
+	@Column("trainingBudgetAllocated")
+	private long trainingBudgetAllocated;
+
+	@Column("trainingBudgetUtilization")
+	private long trainingBudgetUtilization;
 
 	public BudgetInfoPrimaryKeyModel getPrimaryKey() {
 		return primaryKey;
@@ -92,5 +89,16 @@ public class BudgetInfoModel {
 	public void setTrainingBudgetUtilization(long trainingBudgetUtilization) {
 		this.trainingBudgetUtilization = trainingBudgetUtilization;
 	}
-    
+
+	public BudgetInfo getBudgetInfo() {
+		BudgetInfo bInfo = new BudgetInfo();
+		bInfo.setOrgId(primaryKey.getOrgId());
+		bInfo.setBudgetYear(primaryKey.getBudgetYear());
+		bInfo.setId(primaryKey.getId());
+		bInfo.setSalaryBudgetAllocated(salaryBudgetAllocated);
+		bInfo.setSchemeName(schemeName);
+		bInfo.setTrainingBudgetAllocated(trainingBudgetAllocated);
+		bInfo.setTrainingBudgetUtilization(trainingBudgetUtilization);
+		return bInfo;
+	}
 }

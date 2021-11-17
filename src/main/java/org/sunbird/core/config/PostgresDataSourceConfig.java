@@ -10,12 +10,12 @@ import org.springframework.context.annotation.Primary;
 
 @Configuration
 public class PostgresDataSourceConfig {
-	@Bean
-	@Primary
-	@ConfigurationProperties(prefix = "spring.datasource")
-	public DataSource primaryDataSource() {
-		return DataSourceBuilder.create().build();
-	}
+    @Bean
+    @Primary
+    @ConfigurationProperties(prefix = "spring.datasource")
+    public DataSource primaryDataSource() {
+        return DataSourceBuilder.create().build();
+    }
 }
 
 //@Configuration

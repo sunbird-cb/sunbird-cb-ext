@@ -6,6 +6,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.sunbird.portal.department.dto.Role;
 
 public interface RoleRepository extends CrudRepository<Role, Integer> {
-	Role findRoleByRoleName(String roleName);
-	List<Role> findAllByRoleNameIn(List<String> roleNames);
+    Role findRoleByRoleName(String roleName);
+
+    List<Role> findAllByRoleNameIn(List<String> roleNames);
 }

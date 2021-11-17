@@ -3,35 +3,38 @@ package org.sunbird.staff.model;
 import org.springframework.data.cassandra.core.mapping.Column;
 import org.springframework.data.cassandra.core.mapping.PrimaryKey;
 import org.springframework.data.cassandra.core.mapping.Table;
+import org.sunbird.common.util.Constants;
 
 @Table("org_staff_position")
 public class StaffInfoModel {
-	
+
+	@PrimaryKey
+	private StaffInfoPrimaryKeyModel primaryKey;
+
+	@Column(Constants.POSITION)
+	private String position;
+
+	@Column(Constants.TOTAL_POSITION_FILLED)
+	private int totalPositionsFilled;
+
+	@Column(Constants.TOTAL_POSITION_VACANT)
+	private int totalPositionsVacant;
+
 	public StaffInfoModel() {
-        super();
-    }
+		super();
+	}
 
-    public StaffInfoModel(String orgId, String id, String position, int totalPositionsFilled,
-    		int totalPositionsVacant) {
-        this.primaryKey = new StaffInfoPrimaryKeyModel();
-        this.primaryKey.setOrgId(orgId);
-        this.primaryKey.setId(id);
-        this.position = position;
-        this.totalPositionsFilled = totalPositionsFilled;
-        this.totalPositionsVacant = totalPositionsVacant;
-    }
+	public StaffInfoModel(StaffInfoPrimaryKeyModel primaryKey) {
+		this.primaryKey = primaryKey;
+	}
 
-    @PrimaryKey
-    private StaffInfoPrimaryKeyModel primaryKey;
-
-    @Column("position")
-    private String position;
-    
-    @Column("totalPositionsFilled")
-    private int totalPositionsFilled;
-    
-    @Column("totalPositionsVacant")
-    private int totalPositionsVacant;
+	public StaffInfoModel(StaffInfoPrimaryKeyModel primaryKey, String position, int totalPositionsFilled,
+			int totalPositionsVacant) {
+		this.primaryKey = primaryKey;
+		this.position = position;
+		this.totalPositionsFilled = totalPositionsFilled;
+		this.totalPositionsVacant = totalPositionsVacant;
+	}
 
 	public StaffInfoPrimaryKeyModel getPrimaryKey() {
 		return primaryKey;
@@ -63,6 +66,16 @@ public class StaffInfoModel {
 
 	public void setTotalPositionsVacant(int totalPositionsVacant) {
 		this.totalPositionsVacant = totalPositionsVacant;
+	}
+
+	public StaffInfo getStaffInfo() {
+		StaffInfo info = new StaffInfo();
+		info.setId(primaryKey.getId());
+		info.setOrgId(primaryKey.getOrgId());
+		info.setPosition(position);
+		info.setTotalPositionsFilled(totalPositionsFilled);
+		info.setTotalPositionsVacant(totalPositionsVacant);
+		return info;
 	}
 
 }

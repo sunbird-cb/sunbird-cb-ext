@@ -6,9 +6,10 @@ import org.springframework.data.repository.CrudRepository;
 import org.sunbird.portal.department.dto.DepartmentRole;
 
 public interface DepartmentRoleRepository extends CrudRepository<DepartmentRole, Integer> {
-	DepartmentRole findByDeptTypeIgnoreCase(String deptType);
-	List<DepartmentRole> findAllByDeptTypeIn(List<String> deptTypes);
-	
+    DepartmentRole findByDeptTypeIgnoreCase(String deptType);
+
+    List<DepartmentRole> findAllByDeptTypeIn(List<String> deptTypes);
+
 //	DepartmentRole findByRoleIdAndDeptId(Integer roleId, Integer deptId);
 //
 //	List<DepartmentRole> findByRoleId(Integer roleId);
@@ -19,7 +20,7 @@ public interface DepartmentRoleRepository extends CrudRepository<DepartmentRole,
 
 //	@Query("select dRole from department_roles where dRole.role_id in (:role_ids)")
 //	Iterable<DepartmentRole> findByRoleIds(@Param("role_ids") List<Integer> role_ids);
-	
+
 //	@Query("select id from department_roles where id = (select dept_role_id from user_department_role where user_id = ?0)")
 //	Iterable<Integer> findDepartmentRoleForUser_old(String userId);
 

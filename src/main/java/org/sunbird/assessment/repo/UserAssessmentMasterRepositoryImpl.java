@@ -6,25 +6,25 @@ import org.springframework.data.cassandra.core.CassandraOperations;
 
 public class UserAssessmentMasterRepositoryImpl implements UserAssessmentMasterRepositoryCustom {
 
-	@Autowired
-	CassandraOperations cassandraOperations;
+    @Autowired
+    CassandraOperations cassandraOperations;
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sunbird.assessment.repo.
-	 * UserAssessmentMasterRepositoryCustom#updateAssessment(org.sunbird.assessment.
-	 * repo.UserAssessmentMasterModel,
-	 * org.sunbird.assessment.repo.UserAssessmentSummaryModel)
-	 */
-	@Override
-	public UserAssessmentMasterModel updateAssessment(UserAssessmentMasterModel assessment,
-			UserAssessmentSummaryModel assessmentSummary) {
-		CassandraBatchOperations batchOps = cassandraOperations.batchOps();
-		batchOps.insert(assessment);
-		if (assessmentSummary.getPrimaryKey() != null)
-			batchOps.insert(assessmentSummary);
-		batchOps.execute();
-		return assessment;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.sunbird.assessment.repo.
+     * UserAssessmentMasterRepositoryCustom#updateAssessment(org.sunbird.assessment.
+     * repo.UserAssessmentMasterModel,
+     * org.sunbird.assessment.repo.UserAssessmentSummaryModel)
+     */
+    @Override
+    public UserAssessmentMasterModel updateAssessment(UserAssessmentMasterModel assessment,
+                                                      UserAssessmentSummaryModel assessmentSummary) {
+        CassandraBatchOperations batchOps = cassandraOperations.batchOps();
+        batchOps.insert(assessment);
+        if (assessmentSummary.getPrimaryKey() != null)
+            batchOps.insert(assessmentSummary);
+        batchOps.execute();
+        return assessment;
+    }
 }

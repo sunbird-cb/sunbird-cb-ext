@@ -20,4 +20,7 @@ public interface StaffRepository extends CassandraRepository<StaffInfoModel, Sta
 	
 	@Query(" delete from org_staff_position where orgId=?0 and id=?1")
     public List<StaffInfoModel> deleteStaffDetails(String rootOrg, String id);
+	
+	@Query("select * from org_staff_position where orgId=?0 and position=?1")
+	List<StaffInfoModel> getAllByOrgIdAndPosition(String orgId, String position);
 }

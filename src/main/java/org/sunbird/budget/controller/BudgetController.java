@@ -18,38 +18,46 @@ import org.springframework.web.bind.annotation.RestController;
 import org.sunbird.budget.model.BudgetInfo;
 import org.sunbird.budget.service.BudgetService;
 import org.sunbird.common.model.Response;
+import org.sunbird.common.model.SBApiResponse;
 
 @RestController
-@RequestMapping("/budget/scheme")
 public class BudgetController {
 
 	@Autowired
 	BudgetService budgetService;
 
-	@PostMapping
-	public ResponseEntity<Response> createBudgetDetails(@RequestHeader("userId") String userId,
+	@PostMapping("/budget/scheme")
+	public ResponseEntity<?> createBudgetDetails(@RequestHeader("x-authenticated-userid") String userId,
 			@Valid @RequestBody BudgetInfo requestBody) throws Exception {
-		return new ResponseEntity<>(budgetService.submitBudgetDetails(requestBody, userId), HttpStatus.CREATED);
+		SBApiResponse response = budgetService.submitBudgetDetails(requestBody, userId);
+		return new ResponseEntity<>(response, response.getResponseCode());
 	}
 
-	@GetMapping("/{orgId}")
-	public ResponseEntity<Response> getStaffDetails(@PathVariable("orgId") String orgId) throws Exception {
-		return new ResponseEntity<Response>(budgetService.getBudgetDetails(orgId), HttpStatus.OK);
+	@GetMapping("budget/scheme/{orgId}/{budgetYear}")
+	public ResponseEntity<?> getBudgetDetails(@PathVariable("orgId") String orgId,
+			@PathVariable("budgetYear") String budgetYear) throws Exception {
+		SBApiResponse response = budgetService.getBudgetDetails(orgId, budgetYear);
+		return new ResponseEntity<>(response, response.getResponseCode());
 	}
 
-	@PatchMapping
-	public ResponseEntity<Response> updateBudgetDetails(@RequestHeader("userId") String userId,
+	@PatchMapping("/budget/scheme")
+	public ResponseEntity<?> updateBudgetDetails(@RequestHeader("x-authenticated-userid") String userId,
 			@Valid @RequestBody BudgetInfo requestBody) throws Exception {
-		return new ResponseEntity<>(budgetService.updateBudgetDetails(requestBody, userId), HttpStatus.OK);
+		SBApiResponse response = budgetService.updateBudgetDetails(requestBody, userId);
+		return new ResponseEntity<>(response, response.getResponseCode());
 	}
 
-	@DeleteMapping
-	public ResponseEntity<Response> deleteBudgetDetails(@RequestParam String orgId,
-			@RequestParam(name = "id", required = true) String budgetDetailsId, @RequestParam String budgetYear)
-			throws Exception {
-		return new ResponseEntity<>(budgetService.deleteBudgetDetails(orgId, budgetDetailsId, budgetYear),
-				HttpStatus.OK);
+	@DeleteMapping("/budget/scheme")
+	public ResponseEntity<?> deleteBudgetDetails(@RequestParam(name = "orgId", required = true) String orgId,
+			@RequestParam(name = "id", required = true) String budgetDetailsId,
+			@RequestParam(name = "budgetYear", required = false) String budgetYear) throws Exception {
+		SBApiResponse response = budgetService.deleteBudgetDetails(orgId, budgetDetailsId, budgetYear);
+		return new ResponseEntity<>(response, response.getResponseCode());
 	}
 
+	@GetMapping("/orghistory/{orgId}/budget")
+	public ResponseEntity<?> getBudgetHistoryDetails(@PathVariable("orgId") String orgId) throws Exception {
+		SBApiResponse response = budgetService.getBudgetAudit(orgId);
+		return new ResponseEntity<>(response, response.getResponseCode());
+	}
 }
-

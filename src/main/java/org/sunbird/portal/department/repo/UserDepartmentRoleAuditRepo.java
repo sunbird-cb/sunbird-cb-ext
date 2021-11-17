@@ -5,6 +5,6 @@ import org.springframework.stereotype.Repository;
 import org.sunbird.portal.department.dto.UserDepartmentRoleAudit;
 
 @Repository
-public interface UserDepartmentRoleAuditRepo extends  JpaRepository<UserDepartmentRoleAudit, Integer> {
+public interface UserDepartmentRoleAuditRepo extends JpaRepository<UserDepartmentRoleAudit, Integer> {
 
 }

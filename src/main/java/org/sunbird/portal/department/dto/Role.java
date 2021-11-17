@@ -12,55 +12,55 @@ import javax.validation.constraints.NotNull;
 @Entity
 @Table(name = "roles", schema = "wingspan")
 public class Role {
-	@Id
-	@Column(name = "id")
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Integer id;
+    @Id
+    @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
 
-	@Column(name = "role_name")
-	@NotNull
-	private String roleName;
+    @Column(name = "role_name")
+    @NotNull
+    private String roleName;
 
-	@Column(name = "description")
-	@NotNull
-	private String description;
-	
-	@Transient
-	private int noOfUsers;
-	
-	public Integer getId() {
-		return id;
-	}
+    @Column(name = "description")
+    @NotNull
+    private String description;
 
-	public void setId(Integer id) {
-		this.id = id;
-	}
+    @Transient
+    private int noOfUsers;
 
-	public String getRoleName() {
-		return roleName;
-	}
+    public Integer getId() {
+        return id;
+    }
 
-	public void setRoleName(String roleName) {
-		this.roleName = roleName;
-	}
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
-	public String getDescription() {
-		return description;
-	}
+    public String getRoleName() {
+        return roleName;
+    }
 
-	public void setDescription(String description) {
-		this.description = description;
-	}
+    public void setRoleName(String roleName) {
+        this.roleName = roleName;
+    }
 
-	public int getNoOfUsers() {
-		return noOfUsers;
-	}
+    public String getDescription() {
+        return description;
+    }
 
-	public void setNoOfUsers(int noOfUsers) {
-		this.noOfUsers = noOfUsers;
-	}
-	
-	public void incrementUserCount() {
-		noOfUsers++;
-	}
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public int getNoOfUsers() {
+        return noOfUsers;
+    }
+
+    public void setNoOfUsers(int noOfUsers) {
+        this.noOfUsers = noOfUsers;
+    }
+
+    public void incrementUserCount() {
+        noOfUsers++;
+    }
 }

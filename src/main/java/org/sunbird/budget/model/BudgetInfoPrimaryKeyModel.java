@@ -7,16 +7,23 @@ import org.springframework.data.cassandra.core.mapping.PrimaryKeyColumn;
 @PrimaryKeyClass
 public class BudgetInfoPrimaryKeyModel {
 
-	private static final long serialVersionUID = 1L;
-	
-    @PrimaryKeyColumn(name = "orgId", ordinal = 0, type = PrimaryKeyType.PARTITIONED)
-    private String orgId;
-    
-    @PrimaryKeyColumn(name = "budgetYear", ordinal = 0, type = PrimaryKeyType.CLUSTERED)
-    private String budgetYear;
-    
-    @PrimaryKeyColumn(name = "id", ordinal = 0, type = PrimaryKeyType.CLUSTERED)
-    private String id;
+	@PrimaryKeyColumn(name = "orgId", ordinal = 0, type = PrimaryKeyType.PARTITIONED)
+	private String orgId;
+
+	@PrimaryKeyColumn(name = "budgetYear", ordinal = 0, type = PrimaryKeyType.CLUSTERED)
+	private String budgetYear;
+
+	@PrimaryKeyColumn(name = "id", ordinal = 0, type = PrimaryKeyType.CLUSTERED)
+	private String id;
+
+	public BudgetInfoPrimaryKeyModel() {
+	}
+
+	public BudgetInfoPrimaryKeyModel(String orgId, String id, String budgetYear) {
+		this.orgId = orgId;
+		this.id = id;
+		this.budgetYear = budgetYear;
+	}
 
 	public String getOrgId() {
 		return orgId;
@@ -41,5 +48,5 @@ public class BudgetInfoPrimaryKeyModel {
 	public void setId(String id) {
 		this.id = id;
 	}
-    
+
 }
