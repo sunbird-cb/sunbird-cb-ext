@@ -278,7 +278,7 @@ CREATE TABLE sunbird.org_budget_scheme (
 	trainingBudgetAllocated bigint, 
 	trainingBudgetUtilization bigint, 
 	proofDocs frozen<list<map<text,text>>>,
-	PRIMARY KEY (orgId, budgetYear, id)
+	PRIMARY KEY ((orgId, budgetYear), id)
 );
 CREATE INDEX IF NOT EXISTS budget_schemeName_index on sunbird.org_budget_scheme (schemeName);
 ```

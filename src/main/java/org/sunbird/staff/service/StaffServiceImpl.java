@@ -32,11 +32,11 @@ public class StaffServiceImpl implements StaffService {
 	private SimpleDateFormat dateFormatter = new SimpleDateFormat(Constants.DATE_FORMAT);
 	private Logger logger = LoggerFactory.getLogger(getClass().getName());
 
-//	@Autowired
-//	private StaffRepository staffRepository;
+	@Autowired
+	private StaffRepository staffRepository;
 
-//	@Autowired
-//	private AuditRepository auditRepository;
+	@Autowired
+	private AuditRepository auditRepository;
 
 	@Override
 	public SBApiResponse submitStaffDetails(StaffInfo data, String userId) throws Exception {
@@ -44,28 +44,28 @@ public class StaffServiceImpl implements StaffService {
 		try {
 			validateAddStaffInfo(data);
 
-//			List<StaffInfoModel> existingList = staffRepository.getAllByOrgIdAndPosition(data.getOrgId(),
-//					data.getPosition());
+			List<StaffInfoModel> existingList = staffRepository.getAllByOrgIdAndPosition(data.getOrgId(),
+					data.getPosition());
 
-//			if (!CollectionUtils.isEmpty(existingList)) {
-//				String errMsg = "Position exist for given name. Failed to create StaffInfo for OrgId: "
-//						+ data.getOrgId() + ", Position: " + data.getPosition();
-//				logger.error(errMsg);
-//				response.getParams().setErrmsg(errMsg);
-//				response.setResponseCode(HttpStatus.BAD_REQUEST);
-//				return response;
-//			}
+			if (!CollectionUtils.isEmpty(existingList)) {
+				String errMsg = "Position exist for given name. Failed to create StaffInfo for OrgId: "
+						+ data.getOrgId() + ", Position: " + data.getPosition();
+				logger.error(errMsg);
+				response.getParams().setErrmsg(errMsg);
+				response.setResponseCode(HttpStatus.BAD_REQUEST);
+				return response;
+			}
 
 			StaffInfoModel staffInfoModel = new StaffInfoModel(
 					new StaffInfoPrimaryKeyModel(data.getOrgId(), UUID.randomUUID().toString()), data.getPosition(),
 					data.getTotalPositionsFilled(), data.getTotalPositionsVacant());
-//			staffInfoModel = staffRepository.save(staffInfoModel);
+			staffInfoModel = staffRepository.save(staffInfoModel);
 
 			data.setId(staffInfoModel.getPrimaryKey().getId());
 
 			Audit audit = new Audit(data.getOrgId(), Constants.STAFF, dateFormatter.format(new Date()), userId,
 					StringUtils.EMPTY, StringUtils.EMPTY, mapper.writeValueAsString(data));
-//			audit = auditRepository.save(audit);
+			audit = auditRepository.save(audit);
 
 			response.getParams().setStatus(Constants.SUCCESSFUL);
 			response.put(Constants.DATA, staffInfoModel.getStaffInfo());
@@ -86,55 +86,55 @@ public class StaffServiceImpl implements StaffService {
 		SBApiResponse response = new SBApiResponse(Constants.API_STAFF_POSITION_UPDATE);
 		try {
 			validateUpdateStaffInfo(data);
-//			Optional<StaffInfoModel> existingStaffInfo = staffRepository
-//					.findById(new StaffInfoPrimaryKeyModel(data.getOrgId(), data.getId()));
-//			if (!existingStaffInfo.isPresent()) {
-//				String errMsg = "Failed to find StaffInfo for OrgId: " + data.getOrgId() + ", Id: " + data.getId();
-//				logger.error(errMsg);
-//				response.getParams().setErrmsg(errMsg);
-//				response.setResponseCode(HttpStatus.NOT_FOUND);
-//				return response;
-//			}
+			Optional<StaffInfoModel> existingStaffInfo = staffRepository
+					.findById(new StaffInfoPrimaryKeyModel(data.getOrgId(), data.getId()));
+			if (!existingStaffInfo.isPresent()) {
+				String errMsg = "Failed to find StaffInfo for OrgId: " + data.getOrgId() + ", Id: " + data.getId();
+				logger.error(errMsg);
+				response.getParams().setErrmsg(errMsg);
+				response.setResponseCode(HttpStatus.BAD_REQUEST);
+				return response;
+			}
 
 			if (data.getPosition() != null) {
-//				List<StaffInfoModel> existingList = staffRepository.getAllByOrgIdAndPosition(data.getOrgId(),
-//						data.getPosition());
+				List<StaffInfoModel> existingList = staffRepository.getAllByOrgIdAndPosition(data.getOrgId(),
+						data.getPosition());
 
-//				if (!CollectionUtils.isEmpty(existingList)) {
-//					boolean isAnyOtherRecordExist = false;
-//					for (StaffInfoModel sModel : existingList) {
-//						if (!sModel.getPrimaryKey().getId().equalsIgnoreCase(data.getId())) {
-//							if (sModel.getPosition().equalsIgnoreCase(data.getPosition())) {
-//								isAnyOtherRecordExist = true;
-//							}
-//						}
-//					}
-//					if (isAnyOtherRecordExist) {
-//						// Return error
-//						String errMsg = "Position exist for given name. Failed to update StaffInfo for OrgId: "
-//								+ data.getOrgId() + ", Position: " + data.getPosition();
-//						logger.error(errMsg);
-//						response.getParams().setErrmsg(errMsg);
-//						response.setResponseCode(HttpStatus.BAD_REQUEST);
-//						return response;
-//					}
-//				}
-//				existingStaffInfo.get().setPosition(data.getPosition());
+				if (!CollectionUtils.isEmpty(existingList)) {
+					boolean isAnyOtherRecordExist = false;
+					for (StaffInfoModel sModel : existingList) {
+						if (!sModel.getPrimaryKey().getId().equalsIgnoreCase(data.getId())) {
+							if (sModel.getPosition().equalsIgnoreCase(data.getPosition())) {
+								isAnyOtherRecordExist = true;
+							}
+						}
+					}
+					if (isAnyOtherRecordExist) {
+						// Return error
+						String errMsg = "Position exist for given name. Failed to update StaffInfo for OrgId: "
+								+ data.getOrgId() + ", Position: " + data.getPosition();
+						logger.error(errMsg);
+						response.getParams().setErrmsg(errMsg);
+						response.setResponseCode(HttpStatus.BAD_REQUEST);
+						return response;
+					}
+				}
+				existingStaffInfo.get().setPosition(data.getPosition());
 			}
 
 			if (data.getTotalPositionsFilled() != null) {
-//				existingStaffInfo.get().setTotalPositionsFilled(data.getTotalPositionsFilled());
+				existingStaffInfo.get().setTotalPositionsFilled(data.getTotalPositionsFilled());
 			}
 			if (data.getTotalPositionsVacant() != null) {
-//				existingStaffInfo.get().setTotalPositionsVacant(data.getTotalPositionsVacant());
+				existingStaffInfo.get().setTotalPositionsVacant(data.getTotalPositionsVacant());
 			}
-//			StaffInfoModel updatedInfo = staffRepository.save(existingStaffInfo.get());
+			StaffInfoModel updatedInfo = staffRepository.save(existingStaffInfo.get());
 
-//			Audit audit = new Audit(data.getOrgId(), Constants.STAFF, "", "", dateFormatter.format(new Date()), userId,
-//					mapper.writeValueAsString(updatedInfo.getStaffInfo()));
-//			audit = auditRepository.save(audit);
+			Audit audit = new Audit(data.getOrgId(), Constants.STAFF, "", "", dateFormatter.format(new Date()), userId,
+					mapper.writeValueAsString(updatedInfo.getStaffInfo()));
+			audit = auditRepository.save(audit);
 
-//			response.put(Constants.DATA, updatedInfo.getStaffInfo());
+			response.put(Constants.DATA, updatedInfo.getStaffInfo());
 			response.getParams().setStatus(Constants.SUCCESSFUL);
 			response.setResponseCode(HttpStatus.OK);
 		} catch (Exception ex) {
@@ -149,20 +149,20 @@ public class StaffServiceImpl implements StaffService {
 	@Override
 	public SBApiResponse getStaffDetails(String orgId) throws Exception {
 		SBApiResponse response = new SBApiResponse(Constants.API_STAFF_POSITION_READ);
-//		List<StaffInfoModel> staffDetails = staffRepository.getStaffDetails(orgId);
+		List<StaffInfoModel> staffDetails = staffRepository.getStaffDetails(orgId);
 
-//		if (CollectionUtils.isEmpty(staffDetails)) {
-//			String errMsg = "No Staff Position found for Org: " + orgId;
-//			logger.info(errMsg);
-//			response.getParams().setErrmsg(errMsg);
-//			response.setResponseCode(HttpStatus.NOT_FOUND);
-//			return response;
-//		}
+		if (CollectionUtils.isEmpty(staffDetails)) {
+			String errMsg = "No Staff Position found for Org: " + orgId;
+			logger.info(errMsg);
+			response.getParams().setErrmsg(errMsg);
+			response.setResponseCode(HttpStatus.BAD_REQUEST);
+			return response;
+		}
 		List<StaffInfo> staffResponse = new ArrayList<>();
-//		for (StaffInfoModel staff : staffDetails) {
-//			StaffInfo info = staff.getStaffInfo();
-//			staffResponse.add(info);
-//		}
+		for (StaffInfoModel staff : staffDetails) {
+			StaffInfo info = staff.getStaffInfo();
+			staffResponse.add(info);
+		}
 
 		response.getParams().setStatus(Constants.SUCCESSFUL);
 		response.put(Constants.RESPONSE, staffResponse);
@@ -174,19 +174,19 @@ public class StaffServiceImpl implements StaffService {
 	public SBApiResponse deleteStaffDetails(String orgId, String staffInfoId) throws Exception {
 		SBApiResponse response = new SBApiResponse(Constants.API_STAFF_POSITION_DELETE);
 		try {
-//			Optional<StaffInfoModel> staffInfo = staffRepository
-//					.findById(new StaffInfoPrimaryKeyModel(orgId, staffInfoId));
-//
-//			if (staffInfo.isPresent()) {
-//				staffRepository.delete(staffInfo.get());
-//				response.getParams().setStatus(Constants.SUCCESSFUL);
-//				response.setResponseCode(HttpStatus.OK);
-//			} else {
-//				String errMsg = "Staff Position doesn't exist for OrgId: " + orgId + ", Position: " + staffInfoId;
-//				logger.error(errMsg);
-//				response.getParams().setErrmsg(errMsg);
-//				response.setResponseCode(HttpStatus.NOT_FOUND);
-//			}
+			Optional<StaffInfoModel> staffInfo = staffRepository
+					.findById(new StaffInfoPrimaryKeyModel(orgId, staffInfoId));
+
+			if (staffInfo.isPresent()) {
+				staffRepository.delete(staffInfo.get());
+				response.getParams().setStatus(Constants.SUCCESSFUL);
+				response.setResponseCode(HttpStatus.OK);
+			} else {
+				String errMsg = "Staff Position doesn't exist for OrgId: " + orgId + ", Position: " + staffInfoId;
+				logger.error(errMsg);
+				response.getParams().setErrmsg(errMsg);
+				response.setResponseCode(HttpStatus.BAD_REQUEST);
+			}
 		} catch (Exception ex) {
 			String errMsg = "Exception occurred while deleting the staff details. Exception: " + ex.getMessage();
 			logger.error(errMsg, ex);
@@ -199,29 +199,29 @@ public class StaffServiceImpl implements StaffService {
 	@Override
 	public SBApiResponse getStaffAudit(String orgId) throws Exception {
 		SBApiResponse response = new SBApiResponse(Constants.API_STAFF_POSITION_HISTORY_READ);
-//		List<Audit> auditDetails = auditRepository.getAudit(orgId, Constants.STAFF);
-//		if (CollectionUtils.isEmpty(auditDetails)) {
-//			String errMsg = "Staff Position History details not found for Org: " + orgId;
-//			logger.info(errMsg);
-//			response.getParams().setErrmsg(errMsg);
-//			response.setResponseCode(HttpStatus.NOT_FOUND);
-//			return response;
-//		}
+		List<Audit> auditDetails = auditRepository.getAudit(orgId, Constants.STAFF);
+		if (CollectionUtils.isEmpty(auditDetails)) {
+			String errMsg = "Staff Position History details not found for Org: " + orgId;
+			logger.info(errMsg);
+			response.getParams().setErrmsg(errMsg);
+			response.setResponseCode(HttpStatus.BAD_REQUEST);
+			return response;
+		}
 		List<StaffAuditInfo> auditResponse = new ArrayList<>();
-//		for (Audit audit : auditDetails) {
-//			StaffAuditInfo sAuditInfo = new StaffAuditInfo();
-//			sAuditInfo.setCreatedBy(audit.getCreatedBy());
-//			sAuditInfo.setCreatedDate(audit.getPrimaryKey().getCreatedDate());
-//			sAuditInfo.setUpdatedBy(audit.getUpdatedBy());
-//			sAuditInfo.setUpdatedDate(audit.getPrimaryKey().getUpdatedDate());
-//			sAuditInfo.setOrgId(audit.getPrimaryKey().getOrgId());
-//			StaffInfo sInfo = mapper.readValue(audit.getTransactionDetails(), StaffInfo.class);
-//			sAuditInfo.setPosition(sInfo.getPosition());
-//			sAuditInfo.setTotalPositionsFilled(sInfo.getTotalPositionsFilled());
-//			sAuditInfo.setTotalPositionsVacant(sInfo.getTotalPositionsVacant());
-//			sAuditInfo.setId(sInfo.getId());
-//			auditResponse.add(sAuditInfo);
-//		}
+		for (Audit audit : auditDetails) {
+			StaffAuditInfo sAuditInfo = new StaffAuditInfo();
+			sAuditInfo.setCreatedBy(audit.getCreatedBy());
+			sAuditInfo.setCreatedDate(audit.getPrimaryKey().getCreatedDate());
+			sAuditInfo.setUpdatedBy(audit.getUpdatedBy());
+			sAuditInfo.setUpdatedDate(audit.getPrimaryKey().getUpdatedDate());
+			sAuditInfo.setOrgId(audit.getPrimaryKey().getOrgId());
+			StaffInfo sInfo = mapper.readValue(audit.getTransactionDetails(), StaffInfo.class);
+			sAuditInfo.setPosition(sInfo.getPosition());
+			sAuditInfo.setTotalPositionsFilled(sInfo.getTotalPositionsFilled());
+			sAuditInfo.setTotalPositionsVacant(sInfo.getTotalPositionsVacant());
+			sAuditInfo.setId(sInfo.getId());
+			auditResponse.add(sAuditInfo);
+		}
 		response.getParams().setStatus(Constants.SUCCESSFUL);
 		response.setResponseCode(HttpStatus.OK);
 		response.put(Constants.DATA, auditResponse);

@@ -11,9 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestTemplate;
-import org.sunbird.common.model.OpenSaberApiResp;
-import org.sunbird.common.model.OpenSaberApiUserProfile;
-import org.sunbird.common.model.SunbirdApiResp;
+import org.sunbird.common.model.*;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.core.exception.ApplicationLogicError;
@@ -71,31 +69,27 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 
 	@Override
 	public Map<String, Object> getUsersDataFromUserIds(String rootOrg, List<String> userIds, List<String> source) {
-
 		Map<String, Object> result = new HashMap<>();
 
+		Map<String, Object> requestBody = new HashMap<>();
 		Map<String, Object> request = new HashMap<>();
 		Map<String, Object> filters = new HashMap<>();
-		Map<String, Object> idKeyword = new HashMap<>();
-		idKeyword.put("or", userIds);
-		filters.put("id.keyword", idKeyword);
-		request.put("limit", userIds.size());
-		request.put("offset", 0);
+		filters.put("userId", userIds);
 		request.put("filters", filters);
+		requestBody.put("request", request);
+		
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		try {
-			String reqBodyData = new ObjectMapper().writeValueAsString(request);
-			HttpEntity<String> requestEnty = new HttpEntity<>(reqBodyData, headers);
-			String serverUrl = props.getSbUrl() + props.getUserSearchEndPoint();
-			OpenSaberApiResp openSaberApiResp = restTemplate.postForObject(serverUrl, requestEnty,
-					OpenSaberApiResp.class);
-			if (openSaberApiResp != null && "OK".equalsIgnoreCase(openSaberApiResp.getResponseCode())
-					&& !CollectionUtils.isEmpty(openSaberApiResp.getResult().getUserProfile()) ) {
-				for (OpenSaberApiUserProfile userProfile : openSaberApiResp.getResult().getUserProfile()) {
-					result.put(userProfile.getUserId(), userProfile);
+			HttpEntity<?> requestEnty = new HttpEntity<>(requestBody, headers);
+			String url = props.getSbUrl() + props.getUserSearchEndPoint();
+			SearchUserApiResp searchUserResult = restTemplate.postForObject(url, requestEnty, SearchUserApiResp.class);
+			logger.info("searchUserResult ---->"+ searchUserResult.toString());
+			if(searchUserResult !=null && "OK".equalsIgnoreCase(searchUserResult.getResponseCode())
+					&& searchUserResult.getResult().getResponse().getCount()>0){
+				for(SearchUserApiContent searchUserApiContent: searchUserResult.getResult().getResponse().getContent()){
+					result.put(searchUserApiContent.getUserId(), searchUserApiContent);
 				}
-				return result;
 			}
 		} catch (Exception e) {
 			throw new ApplicationLogicError("Sunbird Service ERROR: ", e);

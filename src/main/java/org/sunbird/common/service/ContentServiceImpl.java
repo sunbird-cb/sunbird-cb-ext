@@ -85,6 +85,7 @@ public class ContentServiceImpl implements ContentService {
 					if (batchResp != null && batchResp.getCount() > 0) {
 						participantList.addAll(batchResp.getParticipants());
 					}
+					logger.info("Fetch Participants return - " + participantList.size() + " no. of users.");
 				} else {
 					logger.warn("Failed to get participants for BatchId - " + batchId);
 					logger.warn("Error Response -> " + mapper.writeValueAsString(response));

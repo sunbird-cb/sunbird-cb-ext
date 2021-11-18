@@ -2,6 +2,7 @@ package org.sunbird.budget.service;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -32,40 +33,40 @@ public class BudgetServiceImpl implements BudgetService {
 	private SimpleDateFormat dateFormatter = new SimpleDateFormat(Constants.DATE_FORMAT);
 	private Logger logger = LoggerFactory.getLogger(getClass().getName());
 
-//	@Autowired
-//	private BudgetRepository budgetRepository;
+	@Autowired
+	private BudgetRepository budgetRepository;
 
-//	@Autowired
-//	private AuditRepository auditRepository;
+	@Autowired
+	private AuditRepository auditRepository;
 
 	@Override
 	public SBApiResponse submitBudgetDetails(BudgetInfo data, String userId) throws Exception {
 		SBApiResponse response = new SBApiResponse(Constants.API_BUDGET_SCHEME_ADD);
 		try {
 			validateAddBudgetInfo(data);
-//			List<BudgetInfoModel> existingList = budgetRepository.getAllByOrgIdAndBudgetYearAndSchemeName(
-//					data.getOrgId(), data.getBudgetYear(), data.getSchemeName());
-//			if (!CollectionUtils.isEmpty(existingList)) {
-//				String errMsg = "Budget Scheme exist for given name. Failed to create BudgetInfo for OrgId: "
-//						+ data.getOrgId() + ", BudgetYear: " + data.getBudgetYear() + ", SchemeName: "
-//						+ data.getSchemeName();
-//				logger.error(errMsg);
-//				response.getParams().setErr(errMsg);
-//				response.setResponseCode(HttpStatus.BAD_REQUEST);
-//				return response;
-//			}
+			List<BudgetInfoModel> existingList = budgetRepository.getAllByOrgIdAndBudgetYearAndSchemeName(
+					data.getOrgId(), data.getBudgetYear(), data.getSchemeName());
+			if (!CollectionUtils.isEmpty(existingList)) {
+				String errMsg = "Budget Scheme exist for given name. Failed to create BudgetInfo for OrgId: "
+						+ data.getOrgId() + ", BudgetYear: " + data.getBudgetYear() + ", SchemeName: "
+						+ data.getSchemeName();
+				logger.error(errMsg);
+				response.getParams().setErr(errMsg);
+				response.setResponseCode(HttpStatus.BAD_REQUEST);
+				return response;
+			}
 
 			BudgetInfoModel budgetInfoModel = new BudgetInfoModel(
 					new BudgetInfoPrimaryKeyModel(data.getOrgId(), UUID.randomUUID().toString(), data.getBudgetYear()),
 					data.getSchemeName(), data.getSalaryBudgetAllocated(), data.getTrainingBudgetAllocated(),
 					data.getTrainingBudgetUtilization());
-//			budgetInfoModel = budgetRepository.save(budgetInfoModel);
+			budgetInfoModel = budgetRepository.save(budgetInfoModel);
 
 			data.setId(budgetInfoModel.getPrimaryKey().getId());
 
 			Audit audit = new Audit(data.getOrgId(), Constants.BUDGET, dateFormatter.format(new Date()), userId,
 					StringUtils.EMPTY, StringUtils.EMPTY, mapper.writeValueAsString(data));
-//			audit = auditRepository.save(audit);
+			audit = auditRepository.save(audit);
 
 			response.getParams().setStatus(Constants.SUCCESSFUL);
 			response.put(Constants.DATA, budgetInfoModel.getBudgetInfo());
@@ -84,24 +85,24 @@ public class BudgetServiceImpl implements BudgetService {
 	@Override
 	public SBApiResponse getBudgetDetails(String orgId, String budgetYear) throws Exception {
 		SBApiResponse response = new SBApiResponse(Constants.API_BUDGET_SCHEME_READ);
-//		List<BudgetInfoModel> budgetDetails = budgetRepository.getAllByOrgIdAndBudgetYear(orgId, budgetYear);
+		List<Object> budgetResponseList = null;
+		String errMsg = null;
+		if ("all".equalsIgnoreCase(budgetYear)) {
+			budgetResponseList = getAllBudgetYearDetails(orgId);
+			errMsg = "No Budget Year Collection found for Org: " + orgId;
+		} else {
+			budgetResponseList = getSpecificBudgetYearDetails(orgId, budgetYear);
+			errMsg = "No Budget Scheme found for Org: " + orgId + ", BudgetYear: " + budgetYear;
+		}
 
-//		if (CollectionUtils.isEmpty(budgetDetails)) {
-//			String errMsg = "No Budget Scheme found for Org: " + orgId + ", BudgetYear: " + budgetYear;
-//			logger.info(errMsg);
-//			response.getParams().setErrmsg(errMsg);
-//			response.setResponseCode(HttpStatus.NOT_FOUND);
-//			return response;
-//		}
-
-		List<BudgetInfo> budgetResponse = new ArrayList<>();
-//		for (BudgetInfoModel budget : budgetDetails) {
-//			BudgetInfo info = budget.getBudgetInfo();
-//			budgetResponse.add(info);
-//		}
-
+		if (CollectionUtils.isEmpty(budgetResponseList)) {
+			logger.info(errMsg);
+			response.getParams().setErrmsg(errMsg);
+			response.setResponseCode(HttpStatus.BAD_REQUEST);
+			return response;
+		}
 		response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
-		response.put(Constants.RESPONSE, budgetResponse);
+		response.put(Constants.RESPONSE, budgetResponseList);
 		response.setResponseCode(HttpStatus.OK);
 		return response;
 	}
@@ -111,61 +112,61 @@ public class BudgetServiceImpl implements BudgetService {
 		SBApiResponse response = new SBApiResponse(Constants.API_BUDGET_SCHEME_UPDATE);
 		try {
 			validateUpdateBudgetInfo(data);
-//			Optional<BudgetInfoModel> existingBudgetInfo = budgetRepository
-//					.findById(new BudgetInfoPrimaryKeyModel(data.getOrgId(), data.getId(), data.getBudgetYear()));
+			Optional<BudgetInfoModel> existingBudgetInfo = budgetRepository
+					.findById(new BudgetInfoPrimaryKeyModel(data.getOrgId(), data.getId(), data.getBudgetYear()));
 
-//			if (!existingBudgetInfo.isPresent()) {
-//				String errMsg = "Failed to find BudgetScheme for OrgId: " + data.getOrgId() + ", Id: " + data.getId()
-//						+ ", BudgetYear: " + data.getBudgetYear();
-//				logger.error(errMsg);
-//				response.getParams().setErrmsg(errMsg);
-//				response.setResponseCode(HttpStatus.NOT_FOUND);
-//				return response;
-//			}
+			if (!existingBudgetInfo.isPresent()) {
+				String errMsg = "Failed to find BudgetScheme for OrgId: " + data.getOrgId() + ", Id: " + data.getId()
+						+ ", BudgetYear: " + data.getBudgetYear();
+				logger.error(errMsg);
+				response.getParams().setErrmsg(errMsg);
+				response.setResponseCode(HttpStatus.BAD_REQUEST);
+				return response;
+			}
 
 			if (data.getSchemeName() != null) {
 				// Validate for duplicate schemeNames
-//				List<BudgetInfoModel> existingList = budgetRepository.getAllByOrgIdAndBudgetYearAndSchemeName(
-//						data.getOrgId(), data.getBudgetYear(), data.getSchemeName());
-//				if (!CollectionUtils.isEmpty(existingList)) {
-//					boolean isOtherRecordExist = false;
-//					for (BudgetInfoModel bModel : existingList) {
-//						if (!bModel.getPrimaryKey().getId().equalsIgnoreCase(data.getId())) {
-//							if (bModel.getSchemeName().equalsIgnoreCase(data.getSchemeName())) {
-//								isOtherRecordExist = true;
-//							}
-//						}
-//					}
-//					if (isOtherRecordExist) {
-//
-//						String errMsg = "Budget Scheme exist for given name. Failed to update BudgetInfo for OrgId: "
-//								+ data.getOrgId() + ", BudgetYear: " + data.getBudgetYear() + ", SchemeName: "
-//								+ data.getSchemeName();
-//						logger.error(errMsg);
-//						response.getParams().setErr(errMsg);
-//						response.setResponseCode(HttpStatus.BAD_REQUEST);
-//						return response;
-//					}
-//				}
-//				existingBudgetInfo.get().setSchemeName(data.getSchemeName());
+				List<BudgetInfoModel> existingList = budgetRepository.getAllByOrgIdAndBudgetYearAndSchemeName(
+						data.getOrgId(), data.getBudgetYear(), data.getSchemeName());
+				if (!CollectionUtils.isEmpty(existingList)) {
+					boolean isOtherRecordExist = false;
+					for (BudgetInfoModel bModel : existingList) {
+						if (!bModel.getPrimaryKey().getId().equalsIgnoreCase(data.getId())) {
+							if (bModel.getSchemeName().equalsIgnoreCase(data.getSchemeName())) {
+								isOtherRecordExist = true;
+							}
+						}
+					}
+					if (isOtherRecordExist) {
+
+						String errMsg = "Budget Scheme exist for given name. Failed to update BudgetInfo for OrgId: "
+								+ data.getOrgId() + ", BudgetYear: " + data.getBudgetYear() + ", SchemeName: "
+								+ data.getSchemeName();
+						logger.error(errMsg);
+						response.getParams().setErr(errMsg);
+						response.setResponseCode(HttpStatus.BAD_REQUEST);
+						return response;
+					}
+				}
+				existingBudgetInfo.get().setSchemeName(data.getSchemeName());
 			}
 
 			if (data.getSalaryBudgetAllocated() != null) {
-//				existingBudgetInfo.get().setSalaryBudgetAllocated(data.getSalaryBudgetAllocated());
+				existingBudgetInfo.get().setSalaryBudgetAllocated(data.getSalaryBudgetAllocated());
 			}
 			if (data.getTrainingBudgetAllocated() != null) {
-//				existingBudgetInfo.get().setTrainingBudgetAllocated(data.getTrainingBudgetAllocated());
+				existingBudgetInfo.get().setTrainingBudgetAllocated(data.getTrainingBudgetAllocated());
 			}
 			if (data.getTrainingBudgetUtilization() != null) {
-//				existingBudgetInfo.get().setTrainingBudgetUtilization(data.getTrainingBudgetUtilization());
+				existingBudgetInfo.get().setTrainingBudgetUtilization(data.getTrainingBudgetUtilization());
 			}
-//			BudgetInfoModel updatedInfo = budgetRepository.save(existingBudgetInfo.get());
+			BudgetInfoModel updatedInfo = budgetRepository.save(existingBudgetInfo.get());
 
-//			Audit audit = new Audit(data.getOrgId(), Constants.BUDGET, "", "", dateFormatter.format(new Date()), userId,
-//					mapper.writeValueAsString(updatedInfo.getBudgetInfo()));
-//			audit = auditRepository.save(audit);
+			Audit audit = new Audit(data.getOrgId(), Constants.BUDGET, "", "", dateFormatter.format(new Date()), userId,
+					mapper.writeValueAsString(updatedInfo.getBudgetInfo()));
+			audit = auditRepository.save(audit);
 
-//			response.put(Constants.DATA, updatedInfo.getBudgetInfo());
+			response.put(Constants.DATA, updatedInfo.getBudgetInfo());
 			response.getParams().setStatus(Constants.SUCCESSFUL);
 			response.setResponseCode(HttpStatus.OK);
 		} catch (Exception ex) {
@@ -181,19 +182,19 @@ public class BudgetServiceImpl implements BudgetService {
 	public SBApiResponse deleteBudgetDetails(String orgId, String id, String budgetYear) throws Exception {
 		SBApiResponse response = new SBApiResponse(Constants.API_BUDGET_SCHEME_DELETE);
 		try {
-//			Optional<BudgetInfoModel> budgetInfo = budgetRepository
-//					.findById(new BudgetInfoPrimaryKeyModel(orgId, id, budgetYear));
-//			if (budgetInfo.isPresent()) {
-//				budgetRepository.delete(budgetInfo.get());
-//				response.getParams().setStatus(Constants.SUCCESSFUL);
-//				response.setResponseCode(HttpStatus.OK);
-//			} else {
-//				String errMsg = "Failed to find BudgetScheme for OrgId: " + orgId + ", Id: " + id + ", BudgetYear: "
-//						+ budgetYear;
-//				logger.error(errMsg);
-//				response.getParams().setErrmsg(errMsg);
-//				response.setResponseCode(HttpStatus.NOT_FOUND);
-//			}
+			Optional<BudgetInfoModel> budgetInfo = budgetRepository
+					.findById(new BudgetInfoPrimaryKeyModel(orgId, id, budgetYear));
+			if (budgetInfo.isPresent()) {
+				budgetRepository.delete(budgetInfo.get());
+				response.getParams().setStatus(Constants.SUCCESSFUL);
+				response.setResponseCode(HttpStatus.OK);
+			} else {
+				String errMsg = "Failed to find BudgetScheme for OrgId: " + orgId + ", Id: " + id + ", BudgetYear: "
+						+ budgetYear;
+				logger.error(errMsg);
+				response.getParams().setErrmsg(errMsg);
+				response.setResponseCode(HttpStatus.BAD_REQUEST);
+			}
 		} catch (Exception ex) {
 			String errMsg = "Exception occurred while deleting the Budget details. Exception: " + ex.getMessage();
 			logger.error(errMsg, ex);
@@ -206,32 +207,32 @@ public class BudgetServiceImpl implements BudgetService {
 	@Override
 	public SBApiResponse getBudgetAudit(String orgId) throws Exception {
 		SBApiResponse response = new SBApiResponse(Constants.API_BUDGET_SCHEME_HISTORY_READ);
-//		List<Audit> auditDetails = auditRepository.getAudit(orgId, Constants.BUDGET);
-//		if (CollectionUtils.isEmpty(auditDetails)) {
-//			String errMsg = "Budget Scheme History details not found for Org: " + orgId;
-//			logger.info(errMsg);
-//			response.getParams().setErrmsg(errMsg);
-//			response.setResponseCode(HttpStatus.NOT_FOUND);
-//			return response;
-//		}
+		List<Audit> auditDetails = auditRepository.getAudit(orgId, Constants.BUDGET);
+		if (CollectionUtils.isEmpty(auditDetails)) {
+			String errMsg = "Budget Scheme History details not found for Org: " + orgId;
+			logger.info(errMsg);
+			response.getParams().setErrmsg(errMsg);
+			response.setResponseCode(HttpStatus.BAD_REQUEST);
+			return response;
+		}
 
 		List<BudgetAuditInfo> auditResponse = new ArrayList<>();
-//		for (Audit audit : auditDetails) {
-//			BudgetAuditInfo bAuditInfo = new BudgetAuditInfo();
-//			bAuditInfo.setCreatedBy(audit.getCreatedBy());
-//			bAuditInfo.setCreatedDate(audit.getPrimaryKey().getCreatedDate());
-//			bAuditInfo.setUpdatedBy(audit.getUpdatedBy());
-//			bAuditInfo.setUpdatedDate(audit.getPrimaryKey().getUpdatedDate());
-//			BudgetInfo bInfo = mapper.readValue(audit.getTransactionDetails(), BudgetInfo.class);
-//			bAuditInfo.setOrgId(bInfo.getOrgId());
-//			bAuditInfo.setId(bInfo.getId());
-//			bAuditInfo.setBudgetYear(bInfo.getBudgetYear());
-//			bAuditInfo.setSchemeName(bInfo.getSchemeName());
-//			bAuditInfo.setSalaryBudgetAllocated(bInfo.getSalaryBudgetAllocated());
-//			bAuditInfo.setTrainingBudgetAllocated(bInfo.getTrainingBudgetAllocated());
-//			bAuditInfo.setTrainingBudgetUtilization(bInfo.getTrainingBudgetUtilization());
-//			auditResponse.add(bAuditInfo);
-//		}
+		for (Audit audit : auditDetails) {
+			BudgetAuditInfo bAuditInfo = new BudgetAuditInfo();
+			bAuditInfo.setCreatedBy(audit.getCreatedBy());
+			bAuditInfo.setCreatedDate(audit.getPrimaryKey().getCreatedDate());
+			bAuditInfo.setUpdatedBy(audit.getUpdatedBy());
+			bAuditInfo.setUpdatedDate(audit.getPrimaryKey().getUpdatedDate());
+			BudgetInfo bInfo = mapper.readValue(audit.getTransactionDetails(), BudgetInfo.class);
+			bAuditInfo.setOrgId(bInfo.getOrgId());
+			bAuditInfo.setId(bInfo.getId());
+			bAuditInfo.setBudgetYear(bInfo.getBudgetYear());
+			bAuditInfo.setSchemeName(bInfo.getSchemeName());
+			bAuditInfo.setSalaryBudgetAllocated(bInfo.getSalaryBudgetAllocated());
+			bAuditInfo.setTrainingBudgetAllocated(bInfo.getTrainingBudgetAllocated());
+			bAuditInfo.setTrainingBudgetUtilization(bInfo.getTrainingBudgetUtilization());
+			auditResponse.add(bAuditInfo);
+		}
 		response.getParams().setStatus(Constants.SUCCESSFUL);
 		response.setResponseCode(HttpStatus.OK);
 		response.put(Constants.DATA, auditResponse);
@@ -332,5 +333,31 @@ public class BudgetServiceImpl implements BudgetService {
 		if (!CollectionUtils.isEmpty(errObjList)) {
 			throw new Exception("One or more required fields are empty. Empty fields " + errObjList.toString());
 		}
+	}
+	
+	private List<Object> getAllBudgetYearDetails(String orgId) {
+		List<BudgetInfoModel> budgetDetails = budgetRepository.getDistinctBudgetYear();
+		if (CollectionUtils.isEmpty(budgetDetails)) {
+			return Collections.emptyList();
+		}
+		List<Object> budgetResponse = new ArrayList<>();
+		for (BudgetInfoModel budget : budgetDetails) {
+			if (budget.getPrimaryKey().getOrgId().equals(orgId)) {
+				budgetResponse.add(budget.getPrimaryKey().getBudgetYear());
+			}
+		}
+		return budgetResponse;
+	}
+	
+	private List<Object> getSpecificBudgetYearDetails(String orgId, String budgetYear) {
+		List<BudgetInfoModel> budgetDetails = budgetRepository.getAllByOrgIdAndBudgetYear(orgId, budgetYear);
+		if (CollectionUtils.isEmpty(budgetDetails)) {
+			return Collections.emptyList();
+		}
+		List<Object> budgetResponse = new ArrayList<>();
+		for (BudgetInfoModel budget : budgetDetails) {
+			budgetResponse.add(budget.getBudgetInfo());
+		}
+		return budgetResponse;
 	}
 }
