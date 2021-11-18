@@ -236,10 +236,10 @@ public class StaffServiceImpl implements StaffService {
 		if (StringUtils.isEmpty(staffInfo.getPosition())) {
 			errObjList.add(Constants.POSITION);
 		}
-		if (staffInfo.getTotalPositionsFilled() == null || staffInfo.getTotalPositionsFilled() <= 0) {
+		if (staffInfo.getTotalPositionsFilled() == null || staffInfo.getTotalPositionsFilled() < 0) {
 			errObjList.add(Constants.TOTAL_POSITION_FILLED);
 		}
-		if (staffInfo.getTotalPositionsVacant() == null || staffInfo.getTotalPositionsVacant() <= 0) {
+		if (staffInfo.getTotalPositionsVacant() == null || staffInfo.getTotalPositionsVacant() < 0) {
 			errObjList.add(Constants.TOTAL_POSITION_VACANT);
 		}
 
