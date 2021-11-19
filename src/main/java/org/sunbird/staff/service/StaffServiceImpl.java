@@ -236,10 +236,10 @@ public class StaffServiceImpl implements StaffService {
 		if (StringUtils.isEmpty(staffInfo.getPosition())) {
 			errObjList.add(Constants.POSITION);
 		}
-		if (staffInfo.getTotalPositionsFilled() == null || staffInfo.getTotalPositionsFilled() <= 0) {
+		if (staffInfo.getTotalPositionsFilled() == null || staffInfo.getTotalPositionsFilled() < 0) {
 			errObjList.add(Constants.TOTAL_POSITION_FILLED);
 		}
-		if (staffInfo.getTotalPositionsVacant() == null || staffInfo.getTotalPositionsVacant() <= 0) {
+		if (staffInfo.getTotalPositionsVacant() == null || staffInfo.getTotalPositionsVacant() < 0) {
 			errObjList.add(Constants.TOTAL_POSITION_VACANT);
 		}
 
@@ -266,7 +266,7 @@ public class StaffServiceImpl implements StaffService {
 			position = true;
 		}
 		if (staffInfo.getTotalPositionsFilled() != null) {
-			if (staffInfo.getTotalPositionsFilled() <= 0) {
+			if (staffInfo.getTotalPositionsFilled() < 0) {
 				errObjList.add(Constants.TOTAL_POSITION_FILLED);
 			}
 		} else {
@@ -275,7 +275,7 @@ public class StaffServiceImpl implements StaffService {
 		}
 
 		if (staffInfo.getTotalPositionsVacant() != null) {
-			if (staffInfo.getTotalPositionsVacant() <= 0) {
+			if (staffInfo.getTotalPositionsVacant() < 0) {
 				errObjList.add(Constants.TOTAL_POSITION_VACANT);
 			}
 		} else {
