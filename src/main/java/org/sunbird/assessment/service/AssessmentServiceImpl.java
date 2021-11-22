@@ -7,14 +7,26 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.apache.htrace.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
+import org.springframework.web.client.RestTemplate;
 import org.sunbird.assessment.dto.AssessmentSubmissionDTO;
+import org.sunbird.assessment.model.QuestionSet;
+import org.sunbird.assessment.model.Questions;
 import org.sunbird.assessment.repo.AssessmentRepository;
+import org.sunbird.cache.CacheManager;
 import org.sunbird.common.model.SunbirdApiResp;
 import org.sunbird.common.service.ContentService;
 import org.sunbird.common.service.UserUtilityService;
+import org.sunbird.common.util.CbExtServerProperties;
+import org.sunbird.common.util.Constants;
 import org.sunbird.core.exception.ApplicationLogicError;
 import org.sunbird.core.exception.BadRequestException;
 import org.sunbird.core.logger.CbExtLogger;
@@ -26,6 +38,8 @@ public class AssessmentServiceImpl implements AssessmentService {
 	public static final String CORRECT = "correct";
 	public static final String BLANK = "blank";
 	public static final String TAKEN_ON = "takenOn";
+	private static final String ASSESSMENT_QNS_ANS_SET = "assessmentQnsSet";
+	private static final String ASSESSMENT_QNS_SET = "assessmentQnsAnsSet";
 	private CbExtLogger logger = new CbExtLogger(getClass().getName());
 
 	@Autowired
@@ -39,6 +53,15 @@ public class AssessmentServiceImpl implements AssessmentService {
 
 	@Autowired
 	AssessmentUtilService assessUtilServ;
+
+	@Autowired
+	RestTemplate restTemplate;
+
+	@Autowired
+	private CbExtServerProperties extServerProperties;
+
+	@Autowired
+	CacheManager cacheManager;
 
 	@Override
 	public Map<String, Object> submitAssessment(String rootOrg, AssessmentSubmissionDTO data, String userId)
@@ -200,6 +223,60 @@ public class AssessmentServiceImpl implements AssessmentService {
 			assessments.add(assessmentData);
 		}
 		return assessments;
+	}
+
+	@Override
+	public Map<String, Object> getAssessmentContent(String courseId, String assessmentContentId) {
+		Map<String, Object> result = new HashMap<>();
+		try {
+			HttpHeaders headers = new HttpHeaders();
+			HttpEntity<Object> entity = new HttpEntity<>(headers);
+
+			Object assessmentQuestionSet = cacheManager.getCache(ASSESSMENT_QNS_SET + "_" + assessmentContentId);
+
+			if (assessmentQuestionSet == null) {
+				String serviceURL = "https://igot-dev.in/api/course/v1/hierarchy/{courseId}?hierarchyType={hierarchyType}";
+				// String serviceURL = extServerProperties.getKmBaseHost()
+				// + extServerProperties.getContentHierarchyDetailEndPoint();
+				Map<String, String> params = new HashMap<>();
+				params.put("courseId", courseId);
+				params.put("hierarchyType", "detail");
+				ResponseEntity<Map> response = restTemplate.exchange(serviceURL, HttpMethod.GET, entity, Map.class,
+						params);
+
+				if (!ObjectUtils.isEmpty(response.getBody())) {
+					// get course content
+					List<Map<String, Object>> children = (List<Map<String, Object>>) ((Map<String, Object>) ((Map<String, Object>) response
+							.getBody().get(RESULT)).get("content")).get("children");
+					for (Map<String, Object> child : children) {
+						// get assessment content with id
+						if (((String) child.get("identifier")).equals(assessmentContentId)
+								&& ((String) child.get("artifactUrl")).endsWith(".json")) {
+							ResponseEntity<Map> assessmentContent = restTemplate
+									.exchange((String) child.get("artifactUrl"), HttpMethod.GET, entity, Map.class);
+
+							QuestionSet assessmentQnsSet = assessUtilServ
+									.removeAssessmentAnsKey(assessmentContent.getBody());
+							result.put(Constants.STATUS, Constants.SUCCESSFUL);
+							result.put("questionSet", assessmentQnsSet);
+							// cache the response
+							cacheManager.putCache(ASSESSMENT_QNS_ANS_SET + "_" + assessmentContentId,
+									assessmentContent.getBody());
+							cacheManager.putCache(ASSESSMENT_QNS_SET + "_" + assessmentContentId, assessmentQnsSet);
+						}
+					}
+				}
+			} else {
+				result.put(Constants.STATUS, Constants.SUCCESSFUL);
+				result.put("questionSet", assessmentQuestionSet);
+			}
+
+			return result;
+		} catch (Exception e) {
+			logger.error(e);
+		}
+		result.put(Constants.STATUS, Constants.FAILED);
+		return result;
 	}
 
 }

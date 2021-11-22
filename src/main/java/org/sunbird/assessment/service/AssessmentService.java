@@ -34,4 +34,13 @@ public interface AssessmentService {
 	 */
 	Map<String, Object> submitAssessmentByIframe(String rootOrg, Map<String, Object> request) throws Exception;
 
+	/**
+	 * Get assement question set
+	 * 
+	 * @param courseId
+	 * @param assessmentContentId
+	 * @return
+	 */
+	public Map<String, Object> getAssessmentContent(String courseId, String assessmentContentId);
+
 }

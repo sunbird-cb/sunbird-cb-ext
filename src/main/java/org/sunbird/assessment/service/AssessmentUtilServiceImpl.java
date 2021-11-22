@@ -1,13 +1,18 @@
 package org.sunbird.assessment.service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.htrace.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
+import org.sunbird.assessment.model.QuestionSet;
+import org.sunbird.assessment.model.Questions;
 import org.sunbird.core.exception.ApplicationLogicError;
 
 @Service
@@ -54,8 +59,8 @@ public class AssessmentUtilServiceImpl implements AssessmentUtilService {
 							correctOption.add(options.get(OPTION_ID).toString());
 					}
 					break;
-					default:
-						break;
+				default:
+					break;
 				}
 			} else {
 				for (Map<String, Object> options : (List<Map<String, Object>>) question.get(OPTIONS)) {
@@ -97,15 +102,15 @@ public class AssessmentUtilServiceImpl implements AssessmentUtilService {
 										+ options.get(RESPONSE).toString().toLowerCase());
 						}
 						break;
-						case MCQ_SCA:
+					case MCQ_SCA:
 					case MCQ_MCA:
 						for (Map<String, Object> options : (List<Map<String, Object>>) question.get(OPTIONS)) {
 							if ((boolean) options.get(USER_SELECTED))
 								marked.add(options.get(OPTION_ID).toString());
 						}
 						break;
-						default:
-							break;
+					default:
+						break;
 					}
 				} else {
 					for (Map<String, Object> options : (List<Map<String, Object>>) question.get(OPTIONS)) {
@@ -212,5 +217,26 @@ public class AssessmentUtilServiceImpl implements AssessmentUtilService {
 	@Override
 	public Map<String, Object> getAnswerKeyForAssessmentAuthoringPreview(Map<String, Object> contentMeta) {
 		return null;
+	}
+
+	/**
+	 * To remove answers from the assessment question sets
+	 * 
+	 * @param assessmentContent
+	 *            Map<String, Object>
+	 * @return QuestionSet
+	 */
+	@Override
+	public QuestionSet removeAssessmentAnsKey(Map<String, Object> assessmentContent) {
+		QuestionSet questionSet = new ObjectMapper().convertValue(assessmentContent, QuestionSet.class);
+		List<String> qnsTypes = Arrays.asList(MCQ_MCA, MCQ_MCA, "fitb", "mtf");
+		for (Questions question : questionSet.getQuestions()) {
+			if (qnsTypes.contains(question.getQuestionType()) && !ObjectUtils.isEmpty(question.getOptions())) {
+				for (Map<String, Object> option : question.getOptions()) {
+					option.remove(IS_CORRECT);
+				}
+			}
+		}
+		return questionSet;
 	}
 }
