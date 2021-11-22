@@ -251,16 +251,16 @@ public class BudgetServiceImpl implements BudgetService {
 			errObjList.add(Constants.SCHEME_NAME);
 		} else {
 			if ("all".equalsIgnoreCase(budgetInfo.getSchemeName())) {
-				if (budgetInfo.getSalaryBudgetAllocated() == null || budgetInfo.getSalaryBudgetAllocated() <= 0) {
+				if (budgetInfo.getSalaryBudgetAllocated() == null || budgetInfo.getSalaryBudgetAllocated() < 0) {
 					errObjList.add(Constants.SALARY_BUDGET_ALLOCATED);
 				}
 			}
 		}
 
-		if (budgetInfo.getTrainingBudgetAllocated() == null || budgetInfo.getTrainingBudgetAllocated() <= 0) {
+		if (budgetInfo.getTrainingBudgetAllocated() == null || budgetInfo.getTrainingBudgetAllocated() < 0) {
 			errObjList.add(Constants.TRAINING_BUDGET_ALLOCATED);
 		}
-		if (budgetInfo.getTrainingBudgetUtilization() == null || budgetInfo.getTrainingBudgetUtilization() <= 0) {
+		if (budgetInfo.getTrainingBudgetUtilization() == null || budgetInfo.getTrainingBudgetUtilization() < 0) {
 			errObjList.add(Constants.TRAINING_BUDGET_UTILIZATION);
 		}
 
@@ -292,7 +292,7 @@ public class BudgetServiceImpl implements BudgetService {
 		}
 
 		if (budgetInfo.getSalaryBudgetAllocated() != null) {
-			if (budgetInfo.getSalaryBudgetAllocated() <= 0) {
+			if (budgetInfo.getSalaryBudgetAllocated() < 0) {
 				errObjList.add(Constants.SALARY_BUDGET_ALLOCATED);
 			}
 		} else {
@@ -300,7 +300,7 @@ public class BudgetServiceImpl implements BudgetService {
 			sBudgetAllocated = true;
 		}
 		if (budgetInfo.getTrainingBudgetAllocated() != null) {
-			if (budgetInfo.getTrainingBudgetAllocated() <= 0) {
+			if (budgetInfo.getTrainingBudgetAllocated() < 0) {
 				errObjList.add(Constants.TRAINING_BUDGET_ALLOCATED);
 			}
 		} else {
@@ -309,7 +309,7 @@ public class BudgetServiceImpl implements BudgetService {
 		}
 
 		if (budgetInfo.getTrainingBudgetUtilization() != null) {
-			if (budgetInfo.getTrainingBudgetUtilization() <= 0) {
+			if (budgetInfo.getTrainingBudgetUtilization() < 0) {
 				errObjList.add(Constants.TRAINING_BUDGET_UTILIZATION);
 			}
 		} else {
