@@ -2,6 +2,9 @@ package org.sunbird.assessment.model;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class QuestionSet {
 
 	private int timeLimit;
