@@ -13,5 +13,5 @@ public interface AssessmentUtilService {
 
 	Map<String, Object> getAnswerKeyForAssessmentAuthoringPreview(Map<String, Object> contentMeta);
 
-	QuestionSet removeAssessmentAnsKey(Map<String, Object> assessmentContent);
+	QuestionSet removeAssessmentAnsKey(Object assessmentContent);
 }

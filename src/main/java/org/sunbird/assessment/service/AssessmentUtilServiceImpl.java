@@ -24,6 +24,8 @@ public class AssessmentUtilServiceImpl implements AssessmentUtilService {
 	public static final String OPTION_ID = "optionId";
 	public static final String MCQ_SCA = "mcq-sca";
 	public static final String MCQ_MCA = "mcq-mca";
+	public static final String FITB = "fitb";
+	public static final String MTF = "mtf";
 	public static final String QUESTION_ID = "questionId";
 	public static final String RESPONSE = "response";
 	public static final String USER_SELECTED = "userSelected";
@@ -223,13 +225,13 @@ public class AssessmentUtilServiceImpl implements AssessmentUtilService {
 	 * To remove answers from the assessment question sets
 	 * 
 	 * @param assessmentContent
-	 *            Map<String, Object>
+	 *            Object
 	 * @return QuestionSet
 	 */
 	@Override
-	public QuestionSet removeAssessmentAnsKey(Map<String, Object> assessmentContent) {
+	public QuestionSet removeAssessmentAnsKey(Object assessmentContent) {
 		QuestionSet questionSet = new ObjectMapper().convertValue(assessmentContent, QuestionSet.class);
-		List<String> qnsTypes = Arrays.asList(MCQ_MCA, MCQ_MCA, "fitb", "mtf");
+		List<String> qnsTypes = Arrays.asList(MCQ_MCA, MCQ_SCA, FITB, MTF);
 		for (Questions question : questionSet.getQuestions()) {
 			if (qnsTypes.contains(question.getQuestionType()) && !ObjectUtils.isEmpty(question.getOptions())) {
 				for (Map<String, Object> option : question.getOptions()) {

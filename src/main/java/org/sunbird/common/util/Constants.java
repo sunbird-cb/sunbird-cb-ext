@@ -97,7 +97,7 @@ public class Constants {
 	public static final String API_BUDGET_SCHEME_HISTORY_READ = "api.budget.scheme.history.read";
 	public static final String API_FILE_UPLOAD = "api.file.upload";
 	public static final String API_FILE_DELETE = "api.file.delete";
-	
+
 	public static final String ID = "id";
 	public static final String ORG_ID = "orgId";
 	public static final String POSITION = "position";
@@ -106,11 +106,16 @@ public class Constants {
 	public static final String NAME = "name";
 	public static final String URL = "url";
 	public static final String DELETED = "deleted";
-	
+
 	public static final String BUDGET = "budget";
 	public static final String BUDGET_YEAR = "budgetYear";
 	public static final String SCHEME_NAME = "schemeName";
 	public static final String SALARY_BUDGET_ALLOCATED = "salaryBudgetAllocated";
 	public static final String TRAINING_BUDGET_ALLOCATED = "trainingBudgetAllocated";
 	public static final String TRAINING_BUDGET_UTILIZATION = "trainingBudgetUtilization";
+
+	// assessment
+	public static final String QUESTION_SET = "questionSet";
+	public static final String ASSESSMENT_QNS_ANS_SET = "assessmentQnsAnsSet_";
+	public static final String ASSESSMENT_QNS_SET = "assessmentQnsSet_";
 }
