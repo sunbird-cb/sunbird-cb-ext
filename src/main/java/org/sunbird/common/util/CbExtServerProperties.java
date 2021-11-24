@@ -168,6 +168,12 @@ public class CbExtServerProperties {
 	@Value("${azure.storage.key}")
 	private String azureStorageKey;
 
+	@Value("${redis.host.name}")
+	private String redisHostName;
+
+	@Value("${redis.port}")
+	private String redisPort;
+
 	public String getContentHost() {
 		return contentHost;
 	}
@@ -439,7 +445,21 @@ public class CbExtServerProperties {
 	public void setCourseBatchCreateEndpoint(String courseBatchCreateEndpoint) {
 		this.courseBatchCreateEndpoint = courseBatchCreateEndpoint;
 	}
+	public String getRedisPort() {
+		return redisPort;
+	}
 
+	public void setRedisPort(String redisPort) {
+		this.redisPort = redisPort;
+	}
+
+	public String getRedisHostName() {
+		return redisHostName;
+	}
+
+	public void setRedisHostName(String redisHostName) {
+		this.redisHostName = redisHostName;
+	}
 	@Override
 	public String toString() {
 		StringBuilder str = new StringBuilder("SB-CB-Ext Server Properties: ");
