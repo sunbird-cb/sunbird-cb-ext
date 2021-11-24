@@ -10,14 +10,23 @@ import java.util.TreeMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 import org.sunbird.assessment.dto.AssessmentSubmissionDTO;
+import org.sunbird.assessment.model.QuestionSet;
 import org.sunbird.assessment.repo.AssessmentRepository;
+import org.sunbird.cache.CacheManager;
+import org.sunbird.common.model.SunbirdApiHierarchyResultContent;
 import org.sunbird.common.model.SunbirdApiResp;
 import org.sunbird.common.service.ContentService;
+import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
 import org.sunbird.common.service.UserUtilityService;
+import org.sunbird.common.util.CbExtServerProperties;
+import org.sunbird.common.util.Constants;
 import org.sunbird.core.exception.ApplicationLogicError;
 import org.sunbird.core.exception.BadRequestException;
 import org.sunbird.core.logger.CbExtLogger;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class AssessmentServiceImpl implements AssessmentService {
@@ -26,7 +35,9 @@ public class AssessmentServiceImpl implements AssessmentService {
 	public static final String CORRECT = "correct";
 	public static final String BLANK = "blank";
 	public static final String TAKEN_ON = "takenOn";
+
 	private CbExtLogger logger = new CbExtLogger(getClass().getName());
+	private ObjectMapper mapper = new ObjectMapper();
 
 	@Autowired
 	AssessmentRepository repository;
@@ -39,6 +50,15 @@ public class AssessmentServiceImpl implements AssessmentService {
 
 	@Autowired
 	AssessmentUtilService assessUtilServ;
+
+	@Autowired
+	OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
+
+	@Autowired
+	CbExtServerProperties extServerProperties;
+
+	@Autowired
+	CacheManager cacheManager;
 
 	@Override
 	public Map<String, Object> submitAssessment(String rootOrg, AssessmentSubmissionDTO data, String userId)
@@ -200,6 +220,56 @@ public class AssessmentServiceImpl implements AssessmentService {
 			assessments.add(assessmentData);
 		}
 		return assessments;
+	}
+
+	@Override
+	public Map<String, Object> getAssessmentContent(String courseId, String assessmentContentId) {
+		Map<String, Object> result = new HashMap<>();
+		try {
+			Object assessmentQuestionSet = cacheManager.getCache(Constants.ASSESSMENT_QNS_SET + assessmentContentId);
+
+			if (ObjectUtils.isEmpty(assessmentQuestionSet)) {
+				String serviceURL = extServerProperties.getKmBaseHost()
+						+ extServerProperties.getContentHierarchyDetailEndPoint();
+				serviceURL = (serviceURL.replace("{courseId}", courseId)).replace("{hierarchyType}", "detail");
+				SunbirdApiResp response = mapper.convertValue(
+						outboundRequestHandlerService.fetchUsingGetWithHeaders(serviceURL, new HashMap<>()),
+						SunbirdApiResp.class);
+
+				if (response.getResponseCode().equalsIgnoreCase("Ok")) {
+					// get course content
+					List<SunbirdApiHierarchyResultContent> children = response.getResult().getContent().getChildren();
+					for (SunbirdApiHierarchyResultContent child : children) {
+						// get assessment content with id
+						if (child.getIdentifier().equals(assessmentContentId)
+								&& child.getArtifactUrl().endsWith(".json")) {
+							// read assessment json file
+							QuestionSet assessmentContent = mapper.convertValue(outboundRequestHandlerService
+									.fetchUsingGetWithHeaders(child.getArtifactUrl(), new HashMap<>()),
+									QuestionSet.class);
+
+							QuestionSet assessmentQnsSet = assessUtilServ.removeAssessmentAnsKey(assessmentContent);
+							result.put(Constants.STATUS, Constants.SUCCESSFUL);
+							result.put(Constants.QUESTION_SET, assessmentQnsSet);
+							// cache the response
+							cacheManager.putCache(Constants.ASSESSMENT_QNS_ANS_SET + assessmentContentId,
+									assessmentContent);
+							cacheManager.putCache(Constants.ASSESSMENT_QNS_SET + assessmentContentId, assessmentQnsSet);
+						}
+					}
+				}
+
+			} else {
+				result.put(Constants.STATUS, Constants.SUCCESSFUL);
+				result.put(Constants.QUESTION_SET, assessmentQuestionSet);
+			}
+
+			return result;
+		} catch (Exception e) {
+			logger.error(e);
+		}
+		result.put(Constants.STATUS, Constants.FAILED);
+		return result;
 	}
 
 }

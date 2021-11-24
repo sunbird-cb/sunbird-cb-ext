@@ -2,6 +2,9 @@ package org.sunbird.common.model;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class SunbirdApiHierarchyResultContent {
 	private String parent;
 	private String identifier;
