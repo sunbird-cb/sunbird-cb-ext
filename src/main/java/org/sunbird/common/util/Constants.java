@@ -118,4 +118,10 @@ public class Constants {
 	public static final String QUESTION_SET = "questionSet";
 	public static final String ASSESSMENT_QNS_ANS_SET = "assessmentQnsAnsSet_";
 	public static final String ASSESSMENT_QNS_SET = "assessmentQnsSet_";
+
+	//Redis
+	public static final String API_REDIS_DELETE = "api.redis.delete";
+	public static final String API_REDIS_GET_KEYS = "api.redis.get.keys";
+	public static final String API_REDIS_GET_KEYS_VALUE_SET= "api.redis.get.keys&values";
+	public static final String REDIS_COMMON_KEY="CB_EXT_";
 }
