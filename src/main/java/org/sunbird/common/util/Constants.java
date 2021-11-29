@@ -119,9 +119,24 @@ public class Constants {
 	public static final String ASSESSMENT_QNS_ANS_SET = "assessmentQnsAnsSet_";
 	public static final String ASSESSMENT_QNS_SET = "assessmentQnsSet_";
 
-	//Redis
+	// Redis
 	public static final String API_REDIS_DELETE = "api.redis.delete";
 	public static final String API_REDIS_GET_KEYS = "api.redis.get.keys";
-	public static final String API_REDIS_GET_KEYS_VALUE_SET= "api.redis.get.keys&values";
-	public static final String REDIS_COMMON_KEY="CB_EXT_";
+	public static final String API_REDIS_GET_KEYS_VALUE_SET = "api.redis.get.keys&values";
+	public static final String REDIS_COMMON_KEY = "CB_EXT_";
+
+	public static final String COMPETENCY_CACHE_NAME = "competency";
+	public static final String COMPETENCY_CACHE_NAME_BY_AREA = "competencyByArea";
+	public static final String COMPETENCY_CACHE_NAME_BY_TYPE = "competencyByType";
+	public static final String PROVIDER_CACHE_NAME = "provider";
+	public static final String COMPETENCY_FACET_NAME = "competencies_v3.name";
+
+	public static final String IS_TENANT = "isTenant";
+	public static final String CHANNEL = "channel";
+	public static final String USER_TOKEN = "x-authenticated-user-token";
+	public static final String AUTHORIZATION = "authorization";
+	public static final String FACETS = "facets";
+	public static final String PRIMARY_CATEGORY = "primaryCategory";
+	public static final String LIMIT = "limit";
+	public static final String REQUEST = "request";
 }
