@@ -5,7 +5,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 import org.sunbird.core.logger.CbExtLogger;
 
-import java.util.Set;
+import java.util.*;
 
 @Component
 public class RedisCache {
@@ -65,4 +65,57 @@ public class RedisCache {
         }
     }
 
+    public boolean deleteCache() {
+        try {
+            String keyPattern = "*";
+            Set<String> keys = redisTemplate.keys(keyPattern);
+            if(!keys.isEmpty()) {
+                for (String key : keys) {
+
+                    redisTemplate.delete(key);
+                }
+                logger.info("All Keys in Redis Cache is Deleted");
+                return true;
+            }else {
+                return false;
+            }
+        } catch (Exception e) {
+            logger.error(e);
+            return false;
+        }
+    }
+
+    public Set<String> getAllKeys() {
+        Set<String> keys = null;
+        try{
+            String keyPattern = "*";
+             keys = redisTemplate.keys(keyPattern);
+
+        } catch (Exception e){
+            logger.error(e);
+            return null;
+        }
+        return keys;
+    }
+
+    public List<Map<String, Object>> getAllKeysAndValues() {
+        List<Map<String, Object>> result = null;
+        try{
+            String keyPattern = "*";
+            Map<String, Object> res = new HashMap<>();
+            Set<String> keys = redisTemplate.keys(keyPattern);
+            if(!keys.isEmpty()) {
+                for (String key : keys) {
+                    Object entries;
+                    entries = redisTemplate.opsForValue().get(key);
+                    res.put(key, entries);
+                }
+                result.add(res);
+            }
+            } catch (Exception e){
+            logger.error(e);
+            return null;
+        }
+        return result;
+    }
 }
