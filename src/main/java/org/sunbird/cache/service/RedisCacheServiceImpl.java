@@ -1,7 +1,6 @@
 package org.sunbird.cache.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.sunbird.cache.RedisCache;
 import org.sunbird.common.model.SBApiResponse;
@@ -11,9 +10,6 @@ import org.sunbird.core.logger.CbExtLogger;
 import java.util.*;
 
 public class RedisCacheServiceImpl implements RedisCacheService {
-
-    @Autowired
-    private RedisTemplate redisTemplate;
 
     @Autowired
     RedisCache redisCache;
