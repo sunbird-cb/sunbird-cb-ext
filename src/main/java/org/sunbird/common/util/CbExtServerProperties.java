@@ -174,6 +174,9 @@ public class CbExtServerProperties {
 	@Value("${redis.port}")
 	private String redisPort;
 
+	@Value("${redis.timeout")
+	private String redisTimeout;
+
 	public String getContentHost() {
 		return contentHost;
 	}
@@ -459,6 +462,14 @@ public class CbExtServerProperties {
 
 	public void setRedisHostName(String redisHostName) {
 		this.redisHostName = redisHostName;
+	}
+
+	public String getRedisTimeout() {
+		return redisTimeout;
+	}
+
+	public void setRedisTimeout(String redisTimeout) {
+		this.redisTimeout = redisTimeout;
 	}
 	@Override
 	public String toString() {

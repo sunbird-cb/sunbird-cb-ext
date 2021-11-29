@@ -3,9 +3,11 @@ package org.sunbird.cache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
+import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.core.logger.CbExtLogger;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 @Component
 public class RedisCache {
@@ -13,12 +15,16 @@ public class RedisCache {
     @Autowired
     private RedisTemplate redisTemplate;
 
+    @Autowired
+    CbExtServerProperties cbExtServerProperties;
+
     private CbExtLogger logger = new CbExtLogger(getClass().getName());
     private static final String KEY = "CB_EXT_";
 
     public void putCache(String key, Object object) {
         try {
             redisTemplate.opsForValue().set(KEY + key, object);
+            redisTemplate.expire(KEY + key,Integer.parseInt(cbExtServerProperties.getRedisTimeout()), TimeUnit.SECONDS);
             logger.info("Cache_key_value " + KEY + key + " is saved in redis");
         } catch (Exception e) {
             logger.error(e);
