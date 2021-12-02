@@ -44,7 +44,9 @@ public class SearchByService {
 			updateCompetencyDetails(authUserToken);
 		}
 
-		return (Collection<CompetencyInfo>) redisCacheMgr.getCache(Constants.COMPETENCY_CACHE_NAME);
+		Map<String, CompetencyInfo> competencyMap = (Map<String, CompetencyInfo>) redisCacheMgr
+				.getCache(Constants.COMPETENCY_CACHE_NAME);
+		return competencyMap.values();
 	}
 
 	public Collection<CompetencyInfo> getCompetencyDetailsByFilter(String authUserToken, SearchByFilter filter)
@@ -54,7 +56,7 @@ public class SearchByService {
 			return getCompetencyDetails(authUserToken);
 		}
 
-		Collection<CompetencyInfo> objectNameCache = (Collection<CompetencyInfo>) redisCacheMgr
+		Map<String, CompetencyInfo> objectNameCache = (Map<String, CompetencyInfo>) redisCacheMgr
 				.getCache(Constants.COMPETENCY_CACHE_NAME);
 		Object objectAreaCache = redisCacheMgr.getCache(Constants.COMPETENCY_CACHE_NAME_BY_AREA);
 		Object objectTypeCache = redisCacheMgr.getCache(Constants.COMPETENCY_CACHE_NAME_BY_TYPE);
@@ -62,7 +64,7 @@ public class SearchByService {
 			logger.info("Initializing/Refreshing the Cache Value.");
 			updateCompetencyDetails(authUserToken);
 		}
-		objectNameCache = (Collection<CompetencyInfo>) redisCacheMgr.getCache(Constants.COMPETENCY_CACHE_NAME);
+		objectNameCache = (Map<String, CompetencyInfo>) redisCacheMgr.getCache(Constants.COMPETENCY_CACHE_NAME);
 		objectAreaCache = redisCacheMgr.getCache(Constants.COMPETENCY_CACHE_NAME_BY_AREA);
 		objectTypeCache = redisCacheMgr.getCache(Constants.COMPETENCY_CACHE_NAME_BY_TYPE);
 
@@ -70,7 +72,7 @@ public class SearchByService {
 		Map<String, CompetencyInfo> afterFilter = new HashMap<>();
 		if (!CollectionUtils.isEmpty(filter.getCompetencyName())) {
 			List<String> lowerCaseNameFilter = listToLowerCase(filter.getCompetencyName());
-			for (CompetencyInfo eachInfo : objectNameCache) {
+			for (CompetencyInfo eachInfo : objectNameCache.values()) {
 				if (lowerCaseNameFilter.contains(eachInfo.getName().toLowerCase().trim())) {
 					afterFilter.put(eachInfo.getId(), eachInfo);
 				}
@@ -236,7 +238,7 @@ public class SearchByService {
 			throw err;
 		}
 
-		redisCacheMgr.putCache(Constants.COMPETENCY_CACHE_NAME, competencyMap.values());
+		redisCacheMgr.putCache(Constants.COMPETENCY_CACHE_NAME, competencyMap);
 		redisCacheMgr.putCache(Constants.COMPETENCY_CACHE_NAME_BY_TYPE, comInfoByType);
 		redisCacheMgr.putCache(Constants.COMPETENCY_CACHE_NAME_BY_AREA, comInfoByArea);
 	}
