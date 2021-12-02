@@ -3,13 +3,11 @@ package org.sunbird.budget.service;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.apache.commons.lang.StringUtils;
@@ -23,9 +21,6 @@ import org.sunbird.audit.model.Audit;
 import org.sunbird.audit.repo.AuditRepository;
 import org.sunbird.budget.model.BudgetAuditInfo;
 import org.sunbird.budget.model.BudgetInfo;
-import org.sunbird.budget.model.BudgetInfoModel;
-import org.sunbird.budget.model.BudgetInfoPrimaryKeyModel;
-import org.sunbird.budget.repo.BudgetRepository;
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.util.Constants;
 import org.sunbird.common.util.Jsonkey;
@@ -36,13 +31,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class BudgetServiceImpl implements BudgetService {
-
 	private ObjectMapper mapper = new ObjectMapper();
-	private SimpleDateFormat dateFormatter = new SimpleDateFormat(Constants.DATE_FORMAT);
 	private Logger logger = LoggerFactory.getLogger(getClass().getName());
-
-	@Autowired
-	private BudgetRepository budgetRepository;
 	
 	@Autowired
 	private CassandraOperation cassandraOperation;
@@ -140,7 +130,6 @@ public class BudgetServiceImpl implements BudgetService {
 				response.setResponseCode(HttpStatus.BAD_REQUEST);
 				return response;
 			}
-						
 			if (data.getSchemeName() != null) {
 //				 Validate for duplicate schemeNames
 				keyMap.put(Jsonkey.SCHEME_NAME, data.getSchemeName());
@@ -360,19 +349,19 @@ public class BudgetServiceImpl implements BudgetService {
 		}
 	}
 	
-	private List<Object> getAllBudgetYearDetails(String orgId) {
-		List<BudgetInfoModel> budgetDetails = budgetRepository.getDistinctBudgetYear();
-		if (CollectionUtils.isEmpty(budgetDetails)) {
-			return Collections.emptyList();
-		}
-		List<Object> budgetResponse = new ArrayList<>();
-		for (BudgetInfoModel budget : budgetDetails) {
-			if (budget.getPrimaryKey().getOrgId().equals(orgId)) {
-				budgetResponse.add(budget.getPrimaryKey().getBudgetYear());
-			}
-		}
-		return budgetResponse;
-	}
+//	private List<Object> getAllBudgetYearDetails(String orgId) {
+//		List<BudgetInfoModel> budgetDetails = budgetRepository.getDistinctBudgetYear();
+//		if (CollectionUtils.isEmpty(budgetDetails)) {
+//			return Collections.emptyList();
+//		}
+//		List<Object> budgetResponse = new ArrayList<>();
+//		for (BudgetInfoModel budget : budgetDetails) {
+//			if (budget.getPrimaryKey().getOrgId().equals(orgId)) {
+//				budgetResponse.add(budget.getPrimaryKey().getBudgetYear());
+//			}
+//		}
+//		return budgetResponse;
+//	}
 	
 	private List<Map<String, Object>> getSpecificBudgetYearDetails(String orgId, String budgetYear) {
 		Map<String, Object> propertyMap = new HashMap<>();
