@@ -1,11 +1,13 @@
 package org.sunbird.searchby.model;
 
-public class ProviderInfo {
+import java.io.Serializable;
+
+public class ProviderInfo implements Serializable {
 	private String name;
 	private String logoUrl;
 	private String description;
 	private String orgId;
-	private int contentCount;
+	private Integer contentCount;
 
 	public String getName() {
 		return name;
@@ -39,11 +41,11 @@ public class ProviderInfo {
 		this.orgId = orgId;
 	}
 
-	public int getContentCount() {
+	public Integer getContentCount() {
 		return contentCount;
 	}
 
-	public void setContentCount(int contentCount) {
+	public void setContentCount(Integer contentCount) {
 		this.contentCount = contentCount;
 	}
 }

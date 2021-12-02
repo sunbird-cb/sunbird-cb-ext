@@ -15,30 +15,28 @@ import org.sunbird.common.util.CbExtServerProperties;
 @EnableCaching
 public class RedisConfig {
 
-    @Autowired
-    CbExtServerProperties cbProperties;
+	@Autowired
+	CbExtServerProperties cbProperties;
 
-    @Bean
-    public JedisConnectionFactory jedisConnectionFactory() {
-        RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration();
-        redisStandaloneConfiguration.setHostName(cbProperties.getRedisHostName());
-        redisStandaloneConfiguration.setPort(Integer.parseInt(cbProperties.getRedisPort()));
-        //redisStandaloneConfiguration.setPassword("password");
+	@Bean
+	public JedisConnectionFactory jedisConnectionFactory() {
+		RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration();
+		redisStandaloneConfiguration.setHostName(cbProperties.getRedisHostName());
+		redisStandaloneConfiguration.setPort(Integer.parseInt(cbProperties.getRedisPort()));
 
-        JedisConnectionFactory jedisConnectionFactory = new JedisConnectionFactory(redisStandaloneConfiguration);
-        return  jedisConnectionFactory;
-    }
+		JedisConnectionFactory jedisConnectionFactory = new JedisConnectionFactory(redisStandaloneConfiguration);
+		return jedisConnectionFactory;
+	}
 
-    @Bean
-    public RedisTemplate<String, Object> redisTemplate() {
-        RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
-        redisTemplate.setConnectionFactory(jedisConnectionFactory());
-        redisTemplate.setKeySerializer(new StringRedisSerializer());
-        redisTemplate.setHashKeySerializer(new StringRedisSerializer());
-        redisTemplate.setHashKeySerializer(new JdkSerializationRedisSerializer());
-        redisTemplate.setValueSerializer(new JdkSerializationRedisSerializer());
-        redisTemplate.setEnableTransactionSupport(true);
-        redisTemplate.afterPropertiesSet();
-        return redisTemplate;
-    }
+	@Bean
+	public RedisTemplate<String, Object> redisTemplate() {
+		RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
+		redisTemplate.setConnectionFactory(jedisConnectionFactory());
+		redisTemplate.setKeySerializer(new StringRedisSerializer());
+		redisTemplate.setHashKeySerializer(new JdkSerializationRedisSerializer());
+		redisTemplate.setValueSerializer(new JdkSerializationRedisSerializer());
+		redisTemplate.setEnableTransactionSupport(true);
+		redisTemplate.afterPropertiesSet();
+		return redisTemplate;
+	}
 }

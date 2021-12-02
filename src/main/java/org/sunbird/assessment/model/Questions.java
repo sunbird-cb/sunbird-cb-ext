@@ -1,13 +1,15 @@
 package org.sunbird.assessment.model;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Questions {
+public class Questions implements Serializable {
 
+	private static final long serialVersionUID = 1L;
 	private String questionId;
 	private String question;
 	private String questionType;
