@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
@@ -17,6 +18,8 @@ import org.sunbird.core.logger.CbExtLogger;
 
 @Component
 public class RedisCacheMgr {
+
+	private static final int cache_ttl = 84600;
 
 	@Autowired
 	private RedisTemplate<String, Object> redisTemplate;
@@ -28,9 +31,12 @@ public class RedisCacheMgr {
 
 	public void putCache(String key, Object object) {
 		try {
+			int ttl = cache_ttl;
+			if (!StringUtils.isEmpty(cbExtServerProperties.getRedisTimeout())) {
+				ttl = Integer.parseInt(cbExtServerProperties.getRedisTimeout());
+			}
 			redisTemplate.opsForValue().set(Constants.REDIS_COMMON_KEY + key, object);
-			redisTemplate.expire(Constants.REDIS_COMMON_KEY + key,
-					Integer.parseInt(cbExtServerProperties.getRedisTimeout()), TimeUnit.SECONDS);
+			redisTemplate.expire(Constants.REDIS_COMMON_KEY + key, ttl, TimeUnit.SECONDS);
 			logger.info("Cache_key_value " + Constants.REDIS_COMMON_KEY + key + " is saved in redis");
 		} catch (Exception e) {
 			logger.error(e);
