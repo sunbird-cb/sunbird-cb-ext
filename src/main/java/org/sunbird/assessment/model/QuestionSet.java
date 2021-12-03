@@ -1,21 +1,23 @@
 package org.sunbird.assessment.model;
 
+import java.io.Serializable;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class QuestionSet {
+public class QuestionSet implements Serializable {
 
-	private int timeLimit;
+	private static final long serialVersionUID = 1L;
+	private Integer timeLimit;
 	private Boolean isAssessment;
 	private List<Questions> questions;
 
-	public int getTimeLimit() {
+	public Integer getTimeLimit() {
 		return timeLimit;
 	}
 
-	public void setTimeLimit(int timeLimit) {
+	public void setTimeLimit(Integer timeLimit) {
 		this.timeLimit = timeLimit;
 	}
 
