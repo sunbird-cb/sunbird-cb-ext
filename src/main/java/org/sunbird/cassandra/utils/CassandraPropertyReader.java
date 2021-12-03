@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
 /**
@@ -12,7 +13,6 @@ import org.springframework.context.annotation.PropertySource;
  *
  */
 
-@PropertySource("/src/main/resources:cassandratablecolumn.properties")
 public class CassandraPropertyReader {
 
 	private final Properties properties = new Properties();

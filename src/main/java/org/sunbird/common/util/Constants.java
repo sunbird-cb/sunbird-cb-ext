@@ -134,4 +134,18 @@ public class Constants {
 	public static final String EXCEPTION_MSG_FETCH = "Exception occurred while fetching record from ";
 	public static final String EXCEPTION_MSG_DELETE =
 		      "Exception occurred while deleting record from ";
+	
+	public static final String AUDIT_TYPE = "auditType";
+	public static final String CREATED_DATE = "createdDate";
+	public static final String CREATED_BY = "createdBy";
+	public static final String UPDATED_DATE = "updatedDate";
+	public static final String UPDATED_BY = "updatedBy";
+	public static final String TRANSACTION_DETAILS = "transactionDetails";
+	public static final String PROOF_DOCS = "proofDocs";
+	
+	
+	// Database and Tables
+	public static final String DATABASE = "sunbird";
+	public static final String BUDGET_TABLE = "org_budget_scheme";
+	public static final String AUDIT_TABLE = "org_audit";
 }

@@ -13,8 +13,6 @@ import org.sunbird.common.util.Constants;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
 /**
  * @desc This class will provide all required helper method for cassandra db operation.
  * 
@@ -23,7 +21,6 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 public final class CassandraUtil {
 	
-	@Autowired
 	private static CassandraPropertyReader propertiesCache = CassandraPropertyReader.getInstance();
 	
 	/**
