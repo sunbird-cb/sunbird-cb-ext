@@ -56,6 +56,7 @@ public class Constants {
 
 	public static final String ADD = "add";
 	public static final String UPDATE = "update";
+	public static final String CREATE = "create";
 
 	public static final String ROOT_ORG_CONSTANT = "rootOrg";
 	public static final String ORG_CONSTANT = "org";
@@ -118,6 +119,35 @@ public class Constants {
 	public static final String QUESTION_SET = "questionSet";
 	public static final String ASSESSMENT_QNS_ANS_SET = "assessmentQnsAnsSet_";
 	public static final String ASSESSMENT_QNS_SET = "assessmentQnsSet_";
+	
+	//Cassandra Constants
+	public static final String INSERT_INTO = "INSERT INTO ";
+	public static final String DOT = ".";
+	public static final String OPEN_BRACE = "(";
+	public static final String VALUES_WITH_BRACE = ") VALUES (";
+	public static final String QUE_MARK = "?";
+	public static final String COMMA = ",";
+	public static final String CLOSING_BRACE = ");";
+	public static final String SUCCESS = "SUCCESS";
+	public static final String UNKNOWN_IDENTIFIER = "Unknown identifier ";
+	public static final String UNDEFINED_IDENTIFIER = "Undefined column name ";
+	public static final String EXCEPTION_MSG_FETCH = "Exception occurred while fetching record from ";
+	public static final String EXCEPTION_MSG_DELETE =
+		      "Exception occurred while deleting record from ";
+	
+	public static final String AUDIT_TYPE = "auditType";
+	public static final String CREATED_DATE = "createdDate";
+	public static final String CREATED_BY = "createdBy";
+	public static final String UPDATED_DATE = "updatedDate";
+	public static final String UPDATED_BY = "updatedBy";
+	public static final String TRANSACTION_DETAILS = "transactionDetails";
+	public static final String PROOF_DOCS = "proofDocs";
+	
+	
+	// Database and Tables
+	public static final String DATABASE = "sunbird";
+	public static final String BUDGET_TABLE = "org_budget_scheme";
+	public static final String AUDIT_TABLE = "org_audit";
 
 	// Redis
 	public static final String API_REDIS_DELETE = "api.redis.delete";
@@ -139,4 +169,5 @@ public class Constants {
 	public static final String PRIMARY_CATEGORY = "primaryCategory";
 	public static final String LIMIT = "limit";
 	public static final String REQUEST = "request";
+
 }
