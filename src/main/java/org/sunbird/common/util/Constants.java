@@ -148,6 +148,7 @@ public class Constants {
 	public static final String DATABASE = "sunbird";
 	public static final String BUDGET_TABLE = "org_budget_scheme";
 	public static final String AUDIT_TABLE = "org_audit";
+	public static final String STAFF_TABLE = "org_staff_position";
 
 	// Redis
 	public static final String API_REDIS_DELETE = "api.redis.delete";

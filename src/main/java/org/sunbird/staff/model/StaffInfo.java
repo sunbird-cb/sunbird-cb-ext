@@ -1,11 +1,15 @@
 package org.sunbird.staff.model;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+
 public class StaffInfo {
 
 	private String position;
 	private String orgId;
 	private String id;
+	@JsonAlias("totalpositionsfilled")
 	private Integer totalPositionsFilled;
+	@JsonAlias("totalpositionsvacant")
 	private Integer totalPositionsVacant;
 
 	public String getPosition() {
