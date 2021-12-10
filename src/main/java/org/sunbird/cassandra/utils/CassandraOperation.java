@@ -24,6 +24,19 @@ public interface CassandraOperation {
 		      String keyspaceName, String tableName, Map<String, Object> request);
 	
 	/**
+	 * Insert bulk data using batch
+	 * 
+	 * @param keyspaceName
+	 *            String
+	 * @param tableName
+	 *            String
+	 * @param request
+	 *            List<Map<String, Object>>
+	 * @return SBApiResponse
+	 */
+	public SBApiResponse insertBulkRecord(String keyspaceName, String tableName, List<Map<String, Object>> request);
+	
+	/**
 	   * Fetch records with specified columns (select all if null) for given column map (name, value
 	   * pairs).
 	   *
