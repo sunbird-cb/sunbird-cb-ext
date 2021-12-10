@@ -47,6 +47,7 @@ public class Constants {
 	public static final String SOURCE_DATA = "source_data";
 	public static final String USER_ID = "userId";
 	public static final String FILTERS = "filters";
+	public static final String CONTENT_ID = "content_id";
 
 	public static final String SUCCESSFUL = "Successful";
 	public static final String FAILED = "Failed";
@@ -154,6 +155,7 @@ public class Constants {
 	public static final String WORK_ORDER = "work_order";
 	public static final String WORK_ALLOCATION = "work_allocation";
 	public static final String WORK_ALLOCATION_MAPPING = "user_work_allocation_mapping";
+	public static final String MANDATORY_CONTENT = "mandatory_user_content";
 
 	// Redis
 	public static final String API_REDIS_DELETE = "api.redis.delete";
