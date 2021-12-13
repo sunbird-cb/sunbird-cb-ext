@@ -47,6 +47,7 @@ public class Constants {
 	public static final String SOURCE_DATA = "source_data";
 	public static final String USER_ID = "userId";
 	public static final String FILTERS = "filters";
+	public static final String CONTENT_ID = "content_id";
 
 	public static final String SUCCESSFUL = "Successful";
 	public static final String FAILED = "Failed";
@@ -119,8 +120,8 @@ public class Constants {
 	public static final String QUESTION_SET = "questionSet";
 	public static final String ASSESSMENT_QNS_ANS_SET = "assessmentQnsAnsSet_";
 	public static final String ASSESSMENT_QNS_SET = "assessmentQnsSet_";
-	
-	//Cassandra Constants
+
+	// Cassandra Constants
 	public static final String INSERT_INTO = "INSERT INTO ";
 	public static final String DOT = ".";
 	public static final String OPEN_BRACE = "(";
@@ -132,9 +133,8 @@ public class Constants {
 	public static final String UNKNOWN_IDENTIFIER = "Unknown identifier ";
 	public static final String UNDEFINED_IDENTIFIER = "Undefined column name ";
 	public static final String EXCEPTION_MSG_FETCH = "Exception occurred while fetching record from ";
-	public static final String EXCEPTION_MSG_DELETE =
-		      "Exception occurred while deleting record from ";
-	
+	public static final String EXCEPTION_MSG_DELETE = "Exception occurred while deleting record from ";
+
 	public static final String AUDIT_TYPE = "auditType";
 	public static final String CREATED_DATE = "createdDate";
 	public static final String CREATED_BY = "createdBy";
@@ -142,12 +142,20 @@ public class Constants {
 	public static final String UPDATED_BY = "updatedBy";
 	public static final String TRANSACTION_DETAILS = "transactionDetails";
 	public static final String PROOF_DOCS = "proofDocs";
-	
-	
+	public static final String WORK_ORDER_ID = "workOrderId";
+	public static final String WORK_ALLOCATION_ID = "workAllocationId";
+	public static final String BEGIN_BATCH = "BEGIN BATCH ";
+	public static final String APPLY_BATCH = " APPLY BATCH;";
+
 	// Database and Tables
 	public static final String DATABASE = "sunbird";
 	public static final String BUDGET_TABLE = "org_budget_scheme";
 	public static final String AUDIT_TABLE = "org_audit";
+	public static final String STAFF_TABLE = "org_staff_position";
+	public static final String WORK_ORDER = "work_order";
+	public static final String WORK_ALLOCATION = "work_allocation";
+	public static final String WORK_ALLOCATION_MAPPING = "user_work_allocation_mapping";
+	public static final String MANDATORY_CONTENT = "mandatory_user_content";
 
 	// Redis
 	public static final String API_REDIS_DELETE = "api.redis.delete";
