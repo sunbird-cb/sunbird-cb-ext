@@ -55,8 +55,7 @@ public class CassandraOperationImpl implements CassandraOperation {
 			connectionManager.getSession(keyspaceName).execute(boundStatement.bind(array));
 			response.put(Constants.RESPONSE, Constants.SUCCESS);
 		} catch (Exception e) {
-			logger.error("Exception occurred while inserting record to " + tableName + " : " + e, e);
-			logger.error("Exception occured while inserting record to " + tableName + " : " + e, e);
+			logger.error("Exception occurred while inserting record to " + tableName + " : " + e, e.getMessage());
 		}
 		return response;
 	}
@@ -82,8 +81,7 @@ public class CassandraOperationImpl implements CassandraOperation {
 			connectionManager.getSession(keyspaceName).execute(batchStatement);
 			response.put(Constants.RESPONSE, Constants.SUCCESS);
 		} catch (Exception e) {
-			logger.error("Exception occurred while inserting record to " + tableName + " : " + e, e);
-			logger.error("Exception occured while inserting record to " + tableName + " : " + e, e);
+			logger.error("Exception occurred while inserting bulk record to " + tableName + " : " + e, e.getMessage());
 		}
 		return response;
 	}

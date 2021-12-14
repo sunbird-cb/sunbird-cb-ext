@@ -12,7 +12,7 @@ public class BudgetInfo {
 	private Long salaryBudgetAllocated;
 	private Long trainingBudgetAllocated;
 	private Long trainingBudgetUtilization;
-	private List<Map<String, String>> proofdocs;
+	private List<Map<String, String>> proofDocs;
 
 	public String getId() {
 		return id;
@@ -38,12 +38,12 @@ public class BudgetInfo {
 		this.budgetYear = budgetYear;
 	}
 
-	public List<Map<String, String>> getProofdocs() {
-		return proofdocs;
+	public List<Map<String, String>> getProofDocs() {
+		return proofDocs;
 	}
 
-	public void setProofdocs(List<Map<String, String>> proofdocs) {
-		this.proofdocs = proofdocs;
+	public void setProofDocs(List<Map<String, String>> proofDocs) {
+		this.proofDocs = proofDocs;
 	}
 
 	public Long getSalaryBudgetAllocated() {
@@ -77,5 +77,4 @@ public class BudgetInfo {
 	public void setTrainingBudgetUtilization(Long trainingBudgetUtilization) {
 		this.trainingBudgetUtilization = trainingBudgetUtilization;
 	}
-
 }

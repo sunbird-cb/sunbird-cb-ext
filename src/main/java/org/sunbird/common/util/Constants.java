@@ -93,6 +93,7 @@ public class Constants {
 	public static final String API_STAFF_POSITION_DELETE = "api.staff.position.delete";
 	public static final String API_STAFF_POSITION_HISTORY_READ = "api.staff.position.history.read";
 	public static final String API_BUDGET_SCHEME_ADD = "api.budget.schme.add";
+	public static final String API_BUDGET_SCHEME_DOC_ADD = "api.budget.schme.doc.add";
 	public static final String API_BUDGET_SCHEME_UPDATE = "api.budget.schme.update";
 	public static final String API_BUDGET_SCHEME_READ = "api.budget.scheme.read";
 	public static final String API_BUDGET_SCHEME_DELETE = "api.budget.scheme.delete";
@@ -108,6 +109,7 @@ public class Constants {
 	public static final String NAME = "name";
 	public static final String URL = "url";
 	public static final String DELETED = "deleted";
+	public static final String SCHEME_ID = "schemeId";
 
 	public static final String BUDGET = "budget";
 	public static final String BUDGET_YEAR = "budgetYear";
@@ -177,5 +179,12 @@ public class Constants {
 	public static final String PRIMARY_CATEGORY = "primaryCategory";
 	public static final String LIMIT = "limit";
 	public static final String REQUEST = "request";
+
+	public static final String BUDGET_DOC_UPLOADED_BY = "uploadedBy";
+	public static final String BUDGET_DOC_UPLOADED_DATE = "uploadedDate";
+	public static final String BUDGET_DOC_FILE_NAME = "fileName";
+	public static final String BUDGET_DOC_FILE_TYPE = "fileType";
+	public static final String BUDGET_DOC_FILE_SIZE = "fileSize";
+	public static final String BUDGET_DOC_FILE_URL = "fileUrl";
 
 }
