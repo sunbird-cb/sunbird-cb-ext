@@ -9,8 +9,23 @@ public class CbExtServerProperties {
 	@Value("${wf.service.host}")
 	private String wfServiceHost;
 
+	@Value("${wf.service.transitionPath}")
+	private String wfServiceTransitionPath;
+
 	@Value("${wf.service.updateUserProfilePath}")
 	private String wfServicePath;
+
+	@Value("${lms.service.url}")
+	private String lmsServiceUrl;
+
+	@Value("${lms.system.settings.path}")
+	private String lmsSystemSettingsPath;
+
+	@Value("${lms.user.update.path}")
+	private String lmsUserUpdatePath;
+
+	@Value("${lms.user.read.path}")
+	private String lmsUserReadPath;
 
 	@Value("${user.enable.multidept.mapping}")
 	private boolean isUserMultiMapDeptEnabled;
@@ -174,9 +189,6 @@ public class CbExtServerProperties {
 	@Value("${redis.port}")
 	private String redisPort;
 
-	@Value("${redis.timeout")
-	private String redisTimeout;
-
 	public String getContentHost() {
 		return contentHost;
 	}
@@ -207,6 +219,14 @@ public class CbExtServerProperties {
 
 	public void setWfServicePath(String wfServicePath) {
 		this.wfServicePath = wfServicePath;
+	}
+
+	public String getWfServiceTransitionPath() {
+		return wfServiceTransitionPath;
+	}
+
+	public void setWfServiceTransitionPath(String wfServiceTransitionPath) {
+		this.wfServiceTransitionPath = wfServiceTransitionPath;
 	}
 
 	public boolean isUserMultiMapDeptEnabled() {
@@ -377,6 +397,39 @@ public class CbExtServerProperties {
 		this.fracHost = fracHost;
 	}
 
+	public String getLmsUserUpdatePath() {
+		return lmsUserUpdatePath;
+	}
+
+	public void setLmsUserUpdatePath(String lmsUserUpdatePath) {
+		this.lmsUserUpdatePath = lmsUserUpdatePath;
+	}
+
+	public String getLmsServiceUrl() {
+		return lmsServiceUrl;
+	}
+
+	public String getLmsSystemSettingsPath() {
+		return lmsSystemSettingsPath;
+	}
+
+	public void setLmsSystemSettingsPath(String lmsSystemSettingsPath) {
+		this.lmsSystemSettingsPath = lmsSystemSettingsPath;
+	}
+
+	public void setLmsServiceUrl(String lmsServiceUrl) {
+		this.lmsServiceUrl = lmsServiceUrl;
+	}
+
+	public String getLmsUserReadPath() {
+		return lmsUserReadPath;
+	}
+
+	public void setLmsUserReadPath(String lmsUserReadPath) {
+		this.lmsUserReadPath = lmsUserReadPath;
+	}
+
+
 	public String getFracNodePath() {
 		return fracNodePath;
 	}
@@ -448,6 +501,7 @@ public class CbExtServerProperties {
 	public void setCourseBatchCreateEndpoint(String courseBatchCreateEndpoint) {
 		this.courseBatchCreateEndpoint = courseBatchCreateEndpoint;
 	}
+
 	public String getRedisPort() {
 		return redisPort;
 	}
@@ -464,13 +518,6 @@ public class CbExtServerProperties {
 		this.redisHostName = redisHostName;
 	}
 
-	public String getRedisTimeout() {
-		return redisTimeout;
-	}
-
-	public void setRedisTimeout(String redisTimeout) {
-		this.redisTimeout = redisTimeout;
-	}
 	@Override
 	public String toString() {
 		StringBuilder str = new StringBuilder("SB-CB-Ext Server Properties: ");

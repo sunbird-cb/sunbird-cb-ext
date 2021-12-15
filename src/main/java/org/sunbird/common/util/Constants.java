@@ -114,6 +114,26 @@ public class Constants {
 	public static final String TRAINING_BUDGET_ALLOCATED = "trainingBudgetAllocated";
 	public static final String TRAINING_BUDGET_UTILIZATION = "trainingBudgetUtilization";
 
+	public static final String RESULT = "result";
+	public static final String VALUE = "value";
+	public static final String REQUEST= "request";
+	public static final String DEPT_NAME = "deptName";
+	public static final String PROFILE_DETAILS = "profileDetails";
+	public static final String ACADEMICS = "academics";
+	public static final String PROFESIONAL_DETAILS = "professionalDetails";
+	public static final String PERSONAL_DETAILS = "personalDetails";
+	public static final String EMPLOYMENT_DETAILS = "employmentDetails";
+	public static final String SKILLS = "skills";
+	public static final String READ_DATA = "readData";
+	public static final String FIELD_KEY = "fieldKey";
+	public static final String TO_VALUE = "toValue";
+	public static final String FROM_VALUE = "fromValue";
+	public static final String STATE = "state";
+	public static final String ACTION = "action";
+	public static final String APPLICATION_ID = "applicationId";
+	public static final String ACTOR_USER_ID = "actorUserId";
+	public static final String UPDATED_FIELD_VALUES = "updatedFieldValues";
+
 	// assessment
 	public static final String QUESTION_SET = "questionSet";
 	public static final String ASSESSMENT_QNS_ANS_SET = "assessmentQnsAnsSet_";
