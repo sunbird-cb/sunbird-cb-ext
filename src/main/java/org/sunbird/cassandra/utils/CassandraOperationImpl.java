@@ -20,6 +20,7 @@ import com.datastax.driver.core.BatchStatement;
 import com.datastax.driver.core.BoundStatement;
 import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.ResultSet;
+import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.Statement;
 import com.datastax.driver.core.querybuilder.Clause;
@@ -168,5 +169,16 @@ public class CassandraOperationImpl implements CassandraOperation {
 			throw e;
 		}
 		return response;
+	}
+
+	@Override
+	public Long getRecordCount(String keyspace, String table) {
+		try {
+			Select selectQuery = QueryBuilder.select().countAll().from(keyspace, table);
+			Row row = connectionManager.getSession(keyspace).execute(selectQuery).one();
+			return row.getLong(0);
+		} catch (Exception e) {
+			throw e;
+		}
 	}
 }

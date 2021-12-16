@@ -5,8 +5,15 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.client.RestTemplate;
+import org.sunbird.cache.RedisCacheMgr;
+import org.sunbird.cassandra.utils.CassandraOperation;
 import org.sunbird.common.model.OpenSaberApiUserProfile;
+import org.sunbird.common.model.SunbirdApiResp;
+import org.sunbird.common.model.SunbirdApiRespContent;
+import org.sunbird.common.model.SunbirdApiResultResponse;
+import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
 import org.sunbird.common.service.UserUtilityService;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
@@ -19,6 +26,8 @@ import org.sunbird.portal.department.dto.*;
 import org.sunbird.portal.department.model.*;
 import org.sunbird.portal.department.repo.*;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -30,6 +39,7 @@ public class PortalServiceImpl implements PortalService {
 	public static final String DEPT_IDS = ", DeptIds: ";
 	public static final String DEPARTMENT_NAME = "departmentName";
 	private CbExtLogger logger = new CbExtLogger(getClass().getName());
+	private ObjectMapper mapper = new ObjectMapper();
 
 	@Autowired
 	UserDepartmentRoleRepository userDepartmentRoleRepo;
@@ -58,35 +68,68 @@ public class PortalServiceImpl implements PortalService {
 	@Autowired
 	Producer producer;
 
+	@Autowired
+	RedisCacheMgr redisCacheMgr;
+
+	@Autowired
+	CassandraOperation cassandraOperation;
+
+	@Autowired
+	OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
+
 	private static final String ROOT_ORG_CONST = "rootOrg";
 	private static final String ORG_CONST = "org";
 
 	@Override
 	public List<String> getDeptNameList() {
-		Iterable<Department> deptList = deptRepo.findAllByIsDeletedOrderByDeptNameAsc(false);
-		if (!DataValidator.isCollectionEmpty(deptList)) {
-			List<String> deptNameList = new ArrayList<>();
-			for (Department dept : deptList) {
-				List<Integer> deptTypeIdList = Arrays.asList(dept.getDeptTypeIds());
-				Iterable<DepartmentType> deptTypeList = deptTypeRepo.findAllById(deptTypeIdList);
-				boolean isSpvTypeExist = false;
-				for (DepartmentType deptType : deptTypeList) {
-					if (PortalConstants.SPV_DEPT_TYPE.equalsIgnoreCase(deptType.getDeptType())) {
-						isSpvTypeExist = true;
-						break;
-					}
-				}
-				if (!isSpvTypeExist) {
-					deptNameList.add(dept.getDeptName());
-				}
+		try {
+			Long orgCount = cassandraOperation.getRecordCount(Constants.DATABASE, Constants.ORGANIZATION);
+			List<String> orgNameList = new ArrayList<>();
+			List<String> cachedOrgNames = mapper.convertValue(redisCacheMgr.getCache(Constants.ORG_LIST), List.class);
+			if (ObjectUtils.isEmpty(cachedOrgNames) || !Long.valueOf(cachedOrgNames.size()).equals(orgCount)) {
+				List<String> orgNames = getAllOrg();
+				redisCacheMgr.putCache(Constants.ORG_LIST, orgNames);
+				return orgNames;
 			}
-			if (!DataValidator.isCollectionEmpty(deptNameList)) {
-				Collections.sort(deptNameList);
-			}
-			return deptNameList;
-		}
+			return cachedOrgNames;
 
-			return Collections.emptyList();
+		} catch (Exception e) {
+			logger.info("Exception occurred in getDeptNameList");
+			logger.error(e);
+		}
+		return Collections.emptyList();
+	}
+
+	private List<String> getAllOrg() throws Exception {
+		List<String> orgNames = new ArrayList<>();
+		int count = 0;
+		do {
+			// request body
+			Map<String, Object> requestMap = new HashMap<String, Object>() {
+				{
+					put(Constants.REQUEST, new HashMap<String, Object>() {
+						{
+							put(Constants.FILTERS, new HashMap<String, Object>() {
+								{
+									put(Constants.IS_TENANT, Boolean.TRUE);
+								}
+							});
+							put(Constants.FIELDS, new ArrayList<>(Arrays.asList(Constants.CHANNEL)));
+							put(Constants.LIMIT, 100);
+							put(Constants.OFFSET, orgNames.size());
+						}
+					});
+				}
+			};
+			String serviceURL = serverConfig.getSbUrl() + serverConfig.getSbOrgSearchPath();
+			SunbirdApiResp orgResponse = mapper.convertValue(
+					outboundRequestHandlerService.fetchResultUsingPost(serviceURL, requestMap), SunbirdApiResp.class);
+			SunbirdApiResultResponse resultResp = orgResponse.getResult().getResponse();
+			count = resultResp.getCount();
+			orgNames.addAll(resultResp.getContent().stream().map(SunbirdApiRespContent::getChannel)
+					.collect(Collectors.toList()));
+		} while (count != orgNames.size());
+		return orgNames;
 	}
 
 	@Override
@@ -128,17 +171,17 @@ public class PortalServiceImpl implements PortalService {
 
 	@Override
 	public DepartmentInfo getMyDepartmentForRole(String roleName, String userId, boolean isUserInfoRequired,
-			String rootOrg){
+			String rootOrg) {
 		return enrichDepartmentInfo(getMyCurrentDepartment(roleName, userId), isUserInfoRequired, true, rootOrg);
 	}
 
 	public DepartmentInfo getMyDepartmentForRoles(List<String> roleNames, String userId, boolean isUserInfoRequired,
-			String rootOrg){
+			String rootOrg) {
 		return enrichDepartmentInfo(getMyCurrentDepartment(roleNames, userId), isUserInfoRequired, true, rootOrg);
 	}
 
 	@Override
-	public DepartmentInfo getMyCbpDepartment(String userId, String rootOrg){
+	public DepartmentInfo getMyCbpDepartment(String userId, String rootOrg) {
 		Department myDept = null;
 		List<UserDepartmentRole> userList = userDepartmentRoleRepo.findAllByUserIdAndIsActiveAndIsBlocked(userId, true,
 				false);
@@ -153,13 +196,14 @@ public class PortalServiceImpl implements PortalService {
 		for (Department dept : deptList) {
 			Iterable<DepartmentType> deptTypeList = deptTypeRepo.findAllById(Arrays.asList(dept.getDeptTypeIds()));
 			for (DepartmentType deptType : deptTypeList) {
-				if (deptType.getDeptType().equalsIgnoreCase(PortalConstants.CBP_DEPT_TYPE) && hasCBPRole(dept, userList)) {
+				if (deptType.getDeptType().equalsIgnoreCase(PortalConstants.CBP_DEPT_TYPE)
+						&& hasCBPRole(dept, userList)) {
 					// We found a CBP Type department which user is mapped... Now need to check user
 					// has any roles related CBP Portal in this department
-						if (myDept != null) {
-							throw new BadRequestException("More than one CBP Department is available for the User. ");
-						} else {
-							myDept = dept;
+					if (myDept != null) {
+						throw new BadRequestException("More than one CBP Department is available for the User. ");
+					} else {
+						myDept = dept;
 					}
 				}
 			}
@@ -168,7 +212,7 @@ public class PortalServiceImpl implements PortalService {
 		return enrichDepartmentInfo(myDept, false, false, rootOrg);
 	}
 
-	private Department getMyCurrentDepartment(List<String> roleNames, String userId){
+	private Department getMyCurrentDepartment(List<String> roleNames, String userId) {
 		List<UserDepartmentRole> userList = userDepartmentRoleRepo.findAllByUserIdAndIsActiveAndIsBlocked(userId, true,
 				false);
 		if (DataValidator.isCollectionEmpty(userList)) {
@@ -188,14 +232,16 @@ public class PortalServiceImpl implements PortalService {
 		return filterCurrentDeptInfo(roleNames, userList, myDept, deptMap);
 	}
 
-	private Department filterCurrentDeptInfo(List<String> roleNames, List<UserDepartmentRole> userList, Department myDept, Map<Integer, Department> deptMap) {
+	private Department filterCurrentDeptInfo(List<String> roleNames, List<UserDepartmentRole> userList,
+			Department myDept, Map<Integer, Department> deptMap) {
 		for (UserDepartmentRole user : userList) {
 			Iterable<Role> roles = roleRepo.findAllById(Arrays.asList(user.getRoleIds()));
 			for (Role r : roles) {
 				if (roleNames.contains(r.getRoleName())) {
 					if (myDept != null) {
 						if (!myDept.getDeptId().equals(deptMap.get(user.getDeptId()).getDeptId())) {
-							throw new BadRequestException(	"More than one Department is available with Role: " + r.getRoleName());
+							throw new BadRequestException(
+									"More than one Department is available with Role: " + r.getRoleName());
 						}
 					} else {
 						myDept = deptMap.get(user.getDeptId());
@@ -206,7 +252,7 @@ public class PortalServiceImpl implements PortalService {
 		return myDept;
 	}
 
-	private Department getMyCurrentDepartment(String roleName, String userId){
+	private Department getMyCurrentDepartment(String roleName, String userId) {
 		List<UserDepartmentRole> userList = userDepartmentRoleRepo.findAllByUserIdAndIsActiveAndIsBlocked(userId, true,
 				false);
 		if (DataValidator.isCollectionEmpty(userList)) {
@@ -254,7 +300,7 @@ public class PortalServiceImpl implements PortalService {
 		return false;
 	}
 
-	private Department getMyActiveDepartment(String strDeptType, String userId){
+	private Department getMyActiveDepartment(String strDeptType, String userId) {
 		List<UserDepartmentRole> userList = userDepartmentRoleRepo.findAllByUserIdAndIsActiveAndIsBlocked(userId, true,
 				false);
 		if (DataValidator.isCollectionEmpty(userList)) {
@@ -271,7 +317,8 @@ public class PortalServiceImpl implements PortalService {
 			for (DepartmentType deptType : deptTypeList) {
 				if (deptType.getDeptType().equalsIgnoreCase(strDeptType)) {
 					if (myDept != null) {
-						throw new BadRequestException("More than one Department is available for DeptType: " + strDeptType);
+						throw new BadRequestException(
+								"More than one Department is available for DeptType: " + strDeptType);
 					} else {
 						myDept = dept;
 					}
@@ -282,7 +329,7 @@ public class PortalServiceImpl implements PortalService {
 	}
 
 	@Override
-	public DepartmentInfo getMyDepartment(String userId, String rootOrg){
+	public DepartmentInfo getMyDepartment(String userId, String rootOrg) {
 		return getMyDepartment("MDO", userId, true, rootOrg);
 	}
 
@@ -293,7 +340,7 @@ public class PortalServiceImpl implements PortalService {
 
 	@Override
 	public DepartmentInfo addDepartment(String authUserToken, String userId, String userRoleName,
-			DepartmentInfo deptInfo, String rootOrg){
+			DepartmentInfo deptInfo, String rootOrg) {
 		validateDepartmentInfo(deptInfo);
 		if (deptInfo.getDeptTypeIds() == null) {
 			validateDepartmentTypeInfo(deptInfo.getDeptTypeInfos());
@@ -328,7 +375,7 @@ public class PortalServiceImpl implements PortalService {
 		List<Role> roleList = new ArrayList<>();
 		roles.forEachRemaining(roleList::add);
 		Map<String, Role> roleMap = roleList.stream().collect(Collectors.toMap(Role::getRoleName, role -> role));
-		if(roleMap.containsKey(userRoleName)){
+		if (roleMap.containsKey(userRoleName)) {
 			roleIds.add(roleMap.get(userRoleName).getId());
 		}
 		if (!DataValidator.isCollectionEmpty(deptInfo.getAdminUserList())) { // We have Few admin Users to assign to
@@ -353,7 +400,7 @@ public class PortalServiceImpl implements PortalService {
 	}
 
 	@Override
-	public DepartmentInfo updateDepartment(DepartmentInfo deptInfo, String rootOrg){
+	public DepartmentInfo updateDepartment(DepartmentInfo deptInfo, String rootOrg) {
 		Optional<Department> department = deptRepo.findByIdAndIsDeleted(deptInfo.getId(), false);
 		if (department.isPresent()) {
 			Department existingDept = department.get();
@@ -377,13 +424,13 @@ public class PortalServiceImpl implements PortalService {
 
 	@Override
 	public UserDepartmentInfo addUserRoleInDepartment(UserDepartmentRole userDeptRole, String wid, String rootOrg,
-			String org){
+			String org) {
 		validateUserDepartmentRole(userDeptRole, true, rootOrg);
 		UserDepartmentRole existingRecord = userDepartmentRoleRepo.findByUserIdAndDeptId(userDeptRole.getUserId(),
 				userDeptRole.getDeptId());
 		if (existingRecord != null) {
-			throw new BadRequestException("Record already exist for UserId: '" + userDeptRole.getUserId() + ", RoleName: "
-					+ userDeptRole.getRoles());
+			throw new BadRequestException("Record already exist for UserId: '" + userDeptRole.getUserId()
+					+ ", RoleName: " + userDeptRole.getRoles());
 		}
 
 		existingRecord = userDeptRole;
@@ -447,7 +494,7 @@ public class PortalServiceImpl implements PortalService {
 	}
 
 	public UserDepartmentInfo updateUserRoleInDepartment(UserDepartmentRole userDeptRole, String wid, String rootOrg,
-			String org){
+			String org) {
 		validateUserDepartmentRole(userDeptRole, false, rootOrg);
 		UserDepartmentRole existingRecord = userDepartmentRoleRepo.findByUserIdAndDeptId(userDeptRole.getUserId(),
 				userDeptRole.getDeptId());
@@ -460,7 +507,7 @@ public class PortalServiceImpl implements PortalService {
 		Set<Integer> roleIds = new HashSet<>();
 		Map<String, Role> roleMap = roleList.stream().collect(Collectors.toMap(Role::getRoleName, role -> role));
 		for (String r : userDeptRole.getRoles()) {
-			if(roleMap.containsKey(r)){
+			if (roleMap.containsKey(r)) {
 				roleIds.add(roleMap.get(r).getId());
 			}
 		}
@@ -514,7 +561,7 @@ public class PortalServiceImpl implements PortalService {
 	}
 
 	@Override
-	public Boolean checkAdminPrivilage(Integer deptId, String userId, String rootOrg){
+	public Boolean checkAdminPrivilage(Integer deptId, String userId, String rootOrg) {
 		UserDepartmentInfo userDeptInfoList = enrichUserDepartment(
 				userDepartmentRoleRepo.findByUserIdAndDeptId(userId, deptId), rootOrg);
 		Iterator<Role> roles = userDeptInfoList.getRoleInfo().iterator();
@@ -529,7 +576,7 @@ public class PortalServiceImpl implements PortalService {
 	}
 
 	@Override
-	public Boolean checkMdoAdminPrivilage(String deptKey, String userId){
+	public Boolean checkMdoAdminPrivilage(String deptKey, String userId) {
 		boolean retValue = false;
 		try {
 			logger.info("checkMdoAdminPrivilage... userId: " + userId + ", deptKey: " + deptKey);
@@ -563,7 +610,7 @@ public class PortalServiceImpl implements PortalService {
 	}
 
 	@Override
-	public DepartmentInfo getMyDepartmentDetails(String userId, boolean isUserInfoRequired){
+	public DepartmentInfo getMyDepartmentDetails(String userId, boolean isUserInfoRequired) {
 		return null;
 	}
 
@@ -577,7 +624,8 @@ public class PortalServiceImpl implements PortalService {
 				.findAllByUserIdAndIsActiveAndIsBlocked(userId, true, false);
 		if (!DataValidator.isCollectionEmpty(userDeptRoleList)) {
 			for (UserDepartmentRole userDeptRole : userDeptRoleList) {
-				if (!Boolean.TRUE.equals(userDeptRole.getIsActive()) || Boolean.TRUE.equals(userDeptRole.getIsBlocked())) {
+				if (!Boolean.TRUE.equals(userDeptRole.getIsActive())
+						|| Boolean.TRUE.equals(userDeptRole.getIsBlocked())) {
 					continue;
 				}
 				str.append("Found userDepartmentRole entry id= ").append(userDeptRole.getId())
@@ -680,7 +728,8 @@ public class PortalServiceImpl implements PortalService {
 						.collect(Collectors.toMap(Role::getId, roleInfo -> roleInfo));
 
 				if (isUserInfoRequired && userDeptList != null && !CollectionUtils.isEmpty(userDeptList)) {
-					Set<String> userIdSet = userDeptList.stream().map(UserDepartmentRole::getUserId).collect(Collectors.toSet());
+					Set<String> userIdSet = userDeptList.stream().map(UserDepartmentRole::getUserId)
+							.collect(Collectors.toSet());
 					List<String> userIds = userIdSet.stream().collect(Collectors.toList());
 					Map<String, Object> result = userUtilService.getUsersDataFromUserIds(rootOrg, userIds,
 							new ArrayList<>(Arrays.asList(Constants.FIRST_NAME, Constants.LAST_NAME, Constants.EMAIL,
@@ -793,7 +842,7 @@ public class PortalServiceImpl implements PortalService {
 		return deptInfo;
 	}
 
-	private void validateDepartmentInfo(DepartmentInfo deptInfo){
+	private void validateDepartmentInfo(DepartmentInfo deptInfo) {
 		if (deptRepo.existsByDeptNameIgnoreCase(deptInfo.getDeptName())) {
 			throw new BadRequestException(
 					"Failed to create Department. Given deptName: '" + deptInfo.getDeptName() + "' already exists");
@@ -801,23 +850,25 @@ public class PortalServiceImpl implements PortalService {
 		boolean isValid = !DataValidator.isStringEmpty(deptInfo.getDeptName())
 				&& !DataValidator.isStringEmpty(deptInfo.getRootOrg());
 		if (!isValid) {
-			throw new BadRequestException("Failed to create Department. Given Department is null OR RootOrg/DeptName is null");
+			throw new BadRequestException(
+					"Failed to create Department. Given Department is null OR RootOrg/DeptName is null");
 		}
 	}
 
-	private void validateDepartmentTypeInfo(List<DeptTypeInfo> deptTypeInfoList){
+	private void validateDepartmentTypeInfo(List<DeptTypeInfo> deptTypeInfoList) {
 		if (!DataValidator.isCollectionEmpty(deptTypeInfoList)) {
 			for (DeptTypeInfo deptTypeInfo : deptTypeInfoList) {
 				boolean isValid = !DataValidator.isStringEmpty(deptTypeInfo.getDeptType())
 						&& !DataValidator.isStringEmpty(deptTypeInfo.getDeptSubType());
 				if (!isValid) {
-					throw new BadRequestException("Failed to create Department. Given deptType or deptSubType is Empty");
+					throw new BadRequestException(
+							"Failed to create Department. Given deptType or deptSubType is Empty");
 				}
 			}
 		}
 	}
 
-	private void validateDepartmentTypeInfo(Integer[] deptTypeIds){
+	private void validateDepartmentTypeInfo(Integer[] deptTypeIds) {
 		for (Integer deptTypeId : deptTypeIds) {
 			Optional<DepartmentType> dType = deptTypeRepo.findById(deptTypeId);
 			if (!dType.isPresent()) {
@@ -827,7 +878,7 @@ public class PortalServiceImpl implements PortalService {
 		}
 	}
 
-	private void validateUserDepartmentRole(UserDepartmentRole userDeptRole, boolean isAddReq, String rootOrg){
+	private void validateUserDepartmentRole(UserDepartmentRole userDeptRole, boolean isAddReq, String rootOrg) {
 		// Check User exists
 		if (!userUtilService.validateUser(rootOrg, userDeptRole.getUserId())) {
 			throw new BadRequestException("Invalid UserId.");
@@ -855,8 +906,7 @@ public class PortalServiceImpl implements PortalService {
 			List<Role> rolesAvailableInDept = getDepartmentRoles(Arrays.asList(dept.get().getDeptTypeIds()));
 			Set<String> availableRoleNames = new HashSet<>();
 			if (!CollectionUtils.isEmpty(rolesAvailableInDept)) {
-				availableRoleNames = rolesAvailableInDept.stream().map(Role::getRoleName)
-						.collect(Collectors.toSet());
+				availableRoleNames = rolesAvailableInDept.stream().map(Role::getRoleName).collect(Collectors.toSet());
 			}
 			for (String roleName : userDeptRole.getRoles()) {
 				if (!availableRoleNames.contains(roleName)) {
@@ -883,7 +933,8 @@ public class PortalServiceImpl implements PortalService {
 						for (Integer i : uDeptRole.getRoleIds()) {
 							Role r = givenRoleMap.get(i);
 							if (r != null && !r.getRoleName().equalsIgnoreCase("MEMBER")) {
-								throw new BadRequestException("User is already assigned with given Role in another Department.");
+								throw new BadRequestException(
+										"User is already assigned with given Role in another Department.");
 							}
 						}
 					}
@@ -932,7 +983,8 @@ public class PortalServiceImpl implements PortalService {
 		}
 		if (!DataValidator.isCollectionEmpty(userDeptRoleList)) {
 			for (UserDepartmentRole userDeptRole : userDeptRoleList) {
-				if (!Boolean.TRUE.equals(userDeptRole.getIsActive()) || Boolean.TRUE.equals(userDeptRole.getIsBlocked())) {
+				if (!Boolean.TRUE.equals(userDeptRole.getIsActive())
+						|| Boolean.TRUE.equals(userDeptRole.getIsBlocked())) {
 					continue;
 				}
 				// Just check this department type is "SPV"
@@ -971,7 +1023,8 @@ public class PortalServiceImpl implements PortalService {
 				.findAllByUserIdAndIsActiveAndIsBlocked(userId, true, false);
 		if (!DataValidator.isCollectionEmpty(userDeptRoleList)) {
 			for (UserDepartmentRole userDeptRole : userDeptRoleList) {
-				if (!Boolean.TRUE.equals(userDeptRole.getIsActive()) || Boolean.TRUE.equals(userDeptRole.getIsBlocked())) {
+				if (!Boolean.TRUE.equals(userDeptRole.getIsActive())
+						|| Boolean.TRUE.equals(userDeptRole.getIsBlocked())) {
 					continue;
 				}
 				Optional<Department> dept = deptRepo.findByIdAndIsDeleted(userDeptRole.getDeptId(), false);
@@ -1039,8 +1092,10 @@ public class PortalServiceImpl implements PortalService {
 
 	/**
 	 *
-	 * @param userDepartmentRole user department role object
-	 * @param modifiedBy         modified by value
+	 * @param userDepartmentRole
+	 *            user department role object
+	 * @param modifiedBy
+	 *            modified by value
 	 */
 	private void createUserDepartmentRoleAudit(UserDepartmentRole userDepartmentRole, String modifiedBy) {
 		try {

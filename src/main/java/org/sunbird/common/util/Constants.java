@@ -158,6 +158,7 @@ public class Constants {
 	public static final String WORK_ALLOCATION = "work_allocation";
 	public static final String WORK_ALLOCATION_MAPPING = "user_work_allocation_mapping";
 	public static final String MANDATORY_CONTENT = "mandatory_user_content";
+	public static final String ORGANIZATION = "organisation";
 
 	// Redis
 	public static final String API_REDIS_DELETE = "api.redis.delete";
@@ -179,6 +180,8 @@ public class Constants {
 	public static final String PRIMARY_CATEGORY = "primaryCategory";
 	public static final String LIMIT = "limit";
 	public static final String REQUEST = "request";
+	public static final String FIELDS = "fields";
+	public static final String OFFSET = "offset";
 
 	public static final String BUDGET_DOC_UPLOADED_BY = "uploadedBy";
 	public static final String BUDGET_DOC_UPLOADED_DATE = "uploadedDate";
@@ -186,5 +189,7 @@ public class Constants {
 	public static final String BUDGET_DOC_FILE_TYPE = "fileType";
 	public static final String BUDGET_DOC_FILE_SIZE = "fileSize";
 	public static final String BUDGET_DOC_FILE_URL = "fileUrl";
+
+	public static final String ORG_LIST = "ORGANISATION_LIST";
 
 }
