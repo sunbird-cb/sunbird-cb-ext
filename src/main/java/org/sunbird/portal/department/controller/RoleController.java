@@ -25,37 +25,6 @@ public class RoleController {
 	@Autowired
 	RoleService roleService;
 
-	@GetMapping("/portal/role")
-	public ResponseEntity<Iterable<Role>> getAllRoles(){
-		return new ResponseEntity<>(roleService.getAllRoles(), HttpStatus.OK);
-	}
-
-	@GetMapping("/portal/role/{role_id}")
-	public ResponseEntity<Role> getRoleById(@PathVariable("role_id") Integer roleId) throws Exception {
-		return new ResponseEntity<>(roleService.getRoleById(roleId), HttpStatus.OK);
-	}
-
-	@PostMapping("/portal/role")
-	public ResponseEntity<Role> addRole(@Valid @RequestBody Role role) throws Exception {
-		return new ResponseEntity<>(roleService.addRole(role), HttpStatus.OK);
-	}
-
-	@PatchMapping("/portal/role")
-	public ResponseEntity<Role> updateRole(@Valid @RequestBody Role role) throws Exception {
-		return new ResponseEntity<>(roleService.updateRole(role), HttpStatus.OK);
-	}
-
-	@GetMapping("/portal/deptRole")
-	public ResponseEntity<Iterable<DepartmentRole>> getAllDepartmentRoles(){
-		return new ResponseEntity<>(roleService.getAllDepartmentRoles(), HttpStatus.OK);
-	}
-
-	@GetMapping("/portal/deptRole/{deptType}")
-	public ResponseEntity<DepartmentRole> getDepartmentRolesById(@PathVariable("deptType") String deptType)
-			throws BadRequestException {
-		return new ResponseEntity<>(roleService.getDepartmentRoleById(deptType), HttpStatus.OK);
-	}
-
 	@PostMapping("/portal/deptRole")
 	public ResponseEntity<DepartmentRole> addDepartmentRole(@Valid @RequestBody DepartmentRole deptRole)
 			throws Exception {
@@ -68,9 +37,4 @@ public class RoleController {
 		return new ResponseEntity<>(roleService.removeDepartmentRole(deptRoleId), HttpStatus.OK);
 	}
 
-	@GetMapping("/portal/{user_id}/roles")
-	public ResponseEntity<Set<String>> getUserRoles(@PathVariable("user_id") String userId)
-			throws BadRequestException {
-		return new ResponseEntity<>(roleService.getUserRoles(userId), HttpStatus.OK);
-	}
 }
