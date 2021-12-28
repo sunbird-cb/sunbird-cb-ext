@@ -122,8 +122,8 @@ public class PortalServiceImpl implements PortalService {
 				}
 			};
 			String serviceURL = serverConfig.getSbUrl() + serverConfig.getSbOrgSearchPath();
-			SunbirdApiResp orgResponse = mapper.convertValue(
-					outboundRequestHandlerService.fetchResultUsingPost(serviceURL, requestMap), SunbirdApiResp.class);
+			SunbirdApiResp orgResponse = mapper.convertValue(outboundRequestHandlerService
+					.fetchResultUsingPost("https://igot-dev.in/api/org/v1/search", requestMap), SunbirdApiResp.class);
 			SunbirdApiResultResponse resultResp = orgResponse.getResult().getResponse();
 			count = resultResp.getCount();
 			orgNames.addAll(resultResp.getContent().stream().map(SunbirdApiRespContent::getChannel)

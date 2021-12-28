@@ -93,4 +93,5 @@ public interface CassandraOperation {
 	 * @return Long
 	 */
 	public Long getRecordCount(String keyspace, String table);
+
 }

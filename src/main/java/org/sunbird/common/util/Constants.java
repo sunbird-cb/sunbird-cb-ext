@@ -48,12 +48,20 @@ public class Constants {
 	public static final String USER_ID = "userId";
 	public static final String FILTERS = "filters";
 	public static final String CONTENT_ID = "content_id";
+	public static final String BATCH_ID = "batchId";
+	public static final String COURSE_ID = "courseId";
+	public static final String ENROLMENT_TYPE = "enrollmenttype";
+	public static final String IDENTIFIER = "identifier";
+	public static final String START_DATE = "startDate";
+	public static final String END_DATE = "endDate";
+	public static final String ACTIVE = "active";
 
 	public static final String SUCCESSFUL = "Successful";
 	public static final String FAILED = "Failed";
 	public static final String MESSAGE = "message";
 	public static final String DATA = "data";
 	public static final String STATUS = "status";
+	public static final String RESULT = "result";
 
 	public static final String ADD = "add";
 	public static final String UPDATE = "update";
@@ -151,6 +159,7 @@ public class Constants {
 
 	// Database and Tables
 	public static final String DATABASE = "sunbird";
+	public static final String COURSE_DB = "sunbird_courses";
 	public static final String BUDGET_TABLE = "org_budget_scheme";
 	public static final String AUDIT_TABLE = "org_audit";
 	public static final String STAFF_TABLE = "org_staff_position";
@@ -159,6 +168,9 @@ public class Constants {
 	public static final String WORK_ALLOCATION_MAPPING = "user_work_allocation_mapping";
 	public static final String MANDATORY_CONTENT = "mandatory_user_content";
 	public static final String ORGANIZATION = "organisation";
+	public static final String USER_ENROLMENT = "user_enrolments";
+	public static final String USER = "user";
+	public static final String COURSE_BATCH = "course_batch";
 
 	// Redis
 	public static final String API_REDIS_DELETE = "api.redis.delete";
