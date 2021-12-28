@@ -83,53 +83,41 @@ public class PortalServiceImpl implements PortalService {
 	@Override
 	public List<String> getDeptNameList() {
 		try {
-			Long orgCount = cassandraOperation.getRecordCount(Constants.DATABASE, Constants.ORGANIZATION);
-			List<String> orgNameList = new ArrayList<>();
-			List<String> cachedOrgNames = mapper.convertValue(redisCacheMgr.getCache(Constants.ORG_LIST), List.class);
-			if (ObjectUtils.isEmpty(cachedOrgNames) || !Long.valueOf(cachedOrgNames.size()).equals(orgCount)) {
-				List<String> orgNames = getAllOrg();
-				redisCacheMgr.putCache(Constants.ORG_LIST, orgNames);
-				return orgNames;
-			}
-			return cachedOrgNames;
-
+			List<String> orgNames = new ArrayList<>();
+			int count = 0;
+			do {
+				// request body
+				Map<String, Object> requestMap = new HashMap<String, Object>() {
+					{
+						put(Constants.REQUEST, new HashMap<String, Object>() {
+							{
+								put(Constants.FILTERS, new HashMap<String, Object>() {
+									{
+										put(Constants.IS_TENANT, Boolean.TRUE);
+									}
+								});
+								put(Constants.FIELDS, new ArrayList<>(Arrays.asList(Constants.CHANNEL)));
+								put(Constants.LIMIT, 100);
+								put(Constants.OFFSET, orgNames.size());
+							}
+						});
+					}
+				};
+				String serviceURL = serverConfig.getSbUrl() + serverConfig.getSbOrgSearchPath();
+				SunbirdApiResp orgResponse = mapper.convertValue(
+						outboundRequestHandlerService.fetchResultUsingPost(serviceURL, requestMap),
+						SunbirdApiResp.class);
+				SunbirdApiResultResponse resultResp = orgResponse.getResult().getResponse();
+				count = resultResp.getCount();
+				orgNames.addAll(resultResp.getContent().stream().map(SunbirdApiRespContent::getChannel)
+						.collect(Collectors.toList()));
+			} while (count != orgNames.size());
+			return orgNames;
 		} catch (Exception e) {
 			logger.info("Exception occurred in getDeptNameList");
 			logger.error(e);
 		}
 		return Collections.emptyList();
-	}
-
-	private List<String> getAllOrg() throws Exception {
-		List<String> orgNames = new ArrayList<>();
-		int count = 0;
-		do {
-			// request body
-			Map<String, Object> requestMap = new HashMap<String, Object>() {
-				{
-					put(Constants.REQUEST, new HashMap<String, Object>() {
-						{
-							put(Constants.FILTERS, new HashMap<String, Object>() {
-								{
-									put(Constants.IS_TENANT, Boolean.TRUE);
-								}
-							});
-							put(Constants.FIELDS, new ArrayList<>(Arrays.asList(Constants.CHANNEL)));
-							put(Constants.LIMIT, 100);
-							put(Constants.OFFSET, orgNames.size());
-						}
-					});
-				}
-			};
-			String serviceURL = serverConfig.getSbUrl() + serverConfig.getSbOrgSearchPath();
-			SunbirdApiResp orgResponse = mapper.convertValue(outboundRequestHandlerService
-					.fetchResultUsingPost("https://igot-dev.in/api/org/v1/search", requestMap), SunbirdApiResp.class);
-			SunbirdApiResultResponse resultResp = orgResponse.getResult().getResponse();
-			count = resultResp.getCount();
-			orgNames.addAll(resultResp.getContent().stream().map(SunbirdApiRespContent::getChannel)
-					.collect(Collectors.toList()));
-		} while (count != orgNames.size());
-		return orgNames;
 	}
 
 	@Override
