@@ -25,6 +25,9 @@ public class Constants {
 	public static final String EMAIL = "email";
 	public static final String SOURCE_PROFILE_PICTURE = "source_profile_picture";
 	public static final String ROOT_ORG = "root_org";
+	public static final String ROOT_ORG_ID = "rootOrgId";
+	public static final String DESCRIPTION = "description";
+	public static final String ORG_NAME = "orgName";
 	public static final String ORG = "org";
 	public static final String EMPLOYEMENT_STATUS = "employement_status";
 	public static final String CONTRACT_TYPE = "contract_type";
@@ -179,12 +182,28 @@ public class Constants {
 	public static final String PRIMARY_CATEGORY = "primaryCategory";
 	public static final String LIMIT = "limit";
 	public static final String REQUEST = "request";
-
+	public static final String FIELDS = "fields";
+	public static final String OFFSET = "offset";
+	public static final String ORG_LIST = "ORGANISATION_LIST";
 	public static final String BUDGET_DOC_UPLOADED_BY = "uploadedBy";
 	public static final String BUDGET_DOC_UPLOADED_DATE = "uploadedDate";
 	public static final String BUDGET_DOC_FILE_NAME = "fileName";
 	public static final String BUDGET_DOC_FILE_TYPE = "fileType";
 	public static final String BUDGET_DOC_FILE_SIZE = "fileSize";
 	public static final String BUDGET_DOC_FILE_URL = "fileUrl";
+
+	public static final String ORGANIZATION = "organisation";
+	public static final String USER_ENROLMENT = "user_enrolments";
+	public static final String USER = "user";
+	public static final String COURSE_BATCH = "course_batch";
+	public static final String COURSE_DB = "sunbird_courses";
+	public static final String BATCH_ID = "batchId";
+	public static final String COURSE_ID = "courseId";
+	public static final String ENROLMENT_TYPE = "enrollmenttype";
+	public static final String IDENTIFIER = "identifier";
+	public static final String START_DATE = "startDate";
+	public static final String END_DATE = "endDate";
+	public static final String ACTIVE = "active";
+	public static final String RESULT = "result";
 
 }
