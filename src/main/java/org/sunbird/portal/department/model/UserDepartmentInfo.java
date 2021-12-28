@@ -1,11 +1,8 @@
 package org.sunbird.portal.department.model;
 
-import org.sunbird.portal.department.dto.Role;
-
 public class UserDepartmentInfo {
 	private String userId;
 	private DepartmentInfo deptInfo;
-	private Iterable<Role> roleInfo;
 	private Boolean isActive;
 	private Boolean isBlocked;
 
@@ -23,14 +20,6 @@ public class UserDepartmentInfo {
 
 	public void setDeptInfo(DepartmentInfo deptInfo) {
 		this.deptInfo = deptInfo;
-	}
-
-	public Iterable<Role> getRoleInfo() {
-		return roleInfo;
-	}
-
-	public void setRoleInfo(Iterable<Role> roleInfo) {
-		this.roleInfo = roleInfo;
 	}
 
 	public Boolean getIsActive() {

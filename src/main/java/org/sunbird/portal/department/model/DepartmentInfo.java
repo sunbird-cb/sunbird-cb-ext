@@ -3,23 +3,18 @@ package org.sunbird.portal.department.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.sunbird.portal.department.dto.Role;
-import org.sunbird.portal.department.dto.UserDepartmentRole;
-
 public class DepartmentInfo implements Comparable<DepartmentInfo> {
 	private Integer id;
 	private String rootOrg;
 	private String deptName;
 	private Integer[] deptTypeIds;
 	private List<DeptTypeInfo> deptTypeInfos;
-	private List<Role> rolesInfo;
 	private String description;
 	private long noOfUsers;
 	private String headquarters;
 	private String logo;
 	private long creationDate;
 	private String createdBy;
-	private List<UserDepartmentRole> adminUserList;
 	private List<PortalUserInfo> active_users;
 	private List<PortalUserInfo> inActive_users;
 	private List<PortalUserInfo> blocked_users;
@@ -90,28 +85,12 @@ public class DepartmentInfo implements Comparable<DepartmentInfo> {
 		this.noOfUsers = noOfUsers;
 	}
 
-	public List<Role> getRolesInfo() {
-		return rolesInfo;
-	}
-
-	public void setRolesInfo(List<Role> rolesInfo) {
-		this.rolesInfo = rolesInfo;
-	}
-
 	public String getHeadquarters() {
 		return headquarters;
 	}
 
 	public void setHeadquarters(String headquarters) {
 		this.headquarters = headquarters;
-	}
-
-	public List<UserDepartmentRole> getAdminUserList() {
-		return adminUserList;
-	}
-
-	public void setAdminUserList(List<UserDepartmentRole> adminUserList) {
-		this.adminUserList = adminUserList;
 	}
 
 	public List<PortalUserInfo> getActive_users() {
@@ -138,13 +117,6 @@ public class DepartmentInfo implements Comparable<DepartmentInfo> {
 		this.blocked_users = blocked_users;
 	}
 
-	public void addRoleInfo(Role roleInfo) {
-		if (this.rolesInfo == null) {
-			this.rolesInfo = new ArrayList<Role>();
-		}
-		this.rolesInfo.add(roleInfo);
-	}
-
 	public void addActiveUser(PortalUserInfo pUserInfo) {
 		if (this.active_users == null) {
 			this.active_users = new ArrayList<PortalUserInfo>();
@@ -164,13 +136,6 @@ public class DepartmentInfo implements Comparable<DepartmentInfo> {
 			this.blocked_users = new ArrayList<PortalUserInfo>();
 		}
 		this.blocked_users.add(pUserInfo);
-	}
-
-	public void addAdminUser(UserDepartmentRole pUserInfo) {
-		if (this.adminUserList == null) {
-			this.adminUserList = new ArrayList<UserDepartmentRole>();
-		}
-		this.adminUserList.add(pUserInfo);
 	}
 
 	public List<String> getCurrentUserRoles() {
