@@ -15,6 +15,8 @@ public class Constants {
 	public static final String FIRST_NAME = "first_name";
 	public static final String LAST_NAME = "last_name";
 	public static final String MIDDLE_NAME = "middle_name";
+	public static final String FIRSTNAME = "firstname";
+	public static final String LASTNAME = "lastname";
 	public static final String CONTACT_PHONE_NUMBER_OFFICE = "contact_phone_number_office";
 	public static final String CONTACT_PHONE_NUMBER_HOME = "contact_phone_number_home";
 	public static final String CONTACT_PHONE_NUMBER_PERSONAL = "contact_phone_number_personal";
@@ -55,6 +57,12 @@ public class Constants {
 	public static final String START_DATE = "startDate";
 	public static final String END_DATE = "endDate";
 	public static final String ACTIVE = "active";
+	public static final String COMPLETIONPERCENTAGE = "completionpercentage";
+	public static final String PROGRESS = "progress";
+	public static final String PROFILEDETAILS = "profiledetails";
+	public static final String ISSUED_CERTIFICATES = "issued_certificates";
+	public static final String IS_MDO = "isMdo";
+	public static final String IS_CBP = "isCbp";
 
 	public static final String SUCCESSFUL = "Successful";
 	public static final String FAILED = "Failed";

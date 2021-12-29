@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.sunbird.cassandra.utils.CassandraOperation;
+import org.sunbird.common.model.SunbirdApiRequest;
 import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
@@ -138,11 +139,11 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
 		}
 	}
 
-	public Map<String, Object> getUserProgress(Map<String, Object> requestBody) {
+	public Map<String, Object> getUserProgress(SunbirdApiRequest requestBody) {
 		Map<String, Object> result = new HashMap<>();
 		try {
 			UserProgressRequest requestData = validateGetBatchEnrolment(requestBody);
-			if (ObjectUtils.isEmpty(requestData) || ObjectUtils.isEmpty(requestData.getBatchList())) {
+			if (ObjectUtils.isEmpty(requestData)) {
 				result.put(Constants.STATUS, Constants.FAILED);
 				result.put(Constants.MESSAGE, "check your request params");
 				return result;
@@ -151,19 +152,17 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
 			// get all enrolled details
 			List<Map<String, Object>> userEnrolmentList = new ArrayList<>();
 			for (BatchEnrolment request : requestData.getBatchList()) {
-				if (StringUtils.isNotBlank(request.getBatchId())) {
-					Map<String, Object> propertyMap = new HashMap<>();
-					propertyMap.put(Constants.BATCH_ID, request.getBatchId());
-					propertyMap.put(Constants.ACTIVE, Boolean.TRUE);
-					if (request.getUserList() != null && !request.getUserList().isEmpty()) {
-						propertyMap.put(Constants.USER_ID_CONSTANT, request.getUserList());
-					}
-					userEnrolmentList.addAll(cassandraOperation.getRecordsByProperties(Constants.COURSE_DB,
-							Constants.USER_ENROLMENT, propertyMap,
-							new ArrayList<>(Arrays.asList(Constants.USER_ID_CONSTANT, Constants.COURSE_ID,
-									Constants.BATCH_ID, "completionpercentage", "progress", Constants.STATUS,
-									"issued_certificates"))));
+				Map<String, Object> propertyMap = new HashMap<>();
+				propertyMap.put(Constants.BATCH_ID, request.getBatchId());
+				propertyMap.put(Constants.ACTIVE, Boolean.TRUE);
+				if (request.getUserList() != null && !request.getUserList().isEmpty()) {
+					propertyMap.put(Constants.USER_ID_CONSTANT, request.getUserList());
 				}
+				userEnrolmentList.addAll(cassandraOperation.getRecordsByProperties(Constants.COURSE_DB,
+						Constants.USER_ENROLMENT, propertyMap,
+						new ArrayList<>(Arrays.asList(Constants.USER_ID_CONSTANT, Constants.COURSE_ID,
+								Constants.BATCH_ID, Constants.COMPLETIONPERCENTAGE, Constants.PROGRESS,
+								Constants.STATUS, Constants.ISSUED_CERTIFICATES))));
 			}
 
 			if (userEnrolmentList.size() > 100) {
@@ -178,7 +177,7 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
 						{
 							put(Constants.ID, enrolledUserId);
 						}
-					}, new ArrayList<>(Arrays.asList(Constants.ID, "firstname", "lastname", Constants.EMAIL)));
+					}, new ArrayList<>(Arrays.asList(Constants.ID, Constants.FIRSTNAME, Constants.LASTNAME)));
 
 			Map<String, Map<String, Object>> userMap = userList.stream()
 					.collect(Collectors.toMap(obj -> (String) obj.get(Constants.ID), obj -> obj));
@@ -199,10 +198,20 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
 		return result;
 	}
 
-	private UserProgressRequest validateGetBatchEnrolment(Map<String, Object> requestBody) {
+	private UserProgressRequest validateGetBatchEnrolment(SunbirdApiRequest requestBody) {
 		try {
-			if (requestBody.containsKey(Constants.REQUEST)) {
-				return mapper.convertValue(requestBody.get(Constants.REQUEST), UserProgressRequest.class);
+			UserProgressRequest userProgressRequest = new UserProgressRequest();
+			if (!ObjectUtils.isEmpty(requestBody.getRequest())) {
+				userProgressRequest = mapper.convertValue(requestBody.getRequest(), UserProgressRequest.class);
+			}
+
+			if (!userProgressRequest.getBatchList().isEmpty()) {
+				for (BatchEnrolment batchEnrolment : userProgressRequest.getBatchList()) {
+					if (ObjectUtils.isEmpty(batchEnrolment.getBatchId())) {
+						return null;
+					}
+				}
+				return userProgressRequest;
 			}
 		} catch (Exception e) {
 			logger.error(e);

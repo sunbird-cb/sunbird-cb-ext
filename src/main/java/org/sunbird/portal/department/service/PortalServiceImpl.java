@@ -85,33 +85,39 @@ public class PortalServiceImpl implements PortalService {
 		try {
 			List<String> orgNames = new ArrayList<>();
 			int count = 0;
+			int iterateCount = 0;
 			do {
 				// request body
-				Map<String, Object> requestMap = new HashMap<String, Object>() {
+				Map<String, Object> requestMap = new HashMap<>();
+				requestMap.put(Constants.OFFSET, iterateCount);
+				requestMap.put(Constants.LIMIT, 100);
+				requestMap.put(Constants.FIELDS,
+						new ArrayList<>(Arrays.asList(Constants.CHANNEL, Constants.IS_MDO, Constants.IS_CBP)));
+				requestMap.put(Constants.FILTERS, new HashMap<String, Object>() {
 					{
-						put(Constants.REQUEST, new HashMap<String, Object>() {
-							{
-								put(Constants.FILTERS, new HashMap<String, Object>() {
-									{
-										put(Constants.IS_TENANT, Boolean.TRUE);
-									}
-								});
-								put(Constants.FIELDS, new ArrayList<>(Arrays.asList(Constants.CHANNEL)));
-								put(Constants.LIMIT, 100);
-								put(Constants.OFFSET, orgNames.size());
-							}
-						});
+						put(Constants.IS_TENANT, Boolean.TRUE);
 					}
-				};
+				});
+
 				String serviceURL = serverConfig.getSbUrl() + serverConfig.getSbOrgSearchPath();
 				SunbirdApiResp orgResponse = mapper.convertValue(
-						outboundRequestHandlerService.fetchResultUsingPost(serviceURL, requestMap),
-						SunbirdApiResp.class);
+						outboundRequestHandlerService.fetchResultUsingPost(serviceURL, new HashMap<String, Object>() {
+							{
+								put(Constants.REQUEST, requestMap);
+							}
+						}), SunbirdApiResp.class);
+
 				SunbirdApiResultResponse resultResp = orgResponse.getResult().getResponse();
 				count = resultResp.getCount();
-				orgNames.addAll(resultResp.getContent().stream().map(SunbirdApiRespContent::getChannel)
-						.collect(Collectors.toList()));
-			} while (count != orgNames.size());
+				iterateCount = iterateCount + resultResp.getContent().size();
+				for (SunbirdApiRespContent content : resultResp.getContent()) {
+					// return orgname only if cbp or mdo
+					if ((!ObjectUtils.isEmpty(content.getIsMdo()) && content.getIsMdo())
+							|| (!ObjectUtils.isEmpty(content.getIsCbp()) && content.getIsCbp())) {
+						orgNames.add(content.getChannel());
+					}
+				}
+			} while (count != iterateCount);
 			return orgNames;
 		} catch (Exception e) {
 			logger.info("Exception occurred in getDeptNameList");

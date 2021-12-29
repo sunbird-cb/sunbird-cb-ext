@@ -33,6 +33,10 @@ public class SunbirdApiRespContent {
 
 	private List<SunbirdApiRespOragainsation> organisations;
 
+	private Boolean isMdo;
+
+	private Boolean isCbp;
+
 	public String getRootOrgName() {
 		return rootOrgName;
 	}
@@ -151,6 +155,22 @@ public class SunbirdApiRespContent {
 
 	public void setOrganisations(List<SunbirdApiRespOragainsation> organisations) {
 		this.organisations = organisations;
+	}
+
+	public Boolean getIsMdo() {
+		return isMdo;
+	}
+
+	public void setIsMdo(Boolean isMdo) {
+		this.isMdo = isMdo;
+	}
+
+	public Boolean getIsCbp() {
+		return isCbp;
+	}
+
+	public void setIsCbp(Boolean isCbp) {
+		this.isCbp = isCbp;
 	}
 
 }
