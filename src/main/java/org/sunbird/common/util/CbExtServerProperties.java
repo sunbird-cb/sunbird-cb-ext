@@ -15,9 +15,6 @@ public class CbExtServerProperties {
 	@Value("${wf.service.updateUserProfilePath}")
 	private String wfServicePath;
 
-	@Value("${lms.service.url}")
-	private String lmsServiceUrl;
-
 	@Value("${lms.system.settings.path}")
 	private String lmsSystemSettingsPath;
 
@@ -405,20 +402,12 @@ public class CbExtServerProperties {
 		this.lmsUserUpdatePath = lmsUserUpdatePath;
 	}
 
-	public String getLmsServiceUrl() {
-		return lmsServiceUrl;
-	}
-
 	public String getLmsSystemSettingsPath() {
 		return lmsSystemSettingsPath;
 	}
 
 	public void setLmsSystemSettingsPath(String lmsSystemSettingsPath) {
 		this.lmsSystemSettingsPath = lmsSystemSettingsPath;
-	}
-
-	public void setLmsServiceUrl(String lmsServiceUrl) {
-		this.lmsServiceUrl = lmsServiceUrl;
 	}
 
 	public String getLmsUserReadPath() {

@@ -53,6 +53,7 @@ public class Constants {
 	public static final String MESSAGE = "message";
 	public static final String DATA = "data";
 	public static final String STATUS = "status";
+	public static final String RESPONSE_CODE = "responseCode";
 
 	public static final String ADD = "add";
 	public static final String UPDATE = "update";
@@ -97,6 +98,7 @@ public class Constants {
 	public static final String API_BUDGET_SCHEME_HISTORY_READ = "api.budget.scheme.history.read";
 	public static final String API_FILE_UPLOAD = "api.file.upload";
 	public static final String API_FILE_DELETE = "api.file.delete";
+	public static final String API_PROFILE_UPDATE = "api.profile.update";
 
 	public static final String ID = "id";
 	public static final String ORG_ID = "orgId";
