@@ -11,8 +11,6 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.apache.commons.lang.StringUtils;
-import org.json.simple.JSONArray;
-import org.json.simple.parser.JSONParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +25,7 @@ import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.util.Constants;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
@@ -367,27 +366,25 @@ public class BudgetServiceImpl implements BudgetService {
 			return response;
 		}
 
-		for (Map<String, Object> budgetAudit : auditData) {
-			JSONParser parser = new JSONParser();
-			JSONArray details = (JSONArray) parser.parse((String) budgetAudit.get(Constants.TRANSACTION_DETAILS));
-			budgetAudit.remove(Constants.TRANSACTION_DETAILS);
-			budgetAudit.put(Constants.TRANSACTION_DETAILS, details);
-		}
-
 		List<BudgetAuditInfo> auditResponse = new ArrayList<>();
 		for (Map<String, Object> audit : auditData) {
-			List<Map<String, Object>> transactionDetails = (List<Map<String, Object>>) audit
-					.get(Constants.TRANSACTION_DETAILS);
-			audit.remove(Constants.TRANSACTION_DETAILS);
-			for (Map<String, Object> details : transactionDetails) {
-				audit.put(Constants.TRAINING_BUDGET_ALLOCATED, details.get(Constants.TRAINING_BUDGET_ALLOCATED));
-				audit.put(Constants.TRAINING_BUDGET_UTILIZATION, details.get(Constants.TRAINING_BUDGET_UTILIZATION));
-				audit.put(Constants.SALARY_BUDGET_ALLOCATED, details.get(Constants.SALARY_BUDGET_ALLOCATED));
-				audit.put(Constants.ID, details.get(Constants.ID));
-				audit.put(Constants.PROOF_DOCS, details.get(Constants.PROOF_DOCS));
-				audit.put(Constants.BUDGET_YEAR, details.get(Constants.BUDGET_YEAR));
-				audit.put(Constants.SCHEME_NAME, details.get(Constants.SCHEME_NAME));
+			if (audit.get(Constants.TRANSACTION_DETAILS) != null) {
+				Map<String, Object> transactionDetails = mapper.readValue(
+						(String) audit.get(Constants.TRANSACTION_DETAILS),
+						new TypeReference<HashMap<String, Object>>() {
+						});
+				audit.put(Constants.TRAINING_BUDGET_ALLOCATED,
+						transactionDetails.get(Constants.TRAINING_BUDGET_ALLOCATED));
+				audit.put(Constants.TRAINING_BUDGET_UTILIZATION,
+						transactionDetails.get(Constants.TRAINING_BUDGET_UTILIZATION));
+				audit.put(Constants.SALARY_BUDGET_ALLOCATED, transactionDetails.get(Constants.SALARY_BUDGET_ALLOCATED));
+				audit.put(Constants.ID, transactionDetails.get(Constants.ID));
+				audit.put(Constants.PROOF_DOCS, transactionDetails.get(Constants.PROOF_DOCS));
+				audit.put(Constants.BUDGET_YEAR, transactionDetails.get(Constants.BUDGET_YEAR));
+				audit.put(Constants.SCHEME_NAME, transactionDetails.get(Constants.SCHEME_NAME));
+				audit.remove(Constants.TRANSACTION_DETAILS);
 			}
+
 			BudgetAuditInfo bAuditInfo = new BudgetAuditInfo();
 			bAuditInfo.setCreatedBy((String) audit.get(Constants.CREATED_BY));
 			bAuditInfo.setCreatedDate((String) audit.get(Constants.CREATED_DATE));
