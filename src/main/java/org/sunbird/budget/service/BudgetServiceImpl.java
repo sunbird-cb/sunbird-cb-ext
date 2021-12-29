@@ -48,8 +48,8 @@ public class BudgetServiceImpl implements BudgetService {
 			request.put(Constants.BUDGET_YEAR, data.getBudgetYear());
 			request.put(Constants.SCHEME_NAME, data.getSchemeName());
 
-			List<Map<String, Object>> existingDataList = cassandraOperation.getRecordsByProperties(Constants.DATABASE,
-					Constants.BUDGET_TABLE, request, null);
+			List<Map<String, Object>> existingDataList = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
+					Constants.TABLE_ORG_BUDGET_SCHEME, request, null);
 
 			if (!existingDataList.isEmpty()) {
 				String errMsg = "Budget Scheme exist for given name. Failed to create BudgetInfo for OrgId: "
@@ -67,8 +67,8 @@ public class BudgetServiceImpl implements BudgetService {
 			request.put(Constants.TRAINING_BUDGET_ALLOCATED, data.getTrainingBudgetAllocated());
 			request.put(Constants.TRAINING_BUDGET_UTILIZATION, data.getTrainingBudgetUtilization());
 
-			cassandraOperation.insertRecord(Constants.DATABASE, Constants.BUDGET_TABLE, request);
-			cassandraOperation.insertRecord(Constants.DATABASE, Constants.AUDIT_TABLE,
+			cassandraOperation.insertRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_ORG_BUDGET_SCHEME, request);
+			cassandraOperation.insertRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_ORG_AUDIT,
 					getAuditMap(userId, request, Constants.CREATE));
 
 			response.getParams().setStatus(Constants.SUCCESSFUL);
@@ -93,8 +93,8 @@ public class BudgetServiceImpl implements BudgetService {
 			propertyMap.put(Constants.ORG_ID, docInfo.getOrgId());
 			propertyMap.put(Constants.ID, docInfo.getId());
 			propertyMap.put(Constants.BUDGET_YEAR, docInfo.getBudgetYear());
-			List<Map<String, Object>> existingBudgetInfo = cassandraOperation.getRecordsByProperties(Constants.DATABASE,
-					Constants.BUDGET_TABLE, propertyMap, new ArrayList<>());
+			List<Map<String, Object>> existingBudgetInfo = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
+					Constants.TABLE_ORG_BUDGET_SCHEME, propertyMap, new ArrayList<>());
 
 			if (existingBudgetInfo.isEmpty()) {
 				String errMsg = "Failed to find BudgetScheme for OrgId: " + docInfo.getOrgId() + ", Id: "
@@ -129,7 +129,7 @@ public class BudgetServiceImpl implements BudgetService {
 			budgetInfo.getProofDocs().add(proofDoc);
 
 			Map<String, Object> budgetMap = mapper.convertValue(budgetInfo, HashMap.class);
-			cassandraOperation.insertRecord(Constants.DATABASE, Constants.BUDGET_TABLE, budgetMap);
+			cassandraOperation.insertRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_ORG_BUDGET_SCHEME, budgetMap);
 
 			budgetMap.remove(Constants.PROOF_DOCS);
 
@@ -138,7 +138,7 @@ public class BudgetServiceImpl implements BudgetService {
 			data.put(Constants.AUDIT_TYPE, Constants.BUDGET);
 			data.put(Constants.TRANSACTION_DETAILS, budgetMap);
 			Map<String, Object> auditMap = getAuditMap(userId, data, Constants.UPDATE);
-			cassandraOperation.insertRecord(Constants.DATABASE, Constants.AUDIT_TABLE, auditMap);
+			cassandraOperation.insertRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_ORG_AUDIT, auditMap);
 
 			response.put(Constants.DATA, budgetMap);
 			response.getParams().setStatus(Constants.SUCCESSFUL);
@@ -189,8 +189,8 @@ public class BudgetServiceImpl implements BudgetService {
 		try {
 			validateUpdateBudgetInfo(data);
 
-			List<Map<String, Object>> existingBudgetInfo = cassandraOperation.getRecordsByProperties(Constants.DATABASE,
-					Constants.BUDGET_TABLE, keyMap, null);
+			List<Map<String, Object>> existingBudgetInfo = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
+					Constants.TABLE_ORG_BUDGET_SCHEME, keyMap, null);
 			if (existingBudgetInfo.isEmpty()) {
 				String errMsg = "Failed to find BudgetScheme for OrgId: " + data.getOrgId() + ", Id: " + data.getId()
 						+ ", BudgetYear: " + data.getBudgetYear();
@@ -202,8 +202,8 @@ public class BudgetServiceImpl implements BudgetService {
 			if (data.getSchemeName() != null) {
 				// Validate for duplicate schemeNames
 				keyMap.put(Constants.SCHEME_NAME, data.getSchemeName());
-				List<Map<String, Object>> existingList = cassandraOperation.getRecordsByProperties(Constants.DATABASE,
-						Constants.BUDGET_TABLE, keyMap, null);
+				List<Map<String, Object>> existingList = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
+						Constants.TABLE_ORG_BUDGET_SCHEME, keyMap, null);
 
 				if (!CollectionUtils.isEmpty(existingList)) {
 					boolean isOtherRecordExist = false;
@@ -237,13 +237,13 @@ public class BudgetServiceImpl implements BudgetService {
 				request.put(Constants.TRAINING_BUDGET_UTILIZATION, data.getTrainingBudgetUtilization());
 			}
 
-			cassandraOperation.updateRecord(Constants.DATABASE, Constants.BUDGET_TABLE, request, keyMap);
+			cassandraOperation.updateRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_ORG_BUDGET_SCHEME, request, keyMap);
 
 			request.put(Constants.ID, data.getId());
 			request.put(Constants.ORG_ID, data.getOrgId());
 			request.put(Constants.BUDGET_YEAR, data.getBudgetYear());
 
-			cassandraOperation.insertRecord(Constants.DATABASE, Constants.AUDIT_TABLE,
+			cassandraOperation.insertRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_ORG_AUDIT,
 					getAuditMap(userId, request, Constants.UPDATE));
 
 			response.put(Constants.DATA, request);
@@ -266,10 +266,10 @@ public class BudgetServiceImpl implements BudgetService {
 		keyMap.put(Constants.ID, id);
 		keyMap.put(Constants.BUDGET_YEAR, budgetYear);
 		try {
-			List<Map<String, Object>> existingDetails = cassandraOperation.getRecordsByProperties(Constants.DATABASE,
-					Constants.BUDGET_TABLE, keyMap, null);
+			List<Map<String, Object>> existingDetails = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
+					Constants.TABLE_ORG_BUDGET_SCHEME, keyMap, null);
 			if (!existingDetails.isEmpty()) {
-				cassandraOperation.deleteRecord(Constants.DATABASE, Constants.BUDGET_TABLE, keyMap);
+				cassandraOperation.deleteRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_ORG_BUDGET_SCHEME, keyMap);
 				response.getParams().setStatus(Constants.SUCCESSFUL);
 				response.setResponseCode(HttpStatus.OK);
 			} else {
@@ -296,8 +296,8 @@ public class BudgetServiceImpl implements BudgetService {
 			propertyMap.put(Constants.ORG_ID, orgId);
 			propertyMap.put(Constants.ID, budgetDetailsId);
 			propertyMap.put(Constants.BUDGET_YEAR, budgetYear);
-			List<Map<String, Object>> budgetInfo = cassandraOperation.getRecordsByProperties(Constants.DATABASE,
-					Constants.BUDGET_TABLE, propertyMap, new ArrayList<>());
+			List<Map<String, Object>> budgetInfo = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
+					Constants.TABLE_ORG_BUDGET_SCHEME, propertyMap, new ArrayList<>());
 
 			if (!budgetInfo.isEmpty()) {
 				BudgetInfo budgetInfoModel = mapper.convertValue(budgetInfo.get(0), BudgetInfo.class);
@@ -329,7 +329,7 @@ public class BudgetServiceImpl implements BudgetService {
 
 					// Update the removed list
 					Map<String, Object> budgetMap = mapper.convertValue(budgetInfoModel, HashMap.class);
-					cassandraOperation.insertRecord(Constants.DATABASE, Constants.BUDGET_TABLE, budgetMap);
+					cassandraOperation.insertRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_ORG_BUDGET_SCHEME, budgetMap);
 
 					response.getParams().setStatus(Constants.SUCCESSFUL);
 					response.setResponseCode(HttpStatus.OK);
@@ -357,8 +357,8 @@ public class BudgetServiceImpl implements BudgetService {
 		Map<String, Object> keyMap = new HashMap<>();
 		keyMap.put(Constants.ORG_ID, orgId);
 		keyMap.put(Constants.AUDIT_TYPE, Constants.BUDGET);
-		List<Map<String, Object>> auditData = cassandraOperation.getRecordsByProperties(Constants.DATABASE,
-				Constants.AUDIT_TABLE, keyMap, null);
+		List<Map<String, Object>> auditData = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
+				Constants.TABLE_ORG_AUDIT, keyMap, null);
 		if (CollectionUtils.isEmpty(auditData)) {
 			String errMsg = "Budget Scheme History details not found for Org: " + orgId;
 			logger.info(errMsg);
@@ -516,8 +516,8 @@ public class BudgetServiceImpl implements BudgetService {
 		Map<String, Object> propertyMap = new HashMap<>();
 		propertyMap.put(Constants.ORG_ID, orgId);
 		propertyMap.put(Constants.BUDGET_YEAR, budgetYear);
-		List<Map<String, Object>> details = cassandraOperation.getRecordsByProperties(Constants.DATABASE,
-				Constants.BUDGET_TABLE, propertyMap, null);
+		List<Map<String, Object>> details = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
+				Constants.TABLE_ORG_BUDGET_SCHEME, propertyMap, null);
 		if (CollectionUtils.isEmpty(details)) {
 			return Collections.emptyList();
 		}
