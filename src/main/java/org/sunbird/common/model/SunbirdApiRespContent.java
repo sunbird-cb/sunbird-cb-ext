@@ -2,8 +2,11 @@ package org.sunbird.common.model;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class SunbirdApiRespContent {
-	
+
 	private String rootOrgName;
 	private String channel;
 	private String id;
@@ -29,6 +32,10 @@ public class SunbirdApiRespContent {
 	private String userName;
 
 	private List<SunbirdApiRespOragainsation> organisations;
+
+	private Boolean isMdo;
+
+	private Boolean isCbp;
 
 	public String getRootOrgName() {
 		return rootOrgName;
@@ -149,6 +156,21 @@ public class SunbirdApiRespContent {
 	public void setOrganisations(List<SunbirdApiRespOragainsation> organisations) {
 		this.organisations = organisations;
 	}
-	
+
+	public Boolean getIsMdo() {
+		return isMdo;
+	}
+
+	public void setIsMdo(Boolean isMdo) {
+		this.isMdo = isMdo;
+	}
+
+	public Boolean getIsCbp() {
+		return isCbp;
+	}
+
+	public void setIsCbp(Boolean isCbp) {
+		this.isCbp = isCbp;
+	}
 
 }

@@ -8,19 +8,26 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 import org.sunbird.cassandra.utils.CassandraOperation;
+import org.sunbird.common.model.SunbirdApiRequest;
 import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.core.logger.CbExtLogger;
 import org.sunbird.progress.model.MandatoryContentInfo;
 import org.sunbird.progress.model.MandatoryContentResponse;
+import org.sunbird.progress.model.UserProgressRequest;
+import org.sunbird.progress.model.BatchEnrolment;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
@@ -37,7 +44,7 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
 
 	private CbExtLogger logger = new CbExtLogger(getClass().getName());
 
-	ObjectMapper mapper = new ObjectMapper();
+	private ObjectMapper mapper = new ObjectMapper();
 
 	@Override
 	public MandatoryContentResponse getMandatoryContentStatusForUser(String authUserToken, String rootOrg, String org,
@@ -130,5 +137,85 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
 				logger.error(ex);
 			}
 		}
+	}
+
+	public Map<String, Object> getUserProgress(SunbirdApiRequest requestBody) {
+		Map<String, Object> result = new HashMap<>();
+		try {
+			UserProgressRequest requestData = validateGetBatchEnrolment(requestBody);
+			if (ObjectUtils.isEmpty(requestData)) {
+				result.put(Constants.STATUS, Constants.FAILED);
+				result.put(Constants.MESSAGE, "check your request params");
+				return result;
+			}
+
+			// get all enrolled details
+			List<Map<String, Object>> userEnrolmentList = new ArrayList<>();
+			for (BatchEnrolment request : requestData.getBatchList()) {
+				Map<String, Object> propertyMap = new HashMap<>();
+				propertyMap.put(Constants.BATCH_ID, request.getBatchId());
+				propertyMap.put(Constants.ACTIVE, Boolean.TRUE);
+				if (request.getUserList() != null && !request.getUserList().isEmpty()) {
+					propertyMap.put(Constants.USER_ID_CONSTANT, request.getUserList());
+				}
+				userEnrolmentList.addAll(cassandraOperation.getRecordsByProperties(Constants.COURSE_DB,
+						Constants.USER_ENROLMENT, propertyMap,
+						new ArrayList<>(Arrays.asList(Constants.USER_ID_CONSTANT, Constants.COURSE_ID,
+								Constants.BATCH_ID, Constants.COMPLETIONPERCENTAGE, Constants.PROGRESS,
+								Constants.STATUS, Constants.ISSUED_CERTIFICATES))));
+			}
+
+			if (userEnrolmentList.size() > 100) {
+				userEnrolmentList = userEnrolmentList.subList(0, 100);
+			}
+
+			List<String> enrolledUserId = userEnrolmentList.stream()
+					.map(obj -> (String) obj.get(Constants.USER_ID_CONSTANT)).collect(Collectors.toList());
+			// get all user details
+			List<Map<String, Object>> userList = cassandraOperation.getRecordsByProperties(Constants.DATABASE,
+					Constants.USER, new HashMap<String, Object>() {
+						{
+							put(Constants.ID, enrolledUserId);
+						}
+					}, new ArrayList<>(Arrays.asList(Constants.ID, Constants.FIRSTNAME, Constants.LASTNAME)));
+
+			Map<String, Map<String, Object>> userMap = userList.stream()
+					.collect(Collectors.toMap(obj -> (String) obj.get(Constants.ID), obj -> obj));
+
+			// append user details with enrollment data
+			for (Map<String, Object> userEnrolment : userEnrolmentList) {
+				if (userMap.containsKey(userEnrolment.get(Constants.USER_ID_CONSTANT))) {
+					userEnrolment.putAll(userMap.get(userEnrolment.get(Constants.USER_ID_CONSTANT)));
+				}
+			}
+
+			result.put(Constants.STATUS, Constants.SUCCESSFUL);
+			result.put(Constants.RESULT, userEnrolmentList);
+		} catch (Exception ex) {
+			result.put(Constants.STATUS, Constants.FAILED);
+			logger.error(ex);
+		}
+		return result;
+	}
+
+	private UserProgressRequest validateGetBatchEnrolment(SunbirdApiRequest requestBody) {
+		try {
+			UserProgressRequest userProgressRequest = new UserProgressRequest();
+			if (!ObjectUtils.isEmpty(requestBody.getRequest())) {
+				userProgressRequest = mapper.convertValue(requestBody.getRequest(), UserProgressRequest.class);
+			}
+
+			if (!userProgressRequest.getBatchList().isEmpty()) {
+				for (BatchEnrolment batchEnrolment : userProgressRequest.getBatchList()) {
+					if (ObjectUtils.isEmpty(batchEnrolment.getBatchId())) {
+						return null;
+					}
+				}
+				return userProgressRequest;
+			}
+		} catch (Exception e) {
+			logger.error(e);
+		}
+		return null;
 	}
 }
