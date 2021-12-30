@@ -54,8 +54,8 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
 		Map<String, Object> propertyMap = new HashMap<>();
 		propertyMap.put(Constants.ROOT_ORG, rootOrg);
 		propertyMap.put(Constants.ORG, org);
-		List<Map<String, Object>> contentList = cassandraOperation.getRecordsByProperties(Constants.DATABASE,
-				Constants.MANDATORY_CONTENT, propertyMap, new ArrayList<>());
+		List<Map<String, Object>> contentList = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
+				Constants.TABLE_MANDATORY_USER_CONTENT, propertyMap, new ArrayList<>());
 
 		if (CollectionUtils.isEmpty(contentList)) {
 			logger.info("getMandatoryContentStatusForUser: There are no mandatory Content set in DB.");
@@ -158,8 +158,8 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
 				if (request.getUserList() != null && !request.getUserList().isEmpty()) {
 					propertyMap.put(Constants.USER_ID_CONSTANT, request.getUserList());
 				}
-				userEnrolmentList.addAll(cassandraOperation.getRecordsByProperties(Constants.COURSE_DB,
-						Constants.USER_ENROLMENT, propertyMap,
+				userEnrolmentList.addAll(cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD_COURSES,
+						Constants.TABLE_USER_ENROLMENT, propertyMap,
 						new ArrayList<>(Arrays.asList(Constants.USER_ID_CONSTANT, Constants.COURSE_ID,
 								Constants.BATCH_ID, Constants.COMPLETIONPERCENTAGE, Constants.PROGRESS,
 								Constants.STATUS, Constants.ISSUED_CERTIFICATES))));
@@ -172,8 +172,8 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
 			List<String> enrolledUserId = userEnrolmentList.stream()
 					.map(obj -> (String) obj.get(Constants.USER_ID_CONSTANT)).collect(Collectors.toList());
 			// get all user details
-			List<Map<String, Object>> userList = cassandraOperation.getRecordsByProperties(Constants.DATABASE,
-					Constants.USER, new HashMap<String, Object>() {
+			List<Map<String, Object>> userList = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
+					Constants.TABLE_USER, new HashMap<String, Object>() {
 						{
 							put(Constants.ID, enrolledUserId);
 						}

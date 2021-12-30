@@ -130,7 +130,7 @@ public class AllocationServiceV2 {
 			Map<String, Object> propertyMap = new HashMap<>();
 			propertyMap.put(Constants.ID, workOrder.getId());
 			propertyMap.put(Constants.DATA, mapper.writeValueAsString(workOrder));
-			cassandraOperation.insertRecord(Constants.DATABASE, Constants.WORK_ORDER, propertyMap);
+			cassandraOperation.insertRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_WORK_ORDER, propertyMap);
 
 			restStatus = indexerService.addEntity(workOrderIndex, workOrderIndexType, workOrder.getId(),
 					mapper.convertValue(workOrder, Map.class));
@@ -170,7 +170,7 @@ public class AllocationServiceV2 {
 			Map<String, Object> propertyMap = new HashMap<>();
 			propertyMap.put(Constants.ID, workOrder.getId());
 			propertyMap.put(Constants.DATA, mapper.writeValueAsString(workOrder));
-			cassandraOperation.insertRecord(Constants.DATABASE, Constants.WORK_ORDER, propertyMap);
+			cassandraOperation.insertRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_WORK_ORDER, propertyMap);
 
 			restStatus = indexerService.updateEntity(workOrderIndex, workOrderIndexType, workOrder.getId(),
 					mapper.convertValue(workOrder, Map.class));
@@ -179,7 +179,7 @@ public class AllocationServiceV2 {
 				workOrder.setPublishedPdfLink(publishedPdfLink);
 				propertyMap.put(Constants.ID, workOrder.getId());
 				propertyMap.put(Constants.DATA, mapper.writeValueAsString(workOrder));
-				cassandraOperation.insertRecord(Constants.DATABASE, Constants.WORK_ORDER, propertyMap);
+				cassandraOperation.insertRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_WORK_ORDER, propertyMap);
 
 				indexerService.updateEntity(workOrderIndex, workOrderIndexType, workOrder.getId(),
 						mapper.convertValue(workOrder, Map.class));
@@ -231,7 +231,7 @@ public class AllocationServiceV2 {
 			Map<String, Object> propertyMap = new HashMap<>();
 			propertyMap.put(Constants.ID, workAllocationDTO.getId());
 			propertyMap.put(Constants.DATA, mapper.writeValueAsString(workAllocationDTO));
-			cassandraOperation.insertRecord(Constants.DATABASE, Constants.WORK_ALLOCATION, propertyMap);
+			cassandraOperation.insertRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_WORK_ALLOCATION, propertyMap);
 
 			restStatus = indexerService.addEntity(workAllocationIndex, workAllocationIndexType,
 					workAllocationDTO.getId(), mapper.convertValue(workAllocationDTO, Map.class));
@@ -248,7 +248,7 @@ public class AllocationServiceV2 {
 			Map<String, Object> workOrderMap = new HashMap<>();
 			workOrderMap.put(Constants.ID, workOrder.getId());
 			workOrderMap.put(Constants.DATA, mapper.writeValueAsString(workOrder));
-			cassandraOperation.insertRecord(Constants.DATABASE, Constants.WORK_ORDER, workOrderMap);
+			cassandraOperation.insertRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_WORK_ORDER, workOrderMap);
 
 			indexerService.updateEntity(workOrderIndex, workOrderIndexType, workOrder.getId(),
 					mapper.convertValue(workOrder, Map.class));
@@ -297,7 +297,7 @@ public class AllocationServiceV2 {
 			Map<String, Object> propertyMap = new HashMap<>();
 			propertyMap.put(Constants.ID, workAllocationDTO.getId());
 			propertyMap.put(Constants.DATA, mapper.writeValueAsString(workAllocationDTO));
-			cassandraOperation.insertRecord(Constants.DATABASE, Constants.WORK_ALLOCATION, propertyMap);
+			cassandraOperation.insertRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_WORK_ALLOCATION, propertyMap);
 
 			restStatus = indexerService.updateEntity(workAllocationIndex, workAllocationIndexType,
 					workAllocationDTO.getId(), mapper.convertValue(workAllocationDTO, Map.class));
@@ -314,7 +314,7 @@ public class AllocationServiceV2 {
 			Map<String, Object> workOrderMap = new HashMap<>();
 			workOrderMap.put(Constants.ID, workOrder.getId());
 			workOrderMap.put(Constants.DATA, mapper.writeValueAsString(workOrder));
-			cassandraOperation.insertRecord(Constants.DATABASE, Constants.WORK_ORDER, workOrderMap);
+			cassandraOperation.insertRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_WORK_ORDER, workOrderMap);
 			indexerService.updateEntity(workOrderIndex, workOrderIndexType, workOrder.getId(),
 					mapper.convertValue(workOrder, Map.class));
 		} catch (Exception ex) {
@@ -526,7 +526,7 @@ public class AllocationServiceV2 {
 		prepareWorkAllocations(userId, workOrder, workAllocationIds, indexRequestList, cassandraModelList);
 		RestStatus restStatus = null;
 		if (!CollectionUtils.isEmpty(indexRequestList)) {
-			cassandraOperation.insertBulkRecord(Constants.DATABASE, Constants.WORK_ALLOCATION, cassandraModelList);
+			cassandraOperation.insertBulkRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_WORK_ALLOCATION, cassandraModelList);
 			indexerService.BulkInsert(indexRequestList);
 		}
 		workOrder.setUserIds(workAllocationIds);
@@ -534,7 +534,7 @@ public class AllocationServiceV2 {
 			Map<String, Object> workOrderMap = new HashMap<>();
 			workOrderMap.put(Constants.ID, workOrder.getId());
 			workOrderMap.put(Constants.DATA, mapper.writeValueAsString(workOrder));
-			cassandraOperation.insertRecord(Constants.DATABASE, Constants.WORK_ORDER, workOrderMap);
+			cassandraOperation.insertRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_WORK_ORDER, workOrderMap);
 
 			restStatus = indexerService.addEntity(workOrderIndex, workOrderIndexType, workOrder.getId(),
 					mapper.convertValue(workOrder, Map.class));
@@ -756,8 +756,8 @@ public class AllocationServiceV2 {
 		List<UserWorkAllocationMappingModel> userWorkAllocationMappings = new ArrayList<>();
 		Map<String, Object> propertyMap = new HashMap<>();
 		propertyMap.put(Constants.USER_ID_CONSTANT, userId);
-		List<Map<String, Object>> mappingList = cassandraOperation.getRecordsByProperties(Constants.DATABASE,
-				Constants.WORK_ALLOCATION_MAPPING, propertyMap, new ArrayList<>());
+		List<Map<String, Object>> mappingList = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
+				Constants.TABLE_USER_WORK_ALLOCATION_MAPPING, propertyMap, new ArrayList<>());
 		for (Map<String, Object> mapObj : mappingList) {
 			userWorkAllocationMappings.add(mapper.convertValue(mapObj, UserWorkAllocationMappingModel.class));
 		}

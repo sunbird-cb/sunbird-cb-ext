@@ -73,7 +73,7 @@ public class WATConsumer {
 			Map<String, Object> workOrderMap = new HashMap<>();
 			workOrderMap.put(Constants.ID, (String) workAllocationObj.get("workorderId"));
 			List<Map<String, Object>> workOrderCassandraModelOptional = cassandraOperation
-					.getRecordsByProperties(Constants.DATABASE, Constants.WORK_ORDER, workOrderMap, new ArrayList<>());
+					.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_WORK_ORDER, workOrderMap, new ArrayList<>());
 
 			if (!workOrderCassandraModelOptional.isEmpty()) {
 				Map<String, Object> watObj = mapper
@@ -85,7 +85,7 @@ public class WATConsumer {
 					Map<String, Object> workAllocationMap = new HashMap<>();
 					workAllocationMap.put(Constants.ID, userIds);
 					List<Map<String, Object>> workAllocationList = cassandraOperation.getRecordsByProperties(
-							Constants.DATABASE, Constants.WORK_ALLOCATION, workAllocationMap, new ArrayList<>());
+							Constants.KEYSPACE_SUNBIRD, Constants.TABLE_WORK_ALLOCATION, workAllocationMap, new ArrayList<>());
 
 					List<WorkAllocationDTOV2> workAllocations = new ArrayList<>();
 					for (Map<String, Object> workAllocationCassandraModel : workAllocationList) {
@@ -189,7 +189,7 @@ public class WATConsumer {
 					}
 				});
 
-				cassandraOperation.insertBulkRecord(Constants.DATABASE, Constants.WORK_ALLOCATION_MAPPING,
+				cassandraOperation.insertBulkRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_USER_WORK_ALLOCATION_MAPPING,
 						userAllocationMappingList);
 			}
 		} catch (Exception ex) {

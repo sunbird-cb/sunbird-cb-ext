@@ -56,7 +56,7 @@ public class StaffServiceImpl implements StaffService {
 			staffInfoMap.put(Constants.TOTAL_POSITION_FILLED, data.getTotalPositionsFilled());
 			staffInfoMap.put(Constants.TOTAL_POSITION_VACANT, data.getTotalPositionsVacant());
 
-			cassandraOperation.insertRecord(Constants.DATABASE, Constants.STAFF_TABLE, staffInfoMap);
+			cassandraOperation.insertRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_ORG_STAFF_POSITION, staffInfoMap);
 			data.setId((String) staffInfoMap.get(Constants.ID));
 
 			saveAuditDetails(data, userId);
@@ -127,7 +127,7 @@ public class StaffServiceImpl implements StaffService {
 			if (data.getTotalPositionsVacant() != null) {
 				existingStaffInfo.setTotalPositionsVacant(data.getTotalPositionsVacant());
 			}
-			cassandraOperation.insertRecord(Constants.DATABASE, Constants.STAFF_TABLE,
+			cassandraOperation.insertRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_ORG_STAFF_POSITION,
 					mapper.convertValue(existingStaffInfo, HashMap.class));
 
 			saveAuditDetails(data, userId);
@@ -167,8 +167,8 @@ public class StaffServiceImpl implements StaffService {
 		if (StringUtils.isNotBlank(position)) {
 			propertyMap.put(Constants.POSITION, position);
 		}
-		List<Map<String, Object>> staffLists = cassandraOperation.getRecordsByProperties(Constants.DATABASE,
-				Constants.STAFF_TABLE, propertyMap, new ArrayList<>());
+		List<Map<String, Object>> staffLists = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
+				Constants.TABLE_ORG_STAFF_POSITION, propertyMap, new ArrayList<>());
 		// convert to map to pojo object
 		List<StaffInfo> staffInfo = new ArrayList<>();
 		for (Map<String, Object> mapObj : staffLists) {
@@ -195,7 +195,7 @@ public class StaffServiceImpl implements StaffService {
 		auditMap.put(Constants.UPDATED_DATE, StringUtils.EMPTY);
 		auditMap.put(Constants.UPDATED_BY, StringUtils.EMPTY);
 		auditMap.put(Constants.TRANSACTION_DETAILS, mapper.writeValueAsString(data));
-		cassandraOperation.insertRecord(Constants.DATABASE, Constants.AUDIT_TABLE, auditMap);
+		cassandraOperation.insertRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_ORG_AUDIT, auditMap);
 	}
 
 	@Override
@@ -227,7 +227,7 @@ public class StaffServiceImpl implements StaffService {
 				Map<String, Object> primaryKeyMap = new HashMap<>();
 				primaryKeyMap.put(Constants.ORG_ID, orgId);
 				primaryKeyMap.put(Constants.ID, staffInfoId);
-				cassandraOperation.deleteRecord(Constants.DATABASE, Constants.STAFF_TABLE, primaryKeyMap);
+				cassandraOperation.deleteRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_ORG_STAFF_POSITION, primaryKeyMap);
 				response.getParams().setStatus(Constants.SUCCESSFUL);
 				response.setResponseCode(HttpStatus.OK);
 			} else {
@@ -253,8 +253,8 @@ public class StaffServiceImpl implements StaffService {
 		Map<String, Object> propertyMap = new HashMap<>();
 		propertyMap.put(Constants.ORG_ID, orgId);
 		propertyMap.put(Constants.AUDIT_TYPE, Constants.STAFF);
-		List<Map<String, Object>> auditDetails = cassandraOperation.getRecordsByProperties(Constants.DATABASE,
-				Constants.AUDIT_TABLE, propertyMap, new ArrayList<>());
+		List<Map<String, Object>> auditDetails = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
+				Constants.TABLE_ORG_AUDIT, propertyMap, new ArrayList<>());
 
 		if (CollectionUtils.isEmpty(auditDetails)) {
 			String errMsg = "Staff Position History details not found for Org: " + orgId;

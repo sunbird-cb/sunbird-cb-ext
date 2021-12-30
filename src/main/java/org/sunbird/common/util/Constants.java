@@ -166,19 +166,19 @@ public class Constants {
 	public static final String APPLY_BATCH = " APPLY BATCH;";
 
 	// Database and Tables
-	public static final String DATABASE = "sunbird";
-	public static final String COURSE_DB = "sunbird_courses";
-	public static final String BUDGET_TABLE = "org_budget_scheme";
-	public static final String AUDIT_TABLE = "org_audit";
-	public static final String STAFF_TABLE = "org_staff_position";
-	public static final String WORK_ORDER = "work_order";
-	public static final String WORK_ALLOCATION = "work_allocation";
-	public static final String WORK_ALLOCATION_MAPPING = "user_work_allocation_mapping";
-	public static final String MANDATORY_CONTENT = "mandatory_user_content";
-	public static final String ORGANIZATION = "organisation";
-	public static final String USER_ENROLMENT = "user_enrolments";
-	public static final String USER = "user";
-	public static final String COURSE_BATCH = "course_batch";
+	public static final String KEYSPACE_SUNBIRD = "sunbird";
+	public static final String KEYSPACE_SUNBIRD_COURSES = "sunbird_courses";
+	public static final String TABLE_ORG_BUDGET_SCHEME = "org_budget_scheme";
+	public static final String TABLE_ORG_AUDIT = "org_audit";
+	public static final String TABLE_ORG_STAFF_POSITION = "org_staff_position";
+	public static final String TABLE_WORK_ORDER = "work_order";
+	public static final String TABLE_WORK_ALLOCATION = "work_allocation";
+	public static final String TABLE_USER_WORK_ALLOCATION_MAPPING = "user_work_allocation_mapping";
+	public static final String TABLE_MANDATORY_USER_CONTENT = "mandatory_user_content";
+	public static final String TABLE_ORGANIZATION = "organisation";
+	public static final String TABLE_USER_ENROLMENT = "user_enrolments";
+	public static final String TABLE_USER = "user";
+	public static final String TABLE_COURSE_BATCH = "course_batch";
 
 	// Redis
 	public static final String API_REDIS_DELETE = "api.redis.delete";
