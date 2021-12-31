@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -21,13 +20,12 @@ import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.core.logger.CbExtLogger;
+import org.sunbird.progress.model.BatchEnrolment;
 import org.sunbird.progress.model.MandatoryContentInfo;
 import org.sunbird.progress.model.MandatoryContentResponse;
 import org.sunbird.progress.model.UserProgressRequest;
-import org.sunbird.progress.model.BatchEnrolment;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
