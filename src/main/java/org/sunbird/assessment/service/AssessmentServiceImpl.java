@@ -201,8 +201,7 @@ public class AssessmentServiceImpl implements AssessmentService {
 
 	@Override
 	public Map<String, Object> submitAssessmentByIframe(String rootOrg, Map<String, Object> request) throws Exception {
-
-		return null;
+		return new HashMap<>();
 	}
 
 	// A method to Format Data in the FrontEndFormat

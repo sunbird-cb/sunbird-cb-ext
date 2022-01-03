@@ -1,5 +1,6 @@
 package org.sunbird.assessment.repo;
 
+import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
 
@@ -14,7 +15,7 @@ public interface AssessmentRepository {
 	 * @return
 	 * @throws Exception
 	 */
-	public Map<String, Object> getAssessmentAnswerKey(String artifactUrl) throws Exception;
+	public Map<String, Object> getAssessmentAnswerKey(String artifactUrl);
 
 	/**
 	 * gets answerkey for the quiz submission
@@ -23,7 +24,7 @@ public interface AssessmentRepository {
 	 * @return
 	 * @throws Exception
 	 */
-	public Map<String, Object> getQuizAnswerKey(AssessmentSubmissionDTO quizMap) throws Exception;
+	public Map<String, Object> getQuizAnswerKey(AssessmentSubmissionDTO quizMap);
 
 	/**
 	 * inserts quiz or assessments for a user
@@ -34,7 +35,7 @@ public interface AssessmentRepository {
 	 * @throws Exception
 	 */
 	public Map<String, Object> insertQuizOrAssessment(Map<String, Object> persist, Boolean isAssessment)
-			throws Exception;
+			throws NumberFormatException, ParseException;
 
 	/**
 	 * gets assessment for a user given a content id
@@ -44,7 +45,6 @@ public interface AssessmentRepository {
 	 * @return
 	 * @throws Exception
 	 */
-	public List<Map<String, Object>> getAssessmetbyContentUser(String rootOrg, String courseId, String userId)
-			throws Exception;
+	public List<Map<String, Object>> getAssessmetbyContentUser(String rootOrg, String courseId, String userId);
 
 }

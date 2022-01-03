@@ -1,6 +1,7 @@
 package org.sunbird.assessment.repo;
 
 import java.math.BigDecimal;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
@@ -24,7 +25,7 @@ public class AssessmentRepositoryImpl implements AssessmentRepository {
 	public static final String SOURCE_ID = "sourceId";
 	public static final String USER_ID = "userId";
 	private CbExtLogger logger = new CbExtLogger(getClass().getName());
-	
+
 	@Autowired
 	UserAssessmentSummaryRepository userAssessmentSummaryRepo;
 
@@ -37,20 +38,20 @@ public class AssessmentRepositoryImpl implements AssessmentRepository {
 	SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 
 	@Override
-	public Map<String, Object> getAssessmentAnswerKey(String artifactUrl) throws Exception {
-		
-		return null;
+	public Map<String, Object> getAssessmentAnswerKey(String artifactUrl) {
+
+		return new HashMap<>();
 	}
 
 	@Override
-	public Map<String, Object> getQuizAnswerKey(AssessmentSubmissionDTO quizMap) throws Exception {
-		
-		return null;
+	public Map<String, Object> getQuizAnswerKey(AssessmentSubmissionDTO quizMap) {
+
+		return new HashMap<>();
 	}
 
 	@Override
 	public Map<String, Object> insertQuizOrAssessment(Map<String, Object> persist, Boolean isAssessment)
-			throws Exception {
+			throws NumberFormatException, ParseException {
 		Map<String, Object> response = new HashMap<>();
 		Date date = new Date();
 
@@ -120,9 +121,7 @@ public class AssessmentRepositoryImpl implements AssessmentRepository {
 	}
 
 	@Override
-	public List<Map<String, Object>> getAssessmetbyContentUser(String rootOrg, String courseId, String userId)
-			throws Exception {
-		
+	public List<Map<String, Object>> getAssessmetbyContentUser(String rootOrg, String courseId, String userId) {
 		return Collections.emptyList();
 	}
 }

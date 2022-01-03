@@ -13,6 +13,7 @@ import java.util.UUID;
 import org.apache.commons.lang.StringUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +40,7 @@ public class BudgetServiceImpl implements BudgetService {
 	private CassandraOperation cassandraOperation;
 
 	@Override
-	public SBApiResponse submitBudgetDetails(BudgetInfo data, String userId) throws Exception {
+	public SBApiResponse submitBudgetDetails(BudgetInfo data, String userId) {
 		SBApiResponse response = new SBApiResponse(Constants.API_BUDGET_SCHEME_ADD);
 		try {
 			validateAddBudgetInfo(data);
@@ -84,7 +85,7 @@ public class BudgetServiceImpl implements BudgetService {
 		return response;
 	}
 
-	public SBApiResponse submitBudgetDocDetails(BudgetDocInfo docInfo, String userId) throws Exception {
+	public SBApiResponse submitBudgetDocDetails(BudgetDocInfo docInfo, String userId) {
 		SBApiResponse response = new SBApiResponse(Constants.API_BUDGET_SCHEME_DOC_ADD);
 		try {
 			validateAddBudgetDocInfo(docInfo);
@@ -155,7 +156,7 @@ public class BudgetServiceImpl implements BudgetService {
 	}
 
 	@Override
-	public SBApiResponse getBudgetDetails(String orgId, String budgetYear) throws Exception {
+	public SBApiResponse getBudgetDetails(String orgId, String budgetYear) {
 		SBApiResponse response = new SBApiResponse(Constants.API_BUDGET_SCHEME_READ);
 		List<Map<String, Object>> budgetResponseList = null;
 		String errMsg = null;
@@ -179,7 +180,7 @@ public class BudgetServiceImpl implements BudgetService {
 	}
 
 	@Override
-	public SBApiResponse updateBudgetDetails(BudgetInfo data, String userId) throws Exception {
+	public SBApiResponse updateBudgetDetails(BudgetInfo data, String userId) {
 		SBApiResponse response = new SBApiResponse(Constants.API_BUDGET_SCHEME_UPDATE);
 		Map<String, Object> request = new HashMap<>();
 		Map<String, Object> keyMap = new HashMap<>();
@@ -259,7 +260,7 @@ public class BudgetServiceImpl implements BudgetService {
 	}
 
 	@Override
-	public SBApiResponse deleteBudgetDetails(String orgId, String id, String budgetYear) throws Exception {
+	public SBApiResponse deleteBudgetDetails(String orgId, String id, String budgetYear) {
 		SBApiResponse response = new SBApiResponse(Constants.API_BUDGET_SCHEME_DELETE);
 		Map<String, Object> keyMap = new HashMap<>();
 		keyMap.put(Constants.ORG_ID, orgId);
@@ -289,7 +290,7 @@ public class BudgetServiceImpl implements BudgetService {
 	}
 
 	public SBApiResponse deleteDocBudgetDetails(String orgId, String budgetDetailsId, String budgetYear,
-			String proofDocId) throws Exception {
+			String proofDocId) {
 		SBApiResponse response = new SBApiResponse(Constants.API_BUDGET_SCHEME_DELETE);
 		try {
 			Map<String, Object> propertyMap = new HashMap<>();
@@ -351,7 +352,7 @@ public class BudgetServiceImpl implements BudgetService {
 	}
 
 	@Override
-	public SBApiResponse getBudgetAudit(String orgId) throws Exception {
+	public SBApiResponse getBudgetAudit(String orgId) throws ParseException {
 		SBApiResponse response = new SBApiResponse(Constants.API_BUDGET_SCHEME_HISTORY_READ);
 
 		Map<String, Object> keyMap = new HashMap<>();
