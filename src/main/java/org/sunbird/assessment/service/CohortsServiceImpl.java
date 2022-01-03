@@ -104,10 +104,10 @@ public class CohortsServiceImpl implements CohortsService {
 						&& !topLearnerUUID.equalsIgnoreCase(userId)) {
 					CohortUsers user = new CohortUsers();
 					user.setDesc("Top Learner");
-					user.setUser_id(userProfile.getPersonalDetails().getPrimaryEmail());
+					user.setUserId(userProfile.getPersonalDetails().getPrimaryEmail());
 					user.setEmail(userProfile.getPersonalDetails().getPrimaryEmail());
-					user.setFirst_name(userProfile.getPersonalDetails().getFirstname());
-					user.setLast_name(userProfile.getPersonalDetails().getSurname());
+					user.setFirstName(userProfile.getPersonalDetails().getFirstname());
+					user.setLastName(userProfile.getPersonalDetails().getSurname());
 					userNames.add(userProfile.getPersonalDetails().getPrimaryEmail());
 					topPerformers.add(user);
 					if (counter == count)
@@ -227,8 +227,7 @@ public class CohortsServiceImpl implements CohortsService {
 		selectedBatch.setStartDate(date);
 		selectedBatch.setStatus(1);
 		selectedBatch.setBatchId(batchId);
-		Response response = constructAutoEnrollResponse(selectedBatch);
-		return response;
+		return constructAutoEnrollResponse(selectedBatch);
 	}
 
 	private Response constructAutoEnrollResponse(SunbirdApiBatchResp selectedBatch) {
@@ -242,8 +241,8 @@ public class CohortsServiceImpl implements CohortsService {
 		return response;
 	}
 
-	private void enrollInCourse(String contentId, String userUUID, Map<String, String> headers, String batchId) {
-		Response response = null;
+	private Map<String, Object> enrollInCourse(String contentId, String userUUID, Map<String, String> headers,
+			String batchId) {
 		HashMap<String, Object> req;
 		req = new HashMap<>();
 		HashMap<String, Object> enrollObj = new HashMap<>();
@@ -255,6 +254,7 @@ public class CohortsServiceImpl implements CohortsService {
 				cbExtServerProperties.getCourseServiceHost() + cbExtServerProperties.getUserCourseEnroll(), req,
 				headers);
 		Map<String, Object> enrollmentresul = (Map<String, Object>) enrollMentResponse.get("result");
+		return enrollmentresul;
 	}
 
 	private void processChildContentId(String givenContentId, List<String> assessmentIdList) {
@@ -334,7 +334,7 @@ public class CohortsServiceImpl implements CohortsService {
 		List<CohortUsers> activeUserCollection = new ArrayList<>();
 		if (participantList.size() > count) {
 			participantList = participantList.stream().limit(count).collect(Collectors.toList());
-		} else if (participantList.size() == 0) {
+		} else if (!participantList.isEmpty()) {
 			return activeUserCollection;
 		}
 		try {
@@ -351,10 +351,10 @@ public class CohortsServiceImpl implements CohortsService {
 						SearchUserApiContent userInfo = (SearchUserApiContent) participantMap.get(userId);
 						CohortUsers user = new CohortUsers();
 						// User Id is assigning instead of email
-						user.setUser_id(userInfo.getUserId());
+						user.setUserId(userInfo.getUserId());
 						user.setEmail(userInfo.getEmail());
-						user.setFirst_name(userInfo.getFirstName());
-						user.setLast_name(userInfo.getLastName());
+						user.setFirstName(userInfo.getFirstName());
+						user.setLastName(userInfo.getLastName());
 						user.setDesc(desc);
 						user.setDepartment(userInfo.getChannel());
 						if (userInfo.getProfileDetails() != null

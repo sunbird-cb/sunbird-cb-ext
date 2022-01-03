@@ -9,7 +9,6 @@ public class DeptPublicInfo {
 
 	public DeptPublicInfo() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	public DeptPublicInfo(String id, String description, String rootOrgId, String orgName) {

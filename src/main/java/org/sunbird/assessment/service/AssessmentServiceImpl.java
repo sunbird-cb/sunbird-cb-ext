@@ -71,7 +71,6 @@ public class AssessmentServiceImpl implements AssessmentService {
 
 		Map<String, Object> ret = new HashMap<>();
 
-		// TODO - Need to get the Assessment ContentMeta Data
 		// Get the assessment-key.json file. Current version has both the answers
 
 		Map<String, Object> resultMap = assessUtilServ.validateAssessment(data.getQuestions());
@@ -202,11 +201,12 @@ public class AssessmentServiceImpl implements AssessmentService {
 
 	@Override
 	public Map<String, Object> submitAssessmentByIframe(String rootOrg, Map<String, Object> request) throws Exception {
-		
+
 		return null;
 	}
 
 	// A method to Format Data in the FrontEndFormat
+	@SuppressWarnings("deprecation")
 	private List<Map<String, Object>> getAssessments(List<Map<String, Object>> result) {
 		List<Map<String, Object>> assessments = new ArrayList<>();
 		for (Map<String, Object> map : result) {
@@ -223,7 +223,7 @@ public class AssessmentServiceImpl implements AssessmentService {
 	}
 
 	@Override
-	public Map<String, Object> getAssessmentContent(String courseId, String assessmentContentId) {
+	public Map<String, Object> getAssessmentContent(String courseId, String assessmentContentId) throws Exception {
 		Map<String, Object> result = new HashMap<>();
 		try {
 			Object assessmentQuestionSet = redisCacheMgr.getCache(Constants.ASSESSMENT_QNS_SET + assessmentContentId);
@@ -254,7 +254,8 @@ public class AssessmentServiceImpl implements AssessmentService {
 							// cache the response
 							redisCacheMgr.putCache(Constants.ASSESSMENT_QNS_ANS_SET + assessmentContentId,
 									assessmentContent);
-							redisCacheMgr.putCache(Constants.ASSESSMENT_QNS_SET + assessmentContentId, assessmentQnsSet);
+							redisCacheMgr.putCache(Constants.ASSESSMENT_QNS_SET + assessmentContentId,
+									assessmentQnsSet);
 						}
 					}
 				}

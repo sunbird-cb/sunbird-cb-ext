@@ -54,19 +54,19 @@ public class PortalServiceImpl implements PortalService {
 			List<String> orgNames = new ArrayList<>();
 			int count = 0;
 			do {
-				Map<String, Object> tenantMap = new HashMap<String, Object>();
+				Map<String, Object> tenantMap = new HashMap<>();
 				tenantMap.put(Constants.IS_TENANT, Boolean.TRUE);
-				Map<String, Object> tMap = new HashMap<String, Object>();
+				Map<String, Object> tMap = new HashMap<>();
 				tMap.put(Constants.FILTERS, tenantMap);
 				tMap.put(Constants.FIELDS, new ArrayList<>(Arrays.asList(Constants.CHANNEL)));
 				tMap.put(Constants.LIMIT, 100);
 				tMap.put(Constants.OFFSET, orgNames.size());
-				Map<String, Object> requestMap = new HashMap<String, Object>();
+				Map<String, Object> requestMap = new HashMap<>();
 				requestMap.put(Constants.REQUEST, tMap);
 				StringBuilder stringBuilder = new StringBuilder();
 				stringBuilder.append(serverConfig.getSbUrl());
 				stringBuilder.append(serverConfig.getSbOrgSearchPath());
-				String serviceURL = stringBuilder.toString();
+				// String serviceURL = stringBuilder.toString();
 				SunbirdApiResp orgResponse = mapper.convertValue(outboundRequestHandlerService.fetchResultUsingPost(
 						"https://igot-dev.in/api/org/v1/search", requestMap), SunbirdApiResp.class);
 				SunbirdApiResultResponse resultResp = orgResponse.getResult().getResponse();
@@ -86,16 +86,17 @@ public class PortalServiceImpl implements PortalService {
 	public List<DeptPublicInfo> getAllDept() {
 		List<DeptPublicInfo> deptPublicInfo = new ArrayList<>();
 		try {
-			Map<String, Object> tenantMap = new HashMap<String, Object>();
+			Map<String, Object> tenantMap = new HashMap<>();
 			tenantMap.put(Constants.IS_TENANT, Boolean.TRUE);
-			Map<String, Object> tMap = new HashMap<String, Object>();
+			Map<String, Object> tMap = new HashMap<>();
 			tMap.put(Constants.FILTERS, tenantMap);
 			tMap.put(Constants.FIELDS, new ArrayList<>(
 					Arrays.asList(Constants.ID, Constants.ROOT_ORG_ID, Constants.ORG_NAME, Constants.DESCRIPTION)));
 			tMap.put(Constants.LIMIT, 100);
-			Map<String, Object> requestMap = new HashMap<String, Object>();
+			Map<String, Object> requestMap = new HashMap<>();
 			requestMap.put(Constants.REQUEST, tMap);
-			String serviceURL = serverConfig.getSbUrl() + serverConfig.getSbOrgSearchPath();
+			// String serviceURL = serverConfig.getSbUrl() +
+			// serverConfig.getSbOrgSearchPath();
 			SunbirdApiResp orgResponse = mapper.convertValue(outboundRequestHandlerService
 					.fetchResultUsingPost("https://igot-dev.in/api/org/v1/search", requestMap), SunbirdApiResp.class);
 			SunbirdApiResultResponse resultResp = orgResponse.getResult().getResponse();

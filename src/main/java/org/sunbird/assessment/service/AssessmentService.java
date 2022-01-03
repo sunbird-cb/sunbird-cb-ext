@@ -41,6 +41,6 @@ public interface AssessmentService {
 	 * @param assessmentContentId
 	 * @return
 	 */
-	public Map<String, Object> getAssessmentContent(String courseId, String assessmentContentId);
+	public Map<String, Object> getAssessmentContent(String courseId, String assessmentContentId) throws Exception;
 
 }

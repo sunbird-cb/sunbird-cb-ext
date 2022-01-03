@@ -6,7 +6,7 @@ import org.springframework.data.cassandra.repository.CassandraRepository;
 import org.springframework.data.cassandra.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.sunbird.audit.model.Audit;
-import org.sunbird.audit.model.AuditPrimaryKey;;
+import org.sunbird.audit.model.AuditPrimaryKey;
 
 @Repository
 public interface AuditRepository extends CassandraRepository<Audit, AuditPrimaryKey> {

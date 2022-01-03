@@ -55,13 +55,12 @@ public class StorageServiceImpl implements StorageService {
 			logger.info("File created: " + bool);
 			try (FileOutputStream fos = new FileOutputStream(file)) {
 				fos.write(mFile.getBytes());
-				fos.close();
 			}
 			String objectKey = cbExtServerProperties.getAzureContainerName() + "/" + file.getName();
 			String url = storageService.upload(cbExtServerProperties.getAzureContainerName(), file.getAbsolutePath(),
 					objectKey, Option.apply(false), Option.apply(1), Option.apply(5), Option.empty());
-			boolean bool = file.delete();
-			logger.info("File deleted: " + bool);
+			boolean bool1 = file.delete();
+			logger.info("File deleted: " + bool1);
 			Map<String, String> uploadedFile = new HashMap<>();
 			uploadedFile.put(Constants.NAME, file.getName());
 			uploadedFile.put(Constants.URL, url);

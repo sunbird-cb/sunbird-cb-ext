@@ -94,12 +94,14 @@ public class OutboundRequestHandlerServiceImpl {
 				headersValues.forEach((k, v) -> headers.set(k, v));
 			}
 			response = restTemplate.exchange(uri, HttpMethod.GET, new HttpEntity<Object>(headers), Map.class);
+			if (response.getBody() != null)
+				return response.getBody();
 		} catch (HttpClientErrorException e) {
 			log.error(e);
 		} catch (Exception e) {
 			log.error(e);
 		}
-		return response.getBody() != null ? response.getBody() : null;
+		return null;
 	}
 
 	public Map<String, Object> fetchResultUsingPost(String uri, Object request, Map<String, String> headersValues) {
