@@ -35,7 +35,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 	private CbExtLogger logger = new CbExtLogger(getClass().getName());
 
 	@Override
-	public boolean validateUser(String rootOrg, String userId){
+	public boolean validateUser(String rootOrg, String userId) {
 
 		Map<String, Object> requestMap = new HashMap<>();
 
@@ -59,7 +59,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 
 			boolean expression = (sunbirdApiResp != null && "OK".equalsIgnoreCase(sunbirdApiResp.getResponseCode())
 					&& sunbirdApiResp.getResult().getResponse().getCount() >= 1);
-				return expression;
+			return expression;
 
 		} catch (Exception e) {
 			throw new ApplicationLogicError("Sunbird Service ERROR: ", e);
@@ -77,18 +77,21 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		filters.put("userId", userIds);
 		request.put("filters", filters);
 		requestBody.put("request", request);
-		
+
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		try {
 			HttpEntity<?> requestEnty = new HttpEntity<>(requestBody, headers);
 			String url = props.getSbUrl() + props.getUserSearchEndPoint();
 			SearchUserApiResp searchUserResult = restTemplate.postForObject(url, requestEnty, SearchUserApiResp.class);
-			logger.info("searchUserResult ---->"+ searchUserResult.toString());
-			if(searchUserResult !=null && "OK".equalsIgnoreCase(searchUserResult.getResponseCode())
-					&& searchUserResult.getResult().getResponse().getCount()>0){
-				for(SearchUserApiContent searchUserApiContent: searchUserResult.getResult().getResponse().getContent()){
-					result.put(searchUserApiContent.getUserId(), searchUserApiContent);
+			if (searchUserResult != null) {
+				logger.info("searchUserResult ---->" + searchUserResult.toString());
+				if ("OK".equalsIgnoreCase(searchUserResult.getResponseCode())
+						&& searchUserResult.getResult().getResponse().getCount() > 0) {
+					for (SearchUserApiContent searchUserApiContent : searchUserResult.getResult().getResponse()
+							.getContent()) {
+						result.put(searchUserApiContent.getUserId(), searchUserApiContent);
+					}
 				}
 			}
 		} catch (Exception e) {

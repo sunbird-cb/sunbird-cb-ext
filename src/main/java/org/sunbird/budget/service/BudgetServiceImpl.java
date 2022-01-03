@@ -530,7 +530,7 @@ public class BudgetServiceImpl implements BudgetService {
 
 	private Map<String, Object> getAuditMap(String userId, Map<String, Object> data, String operation)
 			throws JsonProcessingException {
-		DateFormat dateFormat = new SimpleDateFormat("YYYY-MM-dd hh:mm:ss");
+		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 		List<Map<String, Object>> transactionDetails = new ArrayList<>();
 		transactionDetails.add(data);
 		Map<String, Object> auditMap = new HashMap<>();

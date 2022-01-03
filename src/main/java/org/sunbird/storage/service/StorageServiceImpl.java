@@ -51,14 +51,17 @@ public class StorageServiceImpl implements StorageService {
 		response.setId(Constants.API_FILE_UPLOAD);
 		try {
 			File file = new File(System.currentTimeMillis() + "_" + mFile.getOriginalFilename());
-			file.createNewFile();
-			FileOutputStream fos = new FileOutputStream(file);
-			fos.write(mFile.getBytes());
-			fos.close();
+			boolean bool = file.createNewFile();
+			logger.info("File created: " + bool);
+			try (FileOutputStream fos = new FileOutputStream(file)) {
+				fos.write(mFile.getBytes());
+				fos.close();
+			}
 			String objectKey = cbExtServerProperties.getAzureContainerName() + "/" + file.getName();
 			String url = storageService.upload(cbExtServerProperties.getAzureContainerName(), file.getAbsolutePath(),
 					objectKey, Option.apply(false), Option.apply(1), Option.apply(5), Option.empty());
-			file.delete();
+			boolean bool = file.delete();
+			logger.info("File deleted: " + bool);
 			Map<String, String> uploadedFile = new HashMap<>();
 			uploadedFile.put(Constants.NAME, file.getName());
 			uploadedFile.put(Constants.URL, url);

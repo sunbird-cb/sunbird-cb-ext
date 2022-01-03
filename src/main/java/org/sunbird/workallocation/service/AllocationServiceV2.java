@@ -116,10 +116,8 @@ public class AllocationServiceV2 {
 
 	/**
 	 *
-	 * @param userId
-	 *            user Id of the user
-	 * @param workOrder
-	 *            work order object
+	 * @param userId    user Id of the user
+	 * @param workOrder work order object
 	 * @return response message as success of failed
 	 */
 	public Response addWorkOrder(String userId, WorkOrderDTO workOrder) {
@@ -156,10 +154,8 @@ public class AllocationServiceV2 {
 
 	/**
 	 *
-	 * @param userId
-	 *            user Id of the user
-	 * @param workOrder
-	 *            work order object
+	 * @param userId    user Id of the user
+	 * @param workOrder work order object
 	 * @return response message as success of failed
 	 */
 	public Response updateWorkOrder(String userId, WorkOrderDTO workOrder, String xAuthUser) {
@@ -204,12 +200,9 @@ public class AllocationServiceV2 {
 
 	/**
 	 *
-	 * @param authUserToken
-	 *            auth token
-	 * @param userId
-	 *            user Id
-	 * @param workAllocationDTO
-	 *            work allocation object
+	 * @param authUserToken     auth token
+	 * @param userId            user Id
+	 * @param workAllocationDTO work allocation object
 	 * @return
 	 */
 	public Response addWorkAllocation(String authUserToken, String userId, WorkAllocationDTOV2 workAllocationDTO) {
@@ -272,12 +265,9 @@ public class AllocationServiceV2 {
 
 	/**
 	 *
-	 * @param authUserToken
-	 *            auth token
-	 * @param userId
-	 *            user Id
-	 * @param workAllocationDTO
-	 *            work allocation object
+	 * @param authUserToken     auth token
+	 * @param userId            user Id
+	 * @param workAllocationDTO work allocation object
 	 * @return
 	 */
 	public Response updateWorkAllocation(String authUserToken, String userId, WorkAllocationDTOV2 workAllocationDTO) {
@@ -496,10 +486,8 @@ public class AllocationServiceV2 {
 
 	/**
 	 *
-	 * @param userId
-	 *            user Id of the user
-	 * @param workOrderDTO
-	 *            work order object
+	 * @param userId       user Id of the user
+	 * @param workOrderDTO work order object
 	 * @return response message as success of failed
 	 */
 	public Response copyWorkOrder(String userId, WorkOrderDTO workOrderDTO) {
@@ -689,8 +677,13 @@ public class AllocationServiceV2 {
 		String uploadURL = cbExtServerProperties.getContentUploadEndPoint().replace("{identifier}", identifier);
 		ResponseEntity<Map> response = restTemplate
 				.postForEntity(cbExtServerProperties.getContentHost().concat(uploadURL), requestEntity, Map.class);
-		if (!ObjectUtils.isEmpty(response.getBody())) {
-			downloadableLink = (String) ((Map<String, Object>) response.getBody().get(RESULT)).get("artifactUrl");
+		Map<?, ?> b = response.getBody();
+		if (!ObjectUtils.isEmpty(b)) {
+			try {
+				downloadableLink = (String) ((Map<String, Object>) b.get(RESULT)).get("artifactUrl");
+			} catch (Exception e) {
+				logger.error(e.toString());
+			}
 		}
 		return downloadableLink;
 	}

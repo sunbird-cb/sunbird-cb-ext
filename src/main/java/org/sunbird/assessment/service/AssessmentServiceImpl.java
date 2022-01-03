@@ -202,7 +202,7 @@ public class AssessmentServiceImpl implements AssessmentService {
 
 	@Override
 	public Map<String, Object> submitAssessmentByIframe(String rootOrg, Map<String, Object> request) throws Exception {
-		// TODO Auto-generated method stub
+		
 		return null;
 	}
 
