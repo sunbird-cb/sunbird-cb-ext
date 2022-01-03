@@ -3,8 +3,6 @@ package org.sunbird.workallocation.model;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;

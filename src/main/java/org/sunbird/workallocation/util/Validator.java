@@ -1,5 +1,7 @@
 package org.sunbird.workallocation.util;
 
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -11,10 +13,6 @@ import org.sunbird.workallocation.model.WorkAllocationDTO;
 import org.sunbird.workallocation.model.WorkAllocationDTOV2;
 import org.sunbird.workallocation.model.WorkOrderDTO;
 import org.sunbird.workallocation.service.IndexerService;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
 
 @Component
 public class Validator {

@@ -2,7 +2,9 @@ package org.sunbird.cache.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.sunbird.cache.service.RedisCacheService;
 import org.sunbird.common.model.SBApiResponse;
 

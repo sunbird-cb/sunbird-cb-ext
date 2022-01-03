@@ -3,9 +3,10 @@ package org.sunbird.core.producer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
+import org.sunbird.core.logger.CbExtLogger;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.sunbird.core.logger.CbExtLogger;
 
 @Service
 public class Producer {

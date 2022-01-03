@@ -1,12 +1,12 @@
 package org.sunbird.workallocation.repo;
 
+import java.util.List;
+
 import org.springframework.data.cassandra.repository.CassandraRepository;
 import org.springframework.data.cassandra.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.sunbird.workallocation.model.UserWorkAllocationMapping;
 import org.sunbird.workallocation.model.UserWorkAllocationPrimaryKeyModel;
-
-import java.util.List;
 
 @Repository
 public interface UserWorkAllocationMappingRepo extends CassandraRepository<UserWorkAllocationMapping, UserWorkAllocationPrimaryKeyModel> {

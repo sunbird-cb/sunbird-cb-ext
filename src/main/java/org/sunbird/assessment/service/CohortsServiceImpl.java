@@ -18,7 +18,15 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.sunbird.assessment.repo.CohortUsers;
 import org.sunbird.assessment.repo.UserAssessmentTopPerformerRepository;
-import org.sunbird.common.model.*;
+import org.sunbird.common.model.OpenSaberApiUserProfile;
+import org.sunbird.common.model.Response;
+import org.sunbird.common.model.SearchUserApiContent;
+import org.sunbird.common.model.SunbirdApiBatchResp;
+import org.sunbird.common.model.SunbirdApiHierarchyResultContent;
+import org.sunbird.common.model.SunbirdApiResp;
+import org.sunbird.common.model.SunbirdApiUserCourse;
+import org.sunbird.common.model.SunbirdApiUserCourseListResp;
+import org.sunbird.common.model.SunbirdUserProfessionalDetail;
 import org.sunbird.common.service.ContentService;
 import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
 import org.sunbird.common.service.UserUtilityService;
@@ -253,8 +261,7 @@ public class CohortsServiceImpl implements CohortsService {
 		Map<String, Object> enrollMentResponse = outboundRequestHandlerService.fetchResultUsingPost(
 				cbExtServerProperties.getCourseServiceHost() + cbExtServerProperties.getUserCourseEnroll(), req,
 				headers);
-		Map<String, Object> enrollmentresul = (Map<String, Object>) enrollMentResponse.get("result");
-		return enrollmentresul;
+		return (Map<String, Object>) enrollMentResponse.get("result");
 	}
 
 	private void processChildContentId(String givenContentId, List<String> assessmentIdList) {

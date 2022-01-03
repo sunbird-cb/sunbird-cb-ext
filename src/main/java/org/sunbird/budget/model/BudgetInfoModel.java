@@ -6,7 +6,6 @@ import java.util.Map;
 import org.springframework.data.cassandra.core.mapping.Column;
 import org.springframework.data.cassandra.core.mapping.PrimaryKey;
 import org.springframework.data.cassandra.core.mapping.Table;
-import org.sunbird.staff.model.StaffInfoPrimaryKeyModel;
 
 @Table("org_budget_scheme")
 public class BudgetInfoModel {

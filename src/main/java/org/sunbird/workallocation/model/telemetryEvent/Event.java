@@ -1,7 +1,5 @@
 package org.sunbird.workallocation.model.telemetryEvent;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.Map;
 
 public class Event {

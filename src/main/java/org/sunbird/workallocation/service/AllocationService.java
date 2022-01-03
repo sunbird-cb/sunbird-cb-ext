@@ -1,11 +1,18 @@
 package org.sunbird.workallocation.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
 import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.rest.RestStatus;
 import org.elasticsearch.search.SearchHit;
@@ -30,14 +37,23 @@ import org.sunbird.common.service.PdfGenerationService;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.core.exception.BadRequestException;
-import org.sunbird.workallocation.model.*;
+import org.sunbird.workallocation.model.Child;
+import org.sunbird.workallocation.model.ChildNode;
+import org.sunbird.workallocation.model.CompetencyDetails;
+import org.sunbird.workallocation.model.FracRequest;
+import org.sunbird.workallocation.model.FracResponse;
+import org.sunbird.workallocation.model.Role;
+import org.sunbird.workallocation.model.RoleCompetency;
+import org.sunbird.workallocation.model.SearchCriteria;
+import org.sunbird.workallocation.model.WAObject;
+import org.sunbird.workallocation.model.WorkAllocation;
+import org.sunbird.workallocation.model.WorkAllocationDTO;
 import org.sunbird.workallocation.util.FRACReqBuilder;
 import org.sunbird.workallocation.util.Validator;
 import org.sunbird.workallocation.util.WorkAllocationConstants;
 
-import java.io.IOException;
-import java.util.*;
-import java.util.stream.Collectors;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class AllocationService {

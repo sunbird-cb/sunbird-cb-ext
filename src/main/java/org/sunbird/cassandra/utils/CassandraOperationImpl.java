@@ -13,18 +13,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.ObjectUtils;
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.util.Constants;
 
 import com.datastax.driver.core.BatchStatement;
 import com.datastax.driver.core.BoundStatement;
-import com.datastax.driver.core.PagingState;
 import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
-import com.datastax.driver.core.SimpleStatement;
 import com.datastax.driver.core.Statement;
 import com.datastax.driver.core.querybuilder.Clause;
 import com.datastax.driver.core.querybuilder.Delete;
@@ -136,10 +133,8 @@ public class CassandraOperationImpl implements CassandraOperation {
 		try {
 			delete = QueryBuilder.delete().from(keyspaceName, tableName);
 			Delete.Where deleteWhere = delete.where();
-			compositeKeyMap.entrySet().stream().forEach(x -> {
-				Clause clause = QueryBuilder.eq(x.getKey(), x.getValue());
-				deleteWhere.and(clause);
-			});
+			compositeKeyMap.entrySet().stream()
+					.forEach(x -> deleteWhere.and(QueryBuilder.eq(x.getKey(), x.getValue())));
 			connectionManager.getSession(keyspaceName).execute(delete);
 		} catch (Exception e) {
 			logger.error("CassandraOperationImpl: deleteRecord by composite key. " + Constants.EXCEPTION_MSG_DELETE
@@ -159,12 +154,9 @@ public class CassandraOperationImpl implements CassandraOperation {
 			Update update = QueryBuilder.update(keyspaceName, tableName);
 			Assignments assignments = update.with();
 			Update.Where where = update.where();
-			updateAttributes.entrySet().stream().forEach(x -> {
-				assignments.and(QueryBuilder.set(x.getKey(), x.getValue()));
-			});
-			compositeKey.entrySet().stream().forEach(x -> {
-				where.and(QueryBuilder.eq(x.getKey(), x.getValue()));
-			});
+			updateAttributes.entrySet().stream()
+					.forEach(x -> assignments.and(QueryBuilder.set(x.getKey(), x.getValue())));
+			compositeKey.entrySet().stream().forEach(x -> where.and(QueryBuilder.eq(x.getKey(), x.getValue())));
 			updateQuery = where;
 			session.execute(updateQuery);
 			response.put(Constants.RESPONSE, Constants.SUCCESS);

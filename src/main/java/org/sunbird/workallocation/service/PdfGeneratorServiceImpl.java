@@ -40,6 +40,7 @@ import net.glxn.qrgen.javase.QRCode;
 
 @Service
 public class PdfGeneratorServiceImpl implements PdfGeneratorService {
+	public static final String NUMBER_OF_BYTES_READ = "Number of bytes read: ";
 	private Logger logger = LoggerFactory.getLogger(getClass().getName());
 	public static final String DEPT_NAME = "deptName";
 	public static final String DEPT_IMG_URL = "deptImgUrl";
@@ -94,7 +95,7 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 
 		byte[] buffer = new byte[inputStream.available()];
 		int buf = inputStream.read(buffer);
-		logger.info("Number of bytes read: " + buf);
+		logger.info(NUMBER_OF_BYTES_READ + buf);
 
 		File htmlFooterPath = new File("/tmp/" + deptId + "pdf-draft-footer.html");
 		try (OutputStream outStream = new FileOutputStream(htmlFooterPath)) {
@@ -112,7 +113,7 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 		byte[] bytes = new byte[(int) file.length()];
 		try (FileInputStream fis = new FileInputStream(file)) {
 			int i = fis.read(bytes);
-			logger.info("Number of bytes read: " + i);
+			logger.info(NUMBER_OF_BYTES_READ + i);
 		}
 		return bytes;
 	}
@@ -126,7 +127,7 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 			byte[] bytes = new byte[(int) file.length()];
 			try (FileInputStream fis = new FileInputStream(file)) {
 				int i = fis.read(bytes);
-				logger.info("Number of bytes read: " + i);
+				logger.info(NUMBER_OF_BYTES_READ + i);
 			}
 			return bytes;
 
@@ -215,7 +216,7 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 
 		byte[] buffer = new byte[inputStream.available()];
 		int buf = inputStream.read(buffer);
-		logger.info("Number of bytes read: " + buf);
+		logger.info(NUMBER_OF_BYTES_READ + buf);
 
 		File htmlFooterPath = new File("/tmp/" + deptId + "pdf-draft-footer.html");
 		try (OutputStream outStream = new FileOutputStream(htmlFooterPath)) {
