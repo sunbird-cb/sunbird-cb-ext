@@ -15,8 +15,8 @@ public class Constants {
 	public static final String FIRST_NAME = "first_name";
 	public static final String LAST_NAME = "last_name";
 	public static final String MIDDLE_NAME = "middle_name";
-	public static final String FIRSTNAME = "firstname";
-	public static final String LASTNAME = "lastname";
+	public static final String FIRSTNAME = "firstName";
+	public static final String LASTNAME = "lastName";
 	public static final String CONTACT_PHONE_NUMBER_OFFICE = "contact_phone_number_office";
 	public static final String CONTACT_PHONE_NUMBER_HOME = "contact_phone_number_home";
 	public static final String CONTACT_PHONE_NUMBER_PERSONAL = "contact_phone_number_personal";
@@ -63,6 +63,12 @@ public class Constants {
 	public static final String ISSUED_CERTIFICATES = "issued_certificates";
 	public static final String IS_MDO = "isMdo";
 	public static final String IS_CBP = "isCbp";
+	public static final String PROFILE_DETAILS_DESIGNATION = "profileDetails.professionalDetails.designation";
+	public static final String PROFILE_DETAILS_DESIGNATION_OTHER = "profileDetails.professionalDetails.designationOther";
+	public static final String PROFILE_DETAILS_PRIMARY_EMAIL = "profileDetails.personalDetails.primaryEmail";
+	public static final String DEPARTMENT = "department";
+	public static final String DESIGNATION = "designation";
+	public static final String PRIMARY_EMAIL = "primaryEmail";
 
 	public static final String SUCCESSFUL = "Successful";
 	public static final String FAILED = "Failed";

@@ -9,9 +9,11 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestTemplate;
-import org.sunbird.common.model.*;
+import org.sunbird.common.model.SearchUserApiContent;
+import org.sunbird.common.model.SearchUserApiResp;
+import org.sunbird.common.model.SunbirdApiRequest;
+import org.sunbird.common.model.SunbirdApiResp;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.core.exception.ApplicationLogicError;
@@ -88,6 +90,44 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 			if(searchUserResult !=null && "OK".equalsIgnoreCase(searchUserResult.getResponseCode())
 					&& searchUserResult.getResult().getResponse().getCount()>0){
 				for(SearchUserApiContent searchUserApiContent: searchUserResult.getResult().getResponse().getContent()){
+					result.put(searchUserApiContent.getUserId(), searchUserApiContent);
+				}
+			}
+		} catch (Exception e) {
+			throw new ApplicationLogicError("Sunbird Service ERROR: ", e);
+		}
+
+		return result;
+	}
+	
+	@Override
+	public Map<String, Object> getUsersDataFromUserIds(List<String> userIds, List<String> fields, String authToken) {
+		Map<String, Object> result = new HashMap<>();
+
+		// headers
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("X-Authenticated-User-Token", authToken);
+		headers.add("Authorization", props.getSbApiKey());
+		// request body
+		SunbirdApiRequest requestObj = new SunbirdApiRequest();
+		Map<String, Object> reqMap = new HashMap<>();
+		reqMap.put(Constants.FILTERS, new HashMap<String, Object>() {
+			{
+				put(Constants.USER_ID, userIds);
+			}
+		});
+		reqMap.put(Constants.FIELDS_CONSTANT, fields);
+		requestObj.setRequest(reqMap);
+
+		try {
+			String url = props.getSbUrl() + props.getSbUserSearchPath();
+			HttpEntity<?> requestEnty = new HttpEntity<>(requestObj, headers);
+			SearchUserApiResp searchUserResult = restTemplate.postForObject(url, requestEnty, SearchUserApiResp.class);
+			logger.info("searchUserResult ---->" + searchUserResult.toString());
+			if (searchUserResult != null && "OK".equalsIgnoreCase(searchUserResult.getResponseCode())
+					&& searchUserResult.getResult().getResponse().getCount() > 0) {
+				for (SearchUserApiContent searchUserApiContent : searchUserResult.getResult().getResponse()
+						.getContent()) {
 					result.put(searchUserApiContent.getUserId(), searchUserApiContent);
 				}
 			}
