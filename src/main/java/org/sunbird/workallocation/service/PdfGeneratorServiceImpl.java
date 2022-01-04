@@ -40,6 +40,8 @@ import net.glxn.qrgen.javase.QRCode;
 
 @Service
 public class PdfGeneratorServiceImpl implements PdfGeneratorService {
+	private static final String STRING = "/";
+	private static final String DEPT_ID = "deptId";
 	public static final String NUMBER_OF_BYTES_READ = "Number of bytes read: ";
 	private Logger logger = LoggerFactory.getLogger(getClass().getName());
 	public static final String DEPT_NAME = "deptName";
@@ -72,13 +74,13 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 
 	private Logger log = LoggerFactory.getLogger(PdfGeneratorServiceImpl.class);
 
-	public byte[] generatePdf(PdfGeneratorRequest request) throws Exception {
+	public byte[] generatePdf(PdfGeneratorRequest request) throws IOException {
 		if (StringUtils.isEmpty(request.getTemplateId())) {
 			throw new BadRequestException("Template Id is mandatory!");
 		}
 		String footerTemplateName = "templates/pdf-draft-footer.html";
 		Map<String, Object> headerDetails = new HashMap<>();
-		String deptId = (String) request.getTagValuePair().get("deptId");
+		String deptId = (String) request.getTagValuePair().get(DEPT_ID);
 		headerDetails.put(DEPT_NAME, request.getTagValuePair().get(DEPT_NAME));
 		headerDetails.put(DEPT_IMG_URL, request.getTagValuePair().get(DEPT_IMG_URL));
 		String headerMessage = readVm("pdf-header.vm", headerDetails);
@@ -148,7 +150,7 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 		return null;
 	}
 
-	private String getPDFFilePath(String woId) throws Exception {
+	private String getPDFFilePath(String woId) throws IOException {
 		Map<String, Object> workOrder = allocationService.getWorkOrderObject(woId);
 		if (workOrder == null) {
 			return null;
@@ -161,10 +163,10 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 		workOrder.put("printedTime", printedTime);
 		String status = (String) workOrder.get("status");
 		String deptId = "";
-		if (workOrder.get("deptId") instanceof Integer) {
-			deptId = String.valueOf(workOrder.get("deptId"));
-		} else if (workOrder.get("deptId") instanceof String) {
-			deptId = (String) workOrder.get("deptId");
+		if (workOrder.get(DEPT_ID) instanceof Integer) {
+			deptId = String.valueOf(workOrder.get(DEPT_ID));
+		} else if (workOrder.get(DEPT_ID) instanceof String) {
+			deptId = (String) workOrder.get(DEPT_ID);
 		}
 		String templateName = null;
 		String footerTemplateName = null;
@@ -201,7 +203,6 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 			log.error("Exception occurred while loading the default department logo");
 		}
 		headerDetails.put(DEPT_NAME, workOrder.get(DEPT_NAME));
-//		headerDetails.put("deptImgUrl",  (String) workOrder.get("deptImgUrl"));
 		String headerMessage = readVm("pdf-header.vm", headerDetails);
 		String headerHtmlFilePath = createHTMLFile("pdf-header", headerMessage);
 
@@ -245,16 +246,16 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 
 	public String createHTMLFile(String fName, String htmlContent) throws IOException {
 		String prefix = UUID.randomUUID().toString().toUpperCase() + "-" + System.currentTimeMillis();
-		String htmlFilePath = htmlFolderPath + "/" + prefix + "_" + fName + HTML;
+		String htmlFilePath = htmlFolderPath + STRING + prefix + "_" + fName + HTML;
 		File theDir = new File(htmlFolderPath);
 		if (!theDir.exists()) {
 			theDir.mkdirs();
 		}
 		if (htmlContent.contains("â€˜")) {
-			htmlContent = htmlContent.replaceAll("â€˜", "'");
+			htmlContent = htmlContent.replace("â€˜", "'");
 		}
 		if (htmlContent.contains("â€™")) {
-			htmlContent = htmlContent.replaceAll("â€™", "'");
+			htmlContent = htmlContent.replace("â€™", "'");
 		}
 		BufferedWriter out = null;
 		try (FileWriter fstream = new FileWriter(htmlFilePath)) {

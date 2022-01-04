@@ -270,7 +270,7 @@ public class SearchByService {
 		Map<String, Object> compositeSearchResult = (Map<String, Object>) compositeSearchRes.get("result");
 		List<Map<String, Object>> facetsList = (List<Map<String, Object>>) compositeSearchResult.get("facets");
 		if (!CollectionUtils.isEmpty(facetsList)) {
-			providerMap = new HashMap<String, ProviderInfo>();
+			providerMap = new HashMap<>();
 			for (Map<String, Object> facetObj : facetsList) {
 				String name = (String) facetObj.get("name");
 				if ("source".equals(name)) {

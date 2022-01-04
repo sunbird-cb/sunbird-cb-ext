@@ -15,17 +15,16 @@ import org.sunbird.workallocation.service.PdfGeneratorService;
 
 @RestController
 public class PdfGeneratorController {
-    @Autowired
-    private PdfGeneratorService pdfGeneratorService;
-    
-    @PostMapping("/generatePdf")
-    public ResponseEntity<byte[]> generatePdf(@RequestBody PdfGeneratorRequest request) throws Exception {
-        return new ResponseEntity<>(pdfGeneratorService.generatePdf(request), HttpStatus.OK);
-    }
-    
-    @GetMapping(value = "/getWOPdf/{woId}", produces = MediaType.APPLICATION_PDF_VALUE)
-	public ResponseEntity<?> getWAPdf(@PathVariable("woId") String woId)
-			throws Exception {
+	@Autowired
+	private PdfGeneratorService pdfGeneratorService;
+
+	@PostMapping("/generatePdf")
+	public ResponseEntity<byte[]> generatePdf(@RequestBody PdfGeneratorRequest request) throws Exception {
+		return new ResponseEntity<>(pdfGeneratorService.generatePdf(request), HttpStatus.OK);
+	}
+
+	@GetMapping(value = "/getWOPdf/{woId}", produces = MediaType.APPLICATION_PDF_VALUE)
+	public ResponseEntity<?> getWAPdf(@PathVariable("woId") String woId) throws Exception {
 		byte[] out = null;
 		try {
 			out = pdfGeneratorService.generatePdf(woId);
@@ -40,8 +39,7 @@ public class PdfGeneratorController {
 		headers.setContentType(MediaType.APPLICATION_PDF);
 		headers.add("Content-Disposition", "inline; filename=wo_report.pdf");
 
-		ResponseEntity<?> response = new ResponseEntity<>(out, headers, HttpStatus.OK);
-		return response;
+		return new ResponseEntity<>(out, headers, HttpStatus.OK);
 	}
 
 	@GetMapping(value = "/getWOPublishedPdf/{woId}")

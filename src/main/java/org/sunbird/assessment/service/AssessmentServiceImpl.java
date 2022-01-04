@@ -1,6 +1,7 @@
 package org.sunbird.assessment.service;
 
 import java.math.BigDecimal;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -62,7 +63,7 @@ public class AssessmentServiceImpl implements AssessmentService {
 
 	@Override
 	public Map<String, Object> submitAssessment(String rootOrg, AssessmentSubmissionDTO data, String userId)
-			throws Exception {
+			throws NumberFormatException, ParseException {
 		logger.info(String.format("Submit Assessment: rootOrg: %s, userId: %s, data: %s", rootOrg, userId,
 				data.toString()));
 		// Check User exists
@@ -120,7 +121,6 @@ public class AssessmentServiceImpl implements AssessmentService {
 		}
 
 		logger.info(String.format("Trying to persist assessment data -> %s", persist.toString()));
-		// insert into assessment table
 		repository.insertQuizOrAssessment(persist, data.isAssessment());
 
 		ret.put(RESULT, result);
@@ -134,17 +134,13 @@ public class AssessmentServiceImpl implements AssessmentService {
 	}
 
 	@Override
-	public Map<String, Object> getAssessmentByContentUser(String rootOrg, String courseId, String userId)
-			throws Exception {
+	public Map<String, Object> getAssessmentByContentUser(String rootOrg, String courseId, String userId) {
 		Map<String, Object> result = new TreeMap<>();
 		try {
-			// get all submission data from cassandra
 			List<Map<String, Object>> assessmentResults = repository.getAssessmetbyContentUser(rootOrg, courseId,
 					userId);
-			// retain only those fields that need to be sent to front end
 			List<Map<String, Object>> assessments = getAssessments(assessmentResults);
 
-			// initialize variables to calculate first attempt and max score
 			Integer noOfAttemptsForPass = 0;
 			Integer noOfAttemptsForMaxScore = 0;
 			boolean passed = false;
@@ -201,7 +197,7 @@ public class AssessmentServiceImpl implements AssessmentService {
 	}
 
 	@Override
-	public Map<String, Object> submitAssessmentByIframe(String rootOrg, Map<String, Object> request) throws Exception {
+	public Map<String, Object> submitAssessmentByIframe(String rootOrg, Map<String, Object> request) {
 		return new HashMap<>();
 	}
 

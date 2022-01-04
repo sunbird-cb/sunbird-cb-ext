@@ -104,8 +104,7 @@ public class AssessmentController {
 	 */
 	@GetMapping("/v2/{courseId}/assessment/{assessmentContentId}")
 	public ResponseEntity<Map<String, Object>> getAssessmentContent(@PathVariable("courseId") String courseId,
-			@PathVariable("assessmentContentId") String assessmentContentId, @RequestHeader("rootOrg") String rootOrg)
-			throws Exception {
+			@PathVariable("assessmentContentId") String assessmentContentId, @RequestHeader("rootOrg") String rootOrg) {
 		return new ResponseEntity<>(assessmentService.getAssessmentContent(courseId, assessmentContentId),
 				HttpStatus.OK);
 	}

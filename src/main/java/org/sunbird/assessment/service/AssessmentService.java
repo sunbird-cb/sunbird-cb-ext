@@ -1,5 +1,6 @@
 package org.sunbird.assessment.service;
 
+import java.text.ParseException;
 import java.util.Map;
 
 import org.sunbird.assessment.dto.AssessmentSubmissionDTO;
@@ -10,10 +11,11 @@ public interface AssessmentService {
 	 * 
 	 * @param data
 	 * @return
+	 * @throws ParseException
+	 * @throws NumberFormatException
 	 * @throws Exception
 	 */
-	public Map<String, Object> submitAssessment(String rootOrg, AssessmentSubmissionDTO data, String userEmail)
-			throws Exception;
+	public Map<String, Object> submitAssessment(String rootOrg, AssessmentSubmissionDTO data, String userEmail) throws NumberFormatException, ParseException;
 
 	/**
 	 * gets assessments given a content id and user id
@@ -23,7 +25,7 @@ public interface AssessmentService {
 	 * @return
 	 * @throws Exception
 	 */
-	Map<String, Object> getAssessmentByContentUser(String rootOrg, String courseId, String userId) throws Exception;
+	Map<String, Object> getAssessmentByContentUser(String rootOrg, String courseId, String userId);
 
 	/**
 	 * submits assessments coming from iframe
@@ -32,7 +34,7 @@ public interface AssessmentService {
 	 * @return
 	 * @throws Exception
 	 */
-	Map<String, Object> submitAssessmentByIframe(String rootOrg, Map<String, Object> request) throws Exception;
+	Map<String, Object> submitAssessmentByIframe(String rootOrg, Map<String, Object> request);
 
 	/**
 	 * Get assement question set
