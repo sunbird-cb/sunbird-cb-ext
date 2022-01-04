@@ -118,7 +118,7 @@ public class AssessmentServiceImpl implements AssessmentService {
 			persist.put("parentContentType", "");
 		}
 
-		logger.info("Trying to persist assessment data -> " + persist.toString());
+		logger.info(String.format("Trying to persist assessment data -> %s" + persist.toString()));
 		// insert into assessment table
 		repository.insertQuizOrAssessment(persist, data.isAssessment());
 
