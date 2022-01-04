@@ -147,9 +147,6 @@ public class CbExtServerProperties {
 	@Value("${sb.org.search.path}")
 	private String sbOrgSearchPath;
 
-	@Value("${sb.user.search.path}")
-	private String sbUserSearchPath;
-
 	@Value("${km.base.composite.search.path}")
 	private String kmCompositeSearchPath;
 
@@ -589,14 +586,6 @@ public class CbExtServerProperties {
 
 	public void setSbOrgSearchPath(String sbOrgSearchPath) {
 		this.sbOrgSearchPath = sbOrgSearchPath;
-	}
-
-	public String getSbUserSearchPath() {
-		return sbUserSearchPath;
-	}
-
-	public void setSbUserSearchPath(String sbUserSearchPath) {
-		this.sbUserSearchPath = sbUserSearchPath;
 	}
 
 	public String getKmCompositeSearchPath() {

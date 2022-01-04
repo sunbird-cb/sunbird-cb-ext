@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import org.sunbird.common.model.SunbirdApiRequest;
+import org.sunbird.common.util.Constants;
 import org.sunbird.progress.model.MandatoryContentResponse;
 import org.sunbird.progress.service.MandatoryContentService;
 
@@ -36,7 +37,7 @@ public class MandatoryContentController {
 
 	@PostMapping("/v1/progress/getUserProgress")
 	public ResponseEntity<Map<String, Object>> getUserProgress(@RequestBody SunbirdApiRequest requestBody,
-			@RequestHeader("x-authenticated-user-token") String authUserToken) {
+			@RequestHeader(Constants.USER_TOKEN) String authUserToken) {
 		return new ResponseEntity<>(service.getUserProgress(requestBody, authUserToken), HttpStatus.OK);
 	}
 

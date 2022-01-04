@@ -76,6 +76,7 @@ public class Constants {
 	public static final String DATA = "data";
 	public static final String STATUS = "status";
 	public static final String RESULT = "result";
+	public static final String OK = "OK";
 
 	public static final String ADD = "add";
 	public static final String UPDATE = "update";
