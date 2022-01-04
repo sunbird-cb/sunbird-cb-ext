@@ -1,41 +1,55 @@
 package org.sunbird.portal.department.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class SearchUserInfo {
-	private String department_name;
+	@JsonProperty("department_name")
+	private String departmentName;
 	private String wid;
 	private String email;
-	private String first_name;
-	private String last_name;
-	public String getDepartment_name() {
-		return department_name;
-	}
-	public void setDepartment_name(String department_name) {
-		this.department_name = department_name;
-	}
+	@JsonProperty("first_name")
+	private String firstName;
+	@JsonProperty("last_name")
+	private String lastName;
+
 	public String getWid() {
 		return wid;
 	}
+
 	public void setWid(String wid) {
 		this.wid = wid;
 	}
+
 	public String getEmail() {
 		return email;
 	}
+
 	public void setEmail(String email) {
 		this.email = email;
 	}
-	public String getFirst_name() {
-		return first_name;
+
+	public String getDepartmentName() {
+		return departmentName;
 	}
-	public void setFirst_name(String first_name) {
-		this.first_name = first_name;
+
+	public void setDepartmentName(String departmentName) {
+		this.departmentName = departmentName;
 	}
-	public String getLast_name() {
-		return last_name;
+
+	public String getFirstName() {
+		return firstName;
 	}
-	public void setLast_name(String last_name) {
-		this.last_name = last_name;
+
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
 	}
-	
-	
+
+	public String getLastName() {
+		return lastName;
+	}
+
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
+	}
+
 }

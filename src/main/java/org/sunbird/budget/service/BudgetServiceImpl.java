@@ -32,6 +32,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class BudgetServiceImpl implements BudgetService {
+	private static final String FAILED_TO_FIND_BUDGET_SCHEME_FOR_ORG_ID = "Failed to find BudgetScheme for OrgId: ";
+	private static final String ID = ", Id: ";
+	private static final String BUDGET_YEAR = ", BudgetYear: ";
 	private ObjectMapper mapper = new ObjectMapper();
 	private SimpleDateFormat dateFormatter = new SimpleDateFormat(Constants.DATE_FORMAT);
 	private Logger logger = LoggerFactory.getLogger(getClass().getName());
@@ -54,7 +57,7 @@ public class BudgetServiceImpl implements BudgetService {
 
 			if (!existingDataList.isEmpty()) {
 				String errMsg = "Budget Scheme exist for given name. Failed to create BudgetInfo for OrgId: "
-						+ data.getOrgId() + ", BudgetYear: " + data.getBudgetYear() + ", SchemeName: "
+						+ data.getOrgId() + BUDGET_YEAR + data.getBudgetYear() + ", SchemeName: "
 						+ data.getSchemeName();
 				logger.error(errMsg);
 				response.getParams().setErr(errMsg);
@@ -100,8 +103,8 @@ public class BudgetServiceImpl implements BudgetService {
 					Constants.BUDGET_TABLE, propertyMap, new ArrayList<>());
 
 			if (existingBudgetInfo.isEmpty()) {
-				String errMsg = "Failed to find BudgetScheme for OrgId: " + docInfo.getOrgId() + ", Id: "
-						+ docInfo.getId() + ", BudgetYear: " + docInfo.getBudgetYear();
+				String errMsg = FAILED_TO_FIND_BUDGET_SCHEME_FOR_ORG_ID + docInfo.getOrgId() + ID + docInfo.getId()
+						+ BUDGET_YEAR + docInfo.getBudgetYear();
 				logger.error(errMsg);
 				response.getParams().setErrmsg(errMsg);
 				response.setResponseCode(HttpStatus.BAD_REQUEST);
@@ -167,7 +170,7 @@ public class BudgetServiceImpl implements BudgetService {
 			errMsg = "No Budget Year Collection found for Org: " + orgId;
 		} else {
 			budgetResponseList = getSpecificBudgetYearDetails(orgId, budgetYear);
-			errMsg = "No Budget Scheme found for Org: " + orgId + ", BudgetYear: " + budgetYear;
+			errMsg = "No Budget Scheme found for Org: " + orgId + BUDGET_YEAR + budgetYear;
 		}
 
 		if (CollectionUtils.isEmpty(budgetResponseList)) {
@@ -196,8 +199,8 @@ public class BudgetServiceImpl implements BudgetService {
 			List<Map<String, Object>> existingBudgetInfo = cassandraOperation.getRecordsByProperties(Constants.DATABASE,
 					Constants.BUDGET_TABLE, keyMap, null);
 			if (existingBudgetInfo.isEmpty()) {
-				String errMsg = "Failed to find BudgetScheme for OrgId: " + data.getOrgId() + ", Id: " + data.getId()
-						+ ", BudgetYear: " + data.getBudgetYear();
+				String errMsg = FAILED_TO_FIND_BUDGET_SCHEME_FOR_ORG_ID + data.getOrgId() + ID + data.getId()
+						+ BUDGET_YEAR + data.getBudgetYear();
 				logger.error(errMsg);
 				response.getParams().setErrmsg(errMsg);
 				response.setResponseCode(HttpStatus.BAD_REQUEST);
@@ -220,7 +223,7 @@ public class BudgetServiceImpl implements BudgetService {
 					}
 					if (isOtherRecordExist) {
 						String errMsg = "Budget Scheme exist for given name. Failed to update BudgetInfo for OrgId: "
-								+ data.getOrgId() + ", BudgetYear: " + data.getBudgetYear() + ", SchemeName: "
+								+ data.getOrgId() + BUDGET_YEAR + data.getBudgetYear() + ", SchemeName: "
 								+ data.getSchemeName();
 						logger.error(errMsg);
 						response.getParams().setErr(errMsg);
@@ -278,8 +281,7 @@ public class BudgetServiceImpl implements BudgetService {
 				response.getParams().setStatus(Constants.SUCCESSFUL);
 				response.setResponseCode(HttpStatus.OK);
 			} else {
-				String errMsg = "Failed to find BudgetScheme for OrgId: " + orgId + ", Id: " + id + ", BudgetYear: "
-						+ budgetYear;
+				String errMsg = FAILED_TO_FIND_BUDGET_SCHEME_FOR_ORG_ID + orgId + ID + id + BUDGET_YEAR + budgetYear;
 				logger.error(errMsg);
 				response.getParams().setErrmsg(errMsg);
 				response.setResponseCode(HttpStatus.BAD_REQUEST);
@@ -308,8 +310,8 @@ public class BudgetServiceImpl implements BudgetService {
 			if (!budgetInfo.isEmpty()) {
 				BudgetInfo budgetInfoModel = mapper.convertValue(budgetInfo.get(0), BudgetInfo.class);
 				if (CollectionUtils.isEmpty(budgetInfoModel.getProofDocs())) {
-					String errMsg = "Failed to find BudgetScheme for OrgId: " + orgId + ", Id: " + budgetDetailsId
-							+ ", BudgetYear: " + budgetYear;
+					String errMsg = FAILED_TO_FIND_BUDGET_SCHEME_FOR_ORG_ID + orgId + ID + budgetDetailsId + BUDGET_YEAR
+							+ budgetYear;
 					logger.error(errMsg);
 					response.getParams().setErrmsg(errMsg);
 					response.setResponseCode(HttpStatus.BAD_REQUEST);
@@ -341,8 +343,8 @@ public class BudgetServiceImpl implements BudgetService {
 					response.setResponseCode(HttpStatus.OK);
 				}
 			} else {
-				String errMsg = "Failed to find BudgetScheme for OrgId: " + orgId + ", Id: " + budgetDetailsId
-						+ ", BudgetYear: " + budgetYear;
+				String errMsg = FAILED_TO_FIND_BUDGET_SCHEME_FOR_ORG_ID + orgId + ID + budgetDetailsId + BUDGET_YEAR
+						+ budgetYear;
 				logger.error(errMsg);
 				response.getParams().setErrmsg(errMsg);
 				response.setResponseCode(HttpStatus.BAD_REQUEST);
@@ -409,7 +411,7 @@ public class BudgetServiceImpl implements BudgetService {
 	}
 
 	private void validateAddBudgetInfo(BudgetInfo budgetInfo) throws Exception {
-		List<String> errObjList = new ArrayList<String>();
+		List<String> errObjList = new ArrayList<>();
 		if (StringUtils.isEmpty(budgetInfo.getOrgId())) {
 			errObjList.add(Constants.ORG_ID);
 		}
@@ -439,7 +441,7 @@ public class BudgetServiceImpl implements BudgetService {
 	}
 
 	private void validateUpdateBudgetInfo(BudgetInfo budgetInfo) throws Exception {
-		List<String> errObjList = new ArrayList<String>();
+		List<String> errObjList = new ArrayList<>();
 		if (StringUtils.isEmpty(budgetInfo.getOrgId())) {
 			errObjList.add(Constants.ORG_ID);
 		}
@@ -450,7 +452,10 @@ public class BudgetServiceImpl implements BudgetService {
 			errObjList.add(Constants.BUDGET_YEAR);
 		}
 
-		boolean schemeName = false, sBudgetAllocated = false, tBudgetAllocated = false, tBudgetUtilization = false;
+		boolean schemeName = false;
+		boolean sBudgetAllocated = false;
+		boolean tBudgetAllocated = false;
+		boolean tBudgetUtilization = false;
 		if (budgetInfo.getSchemeName() != null) {
 			if (StringUtils.isEmpty(budgetInfo.getSchemeName())) {
 				errObjList.add(Constants.SCHEME_NAME);
@@ -504,21 +509,6 @@ public class BudgetServiceImpl implements BudgetService {
 		}
 	}
 
-	// private List<Object> getAllBudgetYearDetails(String orgId) {
-	// List<BudgetInfoModel> budgetDetails =
-	// budgetRepository.getDistinctBudgetYear();
-	// if (CollectionUtils.isEmpty(budgetDetails)) {
-	// return Collections.emptyList();
-	// }
-	// List<Object> budgetResponse = new ArrayList<>();
-	// for (BudgetInfoModel budget : budgetDetails) {
-	// if (budget.getPrimaryKey().getOrgId().equals(orgId)) {
-	// budgetResponse.add(budget.getPrimaryKey().getBudgetYear());
-	// }
-	// }
-	// return budgetResponse;
-	// }
-
 	private List<Map<String, Object>> getSpecificBudgetYearDetails(String orgId, String budgetYear) {
 		Map<String, Object> propertyMap = new HashMap<>();
 		propertyMap.put(Constants.ORG_ID, orgId);
@@ -560,7 +550,7 @@ public class BudgetServiceImpl implements BudgetService {
 	}
 
 	private void validateAddBudgetDocInfo(BudgetDocInfo budgetInfo) throws Exception {
-		List<String> errObjList = new ArrayList<String>();
+		List<String> errObjList = new ArrayList<>();
 		if (StringUtils.isEmpty(budgetInfo.getOrgId())) {
 			errObjList.add(Constants.ORG_ID);
 		}
