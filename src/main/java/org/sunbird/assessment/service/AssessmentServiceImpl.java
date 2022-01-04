@@ -63,7 +63,8 @@ public class AssessmentServiceImpl implements AssessmentService {
 	@Override
 	public Map<String, Object> submitAssessment(String rootOrg, AssessmentSubmissionDTO data, String userId)
 			throws Exception {
-		logger.info("Submit Assessment: rootOrg: " + rootOrg + ", userId: " + userId + ", data: " + data.toString());
+		logger.info(String.format("Submit Assessment: rootOrg: %s, userId: %s, data: %s", rootOrg, userId,
+				data.toString()));
 		// Check User exists
 		if (!userUtilService.validateUser(rootOrg, userId)) {
 			throw new BadRequestException("Invalid UserId.");
@@ -118,7 +119,7 @@ public class AssessmentServiceImpl implements AssessmentService {
 			persist.put("parentContentType", "");
 		}
 
-		logger.info(String.format("Trying to persist assessment data -> %s" + persist.toString()));
+		logger.info(String.format("Trying to persist assessment data -> %s", persist.toString()));
 		// insert into assessment table
 		repository.insertQuizOrAssessment(persist, data.isAssessment());
 
@@ -222,7 +223,7 @@ public class AssessmentServiceImpl implements AssessmentService {
 	}
 
 	@Override
-	public Map<String, Object> getAssessmentContent(String courseId, String assessmentContentId) throws Exception {
+	public Map<String, Object> getAssessmentContent(String courseId, String assessmentContentId) {
 		Map<String, Object> result = new HashMap<>();
 		try {
 			Object assessmentQuestionSet = redisCacheMgr.getCache(Constants.ASSESSMENT_QNS_SET + assessmentContentId);

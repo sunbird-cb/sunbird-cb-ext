@@ -157,7 +157,8 @@ public class SearchByService {
 			Exception err = new Exception("Failed to get facets value from Composite Search API.");
 			logger.error(err);
 			try {
-				logger.info("Received Response: " + (new ObjectMapper()).writeValueAsString(compositeSearchResult));
+				logger.info(String.format("Received Response: %s",
+						(new ObjectMapper()).writeValueAsString(compositeSearchResult)));
 			} catch (Exception e) {
 			}
 			throw err;
@@ -232,7 +233,8 @@ public class SearchByService {
 			Exception err = new Exception("Failed to get competency info from FRAC API.");
 			logger.error(err);
 			try {
-				logger.info("Received Response: " + (new ObjectMapper()).writeValueAsString(fracSearchRes));
+				logger.info(
+						String.format("Received Response: %s", (new ObjectMapper()).writeValueAsString(fracSearchRes)));
 			} catch (Exception e) {
 			}
 			throw err;
@@ -286,7 +288,8 @@ public class SearchByService {
 			Exception err = new Exception("Failed to get facets value from Composite Search API.");
 			logger.error(err);
 			try {
-				logger.info("Received Response: " + (new ObjectMapper()).writeValueAsString(compositeSearchResult));
+				logger.info(String.format("Received Response: %s",
+						(new ObjectMapper()).writeValueAsString(compositeSearchResult)));
 			} catch (Exception e) {
 			}
 			throw err;
@@ -325,7 +328,8 @@ public class SearchByService {
 			Exception err = new Exception("Failed to get competency info from FRAC API.");
 			logger.error(err);
 			try {
-				logger.info("Received Response: " + (new ObjectMapper()).writeValueAsString(orgSearchRes));
+				logger.info(
+						String.format("Received Response: %s", (new ObjectMapper()).writeValueAsString(orgSearchRes)));
 			} catch (Exception e) {
 			}
 			throw err;

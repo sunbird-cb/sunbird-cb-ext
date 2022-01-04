@@ -86,7 +86,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 			String url = props.getSbUrl() + props.getUserSearchEndPoint();
 			SearchUserApiResp searchUserResult = restTemplate.postForObject(url, requestEnty, SearchUserApiResp.class);
 			if (searchUserResult != null) {
-				logger.info("searchUserResult ---->" + searchUserResult.toString());
+				logger.info(String.format("searchUserResult ----> %s", searchUserResult.toString()));
 				if ("OK".equalsIgnoreCase(searchUserResult.getResponseCode())
 						&& searchUserResult.getResult().getResponse().getCount() > 0) {
 					for (SearchUserApiContent searchUserApiContent : searchUserResult.getResult().getResponse()

@@ -48,7 +48,8 @@ public class ContentServiceImpl implements ContentService {
 		url.append(serverConfig.getCourseServiceHost()).append(endPoint);
 		Map<String, String> headers = new HashMap<>();
 		headers.put("x-authenticated-user-token", authToken);
-		SunbirdApiUserCourseListResp response = mapper.convertValue(outboundRequestHandlerService.fetchUsingGetWithHeaders(url.toString(), headers),
+		SunbirdApiUserCourseListResp response = mapper.convertValue(
+				outboundRequestHandlerService.fetchUsingGetWithHeaders(url.toString(), headers),
 				SunbirdApiUserCourseListResp.class);
 		if (response.getResponseCode().equalsIgnoreCase("Ok")) {
 			return response;
@@ -84,7 +85,7 @@ public class ContentServiceImpl implements ContentService {
 					if (batchResp != null && batchResp.getCount() > 0) {
 						participantList.addAll(batchResp.getParticipants());
 					}
-					logger.info("Fetch Participants return - " + participantList.size() + " no. of users.");
+					logger.info(String.format("Fetch Participants return - %d no. of users.", participantList.size()));
 				} else {
 					logger.warn("Failed to get participants for BatchId - " + batchId);
 					logger.warn("Error Response -> " + mapper.writeValueAsString(response));

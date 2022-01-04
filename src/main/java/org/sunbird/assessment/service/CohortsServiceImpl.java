@@ -96,8 +96,8 @@ public class CohortsServiceImpl implements CohortsService {
 			learnerUUIDEmailMap = userUtilService.getUsersDataFromUserIds(rootOrg, topLearnierIdList,
 					new ArrayList<>(Arrays.asList(Constants.FIRST_NAME, Constants.LAST_NAME, Constants.EMAIL,
 							Constants.DEPARTMENT_NAME)));
-			logger.info("enrichDepartmentInfo UserIds -> " + topLearnierIdList.toString() + ", fetched Information -> "
-					+ learnerUUIDEmailMap.size());
+			logger.info(String.format("enrichDepartmentInfo UserIds -> %s , fetched Information -> %d",
+					topLearnierIdList.toString(), learnerUUIDEmailMap.size()));
 		}
 
 		List<String> userNames = new ArrayList<>();
@@ -349,8 +349,8 @@ public class CohortsServiceImpl implements CohortsService {
 					new ArrayList<>(Arrays.asList(Constants.FIRST_NAME, Constants.LAST_NAME, Constants.EMAIL,
 							Constants.DEPARTMENT_NAME)));
 			if (!CollectionUtils.isEmpty(participantMap)) {
-				logger.info("enrichDepartmentInfo UserIds -> " + participantList.toString()
-						+ ", fetched Information -> " + participantMap.size());
+				logger.info(String.format("enrichDepartmentInfo UserIds -> %s , fetched Information -> %d",
+						participantList.toString(), participantMap.size()));
 				int currentCount = 0;
 				String desc = "Started learning this course";
 				for (String userId : participantList) {

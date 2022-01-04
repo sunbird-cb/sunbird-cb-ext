@@ -41,7 +41,7 @@ public class IndexerService {
 	 * @return status
 	 */
 	public RestStatus addEntity(String index, String indexType, String entityId, Map<String, Object> indexDocument) {
-		logger.info("addEntity starts with index {} and entityId {}", index, entityId);
+		logger.info(String.format("addEntity starts with index %s and entityId %s", index, entityId));
 		IndexResponse response = null;
 		try {
 			if (!StringUtils.isEmpty(entityId)) {
@@ -67,7 +67,7 @@ public class IndexerService {
 	 * @return status
 	 */
 	public RestStatus updateEntity(String index, String indexType, String entityId, Map<String, ?> indexDocument) {
-		logger.info("updateEntity starts with index {} and entityId {}", index, entityId);
+		logger.info(String.format("updateEntity starts with index %s and entityId %s", index, entityId));
 		UpdateResponse response = null;
 		try {
 			response = esClient.update(new UpdateRequest(index.toLowerCase(), indexType, entityId).doc(indexDocument),
@@ -87,7 +87,7 @@ public class IndexerService {
 	 * @return status
 	 */
 	public Map<String, Object> readEntity(String index, String indexType, String entityId) {
-		logger.info("readEntity starts with index {} and entityId {}", index, entityId);
+		logger.info(String.format("readEntity starts with index %s and entityId %s", index, entityId));
 		GetResponse response = null;
 		try {
 			response = esClient.get(new GetRequest(index, indexType, entityId), RequestOptions.DEFAULT);

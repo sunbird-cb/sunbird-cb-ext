@@ -52,7 +52,7 @@ public class StorageServiceImpl implements StorageService {
 		try {
 			File file = new File(System.currentTimeMillis() + "_" + mFile.getOriginalFilename());
 			boolean bool = file.createNewFile();
-			logger.info("File created: " + bool);
+			logger.info(String.format("File created: %b", bool));
 			try (FileOutputStream fos = new FileOutputStream(file)) {
 				fos.write(mFile.getBytes());
 			}
@@ -60,7 +60,7 @@ public class StorageServiceImpl implements StorageService {
 			String url = storageService.upload(cbExtServerProperties.getAzureContainerName(), file.getAbsolutePath(),
 					objectKey, Option.apply(false), Option.apply(1), Option.apply(5), Option.empty());
 			boolean bool1 = file.delete();
-			logger.info("File deleted: " + bool1);
+			logger.info(String.format("File deleted: %b", bool1));
 			Map<String, String> uploadedFile = new HashMap<>();
 			uploadedFile.put(Constants.NAME, file.getName());
 			uploadedFile.put(Constants.URL, url);
@@ -71,7 +71,7 @@ public class StorageServiceImpl implements StorageService {
 		} catch (Exception e) {
 			logger.error(String.format("Failed to upload file. Exception: %s", e.getMessage()));
 			response.getParams().setStatus(Constants.FAILED);
-			response.getParams().setErrmsg("Failed to upload file. Exception: %s" + e.getMessage());
+			response.getParams().setErrmsg("Failed to upload file. Exception:" + e.getMessage());
 			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
 			return response;
 		}

@@ -73,9 +73,9 @@ public class EnrichmentService {
 		}
 		userIds.add(workOrderDTO.getUpdatedBy());
 		try {
-			logger.info("user Ids : {}", mapper.writeValueAsString(userIds));
+			logger.info(String.format("user Ids : {}", mapper.writeValueAsString(userIds)));
 			Map<String, Object> usersMap = allocationServiceV2.getUsersResult(userIds);
-			logger.info("user Map : {}", mapper.writeValueAsString(usersMap));
+			logger.info(String.format("user Map : %s", mapper.writeValueAsString(usersMap)));
 			if (StringUtils.isEmpty(workOrderDTO.getCreatedByName())
 					&& !ObjectUtils.isEmpty(usersMap.get(workOrderDTO.getCreatedBy()))) {
 				UserBasicInfo userBasicInfo = mapper.convertValue(usersMap.get(workOrderDTO.getCreatedBy()),

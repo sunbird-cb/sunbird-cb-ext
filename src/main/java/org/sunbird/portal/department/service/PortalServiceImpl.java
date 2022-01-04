@@ -66,7 +66,8 @@ public class PortalServiceImpl implements PortalService {
 				StringBuilder stringBuilder = new StringBuilder();
 				stringBuilder.append(serverConfig.getSbUrl());
 				stringBuilder.append(serverConfig.getSbOrgSearchPath());
-				// String serviceURL = stringBuilder.toString();
+				String serviceURL = stringBuilder.toString();
+				logger.info(String.format("service Url : %s", serviceURL));
 				SunbirdApiResp orgResponse = mapper.convertValue(outboundRequestHandlerService.fetchResultUsingPost(
 						"https://igot-dev.in/api/org/v1/search", requestMap), SunbirdApiResp.class);
 				SunbirdApiResultResponse resultResp = orgResponse.getResult().getResponse();
@@ -95,8 +96,8 @@ public class PortalServiceImpl implements PortalService {
 			tMap.put(Constants.LIMIT, 100);
 			Map<String, Object> requestMap = new HashMap<>();
 			requestMap.put(Constants.REQUEST, tMap);
-			// String serviceURL = serverConfig.getSbUrl() +
-			// serverConfig.getSbOrgSearchPath();
+			String serviceURL = serverConfig.getSbUrl() + serverConfig.getSbOrgSearchPath();
+			logger.info(String.format("service Url : %s", serviceURL));
 			SunbirdApiResp orgResponse = mapper.convertValue(outboundRequestHandlerService
 					.fetchResultUsingPost("https://igot-dev.in/api/org/v1/search", requestMap), SunbirdApiResp.class);
 			SunbirdApiResultResponse resultResp = orgResponse.getResult().getResponse();
