@@ -2,6 +2,7 @@ package org.sunbird.budget.controller;
 
 import javax.validation.Valid;
 
+import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -26,28 +27,28 @@ public class BudgetController {
 
 	@PostMapping("/budget/scheme")
 	public ResponseEntity<?> createBudgetDetails(@RequestHeader("x-authenticated-userid") String userId,
-			@Valid @RequestBody BudgetInfo requestBody) throws Exception {
+			@Valid @RequestBody BudgetInfo requestBody) {
 		SBApiResponse response = budgetService.submitBudgetDetails(requestBody, userId);
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
 
 	@PostMapping("/budget/scheme/proof")
 	public ResponseEntity<?> createBudgeProofDetails(@RequestHeader("x-authenticated-userid") String userId,
-			@Valid @RequestBody BudgetDocInfo requestBody) throws Exception {
+			@Valid @RequestBody BudgetDocInfo requestBody) {
 		SBApiResponse response = budgetService.submitBudgetDocDetails(requestBody, userId);
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
 
 	@GetMapping("budget/scheme/{orgId}/{budgetYear}")
 	public ResponseEntity<?> getBudgetDetails(@PathVariable("orgId") String orgId,
-			@PathVariable("budgetYear") String budgetYear) throws Exception {
+			@PathVariable("budgetYear") String budgetYear) {
 		SBApiResponse response = budgetService.getBudgetDetails(orgId, budgetYear);
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
 
 	@PatchMapping("/budget/scheme")
 	public ResponseEntity<?> updateBudgetDetails(@RequestHeader("x-authenticated-userid") String userId,
-			@Valid @RequestBody BudgetInfo requestBody) throws Exception {
+			@Valid @RequestBody BudgetInfo requestBody) {
 		SBApiResponse response = budgetService.updateBudgetDetails(requestBody, userId);
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
@@ -55,7 +56,7 @@ public class BudgetController {
 	@DeleteMapping("/budget/scheme")
 	public ResponseEntity<?> deleteBudgetDetails(@RequestParam(name = "orgId", required = true) String orgId,
 			@RequestParam(name = "id", required = true) String budgetDetailsId,
-			@RequestParam(name = "budgetYear", required = false) String budgetYear) throws Exception {
+			@RequestParam(name = "budgetYear", required = false) String budgetYear) {
 		SBApiResponse response = budgetService.deleteBudgetDetails(orgId, budgetDetailsId, budgetYear);
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
@@ -64,13 +65,13 @@ public class BudgetController {
 	public ResponseEntity<?> deleteBudgetDocDetails(@RequestParam(name = "orgId", required = true) String orgId,
 			@RequestParam(name = "id", required = true) String budgetDetailsId,
 			@RequestParam(name = "budgetYear", required = true) String budgetYear,
-			@RequestParam(name = "proofDocId", required = true) String proofDocId) throws Exception {
+			@RequestParam(name = "proofDocId", required = true) String proofDocId) {
 		SBApiResponse response = budgetService.deleteDocBudgetDetails(orgId, budgetDetailsId, budgetYear, proofDocId);
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
 
 	@GetMapping("/orghistory/{orgId}/budget")
-	public ResponseEntity<?> getBudgetHistoryDetails(@PathVariable("orgId") String orgId) throws Exception {
+	public ResponseEntity<?> getBudgetHistoryDetails(@PathVariable("orgId") String orgId) throws ParseException {
 		SBApiResponse response = budgetService.getBudgetAudit(orgId);
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
