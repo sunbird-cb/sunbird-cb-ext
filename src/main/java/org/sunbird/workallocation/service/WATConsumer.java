@@ -25,11 +25,11 @@ import org.sunbird.core.logger.CbExtLogger;
 import org.sunbird.core.producer.Producer;
 import org.sunbird.workallocation.model.PropertyFilterMixIn;
 import org.sunbird.workallocation.model.WorkAllocationDTOV2;
-import org.sunbird.workallocation.model.telemetryEvent.Actor;
-import org.sunbird.workallocation.model.telemetryEvent.Context;
-import org.sunbird.workallocation.model.telemetryEvent.Event;
-import org.sunbird.workallocation.model.telemetryEvent.ObjectData;
-import org.sunbird.workallocation.model.telemetryEvent.Pdata;
+import org.sunbird.workallocation.model.telemetryevent.Actor;
+import org.sunbird.workallocation.model.telemetryevent.Context;
+import org.sunbird.workallocation.model.telemetryevent.Event;
+import org.sunbird.workallocation.model.telemetryevent.ObjectData;
+import org.sunbird.workallocation.model.telemetryevent.Pdata;
 import org.sunbird.workallocation.util.WorkAllocationConstants;
 
 import com.fasterxml.jackson.databind.ObjectMapper;

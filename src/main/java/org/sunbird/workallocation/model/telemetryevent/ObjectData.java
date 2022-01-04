@@ -1,4 +1,4 @@
-package org.sunbird.workallocation.model.telemetryEvent;
+package org.sunbird.workallocation.model.telemetryevent;
 
 public class ObjectData {
     private String id;

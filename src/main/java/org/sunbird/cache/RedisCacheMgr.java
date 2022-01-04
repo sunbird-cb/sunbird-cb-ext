@@ -19,7 +19,7 @@ import org.sunbird.core.logger.CbExtLogger;
 @Component
 public class RedisCacheMgr {
 
-	private static final int cache_ttl = 84600;
+	private static final int CACHE_TTL = 84600;
 
 	@Autowired
 	private RedisTemplate<String, Object> redisTemplate;
@@ -31,7 +31,7 @@ public class RedisCacheMgr {
 
 	public void putCache(String key, Object object) {
 		try {
-			int ttl = cache_ttl;
+			int ttl = CACHE_TTL;
 			if (!StringUtils.isEmpty(cbExtServerProperties.getRedisTimeout())) {
 				ttl = Integer.parseInt(cbExtServerProperties.getRedisTimeout());
 			}
@@ -113,7 +113,7 @@ public class RedisCacheMgr {
 	}
 
 	public List<Map<String, Object>> getAllKeysAndValues() {
-		List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
+		List<Map<String, Object>> result = new ArrayList<>();
 		try {
 			String keyPattern = "*";
 			Map<String, Object> res = new HashMap<>();

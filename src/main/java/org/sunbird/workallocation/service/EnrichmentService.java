@@ -1,6 +1,5 @@
 package org.sunbird.workallocation.service;
 
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -72,28 +71,21 @@ public class EnrichmentService {
 			userIds.add(workOrderDTO.getCreatedBy());
 		}
 		userIds.add(workOrderDTO.getUpdatedBy());
-		try {
-			logger.info(String.format("user Ids : {}", mapper.writeValueAsString(userIds)));
-			Map<String, Object> usersMap = allocationServiceV2.getUsersResult(userIds);
-			logger.info(String.format("user Map : %s", mapper.writeValueAsString(usersMap)));
-			if (StringUtils.isEmpty(workOrderDTO.getCreatedByName())
-					&& !ObjectUtils.isEmpty(usersMap.get(workOrderDTO.getCreatedBy()))) {
-				UserBasicInfo userBasicInfo = mapper.convertValue(usersMap.get(workOrderDTO.getCreatedBy()),
-						UserBasicInfo.class);
-				String firstName = userBasicInfo.getFirstName() == null ? "" : userBasicInfo.getFirstName();
-				String lastName = userBasicInfo.getLastName() == null ? "" : userBasicInfo.getLastName();
-				workOrderDTO.setCreatedByName(firstName + " " + lastName);
-			}
-			if (!ObjectUtils.isEmpty(usersMap.get(workOrderDTO.getUpdatedBy()))) {
-				UserBasicInfo userBasicInfo = mapper.convertValue(usersMap.get(workOrderDTO.getUpdatedBy()),
-						UserBasicInfo.class);
-				String firstName = userBasicInfo.getFirstName() == null ? "" : userBasicInfo.getFirstName();
-				String lastName = userBasicInfo.getLastName() == null ? "" : userBasicInfo.getLastName();
-				workOrderDTO.setUpdatedByName(firstName + " " + lastName);
-			}
-		} catch (IOException e) {
-			logger.error(
-					String.format("Encountered an Exception while fetching the user details :  %s", e.getMessage()));
+		Map<String, Object> usersMap = allocationServiceV2.getUsersResult(userIds);
+		if (StringUtils.isEmpty(workOrderDTO.getCreatedByName())
+				&& !ObjectUtils.isEmpty(usersMap.get(workOrderDTO.getCreatedBy()))) {
+			UserBasicInfo userBasicInfo = mapper.convertValue(usersMap.get(workOrderDTO.getCreatedBy()),
+					UserBasicInfo.class);
+			String firstName = userBasicInfo.getFirstName() == null ? "" : userBasicInfo.getFirstName();
+			String lastName = userBasicInfo.getLastName() == null ? "" : userBasicInfo.getLastName();
+			workOrderDTO.setCreatedByName(firstName + " " + lastName);
+		}
+		if (!ObjectUtils.isEmpty(usersMap.get(workOrderDTO.getUpdatedBy()))) {
+			UserBasicInfo userBasicInfo = mapper.convertValue(usersMap.get(workOrderDTO.getUpdatedBy()),
+					UserBasicInfo.class);
+			String firstName = userBasicInfo.getFirstName() == null ? "" : userBasicInfo.getFirstName();
+			String lastName = userBasicInfo.getLastName() == null ? "" : userBasicInfo.getLastName();
+			workOrderDTO.setUpdatedByName(firstName + " " + lastName);
 		}
 	}
 

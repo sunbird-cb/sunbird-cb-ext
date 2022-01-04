@@ -1,6 +1,7 @@
 package org.sunbird.workallocation.service;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -87,7 +88,6 @@ public class IndexerService {
 	 * @return status
 	 */
 	public Map<String, Object> readEntity(String index, String indexType, String entityId) {
-		logger.info(String.format("readEntity starts with index %s and entityId %s", index, entityId));
 		GetResponse response = null;
 		try {
 			response = esClient.get(new GetRequest(index, indexType, entityId), RequestOptions.DEFAULT);
@@ -95,7 +95,7 @@ public class IndexerService {
 			logger.error(String.format("Exception in getting the record from ElasticSearch :  %s", e.getMessage()));
 		}
 		if (null == response)
-			return null;
+			return new HashMap<>();
 		return response.getSourceAsMap();
 	}
 
@@ -119,7 +119,7 @@ public class IndexerService {
 
 	}
 
-	public RestStatus BulkInsert(List<IndexRequest> indexRequestList) {
+	public RestStatus bulkInsert(List<IndexRequest> indexRequestList) {
 		BulkResponse restStatus = null;
 		if (!CollectionUtils.isEmpty(indexRequestList)) {
 			BulkRequest bulkRequest = new BulkRequest();

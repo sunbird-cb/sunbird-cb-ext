@@ -518,7 +518,7 @@ public class AllocationServiceV2 {
 		RestStatus restStatus = null;
 		if (!CollectionUtils.isEmpty(indexRequestList)) {
 			cassandraOperation.insertBulkRecord(Constants.DATABASE, Constants.WORK_ALLOCATION, cassandraModelList);
-			indexerService.BulkInsert(indexRequestList);
+			indexerService.bulkInsert(indexRequestList);
 		}
 		workOrder.setUserIds(workAllocationIds);
 		try {

@@ -3,6 +3,10 @@ package org.sunbird.portal.department.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class DepartmentInfo implements Comparable<DepartmentInfo> {
 	private Integer id;
 	private String rootOrg;
@@ -15,9 +19,12 @@ public class DepartmentInfo implements Comparable<DepartmentInfo> {
 	private String logo;
 	private long creationDate;
 	private String createdBy;
-	private List<PortalUserInfo> active_users;
-	private List<PortalUserInfo> inActive_users;
-	private List<PortalUserInfo> blocked_users;
+	@JsonProperty("active_users")
+	private List<PortalUserInfo> activeUsers;
+	@JsonProperty("inActive_users")
+	private List<PortalUserInfo> inActiveUsers;
+	@JsonProperty("blocked_users")
+	private List<PortalUserInfo> blockedUsers;
 	private List<String> currentUserRoles;
 	private Integer sourceId;
 
@@ -93,49 +100,25 @@ public class DepartmentInfo implements Comparable<DepartmentInfo> {
 		this.headquarters = headquarters;
 	}
 
-	public List<PortalUserInfo> getActive_users() {
-		return active_users;
-	}
-
-	public void setActive_users(List<PortalUserInfo> active_users) {
-		this.active_users = active_users;
-	}
-
-	public List<PortalUserInfo> getInActive_users() {
-		return inActive_users;
-	}
-
-	public void setInActive_users(List<PortalUserInfo> inActive_users) {
-		this.inActive_users = inActive_users;
-	}
-
-	public List<PortalUserInfo> getBlocked_users() {
-		return blocked_users;
-	}
-
-	public void setBlocked_users(List<PortalUserInfo> blocked_users) {
-		this.blocked_users = blocked_users;
-	}
-
 	public void addActiveUser(PortalUserInfo pUserInfo) {
-		if (this.active_users == null) {
-			this.active_users = new ArrayList<PortalUserInfo>();
+		if (this.activeUsers == null) {
+			this.activeUsers = new ArrayList<>();
 		}
-		this.active_users.add(pUserInfo);
+		this.activeUsers.add(pUserInfo);
 	}
 
 	public void addInActiveUser(PortalUserInfo pUserInfo) {
-		if (this.inActive_users == null) {
-			this.inActive_users = new ArrayList<PortalUserInfo>();
+		if (this.inActiveUsers == null) {
+			this.inActiveUsers = new ArrayList<>();
 		}
-		this.inActive_users.add(pUserInfo);
+		this.inActiveUsers.add(pUserInfo);
 	}
 
 	public void addBlockedUser(PortalUserInfo pUserInfo) {
-		if (this.blocked_users == null) {
-			this.blocked_users = new ArrayList<PortalUserInfo>();
+		if (this.blockedUsers == null) {
+			this.blockedUsers = new ArrayList<>();
 		}
-		this.blocked_users.add(pUserInfo);
+		this.blockedUsers.add(pUserInfo);
 	}
 
 	public List<String> getCurrentUserRoles() {
@@ -168,6 +151,30 @@ public class DepartmentInfo implements Comparable<DepartmentInfo> {
 
 	public void setSourceId(Integer sourceId) {
 		this.sourceId = sourceId;
+	}
+
+	public List<PortalUserInfo> getActiveUsers() {
+		return activeUsers;
+	}
+
+	public void setActiveUsers(List<PortalUserInfo> activeUsers) {
+		this.activeUsers = activeUsers;
+	}
+
+	public List<PortalUserInfo> getInActiveUsers() {
+		return inActiveUsers;
+	}
+
+	public void setInActiveUsers(List<PortalUserInfo> inActiveUsers) {
+		this.inActiveUsers = inActiveUsers;
+	}
+
+	public List<PortalUserInfo> getBlockedUsers() {
+		return blockedUsers;
+	}
+
+	public void setBlockedUsers(List<PortalUserInfo> blockedUsers) {
+		this.blockedUsers = blockedUsers;
 	}
 
 	public String toString() {
