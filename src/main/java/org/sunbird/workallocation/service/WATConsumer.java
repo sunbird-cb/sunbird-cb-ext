@@ -71,7 +71,7 @@ public class WATConsumer {
 			Map<String, Object> workAllocationObj = mapper.readValue(String.valueOf(data.value()), Map.class);
 
 			Map<String, Object> workOrderMap = new HashMap<>();
-			workOrderMap.put(Constants.ID, (String) workAllocationObj.get("workorderId"));
+			workOrderMap.put(Constants.ID, workAllocationObj.get("workorderId"));
 			List<Map<String, Object>> workOrderCassandraModelOptional = cassandraOperation
 					.getRecordsByProperties(Constants.DATABASE, Constants.WORK_ORDER, workOrderMap, new ArrayList<>());
 
@@ -89,13 +89,7 @@ public class WATConsumer {
 
 					List<WorkAllocationDTOV2> workAllocations = new ArrayList<>();
 					for (Map<String, Object> workAllocationCassandraModel : workAllocationList) {
-						try {
-							workAllocations
-									.add(mapper.readValue((String) workAllocationCassandraModel.get(Constants.DATA),
-											WorkAllocationDTOV2.class));
-						} catch (IOException e) {
-							logger.error(e);
-						}
+						extracted(mapper, workAllocations, workAllocationCassandraModel);
 					}
 					watObj.put("users", workAllocations);
 
@@ -106,9 +100,18 @@ public class WATConsumer {
 				Event event = getTelemetryEvent(watObj);
 				logger.info("Posting WAT event to telemetry ...");
 				logger.info(mapper.writeValueAsString(event));
-				// postTelemetryEvent(event);
 				producer.push(telemetryEventTopicName, event);
 			}
+		} catch (IOException e) {
+			logger.error(e);
+		}
+	}
+
+	private void extracted(ObjectMapper mapper, List<WorkAllocationDTOV2> workAllocations,
+			Map<String, Object> workAllocationCassandraModel) {
+		try {
+			workAllocations.add(mapper.readValue((String) workAllocationCassandraModel.get(Constants.DATA),
+					WorkAllocationDTOV2.class));
 		} catch (IOException e) {
 			logger.error(e);
 		}
@@ -166,7 +169,6 @@ public class WATConsumer {
 		objectData.setId((String) watObject.get("id"));
 		objectData.setType(WorkAllocationConstants.WORK_ORDER_ID_CONST);
 		event.setObject(objectData);
-		// event.setType(WorkAllocationConstants.EVENTS_NAME);
 		return event;
 	}
 

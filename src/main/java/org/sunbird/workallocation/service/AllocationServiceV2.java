@@ -66,6 +66,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Service
 public class AllocationServiceV2 {
 
+	private static final String WORKORDER_ID = "workorderId";
 	public static final String RESULT = "result";
 	@Autowired
 	private IndexerService indexerService;
@@ -144,7 +145,7 @@ public class AllocationServiceV2 {
 			response.put(Constants.MESSAGE, Constants.FAILED);
 		}
 		HashMap<String, String> watEventData = new HashMap<>();
-		watEventData.put("workorderId", workOrder.getId());
+		watEventData.put(WORKORDER_ID, workOrder.getId());
 		producer.push(cbExtServerProperties.getKafkaTopicWatEvent(), watEventData);
 		HashMap<String, Object> data = new HashMap<>();
 		data.put("id", workOrder.getId());
@@ -186,7 +187,7 @@ public class AllocationServiceV2 {
 			throw new ApplicationLogicError("Exception occurred while updating the work order", ex);
 		}
 		HashMap<String, String> watEventData = new HashMap<>();
-		watEventData.put("workorderId", workOrder.getId());
+		watEventData.put(WORKORDER_ID, workOrder.getId());
 		producer.push(cbExtServerProperties.getKafkaTopicWatEvent(), watEventData);
 		Response response = new Response();
 		if (!ObjectUtils.isEmpty(restStatus)) {
@@ -251,7 +252,7 @@ public class AllocationServiceV2 {
 			throw new ApplicationLogicError("Exception occurred while saving the work allocation!!", ex);
 		}
 		HashMap<String, String> watEventData = new HashMap<>();
-		watEventData.put("workorderId", workAllocationDTO.getWorkOrderId());
+		watEventData.put(WORKORDER_ID, workAllocationDTO.getWorkOrderId());
 		producer.push(cbExtServerProperties.getKafkaTopicWatEvent(), watEventData);
 		Response response = new Response();
 		if (!ObjectUtils.isEmpty(restStatus)) {
@@ -313,7 +314,7 @@ public class AllocationServiceV2 {
 			throw new ApplicationLogicError("Exception occurred while saving the work allocation!!", ex);
 		}
 		HashMap<String, String> watEventData = new HashMap<>();
-		watEventData.put("workorderId", workAllocationDTO.getWorkOrderId());
+		watEventData.put(WORKORDER_ID, workAllocationDTO.getWorkOrderId());
 		producer.push(cbExtServerProperties.getKafkaTopicWatEvent(), watEventData);
 		Response response = new Response();
 		if (!ObjectUtils.isEmpty(restStatus)) {
@@ -540,7 +541,7 @@ public class AllocationServiceV2 {
 			response.put(Constants.MESSAGE, Constants.FAILED);
 		}
 		HashMap<String, String> watEventData = new HashMap<>();
-		watEventData.put("workorderId", workOrder.getId());
+		watEventData.put(WORKORDER_ID, workOrder.getId());
 		producer.push(cbExtServerProperties.getKafkaTopicWatEvent(), watEventData);
 		HashMap<String, Object> data = new HashMap<>();
 		data.put("id", workOrder.getId());
@@ -573,14 +574,14 @@ public class AllocationServiceV2 {
 					}
 				}
 			}
-		} catch (JsonProcessingException e) {
+		} catch (Exception e) {
 			logger.error(String.format("Exception occurred while preparing the copy work allocation! :  %s",
 					e.getMessage()));
 			throw new ApplicationLogicError("Exception occurred while preparing the copy work allocation!", e);
 		}
 	}
 
-	public Response getUserBasicDetails(String userId) throws IOException {
+	public Response getUserBasicDetails(String userId) {
 		Response response = new Response();
 		response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
 		Set<String> userIds = new HashSet<>();
@@ -693,10 +694,10 @@ public class AllocationServiceV2 {
 		return downloadableLink;
 	}
 
-	public HashMap<String, Object> getUsersResult(Set<String> userIds) {
+	public Map<String, Object> getUsersResult(Set<String> userIds) {
 		HashMap<String, Object> userResult = new HashMap<>();
 		Map<String, Object> request = getSearchObject(userIds);
-		Map<String, Object> record;
+		Map<String, Object> record1;
 		HashMap<String, String> headersValue = new HashMap<>();
 		headersValue.put("Content-Type", "application/json");
 		try {
@@ -716,17 +717,17 @@ public class AllocationServiceV2 {
 										.get("profileDetails");
 								HashMap<String, Object> personalDetails = (HashMap<String, Object>) profileDetails
 										.get("personalDetails");
-								record = new HashMap<>();
-								record.put("wid", userProfile.get("userId"));
-								record.put("first_name", personalDetails.get("firstname"));
-								record.put("last_name", personalDetails.get("surname"));
-								record.put("email", personalDetails.get("primaryEmail"));
+								record1 = new HashMap<>();
+								record1.put("wid", userProfile.get("userId"));
+								record1.put("first_name", personalDetails.get("firstname"));
+								record1.put("last_name", personalDetails.get("surname"));
+								record1.put("email", personalDetails.get("primaryEmail"));
 								if (profileDetails.get("employmentDetails") != null) {
-									record.put("department_name",
+									record1.put("department_name",
 											((HashMap<String, Object>) profileDetails.get("employmentDetails"))
 													.get("departmentName"));
 								}
-								userResult.put(record.get("wid").toString(), record);
+								userResult.put(record1.get("wid").toString(), record1);
 							}
 						}
 					}

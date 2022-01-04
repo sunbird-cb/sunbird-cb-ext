@@ -50,14 +50,9 @@ public class AllocationController {
 	}
 
 	@GetMapping(value = "/getWAPdf/{userId}/{waId}", produces = MediaType.APPLICATION_PDF_VALUE)
-	public ResponseEntity<?> getWAPdf(@PathVariable("userId") String userId, @PathVariable("waId") String waId)
-			throws Exception {
+	public ResponseEntity<byte[]> getWAPdf(@PathVariable("userId") String userId, @PathVariable("waId") String waId) {
 		byte[] out = null;
-		try {
-			out = allocationService.getWaPdf(userId, waId);
-		} catch (Exception e) {
-		}
-
+		out = allocationService.getWaPdf(userId, waId);
 		if (out == null) {
 			throw new InternalError("Failed to generate PDF file.");
 		}
@@ -66,8 +61,7 @@ public class AllocationController {
 		headers.setContentType(MediaType.APPLICATION_PDF);
 		headers.add("Content-Disposition", "inline; filename=wa_report.pdf");
 
-		ResponseEntity<?> response = new ResponseEntity<>(out, headers, HttpStatus.OK);
+		return new ResponseEntity<>(out, headers, HttpStatus.OK);
 
-		return response;
 	}
 }

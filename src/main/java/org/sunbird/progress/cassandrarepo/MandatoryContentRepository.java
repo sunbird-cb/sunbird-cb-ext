@@ -1,4 +1,4 @@
-package org.sunbird.progress.cassandraRepo;
+package org.sunbird.progress.cassandrarepo;
 
 import java.util.List;
 

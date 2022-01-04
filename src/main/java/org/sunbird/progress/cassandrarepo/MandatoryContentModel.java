@@ -1,4 +1,4 @@
-package org.sunbird.progress.cassandraRepo;
+package org.sunbird.progress.cassandrarepo;
 
 import org.springframework.data.cassandra.core.mapping.Column;
 import org.springframework.data.cassandra.core.mapping.PrimaryKey;
