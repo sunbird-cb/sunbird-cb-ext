@@ -56,7 +56,8 @@ public class CassandraOperationImpl implements CassandraOperation {
 			connectionManager.getSession(keyspaceName).execute(boundStatement.bind(array));
 			response.put(Constants.RESPONSE, Constants.SUCCESS);
 		} catch (Exception e) {
-			logger.error("Exception occurred while inserting record to " + tableName + " : " + e, e.getMessage());
+			logger.error(String.format("Exception occurred while inserting record to :  %s :  %s", tableName,
+					e.getMessage()));
 		}
 		return response;
 	}
@@ -82,7 +83,8 @@ public class CassandraOperationImpl implements CassandraOperation {
 			connectionManager.getSession(keyspaceName).execute(batchStatement);
 			response.put(Constants.RESPONSE, Constants.SUCCESS);
 		} catch (Exception e) {
-			logger.error("Exception occurred while inserting bulk record to " + tableName + " : " + e, e.getMessage());
+			logger.error(String.format("Exception occurred while inserting bulk record to %s %s", tableName,
+					e.getMessage()));
 		}
 		return response;
 	}
@@ -137,8 +139,8 @@ public class CassandraOperationImpl implements CassandraOperation {
 					.forEach(x -> deleteWhere.and(QueryBuilder.eq(x.getKey(), x.getValue())));
 			connectionManager.getSession(keyspaceName).execute(delete);
 		} catch (Exception e) {
-			logger.error("CassandraOperationImpl: deleteRecord by composite key. " + Constants.EXCEPTION_MSG_DELETE
-					+ tableName + " : " + e.getMessage(), e);
+			logger.error(String.format("CassandraOperationImpl: deleteRecord by composite key. %s %s %s",
+					Constants.EXCEPTION_MSG_DELETE, tableName, e.getMessage()));
 			throw e;
 
 		}

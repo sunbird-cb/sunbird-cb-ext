@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -133,7 +134,7 @@ public class AllocationServiceV2 {
 			restStatus = indexerService.addEntity(workOrderIndex, workOrderIndexType, workOrder.getId(),
 					mapper.convertValue(workOrder, Map.class));
 		} catch (Exception ex) {
-			logger.error("Exception occurred while creating the work order", ex);
+			logger.error(String.format("Exception occurred while creating the work order %s", ex.getMessage()));
 			throw new ApplicationLogicError("Exception occurred while creating the work order", ex);
 		}
 		Response response = new Response();
@@ -181,7 +182,7 @@ public class AllocationServiceV2 {
 						mapper.convertValue(workOrder, Map.class));
 			}
 		} catch (Exception ex) {
-			logger.error("Exception occurred while updating the work order", ex);
+			logger.error(String.format("Exception occurred while updating the work order :  %s", ex.getMessage()));
 			throw new ApplicationLogicError("Exception occurred while updating the work order", ex);
 		}
 		HashMap<String, String> watEventData = new HashMap<>();
@@ -246,7 +247,7 @@ public class AllocationServiceV2 {
 			indexerService.updateEntity(workOrderIndex, workOrderIndexType, workOrder.getId(),
 					mapper.convertValue(workOrder, Map.class));
 		} catch (Exception ex) {
-			logger.error("Exception occurred while saving the work allocation!!", ex);
+			logger.error(String.format("Exception occurred while saving the work allocation!! :  %s", ex.getMessage()));
 			throw new ApplicationLogicError("Exception occurred while saving the work allocation!!", ex);
 		}
 		HashMap<String, String> watEventData = new HashMap<>();
@@ -308,7 +309,7 @@ public class AllocationServiceV2 {
 			indexerService.updateEntity(workOrderIndex, workOrderIndexType, workOrder.getId(),
 					mapper.convertValue(workOrder, Map.class));
 		} catch (Exception ex) {
-			logger.error("Exception occurred while saving the work allocation!!", ex);
+			logger.error(String.format("Exception occurred while saving the work allocation!! :  %s", ex.getMessage()));
 			throw new ApplicationLogicError("Exception occurred while saving the work allocation!!", ex);
 		}
 		HashMap<String, String> watEventData = new HashMap<>();
@@ -326,7 +327,9 @@ public class AllocationServiceV2 {
 	}
 
 	private void verifyRoleActivity(String authUserToken, WorkAllocationDTOV2 workAllocation) {
-		for (RoleCompetency roleCompetency : workAllocation.getRoleCompetencyList()) {
+		Iterator<RoleCompetency> itr = workAllocation.getRoleCompetencyList().iterator();
+		while (itr.hasNext()) {
+			RoleCompetency roleCompetency = itr.next();
 			Role oldRole = roleCompetency.getRoleDetails();
 			Role newRole = null;
 			try {
@@ -353,7 +356,7 @@ public class AllocationServiceV2 {
 					}
 				}
 			} catch (Exception e) {
-				logger.error("Failed to Add Role / Activity. Excption: ", e);
+				logger.error(String.format("Failed to Add Role / Activity. Excption: %s ", e.getMessage()));
 			}
 		}
 	}
@@ -385,9 +388,9 @@ public class AllocationServiceV2 {
 			if (oldCompetencyDetails.size() == newCompetencyDetails.size()) {
 				roleCompetency.setCompetencyDetails(newCompetencyDetails);
 			} else {
-				logger.error(
+				logger.error(String.format(
 						"Failed to create FRAC Competency / CompetencyLevel. Old List Size: {} , New List Size: {}",
-						oldCompetencyDetails.size(), newCompetencyDetails.size());
+						oldCompetencyDetails.size(), newCompetencyDetails.size()));
 			}
 		}
 	}
@@ -419,7 +422,7 @@ public class AllocationServiceV2 {
 				workOrderDTOList.add(mapper.convertValue(hit.getSourceAsMap(), WorkOrderDTO.class));
 			}
 		} catch (IOException e) {
-			logger.error("Elastic Search Exception", e);
+			logger.error(String.format("Elastic Search Exception :  %s", e.getMessage()));
 		}
 		Response response = new Response();
 		response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
@@ -477,7 +480,7 @@ public class AllocationServiceV2 {
 							WorkAllocationDTOV2.class);
 					workAllocationDTOV2List.add(workAllocationDTOV2);
 				} catch (Exception ex) {
-					logger.error("Exception occurred while reading the work allocation for id, {}", id);
+					logger.error(String.format("Exception occurred while reading the work allocation for id, {}", id));
 				}
 			});
 		}
@@ -527,7 +530,7 @@ public class AllocationServiceV2 {
 			restStatus = indexerService.addEntity(workOrderIndex, workOrderIndexType, workOrder.getId(),
 					mapper.convertValue(workOrder, Map.class));
 		} catch (JsonProcessingException e) {
-			logger.error("Exception occurred while saving the work order!!", e);
+			logger.error(String.format("Exception occurred while saving the work order!! :  %s", e.getMessage()));
 			throw new ApplicationLogicError("Exception occurred while saving the work order!!", e);
 		}
 		Response response = new Response();
@@ -571,7 +574,8 @@ public class AllocationServiceV2 {
 				}
 			}
 		} catch (JsonProcessingException e) {
-			logger.error("Exception occurred while preparing the copy work allocation!", e);
+			logger.error(String.format("Exception occurred while preparing the copy work allocation! :  %s",
+					e.getMessage()));
 			throw new ApplicationLogicError("Exception occurred while preparing the copy work allocation!", e);
 		}
 	}
@@ -636,7 +640,8 @@ public class AllocationServiceV2 {
 			pdfLink = uploadPdfAndgetArtifactURL(identifier, xAuthUser, pdfFilePath);
 
 		} catch (Exception ex) {
-			logger.error("Exception occurred while creating the pdf link for published work order!", ex);
+			logger.error(String.format("Exception occurred while creating the pdf link for published work order! :  %s",
+					ex.getMessage()));
 		}
 		return pdfLink;
 	}
@@ -781,7 +786,7 @@ public class AllocationServiceV2 {
 						}
 					}
 				} catch (IOException e) {
-					logger.error("Elastic Search Exception", e);
+					logger.error(String.format("Elastic Search Exception :  %s", e.getMessage()));
 				}
 			}
 		}

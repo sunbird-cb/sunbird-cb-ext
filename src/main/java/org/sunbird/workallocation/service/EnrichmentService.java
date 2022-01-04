@@ -92,7 +92,8 @@ public class EnrichmentService {
 				workOrderDTO.setUpdatedByName(firstName + " " + lastName);
 			}
 		} catch (IOException e) {
-			logger.error("Error while fetching the user details", e);
+			logger.error(
+					String.format("Encountered an Exception while fetching the user details :  %s", e.getMessage()));
 		}
 	}
 
@@ -120,7 +121,8 @@ public class EnrichmentService {
 				workAllocationDTOV2.setUpdatedByName(firstName + " " + lastName);
 			}
 		} catch (Exception e) {
-			logger.error("Error while fetching the user details", e);
+			logger.error(
+					String.format("Encountered an Exception while fetching the user details :  %s", e.getMessage()));
 		}
 	}
 }

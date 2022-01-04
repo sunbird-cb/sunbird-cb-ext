@@ -69,9 +69,9 @@ public class StorageServiceImpl implements StorageService {
 			response.getResult().putAll(uploadedFile);
 			return response;
 		} catch (Exception e) {
-			logger.error("Failed to upload file. Exception: ", e);
+			logger.error(String.format("Failed to upload file. Exception: %s", e.getMessage()));
 			response.getParams().setStatus(Constants.FAILED);
-			response.getParams().setErrmsg("Failed to upload file. Exception: " + e.getMessage());
+			response.getParams().setErrmsg("Failed to upload file. Exception: %s" + e.getMessage());
 			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
 			return response;
 		}

@@ -200,21 +200,21 @@ public class AllocationService {
 	 */
 	public Response getUsers(SearchCriteria criteria) {
 		final BoolQueryBuilder query = QueryBuilders.boolQuery();
-			if (WorkAllocationConstants.DRAFT_STATUS.equals(criteria.getStatus())) {
-				query.must(QueryBuilders.matchQuery("draftWAObject.deptName", criteria.getDepartmentName()))
-						.must(QueryBuilders.matchQuery("draftWAObject.status", criteria.getStatus()));
-			}
-			if (WorkAllocationConstants.PUBLISHED_STATUS.equals(criteria.getStatus())) {
-				query.must(QueryBuilders.matchQuery("activeWAObject.deptName", criteria.getDepartmentName()))
-						.must(QueryBuilders.matchQuery("activeWAObject.status", criteria.getStatus()));
-			}
-			if (WorkAllocationConstants.ARCHIVED_STATUS.equals(criteria.getStatus())) {
-				query.must(QueryBuilders.nestedQuery("archivedWAList",
-						QueryBuilders.matchQuery("archivedWAList.deptName", criteria.getDepartmentName()), ScoreMode.None));
-			}
-			if(!StringUtils.isEmpty(criteria.getUserId())){
-				query.must(QueryBuilders.matchQuery("userId", criteria.getUserId()));
-			}
+		if (WorkAllocationConstants.DRAFT_STATUS.equals(criteria.getStatus())) {
+			query.must(QueryBuilders.matchQuery("draftWAObject.deptName", criteria.getDepartmentName()))
+					.must(QueryBuilders.matchQuery("draftWAObject.status", criteria.getStatus()));
+		}
+		if (WorkAllocationConstants.PUBLISHED_STATUS.equals(criteria.getStatus())) {
+			query.must(QueryBuilders.matchQuery("activeWAObject.deptName", criteria.getDepartmentName()))
+					.must(QueryBuilders.matchQuery("activeWAObject.status", criteria.getStatus()));
+		}
+		if (WorkAllocationConstants.ARCHIVED_STATUS.equals(criteria.getStatus())) {
+			query.must(QueryBuilders.nestedQuery("archivedWAList",
+					QueryBuilders.matchQuery("archivedWAList.deptName", criteria.getDepartmentName()), ScoreMode.None));
+		}
+		if (!StringUtils.isEmpty(criteria.getUserId())) {
+			query.must(QueryBuilders.matchQuery("userId", criteria.getUserId()));
+		}
 		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder().query(query);
 		sourceBuilder.from(criteria.getPageNo());
 		sourceBuilder.size(criteria.getPageSize());
@@ -242,7 +242,7 @@ public class AllocationService {
 				finalRes.add(result);
 			}
 		} catch (IOException e) {
-			logger.error("Elastic Search Exception", e);
+			logger.error(String.format("Elastic Search Exception :  %s", e.getMessage()));
 		}
 		Response response = new Response();
 		response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
@@ -291,7 +291,8 @@ public class AllocationService {
 			Optional<Map<String, Object>> propDetails = professionalDetails.stream().findFirst();
 			if (propDetails.isPresent()) {
 				depName = CollectionUtils.isEmpty(propDetails.get()) ? "" : (String) propDetails.get().get("name");
-				designation = CollectionUtils.isEmpty(propDetails.get()) ? "" : (String) propDetails.get().get("designation");
+				designation = CollectionUtils.isEmpty(propDetails.get()) ? ""
+						: (String) propDetails.get().get("designation");
 			}
 		}
 		HashMap<String, Object> result = new HashMap<>();
@@ -342,7 +343,8 @@ public class AllocationService {
 		try {
 			userData = getUserSearchData(searchTerm);
 		} catch (IOException e) {
-			logger.error("Exception occurred while searching the user's from user registry", e);
+			logger.error(
+					String.format("Encountered an Exception while fetching the user details :  %s", e.getMessage()));
 		}
 		List<Map<String, Object>> finalRes = new ArrayList<>();
 		Map<String, Object> result;
@@ -387,7 +389,7 @@ public class AllocationService {
 					}
 				}
 			} catch (Exception e) {
-				logger.error("Failed to Add Role / Activity. Excption: ", e);
+				logger.error(String.format("Failed to Add Role / Activity. Excption :  %s", e.getMessage()));
 			}
 		}
 	}
@@ -411,7 +413,7 @@ public class AllocationService {
 			}
 			logger.info("Added Position successful ...");
 		} catch (JsonProcessingException e) {
-			logger.error("Parsing Exception While Creating the Position in Frac", e);
+			logger.error(String.format("Parsing Exception While Creating the Position in Frac :  %s", e.getMessage()));
 		}
 		return positionId;
 	}
@@ -524,12 +526,15 @@ public class AllocationService {
 			if (oldCompetencyDetails.size() == newCompetencyDetails.size()) {
 				roleCompetency.setCompetencyDetails(newCompetencyDetails);
 			} else {
-				logger.error("Failed to create FRAC Competency / CompetencyLevel. Old List Size: {} , New List Size: {}", oldCompetencyDetails.size(), newCompetencyDetails.size());
+				logger.error(String.format(
+						"Failed to create FRAC Competency / CompetencyLevel. Old List Size: {} , New List Size: {}",
+						oldCompetencyDetails.size(), newCompetencyDetails.size()));
 			}
 		}
 	}
 
-	public void addOrUpdateCompetencyToFrac(String authUserToken, List<CompetencyDetails> oldCompetencyDetails, List<CompetencyDetails> newCompetencyDetails) {
+	public void addOrUpdateCompetencyToFrac(String authUserToken, List<CompetencyDetails> oldCompetencyDetails,
+			List<CompetencyDetails> newCompetencyDetails) {
 		try {
 			for (CompetencyDetails c : oldCompetencyDetails) {
 				if (StringUtils.isEmpty(c.getId())) {
@@ -557,11 +562,12 @@ public class AllocationService {
 				}
 			}
 		} catch (Exception e) {
-			logger.error("Failed to Add Competency / Competency area. Exception: ", e);
+			logger.error(String.format("Failed to Add Competency / Competency area. Exception :  %s", e.getMessage()));
 		}
 	}
 
-	private CompetencyDetails fetchAddedComptency(String authUserToken, CompetencyDetails competency, Child cn) throws JsonProcessingException {
+	private CompetencyDetails fetchAddedComptency(String authUserToken, CompetencyDetails competency, Child cn)
+			throws JsonProcessingException {
 		logger.info("Adding Competency into FRAC Service...");
 
 		FracRequest request = competency.getFracRequest(getSourceValue(), cn);
@@ -610,7 +616,7 @@ public class AllocationService {
 		return cn;
 	}
 
-	public byte[] getWaPdf(String userId, String waId){
+	public byte[] getWaPdf(String userId, String waId) {
 		Map<String, Object> existingRecord = indexerService.readEntity(index, indexType, userId);
 		if (CollectionUtils.isEmpty(existingRecord)) {
 			return pdfService.getWaErrorPdf("Failed to find Work Allocation details for given User.");
@@ -628,13 +634,14 @@ public class AllocationService {
 		}
 
 		if (ObjectUtils.isEmpty(waObj)) {
-			return pdfService.getWaErrorPdf("Work allocation details not found or superseded by new order. Please contact Department Administrator.");
+			return pdfService.getWaErrorPdf(
+					"Work allocation details not found or superseded by new order. Please contact Department Administrator.");
 		}
 
 		// If status Draft
 		if (WorkAllocationConstants.DRAFT_STATUS.equalsIgnoreCase(waObj.getStatus())) {
 		}
-		
+
 		return pdfService.getWAPdf(wa, statusSelected);
 	}
 }

@@ -75,9 +75,11 @@ public class BudgetServiceImpl implements BudgetService {
 			response.getParams().setStatus(Constants.SUCCESSFUL);
 			response.put(Constants.DATA, request);
 			response.setResponseCode(HttpStatus.CREATED);
-		} catch (Exception ex) {
-			String errMsg = "Exception occurred while saving the Budget details. Exception: " + ex.getMessage();
-			logger.error(errMsg, ex);
+		} catch (Exception e) {
+			String errMsg = "Exception occurred while saving the Budget details. Exception: " + e.getMessage();
+			logger.error(String.format("Exception occurred while saving the Budget details. Exception:  %s",
+					e.getMessage()));
+
 			response.getParams().setErrmsg(errMsg);
 			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
 			return response;
@@ -144,9 +146,10 @@ public class BudgetServiceImpl implements BudgetService {
 			response.put(Constants.DATA, budgetMap);
 			response.getParams().setStatus(Constants.SUCCESSFUL);
 			response.setResponseCode(HttpStatus.OK);
-		} catch (Exception ex) {
-			String errMsg = "Exception occurred while saving the Budget Doc details. Exception: " + ex.getMessage();
-			logger.error(errMsg, ex);
+		} catch (Exception e) {
+			String errMsg = "Exception occurred while saving the Budget Doc details. Exception: " + e.getMessage();
+			logger.error(String.format("Exception occurred while saving the Budget Doc details. Exception:  %s",
+					e.getMessage()));
 			response.getParams().setErrmsg(errMsg);
 			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
 			return response;
@@ -250,9 +253,10 @@ public class BudgetServiceImpl implements BudgetService {
 			response.put(Constants.DATA, request);
 			response.getParams().setStatus(Constants.SUCCESSFUL);
 			response.setResponseCode(HttpStatus.OK);
-		} catch (Exception ex) {
-			String errMsg = "Exception occurred while updating the Budget details. Exception: " + ex.getMessage();
-			logger.error(errMsg, ex);
+		} catch (Exception e) {
+			String errMsg = "Exception occurred while updating the Budget details. Exception: " + e.getMessage();
+			logger.error(String.format("Exception occurred while updating the Budget details. Exception:  %s",
+					e.getMessage()));
 			response.getParams().setErrmsg(errMsg);
 			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -280,9 +284,10 @@ public class BudgetServiceImpl implements BudgetService {
 				response.getParams().setErrmsg(errMsg);
 				response.setResponseCode(HttpStatus.BAD_REQUEST);
 			}
-		} catch (Exception ex) {
-			String errMsg = "Exception occurred while deleting the Budget details. Exception: " + ex.getMessage();
-			logger.error(errMsg, ex);
+		} catch (Exception e) {
+			String errMsg = "Exception occurred while deleting the Budget details. Exception: " + e.getMessage();
+			logger.error(String.format("Exception occurred while deleting the Budget details. Exception:  %s",
+					e.getMessage()));
 			response.getParams().setErrmsg(errMsg);
 			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -342,9 +347,10 @@ public class BudgetServiceImpl implements BudgetService {
 				response.getParams().setErrmsg(errMsg);
 				response.setResponseCode(HttpStatus.BAD_REQUEST);
 			}
-		} catch (Exception ex) {
-			String errMsg = "Exception occurred while deleting the Budget details. Exception: " + ex.getMessage();
-			logger.error(errMsg, ex);
+		} catch (Exception e) {
+			String errMsg = "Exception occurred while deleting the Budget details. Exception: " + e.getMessage();
+			logger.error(String.format("Exception occurred while deleting the Budget details. Exception:  %s",
+					e.getMessage()));
 			response.getParams().setErrmsg(errMsg);
 			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
