@@ -54,10 +54,9 @@ public class Validator {
 		if (StringUtils.isEmpty(workAllocationDTOV2.getUserName())) {
 			throw new BadRequestException("User name should not be empty!");
 		}
-		if (WorkAllocationConstants.UPDATE.equalsIgnoreCase(reqType)) {
-			if (StringUtils.isEmpty(workAllocationDTOV2.getId())) {
-				throw new BadRequestException("Id should not be empty!");
-			}
+		if (WorkAllocationConstants.UPDATE.equalsIgnoreCase(reqType)
+				&& (StringUtils.isEmpty(workAllocationDTOV2.getId()))) {
+			throw new BadRequestException("Id should not be empty!");
 		}
 	}
 
