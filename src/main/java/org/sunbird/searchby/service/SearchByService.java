@@ -114,7 +114,8 @@ public class SearchByService {
 		return afterFilter.values();
 	}
 
-	public Collection<ProviderInfo> getProviderDetails(String authUserToken) throws Exception {
+	public Collection<ProviderInfo> getProviderDetails(String authUserToken)
+			throws MyOwnRuntimeException, JsonProcessingException {
 		Object object = redisCacheMgr.getCache(Constants.PROVIDER_CACHE_NAME);
 		if (object == null) {
 			logger.info("");

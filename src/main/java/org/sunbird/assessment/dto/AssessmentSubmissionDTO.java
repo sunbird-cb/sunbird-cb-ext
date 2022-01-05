@@ -16,7 +16,7 @@ public class AssessmentSubmissionDTO implements Serializable {
 	private Boolean isAssessment;
 
 	@NotNull(message = "{submission.questions.mandatory}")
-	private List<Map<String, Object>> questions;
+	private transient List<Map<String, Object>> questions;
 
 	@NotNull(message = "{submission.identifier.mandatory}")
 	private String identifier;

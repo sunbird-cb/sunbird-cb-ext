@@ -549,8 +549,7 @@ public class AllocationServiceV2 {
 				}
 			}
 		} catch (Exception e) {
-			logger.error(String.format("Exception occurred while preparing the copy work allocation! :  %s",
-					e.getMessage()));
+			logger.error("Exception occurred while preparing the copy work allocation! : ", e);
 			throw new ApplicationLogicError("Exception occurred while preparing the copy work allocation!", e);
 		}
 	}
