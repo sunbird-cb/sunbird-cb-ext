@@ -121,11 +121,6 @@ public class WATConsumer {
 		return event;
 	}
 
-	private void postTelemetryEvent(Event event) {
-		outboundRequestHandlerService.fetchResultUsingPost(
-				cbExtServerProperties.getTelemetryBaseUrl() + cbExtServerProperties.getTelemetryEndpoint(), event);
-	}
-
 	@KafkaListener(id = "id2", groupId = "watTelemetryTopic-consumer", topicPartitions = {
 			@TopicPartition(topic = "${kafka.topics.wat.telemetry.event}", partitions = { "0", "1", "2", "3" }) })
 	public void processMessage(ConsumerRecord<String, String> data) {

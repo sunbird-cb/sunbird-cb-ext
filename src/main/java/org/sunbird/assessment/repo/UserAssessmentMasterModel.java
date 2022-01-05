@@ -126,7 +126,7 @@ public class UserAssessmentMasterModel {
 		this.sourceTitle = sourceTitle;
 	}
 
-	public void setUser_id(String userId) {
+	public void setUserId(String userId) {
 		this.userId = userId;
 	}
 

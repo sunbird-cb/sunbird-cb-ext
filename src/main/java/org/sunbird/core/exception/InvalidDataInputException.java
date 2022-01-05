@@ -10,7 +10,7 @@ public class InvalidDataInputException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
 	private String code;
-	private Object[] params;
+	private transient Object[] params;
 
 	public InvalidDataInputException(String code) {
 		super(code);

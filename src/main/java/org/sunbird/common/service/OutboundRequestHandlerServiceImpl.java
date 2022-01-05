@@ -86,7 +86,7 @@ public class OutboundRequestHandlerServiceImpl {
 		try {
 			HttpHeaders headers = new HttpHeaders();
 			if (!CollectionUtils.isEmpty(headersValues)) {
-				headersValues.forEach((k, v) -> headers.set(k, v));
+				headersValues.forEach(headers::set);
 			}
 			headers.setContentType(MediaType.APPLICATION_JSON);
 			HttpEntity<Object> entity = new HttpEntity<>(request, headers);

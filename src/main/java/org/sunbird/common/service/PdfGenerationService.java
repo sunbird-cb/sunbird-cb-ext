@@ -140,7 +140,6 @@ public class PdfGenerationService {
 	}
 
 	private void extracted(WorkAllocation wa, WAObject waObj, JSONArray firstRow) {
-		JSONArray widthColumn;
 		extracted9(wa, waObj, firstRow);
 	}
 
@@ -172,18 +171,21 @@ public class PdfGenerationService {
 			firstColProperties = new JSONObject();
 			firstColProperties.put("valign", BOTTOM);
 			deptNameColArray.add(firstColProperties);
-			// Add Name
-			{
-				JSONArray deptName = new JSONArray();
-				deptName.add(PARAGRAPH);
-				deptName.add("Scan this QR code to find the latest updated digital version of this document");
-
-				deptNameColArray.add(deptName);
-			}
+			addName(deptNameColArray);
 			singleRow.add(deptNameColArray);
 			deptColArray.add(singleRow);
 
 			firstRow.add(deptColArray);
+		}
+	}
+
+	private void addName(JSONArray deptNameColArray) {
+		{
+			JSONArray deptName = new JSONArray();
+			deptName.add(PARAGRAPH);
+			deptName.add("Scan this QR code to find the latest updated digital version of this document");
+
+			deptNameColArray.add(deptName);
 		}
 	}
 
@@ -200,6 +202,10 @@ public class PdfGenerationService {
 	}
 
 	private void extracted(WAObject waObj, JSONArray firstRow) {
+		extracted1(waObj, firstRow);
+	}
+
+	private void extracted1(WAObject waObj, JSONArray firstRow) {
 		JSONArray widthColumn;
 		{
 			JSONArray deptColArray = new JSONArray();
@@ -278,6 +284,12 @@ public class PdfGenerationService {
 	private JSONArray getHeaderAndDate() {
 		JSONArray pdfTable = new JSONArray();
 		pdfTable.add(PDF_TABLE);
+		extracted6(pdfTable);
+
+		return pdfTable;
+	}
+
+	private void extracted6(JSONArray pdfTable) {
 		{
 			JSONObject pdfTableProperties = new JSONObject();
 			pdfTableProperties.put(WIDTH_PERCENT, 100);
@@ -319,8 +331,6 @@ public class PdfGenerationService {
 
 			pdfTable.add(secondRow);
 		}
-
-		return pdfTable;
 	}
 
 	/**
@@ -433,18 +443,23 @@ public class PdfGenerationService {
 			secondColPdfTable.add(widthRow);
 			List<RoleCompetency> roleCompetencyList = waObj.getRoleCompetencyList();
 			boolean flag = true;
-			for (RoleCompetency roleCompetency : roleCompetencyList) {
-				JSONArray roleCompeteArray = parseRoleCompetency(roleCompetency, statusSelected);
-				secondColPdfTable.add(roleCompeteArray);
-				if (flag) {
-					secondColPdfTable.add(lineRow());
-					flag = !flag;
-				}
-			}
+			extracted43(statusSelected, secondColPdfTable, roleCompetencyList, flag);
 
 			firstRow.add(secondColPdfTable);
 
 			pdfTable.add(firstRow);
+		}
+	}
+
+	private void extracted43(String statusSelected, JSONArray secondColPdfTable,
+			List<RoleCompetency> roleCompetencyList, boolean flag) {
+		for (RoleCompetency roleCompetency : roleCompetencyList) {
+			JSONArray roleCompeteArray = parseRoleCompetency(roleCompetency, statusSelected);
+			secondColPdfTable.add(roleCompeteArray);
+			if (flag) {
+				secondColPdfTable.add(lineRow());
+				flag = !flag;
+			}
 		}
 	}
 

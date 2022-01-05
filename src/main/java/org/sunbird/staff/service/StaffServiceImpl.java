@@ -19,6 +19,7 @@ import org.springframework.util.CollectionUtils;
 import org.sunbird.cassandra.utils.CassandraOperation;
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.util.Constants;
+import org.sunbird.exception.MyOwnRuntimeException;
 import org.sunbird.staff.model.StaffAuditInfo;
 import org.sunbird.staff.model.StaffInfo;
 
@@ -299,7 +300,7 @@ public class StaffServiceImpl implements StaffService {
 		}
 	}
 
-	private void validateUpdateStaffInfo(StaffInfo staffInfo) throws Exception {
+	private void validateUpdateStaffInfo(StaffInfo staffInfo) throws MyOwnRuntimeException {
 		List<String> errObjList = new ArrayList<>();
 		if (StringUtils.isEmpty(staffInfo.getOrgId())) {
 			errObjList.add(Constants.ORG_ID);
@@ -337,7 +338,7 @@ public class StaffServiceImpl implements StaffService {
 		}
 
 		if (position && filled && vacant) {
-			throw new Exception(ONE_OR_MORE_REQUIRED_FIELDS_ARE_EMPTY_EMPTY_FIELDS + errObjList.toString());
+			throw new MyOwnRuntimeException(ONE_OR_MORE_REQUIRED_FIELDS_ARE_EMPTY_EMPTY_FIELDS + errObjList.toString());
 		} else {
 			if (position) {
 				errObjList.remove(Constants.POSITION);
@@ -351,7 +352,7 @@ public class StaffServiceImpl implements StaffService {
 		}
 
 		if (!CollectionUtils.isEmpty(errObjList)) {
-			throw new Exception(ONE_OR_MORE_REQUIRED_FIELDS_ARE_EMPTY_EMPTY_FIELDS + errObjList.toString());
+			throw new MyOwnRuntimeException(ONE_OR_MORE_REQUIRED_FIELDS_ARE_EMPTY_EMPTY_FIELDS + errObjList.toString());
 		}
 	}
 }

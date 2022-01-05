@@ -15,7 +15,7 @@ public class Response implements Serializable {
 
 	private static final long serialVersionUID = -3773253896160786443L;
 
-	private transient Map<String, Object> result = new HashMap<>();
+	private Map<String, Object> result = new HashMap<>();
 
 	public boolean containsKey(String key) {
 		return result.containsKey(key);
