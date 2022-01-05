@@ -29,48 +29,7 @@ public class UserAssessmentMasterPrimaryKeyModel implements Serializable {
 	@PrimaryKeyColumn(name = "id", ordinal = 3, type = PrimaryKeyType.CLUSTERED)
 	private UUID id;
 
-	public String getRootOrg() {
-		return rootOrg;
-	}
-
-	public void setRootOrg(String rootOrg) {
-		this.rootOrg = rootOrg;
-	}
-
-	public Date getTsCreated() {
-		return tsCreated;
-	}
-
-	public void setTsCreated(Date tsCreated) {
-		this.tsCreated = tsCreated;
-	}
-
-	public String getParentSourceId() {
-		return parentSourceId;
-	}
-
-	public void setParentSourceId(String parentSourceId) {
-		this.parentSourceId = parentSourceId;
-	}
-
-	public BigDecimal getResultPercent() {
-		return resultPercent;
-	}
-
-	public void setResultPercent(BigDecimal resultPercent) {
-		this.resultPercent = resultPercent;
-	}
-
-	public UUID getId() {
-		return id;
-	}
-
-	public void setId(UUID id) {
-		this.id = id;
-	}
-
 	public UserAssessmentMasterPrimaryKeyModel() {
-		super();
 	}
 
 	public UserAssessmentMasterPrimaryKeyModel(String rootOrg, Date tsCreated, String parentSourceId,
@@ -80,6 +39,46 @@ public class UserAssessmentMasterPrimaryKeyModel implements Serializable {
 		this.parentSourceId = parentSourceId;
 		this.resultPercent = resultPercent;
 		this.id = id;
+	}
+
+	public UUID getId() {
+		return id;
+	}
+
+	public String getParentSourceId() {
+		return parentSourceId;
+	}
+
+	public BigDecimal getResultPercent() {
+		return resultPercent;
+	}
+
+	public String getRootOrg() {
+		return rootOrg;
+	}
+
+	public Date getTsCreated() {
+		return tsCreated;
+	}
+
+	public void setId(UUID id) {
+		this.id = id;
+	}
+
+	public void setParentSourceId(String parentSourceId) {
+		this.parentSourceId = parentSourceId;
+	}
+
+	public void setResultPercent(BigDecimal resultPercent) {
+		this.resultPercent = resultPercent;
+	}
+
+	public void setRootOrg(String rootOrg) {
+		this.rootOrg = rootOrg;
+	}
+
+	public void setTsCreated(Date tsCreated) {
+		this.tsCreated = tsCreated;
 	}
 
 	@Override

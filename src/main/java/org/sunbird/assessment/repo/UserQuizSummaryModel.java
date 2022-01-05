@@ -15,29 +15,27 @@ public class UserQuizSummaryModel {
 	private Date dateUpdated;
 
 	public UserQuizSummaryModel() {
-		super();
 	}
 
 	public UserQuizSummaryModel(UserQuizSummaryPrimaryKeyModel primaryKey, Date dateUpdated) {
-		super();
 		this.primaryKey = primaryKey;
 		this.dateUpdated = dateUpdated;
-	}
-
-	public UserQuizSummaryPrimaryKeyModel getPrimaryKey() {
-		return primaryKey;
-	}
-
-	public void setPrimaryKey(UserQuizSummaryPrimaryKeyModel primaryKey) {
-		this.primaryKey = primaryKey;
 	}
 
 	public Date getDateUpdated() {
 		return dateUpdated;
 	}
 
+	public UserQuizSummaryPrimaryKeyModel getPrimaryKey() {
+		return primaryKey;
+	}
+
 	public void setDateUpdated(Date dateUpdated) {
 		this.dateUpdated = dateUpdated;
+	}
+
+	public void setPrimaryKey(UserQuizSummaryPrimaryKeyModel primaryKey) {
+		this.primaryKey = primaryKey;
 	}
 
 	@Override

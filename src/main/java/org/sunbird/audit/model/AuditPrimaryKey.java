@@ -19,32 +19,32 @@ public class AuditPrimaryKey {
 	@PrimaryKeyColumn(name = "updatedDate", ordinal = 0, type = PrimaryKeyType.CLUSTERED)
 	private String updatedDate;
 
-	public String getOrgId() {
-		return orgId;
-	}
-
-	public void setOrgId(String orgId) {
-		this.orgId = orgId;
-	}
-
 	public String getAuditType() {
 		return auditType;
-	}
-
-	public void setAuditType(String auditType) {
-		this.auditType = auditType;
 	}
 
 	public String getCreatedDate() {
 		return createdDate;
 	}
 
-	public void setCreatedDate(String createdDate) {
-		this.createdDate = createdDate;
+	public String getOrgId() {
+		return orgId;
 	}
 
 	public String getUpdatedDate() {
 		return updatedDate;
+	}
+
+	public void setAuditType(String auditType) {
+		this.auditType = auditType;
+	}
+
+	public void setCreatedDate(String createdDate) {
+		this.createdDate = createdDate;
+	}
+
+	public void setOrgId(String orgId) {
+		this.orgId = orgId;
 	}
 
 	public void setUpdatedDate(String updatedDate) {

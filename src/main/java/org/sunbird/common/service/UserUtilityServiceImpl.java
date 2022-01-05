@@ -36,39 +36,6 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 	private CbExtLogger logger = new CbExtLogger(getClass().getName());
 
 	@Override
-	public boolean validateUser(String rootOrg, String userId) {
-
-		Map<String, Object> requestMap = new HashMap<>();
-
-		Map<String, Object> request = new HashMap<>();
-
-		Map<String, String> filters = new HashMap<>();
-		filters.put(Constants.USER_ID, userId);
-		request.put(Constants.FILTERS, filters);
-
-		requestMap.put("request", request);
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.APPLICATION_JSON);
-		try {
-			String reqBodyData = new ObjectMapper().writeValueAsString(requestMap);
-
-			HttpEntity<String> requestEnty = new HttpEntity<>(reqBodyData, headers);
-
-			String serverUrl = props.getSbUrl() + "private/user/v1/search";
-
-			SunbirdApiResp sunbirdApiResp = restTemplate.postForObject(serverUrl, requestEnty, SunbirdApiResp.class);
-
-			boolean expression = (sunbirdApiResp != null && "OK".equalsIgnoreCase(sunbirdApiResp.getResponseCode())
-					&& sunbirdApiResp.getResult().getResponse().getCount() >= 1);
-			return expression;
-
-		} catch (Exception e) {
-			throw new ApplicationLogicError("Sunbird Service ERROR: ", e);
-		}
-
-	}
-
-	@Override
 	public Map<String, Object> getUsersDataFromUserIds(String rootOrg, List<String> userIds, List<String> source) {
 		Map<String, Object> result = new HashMap<>();
 
@@ -100,5 +67,37 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		}
 
 		return result;
+	}
+
+	@Override
+	public boolean validateUser(String rootOrg, String userId) {
+
+		Map<String, Object> requestMap = new HashMap<>();
+
+		Map<String, Object> request = new HashMap<>();
+
+		Map<String, String> filters = new HashMap<>();
+		filters.put(Constants.USER_ID, userId);
+		request.put(Constants.FILTERS, filters);
+
+		requestMap.put("request", request);
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		try {
+			String reqBodyData = new ObjectMapper().writeValueAsString(requestMap);
+
+			HttpEntity<String> requestEnty = new HttpEntity<>(reqBodyData, headers);
+
+			String serverUrl = props.getSbUrl() + "private/user/v1/search";
+
+			SunbirdApiResp sunbirdApiResp = restTemplate.postForObject(serverUrl, requestEnty, SunbirdApiResp.class);
+
+			return sunbirdApiResp != null && "OK".equalsIgnoreCase(sunbirdApiResp.getResponseCode())
+					&& sunbirdApiResp.getResult().getResponse().getCount() >= 1;
+
+		} catch (Exception e) {
+			throw new ApplicationLogicError("Sunbird Service ERROR: ", e);
+		}
+
 	}
 }

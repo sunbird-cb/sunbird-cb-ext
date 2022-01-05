@@ -28,90 +28,11 @@ public class DepartmentInfo implements Comparable<DepartmentInfo> {
 	private List<String> currentUserRoles;
 	private Integer sourceId;
 
-	public String getLogo() {
-		return logo;
-	}
-
-	public void setLogo(String logo) {
-		this.logo = logo;
-	}
-
-	public Integer getId() {
-		return id;
-	}
-
-	public void setId(Integer id) {
-		this.id = id;
-	}
-
-	public String getRootOrg() {
-		return rootOrg;
-	}
-
-	public void setRootOrg(String rootOrg) {
-		this.rootOrg = rootOrg;
-	}
-
-	public String getDeptName() {
-		return deptName;
-	}
-
-	public void setDeptName(String deptName) {
-		this.deptName = deptName;
-	}
-
-	public Integer[] getDeptTypeIds() {
-		return deptTypeIds;
-	}
-
-	public void setDeptTypeIds(Integer[] deptTypeIds) {
-		this.deptTypeIds = deptTypeIds;
-	}
-
-	public List<DeptTypeInfo> getDeptTypeInfos() {
-		return deptTypeInfos;
-	}
-
-	public void setDeptTypeInfos(List<DeptTypeInfo> deptTypeInfo) {
-		this.deptTypeInfos = deptTypeInfo;
-	}
-
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
-	public long getNoOfUsers() {
-		return noOfUsers;
-	}
-
-	public void setNoOfUsers(long noOfUsers) {
-		this.noOfUsers = noOfUsers;
-	}
-
-	public String getHeadquarters() {
-		return headquarters;
-	}
-
-	public void setHeadquarters(String headquarters) {
-		this.headquarters = headquarters;
-	}
-
 	public void addActiveUser(PortalUserInfo pUserInfo) {
 		if (this.activeUsers == null) {
 			this.activeUsers = new ArrayList<>();
 		}
 		this.activeUsers.add(pUserInfo);
-	}
-
-	public void addInActiveUser(PortalUserInfo pUserInfo) {
-		if (this.inActiveUsers == null) {
-			this.inActiveUsers = new ArrayList<>();
-		}
-		this.inActiveUsers.add(pUserInfo);
 	}
 
 	public void addBlockedUser(PortalUserInfo pUserInfo) {
@@ -121,62 +42,147 @@ public class DepartmentInfo implements Comparable<DepartmentInfo> {
 		this.blockedUsers.add(pUserInfo);
 	}
 
-	public List<String> getCurrentUserRoles() {
-		return currentUserRoles;
+	public void addInActiveUser(PortalUserInfo pUserInfo) {
+		if (this.inActiveUsers == null) {
+			this.inActiveUsers = new ArrayList<>();
+		}
+		this.inActiveUsers.add(pUserInfo);
 	}
 
-	public void setCurrentUserRoles(List<String> currentUserRoles) {
-		this.currentUserRoles = currentUserRoles;
-	}
-
-	public long getCreationDate() {
-		return creationDate;
-	}
-
-	public void setCreationDate(long created) {
-		this.creationDate = created;
-	}
-
-	public String getCreatedBy() {
-		return createdBy;
-	}
-
-	public void setCreatedBy(String createdBy) {
-		this.createdBy = createdBy;
-	}
-
-	public Integer getSourceId() {
-		return sourceId;
-	}
-
-	public void setSourceId(Integer sourceId) {
-		this.sourceId = sourceId;
+	@Override
+	public int compareTo(DepartmentInfo o) {
+		return o.getDeptName().compareTo(this.getDeptName());
 	}
 
 	public List<PortalUserInfo> getActiveUsers() {
 		return activeUsers;
 	}
 
-	public void setActiveUsers(List<PortalUserInfo> activeUsers) {
-		this.activeUsers = activeUsers;
+	public List<PortalUserInfo> getBlockedUsers() {
+		return blockedUsers;
+	}
+
+	public String getCreatedBy() {
+		return createdBy;
+	}
+
+	public long getCreationDate() {
+		return creationDate;
+	}
+
+	public List<String> getCurrentUserRoles() {
+		return currentUserRoles;
+	}
+
+	public String getDeptName() {
+		return deptName;
+	}
+
+	public Integer[] getDeptTypeIds() {
+		return deptTypeIds;
+	}
+
+	public List<DeptTypeInfo> getDeptTypeInfos() {
+		return deptTypeInfos;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public String getHeadquarters() {
+		return headquarters;
+	}
+
+	public Integer getId() {
+		return id;
 	}
 
 	public List<PortalUserInfo> getInActiveUsers() {
 		return inActiveUsers;
 	}
 
-	public void setInActiveUsers(List<PortalUserInfo> inActiveUsers) {
-		this.inActiveUsers = inActiveUsers;
+	public String getLogo() {
+		return logo;
 	}
 
-	public List<PortalUserInfo> getBlockedUsers() {
-		return blockedUsers;
+	public long getNoOfUsers() {
+		return noOfUsers;
+	}
+
+	public String getRootOrg() {
+		return rootOrg;
+	}
+
+	public Integer getSourceId() {
+		return sourceId;
+	}
+
+	public void setActiveUsers(List<PortalUserInfo> activeUsers) {
+		this.activeUsers = activeUsers;
 	}
 
 	public void setBlockedUsers(List<PortalUserInfo> blockedUsers) {
 		this.blockedUsers = blockedUsers;
 	}
 
+	public void setCreatedBy(String createdBy) {
+		this.createdBy = createdBy;
+	}
+
+	public void setCreationDate(long created) {
+		this.creationDate = created;
+	}
+
+	public void setCurrentUserRoles(List<String> currentUserRoles) {
+		this.currentUserRoles = currentUserRoles;
+	}
+
+	public void setDeptName(String deptName) {
+		this.deptName = deptName;
+	}
+
+	public void setDeptTypeIds(Integer[] deptTypeIds) {
+		this.deptTypeIds = deptTypeIds;
+	}
+
+	public void setDeptTypeInfos(List<DeptTypeInfo> deptTypeInfo) {
+		this.deptTypeInfos = deptTypeInfo;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public void setHeadquarters(String headquarters) {
+		this.headquarters = headquarters;
+	}
+
+	public void setId(Integer id) {
+		this.id = id;
+	}
+
+	public void setInActiveUsers(List<PortalUserInfo> inActiveUsers) {
+		this.inActiveUsers = inActiveUsers;
+	}
+
+	public void setLogo(String logo) {
+		this.logo = logo;
+	}
+
+	public void setNoOfUsers(long noOfUsers) {
+		this.noOfUsers = noOfUsers;
+	}
+
+	public void setRootOrg(String rootOrg) {
+		this.rootOrg = rootOrg;
+	}
+
+	public void setSourceId(Integer sourceId) {
+		this.sourceId = sourceId;
+	}
+
+	@Override
 	public String toString() {
 		StringBuilder str = new StringBuilder("DepartmentInfo:");
 		str.append(" Id:").append(id);
@@ -195,9 +201,5 @@ public class DepartmentInfo implements Comparable<DepartmentInfo> {
 		str.append("]");
 
 		return str.toString();
-	}
-
-	public int compareTo(DepartmentInfo o) {
-		return o.getDeptName().compareTo(this.getDeptName());
 	}
 }

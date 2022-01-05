@@ -8,7 +8,7 @@ public class UserQuizMasterRepositoryImpl implements UserQuizMasterRepositoryCus
 
 	@Autowired
 	CassandraOperations cassandraOperations;
-	
+
 	@Override
 	public UserQuizMasterModel updateQuiz(UserQuizMasterModel quiz, UserQuizSummaryModel quizSummary) {
 		CassandraBatchOperations batchOps = cassandraOperations.batchOps();

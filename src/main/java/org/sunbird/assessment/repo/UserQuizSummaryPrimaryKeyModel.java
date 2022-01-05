@@ -20,38 +20,37 @@ public class UserQuizSummaryPrimaryKeyModel implements Serializable {
 	@PrimaryKeyColumn(name = "content_id", ordinal = 2, type = PrimaryKeyType.CLUSTERED)
 	private String contentId;
 
-	public String getRootOrg() {
-		return rootOrg;
-	}
-
-	public void setRootOrg(String rootOrg) {
-		this.rootOrg = rootOrg;
-	}
-
-	public String getUserId() {
-		return userId;
-	}
-
-	public void setUserId(String userId) {
-		this.userId = userId;
-	}
-
-	public String getContentId() {
-		return contentId;
-	}
-
-	public void setContentId(String contentId) {
-		this.contentId = contentId;
-	}
-
 	public UserQuizSummaryPrimaryKeyModel() {
-		super();
 	}
 
 	public UserQuizSummaryPrimaryKeyModel(String rootOrg, String userId, String contentId) {
 		this.rootOrg = rootOrg;
 		this.userId = userId;
 		this.contentId = contentId;
+	}
+
+	public String getContentId() {
+		return contentId;
+	}
+
+	public String getRootOrg() {
+		return rootOrg;
+	}
+
+	public String getUserId() {
+		return userId;
+	}
+
+	public void setContentId(String contentId) {
+		this.contentId = contentId;
+	}
+
+	public void setRootOrg(String rootOrg) {
+		this.rootOrg = rootOrg;
+	}
+
+	public void setUserId(String userId) {
+		this.userId = userId;
 	}
 
 	@Override

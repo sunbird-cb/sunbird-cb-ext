@@ -19,28 +19,28 @@ public class MandatoryContentPrimaryKeyModel implements Serializable {
 	@PrimaryKeyColumn(name = "content_id", ordinal = 0, type = PrimaryKeyType.PARTITIONED)
 	private String contentId;
 
-	public String getRootOrg() {
-		return rootOrg;
-	}
-
-	public void setRootOrg(String rootOrg) {
-		this.rootOrg = rootOrg;
+	public String getContentId() {
+		return contentId;
 	}
 
 	public String getOrg() {
 		return org;
 	}
 
-	public void setOrg(String org) {
-		this.org = org;
-	}
-
-	public String getContentId() {
-		return contentId;
+	public String getRootOrg() {
+		return rootOrg;
 	}
 
 	public void setContentId(String contentId) {
 		this.contentId = contentId;
+	}
+
+	public void setOrg(String org) {
+		this.org = org;
+	}
+
+	public void setRootOrg(String rootOrg) {
+		this.rootOrg = rootOrg;
 	}
 
 	@Override

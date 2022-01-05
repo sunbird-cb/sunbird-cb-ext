@@ -32,8 +32,7 @@ public class SearchByController {
 		if (filter == null) {
 			throw new Exception("Invalid Request");
 		}
-		return new ResponseEntity<>(searchByService.getCompetencyDetailsByFilter(authUserToken, filter),
-				HttpStatus.OK);
+		return new ResponseEntity<>(searchByService.getCompetencyDetailsByFilter(authUserToken, filter), HttpStatus.OK);
 	}
 
 	@GetMapping("/v1/browseByProvider")

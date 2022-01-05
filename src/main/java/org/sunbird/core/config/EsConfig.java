@@ -16,22 +16,22 @@ import org.sunbird.common.util.CbExtServerProperties;
 @Configuration
 public class EsConfig {
 
-    @Autowired
-    CbExtServerProperties configuration;
+	@Autowired
+	CbExtServerProperties configuration;
 
-    @Bean(destroyMethod = "close")
-    public RestHighLevelClient restHighLevelClient(CbExtServerProperties configuration) {
+	@Bean(destroyMethod = "close")
+	public RestHighLevelClient restHighLevelClient(CbExtServerProperties configuration) {
 
-        final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-        credentialsProvider.setCredentials(AuthScope.ANY,
-                new UsernamePasswordCredentials(configuration.getEsUser(), configuration.getEsPassword()));
+		final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+		credentialsProvider.setCredentials(AuthScope.ANY,
+				new UsernamePasswordCredentials(configuration.getEsUser(), configuration.getEsPassword()));
 
-        RestClientBuilder builder = RestClient
-                .builder(new HttpHost(configuration.getEsHost(), Integer.parseInt(configuration.getEsPort())))
-                .setHttpClientConfigCallback(
-                        httpClientBuilder -> httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider));
+		RestClientBuilder builder = RestClient
+				.builder(new HttpHost(configuration.getEsHost(), Integer.parseInt(configuration.getEsPort())))
+				.setHttpClientConfigCallback(
+						httpClientBuilder -> httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider));
 
-        return new RestHighLevelClient(builder);
+		return new RestHighLevelClient(builder);
 
-    }
+	}
 }

@@ -11,40 +11,40 @@ public class OpenSaberApiPersonalDetail {
 		return firstname;
 	}
 
-	public void setFirstname(String firstname) {
-		this.firstname = firstname;
-	}
-
-	public String getSurname() {
-		return surname;
-	}
-
-	public void setSurname(String surname) {
-		this.surname = surname;
+	public String getOsid() {
+		return osid;
 	}
 
 	public String getPrimaryEmail() {
 		return primaryEmail;
 	}
 
-	public void setPrimaryEmail(String primaryEmail) {
-		this.primaryEmail = primaryEmail;
+	public String getSurname() {
+		return surname;
 	}
 
 	public String getUsername() {
 		return username;
 	}
 
-	public void setUsername(String username) {
-		this.username = username;
-	}
-
-	public String getOsid() {
-		return osid;
+	public void setFirstname(String firstname) {
+		this.firstname = firstname;
 	}
 
 	public void setOsid(String osid) {
 		this.osid = osid;
+	}
+
+	public void setPrimaryEmail(String primaryEmail) {
+		this.primaryEmail = primaryEmail;
+	}
+
+	public void setSurname(String surname) {
+		this.surname = surname;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
 	}
 
 }

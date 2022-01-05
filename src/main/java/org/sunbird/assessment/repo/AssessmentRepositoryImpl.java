@@ -44,6 +44,11 @@ public class AssessmentRepositoryImpl implements AssessmentRepository {
 	}
 
 	@Override
+	public List<Map<String, Object>> getAssessmetbyContentUser(String rootOrg, String courseId, String userId) {
+		return Collections.emptyList();
+	}
+
+	@Override
 	public Map<String, Object> getQuizAnswerKey(AssessmentSubmissionDTO quizMap) {
 
 		return new HashMap<>();
@@ -72,7 +77,7 @@ public class AssessmentRepositoryImpl implements AssessmentRepository {
 							persist.get(USER_ID).toString(), persist.get(SOURCE_ID).toString()))
 					.orElse(null);
 
-			if (persist.get("parentContentType").toString().equalsIgnoreCase("course")) {
+			if ("course".equalsIgnoreCase(persist.get("parentContentType").toString())) {
 				if (data != null) {
 					if (data.getFirstMaxScore() < Float.parseFloat(persist.get(RESULT).toString())) {
 						summary = new UserAssessmentSummaryModel(
@@ -118,10 +123,5 @@ public class AssessmentRepositoryImpl implements AssessmentRepository {
 
 		response.put("response", "SUCCESS");
 		return response;
-	}
-
-	@Override
-	public List<Map<String, Object>> getAssessmetbyContentUser(String rootOrg, String courseId, String userId) {
-		return Collections.emptyList();
 	}
 }

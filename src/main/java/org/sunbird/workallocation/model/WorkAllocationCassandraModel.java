@@ -7,35 +7,34 @@ import org.springframework.data.cassandra.core.mapping.Table;
 @Table("work_allocation")
 public class WorkAllocationCassandraModel {
 
-    public WorkAllocationCassandraModel() {
-        super();
-    }
+	@PrimaryKey
+	private WorkAllocationPrimaryKeyModel primaryKey;
 
-    public WorkAllocationCassandraModel(String id, String data) {
-        this.primaryKey = new WorkAllocationPrimaryKeyModel();
-        this.primaryKey.setId(id);
-        this.data = data;
-    }
+	@Column("data")
+	private String data;
 
-    @PrimaryKey
-    private WorkAllocationPrimaryKeyModel primaryKey;
+	public WorkAllocationCassandraModel() {
+	}
 
-    @Column("data")
-    private String data;
+	public WorkAllocationCassandraModel(String id, String data) {
+		this.primaryKey = new WorkAllocationPrimaryKeyModel();
+		this.primaryKey.setId(id);
+		this.data = data;
+	}
 
-    public WorkAllocationPrimaryKeyModel getPrimaryKey() {
-        return primaryKey;
-    }
+	public String getData() {
+		return data;
+	}
 
-    public void setPrimaryKey(WorkAllocationPrimaryKeyModel primaryKey) {
-        this.primaryKey = primaryKey;
-    }
+	public WorkAllocationPrimaryKeyModel getPrimaryKey() {
+		return primaryKey;
+	}
 
-    public String getData() {
-        return data;
-    }
+	public void setData(String data) {
+		this.data = data;
+	}
 
-    public void setData(String data) {
-        this.data = data;
-    }
+	public void setPrimaryKey(WorkAllocationPrimaryKeyModel primaryKey) {
+		this.primaryKey = primaryKey;
+	}
 }

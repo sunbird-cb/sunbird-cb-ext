@@ -9,9 +9,10 @@ import org.sunbird.workallocation.model.WorkAllocationCassandraModel;
 import org.sunbird.workallocation.model.WorkAllocationPrimaryKeyModel;
 
 @Repository
-public interface WorkAllocationRepo extends CassandraRepository<WorkAllocationCassandraModel, WorkAllocationPrimaryKeyModel> {
+public interface WorkAllocationRepo
+		extends CassandraRepository<WorkAllocationCassandraModel, WorkAllocationPrimaryKeyModel> {
 
-    @Query("SELECT * FROM work_allocation where id IN ?0")
-    List<WorkAllocationCassandraModel> findByIdIn(List<String> userId);
+	@Query("SELECT * FROM work_allocation where id IN ?0")
+	List<WorkAllocationCassandraModel> findByIdIn(List<String> userId);
 
 }

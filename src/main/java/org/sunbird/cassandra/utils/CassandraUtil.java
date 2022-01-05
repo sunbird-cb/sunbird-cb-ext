@@ -17,37 +17,13 @@ import com.datastax.driver.core.Row;
 /**
  * @desc This class will provide all required helper method for cassandra db
  *       operation.
- * 
+ *
  * @author fathima
  *
  */
 public final class CassandraUtil {
 
 	private static CassandraPropertyReader propertiesCache = CassandraPropertyReader.getInstance();
-
-	/**
-	 * @desc This method is used to create prepared statement based on table name
-	 *       and column name provided in request
-	 * @param keyspaceName Keyspace name
-	 * @param tableName    Table name
-	 * @param map          Map where key is column name and value is column value
-	 * @return Prepared statement
-	 */
-	public static String getPreparedStatement(String keyspaceName, String tableName, Map<String, Object> map) {
-		StringBuilder query = new StringBuilder();
-		query.append(Constants.INSERT_INTO + keyspaceName + Constants.DOT + tableName + Constants.OPEN_BRACE);
-		Set<String> keySet = map.keySet();
-		query.append(String.join(",", keySet) + Constants.VALUES_WITH_BRACE);
-		StringBuilder commaSepValueBuilder = new StringBuilder();
-		for (int i = 0; i < keySet.size(); i++) {
-			commaSepValueBuilder.append(Constants.QUE_MARK);
-			if (i != keySet.size() - 1) {
-				commaSepValueBuilder.append(Constants.COMMA);
-			}
-		}
-		query.append(commaSepValueBuilder + Constants.CLOSING_BRACE);
-		return query.toString();
-	}
 
 	/**
 	 * @desc This method is used for creating response from the resultset i.e return
@@ -71,6 +47,30 @@ public final class CassandraUtil {
 	public static Map<String, String> fetchColumnsMapping(ResultSet results) {
 		return results.getColumnDefinitions().asList().stream()
 				.collect(Collectors.toMap(d -> propertiesCache.readProperty(d.getName()).trim(), Definition::getName));
+	}
+
+	/**
+	 * @desc This method is used to create prepared statement based on table name
+	 *       and column name provided in request
+	 * @param keyspaceName Keyspace name
+	 * @param tableName    Table name
+	 * @param map          Map where key is column name and value is column value
+	 * @return Prepared statement
+	 */
+	public static String getPreparedStatement(String keyspaceName, String tableName, Map<String, Object> map) {
+		StringBuilder query = new StringBuilder();
+		query.append(Constants.INSERT_INTO + keyspaceName + Constants.DOT + tableName + Constants.OPEN_BRACE);
+		Set<String> keySet = map.keySet();
+		query.append(String.join(",", keySet) + Constants.VALUES_WITH_BRACE);
+		StringBuilder commaSepValueBuilder = new StringBuilder();
+		for (int i = 0; i < keySet.size(); i++) {
+			commaSepValueBuilder.append(Constants.QUE_MARK);
+			if (i != keySet.size() - 1) {
+				commaSepValueBuilder.append(Constants.COMMA);
+			}
+		}
+		query.append(commaSepValueBuilder + Constants.CLOSING_BRACE);
+		return query.toString();
 	}
 
 	private CassandraUtil() {

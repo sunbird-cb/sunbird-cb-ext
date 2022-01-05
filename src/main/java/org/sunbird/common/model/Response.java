@@ -7,23 +7,26 @@
 
 package org.sunbird.common.model;
 
-
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Response implements Serializable{
+public class Response implements Serializable {
 
 	private static final long serialVersionUID = -3773253896160786443L;
 
 	private transient Map<String, Object> result = new HashMap<>();
 
-	public Map<String, Object> getResult() {
-		return result;
+	public boolean containsKey(String key) {
+		return result.containsKey(key);
 	}
 
 	public Object get(String key) {
 		return result.get(key);
+	}
+
+	public Map<String, Object> getResult() {
+		return result;
 	}
 
 	public void put(String key, Object vo) {
@@ -32,10 +35,6 @@ public class Response implements Serializable{
 
 	public void putAll(Map<String, Object> map) {
 		result.putAll(map);
-	}
-
-	public boolean containsKey(String key) {
-		return result.containsKey(key);
 	}
 
 }

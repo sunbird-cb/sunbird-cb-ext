@@ -5,11 +5,8 @@ import java.util.Collections;
 import java.util.List;
 
 public class Constants {
-	private Constants() {
-		throw new IllegalStateException("Utility class");
-	}
-
 	public static final String UUID = "wid";
+
 	public static final String KID = "kid";
 	public static final String SOURCE_ID = "source_id";
 	public static final String FIRST_NAME = "first_name";
@@ -51,18 +48,18 @@ public class Constants {
 	public static final String USER_ID = "userId";
 	public static final String FILTERS = "filters";
 	public static final String CONTENT_ID = "content_id";
-
 	public static final String SUCCESSFUL = "Successful";
+
 	public static final String FAILED = "Failed";
 	public static final String MESSAGE = "message";
 	public static final String DATA = "data";
 	public static final String STATUS = "status";
-
 	public static final String ADD = "add";
+
 	public static final String UPDATE = "update";
 	public static final String CREATE = "create";
-
 	public static final String ROOT_ORG_CONSTANT = "rootOrg";
+
 	public static final String ORG_CONSTANT = "org";
 	public static final String USER_ID_CONSTANT = "userId";
 	public static final String FIELD_PASSED_CONSTANT = "fieldsPassed";
@@ -79,13 +76,13 @@ public class Constants {
 	public static final String SERVICE_ERROR_CONSTANT = "Http Client threw an Exception:";
 	public static final String EXTERNAL_SERVICE_ERROR_CODE = "Exception while querying the external service:";
 	public static final String CONTENT_ID_REPLACER = "{contentId}";
-
 	// User assessment pass mark
 	public static final Float ASSESSMENT_PASS_SCORE = 60.0f;
 
 	public static final String DATE_FORMAT = "yyyy-mm-dd hh:mm:ss";
 
 	public static final String RESPONSE = "response";
+
 	public static final String STAFF = "staff";
 	public static final String API_STAFF_POSITION_ADD = "api.staff.position.add";
 	public static final String API_STAFF_POSITION_UPDATE = "api.staff.position.update";
@@ -100,8 +97,8 @@ public class Constants {
 	public static final String API_BUDGET_SCHEME_HISTORY_READ = "api.budget.scheme.history.read";
 	public static final String API_FILE_UPLOAD = "api.file.upload";
 	public static final String API_FILE_DELETE = "api.file.delete";
-
 	public static final String ID = "id";
+
 	public static final String ORG_ID = "orgId";
 	public static final String POSITION = "position";
 	public static final String TOTAL_POSITION_FILLED = "totalPositionsFilled";
@@ -110,21 +107,21 @@ public class Constants {
 	public static final String URL = "url";
 	public static final String DELETED = "deleted";
 	public static final String SCHEME_ID = "schemeId";
-
 	public static final String BUDGET = "budget";
+
 	public static final String BUDGET_YEAR = "budgetYear";
 	public static final String SCHEME_NAME = "schemeName";
 	public static final String SALARY_BUDGET_ALLOCATED = "salaryBudgetAllocated";
 	public static final String TRAINING_BUDGET_ALLOCATED = "trainingBudgetAllocated";
 	public static final String TRAINING_BUDGET_UTILIZATION = "trainingBudgetUtilization";
-
 	// assessment
 	public static final String QUESTION_SET = "questionSet";
+
 	public static final String ASSESSMENT_QNS_ANS_SET = "assessmentQnsAnsSet_";
 	public static final String ASSESSMENT_QNS_SET = "assessmentQnsSet_";
-
 	// Cassandra Constants
 	public static final String INSERT_INTO = "INSERT INTO ";
+
 	public static final String DOT = ".";
 	public static final String OPEN_BRACE = "(";
 	public static final String VALUES_WITH_BRACE = ") VALUES (";
@@ -136,8 +133,8 @@ public class Constants {
 	public static final String UNDEFINED_IDENTIFIER = "Undefined column name ";
 	public static final String EXCEPTION_MSG_FETCH = "Exception occurred while fetching record from ";
 	public static final String EXCEPTION_MSG_DELETE = "Exception occurred while deleting record from ";
-
 	public static final String AUDIT_TYPE = "auditType";
+
 	public static final String CREATED_DATE = "createdDate";
 	public static final String CREATED_BY = "createdBy";
 	public static final String UPDATED_DATE = "updatedDate";
@@ -148,9 +145,9 @@ public class Constants {
 	public static final String WORK_ALLOCATION_ID = "workAllocationId";
 	public static final String BEGIN_BATCH = "BEGIN BATCH ";
 	public static final String APPLY_BATCH = " APPLY BATCH;";
-
 	// Database and Tables
 	public static final String DATABASE = "sunbird";
+
 	public static final String BUDGET_TABLE = "org_budget_scheme";
 	public static final String AUDIT_TABLE = "org_audit";
 	public static final String STAFF_TABLE = "org_staff_position";
@@ -158,20 +155,20 @@ public class Constants {
 	public static final String WORK_ALLOCATION = "work_allocation";
 	public static final String WORK_ALLOCATION_MAPPING = "user_work_allocation_mapping";
 	public static final String MANDATORY_CONTENT = "mandatory_user_content";
-
 	// Redis
 	public static final String API_REDIS_DELETE = "api.redis.delete";
+
 	public static final String API_REDIS_GET_KEYS = "api.redis.get.keys";
 	public static final String API_REDIS_GET_KEYS_VALUE_SET = "api.redis.get.keys&values";
 	public static final String REDIS_COMMON_KEY = "CB_EXT_";
-
 	public static final String COMPETENCY_CACHE_NAME = "competency";
+
 	public static final String COMPETENCY_CACHE_NAME_BY_AREA = "competencyByArea";
 	public static final String COMPETENCY_CACHE_NAME_BY_TYPE = "competencyByType";
 	public static final String PROVIDER_CACHE_NAME = "provider";
 	public static final String COMPETENCY_FACET_NAME = "competencies_v3.name";
-
 	public static final String IS_TENANT = "isTenant";
+
 	public static final String CHANNEL = "channel";
 	public static final String USER_TOKEN = "x-authenticated-user-token";
 	public static final String AUTHORIZATION = "authorization";
@@ -188,8 +185,8 @@ public class Constants {
 	public static final String BUDGET_DOC_FILE_TYPE = "fileType";
 	public static final String BUDGET_DOC_FILE_SIZE = "fileSize";
 	public static final String BUDGET_DOC_FILE_URL = "fileUrl";
-
 	public static final String ORGANIZATION = "organisation";
+
 	public static final String USER_ENROLMENT = "user_enrolments";
 	public static final String USER = "user";
 	public static final String COURSE_BATCH = "course_batch";
@@ -202,9 +199,12 @@ public class Constants {
 	public static final String END_DATE = "endDate";
 	public static final String ACTIVE = "active";
 	public static final String RESULT = "result";
-
 	public static final List<String> MINIMUL_FIELDS = Collections
 			.unmodifiableList(Arrays.asList(IDENTIFIER, "duration", "downloadUrl", DESCRIPTION, "mimeType",
 					"artifactUrl", "name", STATUS, "resourceType", "categoryType", "category"));
+
+	private Constants() {
+		throw new IllegalStateException("Utility class");
+	}
 
 }

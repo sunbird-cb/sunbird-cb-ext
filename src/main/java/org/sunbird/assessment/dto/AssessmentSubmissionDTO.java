@@ -24,40 +24,40 @@ public class AssessmentSubmissionDTO implements Serializable {
 	@NotNull(message = "{submission.title.mandatory}")
 	private String title;
 
-	public Long getTimeLimit() {
-		return timeLimit;
-	}
-
-	public void setTimeLimit(Long timeLimit) {
-		this.timeLimit = timeLimit;
-	}
-
-	public Boolean isAssessment() {
-		return isAssessment;
-	}
-
-	public void setIsAssessment(Boolean isAssessment) {
-		this.isAssessment = isAssessment;
+	public String getIdentifier() {
+		return identifier;
 	}
 
 	public List<Map<String, Object>> getQuestions() {
 		return questions;
 	}
 
-	public void setQuestions(List<Map<String, Object>> questions) {
-		this.questions = questions;
+	public Long getTimeLimit() {
+		return timeLimit;
 	}
 
-	public String getIdentifier() {
-		return identifier;
+	public String getTitle() {
+		return title;
+	}
+
+	public Boolean isAssessment() {
+		return isAssessment;
 	}
 
 	public void setIdentifier(String identifier) {
 		this.identifier = identifier;
 	}
 
-	public String getTitle() {
-		return title;
+	public void setIsAssessment(Boolean isAssessment) {
+		this.isAssessment = isAssessment;
+	}
+
+	public void setQuestions(List<Map<String, Object>> questions) {
+		this.questions = questions;
+	}
+
+	public void setTimeLimit(Long timeLimit) {
+		this.timeLimit = timeLimit;
 	}
 
 	public void setTitle(String title) {

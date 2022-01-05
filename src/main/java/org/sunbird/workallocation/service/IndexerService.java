@@ -55,9 +55,68 @@ public class IndexerService {
 		} catch (IOException e) {
 			logger.error(String.format("Exception in adding record to ElasticSearch :  %s", e.getMessage()));
 		}
-		if (null == response)
+		if (null == response) {
 			return null;
+		}
 		return response.status();
+	}
+
+	public RestStatus bulkInsert(List<IndexRequest> indexRequestList) {
+		BulkResponse restStatus = null;
+		if (!CollectionUtils.isEmpty(indexRequestList)) {
+			BulkRequest bulkRequest = new BulkRequest();
+			indexRequestList.forEach(bulkRequest::add);
+			try {
+				restStatus = esClient.bulk(bulkRequest, RequestOptions.DEFAULT);
+			} catch (IOException e) {
+				logger.error(String.format("Exception while doing the bulk operation in ElasticSearch :  %s",
+						e.getMessage()));
+			}
+		}
+		if (null == restStatus) {
+			return null;
+		}
+		return restStatus.status();
+	}
+
+	/**
+	 * Search the document in es based on provided information
+	 *
+	 * @param indexName           es index name
+	 * @param type                index type
+	 * @param searchSourceBuilder source builder
+	 * @return es search response
+	 * @throws IOException
+	 */
+	public SearchResponse getEsResult(String indexName, String type, SearchSourceBuilder searchSourceBuilder)
+			throws IOException {
+		SearchRequest searchRequest = new SearchRequest();
+		searchRequest.indices(indexName);
+		if (!StringUtils.isEmpty(type)) {
+			searchRequest.types(type);
+		}
+		searchRequest.source(searchSourceBuilder);
+		return esClient.search(searchRequest, RequestOptions.DEFAULT);
+
+	}
+
+	/**
+	 * @param index     name of index
+	 * @param indexType index type
+	 * @param entityId  entity Id
+	 * @return status
+	 */
+	public Map<String, Object> readEntity(String index, String indexType, String entityId) {
+		GetResponse response = null;
+		try {
+			response = esClient.get(new GetRequest(index, indexType, entityId), RequestOptions.DEFAULT);
+		} catch (IOException e) {
+			logger.error(String.format("Exception in getting the record from ElasticSearch :  %s", e.getMessage()));
+		}
+		if (null == response) {
+			return new HashMap<>();
+		}
+		return response.getSourceAsMap();
 	}
 
 	/**
@@ -76,63 +135,9 @@ public class IndexerService {
 		} catch (IOException e) {
 			logger.error(String.format("Exception in updating a record to ElasticSearch :  %s", e.getMessage()));
 		}
-		if (null == response)
+		if (null == response) {
 			return null;
+		}
 		return response.status();
-	}
-
-	/**
-	 * @param index     name of index
-	 * @param indexType index type
-	 * @param entityId  entity Id
-	 * @return status
-	 */
-	public Map<String, Object> readEntity(String index, String indexType, String entityId) {
-		GetResponse response = null;
-		try {
-			response = esClient.get(new GetRequest(index, indexType, entityId), RequestOptions.DEFAULT);
-		} catch (IOException e) {
-			logger.error(String.format("Exception in getting the record from ElasticSearch :  %s", e.getMessage()));
-		}
-		if (null == response)
-			return new HashMap<>();
-		return response.getSourceAsMap();
-	}
-
-	/**
-	 * Search the document in es based on provided information
-	 *
-	 * @param indexName           es index name
-	 * @param type                index type
-	 * @param searchSourceBuilder source builder
-	 * @return es search response
-	 * @throws IOException
-	 */
-	public SearchResponse getEsResult(String indexName, String type, SearchSourceBuilder searchSourceBuilder)
-			throws IOException {
-		SearchRequest searchRequest = new SearchRequest();
-		searchRequest.indices(indexName);
-		if (!StringUtils.isEmpty(type))
-			searchRequest.types(type);
-		searchRequest.source(searchSourceBuilder);
-		return esClient.search(searchRequest, RequestOptions.DEFAULT);
-
-	}
-
-	public RestStatus bulkInsert(List<IndexRequest> indexRequestList) {
-		BulkResponse restStatus = null;
-		if (!CollectionUtils.isEmpty(indexRequestList)) {
-			BulkRequest bulkRequest = new BulkRequest();
-			indexRequestList.forEach(bulkRequest::add);
-			try {
-				restStatus = esClient.bulk(bulkRequest, RequestOptions.DEFAULT);
-			} catch (IOException e) {
-				logger.error(String.format("Exception while doing the bulk operation in ElasticSearch :  %s",
-						e.getMessage()));
-			}
-		}
-		if (null == restStatus)
-			return null;
-		return restStatus.status();
 	}
 }

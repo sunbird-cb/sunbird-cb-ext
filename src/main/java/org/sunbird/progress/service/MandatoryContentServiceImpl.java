@@ -39,6 +39,45 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
 
 	ObjectMapper mapper = new ObjectMapper();
 
+	public void enrichProgressDetails(String authUserToken, MandatoryContentResponse mandatoryContentInfo,
+			String userId) {
+		HashMap<String, Object> req;
+		HashMap<String, Object> reqObj;
+		List<String> fields = Arrays.asList("progressdetails");
+		HashMap<String, String> headersValues = new HashMap<>();
+		headersValues.put("X-Authenticated-User-Token", authUserToken);
+		headersValues.put("Authorization", cbExtServerProperties.getSbApiKey());
+		for (Map.Entry<String, MandatoryContentInfo> infoMap : mandatoryContentInfo.getContentDetails().entrySet()) {
+			try {
+				req = new HashMap<>();
+				reqObj = new HashMap<>();
+				reqObj.put("userId", userId);
+				reqObj.put("courseId", infoMap.getKey());
+				reqObj.put("batchId", infoMap.getValue().getBatchId());
+				reqObj.put("fields", fields);
+				req.put("request", reqObj);
+				Map<String, Object> response = outboundReqService.fetchResultUsingPost(
+						cbExtServerProperties.getCourseServiceHost() + cbExtServerProperties.getProgressReadEndPoint(),
+						req, headersValues);
+				if ("OK".equals(response.get("responseCode"))) {
+					List<Object> result = (List<Object>) ((HashMap<String, Object>) response.get("result"))
+							.get("contentList");
+					if (!CollectionUtils.isEmpty(result)) {
+						Optional<Object> optionResult = result.stream().findFirst();
+						if (optionResult.isPresent()) {
+							Map<String, Object> content = (Map<String, Object>) optionResult.get();
+							BigDecimal progress = new BigDecimal(content.get("completionPercentage").toString());
+							mandatoryContentInfo.getContentDetails().get(infoMap.getKey())
+									.setUserProgress(progress.floatValue());
+						}
+					}
+				}
+			} catch (Exception ex) {
+				logger.error(ex);
+			}
+		}
+	}
+
 	@Override
 	public MandatoryContentResponse getMandatoryContentStatusForUser(String authUserToken, String rootOrg, String org,
 			String userId) {
@@ -91,44 +130,5 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
 			response.setMandatoryCourseCompleted(true);
 		}
 		return response;
-	}
-
-	public void enrichProgressDetails(String authUserToken, MandatoryContentResponse mandatoryContentInfo,
-			String userId) {
-		HashMap<String, Object> req;
-		HashMap<String, Object> reqObj;
-		List<String> fields = Arrays.asList("progressdetails");
-		HashMap<String, String> headersValues = new HashMap<>();
-		headersValues.put("X-Authenticated-User-Token", authUserToken);
-		headersValues.put("Authorization", cbExtServerProperties.getSbApiKey());
-		for (Map.Entry<String, MandatoryContentInfo> infoMap : mandatoryContentInfo.getContentDetails().entrySet()) {
-			try {
-				req = new HashMap<>();
-				reqObj = new HashMap<>();
-				reqObj.put("userId", userId);
-				reqObj.put("courseId", infoMap.getKey());
-				reqObj.put("batchId", infoMap.getValue().getBatchId());
-				reqObj.put("fields", fields);
-				req.put("request", reqObj);
-				Map<String, Object> response = outboundReqService.fetchResultUsingPost(
-						cbExtServerProperties.getCourseServiceHost() + cbExtServerProperties.getProgressReadEndPoint(),
-						req, headersValues);
-				if (response.get("responseCode").equals("OK")) {
-					List<Object> result = (List<Object>) ((HashMap<String, Object>) response.get("result"))
-							.get("contentList");
-					if (!CollectionUtils.isEmpty(result)) {
-						Optional<Object> optionResult = result.stream().findFirst();
-						if (optionResult.isPresent()) {
-							Map<String, Object> content = (Map<String, Object>) optionResult.get();
-							BigDecimal progress = new BigDecimal(content.get("completionPercentage").toString());
-							mandatoryContentInfo.getContentDetails().get(infoMap.getKey())
-									.setUserProgress(progress.floatValue());
-						}
-					}
-				}
-			} catch (Exception ex) {
-				logger.error(ex);
-			}
-		}
 	}
 }

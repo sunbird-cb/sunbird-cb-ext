@@ -14,7 +14,6 @@ public class StaffInfoPrimaryKeyModel {
 	private String id;
 
 	public StaffInfoPrimaryKeyModel() {
-		super();
 	}
 
 	public StaffInfoPrimaryKeyModel(String orgId, String id) {
@@ -22,20 +21,20 @@ public class StaffInfoPrimaryKeyModel {
 		this.id = id;
 	}
 
-	public String getOrgId() {
-		return orgId;
-	}
-
-	public void setOrgId(String orgId) {
-		this.orgId = orgId;
-	}
-
 	public String getId() {
 		return id;
 	}
 
+	public String getOrgId() {
+		return orgId;
+	}
+
 	public void setId(String id) {
 		this.id = id;
+	}
+
+	public void setOrgId(String orgId) {
+		this.orgId = orgId;
 	}
 
 }

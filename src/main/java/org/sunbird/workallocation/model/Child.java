@@ -9,59 +9,59 @@ public class Child {
 	private String source;
 	private String level;
 
-	public String getId() {
-		return id;
-	}
-
-	public void setId(String id) {
-		this.id = id;
-	}
-
-	public String getType() {
-		return type;
-	}
-
-	public void setType(String type) {
-		this.type = type;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
 	public String getDescription() {
 		return description;
 	}
 
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
-	public Object getStatus() {
-		return status;
-	}
-
-	public void setStatus(Object status) {
-		this.status = status;
-	}
-
-	public String getSource() {
-		return source;
-	}
-
-	public void setSource(String source) {
-		this.source = source;
+	public String getId() {
+		return id;
 	}
 
 	public String getLevel() {
 		return level;
 	}
 
+	public String getName() {
+		return name;
+	}
+
+	public String getSource() {
+		return source;
+	}
+
+	public Object getStatus() {
+		return status;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
 	public void setLevel(String level) {
 		this.level = level;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public void setSource(String source) {
+		this.source = source;
+	}
+
+	public void setStatus(Object status) {
+		this.status = status;
+	}
+
+	public void setType(String type) {
+		this.type = type;
 	}
 }

@@ -25,57 +25,55 @@ public class UserAssessmentSummaryModel {
 	private Date firstPassesScoreDate;
 
 	public UserAssessmentSummaryModel() {
-		super();
 	}
 
 	public UserAssessmentSummaryModel(UserAssessmentSummaryPrimaryKeyModel primaryKey, Float firstMaxScore,
 			Date firstMaxScoreDate, Float firstPassesScore, Date firstPassesScoreDate) {
-		super();
 		this.primaryKey = primaryKey;
 		this.firstMaxScore = firstMaxScore;
 		this.firstMaxScoreDate = firstMaxScoreDate;
 		this.firstPassesScore = firstPassesScore;
 		this.firstPassesScoreDate = firstPassesScoreDate;
-	}
-
-	public UserAssessmentSummaryPrimaryKeyModel getPrimaryKey() {
-		return primaryKey;
-	}
-
-	public void setPrimaryKey(UserAssessmentSummaryPrimaryKeyModel primaryKey) {
-		this.primaryKey = primaryKey;
 	}
 
 	public Float getFirstMaxScore() {
 		return firstMaxScore;
 	}
 
-	public void setFirstMaxScore(Float firstMaxScore) {
-		this.firstMaxScore = firstMaxScore;
-	}
-
 	public Date getFirstMaxScoreDate() {
 		return firstMaxScoreDate;
-	}
-
-	public void setFirstMaxScoreDate(Date firstMaxScoreDate) {
-		this.firstMaxScoreDate = firstMaxScoreDate;
 	}
 
 	public Float getFirstPassesScore() {
 		return firstPassesScore;
 	}
 
-	public void setFirstPassesScore(Float firstPassesScore) {
-		this.firstPassesScore = firstPassesScore;
-	}
-
 	public Date getFirstPassesScoreDate() {
 		return firstPassesScoreDate;
 	}
 
+	public UserAssessmentSummaryPrimaryKeyModel getPrimaryKey() {
+		return primaryKey;
+	}
+
+	public void setFirstMaxScore(Float firstMaxScore) {
+		this.firstMaxScore = firstMaxScore;
+	}
+
+	public void setFirstMaxScoreDate(Date firstMaxScoreDate) {
+		this.firstMaxScoreDate = firstMaxScoreDate;
+	}
+
+	public void setFirstPassesScore(Float firstPassesScore) {
+		this.firstPassesScore = firstPassesScore;
+	}
+
 	public void setFirstPassesScoreDate(Date firstPassesScoreDate) {
 		this.firstPassesScoreDate = firstPassesScoreDate;
+	}
+
+	public void setPrimaryKey(UserAssessmentSummaryPrimaryKeyModel primaryKey) {
+		this.primaryKey = primaryKey;
 	}
 
 	@Override

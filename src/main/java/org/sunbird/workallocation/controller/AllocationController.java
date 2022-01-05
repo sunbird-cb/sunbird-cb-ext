@@ -32,26 +32,14 @@ public class AllocationController {
 				HttpStatus.OK);
 	}
 
-	@PostMapping("/update")
-	public ResponseEntity<Response> update(@RequestHeader("Authorization") String authUserToken,
-			@RequestHeader("userId") String userId, @RequestBody WorkAllocationDTO workAllocation) {
-		return new ResponseEntity<>(allocationService.updateWorkAllocation(authUserToken, userId, workAllocation),
-				HttpStatus.OK);
-	}
-
 	@PostMapping("/getUsers")
 	public ResponseEntity<Response> getUsers(@RequestBody SearchCriteria searchCriteria) {
 		return new ResponseEntity<>(allocationService.getUsers(searchCriteria), HttpStatus.OK);
 	}
 
-	@GetMapping("/users/autocomplete")
-	public ResponseEntity<Response> userAutoComplete(@RequestParam("searchTerm") String searchTerm) {
-		return new ResponseEntity<>(allocationService.userAutoComplete(searchTerm), HttpStatus.OK);
-	}
-
 	@GetMapping(value = "/getWAPdf/{userId}/{waId}", produces = MediaType.APPLICATION_PDF_VALUE)
 	public ResponseEntity<byte[]> getWAPdf(@PathVariable("userId") String userId, @PathVariable("waId") String waId) {
-		byte[] out = null;
+		byte[] out;
 		out = allocationService.getWaPdf(userId, waId);
 		if (out == null) {
 			throw new InternalError("Failed to generate PDF file.");
@@ -63,5 +51,17 @@ public class AllocationController {
 
 		return new ResponseEntity<>(out, headers, HttpStatus.OK);
 
+	}
+
+	@PostMapping("/update")
+	public ResponseEntity<Response> update(@RequestHeader("Authorization") String authUserToken,
+			@RequestHeader("userId") String userId, @RequestBody WorkAllocationDTO workAllocation) {
+		return new ResponseEntity<>(allocationService.updateWorkAllocation(authUserToken, userId, workAllocation),
+				HttpStatus.OK);
+	}
+
+	@GetMapping("/users/autocomplete")
+	public ResponseEntity<Response> userAutoComplete(@RequestParam("searchTerm") String searchTerm) {
+		return new ResponseEntity<>(allocationService.userAutoComplete(searchTerm), HttpStatus.OK);
 	}
 }

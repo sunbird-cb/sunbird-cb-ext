@@ -29,6 +29,29 @@ public class OutboundRequestHandlerServiceImpl {
 
 	/**
 	 * @param uri
+	 * @return
+	 * @throws Exception
+	 */
+	public Object fetchResult(String uri) {
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+		Object response = null;
+
+		try {
+			StringBuilder str = new StringBuilder(this.getClass().getCanonicalName())
+					.append(Constants.FETCH_RESULT_CONSTANT).append(System.lineSeparator());
+			str.append(Constants.URI_CONSTANT).append(uri).append(System.lineSeparator());
+			log.info(str.toString());
+			response = restTemplate.getForObject(uri, Map.class);
+		} catch (RestClientException e) {
+			log.error(e);
+		}
+
+		return response;
+	}
+
+	/**
+	 * @param uri
 	 * @param request
 	 * @return
 	 * @throws Exception
@@ -56,56 +79,6 @@ public class OutboundRequestHandlerServiceImpl {
 		return response;
 	}
 
-	/**
-	 * @param uri
-	 * @return
-	 * @throws Exception
-	 */
-	public Object fetchResult(String uri) {
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-		Object response = null;
-
-		try {
-			StringBuilder str = new StringBuilder(this.getClass().getCanonicalName())
-					.append(Constants.FETCH_RESULT_CONSTANT).append(System.lineSeparator());
-			str.append(Constants.URI_CONSTANT).append(uri).append(System.lineSeparator());
-			log.info(str.toString());
-			response = restTemplate.getForObject(uri, Map.class);
-		} catch (RestClientException e) {
-			log.error(e);
-		}
-
-		return response;
-	}
-
-	/**
-	 * @param uri
-	 * @return
-	 * @throws Exception
-	 */
-	public Object fetchUsingGetWithHeaders(String uri, Map<String, String> headersValues) {
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-		ResponseEntity<Map> response = null;
-		try {
-			StringBuilder str = new StringBuilder(this.getClass().getCanonicalName())
-					.append(Constants.FETCH_RESULT_CONSTANT).append(System.lineSeparator());
-			str.append(Constants.URI_CONSTANT).append(uri).append(System.lineSeparator());
-			log.info(str.toString());
-			HttpHeaders headers = new HttpHeaders();
-			if (!CollectionUtils.isEmpty(headersValues)) {
-				headersValues.forEach(headers::set);
-			}
-			response = restTemplate.exchange(uri, HttpMethod.GET, new HttpEntity<Object>(headers), Map.class);
-			if (response.getBody() != null)
-				return response.getBody();
-		} catch (Exception e) {
-			log.error(e);
-		}
-		return null;
-	}
-
 	public Map<String, Object> fetchResultUsingPost(String uri, Object request, Map<String, String> headersValues) {
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
@@ -129,5 +102,33 @@ public class OutboundRequestHandlerServiceImpl {
 			log.error(e);
 		}
 		return response;
+	}
+
+	/**
+	 * @param uri
+	 * @return
+	 * @throws Exception
+	 */
+	public Object fetchUsingGetWithHeaders(String uri, Map<String, String> headersValues) {
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+		ResponseEntity<Map> response = null;
+		try {
+			StringBuilder str = new StringBuilder(this.getClass().getCanonicalName())
+					.append(Constants.FETCH_RESULT_CONSTANT).append(System.lineSeparator());
+			str.append(Constants.URI_CONSTANT).append(uri).append(System.lineSeparator());
+			log.info(str.toString());
+			HttpHeaders headers = new HttpHeaders();
+			if (!CollectionUtils.isEmpty(headersValues)) {
+				headersValues.forEach(headers::set);
+			}
+			response = restTemplate.exchange(uri, HttpMethod.GET, new HttpEntity<>(headers), Map.class);
+			if (response.getBody() != null) {
+				return response.getBody();
+			}
+		} catch (Exception e) {
+			log.error(e);
+		}
+		return null;
 	}
 }

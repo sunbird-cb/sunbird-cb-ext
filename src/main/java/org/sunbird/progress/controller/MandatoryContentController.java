@@ -12,21 +12,20 @@ import org.sunbird.progress.service.MandatoryContentService;
 @RestController
 public class MandatoryContentController {
 
-    @Autowired
-    private MandatoryContentService service;
+	@Autowired
+	private MandatoryContentService service;
 
-    /**
-     * @param rootOrg
-     * @param userId
-     * @return Status of mandatory content
-     * @throws Exception
-     */
-    @GetMapping("/v1/check/mandatoryContentStatus")
-    public ResponseEntity<MandatoryContentResponse> getMandatoryContentStatus(
-            @RequestHeader("xAuthUser") String authUserToken,
-            @RequestHeader("rootOrg") String rootOrg,
-            @RequestHeader("org") String org,
-            @RequestHeader("wid") String userId){
-        return new ResponseEntity<>(service.getMandatoryContentStatusForUser(authUserToken, rootOrg, org, userId), HttpStatus.OK);
-    }
+	/**
+	 * @param rootOrg
+	 * @param userId
+	 * @return Status of mandatory content
+	 * @throws Exception
+	 */
+	@GetMapping("/v1/check/mandatoryContentStatus")
+	public ResponseEntity<MandatoryContentResponse> getMandatoryContentStatus(
+			@RequestHeader("xAuthUser") String authUserToken, @RequestHeader("rootOrg") String rootOrg,
+			@RequestHeader("org") String org, @RequestHeader("wid") String userId) {
+		return new ResponseEntity<>(service.getMandatoryContentStatusForUser(authUserToken, rootOrg, org, userId),
+				HttpStatus.OK);
+	}
 }

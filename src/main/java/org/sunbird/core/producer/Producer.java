@@ -11,20 +11,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Service
 public class Producer {
 
-    private CbExtLogger log = new CbExtLogger(getClass().getName());
+	private CbExtLogger log = new CbExtLogger(getClass().getName());
 
+	@Autowired
+	KafkaTemplate<String, String> kafkaTemplate;
 
-    @Autowired
-    KafkaTemplate<String, String> kafkaTemplate;
-
-    public void push(String topic, Object value) {
-        ObjectMapper mapper = new ObjectMapper();
-        String message = null;
-        try {
-            message = mapper.writeValueAsString(value);
-            kafkaTemplate.send(topic, message);
-        } catch (JsonProcessingException e) {
-            log.error(e);
-        }
-    }
+	public void push(String topic, Object value) {
+		ObjectMapper mapper = new ObjectMapper();
+		String message = null;
+		try {
+			message = mapper.writeValueAsString(value);
+			kafkaTemplate.send(topic, message);
+		} catch (JsonProcessingException e) {
+			log.error(e);
+		}
+	}
 }

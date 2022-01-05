@@ -6,9 +6,9 @@ import org.sunbird.portal.department.model.DeptPublicInfo;
 
 public interface PortalService {
 
-	List<String> getDeptNameList();
-
 	List<DeptPublicInfo> getAllDept();
+
+	List<String> getDeptNameList();
 
 	DeptPublicInfo searchDept(String deptName);
 

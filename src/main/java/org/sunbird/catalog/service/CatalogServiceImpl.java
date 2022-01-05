@@ -28,10 +28,6 @@ public class CatalogServiceImpl {
 	@Autowired
 	private CbExtServerProperties extServerProperties;
 
-	public Catalog getCatalog(String authUserToken, boolean isEnrichConsumption) {
-		return fetchCatalog(authUserToken, isEnrichConsumption);
-	}
-
 	private Catalog fetchCatalog(String authUserToken, boolean isEnrichConsumption) {
 		log.info("Fetching Framework details...");
 		ObjectMapper mapper = new ObjectMapper();
@@ -55,6 +51,10 @@ public class CatalogServiceImpl {
 			log.error("Failed to read response data. Exception: ", e);
 		}
 		return new Catalog();
+	}
+
+	public Catalog getCatalog(String authUserToken, boolean isEnrichConsumption) {
+		return fetchCatalog(authUserToken, isEnrichConsumption);
 	}
 
 	private Catalog processResponse(Framework framework, boolean isEnrichConsumption) {

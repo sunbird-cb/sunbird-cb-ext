@@ -34,140 +34,140 @@ public class SunbirdApiRespContent {
 
 	private List<SunbirdApiRespOragainsation> organisations;
 
-	public String getRootOrgName() {
-		return rootOrgName;
-	}
-
-	public void setRootOrgName(String rootOrgName) {
-		this.rootOrgName = rootOrgName;
-	}
-
 	public String getChannel() {
 		return channel;
-	}
-
-	public void setChannel(String channel) {
-		this.channel = channel;
-	}
-
-	public String getId() {
-		return id;
-	}
-
-	public void setId(String id) {
-		this.id = id;
-	}
-
-	public String getIdentifier() {
-		return identifier;
-	}
-
-	public void setIdentifier(String identifier) {
-		this.identifier = identifier;
-	}
-
-	public String getRootOrgId() {
-		return rootOrgId;
-	}
-
-	public void setRootOrgId(String rootOrgId) {
-		this.rootOrgId = rootOrgId;
-	}
-
-	public String getFirstName() {
-		return firstName;
-	}
-
-	public void setFirstName(String firstName) {
-		this.firstName = firstName;
-	}
-
-	public String getDob() {
-		return dob;
-	}
-
-	public void setDob(String dob) {
-		this.dob = dob;
-	}
-
-	public String getUserType() {
-		return userType;
-	}
-
-	public void setUserType(String userType) {
-		this.userType = userType;
-	}
-
-	public String getLastName() {
-		return lastName;
-	}
-
-	public void setLastName(String lastName) {
-		this.lastName = lastName;
-	}
-
-	public String getGender() {
-		return gender;
-	}
-
-	public void setGender(String gender) {
-		this.gender = gender;
-	}
-
-	public List<String> getRoles() {
-		return roles;
-	}
-
-	public void setRoles(List<String> roles) {
-		this.roles = roles;
 	}
 
 	public String getCountryCode() {
 		return countryCode;
 	}
 
-	public void setCountryCode(String countryCode) {
-		this.countryCode = countryCode;
+	public String getDescription() {
+		return description;
+	}
+
+	public String getDob() {
+		return dob;
 	}
 
 	public String getEmail() {
 		return email;
 	}
 
-	public void setEmail(String email) {
-		this.email = email;
+	public String getFirstName() {
+		return firstName;
 	}
 
-	public String getUserName() {
-		return userName;
+	public String getGender() {
+		return gender;
 	}
 
-	public void setUserName(String userName) {
-		this.userName = userName;
+	public String getId() {
+		return id;
+	}
+
+	public String getIdentifier() {
+		return identifier;
+	}
+
+	public String getLastName() {
+		return lastName;
 	}
 
 	public List<SunbirdApiRespOragainsation> getOrganisations() {
 		return organisations;
 	}
 
-	public void setOrganisations(List<SunbirdApiRespOragainsation> organisations) {
-		this.organisations = organisations;
-	}
-
 	public String getOrgName() {
 		return orgName;
+	}
+
+	public List<String> getRoles() {
+		return roles;
+	}
+
+	public String getRootOrgId() {
+		return rootOrgId;
+	}
+
+	public String getRootOrgName() {
+		return rootOrgName;
+	}
+
+	public String getUserName() {
+		return userName;
+	}
+
+	public String getUserType() {
+		return userType;
+	}
+
+	public void setChannel(String channel) {
+		this.channel = channel;
+	}
+
+	public void setCountryCode(String countryCode) {
+		this.countryCode = countryCode;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public void setDob(String dob) {
+		this.dob = dob;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
+	}
+
+	public void setGender(String gender) {
+		this.gender = gender;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	public void setIdentifier(String identifier) {
+		this.identifier = identifier;
+	}
+
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
+	}
+
+	public void setOrganisations(List<SunbirdApiRespOragainsation> organisations) {
+		this.organisations = organisations;
 	}
 
 	public void setOrgName(String orgName) {
 		this.orgName = orgName;
 	}
 
-	public String getDescription() {
-		return description;
+	public void setRoles(List<String> roles) {
+		this.roles = roles;
 	}
 
-	public void setDescription(String description) {
-		this.description = description;
+	public void setRootOrgId(String rootOrgId) {
+		this.rootOrgId = rootOrgId;
+	}
+
+	public void setRootOrgName(String rootOrgName) {
+		this.rootOrgName = rootOrgName;
+	}
+
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
+
+	public void setUserType(String userType) {
+		this.userType = userType;
 	}
 
 }

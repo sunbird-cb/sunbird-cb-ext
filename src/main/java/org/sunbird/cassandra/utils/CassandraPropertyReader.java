@@ -6,30 +6,14 @@ import java.util.Properties;
 
 /**
  * This class will be used to read cassandratablecolumn properties file.
- * 
+ *
  * @author fathima
  *
  */
 
 public class CassandraPropertyReader {
-	private final Properties properties = new Properties();
 	private static final String FILE = "cassandratablecolumn.properties";
 	private static CassandraPropertyReader cassandraPropertyReader = null;
-
-	/**
-	 * private default constructor
-	 * 
-	 * @throws IOException
-	 */
-	private CassandraPropertyReader() throws IOException {
-		InputStream in = this.getClass().getClassLoader().getResourceAsStream(FILE);
-		try {
-			properties.load(in);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-	}
 
 	public static synchronized CassandraPropertyReader getInstance() {
 		if (cassandraPropertyReader == null) {
@@ -41,6 +25,23 @@ public class CassandraPropertyReader {
 
 		}
 		return cassandraPropertyReader;
+	}
+
+	private final Properties properties = new Properties();
+
+	/**
+	 * private default constructor
+	 *
+	 * @throws IOException
+	 */
+	private CassandraPropertyReader() throws IOException {
+		InputStream in = this.getClass().getClassLoader().getResourceAsStream(FILE);
+		try {
+			properties.load(in);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
 	}
 
 	/**

@@ -12,40 +12,40 @@ public class Category {
 	private String description;
 	private List<Term> terms;
 
-	public String getIdentifier() {
-		return identifier;
-	}
-
-	public void setIdentifier(String identifier) {
-		this.identifier = identifier;
-	}
-
 	public String getCode() {
 		return code;
-	}
-
-	public void setCode(String code) {
-		this.code = code;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
 	}
 
 	public String getDescription() {
 		return description;
 	}
 
-	public void setDescription(String description) {
-		this.description = description;
+	public String getIdentifier() {
+		return identifier;
+	}
+
+	public String getName() {
+		return name;
 	}
 
 	public List<Term> getTerms() {
 		return terms;
+	}
+
+	public void setCode(String code) {
+		this.code = code;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public void setIdentifier(String identifier) {
+		this.identifier = identifier;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	public void setTerms(List<Term> terms) {

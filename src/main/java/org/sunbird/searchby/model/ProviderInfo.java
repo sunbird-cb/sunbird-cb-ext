@@ -9,43 +9,43 @@ public class ProviderInfo implements Serializable {
 	private String orgId;
 	private Integer contentCount;
 
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getLogoUrl() {
-		return logoUrl;
-	}
-
-	public void setLogoUrl(String logoUrl) {
-		this.logoUrl = logoUrl;
+	public Integer getContentCount() {
+		return contentCount;
 	}
 
 	public String getDescription() {
 		return description;
 	}
 
-	public void setDescription(String description) {
-		this.description = description;
+	public String getLogoUrl() {
+		return logoUrl;
+	}
+
+	public String getName() {
+		return name;
 	}
 
 	public String getOrgId() {
 		return orgId;
 	}
 
-	public void setOrgId(String orgId) {
-		this.orgId = orgId;
-	}
-
-	public Integer getContentCount() {
-		return contentCount;
-	}
-
 	public void setContentCount(Integer contentCount) {
 		this.contentCount = contentCount;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public void setLogoUrl(String logoUrl) {
+		this.logoUrl = logoUrl;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public void setOrgId(String orgId) {
+		this.orgId = orgId;
 	}
 }

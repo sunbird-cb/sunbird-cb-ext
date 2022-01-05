@@ -15,21 +15,21 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Service
 public class OrgCreationConsumer {
 
-    @Autowired
-    OrgCreationProcessService processService;
+	@Autowired
+	OrgCreationProcessService processService;
 
-    private CbExtLogger log = new CbExtLogger(getClass().getName());
+	private CbExtLogger log = new CbExtLogger(getClass().getName());
 
-    @KafkaListener(id = "id0", groupId = "orgCreationTopic-consumer", topicPartitions = {
-            @TopicPartition(topic = "${kafka.topics.org.creation}", partitions = {"0", "1", "2", "3"})})
-    public void processMessage(ConsumerRecord<String, String> data) {
+	@KafkaListener(id = "id0", groupId = "orgCreationTopic-consumer", topicPartitions = {
+			@TopicPartition(topic = "${kafka.topics.org.creation}", partitions = { "0", "1", "2", "3" }) })
+	public void processMessage(ConsumerRecord<String, String> data) {
 
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            Map<String, Object> orgObject = mapper.readValue(String.valueOf(data.value()), Map.class);
-            processService.createOrg(orgObject);
-        } catch (IOException e) {
-            log.error(e);
-        }
-    }
+		try {
+			ObjectMapper mapper = new ObjectMapper();
+			Map<String, Object> orgObject = mapper.readValue(String.valueOf(data.value()), Map.class);
+			processService.createOrg(orgObject);
+		} catch (IOException e) {
+			log.error(e);
+		}
+	}
 }

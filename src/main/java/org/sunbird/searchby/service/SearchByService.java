@@ -84,8 +84,9 @@ public class SearchByService {
 			Map<String, List<CompetencyInfo>> typeCache = (Map<String, List<CompetencyInfo>>) objectTypeCache;
 			for (Map.Entry<String, List<CompetencyInfo>> eachInfo : typeCache.entrySet()) {
 				if (lowerCaseTypeFilter.contains(eachInfo.getKey().toLowerCase().trim())) {
-					for (CompetencyInfo competencyInfo : eachInfo.getValue())
+					for (CompetencyInfo competencyInfo : eachInfo.getValue()) {
 						afterFilter.put(competencyInfo.getId(), competencyInfo);
+					}
 				}
 			}
 		}
@@ -95,8 +96,9 @@ public class SearchByService {
 			Map<String, List<CompetencyInfo>> areaCache = (Map<String, List<CompetencyInfo>>) objectAreaCache;
 			for (Map.Entry<String, List<CompetencyInfo>> eachInfo : areaCache.entrySet()) {
 				if (lowerCaseAreaFilter.contains(eachInfo.getKey().toLowerCase().trim())) {
-					for (CompetencyInfo competencyInfo : eachInfo.getValue())
+					for (CompetencyInfo competencyInfo : eachInfo.getValue()) {
 						afterFilter.put(competencyInfo.getId(), competencyInfo);
+					}
 				}
 			}
 		}
@@ -110,6 +112,10 @@ public class SearchByService {
 			updateProviderDetails(authUserToken);
 		}
 		return (Collection<ProviderInfo>) redisCacheMgr.getCache(Constants.PROVIDER_CACHE_NAME);
+	}
+
+	private List<String> listToLowerCase(List<String> convertString) {
+		return convertString.stream().map(String::toLowerCase).map(String::trim).collect(Collectors.toList());
 	}
 
 	private void updateCompetencyDetails(String authUserToken) throws Exception {
@@ -158,7 +164,7 @@ public class SearchByService {
 			logger.error(err);
 			try {
 				logger.info(String.format("Received Response: %s",
-						(new ObjectMapper()).writeValueAsString(compositeSearchResult)));
+						new ObjectMapper().writeValueAsString(compositeSearchResult)));
 			} catch (Exception e) {
 			}
 			throw err;
@@ -234,7 +240,7 @@ public class SearchByService {
 			logger.error(err);
 			try {
 				logger.info(
-						String.format("Received Response: %s", (new ObjectMapper()).writeValueAsString(fracSearchRes)));
+						String.format("Received Response: %s", new ObjectMapper().writeValueAsString(fracSearchRes)));
 			} catch (Exception e) {
 			}
 			throw err;
@@ -289,7 +295,7 @@ public class SearchByService {
 			logger.error(err);
 			try {
 				logger.info(String.format("Received Response: %s",
-						(new ObjectMapper()).writeValueAsString(compositeSearchResult)));
+						new ObjectMapper().writeValueAsString(compositeSearchResult)));
 			} catch (Exception e) {
 			}
 			throw err;
@@ -329,16 +335,12 @@ public class SearchByService {
 			logger.error(err);
 			try {
 				logger.info(
-						String.format("Received Response: %s", (new ObjectMapper()).writeValueAsString(orgSearchRes)));
+						String.format("Received Response: %s", new ObjectMapper().writeValueAsString(orgSearchRes)));
 			} catch (Exception e) {
 			}
 			throw err;
 		}
 
 		redisCacheMgr.putCache(Constants.PROVIDER_CACHE_NAME, providerMap.values());
-	}
-
-	private List<String> listToLowerCase(List<String> convertString) {
-		return convertString.stream().map(String::toLowerCase).map(String::trim).collect(Collectors.toList());
 	}
 }

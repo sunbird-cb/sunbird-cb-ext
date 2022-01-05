@@ -5,27 +5,27 @@ public class SunbirdApiRespResult {
 	private SunbirdApiHierarchyResultContent content;
 	private SunbirdApiHierarchyResultBatch batch;
 
-	public SunbirdApiResultResponse getResponse() {
-		return response;
-	}
-
-	public void setResponse(SunbirdApiResultResponse response) {
-		this.response = response;
+	public SunbirdApiHierarchyResultBatch getBatch() {
+		return batch;
 	}
 
 	public SunbirdApiHierarchyResultContent getContent() {
 		return content;
 	}
 
-	public void setContent(SunbirdApiHierarchyResultContent content) {
-		this.content = content;
-	}
-
-	public SunbirdApiHierarchyResultBatch getBatch() {
-		return batch;
+	public SunbirdApiResultResponse getResponse() {
+		return response;
 	}
 
 	public void setBatch(SunbirdApiHierarchyResultBatch batch) {
 		this.batch = batch;
+	}
+
+	public void setContent(SunbirdApiHierarchyResultContent content) {
+		this.content = content;
+	}
+
+	public void setResponse(SunbirdApiResultResponse response) {
+		this.response = response;
 	}
 }

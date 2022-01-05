@@ -9,8 +9,9 @@ import org.sunbird.workallocation.model.UserWorkAllocationMapping;
 import org.sunbird.workallocation.model.UserWorkAllocationPrimaryKeyModel;
 
 @Repository
-public interface UserWorkAllocationMappingRepo extends CassandraRepository<UserWorkAllocationMapping, UserWorkAllocationPrimaryKeyModel> {
+public interface UserWorkAllocationMappingRepo
+		extends CassandraRepository<UserWorkAllocationMapping, UserWorkAllocationPrimaryKeyModel> {
 
-    @Query("SELECT * FROM user_work_allocation_mapping where userid=?0;")
-    List<UserWorkAllocationMapping> findByUserId(String userId);
+	@Query("SELECT * FROM user_work_allocation_mapping where userid=?0;")
+	List<UserWorkAllocationMapping> findByUserId(String userId);
 }

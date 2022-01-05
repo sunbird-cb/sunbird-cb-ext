@@ -7,47 +7,47 @@ import org.springframework.data.cassandra.core.mapping.Table;
 @Table("user_work_allocation_mapping")
 public class UserWorkAllocationMapping {
 
-    public UserWorkAllocationMapping() {
-        super();
-    }
+	@PrimaryKey
+	private UserWorkAllocationPrimaryKeyModel primaryKey;
 
-    public UserWorkAllocationMapping(String userId, String workAllocationId, String workOrderId, String status) {
-        this.primaryKey = new UserWorkAllocationPrimaryKeyModel();
-        this.primaryKey.setUserId(userId);
-        this.primaryKey.setWorkAllocationId(workAllocationId);
-        this.workOrderId = workOrderId;
-        this.status = status;
-    }
+	@Column("workorderid")
+	private String workOrderId;
 
-    @PrimaryKey
-    private UserWorkAllocationPrimaryKeyModel primaryKey;
+	@Column("status")
+	private String status;
 
-    @Column("workorderid")
-    private String workOrderId;
+	public UserWorkAllocationMapping() {
+	}
 
-    @Column("status")
-    private String status;
+	public UserWorkAllocationMapping(String userId, String workAllocationId, String workOrderId, String status) {
+		this.primaryKey = new UserWorkAllocationPrimaryKeyModel();
+		this.primaryKey.setUserId(userId);
+		this.primaryKey.setWorkAllocationId(workAllocationId);
+		this.workOrderId = workOrderId;
+		this.status = status;
+	}
 
-    public UserWorkAllocationPrimaryKeyModel getPrimaryKey() {
-        return primaryKey;
-    }
+	public UserWorkAllocationPrimaryKeyModel getPrimaryKey() {
+		return primaryKey;
+	}
 
-    public void setPrimaryKey(UserWorkAllocationPrimaryKeyModel primaryKey) {
-        this.primaryKey = primaryKey;
-    }
+	public String getStatus() {
+		return status;
+	}
 
-    public String getStatus() {
-        return status;
-    }
+	public String getWorkOrderId() {
+		return workOrderId;
+	}
 
-    public String getWorkOrderId() {
-        return workOrderId;
-    }
-    public void setWorkOrderId(String workOrderId) {
-        this.workOrderId = workOrderId;
-    }
+	public void setPrimaryKey(UserWorkAllocationPrimaryKeyModel primaryKey) {
+		this.primaryKey = primaryKey;
+	}
 
-    public void setStatus(String status) {
-        this.status = status;
-    }
+	public void setStatus(String status) {
+		this.status = status;
+	}
+
+	public void setWorkOrderId(String workOrderId) {
+		this.workOrderId = workOrderId;
+	}
 }

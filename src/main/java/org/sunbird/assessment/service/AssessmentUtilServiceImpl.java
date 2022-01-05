@@ -30,6 +30,15 @@ public class AssessmentUtilServiceImpl implements AssessmentUtilService {
 	public static final String RESPONSE = "response";
 	public static final String USER_SELECTED = "userSelected";
 
+	/*
+	 * This method fetches the answer key for assessment
+	 */
+	@SuppressWarnings("unchecked")
+	@Override
+	public Map<String, Object> getAnswerKeyForAssessmentAuthoringPreview(Map<String, Object> contentMeta) {
+		return new HashMap<>();
+	}
+
 	private Map<String, Object> getAnswers(List<Map<String, Object>> questions) {
 		Map<String, Object> ret = new HashMap<>();
 
@@ -41,24 +50,27 @@ public class AssessmentUtilServiceImpl implements AssessmentUtilService {
 				switch (questionType) {
 				case "mtf":
 					for (Map<String, Object> options : (List<Map<String, Object>>) question.get(OPTIONS)) {
-						if ((boolean) options.get(IS_CORRECT))
+						if ((boolean) options.get(IS_CORRECT)) {
 							correctOption.add(options.get(OPTION_ID).toString() + "-"
 									+ options.get("text").toString().toLowerCase() + "-"
 									+ options.get("match").toString().toLowerCase());
+						}
 					}
 					break;
 				case "fitb":
 					for (Map<String, Object> options : (List<Map<String, Object>>) question.get(OPTIONS)) {
-						if ((boolean) options.get(IS_CORRECT))
+						if ((boolean) options.get(IS_CORRECT)) {
 							correctOption.add(options.get(OPTION_ID).toString() + "-"
 									+ options.get("text").toString().toLowerCase());
+						}
 					}
 					break;
 				case MCQ_SCA:
 				case MCQ_MCA:
 					for (Map<String, Object> options : (List<Map<String, Object>>) question.get(OPTIONS)) {
-						if ((boolean) options.get(IS_CORRECT))
+						if ((boolean) options.get(IS_CORRECT)) {
 							correctOption.add(options.get(OPTION_ID).toString());
+						}
 					}
 					break;
 				default:
@@ -66,8 +78,9 @@ public class AssessmentUtilServiceImpl implements AssessmentUtilService {
 				}
 			} else {
 				for (Map<String, Object> options : (List<Map<String, Object>>) question.get(OPTIONS)) {
-					if ((boolean) options.get(IS_CORRECT))
+					if ((boolean) options.get(IS_CORRECT)) {
 						correctOption.add(options.get(OPTION_ID).toString());
+					}
 				}
 			}
 			ret.put(question.get(QUESTION_ID).toString(), correctOption);
@@ -76,6 +89,27 @@ public class AssessmentUtilServiceImpl implements AssessmentUtilService {
 		return ret;
 	}
 
+	/**
+	 * To remove answers from the assessment question sets
+	 *
+	 * @param assessmentContent Object
+	 * @return QuestionSet
+	 */
+	@Override
+	public QuestionSet removeAssessmentAnsKey(Object assessmentContent) {
+		QuestionSet questionSet = new ObjectMapper().convertValue(assessmentContent, QuestionSet.class);
+		List<String> qnsTypes = Arrays.asList(MCQ_MCA, MCQ_SCA, FITB, MTF);
+		for (Questions question : questionSet.getQuestions()) {
+			if (qnsTypes.contains(question.getQuestionType()) && !ObjectUtils.isEmpty(question.getOptions())) {
+				for (Map<String, Object> option : question.getOptions()) {
+					option.remove(IS_CORRECT);
+				}
+			}
+		}
+		return questionSet;
+	}
+
+	@Override
 	public Map<String, Object> validateAssessment(List<Map<String, Object>> questions) {
 		try {
 			Integer correct = 0;
@@ -91,24 +125,27 @@ public class AssessmentUtilServiceImpl implements AssessmentUtilService {
 					switch (questionType) {
 					case "mtf":
 						for (Map<String, Object> options : (List<Map<String, Object>>) question.get(OPTIONS)) {
-							if (options.containsKey(RESPONSE) && !options.get(RESPONSE).toString().isEmpty())
+							if (options.containsKey(RESPONSE) && !options.get(RESPONSE).toString().isEmpty()) {
 								marked.add(options.get(OPTION_ID).toString() + "-"
 										+ options.get("text").toString().toLowerCase() + "-"
 										+ options.get(RESPONSE).toString().toLowerCase());
+							}
 						}
 						break;
 					case "fitb":
 						for (Map<String, Object> options : (List<Map<String, Object>>) question.get(OPTIONS)) {
-							if (options.containsKey(RESPONSE) && !options.get(RESPONSE).toString().isEmpty())
+							if (options.containsKey(RESPONSE) && !options.get(RESPONSE).toString().isEmpty()) {
 								marked.add(options.get(OPTION_ID).toString() + "-"
 										+ options.get(RESPONSE).toString().toLowerCase());
+							}
 						}
 						break;
 					case MCQ_SCA:
 					case MCQ_MCA:
 						for (Map<String, Object> options : (List<Map<String, Object>>) question.get(OPTIONS)) {
-							if ((boolean) options.get(USER_SELECTED))
+							if ((boolean) options.get(USER_SELECTED)) {
 								marked.add(options.get(OPTION_ID).toString());
+							}
 						}
 						break;
 					default:
@@ -116,26 +153,30 @@ public class AssessmentUtilServiceImpl implements AssessmentUtilService {
 					}
 				} else {
 					for (Map<String, Object> options : (List<Map<String, Object>>) question.get(OPTIONS)) {
-						if ((boolean) options.get(USER_SELECTED))
+						if ((boolean) options.get(USER_SELECTED)) {
 							marked.add(options.get(OPTION_ID).toString());
+						}
 					}
 				}
 
-				if (CollectionUtils.isEmpty(marked))
+				if (CollectionUtils.isEmpty(marked)) {
 					blank++;
-				else {
+				} else {
 					List<String> answer = (List<String>) answers.get(question.get(QUESTION_ID));
-					if (answer.size() > 1)
+					if (answer.size() > 1) {
 						Collections.sort(answer);
-					if (marked.size() > 1)
+					}
+					if (marked.size() > 1) {
 						Collections.sort(marked);
-					if (answer.equals(marked))
+					}
+					if (answer.equals(marked)) {
 						correct++;
-					else
+					} else {
 						inCorrect++;
+					}
 				}
 			}
-			result = ((correct * 100d) / (correct + blank + inCorrect));
+			result = correct * 100d / (correct + blank + inCorrect);
 			resultMap.put("result", result);
 			resultMap.put("incorrect", inCorrect);
 			resultMap.put("blank", blank);
@@ -159,48 +200,55 @@ public class AssessmentUtilServiceImpl implements AssessmentUtilService {
 			for (Map<String, Object> question : questions) {
 				List<String> marked = new ArrayList<>();
 				if (question.containsKey(QUESTION_TYPE)) {
-					if (question.get(QUESTION_TYPE).toString().equalsIgnoreCase("mtf")) {
+					if ("mtf".equalsIgnoreCase(question.get(QUESTION_TYPE).toString())) {
 						for (Map<String, Object> options : (List<Map<String, Object>>) question.get(OPTIONS)) {
-							if (options.containsKey(RESPONSE) && !options.get(RESPONSE).toString().isEmpty())
+							if (options.containsKey(RESPONSE) && !options.get(RESPONSE).toString().isEmpty()) {
 								marked.add(options.get(OPTION_ID).toString() + "-"
 										+ options.get("text").toString().toLowerCase() + "-"
 										+ options.get(RESPONSE).toString().toLowerCase());
+							}
 						}
-					} else if (question.get(QUESTION_TYPE).toString().equalsIgnoreCase("fitb")) {
+					} else if ("fitb".equalsIgnoreCase(question.get(QUESTION_TYPE).toString())) {
 						for (Map<String, Object> options : (List<Map<String, Object>>) question.get(OPTIONS)) {
-							if (options.containsKey(RESPONSE) && !options.get(RESPONSE).toString().isEmpty())
+							if (options.containsKey(RESPONSE) && !options.get(RESPONSE).toString().isEmpty()) {
 								marked.add(options.get(OPTION_ID).toString() + "-"
 										+ options.get(RESPONSE).toString().toLowerCase());
+							}
 						}
-					} else if (question.get(QUESTION_TYPE).toString().equalsIgnoreCase((MCQ_SCA))
-							|| question.get(QUESTION_TYPE).toString().equalsIgnoreCase(MCQ_MCA)) {
+					} else if (MCQ_SCA.equalsIgnoreCase(question.get(QUESTION_TYPE).toString())
+							|| MCQ_MCA.equalsIgnoreCase(question.get(QUESTION_TYPE).toString())) {
 						for (Map<String, Object> options : (List<Map<String, Object>>) question.get(OPTIONS)) {
-							if ((boolean) options.get(USER_SELECTED))
+							if ((boolean) options.get(USER_SELECTED)) {
 								marked.add(options.get(OPTION_ID).toString());
+							}
 						}
 					}
 				} else {
 					for (Map<String, Object> options : (List<Map<String, Object>>) question.get(OPTIONS)) {
-						if ((boolean) options.get(USER_SELECTED))
+						if ((boolean) options.get(USER_SELECTED)) {
 							marked.add(options.get(OPTION_ID).toString());
+						}
 					}
 				}
 
-				if (CollectionUtils.isEmpty(marked))
+				if (CollectionUtils.isEmpty(marked)) {
 					blank++;
-				else {
+				} else {
 					List<String> answer = (List<String>) answers.get(question.get(QUESTION_ID));
-					if (answer.size() > 1)
+					if (answer.size() > 1) {
 						Collections.sort(answer);
-					if (marked.size() > 1)
+					}
+					if (marked.size() > 1) {
 						Collections.sort(marked);
-					if (answer.equals(marked))
+					}
+					if (answer.equals(marked)) {
 						correct++;
-					else
+					} else {
 						inCorrect++;
+					}
 				}
 			}
-			result = ((correct * 100d) / (correct + blank + inCorrect));
+			result = correct * 100d / (correct + blank + inCorrect);
 			resultMap.put("result", result);
 			resultMap.put("incorrect", inCorrect);
 			resultMap.put("blank", blank);
@@ -210,34 +258,5 @@ public class AssessmentUtilServiceImpl implements AssessmentUtilService {
 			throw new ApplicationLogicError("Error when verifying assessment. Error : " + ex.getMessage(), ex);
 		}
 
-	}
-
-	/*
-	 * This method fetches the answer key for assessment
-	 */
-	@SuppressWarnings("unchecked")
-	@Override
-	public Map<String, Object> getAnswerKeyForAssessmentAuthoringPreview(Map<String, Object> contentMeta) {
-		return new HashMap<>();
-	}
-
-	/**
-	 * To remove answers from the assessment question sets
-	 * 
-	 * @param assessmentContent Object
-	 * @return QuestionSet
-	 */
-	@Override
-	public QuestionSet removeAssessmentAnsKey(Object assessmentContent) {
-		QuestionSet questionSet = new ObjectMapper().convertValue(assessmentContent, QuestionSet.class);
-		List<String> qnsTypes = Arrays.asList(MCQ_MCA, MCQ_SCA, FITB, MTF);
-		for (Questions question : questionSet.getQuestions()) {
-			if (qnsTypes.contains(question.getQuestionType()) && !ObjectUtils.isEmpty(question.getOptions())) {
-				for (Map<String, Object> option : question.getOptions()) {
-					option.remove(IS_CORRECT);
-				}
-			}
-		}
-		return questionSet;
 	}
 }

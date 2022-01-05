@@ -9,38 +9,38 @@ public class SearchByFilter {
 	List<String> competencyType;
 	List<String> competencyArea;
 
-	public List<String> getCompetencyName() {
-		return competencyName;
+	public List<String> getCompetencyArea() {
+		return competencyArea;
 	}
 
-	public void setCompetencyName(List<String> competencyName) {
-		this.competencyName = competencyName;
+	public List<String> getCompetencyName() {
+		return competencyName;
 	}
 
 	public List<String> getCompetencyType() {
 		return competencyType;
 	}
 
-	public void setCompetencyType(List<String> competencyType) {
-		this.competencyType = competencyType;
-	}
-
-	public List<String> getCompetencyArea() {
-		return competencyArea;
+	public boolean isEmptyFilter() {
+		return CollectionUtils.isEmpty(competencyName) || CollectionUtils.isEmpty(competencyType)
+				|| CollectionUtils.isEmpty(competencyArea);
 	}
 
 	public void setCompetencyArea(List<String> competencyArea) {
 		this.competencyArea = competencyArea;
 	}
 
+	public void setCompetencyName(List<String> competencyName) {
+		this.competencyName = competencyName;
+	}
+
+	public void setCompetencyType(List<String> competencyType) {
+		this.competencyType = competencyType;
+	}
+
 	@Override
 	public String toString() {
 		return "SearchByFilter{" + "competencyName=" + competencyName + ", competencyType=" + competencyType
 				+ ", competencyArea=" + competencyArea + '}';
-	}
-
-	public boolean isEmptyFilter() {
-		return (CollectionUtils.isEmpty(competencyName) || CollectionUtils.isEmpty(competencyType)
-				|| CollectionUtils.isEmpty(competencyArea));
 	}
 }

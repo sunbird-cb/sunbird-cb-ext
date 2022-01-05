@@ -32,104 +32,102 @@ public class UserAssessmentMasterModel {
 	@Column("user_id")
 	private String userId;
 
-	public UserAssessmentMasterPrimaryKeyModel getPrimaryKey() {
-		return primaryKey;
+	public UserAssessmentMasterModel() {
 	}
 
-	public void setPrimaryKey(UserAssessmentMasterPrimaryKeyModel primaryKey) {
+	public UserAssessmentMasterModel(UserAssessmentMasterPrimaryKeyModel primaryKey, Integer correctCount,
+			Date dateCreated, Integer incorrectCount, Integer notAnsweredCount, String parentContentType,
+			BigDecimal passPercent, String sourceId, String sourceTitle, String userId) {
 		this.primaryKey = primaryKey;
+		this.correctCount = correctCount;
+		this.dateCreated = dateCreated;
+		this.incorrectCount = incorrectCount;
+		this.notAnsweredCount = notAnsweredCount;
+		this.parentContentType = parentContentType;
+		this.passPercent = passPercent;
+		this.sourceId = sourceId;
+		this.sourceTitle = sourceTitle;
+		this.userId = userId;
 	}
 
 	public Integer getCorrectCount() {
 		return correctCount;
 	}
 
-	public void setCorrectCount(Integer correctCount) {
-		this.correctCount = correctCount;
-	}
-
 	public Date getDateCreated() {
 		return dateCreated;
-	}
-
-	public void setDateCreated(Date dateCreated) {
-		this.dateCreated = dateCreated;
 	}
 
 	public Integer getIncorrectCount() {
 		return incorrectCount;
 	}
 
-	public void setIncorrectCount(Integer incorrectCount) {
-		this.incorrectCount = incorrectCount;
-	}
-
 	public Integer getNotAnsweredCount() {
 		return notAnsweredCount;
-	}
-
-	public void setNotAnsweredCount(Integer notAnsweredCount) {
-		this.notAnsweredCount = notAnsweredCount;
 	}
 
 	public String getParentContentType() {
 		return parentContentType;
 	}
 
-	public void setParentContentType(String parentContentType) {
-		this.parentContentType = parentContentType;
-	}
-
 	public BigDecimal getPassPercent() {
 		return passPercent;
 	}
 
-	public void setPassPercent(BigDecimal passPercent) {
-		this.passPercent = passPercent;
+	public UserAssessmentMasterPrimaryKeyModel getPrimaryKey() {
+		return primaryKey;
 	}
 
 	public String getSourceId() {
 		return sourceId;
 	}
 
-	public void setSourceId(String sourceId) {
-		this.sourceId = sourceId;
-	}
-
 	public String getSourceTitle() {
 		return sourceTitle;
-	}
-
-	public void setSourceTitle(String sourceTitle) {
-		this.sourceTitle = sourceTitle;
 	}
 
 	public String getUserId() {
 		return userId;
 	}
 
+	public void setCorrectCount(Integer correctCount) {
+		this.correctCount = correctCount;
+	}
+
+	public void setDateCreated(Date dateCreated) {
+		this.dateCreated = dateCreated;
+	}
+
+	public void setIncorrectCount(Integer incorrectCount) {
+		this.incorrectCount = incorrectCount;
+	}
+
+	public void setNotAnsweredCount(Integer notAnsweredCount) {
+		this.notAnsweredCount = notAnsweredCount;
+	}
+
+	public void setParentContentType(String parentContentType) {
+		this.parentContentType = parentContentType;
+	}
+
+	public void setPassPercent(BigDecimal passPercent) {
+		this.passPercent = passPercent;
+	}
+
+	public void setPrimaryKey(UserAssessmentMasterPrimaryKeyModel primaryKey) {
+		this.primaryKey = primaryKey;
+	}
+
+	public void setSourceId(String sourceId) {
+		this.sourceId = sourceId;
+	}
+
+	public void setSourceTitle(String sourceTitle) {
+		this.sourceTitle = sourceTitle;
+	}
+
 	public void setUser_id(String userId) {
 		this.userId = userId;
-	}
-
-	public UserAssessmentMasterModel(UserAssessmentMasterPrimaryKeyModel primaryKey, Integer correctCount,
-			Date dateCreated, Integer incorrectCount, Integer notAnsweredCount, String parentContentType,
-			BigDecimal passPercent, String sourceId, String sourceTitle, String userId) {
-		super();
-		this.primaryKey = primaryKey;
-		this.correctCount = correctCount;
-		this.dateCreated = dateCreated;
-		this.incorrectCount = incorrectCount;
-		this.notAnsweredCount = notAnsweredCount;
-		this.parentContentType = parentContentType;
-		this.passPercent = passPercent;
-		this.sourceId = sourceId;
-		this.sourceTitle = sourceTitle;
-		this.userId = userId;
-	}
-
-	public UserAssessmentMasterModel() {
-		super();
 	}
 
 	@Override

@@ -38,6 +38,29 @@ public class Validator {
 		}
 	}
 
+	public void validateSearchCriteria(SearchCriteria criteria) {
+		if (StringUtils.isEmpty(criteria.getStatus())) {
+			throw new BadRequestException("Status should not be empty!");
+		}
+		if (StringUtils.isEmpty(criteria.getDepartmentName())) {
+			throw new BadRequestException("Department should not be empty!");
+		}
+	}
+
+	public void validateWorkAllocation(WorkAllocationDTOV2 workAllocationDTOV2, String reqType) {
+		if (StringUtils.isEmpty(workAllocationDTOV2.getWorkOrderId())) {
+			throw new BadRequestException("Work order Id should not be empty!");
+		}
+		if (StringUtils.isEmpty(workAllocationDTOV2.getUserName())) {
+			throw new BadRequestException("User name should not be empty!");
+		}
+		if (WorkAllocationConstants.UPDATE.equalsIgnoreCase(reqType)) {
+			if (StringUtils.isEmpty(workAllocationDTOV2.getId())) {
+				throw new BadRequestException("Id should not be empty!");
+			}
+		}
+	}
+
 	public void validateWorkAllocationReq(WorkAllocationDTO workAllocation, String reqType) {
 		if (StringUtils.isEmpty(workAllocation.getStatus())) {
 			throw new BadRequestException("Status can not be empty!");
@@ -75,7 +98,8 @@ public class Validator {
 			if (StringUtils.isEmpty(workOrderDTO.getId())) {
 				throw new BadRequestException("Work order Id should not be empty!");
 			}
-			Map<String, Object> existingRecord = indexerService.readEntity(workOrderIndex, workOrderIndexType, workOrderDTO.getId());
+			Map<String, Object> existingRecord = indexerService.readEntity(workOrderIndex, workOrderIndexType,
+					workOrderDTO.getId());
 			if (CollectionUtils.isEmpty(existingRecord)) {
 				throw new BadRequestException("No record found on given work order Id!");
 			}
@@ -83,35 +107,15 @@ public class Validator {
 				throw new BadRequestException("Work order status should not be empty!");
 			}
 			String prevStatus = (String) existingRecord.get("status");
-			if (WorkAllocationConstants.PUBLISHED_STATUS.equals(prevStatus) && WorkAllocationConstants.DRAFT_STATUS.equals(workOrderDTO.getStatus())) {
-				throw new BadRequestException("Work order in the " + prevStatus + " status!, can't move to "+ WorkAllocationConstants.DRAFT_STATUS +" status");
+			if (WorkAllocationConstants.PUBLISHED_STATUS.equals(prevStatus)
+					&& WorkAllocationConstants.DRAFT_STATUS.equals(workOrderDTO.getStatus())) {
+				throw new BadRequestException("Work order in the " + prevStatus + " status!, can't move to "
+						+ WorkAllocationConstants.DRAFT_STATUS + " status");
 			}
 			if (WorkAllocationConstants.ARCHIVED_STATUS.equals(prevStatus)) {
-				throw new BadRequestException("Work order in the " + WorkAllocationConstants.ARCHIVED_STATUS + " status!, can't move further!");
+				throw new BadRequestException("Work order in the " + WorkAllocationConstants.ARCHIVED_STATUS
+						+ " status!, can't move further!");
 			}
-		}
-	}
-
-	public void validateWorkAllocation(WorkAllocationDTOV2 workAllocationDTOV2, String reqType) {
-		if (StringUtils.isEmpty(workAllocationDTOV2.getWorkOrderId())) {
-			throw new BadRequestException("Work order Id should not be empty!");
-		}
-		if (StringUtils.isEmpty(workAllocationDTOV2.getUserName())) {
-			throw new BadRequestException("User name should not be empty!");
-		}
-		if (WorkAllocationConstants.UPDATE.equalsIgnoreCase(reqType)) {
-			if (StringUtils.isEmpty(workAllocationDTOV2.getId())) {
-				throw new BadRequestException("Id should not be empty!");
-			}
-		}
-	}
-
-	public void validateSearchCriteria(SearchCriteria criteria) {
-		if(StringUtils.isEmpty(criteria.getStatus())){
-			throw new BadRequestException("Status should not be empty!");
-		}
-		if(StringUtils.isEmpty(criteria.getDepartmentName())){
-			throw new BadRequestException("Department should not be empty!");
 		}
 	}
 }

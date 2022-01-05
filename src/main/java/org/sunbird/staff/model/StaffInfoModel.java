@@ -21,7 +21,6 @@ public class StaffInfoModel {
 	private int totalPositionsVacant;
 
 	public StaffInfoModel() {
-		super();
 	}
 
 	public StaffInfoModel(StaffInfoPrimaryKeyModel primaryKey) {
@@ -36,36 +35,12 @@ public class StaffInfoModel {
 		this.totalPositionsVacant = totalPositionsVacant;
 	}
 
-	public StaffInfoPrimaryKeyModel getPrimaryKey() {
-		return primaryKey;
-	}
-
-	public void setPrimaryKey(StaffInfoPrimaryKeyModel primaryKey) {
-		this.primaryKey = primaryKey;
-	}
-
 	public String getPosition() {
 		return position;
 	}
 
-	public void setPosition(String position) {
-		this.position = position;
-	}
-
-	public int getTotalPositionsFilled() {
-		return totalPositionsFilled;
-	}
-
-	public void setTotalPositionsFilled(int totalPositionsFilled) {
-		this.totalPositionsFilled = totalPositionsFilled;
-	}
-
-	public int getTotalPositionsVacant() {
-		return totalPositionsVacant;
-	}
-
-	public void setTotalPositionsVacant(int totalPositionsVacant) {
-		this.totalPositionsVacant = totalPositionsVacant;
+	public StaffInfoPrimaryKeyModel getPrimaryKey() {
+		return primaryKey;
 	}
 
 	public StaffInfo getStaffInfo() {
@@ -76,6 +51,30 @@ public class StaffInfoModel {
 		info.setTotalPositionsFilled(totalPositionsFilled);
 		info.setTotalPositionsVacant(totalPositionsVacant);
 		return info;
+	}
+
+	public int getTotalPositionsFilled() {
+		return totalPositionsFilled;
+	}
+
+	public int getTotalPositionsVacant() {
+		return totalPositionsVacant;
+	}
+
+	public void setPosition(String position) {
+		this.position = position;
+	}
+
+	public void setPrimaryKey(StaffInfoPrimaryKeyModel primaryKey) {
+		this.primaryKey = primaryKey;
+	}
+
+	public void setTotalPositionsFilled(int totalPositionsFilled) {
+		this.totalPositionsFilled = totalPositionsFilled;
+	}
+
+	public void setTotalPositionsVacant(int totalPositionsVacant) {
+		this.totalPositionsVacant = totalPositionsVacant;
 	}
 
 }

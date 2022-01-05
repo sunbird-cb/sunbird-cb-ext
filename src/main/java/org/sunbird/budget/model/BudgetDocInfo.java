@@ -17,84 +17,32 @@ public class BudgetDocInfo {
 	private String uploadedDate;
 	private String uploadedBy;
 
-	public String getOrgId() {
-		return orgId;
-	}
-
-	public void setOrgId(String orgId) {
-		this.orgId = orgId;
-	}
-
 	public String getBudgetYear() {
 		return budgetYear;
-	}
-
-	public void setBudgetYear(String budgetYear) {
-		this.budgetYear = budgetYear;
-	}
-
-	public String getId() {
-		return id;
-	}
-
-	public void setId(String id) {
-		this.id = id;
-	}
-
-	public String getProofId() {
-		return proofId;
-	}
-
-	public void setProofId(String proofId) {
-		this.proofId = proofId;
 	}
 
 	public String getFileName() {
 		return fileName;
 	}
 
-	public void setFileName(String fileName) {
-		this.fileName = fileName;
+	public String getFileSize() {
+		return fileSize;
 	}
 
 	public String getFileType() {
 		return fileType;
 	}
 
-	public void setFileType(String fileType) {
-		this.fileType = fileType;
-	}
-
-	public String getFileSize() {
-		return fileSize;
-	}
-
-	public void setFileSize(String fileSize) {
-		this.fileSize = fileSize;
-	}
-
 	public String getFileUrl() {
 		return fileUrl;
 	}
 
-	public void setFileUrl(String fileUrl) {
-		this.fileUrl = fileUrl;
+	public String getId() {
+		return id;
 	}
 
-	public String getUploadedDate() {
-		return uploadedDate;
-	}
-
-	public void setUploadedDate(String uploadedDate) {
-		this.uploadedDate = uploadedDate;
-	}
-
-	public String getUploadedBy() {
-		return uploadedBy;
-	}
-
-	public void setUploadedBy(String uploadedBy) {
-		this.uploadedBy = uploadedBy;
+	public String getOrgId() {
+		return orgId;
 	}
 
 	public Map<String, String> getProofDoc() {
@@ -104,5 +52,57 @@ public class BudgetDocInfo {
 		proofDoc.put(Constants.BUDGET_DOC_FILE_TYPE, fileType);
 		proofDoc.put(Constants.BUDGET_DOC_FILE_URL, fileUrl);
 		return proofDoc;
+	}
+
+	public String getProofId() {
+		return proofId;
+	}
+
+	public String getUploadedBy() {
+		return uploadedBy;
+	}
+
+	public String getUploadedDate() {
+		return uploadedDate;
+	}
+
+	public void setBudgetYear(String budgetYear) {
+		this.budgetYear = budgetYear;
+	}
+
+	public void setFileName(String fileName) {
+		this.fileName = fileName;
+	}
+
+	public void setFileSize(String fileSize) {
+		this.fileSize = fileSize;
+	}
+
+	public void setFileType(String fileType) {
+		this.fileType = fileType;
+	}
+
+	public void setFileUrl(String fileUrl) {
+		this.fileUrl = fileUrl;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	public void setOrgId(String orgId) {
+		this.orgId = orgId;
+	}
+
+	public void setProofId(String proofId) {
+		this.proofId = proofId;
+	}
+
+	public void setUploadedBy(String uploadedBy) {
+		this.uploadedBy = uploadedBy;
+	}
+
+	public void setUploadedDate(String uploadedDate) {
+		this.uploadedDate = uploadedDate;
 	}
 }

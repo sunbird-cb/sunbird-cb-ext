@@ -30,95 +30,93 @@ public class UserQuizMasterModel {
 	@Column("user_id")
 	private String userId;
 
-	public UserQuizMasterPrimaryKeyModel getPrimaryKey() {
-		return primaryKey;
+	public UserQuizMasterModel() {
 	}
 
-	public void setPrimaryKey(UserQuizMasterPrimaryKeyModel primaryKey) {
+	public UserQuizMasterModel(UserQuizMasterPrimaryKeyModel primaryKey, Integer correctCount, Date dateCreated,
+			Integer incorrectCount, Integer notAnsweredCount, BigDecimal passPercent, String sourceId,
+			String sourceTitle, String userId) {
 		this.primaryKey = primaryKey;
+		this.correctCount = correctCount;
+		this.dateCreated = dateCreated;
+		this.incorrectCount = incorrectCount;
+		this.notAnsweredCount = notAnsweredCount;
+		this.passPercent = passPercent;
+		this.sourceId = sourceId;
+		this.sourceTitle = sourceTitle;
+		this.userId = userId;
 	}
 
 	public Integer getCorrectCount() {
 		return correctCount;
 	}
 
-	public void setCorrectCount(Integer correctCount) {
-		this.correctCount = correctCount;
-	}
-
 	public Date getDateCreated() {
 		return dateCreated;
-	}
-
-	public void setDateCreated(Date dateCreated) {
-		this.dateCreated = dateCreated;
 	}
 
 	public Integer getIncorrectCount() {
 		return incorrectCount;
 	}
 
-	public void setIncorrectCount(Integer incorrectCount) {
-		this.incorrectCount = incorrectCount;
-	}
-
 	public Integer getNotAnsweredCount() {
 		return notAnsweredCount;
-	}
-
-	public void setNotAnsweredCount(Integer notAnsweredCount) {
-		this.notAnsweredCount = notAnsweredCount;
 	}
 
 	public BigDecimal getPassPercent() {
 		return passPercent;
 	}
 
-	public void setPassPercent(BigDecimal passPercent) {
-		this.passPercent = passPercent;
+	public UserQuizMasterPrimaryKeyModel getPrimaryKey() {
+		return primaryKey;
 	}
 
 	public String getSourceId() {
 		return sourceId;
 	}
 
-	public void setSourceId(String sourceId) {
-		this.sourceId = sourceId;
-	}
-
 	public String getSourceTitle() {
 		return sourceTitle;
-	}
-
-	public void setSourceTitle(String sourceTitle) {
-		this.sourceTitle = sourceTitle;
 	}
 
 	public String getUserId() {
 		return userId;
 	}
 
+	public void setCorrectCount(Integer correctCount) {
+		this.correctCount = correctCount;
+	}
+
+	public void setDateCreated(Date dateCreated) {
+		this.dateCreated = dateCreated;
+	}
+
+	public void setIncorrectCount(Integer incorrectCount) {
+		this.incorrectCount = incorrectCount;
+	}
+
+	public void setNotAnsweredCount(Integer notAnsweredCount) {
+		this.notAnsweredCount = notAnsweredCount;
+	}
+
+	public void setPassPercent(BigDecimal passPercent) {
+		this.passPercent = passPercent;
+	}
+
+	public void setPrimaryKey(UserQuizMasterPrimaryKeyModel primaryKey) {
+		this.primaryKey = primaryKey;
+	}
+
+	public void setSourceId(String sourceId) {
+		this.sourceId = sourceId;
+	}
+
+	public void setSourceTitle(String sourceTitle) {
+		this.sourceTitle = sourceTitle;
+	}
+
 	public void setUserId(String userId) {
 		this.userId = userId;
-	}
-
-	public UserQuizMasterModel(UserQuizMasterPrimaryKeyModel primaryKey, Integer correctCount, Date dateCreated,
-			Integer incorrectCount, Integer notAnsweredCount, BigDecimal passPercent, String sourceId,
-			String sourceTitle, String userId) {
-		super();
-		this.primaryKey = primaryKey;
-		this.correctCount = correctCount;
-		this.dateCreated = dateCreated;
-		this.incorrectCount = incorrectCount;
-		this.notAnsweredCount = notAnsweredCount;
-		this.passPercent = passPercent;
-		this.sourceId = sourceId;
-		this.sourceTitle = sourceTitle;
-		this.userId = userId;
-	}
-
-	public UserQuizMasterModel() {
-		super();
 	}
 
 	@Override

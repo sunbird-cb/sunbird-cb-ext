@@ -36,6 +36,36 @@ public class StorageServiceImpl implements StorageService {
 	@Autowired
 	private CbExtServerProperties cbExtServerProperties;
 
+	@Override
+	public SBApiResponse deleteFile(String fileName) {
+		SBApiResponse response = new SBApiResponse();
+		response.setId(Constants.API_FILE_DELETE);
+		try {
+			storageService.deleteObject(cbExtServerProperties.getAzureContainerName(), fileName,
+					Option.apply(Boolean.FALSE));
+			response.getParams().setStatus(Constants.SUCCESSFUL);
+			response.setResponseCode(HttpStatus.OK);
+			return response;
+		} catch (Exception e) {
+			logger.error("Failed to delete file: " + fileName + ", Exception: ", e);
+			response.getParams().setStatus(Constants.FAILED);
+			response.getParams().setErrmsg("Failed to delete file. Exception: " + e.getMessage());
+			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+			return response;
+		}
+	}
+
+	@Override
+	protected void finalize() {
+		try {
+			if (storageService != null) {
+				storageService.closeContext();
+				storageService = null;
+			}
+		} catch (Exception e) {
+		}
+	}
+
 	@PostConstruct
 	public void init() {
 		if (storageService == null) {
@@ -74,35 +104,6 @@ public class StorageServiceImpl implements StorageService {
 			response.getParams().setErrmsg("Failed to upload file. Exception:" + e.getMessage());
 			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
 			return response;
-		}
-	}
-
-	@Override
-	public SBApiResponse deleteFile(String fileName) {
-		SBApiResponse response = new SBApiResponse();
-		response.setId(Constants.API_FILE_DELETE);
-		try {
-			storageService.deleteObject(cbExtServerProperties.getAzureContainerName(), fileName,
-					Option.apply(Boolean.FALSE));
-			response.getParams().setStatus(Constants.SUCCESSFUL);
-			response.setResponseCode(HttpStatus.OK);
-			return response;
-		} catch (Exception e) {
-			logger.error("Failed to delete file: " + fileName + ", Exception: ", e);
-			response.getParams().setStatus(Constants.FAILED);
-			response.getParams().setErrmsg("Failed to delete file. Exception: " + e.getMessage());
-			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
-			return response;
-		}
-	}
-
-	protected void finalize() {
-		try {
-			if (storageService != null) {
-				storageService.closeContext();
-				storageService = null;
-			}
-		} catch (Exception e) {
 		}
 	}
 }

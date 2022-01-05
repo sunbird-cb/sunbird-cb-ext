@@ -9,72 +9,74 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class WorkAllocation {
-    private String id;
-    private String userId;
-    private String userName;
-    private String userEmail;
-    private WAObject draftWAObject;
-    private WAObject activeWAObject;
-    private List<WAObject> archivedWAList;
+	private String id;
+	private String userId;
+	private String userName;
+	private String userEmail;
+	private WAObject draftWAObject;
+	private WAObject activeWAObject;
+	private List<WAObject> archivedWAList;
 
-    public String getId() {
-        return id;
-    }
+	public void addArchivedWAList(WAObject archivedWAList) {
+		if (CollectionUtils.isEmpty(this.archivedWAList)) {
+			this.archivedWAList = new ArrayList<>();
+		}
+		this.archivedWAList.add(archivedWAList);
+	}
 
-    public void setId(String id) {
-        this.id = id;
-    }
+	public WAObject getActiveWAObject() {
+		return activeWAObject;
+	}
 
-    public String getUserId() {
-        return userId;
-    }
+	public List<WAObject> getArchivedWAList() {
+		return archivedWAList;
+	}
 
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
+	public WAObject getDraftWAObject() {
+		return draftWAObject;
+	}
 
-    public String getUserName() {
-        return userName;
-    }
+	public String getId() {
+		return id;
+	}
 
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
+	public String getUserEmail() {
+		return userEmail;
+	}
 
-    public String getUserEmail() {
-        return userEmail;
-    }
+	public String getUserId() {
+		return userId;
+	}
 
-    public void setUserEmail(String userEmail) {
-        this.userEmail = userEmail;
-    }
+	public String getUserName() {
+		return userName;
+	}
 
-    public WAObject getDraftWAObject() {
-        return draftWAObject;
-    }
+	public void setActiveWAObject(WAObject activeWAObject) {
+		this.activeWAObject = activeWAObject;
+	}
 
-    public void setDraftWAObject(WAObject draftWAObject) {
-        this.draftWAObject = draftWAObject;
-    }
+	public void setArchivedWAList(List<WAObject> archivedWAList) {
+		this.archivedWAList = archivedWAList;
+	}
 
-    public WAObject getActiveWAObject() {
-        return activeWAObject;
-    }
+	public void setDraftWAObject(WAObject draftWAObject) {
+		this.draftWAObject = draftWAObject;
+	}
 
-    public void setActiveWAObject(WAObject activeWAObject) {
-        this.activeWAObject = activeWAObject;
-    }
+	public void setId(String id) {
+		this.id = id;
+	}
 
-    public List<WAObject> getArchivedWAList() {
-        return archivedWAList;
-    }
+	public void setUserEmail(String userEmail) {
+		this.userEmail = userEmail;
+	}
 
-    public void setArchivedWAList(List<WAObject> archivedWAList) {
-        this.archivedWAList = archivedWAList;
-    }
-    public void addArchivedWAList(WAObject archivedWAList) {
-        if(CollectionUtils.isEmpty(this.archivedWAList))
-            this.archivedWAList = new ArrayList<>();
-        this.archivedWAList.add(archivedWAList);
-    }
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
+
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
 }

@@ -25,28 +25,28 @@ public class BudgetInfoPrimaryKeyModel {
 		this.budgetYear = budgetYear;
 	}
 
-	public String getOrgId() {
-		return orgId;
-	}
-
-	public void setOrgId(String orgId) {
-		this.orgId = orgId;
-	}
-
 	public String getBudgetYear() {
 		return budgetYear;
-	}
-
-	public void setBudgetYear(String budgetYear) {
-		this.budgetYear = budgetYear;
 	}
 
 	public String getId() {
 		return id;
 	}
 
+	public String getOrgId() {
+		return orgId;
+	}
+
+	public void setBudgetYear(String budgetYear) {
+		this.budgetYear = budgetYear;
+	}
+
 	public void setId(String id) {
 		this.id = id;
+	}
+
+	public void setOrgId(String orgId) {
+		this.orgId = orgId;
 	}
 
 }

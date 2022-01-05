@@ -49,6 +49,38 @@ public class PortalServiceImpl implements PortalService {
 	OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
 
 	@Override
+	public List<DeptPublicInfo> getAllDept() {
+		List<DeptPublicInfo> deptPublicInfo = new ArrayList<>();
+		try {
+			Map<String, Object> tenantMap = new HashMap<>();
+			tenantMap.put(Constants.IS_TENANT, Boolean.TRUE);
+			Map<String, Object> tMap = new HashMap<>();
+			tMap.put(Constants.FILTERS, tenantMap);
+			tMap.put(Constants.FIELDS, new ArrayList<>(
+					Arrays.asList(Constants.ID, Constants.ROOT_ORG_ID, Constants.ORG_NAME, Constants.DESCRIPTION)));
+			tMap.put(Constants.LIMIT, 100);
+			Map<String, Object> requestMap = new HashMap<>();
+			requestMap.put(Constants.REQUEST, tMap);
+			String serviceURL = serverConfig.getSbUrl() + serverConfig.getSbOrgSearchPath();
+			logger.info(String.format("service Url : %s", serviceURL));
+			SunbirdApiResp orgResponse = mapper.convertValue(outboundRequestHandlerService
+					.fetchResultUsingPost("https://igot-dev.in/api/org/v1/search", requestMap), SunbirdApiResp.class);
+			SunbirdApiResultResponse resultResp = orgResponse.getResult().getResponse();
+			for (int j = 0; j < resultResp.getContent().size(); j++) {
+				DeptPublicInfo dept = new DeptPublicInfo(resultResp.getContent().get(j).getId(),
+						resultResp.getContent().get(j).getDescription(), resultResp.getContent().get(j).getRootOrgId(),
+						resultResp.getContent().get(j).getOrgName());
+				deptPublicInfo.add(dept);
+			}
+			return deptPublicInfo;
+		} catch (Exception e) {
+			logger.info("Exception occurred in getDeptNameList");
+			logger.error(e);
+		}
+		return Collections.emptyList();
+	}
+
+	@Override
 	public List<String> getDeptNameList() {
 		try {
 			List<String> orgNames = new ArrayList<>();
@@ -76,38 +108,6 @@ public class PortalServiceImpl implements PortalService {
 						.collect(Collectors.toList()));
 			} while (count != orgNames.size());
 			return orgNames;
-		} catch (Exception e) {
-			logger.info("Exception occurred in getDeptNameList");
-			logger.error(e);
-		}
-		return Collections.emptyList();
-	}
-
-	@Override
-	public List<DeptPublicInfo> getAllDept() {
-		List<DeptPublicInfo> deptPublicInfo = new ArrayList<>();
-		try {
-			Map<String, Object> tenantMap = new HashMap<>();
-			tenantMap.put(Constants.IS_TENANT, Boolean.TRUE);
-			Map<String, Object> tMap = new HashMap<>();
-			tMap.put(Constants.FILTERS, tenantMap);
-			tMap.put(Constants.FIELDS, new ArrayList<>(
-					Arrays.asList(Constants.ID, Constants.ROOT_ORG_ID, Constants.ORG_NAME, Constants.DESCRIPTION)));
-			tMap.put(Constants.LIMIT, 100);
-			Map<String, Object> requestMap = new HashMap<>();
-			requestMap.put(Constants.REQUEST, tMap);
-			String serviceURL = serverConfig.getSbUrl() + serverConfig.getSbOrgSearchPath();
-			logger.info(String.format("service Url : %s", serviceURL));
-			SunbirdApiResp orgResponse = mapper.convertValue(outboundRequestHandlerService
-					.fetchResultUsingPost("https://igot-dev.in/api/org/v1/search", requestMap), SunbirdApiResp.class);
-			SunbirdApiResultResponse resultResp = orgResponse.getResult().getResponse();
-			for (int j = 0; j < resultResp.getContent().size(); j++) {
-				DeptPublicInfo dept = new DeptPublicInfo(resultResp.getContent().get(j).getId(),
-						resultResp.getContent().get(j).getDescription(), resultResp.getContent().get(j).getRootOrgId(),
-						resultResp.getContent().get(j).getOrgName());
-				deptPublicInfo.add(dept);
-			}
-			return deptPublicInfo;
 		} catch (Exception e) {
 			logger.info("Exception occurred in getDeptNameList");
 			logger.error(e);

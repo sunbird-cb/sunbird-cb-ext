@@ -31,41 +31,10 @@ public class AllocationControllerV2 {
 				HttpStatus.OK);
 	}
 
-	@PostMapping("/update")
-	public ResponseEntity<Response> updateWorkAllocation(
-			@RequestHeader("x-authenticated-user-token") String authUserToken, @RequestHeader("userId") String userId,
-			@RequestBody WorkAllocationDTOV2 workAllocation) {
-		authUserToken = "bearer " + authUserToken;
-		return new ResponseEntity<>(allocationServiceV2.updateWorkAllocation(authUserToken, userId, workAllocation),
-				HttpStatus.OK);
-	}
-
 	@PostMapping("/add/workorder")
 	public ResponseEntity<Response> addWorkOrder(@RequestHeader("userId") String userId,
 			@RequestBody WorkOrderDTO workOrder) {
 		return new ResponseEntity<>(allocationServiceV2.addWorkOrder(userId, workOrder), HttpStatus.OK);
-	}
-
-	@PostMapping("/update/workorder")
-	public ResponseEntity<Response> updateWorkOrder(@RequestHeader("x-authenticated-user-token") String authUserToken,
-			@RequestHeader("userId") String userId, @RequestBody WorkOrderDTO workOrder) {
-		return new ResponseEntity<>(allocationServiceV2.updateWorkOrder(userId, workOrder, authUserToken),
-				HttpStatus.OK);
-	}
-
-	@PostMapping("/getWorkOrders")
-	public ResponseEntity<Response> getWorkOrders(@RequestBody SearchCriteria searchCriteria) {
-		return new ResponseEntity<>(allocationServiceV2.getWorkOrders(searchCriteria), HttpStatus.OK);
-	}
-
-	@GetMapping("/getWorkOrderById/{workOrderId}")
-	public ResponseEntity<Response> getWorkOrderById(@PathVariable("workOrderId") String workOrderId) {
-		return new ResponseEntity<>(allocationServiceV2.getWorkOrderById(workOrderId), HttpStatus.OK);
-	}
-
-	@GetMapping("/getWorkAllocationById/{allocationId}")
-	public ResponseEntity<Response> getWorkAllocationById(@PathVariable("allocationId") String allocationId) {
-		return new ResponseEntity<>(allocationServiceV2.getWorkAllocationById(allocationId), HttpStatus.OK);
 	}
 
 	@PostMapping("/copy/workOrder")
@@ -82,6 +51,37 @@ public class AllocationControllerV2 {
 	@GetMapping("/user/competencies/{userId}")
 	public ResponseEntity<Response> getUserCompetencies(@PathVariable("userId") String userId) {
 		return new ResponseEntity<>(allocationServiceV2.getUserCompetencies(userId), HttpStatus.OK);
+	}
+
+	@GetMapping("/getWorkAllocationById/{allocationId}")
+	public ResponseEntity<Response> getWorkAllocationById(@PathVariable("allocationId") String allocationId) {
+		return new ResponseEntity<>(allocationServiceV2.getWorkAllocationById(allocationId), HttpStatus.OK);
+	}
+
+	@GetMapping("/getWorkOrderById/{workOrderId}")
+	public ResponseEntity<Response> getWorkOrderById(@PathVariable("workOrderId") String workOrderId) {
+		return new ResponseEntity<>(allocationServiceV2.getWorkOrderById(workOrderId), HttpStatus.OK);
+	}
+
+	@PostMapping("/getWorkOrders")
+	public ResponseEntity<Response> getWorkOrders(@RequestBody SearchCriteria searchCriteria) {
+		return new ResponseEntity<>(allocationServiceV2.getWorkOrders(searchCriteria), HttpStatus.OK);
+	}
+
+	@PostMapping("/update")
+	public ResponseEntity<Response> updateWorkAllocation(
+			@RequestHeader("x-authenticated-user-token") String authUserToken, @RequestHeader("userId") String userId,
+			@RequestBody WorkAllocationDTOV2 workAllocation) {
+		authUserToken = "bearer " + authUserToken;
+		return new ResponseEntity<>(allocationServiceV2.updateWorkAllocation(authUserToken, userId, workAllocation),
+				HttpStatus.OK);
+	}
+
+	@PostMapping("/update/workorder")
+	public ResponseEntity<Response> updateWorkOrder(@RequestHeader("x-authenticated-user-token") String authUserToken,
+			@RequestHeader("userId") String userId, @RequestBody WorkOrderDTO workOrder) {
+		return new ResponseEntity<>(allocationServiceV2.updateWorkOrder(userId, workOrder, authUserToken),
+				HttpStatus.OK);
 	}
 
 }

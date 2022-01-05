@@ -40,6 +40,9 @@ import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 @Service
 public class WATConsumer {
 
+	private static final String[] ignorableFieldsForPublishedState = { "userName", "userEmail", "submittedFromName",
+			"submittedFromEmail", "submittedToName", "submittedToEmail", "createdByName", "updatedByName" };
+
 	@Autowired
 	private OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
 
@@ -59,8 +62,69 @@ public class WATConsumer {
 
 	SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-ddXHH:mm:ss.ms", Locale.getDefault());
 
-	private static final String[] ignorableFieldsForPublishedState = { "userName", "userEmail", "submittedFromName",
-			"submittedFromEmail", "submittedToName", "submittedToEmail", "createdByName", "updatedByName" };
+	private void extracted(ObjectMapper mapper, List<WorkAllocationDTOV2> workAllocations,
+			Map<String, Object> workAllocationCassandraModel) {
+		try {
+			workAllocations.add(mapper.readValue((String) workAllocationCassandraModel.get(Constants.DATA),
+					WorkAllocationDTOV2.class));
+		} catch (IOException e) {
+			logger.error(e);
+		}
+	}
+
+	private Map<String, Object> getFilterObject(Map<String, Object> watObj) throws IOException {
+		ObjectMapper mapper1 = new ObjectMapper();
+		mapper1.addMixIn(Object.class, PropertyFilterMixIn.class);
+		FilterProvider filters = new SimpleFilterProvider().addFilter("PropertyFilter",
+				SimpleBeanPropertyFilter.serializeAllExcept(ignorableFieldsForPublishedState));
+		String writer = mapper1.writer(filters).writeValueAsString(watObj);
+		return mapper1.readValue(writer, Map.class);
+	}
+
+	private Event getTelemetryEvent(Map<String, Object> watObject) {
+		HashMap<String, Object> eData = new HashMap<>();
+		eData.put("state", watObject.get("status"));
+		eData.put("props", WorkAllocationConstants.PROPS);
+		HashMap<String, Object> cbObject = new HashMap<>();
+		cbObject.put("id", watObject.get("id"));
+		cbObject.put("type", WorkAllocationConstants.TYPE);
+		cbObject.put("ver", String.valueOf(1.0));
+		cbObject.put("name", watObject.get("name"));
+		cbObject.put("org", watObject.get("deptName"));
+		eData.put("cb_object", cbObject);
+		HashMap<String, Object> data = new HashMap<>();
+		data.put("data", watObject);
+		eData.put("cb_data", data);
+		Event event = new Event();
+		Actor actor = new Actor();
+		actor.setId((String) watObject.get("id"));
+		actor.setType(WorkAllocationConstants.USER_CONST);
+		event.setActor(actor);
+		event.setEid(WorkAllocationConstants.EID);
+		event.setEdata(eData);
+		event.setVer(WorkAllocationConstants.VERSION);
+		event.setEts((Long) watObject.get("updatedAt"));
+		event.setMid(WorkAllocationConstants.CB_NAME + "." + UUID.randomUUID());
+		Context context = new Context();
+		context.setChannel((String) watObject.get("deptId"));
+		context.setEnv(WorkAllocationConstants.WAT_NAME);
+		Pdata pdata = new Pdata();
+		pdata.setId(cbExtServerProperties.getWatTelemetryEnv());
+		pdata.setPid(WorkAllocationConstants.MDO_NAME_CONST);
+		pdata.setVer(WorkAllocationConstants.VERSION_TYPE);
+		context.setPdata(pdata);
+		event.setContext(context);
+		ObjectData objectData = new ObjectData();
+		objectData.setId((String) watObject.get("id"));
+		objectData.setType(WorkAllocationConstants.WORK_ORDER_ID_CONST);
+		event.setObject(objectData);
+		return event;
+	}
+
+	private void postTelemetryEvent(Event event) {
+		outboundRequestHandlerService.fetchResultUsingPost(
+				cbExtServerProperties.getTelemetryBaseUrl() + cbExtServerProperties.getTelemetryEndpoint(), event);
+	}
 
 	@KafkaListener(id = "id2", groupId = "watTelemetryTopic-consumer", topicPartitions = {
 			@TopicPartition(topic = "${kafka.topics.wat.telemetry.event}", partitions = { "0", "1", "2", "3" }) })
@@ -105,71 +169,6 @@ public class WATConsumer {
 		} catch (IOException e) {
 			logger.error(e);
 		}
-	}
-
-	private void extracted(ObjectMapper mapper, List<WorkAllocationDTOV2> workAllocations,
-			Map<String, Object> workAllocationCassandraModel) {
-		try {
-			workAllocations.add(mapper.readValue((String) workAllocationCassandraModel.get(Constants.DATA),
-					WorkAllocationDTOV2.class));
-		} catch (IOException e) {
-			logger.error(e);
-		}
-	}
-
-	private Map<String, Object> getFilterObject(Map<String, Object> watObj) throws IOException {
-		ObjectMapper mapper1 = new ObjectMapper();
-		mapper1.addMixIn(Object.class, PropertyFilterMixIn.class);
-		FilterProvider filters = new SimpleFilterProvider().addFilter("PropertyFilter",
-				SimpleBeanPropertyFilter.serializeAllExcept(ignorableFieldsForPublishedState));
-		String writer = mapper1.writer(filters).writeValueAsString(watObj);
-		watObj = mapper1.readValue(writer, Map.class);
-		return watObj;
-	}
-
-	private void postTelemetryEvent(Event event) {
-		outboundRequestHandlerService.fetchResultUsingPost(
-				cbExtServerProperties.getTelemetryBaseUrl() + cbExtServerProperties.getTelemetryEndpoint(), event);
-	}
-
-	private Event getTelemetryEvent(Map<String, Object> watObject) {
-		HashMap<String, Object> eData = new HashMap<>();
-		eData.put("state", watObject.get("status"));
-		eData.put("props", WorkAllocationConstants.PROPS);
-		HashMap<String, Object> cbObject = new HashMap<>();
-		cbObject.put("id", watObject.get("id"));
-		cbObject.put("type", WorkAllocationConstants.TYPE);
-		cbObject.put("ver", String.valueOf(1.0));
-		cbObject.put("name", watObject.get("name"));
-		cbObject.put("org", watObject.get("deptName"));
-		eData.put("cb_object", cbObject);
-		HashMap<String, Object> data = new HashMap<>();
-		data.put("data", watObject);
-		eData.put("cb_data", data);
-		Event event = new Event();
-		Actor actor = new Actor();
-		actor.setId((String) watObject.get("id"));
-		actor.setType(WorkAllocationConstants.USER_CONST);
-		event.setActor(actor);
-		event.setEid(WorkAllocationConstants.EID);
-		event.setEdata(eData);
-		event.setVer(WorkAllocationConstants.VERSION);
-		event.setEts((Long) watObject.get("updatedAt"));
-		event.setMid(WorkAllocationConstants.CB_NAME + "." + UUID.randomUUID());
-		Context context = new Context();
-		context.setChannel((String) watObject.get("deptId"));
-		context.setEnv(WorkAllocationConstants.WAT_NAME);
-		Pdata pdata = new Pdata();
-		pdata.setId(cbExtServerProperties.getWatTelemetryEnv());
-		pdata.setPid(WorkAllocationConstants.MDO_NAME_CONST);
-		pdata.setVer(WorkAllocationConstants.VERSION_TYPE);
-		context.setPdata(pdata);
-		event.setContext(context);
-		ObjectData objectData = new ObjectData();
-		objectData.setId((String) watObject.get("id"));
-		objectData.setType(WorkAllocationConstants.WORK_ORDER_ID_CONST);
-		event.setObject(objectData);
-		return event;
 	}
 
 	public void updateUserWorkOrderMappings(Map<String, Object> workOrderMap,

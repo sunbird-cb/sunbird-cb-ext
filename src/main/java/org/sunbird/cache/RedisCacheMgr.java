@@ -29,32 +29,6 @@ public class RedisCacheMgr {
 
 	private CbExtLogger logger = new CbExtLogger(getClass().getName());
 
-	public void putCache(String key, Object object) {
-		try {
-			int ttl = CACHE_TTL;
-			if (!StringUtils.isEmpty(cbExtServerProperties.getRedisTimeout())) {
-				ttl = Integer.parseInt(cbExtServerProperties.getRedisTimeout());
-			}
-			redisTemplate.opsForValue().set(Constants.REDIS_COMMON_KEY + key, object);
-			redisTemplate.expire(Constants.REDIS_COMMON_KEY + key, ttl, TimeUnit.SECONDS);
-			logger.info("Cache_key_value " + Constants.REDIS_COMMON_KEY + key + " is saved in redis");
-		} catch (Exception e) {
-			logger.error(e);
-		}
-	}
-
-	public boolean deleteKeyByName(String key) {
-		try {
-			key = key.toUpperCase();
-			redisTemplate.delete(Constants.REDIS_COMMON_KEY + key);
-			logger.info("Cache_key_value " + Constants.REDIS_COMMON_KEY + key + " is deleted from redis");
-			return true;
-		} catch (Exception e) {
-			logger.error(e);
-			return false;
-		}
-	}
-
 	public boolean deleteAllKey() {
 		try {
 			String keyPattern = Constants.REDIS_COMMON_KEY + "*";
@@ -67,15 +41,6 @@ public class RedisCacheMgr {
 		} catch (Exception e) {
 			logger.error(e);
 			return false;
-		}
-	}
-
-	public Object getCache(String key) {
-		try {
-			return redisTemplate.opsForValue().get(Constants.REDIS_COMMON_KEY + key);
-		} catch (Exception e) {
-			logger.error(e);
-			return null;
 		}
 	}
 
@@ -93,6 +58,18 @@ public class RedisCacheMgr {
 			} else {
 				return false;
 			}
+		} catch (Exception e) {
+			logger.error(e);
+			return false;
+		}
+	}
+
+	public boolean deleteKeyByName(String key) {
+		try {
+			key = key.toUpperCase();
+			redisTemplate.delete(Constants.REDIS_COMMON_KEY + key);
+			logger.info("Cache_key_value " + Constants.REDIS_COMMON_KEY + key + " is deleted from redis");
+			return true;
 		} catch (Exception e) {
 			logger.error(e);
 			return false;
@@ -131,5 +108,28 @@ public class RedisCacheMgr {
 			return Collections.emptyList();
 		}
 		return result;
+	}
+
+	public Object getCache(String key) {
+		try {
+			return redisTemplate.opsForValue().get(Constants.REDIS_COMMON_KEY + key);
+		} catch (Exception e) {
+			logger.error(e);
+			return null;
+		}
+	}
+
+	public void putCache(String key, Object object) {
+		try {
+			int ttl = CACHE_TTL;
+			if (!StringUtils.isEmpty(cbExtServerProperties.getRedisTimeout())) {
+				ttl = Integer.parseInt(cbExtServerProperties.getRedisTimeout());
+			}
+			redisTemplate.opsForValue().set(Constants.REDIS_COMMON_KEY + key, object);
+			redisTemplate.expire(Constants.REDIS_COMMON_KEY + key, ttl, TimeUnit.SECONDS);
+			logger.info("Cache_key_value " + Constants.REDIS_COMMON_KEY + key + " is saved in redis");
+		} catch (Exception e) {
+			logger.error(e);
+		}
 	}
 }

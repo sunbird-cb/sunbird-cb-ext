@@ -14,40 +14,40 @@ public class FrameworkResponse {
 		return id;
 	}
 
-	public void setId(String id) {
-		this.id = id;
-	}
-
-	public String getVer() {
-		return ver;
-	}
-
-	public void setVer(String ver) {
-		this.ver = ver;
-	}
-
 	public FrameworkResponseParams getParams() {
 		return params;
-	}
-
-	public void setParams(FrameworkResponseParams params) {
-		this.params = params;
 	}
 
 	public String getResponseCode() {
 		return responseCode;
 	}
 
-	public void setResponseCode(String responseCode) {
-		this.responseCode = responseCode;
-	}
-
 	public FrameworkResponseResult getResult() {
 		return result;
 	}
 
+	public String getVer() {
+		return ver;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	public void setParams(FrameworkResponseParams params) {
+		this.params = params;
+	}
+
+	public void setResponseCode(String responseCode) {
+		this.responseCode = responseCode;
+	}
+
 	public void setResult(FrameworkResponseResult result) {
 		this.result = result;
+	}
+
+	public void setVer(String ver) {
+		this.ver = ver;
 	}
 
 }

@@ -11,7 +11,6 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.util.ObjectUtils;
 import org.sunbird.core.logger.CbExtLogger;
 import org.sunbird.workallocation.model.ChildNode;
 import org.sunbird.workallocation.model.CompetencyDetails;

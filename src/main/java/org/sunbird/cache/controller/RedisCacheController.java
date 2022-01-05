@@ -11,26 +11,25 @@ import org.sunbird.common.model.SBApiResponse;
 @RestController
 public class RedisCacheController {
 
-    @Autowired
-    RedisCacheService redisCacheService;
+	@Autowired
+	RedisCacheService redisCacheService;
 
+	@DeleteMapping("/redis")
+	public ResponseEntity<?> deleteCache() throws Exception {
+		SBApiResponse response = redisCacheService.deleteCache();
+		return new ResponseEntity<>(response, response.getResponseCode());
+	}
 
-    @DeleteMapping("/redis")
-    public ResponseEntity<?> deleteCache() throws Exception {
-        SBApiResponse response = redisCacheService.deleteCache();
-        return new ResponseEntity<>(response, response.getResponseCode());
-    }
+	@GetMapping("/redis")
+	public ResponseEntity<?> getKeys() throws Exception {
+		SBApiResponse response = redisCacheService.getKeys();
+		return new ResponseEntity<>(response, response.getResponseCode());
+	}
 
-    @GetMapping("/redis")
-    public ResponseEntity<?> getKeys() throws Exception {
-        SBApiResponse response = redisCacheService.getKeys();
-        return new ResponseEntity<>(response, response.getResponseCode());
-    }
-
-    @GetMapping("/redis/values")
-    public ResponseEntity<?> getKeysAndValues() throws Exception {
-        SBApiResponse response = redisCacheService.getKeysAndValues();
-        return new ResponseEntity<>(response, response.getResponseCode());
-    }
+	@GetMapping("/redis/values")
+	public ResponseEntity<?> getKeysAndValues() throws Exception {
+		SBApiResponse response = redisCacheService.getKeysAndValues();
+		return new ResponseEntity<>(response, response.getResponseCode());
+	}
 
 }

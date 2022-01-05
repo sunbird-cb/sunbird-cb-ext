@@ -25,13 +25,6 @@ public class BudgetController {
 	@Autowired
 	BudgetService budgetService;
 
-	@PostMapping("/budget/scheme")
-	public ResponseEntity<SBApiResponse> createBudgetDetails(@RequestHeader("x-authenticated-userid") String userId,
-			@Valid @RequestBody BudgetInfo requestBody) {
-		SBApiResponse response = budgetService.submitBudgetDetails(requestBody, userId);
-		return new ResponseEntity<>(response, response.getResponseCode());
-	}
-
 	@PostMapping("/budget/scheme/proof")
 	public ResponseEntity<SBApiResponse> createBudgeProofDetails(@RequestHeader("x-authenticated-userid") String userId,
 			@Valid @RequestBody BudgetDocInfo requestBody) {
@@ -39,17 +32,10 @@ public class BudgetController {
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
 
-	@GetMapping("budget/scheme/{orgId}/{budgetYear}")
-	public ResponseEntity<SBApiResponse> getBudgetDetails(@PathVariable("orgId") String orgId,
-			@PathVariable("budgetYear") String budgetYear) {
-		SBApiResponse response = budgetService.getBudgetDetails(orgId, budgetYear);
-		return new ResponseEntity<>(response, response.getResponseCode());
-	}
-
-	@PatchMapping("/budget/scheme")
-	public ResponseEntity<SBApiResponse> updateBudgetDetails(@RequestHeader("x-authenticated-userid") String userId,
+	@PostMapping("/budget/scheme")
+	public ResponseEntity<SBApiResponse> createBudgetDetails(@RequestHeader("x-authenticated-userid") String userId,
 			@Valid @RequestBody BudgetInfo requestBody) {
-		SBApiResponse response = budgetService.updateBudgetDetails(requestBody, userId);
+		SBApiResponse response = budgetService.submitBudgetDetails(requestBody, userId);
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
 
@@ -72,10 +58,24 @@ public class BudgetController {
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
 
+	@GetMapping("budget/scheme/{orgId}/{budgetYear}")
+	public ResponseEntity<SBApiResponse> getBudgetDetails(@PathVariable("orgId") String orgId,
+			@PathVariable("budgetYear") String budgetYear) {
+		SBApiResponse response = budgetService.getBudgetDetails(orgId, budgetYear);
+		return new ResponseEntity<>(response, response.getResponseCode());
+	}
+
 	@GetMapping("/orghistory/{orgId}/budget")
 	public ResponseEntity<SBApiResponse> getBudgetHistoryDetails(@PathVariable("orgId") String orgId)
 			throws ParseException {
 		SBApiResponse response = budgetService.getBudgetAudit(orgId);
+		return new ResponseEntity<>(response, response.getResponseCode());
+	}
+
+	@PatchMapping("/budget/scheme")
+	public ResponseEntity<SBApiResponse> updateBudgetDetails(@RequestHeader("x-authenticated-userid") String userId,
+			@Valid @RequestBody BudgetInfo requestBody) {
+		SBApiResponse response = budgetService.updateBudgetDetails(requestBody, userId);
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
 }

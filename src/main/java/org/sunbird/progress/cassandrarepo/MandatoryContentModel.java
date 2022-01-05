@@ -7,47 +7,47 @@ import org.springframework.data.cassandra.core.mapping.Table;
 @Table("mandatory_user_content")
 public class MandatoryContentModel {
 
-    @PrimaryKey
-    private MandatoryContentPrimaryKeyModel primaryKey;
+	@PrimaryKey
+	private MandatoryContentPrimaryKeyModel primaryKey;
 
-    @Column("content_type")
-    private String contentType;
+	@Column("content_type")
+	private String contentType;
 
-    @Column("batch_id")
-    private String batchId;
+	@Column("batch_id")
+	private String batchId;
 
-    @Column("minProgressForCompletion")
-    private Float minProgressCheck;
+	@Column("minProgressForCompletion")
+	private Float minProgressCheck;
 
-    public MandatoryContentPrimaryKeyModel getPrimaryKey() {
-        return primaryKey;
-    }
+	public String getBatchId() {
+		return batchId;
+	}
 
-    public void setPrimaryKey(MandatoryContentPrimaryKeyModel primaryKey) {
-        this.primaryKey = primaryKey;
-    }
+	public String getContentType() {
+		return contentType;
+	}
 
-    public String getContentType() {
-        return contentType;
-    }
+	public Float getMinProgressCheck() {
+		return minProgressCheck;
+	}
 
-    public void setContentType(String contentType) {
-        this.contentType = contentType;
-    }
+	public MandatoryContentPrimaryKeyModel getPrimaryKey() {
+		return primaryKey;
+	}
 
-    public Float getMinProgressCheck() {
-        return minProgressCheck;
-    }
+	public void setBatchId(String batchId) {
+		this.batchId = batchId;
+	}
 
-    public void setMinProgressCheck(Float minProgressCheck) {
-        this.minProgressCheck = minProgressCheck;
-    }
+	public void setContentType(String contentType) {
+		this.contentType = contentType;
+	}
 
-    public String getBatchId() {
-        return batchId;
-    }
+	public void setMinProgressCheck(Float minProgressCheck) {
+		this.minProgressCheck = minProgressCheck;
+	}
 
-    public void setBatchId(String batchId) {
-        this.batchId = batchId;
-    }
+	public void setPrimaryKey(MandatoryContentPrimaryKeyModel primaryKey) {
+		this.primaryKey = primaryKey;
+	}
 }

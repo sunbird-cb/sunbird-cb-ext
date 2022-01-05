@@ -21,58 +21,42 @@ public class SBApiResponse {
 		this.ts = new Timestamp(System.currentTimeMillis()).toString();
 		this.params = new SunbirdApiRespParam();
 	}
-	
+
 	public SBApiResponse(String id) {
 		this();
 		this.id = id;
+	}
+
+	public boolean containsKey(String key) {
+		return response.containsKey(key);
+	}
+
+	public Object get(String key) {
+		return response.get(key);
 	}
 
 	public String getId() {
 		return id;
 	}
 
-	public void setId(String id) {
-		this.id = id;
-	}
-
-	public String getVer() {
-		return ver;
-	}
-
-	public void setVer(String ver) {
-		this.ver = ver;
-	}
-
-	public String getTs() {
-		return ts;
-	}
-
-	public void setTs(String ts) {
-		this.ts = ts;
-	}
-
 	public SunbirdApiRespParam getParams() {
 		return params;
-	}
-
-	public void setParams(SunbirdApiRespParam params) {
-		this.params = params;
 	}
 
 	public HttpStatus getResponseCode() {
 		return responseCode;
 	}
 
-	public void setResponseCode(HttpStatus responseCode) {
-		this.responseCode = responseCode;
-	}
-
 	public Map<String, Object> getResult() {
 		return response;
 	}
 
-	public Object get(String key) {
-		return response.get(key);
+	public String getTs() {
+		return ts;
+	}
+
+	public String getVer() {
+		return ver;
 	}
 
 	public void put(String key, Object vo) {
@@ -83,7 +67,23 @@ public class SBApiResponse {
 		response.putAll(map);
 	}
 
-	public boolean containsKey(String key) {
-		return response.containsKey(key);
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	public void setParams(SunbirdApiRespParam params) {
+		this.params = params;
+	}
+
+	public void setResponseCode(HttpStatus responseCode) {
+		this.responseCode = responseCode;
+	}
+
+	public void setTs(String ts) {
+		this.ts = ts;
+	}
+
+	public void setVer(String ver) {
+		this.ver = ver;
 	}
 }

@@ -22,17 +22,17 @@ public class StorageController {
 	@Autowired
 	StorageService storageService;
 
-	@PostMapping("/upload")
-	public ResponseEntity<?> upload(@RequestParam(value = "file", required = true) MultipartFile multipartFile)
-			throws IOException {
-		SBApiResponse uploadResponse = storageService.uploadFile(multipartFile);
-		return new ResponseEntity<>(uploadResponse, uploadResponse.getResponseCode());
-	}
-
 	@DeleteMapping("/delete")
 	public ResponseEntity<?> deleteCloudFile(@RequestParam(value = "fileName", required = true) String fileName)
 			throws JsonProcessingException {
 		SBApiResponse deleteResponse = storageService.deleteFile(fileName);
 		return new ResponseEntity<>(deleteResponse, deleteResponse.getResponseCode());
+	}
+
+	@PostMapping("/upload")
+	public ResponseEntity<?> upload(@RequestParam(value = "file", required = true) MultipartFile multipartFile)
+			throws IOException {
+		SBApiResponse uploadResponse = storageService.uploadFile(multipartFile);
+		return new ResponseEntity<>(uploadResponse, uploadResponse.getResponseCode());
 	}
 }

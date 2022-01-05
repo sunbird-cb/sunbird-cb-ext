@@ -10,7 +10,7 @@ public interface AssessmentRepository {
 
 	/**
 	 * gets answer key for the assessment given the url
-	 * 
+	 *
 	 * @param artifactUrl
 	 * @return
 	 * @throws Exception
@@ -18,8 +18,18 @@ public interface AssessmentRepository {
 	public Map<String, Object> getAssessmentAnswerKey(String artifactUrl);
 
 	/**
+	 * gets assessment for a user given a content id
+	 *
+	 * @param courseId
+	 * @param userId
+	 * @return
+	 * @throws Exception
+	 */
+	public List<Map<String, Object>> getAssessmetbyContentUser(String rootOrg, String courseId, String userId);
+
+	/**
 	 * gets answerkey for the quiz submission
-	 * 
+	 *
 	 * @param quizMap
 	 * @return
 	 * @throws Exception
@@ -28,7 +38,7 @@ public interface AssessmentRepository {
 
 	/**
 	 * inserts quiz or assessments for a user
-	 * 
+	 *
 	 * @param persist
 	 * @param isAssessment
 	 * @return
@@ -36,15 +46,5 @@ public interface AssessmentRepository {
 	 */
 	public Map<String, Object> insertQuizOrAssessment(Map<String, Object> persist, Boolean isAssessment)
 			throws NumberFormatException, ParseException;
-
-	/**
-	 * gets assessment for a user given a content id
-	 * 
-	 * @param courseId
-	 * @param userId
-	 * @return
-	 * @throws Exception
-	 */
-	public List<Map<String, Object>> getAssessmetbyContentUser(String rootOrg, String courseId, String userId);
 
 }

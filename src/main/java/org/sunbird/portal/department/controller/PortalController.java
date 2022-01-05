@@ -16,15 +16,15 @@ public class PortalController {
 	@Autowired
 	PortalService portalService;
 
+	@GetMapping("/portal/getAllDept")
+	public ResponseEntity<List<DeptPublicInfo>> getAllDepartment() {
+		return new ResponseEntity<>(portalService.getAllDept(), HttpStatus.OK);
+	}
+
 	// ----------------- Public APIs --------------------
 	@GetMapping("/portal/listDeptNames")
 	public ResponseEntity<List<String>> getDeptNameList() {
 		return new ResponseEntity<>(portalService.getDeptNameList(), HttpStatus.OK);
-	}
-
-	@GetMapping("/portal/getAllDept")
-	public ResponseEntity<List<DeptPublicInfo>> getAllDepartment() {
-		return new ResponseEntity<>(portalService.getAllDept(), HttpStatus.OK);
 	}
 
 	@GetMapping("/portal/deptSearch")

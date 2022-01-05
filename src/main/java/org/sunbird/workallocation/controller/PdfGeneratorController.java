@@ -24,7 +24,7 @@ public class PdfGeneratorController {
 	}
 
 	@GetMapping(value = "/getWOPdf/{woId}", produces = MediaType.APPLICATION_PDF_VALUE)
-	public ResponseEntity<?> getWAPdf(@PathVariable("woId") String woId) throws Exception {
+	public ResponseEntity<byte[]> getWAPdf(@PathVariable("woId") String woId) {
 		byte[] out = null;
 		try {
 			out = pdfGeneratorService.generatePdf(woId);

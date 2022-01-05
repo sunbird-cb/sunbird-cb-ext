@@ -5,8 +5,8 @@ import java.util.Map;
 
 public interface UserUtilityService {
 
-	boolean validateUser(String rootOrg, String userId);
-
 	Map<String, Object> getUsersDataFromUserIds(String rootOrg, List<String> userIds, List<String> source);
+
+	boolean validateUser(String rootOrg, String userId);
 
 }
