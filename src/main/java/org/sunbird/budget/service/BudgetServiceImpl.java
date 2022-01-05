@@ -26,12 +26,14 @@ import org.sunbird.budget.model.BudgetInfo;
 import org.sunbird.cassandra.utils.CassandraOperation;
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.util.Constants;
+import org.sunbird.exception.MyOwnRuntimeException;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class BudgetServiceImpl implements BudgetService {
+	private static final String ONE_OR_MORE_REQUIRED_FIELDS_ARE_EMPTY_EMPTY_FIELDS = "One or more required fields are empty. Empty fields ";
 	private static final String FAILED_TO_FIND_BUDGET_SCHEME_FOR_ORG_ID = "Failed to find BudgetScheme for OrgId: ";
 	private static final String ID = ", Id: ";
 	private static final String BUDGET_YEAR = ", BudgetYear: ";
@@ -447,7 +449,7 @@ public class BudgetServiceImpl implements BudgetService {
 		return response;
 	}
 
-	private void validateAddBudgetDocInfo(BudgetDocInfo budgetInfo) throws Exception {
+	private void validateAddBudgetDocInfo(BudgetDocInfo budgetInfo) throws MyOwnRuntimeException {
 		List<String> errObjList = new ArrayList<>();
 		if (StringUtils.isEmpty(budgetInfo.getOrgId())) {
 			errObjList.add(Constants.ORG_ID);
@@ -472,11 +474,11 @@ public class BudgetServiceImpl implements BudgetService {
 		}
 
 		if (!CollectionUtils.isEmpty(errObjList)) {
-			throw new Exception("One or more required fields are empty. Empty fields " + errObjList.toString());
+			throw new MyOwnRuntimeException(ONE_OR_MORE_REQUIRED_FIELDS_ARE_EMPTY_EMPTY_FIELDS + errObjList.toString());
 		}
 	}
 
-	private void validateAddBudgetInfo(BudgetInfo budgetInfo) throws Exception {
+	private void validateAddBudgetInfo(BudgetInfo budgetInfo) throws MyOwnRuntimeException {
 		List<String> errObjList = new ArrayList<>();
 		if (StringUtils.isEmpty(budgetInfo.getOrgId())) {
 			errObjList.add(Constants.ORG_ID);
@@ -501,11 +503,11 @@ public class BudgetServiceImpl implements BudgetService {
 		}
 
 		if (!CollectionUtils.isEmpty(errObjList)) {
-			throw new Exception("One or more required fields are empty. Empty fields " + errObjList.toString());
+			throw new MyOwnRuntimeException(ONE_OR_MORE_REQUIRED_FIELDS_ARE_EMPTY_EMPTY_FIELDS + errObjList.toString());
 		}
 	}
 
-	private void validateUpdateBudgetInfo(BudgetInfo budgetInfo) throws Exception {
+	private void validateUpdateBudgetInfo(BudgetInfo budgetInfo) throws MyOwnRuntimeException {
 		List<String> errObjList = new ArrayList<>();
 		if (StringUtils.isEmpty(budgetInfo.getOrgId())) {
 			errObjList.add(Constants.ORG_ID);
@@ -557,7 +559,7 @@ public class BudgetServiceImpl implements BudgetService {
 		}
 
 		if (schemeName && sBudgetAllocated && tBudgetAllocated && tBudgetUtilization) {
-			throw new Exception("One or more required fields are empty. Empty fields " + errObjList.toString());
+			throw new MyOwnRuntimeException(ONE_OR_MORE_REQUIRED_FIELDS_ARE_EMPTY_EMPTY_FIELDS + errObjList.toString());
 		} else {
 			if (schemeName) {
 				errObjList.remove(Constants.SCHEME_NAME);
@@ -574,7 +576,7 @@ public class BudgetServiceImpl implements BudgetService {
 		}
 
 		if (!CollectionUtils.isEmpty(errObjList)) {
-			throw new Exception("One or more required fields are empty. Empty fields " + errObjList.toString());
+			throw new MyOwnRuntimeException(ONE_OR_MORE_REQUIRED_FIELDS_ARE_EMPTY_EMPTY_FIELDS + errObjList.toString());
 		}
 	}
 }

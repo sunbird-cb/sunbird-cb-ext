@@ -280,7 +280,7 @@ public class StaffServiceImpl implements StaffService {
 		return response;
 	}
 
-	private void validateAddStaffInfo(StaffInfo staffInfo) throws Exception {
+	private void validateAddStaffInfo(StaffInfo staffInfo) throws MyOwnRuntimeException {
 		List<String> errObjList = new ArrayList<>();
 		if (StringUtils.isEmpty(staffInfo.getOrgId())) {
 			errObjList.add(Constants.ORG_ID);
@@ -296,7 +296,7 @@ public class StaffServiceImpl implements StaffService {
 		}
 
 		if (!CollectionUtils.isEmpty(errObjList)) {
-			throw new Exception(ONE_OR_MORE_REQUIRED_FIELDS_ARE_EMPTY_EMPTY_FIELDS + errObjList.toString());
+			throw new MyOwnRuntimeException(ONE_OR_MORE_REQUIRED_FIELDS_ARE_EMPTY_EMPTY_FIELDS + errObjList.toString());
 		}
 	}
 
