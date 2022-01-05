@@ -13,7 +13,7 @@ public class Questions implements Serializable {
 	private String questionId;
 	private String question;
 	private String questionType;
-	private List<Map<String, Object>> options;
+	private transient List<Map<String, Object>> options;
 	private Boolean multiSelection;
 
 	public Boolean getMultiSelection() {
