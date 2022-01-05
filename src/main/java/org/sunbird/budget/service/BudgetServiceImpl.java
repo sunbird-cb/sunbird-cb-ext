@@ -244,8 +244,7 @@ public class BudgetServiceImpl implements BudgetService {
 		if (CollectionUtils.isEmpty(details)) {
 			return Collections.emptyList();
 		}
-		List<Map<String, Object>> response = new ArrayList<>(details);
-		return response;
+		return new ArrayList<>(details);
 	}
 
 	@Override

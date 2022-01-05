@@ -55,14 +55,9 @@ public class StorageServiceImpl implements StorageService {
 		}
 	}
 
-	@Override
 	protected void finalize() {
-		try {
-			if (storageService != null) {
-				storageService.closeContext();
-				storageService = null;
-			}
-		} catch (Exception e) {
+		if (storageService != null) {
+			storageService.closeContext();
 		}
 	}
 

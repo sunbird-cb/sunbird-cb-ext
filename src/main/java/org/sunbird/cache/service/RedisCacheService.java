@@ -4,10 +4,10 @@ import org.sunbird.common.model.SBApiResponse;
 
 public interface RedisCacheService {
 
-	public SBApiResponse deleteCache() throws Exception;
+	public SBApiResponse deleteCache();
 
-	public SBApiResponse getKeys() throws Exception;
+	public SBApiResponse getKeys();
 
-	public SBApiResponse getKeysAndValues() throws Exception;
+	public SBApiResponse getKeysAndValues();
 
 }

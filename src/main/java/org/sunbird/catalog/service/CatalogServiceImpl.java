@@ -28,7 +28,7 @@ public class CatalogServiceImpl {
 	@Autowired
 	private CbExtServerProperties extServerProperties;
 
-	private Catalog fetchCatalog(String authUserToken, boolean isEnrichConsumption) {
+	private Catalog fetchCatalog(String authUserToken) {
 		log.info("Fetching Framework details...");
 		ObjectMapper mapper = new ObjectMapper();
 		HttpHeaders headers = new HttpHeaders();
@@ -43,7 +43,7 @@ public class CatalogServiceImpl {
 		try {
 			response = mapper.readValue(responseStr.getBody(), FrameworkResponse.class);
 			if (response != null && "successful".equalsIgnoreCase(response.getParams().getStatus())) {
-				return processResponse(response.getResult().getFramework(), isEnrichConsumption);
+				return processResponse(response.getResult().getFramework());
 			} else {
 				log.info("Some exception occurred while creating the org ....");
 			}
@@ -53,11 +53,11 @@ public class CatalogServiceImpl {
 		return new Catalog();
 	}
 
-	public Catalog getCatalog(String authUserToken, boolean isEnrichConsumption) {
-		return fetchCatalog(authUserToken, isEnrichConsumption);
+	public Catalog getCatalog(String authUserToken) {
+		return fetchCatalog(authUserToken);
 	}
 
-	private Catalog processResponse(Framework framework, boolean isEnrichConsumption) {
+	private Catalog processResponse(Framework framework) {
 		Catalog catalog = new Catalog();
 		for (Category c : framework.getCategories()) {
 			if (c.getName() != null && c.getName().equalsIgnoreCase(extServerProperties.getTaxonomyCategoryName())) {

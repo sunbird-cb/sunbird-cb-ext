@@ -26,6 +26,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @SuppressWarnings("unchecked")
 public class SearchByService {
 
+	private static final String RECEIVED_RESPONSE_S = "Received Response: %s";
+
+	private static final String SOURCE = "source";
+
+	private static final String RESULT = "result";
+
 	private CbExtLogger logger = new CbExtLogger(getClass().getName());
 
 	@Autowired
@@ -142,7 +148,7 @@ public class SearchByService {
 				cbExtServerProperties.getKmBaseHost() + cbExtServerProperties.getKmCompositeSearchPath(), reqBody,
 				headers);
 
-		Map<String, Object> compositeSearchResult = (Map<String, Object>) compositeSearchRes.get("result");
+		Map<String, Object> compositeSearchResult = (Map<String, Object>) compositeSearchRes.get(RESULT);
 		List<Map<String, Object>> facetsList = (List<Map<String, Object>>) compositeSearchResult.get("facets");
 		if (!CollectionUtils.isEmpty(facetsList)) {
 			competencyMap = new HashMap<>();
@@ -162,11 +168,8 @@ public class SearchByService {
 		} else {
 			Exception err = new Exception("Failed to get facets value from Composite Search API.");
 			logger.error(err);
-			try {
-				logger.info(String.format("Received Response: %s",
-						new ObjectMapper().writeValueAsString(compositeSearchResult)));
-			} catch (Exception e) {
-			}
+			logger.info(
+					String.format(RECEIVED_RESPONSE_S, new ObjectMapper().writeValueAsString(compositeSearchResult)));
 			throw err;
 		}
 
@@ -204,7 +207,7 @@ public class SearchByService {
 							((Map<String, String>) respObj.get("additionalProperties")).get("competencyType"));
 					compInfo.setDescription((String) respObj.get("description"));
 					compInfo.setId((String) respObj.get("id"));
-					compInfo.setSource((String) respObj.get("source"));
+					compInfo.setSource((String) respObj.get(SOURCE));
 					compInfo.setStatus((String) respObj.get("status"));
 					competencyMap.put(compName, compInfo);
 
@@ -238,11 +241,7 @@ public class SearchByService {
 		} else {
 			Exception err = new Exception("Failed to get competency info from FRAC API.");
 			logger.error(err);
-			try {
-				logger.info(
-						String.format("Received Response: %s", new ObjectMapper().writeValueAsString(fracSearchRes)));
-			} catch (Exception e) {
-			}
+			logger.info(String.format(RECEIVED_RESPONSE_S, new ObjectMapper().writeValueAsString(fracSearchRes)));
 			throw err;
 		}
 
@@ -261,7 +260,7 @@ public class SearchByService {
 
 		HashMap<String, Object> reqBody = new HashMap<>();
 		HashMap<String, Object> req = new HashMap<>();
-		req.put(Constants.FACETS, Arrays.asList("source"));
+		req.put(Constants.FACETS, Arrays.asList(SOURCE));
 		Map<String, Object> filters = new HashMap<>();
 		filters.put(Constants.PRIMARY_CATEGORY, Arrays.asList("Course", "Program"));
 		filters.put(Constants.STATUS, Arrays.asList("Live"));
@@ -273,13 +272,13 @@ public class SearchByService {
 				cbExtServerProperties.getKmBaseHost() + cbExtServerProperties.getKmCompositeSearchPath(), reqBody,
 				headers);
 
-		Map<String, Object> compositeSearchResult = (Map<String, Object>) compositeSearchRes.get("result");
+		Map<String, Object> compositeSearchResult = (Map<String, Object>) compositeSearchRes.get(RESULT);
 		List<Map<String, Object>> facetsList = (List<Map<String, Object>>) compositeSearchResult.get("facets");
 		if (!CollectionUtils.isEmpty(facetsList)) {
 			providerMap = new HashMap<>();
 			for (Map<String, Object> facetObj : facetsList) {
 				String name = (String) facetObj.get("name");
-				if ("source".equals(name)) {
+				if (SOURCE.equals(name)) {
 					List<Map<String, Object>> facetValueList = (List<Map<String, Object>>) facetObj.get("values");
 					if (!CollectionUtils.isEmpty(facetValueList)) {
 						for (Map<String, Object> facetValueObj : facetValueList) {
@@ -293,11 +292,8 @@ public class SearchByService {
 		} else {
 			Exception err = new Exception("Failed to get facets value from Composite Search API.");
 			logger.error(err);
-			try {
-				logger.info(String.format("Received Response: %s",
-						new ObjectMapper().writeValueAsString(compositeSearchResult)));
-			} catch (Exception e) {
-			}
+			logger.info(
+					String.format(RECEIVED_RESPONSE_S, new ObjectMapper().writeValueAsString(compositeSearchResult)));
 			throw err;
 		}
 
@@ -313,7 +309,7 @@ public class SearchByService {
 		Map<String, Object> orgSearchRes = outboundRequestHandlerService.fetchResultUsingPost(
 				cbExtServerProperties.getSbUrl() + cbExtServerProperties.getSbOrgSearchPath(), reqBody, headers);
 
-		Map<String, Object> orgSearchResponse = (Map<String, Object>) ((Map<String, Object>) orgSearchRes.get("result"))
+		Map<String, Object> orgSearchResponse = (Map<String, Object>) ((Map<String, Object>) orgSearchRes.get(RESULT))
 				.get("response");
 
 		List<Map<String, Object>> orgResponseList = (List<Map<String, Object>>) orgSearchResponse.get("content");
@@ -333,11 +329,7 @@ public class SearchByService {
 		} else {
 			Exception err = new Exception("Failed to get competency info from FRAC API.");
 			logger.error(err);
-			try {
-				logger.info(
-						String.format("Received Response: %s", new ObjectMapper().writeValueAsString(orgSearchRes)));
-			} catch (Exception e) {
-			}
+			logger.info(String.format(RECEIVED_RESPONSE_S, new ObjectMapper().writeValueAsString(orgSearchRes)));
 			throw err;
 		}
 
