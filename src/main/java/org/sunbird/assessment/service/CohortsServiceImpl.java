@@ -37,6 +37,8 @@ import org.sunbird.core.logger.CbExtLogger;
 @Service
 public class CohortsServiceImpl implements CohortsService {
 
+	private static final String SUCCESSFUL = "successful";
+	private static final String OPEN_BATCH = "Open Batch";
 	public static final String TS_CREATED = "ts_created";
 	private CbExtLogger logger = new CbExtLogger(getClass().getName());
 
@@ -57,14 +59,6 @@ public class CohortsServiceImpl implements CohortsService {
 
 	@Override
 	public List<CohortUsers> getTopPerformers(String rootOrg, String contentId, String userId, int count) {
-		// Check User exists
-// 		if (!userUtilService.validateUser(rootOrg, userId)) {
-// 			throw new BadRequestException("Invalid UserId.");
-// 		}
-
-		// This contains the list of all the children for provided course(resourceId) if
-		// it is a learning-path.
-		// Else, it will contain the parents for provided course(resourceId)
 		List<String> assessmentIdList = new ArrayList<>();
 		assessmentIdList.add(contentId);
 		processChildContentId(contentId, assessmentIdList);
@@ -129,13 +123,8 @@ public class CohortsServiceImpl implements CohortsService {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public List<CohortUsers> getActiveUsers(String xAuthUser, String rootOrg, String contentId, String userId,
-			int count, Boolean toFilter) throws Exception {
-		// Check User exists
-// 		if (!userUtilService.validateUser(rootOrg, userId)) {
-// 			throw new BadRequestException("Invalid UserId.");
-// 		}
+			int count, Boolean toFilter) {
 
 		List<String> batchIdList = fetchBatchIdDetails(contentId);
 		if (CollectionUtils.isEmpty(batchIdList)) {
@@ -145,8 +134,7 @@ public class CohortsServiceImpl implements CohortsService {
 	}
 
 	@Override
-	public Response autoEnrollmentInCourse(String authUserToken, String rootOrg, String contentId, String userUUID)
-			throws Exception {
+	public Response autoEnrollmentInCourse(String authUserToken, String rootOrg, String contentId, String userUUID) {
 		List<SunbirdApiBatchResp> batchResp = fetchBatchsDetails(contentId);
 		List<String> batchIdList = null;
 		if (!CollectionUtils.isEmpty(batchResp))
@@ -211,8 +199,8 @@ public class CohortsServiceImpl implements CohortsService {
 		HashMap<String, Object> req = new HashMap<>();
 		String date = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
 		batchObj.put("courseId", contentId);
-		batchObj.put("name", "Open Batch");
-		batchObj.put("description", "Open Batch");
+		batchObj.put("name", OPEN_BATCH);
+		batchObj.put("description", OPEN_BATCH);
 		batchObj.put("enrollmentType", "open");
 		batchObj.put("startDate", date);
 		batchObj.put("createdBy", userUUID);
@@ -231,7 +219,7 @@ public class CohortsServiceImpl implements CohortsService {
 		selectedBatch.setCreatedFor(new ArrayList<>());
 		selectedBatch.setEnrollmentEndDate(null);
 		selectedBatch.setEnrollmentType("open");
-		selectedBatch.setName("Open Batch");
+		selectedBatch.setName(OPEN_BATCH);
 		selectedBatch.setStartDate(date);
 		selectedBatch.setStatus(1);
 		selectedBatch.setBatchId(batchId);
@@ -268,7 +256,7 @@ public class CohortsServiceImpl implements CohortsService {
 		try {
 			SunbirdApiResp contentHierarchy = contentService.getHeirarchyResponse(givenContentId);
 			if (contentHierarchy != null) {
-				if ("successful".equalsIgnoreCase(contentHierarchy.getParams().getStatus())) {
+				if (SUCCESSFUL.equalsIgnoreCase(contentHierarchy.getParams().getStatus())) {
 					List<SunbirdApiHierarchyResultContent> children = contentHierarchy.getResult().getContent()
 							.getChildren();
 					if (!CollectionUtils.isEmpty(children)) {
@@ -297,7 +285,7 @@ public class CohortsServiceImpl implements CohortsService {
 	private List<String> fetchBatchIdDetails(String contentId) {
 		try {
 			SunbirdApiResp contentHierarchy = contentService.getHeirarchyResponse(contentId);
-			if (contentHierarchy != null && "successful".equalsIgnoreCase(contentHierarchy.getParams().getStatus())) {
+			if (contentHierarchy != null && SUCCESSFUL.equalsIgnoreCase(contentHierarchy.getParams().getStatus())) {
 				List<SunbirdApiBatchResp> batches = contentHierarchy.getResult().getContent().getBatches();
 				if (!CollectionUtils.isEmpty(batches)) {
 					return batches.stream().map(SunbirdApiBatchResp::getBatchId).collect(Collectors.toList());
@@ -313,7 +301,7 @@ public class CohortsServiceImpl implements CohortsService {
 	private List<SunbirdApiBatchResp> fetchBatchsDetails(String contentId) {
 		try {
 			SunbirdApiResp contentHierarchy = contentService.getHeirarchyResponse(contentId);
-			if (contentHierarchy != null && "successful".equalsIgnoreCase(contentHierarchy.getParams().getStatus())) {
+			if (contentHierarchy != null && SUCCESSFUL.equalsIgnoreCase(contentHierarchy.getParams().getStatus())) {
 				return contentHierarchy.getResult().getContent().getBatches();
 			}
 		} catch (Exception e) {

@@ -72,9 +72,6 @@ public class Constants {
 	public static final boolean FIELDS_PASSED = true;
 	public static final boolean FETCH_ON_LEVEL = false;
 	public static final boolean SKIP_ACCESS_CHECK = true;
-	public static final List<String> MINIMUL_FIELDS = Collections
-			.unmodifiableList(Arrays.asList("identifier", "duration", "downloadUrl", "description", "mimeType",
-					"artifactUrl", "name", STATUS, "resourceType", "categoryType", "category"));
 	public static final String FETCH_RESULT_CONSTANT = ".fetchResult:";
 	public static final String URI_CONSTANT = "URI: ";
 	public static final String REQUEST_CONSTANT = "Request: ";
@@ -205,5 +202,9 @@ public class Constants {
 	public static final String END_DATE = "endDate";
 	public static final String ACTIVE = "active";
 	public static final String RESULT = "result";
+
+	public static final List<String> MINIMUL_FIELDS = Collections
+			.unmodifiableList(Arrays.asList(IDENTIFIER, "duration", "downloadUrl", DESCRIPTION, "mimeType",
+					"artifactUrl", "name", STATUS, "resourceType", "categoryType", "category"));
 
 }

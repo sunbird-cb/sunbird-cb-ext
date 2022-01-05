@@ -638,10 +638,6 @@ public class AllocationService {
 					"Work allocation details not found or superseded by new order. Please contact Department Administrator.");
 		}
 
-		// If status Draft
-		if (WorkAllocationConstants.DRAFT_STATUS.equalsIgnoreCase(waObj.getStatus())) {
-		}
-
 		return pdfService.getWAPdf(wa, statusSelected);
 	}
 }

@@ -1,5 +1,6 @@
 package org.sunbird.assessment.controller;
 
+import java.text.ParseException;
 import java.util.Map;
 
 import javax.validation.Valid;
@@ -28,11 +29,14 @@ public class AssessmentController {
 	 * @param requestBody
 	 * @param userId
 	 * @return
+	 * @throws ParseException
+	 * @throws NumberFormatException
 	 * @throws Exception
 	 */
 	@PostMapping("/v2/user/{userId}/assessment/submit")
 	public ResponseEntity<Map<String, Object>> submitAssessment(@Valid @RequestBody AssessmentSubmissionDTO requestBody,
-			@PathVariable("userId") String userId, @RequestHeader("rootOrg") String rootOrg) throws Exception {
+			@PathVariable("userId") String userId, @RequestHeader("rootOrg") String rootOrg)
+			throws NumberFormatException, ParseException {
 
 		return new ResponseEntity<>(assessmentService.submitAssessment(rootOrg, requestBody, userId),
 				HttpStatus.CREATED);
@@ -51,7 +55,7 @@ public class AssessmentController {
 	 */
 	@GetMapping("/v2/content/{courseId}/user/{userId}/assessment")
 	public ResponseEntity<Map<String, Object>> getAssessmentByContentUser(@PathVariable String courseId,
-			@PathVariable("userId") String userId, @RequestHeader("rootOrg") String rootOrg) throws Exception {
+			@PathVariable("userId") String userId, @RequestHeader("rootOrg") String rootOrg) {
 		return new ResponseEntity<>(assessmentService.getAssessmentByContentUser(rootOrg, courseId, userId),
 				HttpStatus.OK);
 	}
@@ -64,12 +68,14 @@ public class AssessmentController {
 	 * @param requestBody
 	 * @param userId
 	 * @return
+	 * @throws ParseException
+	 * @throws NumberFormatExceptio
 	 * @throws Exception
 	 */
 	@PostMapping("/v2/user/assessment/submit")
 	public ResponseEntity<Map<String, Object>> submitUserAssessment(
 			@Valid @RequestBody AssessmentSubmissionDTO requestBody, @RequestHeader("userId") String userId,
-			@RequestHeader("rootOrg") String rootOrg) throws Exception {
+			@RequestHeader("rootOrg") String rootOrg) throws NumberFormatException, ParseException {
 
 		return new ResponseEntity<>(assessmentService.submitAssessment(rootOrg, requestBody, userId),
 				HttpStatus.CREATED);
@@ -88,7 +94,7 @@ public class AssessmentController {
 	 */
 	@GetMapping("/v2/content/user/assessment")
 	public ResponseEntity<Map<String, Object>> getUserAssessmentByContent(@RequestHeader("courseId") String courseId,
-			@RequestHeader("userId") String userId, @RequestHeader("rootOrg") String rootOrg) throws Exception {
+			@RequestHeader("userId") String userId, @RequestHeader("rootOrg") String rootOrg) {
 		return new ResponseEntity<>(assessmentService.getAssessmentByContentUser(rootOrg, courseId, userId),
 				HttpStatus.OK);
 	}

@@ -141,7 +141,6 @@ public class CassandraOperationImpl implements CassandraOperation {
 		} catch (Exception e) {
 			logger.error(String.format("CassandraOperationImpl: deleteRecord by composite key. %s %s %s",
 					Constants.EXCEPTION_MSG_DELETE, tableName, e.getMessage()));
-			throw e;
 
 		}
 	}
@@ -163,7 +162,7 @@ public class CassandraOperationImpl implements CassandraOperation {
 			session.execute(updateQuery);
 			response.put(Constants.RESPONSE, Constants.SUCCESS);
 		} catch (Exception e) {
-			throw e;
+			logger.error(e.getMessage());
 		}
 		return response;
 	}
@@ -175,8 +174,9 @@ public class CassandraOperationImpl implements CassandraOperation {
 			Row row = connectionManager.getSession(keyspace).execute(selectQuery).one();
 			return row.getLong(0);
 		} catch (Exception e) {
-			throw e;
+			logger.error(e.getMessage());
 		}
+		return 0L;
 	}
 
 }

@@ -215,10 +215,9 @@ public class BudgetServiceImpl implements BudgetService {
 				if (!CollectionUtils.isEmpty(existingList)) {
 					boolean isOtherRecordExist = false;
 					for (Map<String, Object> map : existingList) {
-						if (!((String) map.get(Constants.ID)).equalsIgnoreCase(data.getId())) {
-							if (((String) map.get(Constants.SCHEME_NAME)).equalsIgnoreCase(data.getSchemeName())) {
-								isOtherRecordExist = true;
-							}
+						if (!((String) map.get(Constants.ID)).equalsIgnoreCase(data.getId())
+								&& ((String) map.get(Constants.SCHEME_NAME)).equalsIgnoreCase(data.getSchemeName())) {
+							isOtherRecordExist = true;
 						}
 					}
 					if (isOtherRecordExist) {
@@ -421,14 +420,15 @@ public class BudgetServiceImpl implements BudgetService {
 		if (StringUtils.isEmpty(budgetInfo.getSchemeName())) {
 			errObjList.add(Constants.SCHEME_NAME);
 		} else {
-			if ("all".equalsIgnoreCase(budgetInfo.getSchemeName())) {
-				if (budgetInfo.getSalaryBudgetAllocated() == null || budgetInfo.getSalaryBudgetAllocated() < 0) {
-					errObjList.add(Constants.SALARY_BUDGET_ALLOCATED);
-				}
+			if ("all".equalsIgnoreCase(budgetInfo.getSchemeName())
+					&& (budgetInfo.getSalaryBudgetAllocated() == null || budgetInfo.getSalaryBudgetAllocated() < 0)) {
+				errObjList.add(Constants.SALARY_BUDGET_ALLOCATED);
 			}
 		}
 
-		if (budgetInfo.getTrainingBudgetAllocated() == null || budgetInfo.getTrainingBudgetAllocated() < 0) {
+		if (budgetInfo.getTrainingBudgetAllocated() == null || budgetInfo.getTrainingBudgetAllocated() < 0)
+
+		{
 			errObjList.add(Constants.TRAINING_BUDGET_ALLOCATED);
 		}
 		if (budgetInfo.getTrainingBudgetUtilization() == null || budgetInfo.getTrainingBudgetUtilization() < 0) {

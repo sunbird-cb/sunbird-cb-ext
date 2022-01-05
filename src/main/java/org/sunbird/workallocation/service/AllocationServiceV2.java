@@ -66,8 +66,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Service
 public class AllocationServiceV2 {
 
+	private static final String RESULT2 = "result";
 	private static final String WORKORDER_ID = "workorderId";
-	public static final String RESULT = "result";
+	public static final String RESULT = RESULT2;
 	@Autowired
 	private IndexerService indexerService;
 
@@ -389,9 +390,10 @@ public class AllocationServiceV2 {
 			if (oldCompetencyDetails.size() == newCompetencyDetails.size()) {
 				roleCompetency.setCompetencyDetails(newCompetencyDetails);
 			} else {
-				logger.error(String.format(
-						"Failed to create FRAC Competency / CompetencyLevel. Old List Size: {} , New List Size: {}",
-						oldCompetencyDetails.size(), newCompetencyDetails.size()));
+				String d = String.format(
+						"Failed to create FRAC Competency / CompetencyLevel. Old List Size: %d , New List Size: %d",
+						oldCompetencyDetails.size(), newCompetencyDetails.size());
+				logger.error(d);
 			}
 		}
 	}
@@ -464,13 +466,6 @@ public class AllocationServiceV2 {
 		return response;
 	}
 
-	private SearchResponse getSearchResponseForWorkOrder(List<String> workAllocationIds) throws IOException {
-		final BoolQueryBuilder query = QueryBuilders.boolQuery();
-		query.must(QueryBuilders.termsQuery("id.keyword", workAllocationIds));
-		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder().query(query);
-		return indexerService.getEsResult(workAllocationIndex, workAllocationIndexType, sourceBuilder);
-	}
-
 	private List<WorkAllocationDTOV2> getWorkAllocationListByIds(List<String> workAllocationIds) {
 		List<WorkAllocationDTOV2> workAllocationDTOV2List = new ArrayList<>();
 		if (!CollectionUtils.isEmpty(workAllocationIds)) {
@@ -481,7 +476,7 @@ public class AllocationServiceV2 {
 							WorkAllocationDTOV2.class);
 					workAllocationDTOV2List.add(workAllocationDTOV2);
 				} catch (Exception ex) {
-					logger.error(String.format("Exception occurred while reading the work allocation for id, {}", id));
+					logger.error(String.format("Exception occurred while reading the work allocation for id, %s", id));
 				}
 			});
 		}
@@ -706,7 +701,7 @@ public class AllocationServiceV2 {
 			Map<String, Object> profileResponse = outboundRequestHandlerService.fetchResultUsingPost(builder.toString(),
 					request, headersValue);
 			if (profileResponse != null && "OK".equalsIgnoreCase((String) profileResponse.get("responseCode"))) {
-				Map<String, Object> map = (Map<String, Object>) profileResponse.get("result");
+				Map<String, Object> map = (Map<String, Object>) profileResponse.get(RESULT2);
 				if (map.get("response") != null) {
 					Map<String, Object> profiles = (Map<String, Object>) map.get("response");
 					List<Map<String, Object>> userProfiles = (List<Map<String, Object>>) profiles.get("content");
@@ -764,8 +759,7 @@ public class AllocationServiceV2 {
 		if (!CollectionUtils.isEmpty(userWorkAllocationMappings)) {
 			List<String> workAllocationIds = userWorkAllocationMappings.stream().filter(
 					allocationDetails -> WorkAllocationConstants.PUBLISHED_STATUS.equals(allocationDetails.getStatus()))
-					.map(userWorkAllocationMapping -> userWorkAllocationMapping.getWorkAllocationId())
-					.collect(Collectors.toList());
+					.map(UserWorkAllocationMappingModel::getWorkAllocationId).collect(Collectors.toList());
 			if (!CollectionUtils.isEmpty(workAllocationIds)) {
 				final BoolQueryBuilder query = QueryBuilders.boolQuery();
 				query.must(QueryBuilders.termsQuery("id.keyword", workAllocationIds));
@@ -781,8 +775,8 @@ public class AllocationServiceV2 {
 								});
 						if (!CollectionUtils.isEmpty(roleCompetencies)) {
 							List<CompetencyDetails> competencyDetailsList = roleCompetencies.stream()
-									.map(roleCompetency -> roleCompetency.getCompetencyDetails())
-									.flatMap(competencyList -> competencyList.stream()).collect(Collectors.toList());
+									.map(RoleCompetency::getCompetencyDetails).flatMap(Collection::stream)
+									.collect(Collectors.toList());
 							competencyDetails.addAll(competencyDetailsList);
 						}
 					}

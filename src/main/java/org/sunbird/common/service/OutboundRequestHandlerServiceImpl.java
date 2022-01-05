@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.sunbird.common.util.Constants;
 import org.sunbird.core.logger.CbExtLogger;
@@ -48,11 +49,10 @@ public class OutboundRequestHandlerServiceImpl {
 			str.append(Constants.RESPONSE_CONSTANT).append(mapper.writeValueAsString(response))
 					.append(System.lineSeparator());
 			log.debug(str.toString());
-		} catch (HttpClientErrorException e) {
-			log.error(e);
-		} catch (Exception e) {
+		} catch (RestClientException | JsonProcessingException e) {
 			log.error(e);
 		}
+
 		return response;
 	}
 
@@ -65,17 +65,17 @@ public class OutboundRequestHandlerServiceImpl {
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
 		Object response = null;
+
 		try {
 			StringBuilder str = new StringBuilder(this.getClass().getCanonicalName())
 					.append(Constants.FETCH_RESULT_CONSTANT).append(System.lineSeparator());
 			str.append(Constants.URI_CONSTANT).append(uri).append(System.lineSeparator());
 			log.info(str.toString());
 			response = restTemplate.getForObject(uri, Map.class);
-		} catch (HttpClientErrorException e) {
-			log.error(e);
-		} catch (Exception e) {
+		} catch (RestClientException e) {
 			log.error(e);
 		}
+
 		return response;
 	}
 
@@ -95,13 +95,11 @@ public class OutboundRequestHandlerServiceImpl {
 			log.info(str.toString());
 			HttpHeaders headers = new HttpHeaders();
 			if (!CollectionUtils.isEmpty(headersValues)) {
-				headersValues.forEach((k, v) -> headers.set(k, v));
+				headersValues.forEach(headers::set);
 			}
 			response = restTemplate.exchange(uri, HttpMethod.GET, new HttpEntity<Object>(headers), Map.class);
 			if (response.getBody() != null)
 				return response.getBody();
-		} catch (HttpClientErrorException e) {
-			log.error(e);
 		} catch (Exception e) {
 			log.error(e);
 		}
