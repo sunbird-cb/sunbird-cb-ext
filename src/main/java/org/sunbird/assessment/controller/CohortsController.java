@@ -31,11 +31,10 @@ public class CohortsController {
 	 */
 	@GetMapping("/v2/resources/{resourceId}/user/{userUUID}/cohorts/top-performers")
 	public ResponseEntity<List<CohortUsers>> getTopPerformers(@PathVariable("resourceId") String resourceId,
-															  @RequestHeader("rootOrg") String rootOrg, @PathVariable("userUUID") String userUUID,
-															  @RequestParam(value = "count", defaultValue = "20", required = false) Integer count) throws Exception {
+			@RequestHeader("rootOrg") String rootOrg, @PathVariable("userUUID") String userUUID,
+			@RequestParam(value = "count", defaultValue = "20", required = false) Integer count) {
 
-		return new ResponseEntity<>(cohortsServ.getTopPerformers(rootOrg, resourceId, userUUID, count),
-				HttpStatus.OK);
+		return new ResponseEntity<>(cohortsServ.getTopPerformers(rootOrg, resourceId, userUUID, count), HttpStatus.OK);
 	}
 
 	/**
@@ -52,8 +51,7 @@ public class CohortsController {
 			@PathVariable("resourceId") String contentId, @RequestHeader("rootOrg") String rootOrg,
 			@PathVariable("userUUID") String userUUID,
 			@RequestParam(value = "count", required = false, defaultValue = "50") Integer count,
-			@RequestParam(value = "filter", required = false, defaultValue = "false") Boolean toFilter)
-			throws Exception {
+			@RequestParam(value = "filter", required = false, defaultValue = "false") Boolean toFilter) {
 		if (authUserToken.contains(" ")) {
 			authUserToken = authUserToken.split(" ")[1];
 		}
@@ -73,16 +71,14 @@ public class CohortsController {
 	 */
 	@GetMapping("/v1/autoenrollment/{userUUID}/{courseId}")
 	public ResponseEntity<Response> autoEnrollmentInCourse(@RequestHeader("Authorization") String authUserToken,
-														   @PathVariable("courseId") String contentId, @RequestHeader("rootOrg") String rootOrg,
-														   @PathVariable("userUUID") String userUUID)throws Exception {
+			@PathVariable("courseId") String contentId, @RequestHeader("rootOrg") String rootOrg,
+			@PathVariable("userUUID") String userUUID) {
 		if (authUserToken.contains(" ")) {
 			authUserToken = authUserToken.split(" ")[1];
 		}
-		return new ResponseEntity<>(
-				cohortsServ.autoEnrollmentInCourse(authUserToken, rootOrg, contentId, userUUID),
+		return new ResponseEntity<>(cohortsServ.autoEnrollmentInCourse(authUserToken, rootOrg, contentId, userUUID),
 				HttpStatus.OK);
 	}
-
 
 //	====================================
 //	KONG API ROUTES CHANGES
@@ -97,11 +93,10 @@ public class CohortsController {
 	 */
 	@GetMapping("/v2/resources/user/cohorts/top-performers")
 	public ResponseEntity<List<CohortUsers>> getTopPerformersForResource(@RequestHeader("resourceId") String resourceId,
-															  @RequestHeader("rootOrg") String rootOrg, @RequestHeader("userUUID") String userUUID,
-															  @RequestParam(value = "count", defaultValue = "20", required = false) Integer count) throws Exception {
+			@RequestHeader("rootOrg") String rootOrg, @RequestHeader("userUUID") String userUUID,
+			@RequestParam(value = "count", defaultValue = "20", required = false) Integer count) {
 
-		return new ResponseEntity<>(cohortsServ.getTopPerformers(rootOrg, resourceId, userUUID, count),
-				HttpStatus.OK);
+		return new ResponseEntity<>(cohortsServ.getTopPerformers(rootOrg, resourceId, userUUID, count), HttpStatus.OK);
 	}
 
 	/**
@@ -117,12 +112,12 @@ public class CohortsController {
 	 * @throws Exception
 	 */
 	@GetMapping("/v2/resources/user/cohorts/activeusers")
-	public ResponseEntity<List<CohortUsers>> getActiveUsersForResource(@RequestHeader("x-authenticated-user-token") String authUserToken,
-															@RequestHeader("resourceId") String contentId, @RequestHeader("rootOrg") String rootOrg,
-															@RequestHeader("userUUID") String userUUID,
-															@RequestParam(value = "count", required = false, defaultValue = "50") Integer count,
-															@RequestParam(value = "filter", required = false, defaultValue = "false") Boolean toFilter)
-			throws Exception {
+	public ResponseEntity<List<CohortUsers>> getActiveUsersForResource(
+			@RequestHeader("x-authenticated-user-token") String authUserToken,
+			@RequestHeader("resourceId") String contentId, @RequestHeader("rootOrg") String rootOrg,
+			@RequestHeader("userUUID") String userUUID,
+			@RequestParam(value = "count", required = false, defaultValue = "50") Integer count,
+			@RequestParam(value = "filter", required = false, defaultValue = "false") Boolean toFilter) {
 		return new ResponseEntity<>(
 				cohortsServ.getActiveUsers(authUserToken, rootOrg, contentId, userUUID, count, toFilter),
 				HttpStatus.OK);
@@ -138,11 +133,11 @@ public class CohortsController {
 	 * @throws Exception
 	 */
 	@GetMapping("/v1/autoenrollment")
-	public ResponseEntity<Response> userAutoEnrollment(@RequestHeader("x-authenticated-user-token") String authUserToken,
-														   @RequestHeader("courseId") String contentId, @RequestHeader("rootOrg") String rootOrg,
-														   @RequestHeader("userUUID") String userUUID)throws Exception {
-		return new ResponseEntity<>(
-				cohortsServ.autoEnrollmentInCourse(authUserToken, rootOrg, contentId, userUUID),
+	public ResponseEntity<Response> userAutoEnrollment(
+			@RequestHeader("x-authenticated-user-token") String authUserToken,
+			@RequestHeader("courseId") String contentId, @RequestHeader("rootOrg") String rootOrg,
+			@RequestHeader("userUUID") String userUUID) {
+		return new ResponseEntity<>(cohortsServ.autoEnrollmentInCourse(authUserToken, rootOrg, contentId, userUUID),
 				HttpStatus.OK);
 	}
 }
