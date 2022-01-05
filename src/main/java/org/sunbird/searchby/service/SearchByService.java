@@ -16,10 +16,12 @@ import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.core.logger.CbExtLogger;
+import org.sunbird.exception.MyOwnRuntimeException;
 import org.sunbird.searchby.model.CompetencyInfo;
 import org.sunbird.searchby.model.ProviderInfo;
 import org.sunbird.searchby.model.SearchByFilter;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
@@ -43,7 +45,8 @@ public class SearchByService {
 	@Autowired
 	OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
 
-	public Collection<CompetencyInfo> getCompetencyDetails(String authUserToken) throws Exception {
+	public Collection<CompetencyInfo> getCompetencyDetails(String authUserToken)
+			throws MyOwnRuntimeException, JsonProcessingException {
 		Object object = redisCacheMgr.getCache(Constants.COMPETENCY_CACHE_NAME);
 		if (object == null) {
 			logger.info("Initializing/Refreshing the Cache Value.");
@@ -56,7 +59,7 @@ public class SearchByService {
 	}
 
 	public Collection<CompetencyInfo> getCompetencyDetailsByFilter(String authUserToken, SearchByFilter filter)
-			throws Exception {
+			throws MyOwnRuntimeException, JsonProcessingException {
 
 		if (filter.isEmptyFilter()) {
 			return getCompetencyDetails(authUserToken);
@@ -124,7 +127,7 @@ public class SearchByService {
 		return convertString.stream().map(String::toLowerCase).map(String::trim).collect(Collectors.toList());
 	}
 
-	private void updateCompetencyDetails(String authUserToken) throws Exception {
+	private void updateCompetencyDetails(String authUserToken) throws MyOwnRuntimeException, JsonProcessingException {
 		Map<String, CompetencyInfo> competencyMap;
 		Map<String, List<CompetencyInfo>> comInfoByType = new HashMap<>();
 		Map<String, List<CompetencyInfo>> comInfoByArea = new HashMap<>();
@@ -166,7 +169,8 @@ public class SearchByService {
 				}
 			}
 		} else {
-			Exception err = new Exception("Failed to get facets value from Composite Search API.");
+			MyOwnRuntimeException err = new MyOwnRuntimeException(
+					"Failed to get facets value from Composite Search API.");
 			logger.error(err);
 			logger.info(
 					String.format(RECEIVED_RESPONSE_S, new ObjectMapper().writeValueAsString(compositeSearchResult)));
@@ -239,7 +243,7 @@ public class SearchByService {
 
 			}
 		} else {
-			Exception err = new Exception("Failed to get competency info from FRAC API.");
+			MyOwnRuntimeException err = new MyOwnRuntimeException("Failed to get competency info from FRAC API.");
 			logger.error(err);
 			logger.info(String.format(RECEIVED_RESPONSE_S, new ObjectMapper().writeValueAsString(fracSearchRes)));
 			throw err;
@@ -250,7 +254,7 @@ public class SearchByService {
 		redisCacheMgr.putCache(Constants.COMPETENCY_CACHE_NAME_BY_AREA, comInfoByArea);
 	}
 
-	private void updateProviderDetails(String authUserToken) throws Exception {
+	private void updateProviderDetails(String authUserToken) throws MyOwnRuntimeException, JsonProcessingException {
 		Map<String, ProviderInfo> providerMap = null;
 
 		// Get facets from Composite Search
@@ -290,7 +294,8 @@ public class SearchByService {
 				}
 			}
 		} else {
-			Exception err = new Exception("Failed to get facets value from Composite Search API.");
+			MyOwnRuntimeException err = new MyOwnRuntimeException(
+					"Failed to get facets value from Composite Search API.");
 			logger.error(err);
 			logger.info(
 					String.format(RECEIVED_RESPONSE_S, new ObjectMapper().writeValueAsString(compositeSearchResult)));
@@ -327,7 +332,7 @@ public class SearchByService {
 				}
 			}
 		} else {
-			Exception err = new Exception("Failed to get competency info from FRAC API.");
+			MyOwnRuntimeException err = new MyOwnRuntimeException("Failed to get competency info from FRAC API.");
 			logger.error(err);
 			logger.info(String.format(RECEIVED_RESPONSE_S, new ObjectMapper().writeValueAsString(orgSearchRes)));
 			throw err;

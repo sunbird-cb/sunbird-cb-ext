@@ -12,10 +12,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
+import org.sunbird.exception.MyOwnRuntimeException;
 import org.sunbird.searchby.model.CompetencyInfo;
 import org.sunbird.searchby.model.ProviderInfo;
 import org.sunbird.searchby.model.SearchByFilter;
 import org.sunbird.searchby.service.SearchByService;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 @RestController
 public class SearchByController {
@@ -25,16 +28,17 @@ public class SearchByController {
 
 	@GetMapping("/v1/browseByCompetency")
 	public ResponseEntity<Collection<CompetencyInfo>> browseByCompetency(
-			@RequestHeader("x-authenticated-user-token") String authUserToken) throws Exception {
+			@RequestHeader("x-authenticated-user-token") String authUserToken)
+			throws JsonProcessingException, MyOwnRuntimeException {
 		return new ResponseEntity<>(searchByService.getCompetencyDetails(authUserToken), HttpStatus.OK);
 	}
 
 	@PostMapping("/v1/browseByCompetency")
 	public ResponseEntity<Collection<CompetencyInfo>> browseByCompetencyByFilter(
 			@RequestHeader("x-authenticated-user-token") String authUserToken,
-			@Valid @RequestBody SearchByFilter filter) throws Exception {
+			@Valid @RequestBody SearchByFilter filter) throws MyOwnRuntimeException, JsonProcessingException {
 		if (filter == null) {
-			throw new Exception("Invalid Request");
+			throw new MyOwnRuntimeException("Invalid Request");
 		}
 		return new ResponseEntity<>(searchByService.getCompetencyDetailsByFilter(authUserToken, filter), HttpStatus.OK);
 	}
