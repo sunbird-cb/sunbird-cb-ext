@@ -20,6 +20,6 @@ public class CatalogController {
 	@GetMapping("/")
 	public ResponseEntity<Catalog> getCatalog(@RequestHeader("x-authenticated-user-token") String authUserToken,
 			@RequestParam(name = "consumption", required = false) boolean isEnrichConsumption) {
-		return new ResponseEntity<>(catalogService.getCatalog(authUserToken, isEnrichConsumption), HttpStatus.OK);
+		return new ResponseEntity<>(catalogService.getCatalog(authUserToken), HttpStatus.OK);
 	}
 }
