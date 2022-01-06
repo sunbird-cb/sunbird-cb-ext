@@ -448,6 +448,7 @@ public class CbExtServerProperties {
 	public void setCourseBatchCreateEndpoint(String courseBatchCreateEndpoint) {
 		this.courseBatchCreateEndpoint = courseBatchCreateEndpoint;
 	}
+
 	public String getRedisPort() {
 		return redisPort;
 	}
@@ -471,6 +472,7 @@ public class CbExtServerProperties {
 	public void setRedisTimeout(String redisTimeout) {
 		this.redisTimeout = redisTimeout;
 	}
+
 	@Override
 	public String toString() {
 		StringBuilder str = new StringBuilder("SB-CB-Ext Server Properties: ");

@@ -9,4 +9,6 @@ public interface UserUtilityService {
 
 	Map<String, Object> getUsersDataFromUserIds(String rootOrg, List<String> userIds, List<String> source);
 
+	Map<String, Object> getUsersDataFromUserIds(List<String> userIds, List<String> fields, String authToken);
+
 }
