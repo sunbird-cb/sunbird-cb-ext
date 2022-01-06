@@ -14,7 +14,7 @@ import org.springframework.util.ObjectUtils;
 import org.sunbird.assessment.dto.AssessmentSubmissionDTO;
 import org.sunbird.assessment.model.QuestionSet;
 import org.sunbird.assessment.repo.AssessmentRepository;
-import org.sunbird.cache.CacheManager;
+import org.sunbird.cache.RedisCacheMgr;
 import org.sunbird.common.model.SunbirdApiHierarchyResultContent;
 import org.sunbird.common.model.SunbirdApiResp;
 import org.sunbird.common.service.ContentService;
@@ -58,7 +58,7 @@ public class AssessmentServiceImpl implements AssessmentService {
 	CbExtServerProperties extServerProperties;
 
 	@Autowired
-	CacheManager cacheManager;
+	RedisCacheMgr redisCacheMgr;
 
 	@Override
 	public Map<String, Object> submitAssessment(String rootOrg, AssessmentSubmissionDTO data, String userId)
@@ -226,7 +226,7 @@ public class AssessmentServiceImpl implements AssessmentService {
 	public Map<String, Object> getAssessmentContent(String courseId, String assessmentContentId) {
 		Map<String, Object> result = new HashMap<>();
 		try {
-			Object assessmentQuestionSet = cacheManager.getCache(Constants.ASSESSMENT_QNS_SET + assessmentContentId);
+			Object assessmentQuestionSet = redisCacheMgr.getCache(Constants.ASSESSMENT_QNS_SET + assessmentContentId);
 
 			if (ObjectUtils.isEmpty(assessmentQuestionSet)) {
 				String serviceURL = extServerProperties.getKmBaseHost()
@@ -252,9 +252,9 @@ public class AssessmentServiceImpl implements AssessmentService {
 							result.put(Constants.STATUS, Constants.SUCCESSFUL);
 							result.put(Constants.QUESTION_SET, assessmentQnsSet);
 							// cache the response
-							cacheManager.putCache(Constants.ASSESSMENT_QNS_ANS_SET + assessmentContentId,
+							redisCacheMgr.putCache(Constants.ASSESSMENT_QNS_ANS_SET + assessmentContentId,
 									assessmentContent);
-							cacheManager.putCache(Constants.ASSESSMENT_QNS_SET + assessmentContentId, assessmentQnsSet);
+							redisCacheMgr.putCache(Constants.ASSESSMENT_QNS_SET + assessmentContentId, assessmentQnsSet);
 						}
 					}
 				}

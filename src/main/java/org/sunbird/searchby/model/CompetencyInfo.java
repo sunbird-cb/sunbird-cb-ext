@@ -1,6 +1,9 @@
 package org.sunbird.searchby.model;
 
-public class CompetencyInfo {
+import java.io.Serializable;
+
+public class CompetencyInfo implements Serializable {
+	private static final long serialVersionUID = 1L;
 	private String name;
 	private String id;
 	private String type;
@@ -9,7 +12,7 @@ public class CompetencyInfo {
 	private String source;
 	private String competencyType;
 	private String competencyArea;
-	private int contentCount;
+	private Integer contentCount;
 
 	public String getName() {
 		return name;
@@ -19,11 +22,11 @@ public class CompetencyInfo {
 		this.name = name;
 	}
 
-	public int getContentCount() {
+	public Integer getContentCount() {
 		return contentCount;
 	}
 
-	public void setContentCount(int contentCount) {
+	public void setContentCount(Integer contentCount) {
 		this.contentCount = contentCount;
 	}
 

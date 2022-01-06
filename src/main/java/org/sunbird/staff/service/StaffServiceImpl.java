@@ -3,8 +3,9 @@ package org.sunbird.staff.service;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 import java.util.UUID;
 
 import org.apache.commons.lang.StringUtils;
@@ -14,15 +15,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import org.sunbird.audit.model.Audit;
-import org.sunbird.audit.repo.AuditRepository;
+import org.sunbird.cassandra.utils.CassandraOperation;
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.util.Constants;
 import org.sunbird.staff.model.StaffAuditInfo;
 import org.sunbird.staff.model.StaffInfo;
-import org.sunbird.staff.model.StaffInfoModel;
-import org.sunbird.staff.model.StaffInfoPrimaryKeyModel;
-import org.sunbird.staff.repo.StaffRepository;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -33,10 +30,7 @@ public class StaffServiceImpl implements StaffService {
 	private Logger logger = LoggerFactory.getLogger(getClass().getName());
 
 	@Autowired
-	private StaffRepository staffRepository;
-
-	@Autowired
-	private AuditRepository auditRepository;
+	private CassandraOperation cassandraOperation;
 
 	@Override
 	public SBApiResponse submitStaffDetails(StaffInfo data, String userId) throws Exception {
@@ -44,9 +38,8 @@ public class StaffServiceImpl implements StaffService {
 		try {
 			validateAddStaffInfo(data);
 
-			List<StaffInfoModel> existingList = staffRepository.getAllByOrgIdAndPosition(data.getOrgId(),
+			List<StaffInfo> existingList = getStaffListByProperty(data.getOrgId(), StringUtils.EMPTY,
 					data.getPosition());
-
 			if (!CollectionUtils.isEmpty(existingList)) {
 				String errMsg = "Position exist for given name. Failed to create StaffInfo for OrgId: "
 						+ data.getOrgId() + ", Position: " + data.getPosition();
@@ -56,19 +49,20 @@ public class StaffServiceImpl implements StaffService {
 				return response;
 			}
 
-			StaffInfoModel staffInfoModel = new StaffInfoModel(
-					new StaffInfoPrimaryKeyModel(data.getOrgId(), UUID.randomUUID().toString()), data.getPosition(),
-					data.getTotalPositionsFilled(), data.getTotalPositionsVacant());
-			staffInfoModel = staffRepository.save(staffInfoModel);
+			Map<String, Object> staffInfoMap = new HashMap<>();
+			staffInfoMap.put(Constants.ORG_ID, data.getOrgId());
+			staffInfoMap.put(Constants.ID, UUID.randomUUID().toString());
+			staffInfoMap.put(Constants.POSITION, data.getPosition());
+			staffInfoMap.put(Constants.TOTAL_POSITION_FILLED, data.getTotalPositionsFilled());
+			staffInfoMap.put(Constants.TOTAL_POSITION_VACANT, data.getTotalPositionsVacant());
 
-			data.setId(staffInfoModel.getPrimaryKey().getId());
+			cassandraOperation.insertRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_ORG_STAFF_POSITION, staffInfoMap);
+			data.setId((String) staffInfoMap.get(Constants.ID));
 
-			Audit audit = new Audit(data.getOrgId(), Constants.STAFF, dateFormatter.format(new Date()), userId,
-					StringUtils.EMPTY, StringUtils.EMPTY, mapper.writeValueAsString(data));
-			audit = auditRepository.save(audit);
+			saveAuditDetails(data, userId);
 
 			response.getParams().setStatus(Constants.SUCCESSFUL);
-			response.put(Constants.DATA, staffInfoModel.getStaffInfo());
+			response.put(Constants.DATA, staffInfoMap);
 			response.setResponseCode(HttpStatus.CREATED);
 		} catch (Exception ex) {
 			String errMsg = "Exception occurred while saving the staff details. Exception: " + ex.getMessage();
@@ -86,9 +80,14 @@ public class StaffServiceImpl implements StaffService {
 		SBApiResponse response = new SBApiResponse(Constants.API_STAFF_POSITION_UPDATE);
 		try {
 			validateUpdateStaffInfo(data);
-			Optional<StaffInfoModel> existingStaffInfo = staffRepository
-					.findById(new StaffInfoPrimaryKeyModel(data.getOrgId(), data.getId()));
-			if (!existingStaffInfo.isPresent()) {
+
+			List<StaffInfo> existingStaffList = getStaffListByProperty(data.getOrgId(), data.getId(),
+					StringUtils.EMPTY);
+
+			StaffInfo existingStaffInfo = new StaffInfo();
+			if (!existingStaffList.isEmpty()) {
+				existingStaffInfo = existingStaffList.get(0);
+			} else {
 				String errMsg = "Failed to find StaffInfo for OrgId: " + data.getOrgId() + ", Id: " + data.getId();
 				logger.error(errMsg);
 				response.getParams().setErrmsg(errMsg);
@@ -97,13 +96,13 @@ public class StaffServiceImpl implements StaffService {
 			}
 
 			if (data.getPosition() != null) {
-				List<StaffInfoModel> existingList = staffRepository.getAllByOrgIdAndPosition(data.getOrgId(),
+				List<StaffInfo> existingList = getStaffListByProperty(data.getOrgId(), StringUtils.EMPTY,
 						data.getPosition());
 
 				if (!CollectionUtils.isEmpty(existingList)) {
 					boolean isAnyOtherRecordExist = false;
-					for (StaffInfoModel sModel : existingList) {
-						if (!sModel.getPrimaryKey().getId().equalsIgnoreCase(data.getId())) {
+					for (StaffInfo sModel : existingList) {
+						if (!sModel.getId().equalsIgnoreCase(data.getId())) {
 							if (sModel.getPosition().equalsIgnoreCase(data.getPosition())) {
 								isAnyOtherRecordExist = true;
 							}
@@ -119,22 +118,21 @@ public class StaffServiceImpl implements StaffService {
 						return response;
 					}
 				}
-				existingStaffInfo.get().setPosition(data.getPosition());
+				existingStaffInfo.setPosition(data.getPosition());
 			}
 
 			if (data.getTotalPositionsFilled() != null) {
-				existingStaffInfo.get().setTotalPositionsFilled(data.getTotalPositionsFilled());
+				existingStaffInfo.setTotalPositionsFilled(data.getTotalPositionsFilled());
 			}
 			if (data.getTotalPositionsVacant() != null) {
-				existingStaffInfo.get().setTotalPositionsVacant(data.getTotalPositionsVacant());
+				existingStaffInfo.setTotalPositionsVacant(data.getTotalPositionsVacant());
 			}
-			StaffInfoModel updatedInfo = staffRepository.save(existingStaffInfo.get());
+			cassandraOperation.insertRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_ORG_STAFF_POSITION,
+					mapper.convertValue(existingStaffInfo, HashMap.class));
 
-			Audit audit = new Audit(data.getOrgId(), Constants.STAFF, "", "", dateFormatter.format(new Date()), userId,
-					mapper.writeValueAsString(updatedInfo.getStaffInfo()));
-			audit = auditRepository.save(audit);
+			saveAuditDetails(data, userId);
 
-			response.put(Constants.DATA, updatedInfo.getStaffInfo());
+			response.put(Constants.DATA, existingStaffInfo);
 			response.getParams().setStatus(Constants.SUCCESSFUL);
 			response.setResponseCode(HttpStatus.OK);
 		} catch (Exception ex) {
@@ -146,10 +144,64 @@ public class StaffServiceImpl implements StaffService {
 		return response;
 	}
 
+	/**
+	 * Returns the list staff objects from database that matches the property
+	 * conditions
+	 * 
+	 * @param orgId
+	 *            String
+	 * @param id
+	 *            String
+	 * @param position
+	 *            String
+	 * @return List<Map<String, Object>>
+	 */
+	private List<StaffInfo> getStaffListByProperty(String orgId, String id, String position) {
+		Map<String, Object> propertyMap = new HashMap<>();
+		if (StringUtils.isNotBlank(orgId)) {
+			propertyMap.put(Constants.ORG_ID, orgId);
+		}
+		if (StringUtils.isNotBlank(id)) {
+			propertyMap.put(Constants.ID, id);
+		}
+		if (StringUtils.isNotBlank(position)) {
+			propertyMap.put(Constants.POSITION, position);
+		}
+		List<Map<String, Object>> staffLists = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
+				Constants.TABLE_ORG_STAFF_POSITION, propertyMap, new ArrayList<>());
+		// convert to map to pojo object
+		List<StaffInfo> staffInfo = new ArrayList<>();
+		for (Map<String, Object> mapObj : staffLists) {
+			staffInfo.add(mapper.convertValue(mapObj, StaffInfo.class));
+		}
+		return staffInfo;
+	}
+
+	/**
+	 * Saves the staff update in the audit table
+	 * 
+	 * @param data
+	 *            StaffInfo
+	 * @param userId
+	 *            String
+	 * @throws Exception
+	 */
+	private void saveAuditDetails(StaffInfo data, String userId) throws Exception {
+		Map<String, Object> auditMap = new HashMap<>();
+		auditMap.put(Constants.ORG_ID, data.getOrgId());
+		auditMap.put(Constants.AUDIT_TYPE, Constants.STAFF);
+		auditMap.put(Constants.CREATED_DATE, dateFormatter.format(new Date()));
+		auditMap.put(Constants.CREATED_BY, userId);
+		auditMap.put(Constants.UPDATED_DATE, StringUtils.EMPTY);
+		auditMap.put(Constants.UPDATED_BY, StringUtils.EMPTY);
+		auditMap.put(Constants.TRANSACTION_DETAILS, mapper.writeValueAsString(data));
+		cassandraOperation.insertRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_ORG_AUDIT, auditMap);
+	}
+
 	@Override
 	public SBApiResponse getStaffDetails(String orgId) throws Exception {
 		SBApiResponse response = new SBApiResponse(Constants.API_STAFF_POSITION_READ);
-		List<StaffInfoModel> staffDetails = staffRepository.getStaffDetails(orgId);
+		List<StaffInfo> staffDetails = getStaffListByProperty(orgId, StringUtils.EMPTY, StringUtils.EMPTY);
 
 		if (CollectionUtils.isEmpty(staffDetails)) {
 			String errMsg = "No Staff Position found for Org: " + orgId;
@@ -158,14 +210,9 @@ public class StaffServiceImpl implements StaffService {
 			response.setResponseCode(HttpStatus.BAD_REQUEST);
 			return response;
 		}
-		List<StaffInfo> staffResponse = new ArrayList<>();
-		for (StaffInfoModel staff : staffDetails) {
-			StaffInfo info = staff.getStaffInfo();
-			staffResponse.add(info);
-		}
 
 		response.getParams().setStatus(Constants.SUCCESSFUL);
-		response.put(Constants.RESPONSE, staffResponse);
+		response.put(Constants.RESPONSE, staffDetails);
 		response.setResponseCode(HttpStatus.OK);
 		return response;
 	}
@@ -174,11 +221,13 @@ public class StaffServiceImpl implements StaffService {
 	public SBApiResponse deleteStaffDetails(String orgId, String staffInfoId) throws Exception {
 		SBApiResponse response = new SBApiResponse(Constants.API_STAFF_POSITION_DELETE);
 		try {
-			Optional<StaffInfoModel> staffInfo = staffRepository
-					.findById(new StaffInfoPrimaryKeyModel(orgId, staffInfoId));
+			List<StaffInfo> existingStaffList = getStaffListByProperty(orgId, staffInfoId, StringUtils.EMPTY);
 
-			if (staffInfo.isPresent()) {
-				staffRepository.delete(staffInfo.get());
+			if (!existingStaffList.isEmpty()) {
+				Map<String, Object> primaryKeyMap = new HashMap<>();
+				primaryKeyMap.put(Constants.ORG_ID, orgId);
+				primaryKeyMap.put(Constants.ID, staffInfoId);
+				cassandraOperation.deleteRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_ORG_STAFF_POSITION, primaryKeyMap);
 				response.getParams().setStatus(Constants.SUCCESSFUL);
 				response.setResponseCode(HttpStatus.OK);
 			} else {
@@ -199,7 +248,14 @@ public class StaffServiceImpl implements StaffService {
 	@Override
 	public SBApiResponse getStaffAudit(String orgId) throws Exception {
 		SBApiResponse response = new SBApiResponse(Constants.API_STAFF_POSITION_HISTORY_READ);
-		List<Audit> auditDetails = auditRepository.getAudit(orgId, Constants.STAFF);
+		// List<Audit> auditDetails = auditRepository.getAudit(orgId, Constants.STAFF);
+
+		Map<String, Object> propertyMap = new HashMap<>();
+		propertyMap.put(Constants.ORG_ID, orgId);
+		propertyMap.put(Constants.AUDIT_TYPE, Constants.STAFF);
+		List<Map<String, Object>> auditDetails = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
+				Constants.TABLE_ORG_AUDIT, propertyMap, new ArrayList<>());
+
 		if (CollectionUtils.isEmpty(auditDetails)) {
 			String errMsg = "Staff Position History details not found for Org: " + orgId;
 			logger.info(errMsg);
@@ -208,18 +264,13 @@ public class StaffServiceImpl implements StaffService {
 			return response;
 		}
 		List<StaffAuditInfo> auditResponse = new ArrayList<>();
-		for (Audit audit : auditDetails) {
-			StaffAuditInfo sAuditInfo = new StaffAuditInfo();
-			sAuditInfo.setCreatedBy(audit.getCreatedBy());
-			sAuditInfo.setCreatedDate(audit.getPrimaryKey().getCreatedDate());
-			sAuditInfo.setUpdatedBy(audit.getUpdatedBy());
-			sAuditInfo.setUpdatedDate(audit.getPrimaryKey().getUpdatedDate());
-			sAuditInfo.setOrgId(audit.getPrimaryKey().getOrgId());
-			StaffInfo sInfo = mapper.readValue(audit.getTransactionDetails(), StaffInfo.class);
-			sAuditInfo.setPosition(sInfo.getPosition());
-			sAuditInfo.setTotalPositionsFilled(sInfo.getTotalPositionsFilled());
-			sAuditInfo.setTotalPositionsVacant(sInfo.getTotalPositionsVacant());
-			sAuditInfo.setId(sInfo.getId());
+		for (Map<String, Object> audit : auditDetails) {
+			StaffAuditInfo sAuditInfo = mapper.readValue((String) audit.get(Constants.TRANSACTION_DETAILS),
+					StaffAuditInfo.class);
+			sAuditInfo.setCreatedBy((String) audit.get(Constants.CREATED_BY));
+			sAuditInfo.setCreatedDate((String) audit.get(Constants.CREATED_DATE));
+			sAuditInfo.setUpdatedBy((String) audit.get(Constants.UPDATED_BY));
+			sAuditInfo.setUpdatedDate((String) audit.get(Constants.UPDATED_DATE));
 			auditResponse.add(sAuditInfo);
 		}
 		response.getParams().setStatus(Constants.SUCCESSFUL);

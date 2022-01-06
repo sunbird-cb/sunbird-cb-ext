@@ -185,8 +185,8 @@ public class CbExtServerProperties {
 
 	@Value("${redis.port}")
 	private String redisPort;
-	
-	@Value("${redis.timeout")
+
+	@Value("${redis.timeout}")
 	private String redisTimeout;
 
 	public String getContentHost() {

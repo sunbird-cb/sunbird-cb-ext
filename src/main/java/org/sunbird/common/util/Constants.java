@@ -15,6 +15,8 @@ public class Constants {
 	public static final String FIRST_NAME = "first_name";
 	public static final String LAST_NAME = "last_name";
 	public static final String MIDDLE_NAME = "middle_name";
+	public static final String FIRSTNAME = "firstname";
+	public static final String LASTNAME = "lastname";
 	public static final String CONTACT_PHONE_NUMBER_OFFICE = "contact_phone_number_office";
 	public static final String CONTACT_PHONE_NUMBER_HOME = "contact_phone_number_home";
 	public static final String CONTACT_PHONE_NUMBER_PERSONAL = "contact_phone_number_personal";
@@ -47,16 +49,33 @@ public class Constants {
 	public static final String SOURCE_DATA = "source_data";
 	public static final String USER_ID = "userId";
 	public static final String FILTERS = "filters";
+	public static final String CONTENT_ID = "content_id";
+	public static final String BATCH_ID = "batchId";
+	public static final String COURSE_ID = "courseId";
+	public static final String ENROLMENT_TYPE = "enrollmenttype";
+	public static final String IDENTIFIER = "identifier";
+	public static final String START_DATE = "startDate";
+	public static final String END_DATE = "endDate";
+	public static final String ACTIVE = "active";
+	public static final String COMPLETIONPERCENTAGE = "completionpercentage";
+	public static final String PROGRESS = "progress";
+	public static final String PROFILEDETAILS = "profiledetails";
+	public static final String ISSUED_CERTIFICATES = "issued_certificates";
+	public static final String IS_MDO = "isMdo";
+	public static final String IS_CBP = "isCbp";
 
 	public static final String SUCCESSFUL = "Successful";
 	public static final String FAILED = "Failed";
 	public static final String MESSAGE = "message";
 	public static final String DATA = "data";
 	public static final String STATUS = "status";
-	public static final String RESPONSE_CODE = "responseCode";
+	public static final String RESULT = "result";
+  public static final String RESPONSE_CODE = "responseCode";
+
 
 	public static final String ADD = "add";
 	public static final String UPDATE = "update";
+	public static final String CREATE = "create";
 
 	public static final String ROOT_ORG_CONSTANT = "rootOrg";
 	public static final String ORG_CONSTANT = "org";
@@ -92,6 +111,7 @@ public class Constants {
 	public static final String API_STAFF_POSITION_DELETE = "api.staff.position.delete";
 	public static final String API_STAFF_POSITION_HISTORY_READ = "api.staff.position.history.read";
 	public static final String API_BUDGET_SCHEME_ADD = "api.budget.schme.add";
+	public static final String API_BUDGET_SCHEME_DOC_ADD = "api.budget.schme.doc.add";
 	public static final String API_BUDGET_SCHEME_UPDATE = "api.budget.schme.update";
 	public static final String API_BUDGET_SCHEME_READ = "api.budget.scheme.read";
 	public static final String API_BUDGET_SCHEME_DELETE = "api.budget.scheme.delete";
@@ -108,6 +128,7 @@ public class Constants {
 	public static final String NAME = "name";
 	public static final String URL = "url";
 	public static final String DELETED = "deleted";
+	public static final String SCHEME_ID = "schemeId";
 
 	public static final String BUDGET = "budget";
 	public static final String BUDGET_YEAR = "budgetYear";
@@ -116,7 +137,6 @@ public class Constants {
 	public static final String TRAINING_BUDGET_ALLOCATED = "trainingBudgetAllocated";
 	public static final String TRAINING_BUDGET_UTILIZATION = "trainingBudgetUtilization";
 
-	public static final String RESULT = "result";
 	public static final String VALUE = "value";
 	public static final String REQUEST= "request";
 	public static final String DEPT_NAME = "deptName";
@@ -141,9 +161,77 @@ public class Constants {
 	public static final String ASSESSMENT_QNS_ANS_SET = "assessmentQnsAnsSet_";
 	public static final String ASSESSMENT_QNS_SET = "assessmentQnsSet_";
 
-	//Redis
+	// Cassandra Constants
+	public static final String INSERT_INTO = "INSERT INTO ";
+	public static final String DOT = ".";
+	public static final String OPEN_BRACE = "(";
+	public static final String VALUES_WITH_BRACE = ") VALUES (";
+	public static final String QUE_MARK = "?";
+	public static final String COMMA = ",";
+	public static final String CLOSING_BRACE = ");";
+	public static final String SUCCESS = "SUCCESS";
+	public static final String UNKNOWN_IDENTIFIER = "Unknown identifier ";
+	public static final String UNDEFINED_IDENTIFIER = "Undefined column name ";
+	public static final String EXCEPTION_MSG_FETCH = "Exception occurred while fetching record from ";
+	public static final String EXCEPTION_MSG_DELETE = "Exception occurred while deleting record from ";
+
+	public static final String AUDIT_TYPE = "auditType";
+	public static final String CREATED_DATE = "createdDate";
+	public static final String CREATED_BY = "createdBy";
+	public static final String UPDATED_DATE = "updatedDate";
+	public static final String UPDATED_BY = "updatedBy";
+	public static final String TRANSACTION_DETAILS = "transactionDetails";
+	public static final String PROOF_DOCS = "proofDocs";
+	public static final String WORK_ORDER_ID = "workOrderId";
+	public static final String WORK_ALLOCATION_ID = "workAllocationId";
+	public static final String BEGIN_BATCH = "BEGIN BATCH ";
+	public static final String APPLY_BATCH = " APPLY BATCH;";
+
+	// Database and Tables
+	public static final String KEYSPACE_SUNBIRD = "sunbird";
+	public static final String KEYSPACE_SUNBIRD_COURSES = "sunbird_courses";
+	public static final String TABLE_ORG_BUDGET_SCHEME = "org_budget_scheme";
+	public static final String TABLE_ORG_AUDIT = "org_audit";
+	public static final String TABLE_ORG_STAFF_POSITION = "org_staff_position";
+	public static final String TABLE_WORK_ORDER = "work_order";
+	public static final String TABLE_WORK_ALLOCATION = "work_allocation";
+	public static final String TABLE_USER_WORK_ALLOCATION_MAPPING = "user_work_allocation_mapping";
+	public static final String TABLE_MANDATORY_USER_CONTENT = "mandatory_user_content";
+	public static final String TABLE_ORGANIZATION = "organisation";
+	public static final String TABLE_USER_ENROLMENT = "user_enrolments";
+	public static final String TABLE_USER = "user";
+	public static final String TABLE_COURSE_BATCH = "course_batch";
+
+	// Redis
 	public static final String API_REDIS_DELETE = "api.redis.delete";
 	public static final String API_REDIS_GET_KEYS = "api.redis.get.keys";
-	public static final String API_REDIS_GET_KEYS_VALUE_SET= "api.redis.get.keys&values";
-	public static final String REDIS_COMMON_KEY="CB_EXT_";
+	public static final String API_REDIS_GET_KEYS_VALUE_SET = "api.redis.get.keys&values";
+	public static final String REDIS_COMMON_KEY = "CB_EXT_";
+
+	public static final String COMPETENCY_CACHE_NAME = "competency";
+	public static final String COMPETENCY_CACHE_NAME_BY_AREA = "competencyByArea";
+	public static final String COMPETENCY_CACHE_NAME_BY_TYPE = "competencyByType";
+	public static final String PROVIDER_CACHE_NAME = "provider";
+	public static final String COMPETENCY_FACET_NAME = "competencies_v3.name";
+
+	public static final String IS_TENANT = "isTenant";
+	public static final String CHANNEL = "channel";
+	public static final String USER_TOKEN = "x-authenticated-user-token";
+	public static final String AUTHORIZATION = "authorization";
+	public static final String FACETS = "facets";
+	public static final String PRIMARY_CATEGORY = "primaryCategory";
+	public static final String LIMIT = "limit";
+	public static final String REQUEST = "request";
+	public static final String FIELDS = "fields";
+	public static final String OFFSET = "offset";
+
+	public static final String BUDGET_DOC_UPLOADED_BY = "uploadedBy";
+	public static final String BUDGET_DOC_UPLOADED_DATE = "uploadedDate";
+	public static final String BUDGET_DOC_FILE_NAME = "fileName";
+	public static final String BUDGET_DOC_FILE_TYPE = "fileType";
+	public static final String BUDGET_DOC_FILE_SIZE = "fileSize";
+	public static final String BUDGET_DOC_FILE_URL = "fileUrl";
+
+	public static final String ORG_LIST = "ORGANISATION_LIST";
+
 }
