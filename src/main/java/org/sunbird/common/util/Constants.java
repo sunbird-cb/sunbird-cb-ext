@@ -12,6 +12,8 @@ public class Constants {
 	public static final String FIRST_NAME = "first_name";
 	public static final String LAST_NAME = "last_name";
 	public static final String MIDDLE_NAME = "middle_name";
+	public static final String FIRSTNAME = "firstName";
+	public static final String LASTNAME = "lastName";
 	public static final String CONTACT_PHONE_NUMBER_OFFICE = "contact_phone_number_office";
 	public static final String CONTACT_PHONE_NUMBER_HOME = "contact_phone_number_home";
 	public static final String CONTACT_PHONE_NUMBER_PERSONAL = "contact_phone_number_personal";
@@ -48,12 +50,27 @@ public class Constants {
 	public static final String USER_ID = "userId";
 	public static final String FILTERS = "filters";
 	public static final String CONTENT_ID = "content_id";
+	public static final String COMPLETIONPERCENTAGE = "completionpercentage";
+	public static final String PROGRESS = "progress";
+	public static final String PROFILEDETAILS = "profiledetails";
+	public static final String ISSUED_CERTIFICATES = "issued_certificates";
+	public static final String IS_MDO = "isMdo";
+	public static final String IS_CBP = "isCbp";
+	public static final String PROFILE_DETAILS_DESIGNATION = "profileDetails.professionalDetails.designation";
+	public static final String PROFILE_DETAILS_DESIGNATION_OTHER = "profileDetails.professionalDetails.designationOther";
+	public static final String PROFILE_DETAILS_PRIMARY_EMAIL = "profileDetails.personalDetails.primaryEmail";
+	public static final String DEPARTMENT = "department";
+	public static final String DESIGNATION = "designation";
+	public static final String PRIMARY_EMAIL = "primaryEmail";
+
 	public static final String SUCCESSFUL = "Successful";
 
 	public static final String FAILED = "Failed";
 	public static final String MESSAGE = "message";
 	public static final String DATA = "data";
 	public static final String STATUS = "status";
+	public static final String OK = "OK";
+
 	public static final String ADD = "add";
 
 	public static final String UPDATE = "update";
@@ -155,7 +172,20 @@ public class Constants {
 	public static final String WORK_ALLOCATION = "work_allocation";
 	public static final String WORK_ALLOCATION_MAPPING = "user_work_allocation_mapping";
 	public static final String MANDATORY_CONTENT = "mandatory_user_content";
-	// Redis
+	public static final String KEYSPACE_SUNBIRD = "sunbird";
+	public static final String KEYSPACE_SUNBIRD_COURSES = "sunbird_courses";
+	public static final String TABLE_ORG_BUDGET_SCHEME = "org_budget_scheme";
+	public static final String TABLE_ORG_AUDIT = "org_audit";
+	public static final String TABLE_ORG_STAFF_POSITION = "org_staff_position";
+	public static final String TABLE_WORK_ORDER = "work_order";
+	public static final String TABLE_WORK_ALLOCATION = "work_allocation";
+	public static final String TABLE_USER_WORK_ALLOCATION_MAPPING = "user_work_allocation_mapping";
+	public static final String TABLE_MANDATORY_USER_CONTENT = "mandatory_user_content";
+	public static final String TABLE_ORGANIZATION = "organisation";
+	public static final String TABLE_USER_ENROLMENT = "user_enrolments";
+	public static final String TABLE_USER = "user";
+	public static final String TABLE_COURSE_BATCH = "course_batch";
+
 	public static final String API_REDIS_DELETE = "api.redis.delete";
 
 	public static final String API_REDIS_GET_KEYS = "api.redis.get.keys";
@@ -179,6 +209,7 @@ public class Constants {
 	public static final String FIELDS = "fields";
 	public static final String OFFSET = "offset";
 	public static final String ORG_LIST = "ORGANISATION_LIST";
+
 	public static final String BUDGET_DOC_UPLOADED_BY = "uploadedBy";
 	public static final String BUDGET_DOC_UPLOADED_DATE = "uploadedDate";
 	public static final String BUDGET_DOC_FILE_NAME = "fileName";
@@ -186,7 +217,6 @@ public class Constants {
 	public static final String BUDGET_DOC_FILE_SIZE = "fileSize";
 	public static final String BUDGET_DOC_FILE_URL = "fileUrl";
 	public static final String ORGANIZATION = "organisation";
-
 	public static final String USER_ENROLMENT = "user_enrolments";
 	public static final String USER = "user";
 	public static final String COURSE_BATCH = "course_batch";

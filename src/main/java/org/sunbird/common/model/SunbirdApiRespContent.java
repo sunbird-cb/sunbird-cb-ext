@@ -14,28 +14,25 @@ public class SunbirdApiRespContent {
 	private String description;
 	private String identifier;
 	private String rootOrgId;
-
 	private String firstName;
 	private String dob;
-
 	private String userType;
-
 	private String lastName;
-
 	private String gender;
-
 	private List<String> roles;
-
 	private String countryCode;
-
 	private String email;
-
 	private String userName;
-
 	private List<SunbirdApiRespOragainsation> organisations;
+	private Boolean isMdo;
+	private Boolean isCbp;
 
 	public String getChannel() {
 		return channel;
+	}
+
+	public String getRootOrgName() {
+		return rootOrgName;
 	}
 
 	public String getCountryCode() {
@@ -88,10 +85,6 @@ public class SunbirdApiRespContent {
 
 	public String getRootOrgId() {
 		return rootOrgId;
-	}
-
-	public String getRootOrgName() {
-		return rootOrgName;
 	}
 
 	public String getUserName() {
@@ -168,6 +161,22 @@ public class SunbirdApiRespContent {
 
 	public void setUserType(String userType) {
 		this.userType = userType;
+	}
+
+	public Boolean getIsMdo() {
+		return isMdo;
+	}
+
+	public void setIsMdo(Boolean isMdo) {
+		this.isMdo = isMdo;
+	}
+
+	public Boolean getIsCbp() {
+		return isCbp;
+	}
+
+	public void setIsCbp(Boolean isCbp) {
+		this.isCbp = isCbp;
 	}
 
 }
