@@ -13,13 +13,9 @@ import org.sunbird.portal.department.service.PortalService;
 
 @RestController
 public class PortalController {
+
 	@Autowired
 	PortalService portalService;
-
-	@GetMapping("/portal/getAllDept")
-	public ResponseEntity<List<DeptPublicInfo>> getAllDepartment() {
-		return new ResponseEntity<>(portalService.getAllDept(), HttpStatus.OK);
-	}
 
 	// ----------------- Public APIs --------------------
 	@GetMapping("/portal/listDeptNames")
@@ -27,10 +23,15 @@ public class PortalController {
 		return new ResponseEntity<>(portalService.getDeptNameList(), HttpStatus.OK);
 	}
 
-	@GetMapping("/portal/deptSearch")
-	public ResponseEntity<DeptPublicInfo> searchDepartment(
-			@RequestParam(name = "friendlyName", required = true) String deptName) {
-		return new ResponseEntity<>(portalService.searchDept(deptName), HttpStatus.OK);
+	@GetMapping("/portal/getAllDept")
+	public ResponseEntity<List<DeptPublicInfo>> getAllDepartment() throws Exception {
+		return new ResponseEntity<>(portalService.getAllDept(), HttpStatus.OK);
 	}
 
+	@GetMapping("/portal/deptSearch")
+	public ResponseEntity<DeptPublicInfo> searchDepartment(
+			@RequestParam(name = "friendlyName", required = true) String deptName) throws Exception {
+		return new ResponseEntity<>(portalService.searchDept(deptName), HttpStatus.OK);
+	}
+	// ----------------- END of Public APIs --------------------
 }

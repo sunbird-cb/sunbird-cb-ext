@@ -41,13 +41,64 @@ public class CassandraOperationImpl implements CassandraOperation {
 	private CassandraConnectionManager connectionManager;
 
 	@Override
+	public SBApiResponse insertRecord(String keyspaceName, String tableName, Map<String, Object> request) {
+		SBApiResponse response = new SBApiResponse();
+		String query = CassandraUtil.getPreparedStatement(keyspaceName, tableName, request);
+		try {
+			PreparedStatement statement = connectionManager.getSession(keyspaceName).prepare(query);
+			BoundStatement boundStatement = new BoundStatement(statement);
+			Iterator<Object> iterator = request.values().iterator();
+			Object[] array = new Object[request.keySet().size()];
+			int i = 0;
+			while (iterator.hasNext()) {
+				array[i++] = iterator.next();
+			}
+			connectionManager.getSession(keyspaceName).execute(boundStatement.bind(array));
+			response.put(Constants.RESPONSE, Constants.SUCCESS);
+		} catch (Exception e) {
+			logger.error(
+					String.format("Exception occurred while inserting record to %s %s", tableName, e.getMessage()));
+		}
+		return response;
+	}
+
+	@Override
+	public SBApiResponse insertBulkRecord(String keyspaceName, String tableName, List<Map<String, Object>> request) {
+		SBApiResponse response = new SBApiResponse();
+		try {
+			BatchStatement batchStatement = new BatchStatement();
+			for (Map<String, Object> requestMap : request) {
+				String query = CassandraUtil.getPreparedStatement(keyspaceName, tableName, requestMap);
+				PreparedStatement statement = connectionManager.getSession(keyspaceName).prepare(query);
+				BoundStatement boundStatement = new BoundStatement(statement);
+				Iterator<Object> iterator = requestMap.values().iterator();
+				Object[] array = new Object[requestMap.size()];
+				int i = 0;
+				while (iterator.hasNext()) {
+					array[i++] = iterator.next();
+				}
+				boundStatement.bind(array);
+				batchStatement.add(boundStatement);
+			}
+			connectionManager.getSession(keyspaceName).execute(batchStatement);
+			response.put(Constants.RESPONSE, Constants.SUCCESS);
+		} catch (Exception e) {
+			logger.error(String.format("Exception occurred while inserting bulk record to %s %s", tableName,
+					e.getMessage()));
+		}
+		return response;
+	}
+
+	@Override
 	public void deleteRecord(String keyspaceName, String tableName, Map<String, Object> compositeKeyMap) {
 		Delete delete = null;
 		try {
 			delete = QueryBuilder.delete().from(keyspaceName, tableName);
 			Delete.Where deleteWhere = delete.where();
-			compositeKeyMap.entrySet().stream()
-					.forEach(x -> deleteWhere.and(QueryBuilder.eq(x.getKey(), x.getValue())));
+			compositeKeyMap.entrySet().stream().forEach(x -> {
+				Clause clause = QueryBuilder.eq(x.getKey(), x.getValue());
+				deleteWhere.and(clause);
+			});
 			connectionManager.getSession(keyspaceName).execute(delete);
 		} catch (Exception e) {
 			logger.error(String.format("CassandraOperationImpl: deleteRecord by composite key. %s %s %s",
@@ -104,57 +155,6 @@ public class CassandraOperationImpl implements CassandraOperation {
 			response = CassandraUtil.createResponse(results);
 		} catch (Exception e) {
 			logger.error(Constants.EXCEPTION_MSG_FETCH + tableName + " : " + e.getMessage(), e);
-		}
-		return response;
-	}
-
-	@Override
-	public SBApiResponse insertBulkRecord(String keyspaceName, String tableName, List<Map<String, Object>> request) {
-		SBApiResponse response = new SBApiResponse();
-		try {
-			BatchStatement batchStatement = new BatchStatement();
-			for (Map<String, Object> requestMap : request) {
-				String query = CassandraUtil.getPreparedStatement(keyspaceName, tableName, requestMap);
-				PreparedStatement statement = connectionManager.getSession(keyspaceName).prepare(query);
-				BoundStatement boundStatement = new BoundStatement(statement);
-				Iterator<Object> iterator = requestMap.values().iterator();
-				Object[] array = new Object[requestMap.size()];
-				int i = 0;
-				while (iterator.hasNext()) {
-					array[i] = iterator.next();
-					i++;
-				}
-				boundStatement.bind(array);
-				batchStatement.add(boundStatement);
-			}
-			connectionManager.getSession(keyspaceName).execute(batchStatement);
-			response.put(Constants.RESPONSE, Constants.SUCCESS);
-		} catch (Exception e) {
-			logger.error(String.format("Exception occurred while inserting bulk record to %s %s", tableName,
-					e.getMessage()));
-		}
-		return response;
-	}
-
-	@Override
-	public SBApiResponse insertRecord(String keyspaceName, String tableName, Map<String, Object> request) {
-		SBApiResponse response = new SBApiResponse();
-		String query = CassandraUtil.getPreparedStatement(keyspaceName, tableName, request);
-		try {
-			PreparedStatement statement = connectionManager.getSession(keyspaceName).prepare(query);
-			BoundStatement boundStatement = new BoundStatement(statement);
-			Iterator<Object> iterator = request.values().iterator();
-			Object[] array = new Object[request.size()];
-			int i = 0;
-			while (iterator.hasNext()) {
-				array[i] = iterator.next();
-				i++;
-			}
-			connectionManager.getSession(keyspaceName).execute(boundStatement.bind(array));
-			response.put(Constants.RESPONSE, Constants.SUCCESS);
-		} catch (Exception e) {
-			logger.error(String.format("Exception occurred while inserting record to :  %s :  %s", tableName,
-					e.getMessage()));
 		}
 		return response;
 	}
