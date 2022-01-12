@@ -201,11 +201,7 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
 					SunbirdApiResp contentResponse = contentService.getHeirarchyResponse(courseId);
 					courseLeafCount.put(courseId, contentResponse.getResult().getContent().getLeafNodesCount());
 				}
-				int leafNodeCount = courseLeafCount.get(courseId);
-				responseObj.put(Constants.COMPLETION_PERCENTAGE,
-						getCompletionPercentage((int) responseObj.get(Constants.PROGRESS), leafNodeCount));
-				responseObj.put(Constants.STATUS,
-						getCompletionStatus((int) responseObj.get(Constants.PROGRESS), leafNodeCount));
+				setCourseCompletiondetails(responseObj, courseLeafCount.get(courseId));
 			}
 
 			result.put(Constants.STATUS, Constants.SUCCESSFUL);
@@ -276,23 +272,23 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
 		}
 	}
 
-	private int getCompletionPercentage(int progress, int leafNodeCount) {
+	/**
+	 * To update the course completion status & percentage
+	 * 
+	 * @param responseObj
+	 * @param leafNodeCount
+	 */
+	private void setCourseCompletiondetails(Map<String, Object> responseObj, int leafNodeCount) {
+		int progress = (int) responseObj.get(Constants.PROGRESS);
 		if (progress == 0) {
-			return 0;
+			responseObj.put(Constants.COMPLETION_PERCENTAGE, 0);
+			responseObj.put(Constants.STATUS, 0);
 		} else if (progress >= 1 && progress < leafNodeCount) {
-			return (progress * 100) / leafNodeCount;
+			responseObj.put(Constants.COMPLETION_PERCENTAGE, (progress * 100) / leafNodeCount);
+			responseObj.put(Constants.STATUS, 1);
 		} else {
-			return 100;
-		}
-	}
-
-	private int getCompletionStatus(int progress, int leafNodeCount) {
-		if (progress == 0) {
-			return 0;
-		} else if (progress >= 1 && progress < leafNodeCount) {
-			return 1;
-		} else {
-			return 2;
+			responseObj.put(Constants.COMPLETION_PERCENTAGE, 100);
+			responseObj.put(Constants.STATUS, 2);
 		}
 	}
 }
