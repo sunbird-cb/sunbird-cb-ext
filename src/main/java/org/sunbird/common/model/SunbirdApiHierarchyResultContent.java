@@ -22,6 +22,7 @@ public class SunbirdApiHierarchyResultContent {
 	private String streamingUrl;
 	private List<SunbirdApiHierarchyResultContent> children;
 	private List<SunbirdApiBatchResp> batches;
+	private int leafNodesCount;
 
 	public String getParent() {
 		return parent;
@@ -149,5 +150,13 @@ public class SunbirdApiHierarchyResultContent {
 
 	public void setBatches(List<SunbirdApiBatchResp> batches) {
 		this.batches = batches;
+	}
+
+	public int getLeafNodesCount() {
+		return leafNodesCount;
+	}
+
+	public void setLeafNodesCount(int leafNodesCount) {
+		this.leafNodesCount = leafNodesCount;
 	}
 }
