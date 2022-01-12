@@ -57,7 +57,7 @@ public class Constants {
 	public static final String START_DATE = "startDate";
 	public static final String END_DATE = "endDate";
 	public static final String ACTIVE = "active";
-	public static final String COMPLETIONPERCENTAGE = "completionpercentage";
+	public static final String COMPLETION_PERCENTAGE = "completionPercentage";
 	public static final String PROGRESS = "progress";
 	public static final String PROFILEDETAILS = "profiledetails";
 	public static final String ISSUED_CERTIFICATES = "issued_certificates";
