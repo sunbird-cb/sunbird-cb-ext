@@ -15,8 +15,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.sunbird.cassandra.utils.CassandraOperation;
+import org.sunbird.common.model.SearchUserApiContent;
+import org.sunbird.common.model.SearchUserApiResp;
 import org.sunbird.common.model.SunbirdApiRequest;
+import org.sunbird.common.model.SunbirdApiResp;
+import org.sunbird.common.model.SunbirdApiRespContent;
+import org.sunbird.common.model.SunbirdUserProfileDetail;
 import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
+import org.sunbird.common.service.UserUtilityServiceImpl;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.core.logger.CbExtLogger;
@@ -39,6 +45,9 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
 
 	@Autowired
 	private CassandraOperation cassandraOperation;
+
+	@Autowired
+	private UserUtilityServiceImpl userUtilService;
 
 	private CbExtLogger logger = new CbExtLogger(getClass().getName());
 
@@ -137,7 +146,7 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
 		}
 	}
 
-	public Map<String, Object> getUserProgress(SunbirdApiRequest requestBody) {
+	public Map<String, Object> getUserProgress(SunbirdApiRequest requestBody, String authUserToken) {
 		Map<String, Object> result = new HashMap<>();
 		try {
 			UserProgressRequest requestData = validateGetBatchEnrolment(requestBody);
@@ -162,30 +171,22 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
 								Constants.BATCH_ID, Constants.COMPLETIONPERCENTAGE, Constants.PROGRESS,
 								Constants.STATUS, Constants.ISSUED_CERTIFICATES))));
 			}
-
+			// restricting with only 100 items in the response
 			if (userEnrolmentList.size() > 100) {
 				userEnrolmentList = userEnrolmentList.subList(0, 100);
 			}
 
+			// get all user details
 			List<String> enrolledUserId = userEnrolmentList.stream()
 					.map(obj -> (String) obj.get(Constants.USER_ID_CONSTANT)).collect(Collectors.toList());
-			// get all user details
-			List<Map<String, Object>> userList = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
-					Constants.TABLE_USER, new HashMap<String, Object>() {
-						{
-							put(Constants.ID, enrolledUserId);
-						}
-					}, new ArrayList<>(Arrays.asList(Constants.ID, Constants.FIRSTNAME, Constants.LASTNAME)));
-
-			Map<String, Map<String, Object>> userMap = userList.stream()
-					.collect(Collectors.toMap(obj -> (String) obj.get(Constants.ID), obj -> obj));
+			List<String> userFields = new ArrayList<>(Arrays.asList(Constants.USER_ID_CONSTANT, Constants.FIRSTNAME,
+					Constants.LASTNAME, Constants.PROFILE_DETAILS_PRIMARY_EMAIL, Constants.CHANNEL,
+					Constants.PROFILE_DETAILS_DESIGNATION, Constants.PROFILE_DETAILS_DESIGNATION_OTHER));
+			Map<String, Object> userMap = userUtilService.getUsersDataFromUserIds(enrolledUserId, userFields,
+					authUserToken);
 
 			// append user details with enrollment data
-			for (Map<String, Object> userEnrolment : userEnrolmentList) {
-				if (userMap.containsKey(userEnrolment.get(Constants.USER_ID_CONSTANT))) {
-					userEnrolment.putAll(userMap.get(userEnrolment.get(Constants.USER_ID_CONSTANT)));
-				}
-			}
+			appendUserDetails(userEnrolmentList, userMap);
 
 			result.put(Constants.STATUS, Constants.SUCCESSFUL);
 			result.put(Constants.RESULT, userEnrolmentList);
@@ -215,5 +216,48 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
 			logger.error(e);
 		}
 		return null;
+	}
+
+	/**
+	 * Add user basic details with the response map
+	 * 
+	 * @param response
+	 * @param userMap
+	 * @throws Exception
+	 */
+	private void appendUserDetails(List<Map<String, Object>> response, Map<String, Object> userMap) throws Exception {
+		for (Map<String, Object> responseObj : response) {
+			if (userMap.containsKey(responseObj.get(Constants.USER_ID_CONSTANT))) {
+				SearchUserApiContent userObj = mapper.convertValue(
+						userMap.get(responseObj.get(Constants.USER_ID_CONSTANT)), SearchUserApiContent.class);
+				responseObj.put(Constants.FIRSTNAME, userObj.getFirstName());
+				responseObj.put(Constants.LASTNAME, userObj.getLastName());
+				responseObj.put(Constants.DEPARTMENT, userObj.getChannel());
+
+				if (!ObjectUtils.isEmpty(userObj.getProfileDetails())) {
+					SunbirdUserProfileDetail profileDetails = userObj.getProfileDetails();
+					if (!ObjectUtils.isEmpty(profileDetails.getPersonalDetails())
+							&& profileDetails.getPersonalDetails().containsKey(Constants.PRIMARY_EMAIL)) {
+						responseObj.put(Constants.EMAIL,
+								profileDetails.getPersonalDetails().get(Constants.PRIMARY_EMAIL));
+					}
+					if (!ObjectUtils.isEmpty(profileDetails.getProfessionalDetails())
+							&& !profileDetails.getProfessionalDetails().isEmpty()) {
+						if (!ObjectUtils.isEmpty(profileDetails.getProfessionalDetails().get(0).getDesignation())) {
+							responseObj.put(Constants.DESIGNATION,
+									profileDetails.getProfessionalDetails().get(0).getDesignation());
+						} else if (!ObjectUtils
+								.isEmpty(profileDetails.getProfessionalDetails().get(0).getDesignationOther())) {
+							responseObj.put(Constants.DESIGNATION,
+									profileDetails.getProfessionalDetails().get(0).getDesignationOther());
+						} else {
+							responseObj.put(Constants.DESIGNATION, "");
+						}
+					} else {
+						responseObj.put(Constants.DESIGNATION, "");
+					}
+				}
+			}
+		}
 	}
 }
