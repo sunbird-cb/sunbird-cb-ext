@@ -134,6 +134,24 @@ public class Constants {
 	public static final String TRAINING_BUDGET_ALLOCATED = "trainingBudgetAllocated";
 	public static final String TRAINING_BUDGET_UTILIZATION = "trainingBudgetUtilization";
 
+	//ratings and review
+	public static final String API_RATINGS_ADD = "api.ratings.add";
+	public static final String API_RATINGS_UPDATE = "api.ratings.update";
+	public static final String API_RATINGS_SUMMARY = "api.ratings.summary";
+	public static final String API_RATINGS_LOOKUP = "api.ratings.lookup";
+
+	public static final String ACTIVITY_ID = "activity_id";
+	public static final String ACTIVITY_TYPE = "activity_type";
+	public static final String RATINGS_USER_ID = "userid";
+	public static final String COMMENT = "comment";
+	public static final String COMMENT_BY = "commentby";
+	public static final String COMMENT_UPDATED_ON = "commentupdatedon";
+	public static final String CREATED_ON = "createdon";
+	public static final String RATING = "rating";
+	public static final String REVIEW = "review";
+	public static final String UPDATED_ON = "updatedon";
+
+
 	// assessment
 	public static final String QUESTION_SET = "questionSet";
 	public static final String ASSESSMENT_QNS_ANS_SET = "assessmentQnsAnsSet_";
@@ -179,6 +197,9 @@ public class Constants {
 	public static final String TABLE_USER_ENROLMENT = "user_enrolments";
 	public static final String TABLE_USER = "user";
 	public static final String TABLE_COURSE_BATCH = "course_batch";
+	public static final String TABLE_RATINGS = "ratings";
+	public static final String TABLE_RATINGS_LOOKUP = "ratings_lookup";
+	public static final String TABLE_RATINGS_SUMMARY = "ratings_summary";
 
 	// Redis
 	public static final String API_REDIS_DELETE = "api.redis.delete";
