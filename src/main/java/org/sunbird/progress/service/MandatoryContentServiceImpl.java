@@ -16,11 +16,10 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.sunbird.cassandra.utils.CassandraOperation;
 import org.sunbird.common.model.SearchUserApiContent;
-import org.sunbird.common.model.SearchUserApiResp;
 import org.sunbird.common.model.SunbirdApiRequest;
 import org.sunbird.common.model.SunbirdApiResp;
-import org.sunbird.common.model.SunbirdApiRespContent;
 import org.sunbird.common.model.SunbirdUserProfileDetail;
+import org.sunbird.common.service.ContentServiceImpl;
 import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
 import org.sunbird.common.service.UserUtilityServiceImpl;
 import org.sunbird.common.util.CbExtServerProperties;
@@ -48,6 +47,9 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
 
 	@Autowired
 	private UserUtilityServiceImpl userUtilService;
+
+	@Autowired
+	private ContentServiceImpl contentService;
 
 	private CbExtLogger logger = new CbExtLogger(getClass().getName());
 
@@ -168,7 +170,7 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
 				userEnrolmentList.addAll(cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD_COURSES,
 						Constants.TABLE_USER_ENROLMENT, propertyMap,
 						new ArrayList<>(Arrays.asList(Constants.USER_ID_CONSTANT, Constants.COURSE_ID,
-								Constants.BATCH_ID, Constants.COMPLETIONPERCENTAGE, Constants.PROGRESS,
+								Constants.BATCH_ID, Constants.COMPLETION_PERCENTAGE, Constants.PROGRESS,
 								Constants.STATUS, Constants.ISSUED_CERTIFICATES))));
 			}
 			// restricting with only 100 items in the response
@@ -185,8 +187,22 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
 			Map<String, Object> userMap = userUtilService.getUsersDataFromUserIds(enrolledUserId, userFields,
 					authUserToken);
 
-			// append user details with enrollment data
-			appendUserDetails(userEnrolmentList, userMap);
+			Map<String, Integer> courseLeafCount = new HashMap<>();
+			for (Map<String, Object> responseObj : userEnrolmentList) {
+				// set user details
+				if (userMap.containsKey(responseObj.get(Constants.USER_ID_CONSTANT))) {
+					SearchUserApiContent userObj = mapper.convertValue(
+							userMap.get(responseObj.get(Constants.USER_ID_CONSTANT)), SearchUserApiContent.class);
+					appendUserDetails(responseObj, userObj);
+				}
+				// set completion percentage & status
+				String courseId = (String) responseObj.get(Constants.COURSE_ID);
+				if (!courseLeafCount.containsKey(courseId)) {
+					SunbirdApiResp contentResponse = contentService.getHeirarchyResponse(courseId);
+					courseLeafCount.put(courseId, contentResponse.getResult().getContent().getLeafNodesCount());
+				}
+				setCourseCompletiondetails(responseObj, courseLeafCount.get(courseId));
+			}
 
 			result.put(Constants.STATUS, Constants.SUCCESSFUL);
 			result.put(Constants.RESULT, userEnrolmentList);
@@ -225,39 +241,54 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
 	 * @param userMap
 	 * @throws Exception
 	 */
-	private void appendUserDetails(List<Map<String, Object>> response, Map<String, Object> userMap) throws Exception {
-		for (Map<String, Object> responseObj : response) {
-			if (userMap.containsKey(responseObj.get(Constants.USER_ID_CONSTANT))) {
-				SearchUserApiContent userObj = mapper.convertValue(
-						userMap.get(responseObj.get(Constants.USER_ID_CONSTANT)), SearchUserApiContent.class);
-				responseObj.put(Constants.FIRSTNAME, userObj.getFirstName());
-				responseObj.put(Constants.LASTNAME, userObj.getLastName());
-				responseObj.put(Constants.DEPARTMENT, userObj.getChannel());
+	private void appendUserDetails(Map<String, Object> responseObj, SearchUserApiContent userObj) throws Exception {
+		if (!ObjectUtils.isEmpty(userObj)) {
+			responseObj.put(Constants.FIRSTNAME, userObj.getFirstName());
+			responseObj.put(Constants.LASTNAME, userObj.getLastName());
+			responseObj.put(Constants.DEPARTMENT, userObj.getChannel());
 
-				if (!ObjectUtils.isEmpty(userObj.getProfileDetails())) {
-					SunbirdUserProfileDetail profileDetails = userObj.getProfileDetails();
-					if (!ObjectUtils.isEmpty(profileDetails.getPersonalDetails())
-							&& profileDetails.getPersonalDetails().containsKey(Constants.PRIMARY_EMAIL)) {
-						responseObj.put(Constants.EMAIL,
-								profileDetails.getPersonalDetails().get(Constants.PRIMARY_EMAIL));
-					}
-					if (!ObjectUtils.isEmpty(profileDetails.getProfessionalDetails())
-							&& !profileDetails.getProfessionalDetails().isEmpty()) {
-						if (!ObjectUtils.isEmpty(profileDetails.getProfessionalDetails().get(0).getDesignation())) {
-							responseObj.put(Constants.DESIGNATION,
-									profileDetails.getProfessionalDetails().get(0).getDesignation());
-						} else if (!ObjectUtils
-								.isEmpty(profileDetails.getProfessionalDetails().get(0).getDesignationOther())) {
-							responseObj.put(Constants.DESIGNATION,
-									profileDetails.getProfessionalDetails().get(0).getDesignationOther());
-						} else {
-							responseObj.put(Constants.DESIGNATION, "");
-						}
+			if (!ObjectUtils.isEmpty(userObj.getProfileDetails())) {
+				SunbirdUserProfileDetail profileDetails = userObj.getProfileDetails();
+				if (!ObjectUtils.isEmpty(profileDetails.getPersonalDetails())
+						&& profileDetails.getPersonalDetails().containsKey(Constants.PRIMARY_EMAIL)) {
+					responseObj.put(Constants.EMAIL, profileDetails.getPersonalDetails().get(Constants.PRIMARY_EMAIL));
+				}
+				if (!ObjectUtils.isEmpty(profileDetails.getProfessionalDetails())
+						&& !profileDetails.getProfessionalDetails().isEmpty()) {
+					if (!ObjectUtils.isEmpty(profileDetails.getProfessionalDetails().get(0).getDesignation())) {
+						responseObj.put(Constants.DESIGNATION,
+								profileDetails.getProfessionalDetails().get(0).getDesignation());
+					} else if (!ObjectUtils
+							.isEmpty(profileDetails.getProfessionalDetails().get(0).getDesignationOther())) {
+						responseObj.put(Constants.DESIGNATION,
+								profileDetails.getProfessionalDetails().get(0).getDesignationOther());
 					} else {
 						responseObj.put(Constants.DESIGNATION, "");
 					}
+				} else {
+					responseObj.put(Constants.DESIGNATION, "");
 				}
 			}
+		}
+	}
+
+	/**
+	 * To update the course completion status & percentage
+	 * 
+	 * @param responseObj
+	 * @param leafNodeCount
+	 */
+	private void setCourseCompletiondetails(Map<String, Object> responseObj, int leafNodeCount) {
+		int progress = (int) responseObj.get(Constants.PROGRESS);
+		if (progress == 0) {
+			responseObj.put(Constants.COMPLETION_PERCENTAGE, 0);
+			responseObj.put(Constants.STATUS, 0);
+		} else if (progress >= 1 && progress < leafNodeCount) {
+			responseObj.put(Constants.COMPLETION_PERCENTAGE, (progress * 100) / leafNodeCount);
+			responseObj.put(Constants.STATUS, 1);
+		} else {
+			responseObj.put(Constants.COMPLETION_PERCENTAGE, 100);
+			responseObj.put(Constants.STATUS, 2);
 		}
 	}
 }
