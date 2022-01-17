@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.ratings.model.RequestRating;
 import org.sunbird.ratings.service.RatingService;
+
 import javax.validation.Valid;
 
 @RestController
@@ -18,10 +19,9 @@ public class RatingsController {
 
     // ----------------- Public APIs --------------------
 
-    @PostMapping("/ratings/v1/add")
-    public ResponseEntity<?> addRatings(@Valid @RequestBody RequestRating requestRatingBody) throws Exception {
-
-        SBApiResponse response = ratingService.addRating(requestRatingBody);
+    @PostMapping("/ratings/v1/upsert")
+    public ResponseEntity<?> upsert(@Valid @RequestBody RequestRating requestRatingBody) throws Exception {
+        SBApiResponse response = ratingService.upsert(requestRatingBody);
         return new ResponseEntity<>(response, response.getResponseCode());
 
     }

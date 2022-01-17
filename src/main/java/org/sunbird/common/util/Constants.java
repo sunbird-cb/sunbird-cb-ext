@@ -157,6 +157,7 @@ public class Constants {
 	public static final String RATING = "rating";
 	public static final String REVIEW = "review";
 	public static final String UPDATED_ON = "updatedon";
+	public static final String RATINGS_UPDATE_EVENT = "test_ratings";
 
 
 	// assessment
