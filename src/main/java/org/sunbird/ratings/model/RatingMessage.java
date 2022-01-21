@@ -11,6 +11,15 @@ public class RatingMessage {
     private UpdatedValues updatedValues;
 
 
+    public RatingMessage( String action, String activity_id, String activity_Type, String user_id, String created_Date) {
+        this.action = action;
+        this.activity_id = activity_id;
+        this.activity_Type = activity_Type;
+        this.user_id = user_id;
+        this.created_Date = created_Date;
+    }
+
+
     public String getActivity_id() {
         return activity_id;
     }
@@ -67,7 +76,36 @@ public class RatingMessage {
         this.updatedValues = updatedValues;
     }
 
+    public static class UpdatedValues {
+        public String updatedOn;
+        public Float rating;
+        public String review;
 
+        public String getUpdatedOn() {
+            return updatedOn;
+        }
+
+        public void setUpdatedOn(String updatedOn) {
+            this.updatedOn = updatedOn;
+        }
+
+        public Float getRating() {
+            return rating;
+        }
+
+        public void setRating(Float rating) {
+            this.rating = rating;
+        }
+
+        public String getReview() {
+            return review;
+        }
+
+        public void setReview(String review) {
+            this.review = review;
+        }
+
+    }
 
 }
 

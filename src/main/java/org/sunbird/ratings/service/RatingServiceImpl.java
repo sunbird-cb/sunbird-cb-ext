@@ -6,6 +6,7 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -13,10 +14,11 @@ import org.sunbird.cassandra.utils.CassandraOperation;
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.util.Constants;
 import org.sunbird.core.producer.Producer;
-import org.sunbird.ratings.exception.ValidateRatingException;
+import org.sunbird.ratings.exception.ValidationException;
 import org.sunbird.ratings.model.RatingMessage;
 import org.sunbird.ratings.model.RequestRating;
-import org.sunbird.ratings.model.UpdatedValues;
+import org.sunbird.ratings.responsecode.ResponseCode;
+import org.sunbird.ratings.responsecode.ResponseMessage;
 
 import java.util.*;
 import java.util.regex.Pattern;
@@ -31,12 +33,40 @@ public class RatingServiceImpl implements RatingService {
     CassandraOperation cassandraOperation;
 
     @Autowired
-    Producer producer;
+    Producer kafkaProducer;
+
+    @Value("${kafka.topics.parent.rating.event}")
+    public String updateRatingTopicName;
 
     //TO DO
     @Override
     public SBApiResponse getRatings(String activity_Id, String activity_Type, String userId) {
-        return null;
+        SBApiResponse response = new SBApiResponse(Constants.API_RATINGS_READ);
+
+        try {
+            Map<String, Object> request = new HashMap<>();
+            request.put(Constants.ACTIVITY_ID, activity_Id);
+            request.put(Constants.ACTIVITY_TYPE, activity_Type);
+            request.put(Constants.RATINGS_USER_ID, userId);
+
+            List<Map<String, Object>> existingDataList = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
+                    Constants.TABLE_RATINGS, request, null);
+            if (!existingDataList.isEmpty()) {
+                response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
+                response.put(Constants.RESPONSE, existingDataList);
+                response.setResponseCode(HttpStatus.OK);
+            }
+            else {
+                String errMsg = "No ratings found for : " + activity_Id + ", activity_Type: " + activity_Type;
+                response.put(Constants.MESSAGE, Constants.FAILED);
+                response.getParams().setErrmsg(errMsg);
+                response.setResponseCode(HttpStatus.BAD_REQUEST);
+            }
+        } catch (Exception e) {
+            System.out.println("The exception has occurred in read ratings" + e.getMessage());
+            e.printStackTrace();
+        }
+        return response;
     }
 
     //TO DO
@@ -45,11 +75,6 @@ public class RatingServiceImpl implements RatingService {
         return null;
     }
 
-    //TO DO
-    @Override
-    public SBApiResponse upsertRating(String activity_Id, String activity_Type, String userId) {
-        return null;
-    }
 
     //TO DO
     @Override
@@ -58,11 +83,11 @@ public class RatingServiceImpl implements RatingService {
     }
 
     @Override
-    public SBApiResponse upsert(RequestRating requestRating) {
+    public SBApiResponse upsertRating(RequestRating requestRating) {
         UUID timeBasedUuid = UUIDs.timeBased();
 
         SBApiResponse response = new SBApiResponse(Constants.API_RATINGS_ADD);
-        RatingMessage msg = new RatingMessage();
+        RatingMessage ratingMessage;
 
         try {
             validateRatingsInfo(requestRating);
@@ -86,52 +111,45 @@ public class RatingServiceImpl implements RatingService {
                 Map<String, Object> prevInfo = existingDataList.get(0);
                 cassandraOperation.updateRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_RATINGS, updateRequest,
                         request);
+                ratingMessage = new RatingMessage("ratingUpdate", requestRating.getActivity_Id(), requestRating.getActivity_type(),
+                        requestRating.getUserId(), String.valueOf((prevInfo.get("createdon"))));
 
-                msg.setAction("ratingUpdate");
-                msg.setActivity_id(requestRating.getActivity_Id());
-                msg.setActivity_Type(requestRating.getActivity_type());
-                msg.setUser_id(requestRating.getUserId());
-                msg.setCreated_Date(String.valueOf((prevInfo.get("createdon"))));
-
-                UpdatedValues prevValues = processEventMessage(String.valueOf(prevInfo.get("createdon")),
-                        (Float) prevInfo.get("rating"), (String) prevInfo.get("review"));
-
-                UpdatedValues updatedValues = processEventMessage(String.valueOf(updateRequest.get(Constants.UPDATED_ON)),
-                        requestRating.getRating(), requestRating.getReview());
-
-                msg.setPrevValues(prevValues);
-                msg.setUpdatedValues(updatedValues);
-
-                producer.push(Constants.RATINGS_UPDATE_EVENT, msg);
-                response.getParams().setStatus(Constants.SUCCESSFUL);
-                response.setResponseCode(HttpStatus.CREATED);
+                ratingMessage.setPrevValues(processEventMessage(String.valueOf(prevInfo.get("createdon")),
+                        (Float) prevInfo.get("rating"), (String) prevInfo.get("review")));
+                ratingMessage.setUpdatedValues(processEventMessage(String.valueOf(updateRequest.get(Constants.UPDATED_ON)),
+                        requestRating.getRating(), requestRating.getReview()));
                 response.setResponseCode(HttpStatus.OK);
-                return response;
+            } else {
+                request.put(Constants.CREATED_ON, timeBasedUuid);
+                request.put(Constants.RATING, requestRating.getRating());
+                request.put(Constants.REVIEW, requestRating.getReview());
+                request.put(Constants.UPDATED_ON, timeBasedUuid);
+
+                cassandraOperation.insertRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_RATINGS, request);
+
+                ratingMessage = new RatingMessage("ratingAdd", requestRating.getActivity_Id(), requestRating.getActivity_type(),
+                        requestRating.getUserId(), String.valueOf(timeBasedUuid));
+
+                ratingMessage.setUpdatedValues(processEventMessage(String.valueOf(request.get(Constants.CREATED_ON)),
+                        requestRating.getRating(), requestRating.getReview()));
+                response.put(Constants.DATA, request);
+                response.setResponseCode(HttpStatus.CREATED);
+
             }
-
-            request.put(Constants.CREATED_ON, timeBasedUuid);
-            request.put(Constants.RATING, requestRating.getRating());
-            request.put(Constants.REVIEW, requestRating.getReview());
-            request.put(Constants.UPDATED_ON, timeBasedUuid);
-
-            cassandraOperation.insertRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_RATINGS, request);
-
             response.getParams().setStatus(Constants.SUCCESSFUL);
-            response.put(Constants.DATA, request);
-            response.setResponseCode(HttpStatus.CREATED);
-        } catch (ValidateRatingException ex) {
-            String errMsg = "Exception is : ";
-            return processExceptionBody(response, ex, errMsg, HttpStatus.BAD_REQUEST);
+            kafkaProducer.push(updateRatingTopicName, ratingMessage);
+        } catch (ValidationException ex) {
+            return processExceptionBody(response, ex, "", HttpStatus.BAD_REQUEST);
         } catch (Exception ex) {
-            String errMsg = "Exception occurred while adding the course review. Exception: ";
+            String errMsg = "Exception occurred while adding the course review : ";
             return processExceptionBody(response, ex, errMsg, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         return response;
     }
 
-    public UpdatedValues processEventMessage(String date, Float rating, String review) {
-        UpdatedValues values = new UpdatedValues();
+    public RatingMessage.UpdatedValues processEventMessage(String date, Float rating, String review) {
+        RatingMessage.UpdatedValues values = new RatingMessage.UpdatedValues();
         values.setUpdatedOn(date);
         values.setRating(rating);
         values.setReview(review);
@@ -140,32 +158,33 @@ public class RatingServiceImpl implements RatingService {
 
     private void validateRatingsInfo(RequestRating requestRating) throws Exception {
         List<String> errObjList = new ArrayList<String>();
+
         if (StringUtils.isEmpty(requestRating.getActivity_Id())) {
-            errObjList.add(Constants.ACTIVITY_ID);
+            errObjList.add(ResponseMessage.Message.INVALID_INPUT);
         }
         if (StringUtils.isEmpty(requestRating.getActivity_type())) {
-            errObjList.add(Constants.ACTIVITY_TYPE);
+            errObjList.add(ResponseMessage.Message.INVALID_INPUT);
         }
         if (StringUtils.isEmpty((String.valueOf(requestRating.getRating()))) || requestRating.getRating() < 1
                 || requestRating.getRating() > 5) {
-            errObjList.add(Constants.RATING);
+            errObjList.add(ResponseMessage.Message.INVALID_INPUT + ResponseMessage.Message.INVALID_RATING);
         }
         if (StringUtils.isEmpty(requestRating.getReview()) || (!Pattern.matches("^[A-Za-z0-9, ]++$", requestRating.getReview()))) {
-            errObjList.add(Constants.REVIEW);
+            errObjList.add(ResponseMessage.Message.INVALID_REVIEW);
+
         }
         if (StringUtils.isEmpty(requestRating.getUserId())) {
-            errObjList.add(Constants.RATINGS_USER_ID);
+            errObjList.add(ResponseMessage.Message.INVALID_USER);
         }
         if (!CollectionUtils.isEmpty(errObjList)) {
-            throw new ValidateRatingException("One or more required fields are empty or incorrect. Empty fields " + errObjList.toString());
+            throw new ValidationException(errObjList, ResponseCode.BAD_REQUEST.getResponseCode());
         }
     }
 
     public SBApiResponse processExceptionBody(SBApiResponse response, Exception ex,
                                               String exceptionMessage, HttpStatus status) {
-
         String errMsg = exceptionMessage + ex.getMessage();
-        logger.error(errMsg, ex);
+        logger.error(errMsg, ex.toString());
         response.getParams().setErrmsg(errMsg);
         response.setResponseCode(status);
         return response;
