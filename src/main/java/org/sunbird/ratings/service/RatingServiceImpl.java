@@ -25,9 +25,9 @@ import java.util.regex.Pattern;
 
 @Service
 public class RatingServiceImpl implements RatingService {
-    private ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = new ObjectMapper();
 
-    private Logger logger = LoggerFactory.getLogger(getClass().getName());
+    private final Logger logger = LoggerFactory.getLogger(getClass().getName());
 
     @Autowired
     CassandraOperation cassandraOperation;
@@ -86,7 +86,7 @@ public class RatingServiceImpl implements RatingService {
     public SBApiResponse upsertRating(RequestRating requestRating) {
         UUID timeBasedUuid = UUIDs.timeBased();
 
-        SBApiResponse response = new SBApiResponse(Constants.API_RATINGS_ADD);
+        SBApiResponse response = new SBApiResponse(Constants.API_RATINGS_UPDATE);
         RatingMessage ratingMessage;
 
         try {
@@ -118,7 +118,6 @@ public class RatingServiceImpl implements RatingService {
                         (Float) prevInfo.get("rating"), (String) prevInfo.get("review")));
                 ratingMessage.setUpdatedValues(processEventMessage(String.valueOf(updateRequest.get(Constants.UPDATED_ON)),
                         requestRating.getRating(), requestRating.getReview()));
-                response.setResponseCode(HttpStatus.OK);
             } else {
                 request.put(Constants.CREATED_ON, timeBasedUuid);
                 request.put(Constants.RATING, requestRating.getRating());
@@ -133,9 +132,9 @@ public class RatingServiceImpl implements RatingService {
                 ratingMessage.setUpdatedValues(processEventMessage(String.valueOf(request.get(Constants.CREATED_ON)),
                         requestRating.getRating(), requestRating.getReview()));
                 response.put(Constants.DATA, request);
-                response.setResponseCode(HttpStatus.CREATED);
 
             }
+            response.setResponseCode(HttpStatus.OK);
             response.getParams().setStatus(Constants.SUCCESSFUL);
             kafkaProducer.push(updateRatingTopicName, ratingMessage);
         } catch (ValidationException ex) {
@@ -156,8 +155,8 @@ public class RatingServiceImpl implements RatingService {
         return values;
     }
 
-    private void validateRatingsInfo(RequestRating requestRating) throws Exception {
-        List<String> errObjList = new ArrayList<String>();
+    private void validateRatingsInfo(RequestRating requestRating) {
+        List<String> errObjList = new ArrayList<>();
 
         if (StringUtils.isEmpty(requestRating.getActivity_Id())) {
             errObjList.add(ResponseMessage.Message.INVALID_INPUT);

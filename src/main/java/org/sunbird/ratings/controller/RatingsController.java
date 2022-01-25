@@ -18,16 +18,16 @@ public class RatingsController {
     // ----------------- Public APIs --------------------
 
     @PostMapping("/ratings/v1/upsert")
-    public ResponseEntity<?> upsertRating(@Valid @RequestBody RequestRating requestRatingBody) throws Exception {
+    public ResponseEntity<?> upsertRating(@Valid @RequestBody RequestRating requestRatingBody) {
         SBApiResponse response = ratingService.upsertRating(requestRatingBody);
         return new ResponseEntity<>(response, response.getResponseCode());
 
     }
 
-    @GetMapping("/ratings/v1/read/{activity_Id}/{activity_Type}/{userId}")
+    @GetMapping("/ratings/v1/read/{activity_Type}/{activity_Id}/{userId}")
     public ResponseEntity<?> getRating(@PathVariable("activity_Id") String activity_Id,
                                        @PathVariable("activity_Type") String activity_Type,
-                                       @PathVariable("userId") String userId) throws Exception {
+                                       @PathVariable("userId") String userId) {
         SBApiResponse response = ratingService.getRatings(activity_Id, activity_Type, userId);
         return new ResponseEntity<>(response, response.getResponseCode());
 
