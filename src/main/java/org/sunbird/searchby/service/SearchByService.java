@@ -6,7 +6,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,7 +17,6 @@ import org.sunbird.common.util.Constants;
 import org.sunbird.core.logger.CbExtLogger;
 import org.sunbird.searchby.model.CompetencyInfo;
 import org.sunbird.searchby.model.ProviderInfo;
-import org.sunbird.searchby.model.SearchByFilter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -48,68 +46,15 @@ public class SearchByService {
 				.getCache(Constants.COMPETENCY_CACHE_NAME);
 		return competencyMap.values();
 	}
-
-	public Collection<CompetencyInfo> getCompetencyDetailsByFilter(String authUserToken, SearchByFilter filter)
-			throws Exception {
-
-		if (filter.isEmptyFilter()) {
-			return getCompetencyDetails(authUserToken);
-		}
-
-		Map<String, CompetencyInfo> objectNameCache = (Map<String, CompetencyInfo>) redisCacheMgr
-				.getCache(Constants.COMPETENCY_CACHE_NAME);
-		Object objectAreaCache = redisCacheMgr.getCache(Constants.COMPETENCY_CACHE_NAME_BY_AREA);
-		Object objectTypeCache = redisCacheMgr.getCache(Constants.COMPETENCY_CACHE_NAME_BY_TYPE);
-		if (CollectionUtils.isEmpty(objectNameCache) || objectAreaCache == null || objectTypeCache == null) {
-			logger.info("Initializing/Refreshing the Cache Value.");
-			updateCompetencyDetails(authUserToken);
-		}
-		objectNameCache = (Map<String, CompetencyInfo>) redisCacheMgr.getCache(Constants.COMPETENCY_CACHE_NAME);
-		objectAreaCache = redisCacheMgr.getCache(Constants.COMPETENCY_CACHE_NAME_BY_AREA);
-		objectTypeCache = redisCacheMgr.getCache(Constants.COMPETENCY_CACHE_NAME_BY_TYPE);
-
-		// Apply Name filter
-		Map<String, CompetencyInfo> afterFilter = new HashMap<>();
-		if (!CollectionUtils.isEmpty(filter.getCompetencyName())) {
-			List<String> lowerCaseNameFilter = listToLowerCase(filter.getCompetencyName());
-			for (CompetencyInfo eachInfo : objectNameCache.values()) {
-				if (lowerCaseNameFilter.contains(eachInfo.getName().toLowerCase().trim())) {
-					afterFilter.put(eachInfo.getId(), eachInfo);
-				}
-			}
-		}
-
-		if (!CollectionUtils.isEmpty(filter.getCompetencyType())) {
-			List<String> lowerCaseTypeFilter = listToLowerCase(filter.getCompetencyType());
-			Map<String, List<CompetencyInfo>> typeCache = (Map<String, List<CompetencyInfo>>) objectTypeCache;
-			for (Map.Entry<String, List<CompetencyInfo>> eachInfo : typeCache.entrySet()) {
-				if (lowerCaseTypeFilter.contains(eachInfo.getKey().toLowerCase().trim())) {
-					for (CompetencyInfo competencyInfo : eachInfo.getValue())
-						afterFilter.put(competencyInfo.getId(), competencyInfo);
-				}
-			}
-		}
-
-		if (!CollectionUtils.isEmpty(filter.getCompetencyArea())) {
-			List<String> lowerCaseAreaFilter = listToLowerCase(filter.getCompetencyArea());
-			Map<String, List<CompetencyInfo>> areaCache = (Map<String, List<CompetencyInfo>>) objectAreaCache;
-			for (Map.Entry<String, List<CompetencyInfo>> eachInfo : areaCache.entrySet()) {
-				if (lowerCaseAreaFilter.contains(eachInfo.getKey().toLowerCase().trim())) {
-					for (CompetencyInfo competencyInfo : eachInfo.getValue())
-						afterFilter.put(competencyInfo.getId(), competencyInfo);
-				}
-			}
-		}
-		return afterFilter.values();
-	}
-
+	
 	public Collection<ProviderInfo> getProviderDetails(String authUserToken) throws Exception {
 		Object object = redisCacheMgr.getCache(Constants.PROVIDER_CACHE_NAME);
 		if (object == null) {
 			logger.info("");
 			updateProviderDetails(authUserToken);
 		}
-		return (Collection<ProviderInfo>) redisCacheMgr.getCache(Constants.PROVIDER_CACHE_NAME);
+		Map<String, ProviderInfo> providerMap = (Map<String, ProviderInfo>) redisCacheMgr.getCache(Constants.PROVIDER_CACHE_NAME);
+		return providerMap.values();
 	}
 
 	private void updateCompetencyDetails(String authUserToken) throws Exception {
@@ -147,6 +92,7 @@ public class SearchByService {
 					if (!CollectionUtils.isEmpty(facetValueList)) {
 						for (Map<String, Object> facetValueObj : facetValueList) {
 							CompetencyInfo compInfo = new CompetencyInfo();
+							//TODO - Make sure which competency field is unique
 							compInfo.setContentCount((int) facetValueObj.get("count"));
 							competencyMap.put((String) facetValueObj.get("name"), compInfo);
 						}
@@ -331,10 +277,6 @@ public class SearchByService {
 			throw err;
 		}
 
-		redisCacheMgr.putCache(Constants.PROVIDER_CACHE_NAME, providerMap.values());
-	}
-
-	private List<String> listToLowerCase(List<String> convertString) {
-		return convertString.stream().map(String::toLowerCase).map(String::trim).collect(Collectors.toList());
+		redisCacheMgr.putCache(Constants.PROVIDER_CACHE_NAME, providerMap);
 	}
 }
