@@ -25,7 +25,7 @@ public class RatingsController {
 
     }
 
-    @GetMapping("/ratings/v1/read/{activity_Type}/{activity_Id}/{userId}")
+    @GetMapping("/ratings/v1/read/{activity_Id}/{activity_Type}/{userId}")
     public ResponseEntity<?> getRating(@PathVariable("activity_Id") String activity_Id,
                                        @PathVariable("activity_Type") String activity_Type,
                                        @PathVariable("userId") String userId) {
@@ -36,13 +36,13 @@ public class RatingsController {
 
     @GetMapping("/ratings/v1/summary/{activity_Id}/{activity_Type}")
     public ResponseEntity<?> getRatingSummary(@PathVariable("activity_Id") String activity_Id,
-                                              @PathVariable("activity_Type") String activity_Type) throws Exception {
+                                              @PathVariable("activity_Type") String activity_Type) {
         SBApiResponse response = ratingService.getRatingSummary(activity_Id, activity_Type);
         return new ResponseEntity<>(response, response.getResponseCode());
     }
 
     @PostMapping("/ratings/v1/search")
-    public ResponseEntity<?> search(@RequestBody LookupRequest request) throws Exception {
+    public ResponseEntity<?> search(@RequestBody LookupRequest request) {
         SBApiResponse response = ratingService.search(request);
         return new ResponseEntity<>(response, response.getResponseCode());
     }

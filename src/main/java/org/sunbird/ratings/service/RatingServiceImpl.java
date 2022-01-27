@@ -49,7 +49,6 @@ public class RatingServiceImpl implements RatingService {
             request.put(Constants.ACTIVITY_ID, activity_Id);
             request.put(Constants.ACTIVITY_TYPE, activity_Type);
             request.put(Constants.RATINGS_USER_ID, userId);
-
             List<Map<String, Object>> existingDataList = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
                     Constants.TABLE_RATINGS, request, null);
             if (!existingDataList.isEmpty()) {

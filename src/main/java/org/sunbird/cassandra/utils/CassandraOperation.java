@@ -1,9 +1,9 @@
 package org.sunbird.cassandra.utils;
 
+import org.sunbird.common.model.SBApiResponse;
+
 import java.util.List;
 import java.util.Map;
-
-import org.sunbird.common.model.SBApiResponse;
 
 /**
  * @author fathima
@@ -75,7 +75,7 @@ public interface CassandraOperation {
     public Long getRecordCount(String keyspace, String table);
 
     public List<Map<String, Object>> getRecordsByPropertiesWithPagination(String keyspaceName, String tableName,
-                                                                   Map<String, Object> propertyMap, List<String> fields, int limit, String updatedOn);
+                                                                          Map<String, Object> propertyMap, List<String> fields, int limit, String updatedOn);
 
 
 }

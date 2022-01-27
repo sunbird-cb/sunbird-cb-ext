@@ -1,35 +1,21 @@
 package org.sunbird.cassandra.utils;
 
-import java.util.*;
-import java.util.Map.Entry;
-
+import com.datastax.driver.core.*;
+import com.datastax.driver.core.querybuilder.*;
+import com.datastax.driver.core.querybuilder.Select.Builder;
+import com.datastax.driver.core.querybuilder.Select.Where;
+import com.datastax.driver.core.querybuilder.Update.Assignments;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.ObjectUtils;
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.util.Constants;
 
-import com.datastax.driver.core.BatchStatement;
-import com.datastax.driver.core.BoundStatement;
-import com.datastax.driver.core.PagingState;
-import com.datastax.driver.core.PreparedStatement;
-import com.datastax.driver.core.ResultSet;
-import com.datastax.driver.core.Row;
-import com.datastax.driver.core.Session;
-import com.datastax.driver.core.SimpleStatement;
-import com.datastax.driver.core.Statement;
-import com.datastax.driver.core.querybuilder.Clause;
-import com.datastax.driver.core.querybuilder.Delete;
-import com.datastax.driver.core.querybuilder.QueryBuilder;
-import com.datastax.driver.core.querybuilder.Select;
-import com.datastax.driver.core.querybuilder.Select.Builder;
-import com.datastax.driver.core.querybuilder.Select.Where;
-import com.datastax.driver.core.querybuilder.Update;
-import com.datastax.driver.core.querybuilder.Update.Assignments;
+import java.util.*;
+import java.util.Map.Entry;
 
 @Component
 public class CassandraOperationImpl implements CassandraOperation {
@@ -95,6 +81,7 @@ public class CassandraOperationImpl implements CassandraOperation {
             selectQuery = processQuery(keyspaceName, tableName, propertyMap, fields);
             ResultSet results = connectionManager.getSession(keyspaceName).execute(selectQuery);
             response = CassandraUtil.createResponse(results);
+
         } catch (Exception e) {
             logger.error(Constants.EXCEPTION_MSG_FETCH + tableName + " : " + e.getMessage(), e);
         }

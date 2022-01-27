@@ -9,7 +9,7 @@ public interface RatingService {
 
     public SBApiResponse upsertRating(RequestRating requestRating);
 
-    public SBApiResponse getRatingSummary(String activity_Id, String activity_Type); //To do
+    public SBApiResponse getRatingSummary(String activity_Id, String activity_Type);
 
     public SBApiResponse search(LookupRequest request);
 }
