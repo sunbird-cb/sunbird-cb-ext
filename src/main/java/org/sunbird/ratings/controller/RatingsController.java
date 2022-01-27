@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.sunbird.common.model.SBApiResponse;
+import org.sunbird.ratings.model.LookupRequest;
 import org.sunbird.ratings.model.RequestRating;
 import org.sunbird.ratings.service.RatingService;
 
@@ -32,16 +33,18 @@ public class RatingsController {
         return new ResponseEntity<>(response, response.getResponseCode());
 
     }
-//    @GetMapping("/ratings/v1/search")
-//    public ResponseEntity<List<String>> getUsersList() {
-//        return new ResponseEntity<>(ratingService.getUsers(activity_Id, activity_Type, userId), HttpStatus.OK);
-//    }
 
+    @GetMapping("/ratings/v1/summary/{activity_Id}/{activity_Type}")
+    public ResponseEntity<?> getRatingSummary(@PathVariable("activity_Id") String activity_Id,
+                                              @PathVariable("activity_Type") String activity_Type) throws Exception {
+        SBApiResponse response = ratingService.getRatingSummary(activity_Id, activity_Type);
+        return new ResponseEntity<>(response, response.getResponseCode());
+    }
 
-//    @PostMapping("/ratings/v1/summary")
-//    public ResponseEntity<?> getRatingSummary(
-//            @RequestParam( String activity_Id) throws Exception {
-//         return new ResponseEntity<>(response, response.getResponseCode());
-//    }
+    @PostMapping("/ratings/v1/search")
+    public ResponseEntity<?> search(@RequestBody LookupRequest request) throws Exception {
+        SBApiResponse response = ratingService.search(request);
+        return new ResponseEntity<>(response, response.getResponseCode());
+    }
 }
 

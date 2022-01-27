@@ -15,6 +15,7 @@ import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.util.Constants;
 import org.sunbird.core.producer.Producer;
 import org.sunbird.ratings.exception.ValidationException;
+import org.sunbird.ratings.model.LookupRequest;
 import org.sunbird.ratings.model.RatingMessage;
 import org.sunbird.ratings.model.RequestRating;
 import org.sunbird.ratings.responsecode.ResponseCode;
@@ -38,12 +39,12 @@ public class RatingServiceImpl implements RatingService {
     @Value("${kafka.topics.parent.rating.event}")
     public String updateRatingTopicName;
 
-    //TO DO
     @Override
     public SBApiResponse getRatings(String activity_Id, String activity_Type, String userId) {
         SBApiResponse response = new SBApiResponse(Constants.API_RATINGS_READ);
 
         try {
+            validateRatingsInfo(null, null, activity_Id, activity_Type, userId);
             Map<String, Object> request = new HashMap<>();
             request.put(Constants.ACTIVITY_ID, activity_Id);
             request.put(Constants.ACTIVITY_TYPE, activity_Type);
@@ -55,8 +56,7 @@ public class RatingServiceImpl implements RatingService {
                 response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
                 response.put(Constants.RESPONSE, existingDataList);
                 response.setResponseCode(HttpStatus.OK);
-            }
-            else {
+            } else {
                 String errMsg = "No ratings found for : " + activity_Id + ", activity_Type: " + activity_Type;
                 response.put(Constants.MESSAGE, Constants.FAILED);
                 response.getParams().setErrmsg(errMsg);
@@ -69,28 +69,45 @@ public class RatingServiceImpl implements RatingService {
         return response;
     }
 
-    //TO DO
-    @Override
-    public SBApiResponse getUsers(String activity_Id, String activity_Type, String userId) {
-        return null;
-    }
-
-
-    //TO DO
     @Override
     public SBApiResponse getRatingSummary(String activity_Id, String activity_Type) {
-        return null;
+        SBApiResponse response = new SBApiResponse(Constants.API_RATINGS_SUMMARY);
+
+        try {
+            validateRatingsInfo(null, null, activity_Id, activity_Type, null);
+            Map<String, Object> request = new HashMap<>();
+            request.put(Constants.ACTIVITY_ID, activity_Id);
+            request.put(Constants.ACTIVITY_TYPE, activity_Type);
+
+            List<Map<String, Object>> existingDataList = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
+                    Constants.TABLE_RATINGS_SUMMARY, request, null);
+            if (!existingDataList.isEmpty()) {
+                response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
+                response.put(Constants.RESPONSE, existingDataList);
+                response.setResponseCode(HttpStatus.OK);
+            } else {
+                String errMsg = "No reviews found for : " + activity_Id + ", activity_Type: " + activity_Type;
+                response.put(Constants.MESSAGE, Constants.FAILED);
+                response.getParams().setErrmsg(errMsg);
+                response.setResponseCode(HttpStatus.BAD_REQUEST);
+            }
+        } catch (Exception e) {
+            System.out.println("The exception has occurred in read ratings" + e.getMessage());
+            e.printStackTrace();
+        }
+        return response;
     }
 
     @Override
     public SBApiResponse upsertRating(RequestRating requestRating) {
         UUID timeBasedUuid = UUIDs.timeBased();
 
+
         SBApiResponse response = new SBApiResponse(Constants.API_RATINGS_ADD);
         RatingMessage ratingMessage;
 
         try {
-            validateRatingsInfo(requestRating);
+            validateRatingsInfo(requestRating, null, null, null, null);
 
             Map<String, Object> request = new HashMap<>();
             request.put(Constants.ACTIVITY_ID, requestRating.getActivity_Id());
@@ -148,6 +165,40 @@ public class RatingServiceImpl implements RatingService {
         return response;
     }
 
+    @Override
+    public SBApiResponse search(LookupRequest lookupRequest) {
+
+        SBApiResponse response = new SBApiResponse(Constants.API_RATINGS_LOOKUP);
+
+        try {
+            validateRatingsInfo(null, lookupRequest, null, null, null);
+            Map<String, Object> request = new HashMap<>();
+            request.put(Constants.ACTIVITY_ID, lookupRequest.getActivity_Id());
+            request.put(Constants.ACTIVITY_TYPE, lookupRequest.getActivity_Type());
+            request.put(Constants.RATING, lookupRequest.getRating());
+
+            List<Map<String, Object>> existingDataList = cassandraOperation.getRecordsByPropertiesWithPagination(Constants.KEYSPACE_SUNBIRD,
+                    Constants.TABLE_RATINGS_LOOKUP, request, null, lookupRequest.getLimit(), lookupRequest.getUpdateOn());
+            if (!existingDataList.isEmpty()) {
+                response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
+                response.put(Constants.RESPONSE, existingDataList);
+                response.setResponseCode(HttpStatus.OK);
+            } else {
+                String errMsg = "No ratings found for : " + lookupRequest.getActivity_Id() + ", activity_Type: " + lookupRequest.getActivity_Type();
+                response.put(Constants.MESSAGE, Constants.FAILED);
+                response.getParams().setErrmsg(errMsg);
+                response.setResponseCode(HttpStatus.BAD_REQUEST);
+            }
+        } catch (ValidationException ex) {
+            return processExceptionBody(response, ex, "", HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            System.out.println("The exception has occurred in lookup ratings" + e.getMessage());
+            e.printStackTrace();
+        }
+        return response;
+
+    }
+
     public RatingMessage.UpdatedValues processEventMessage(String date, Float rating, String review) {
         RatingMessage.UpdatedValues values = new RatingMessage.UpdatedValues();
         values.setUpdatedOn(date);
@@ -156,25 +207,59 @@ public class RatingServiceImpl implements RatingService {
         return values;
     }
 
-    private void validateRatingsInfo(RequestRating requestRating) throws Exception {
+    private void validateRatingsInfo(RequestRating requestRating, LookupRequest lookupRequest,
+                                     String activity_Id, String activity_Type, String userId) throws Exception {
         List<String> errObjList = new ArrayList<String>();
 
-        if (StringUtils.isEmpty(requestRating.getActivity_Id())) {
-            errObjList.add(ResponseMessage.Message.INVALID_INPUT);
+        if (requestRating != null) {
+            if (StringUtils.isEmpty(requestRating.getActivity_Id())) {
+                errObjList.add(ResponseMessage.Message.INVALID_INPUT);
+            }
+            if (StringUtils.isEmpty(requestRating.getActivity_type())) {
+                errObjList.add(ResponseMessage.Message.INVALID_INPUT);
+            }
+            if (StringUtils.isEmpty((String.valueOf(requestRating.getRating()))) || requestRating.getRating() < 1
+                    || requestRating.getRating() > 5) {
+                errObjList.add(ResponseMessage.Message.INVALID_INPUT + ResponseMessage.Message.INVALID_RATING);
+            }
+            if (StringUtils.isEmpty(requestRating.getReview()) || (!Pattern.matches("^[A-Za-z0-9, ]++$", requestRating.getReview()))) {
+                errObjList.add(ResponseMessage.Message.INVALID_REVIEW);
+            }
+            if (StringUtils.isEmpty(requestRating.getUserId())) {
+                errObjList.add(ResponseMessage.Message.INVALID_USER);
+            }
         }
-        if (StringUtils.isEmpty(requestRating.getActivity_type())) {
-            errObjList.add(ResponseMessage.Message.INVALID_INPUT);
-        }
-        if (StringUtils.isEmpty((String.valueOf(requestRating.getRating()))) || requestRating.getRating() < 1
-                || requestRating.getRating() > 5) {
-            errObjList.add(ResponseMessage.Message.INVALID_INPUT + ResponseMessage.Message.INVALID_RATING);
-        }
-        if (StringUtils.isEmpty(requestRating.getReview()) || (!Pattern.matches("^[A-Za-z0-9, ]++$", requestRating.getReview()))) {
-            errObjList.add(ResponseMessage.Message.INVALID_REVIEW);
+        if (lookupRequest != null) {
 
+            if (StringUtils.isEmpty(lookupRequest.getActivity_Id())) {
+                errObjList.add(ResponseMessage.Message.INVALID_INPUT);
+            }
+            if (StringUtils.isEmpty(lookupRequest.getActivity_Type())) {
+                errObjList.add(ResponseMessage.Message.INVALID_INPUT);
+            }
+            if ((lookupRequest.getRating() < 1.0
+                    || lookupRequest.getRating() > 5.0)) {
+                errObjList.add(ResponseMessage.Message.INVALID_INPUT + ResponseMessage.Message.INVALID_RATING);
+            }
+            if (lookupRequest.getLimit() < 1) {
+                errObjList.add(ResponseMessage.Message.INVALID_LIMIT);
+            }
+            if (StringUtils.isEmpty(lookupRequest.getUpdateOn())) {
+                errObjList.add(ResponseMessage.Message.INVALID_INPUT);
+            }
         }
-        if (StringUtils.isEmpty(requestRating.getUserId())) {
-            errObjList.add(ResponseMessage.Message.INVALID_USER);
+        if (activity_Id != null && activity_Type != null) {
+            if (StringUtils.isEmpty(activity_Id)) {
+                errObjList.add(ResponseMessage.Message.INVALID_INPUT);
+            }
+            if (StringUtils.isEmpty(activity_Type)) {
+                errObjList.add(ResponseMessage.Message.INVALID_INPUT);
+            }
+        }
+        if (userId != null) {
+            if (StringUtils.isEmpty(userId)) {
+                errObjList.add(ResponseMessage.Message.INVALID_INPUT);
+            }
         }
         if (!CollectionUtils.isEmpty(errObjList)) {
             throw new ValidationException(errObjList, ResponseCode.BAD_REQUEST.getResponseCode());
