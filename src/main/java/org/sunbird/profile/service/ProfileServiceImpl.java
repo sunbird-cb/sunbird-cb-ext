@@ -62,8 +62,13 @@ public class ProfileServiceImpl implements ProfileService{
                 for (String keys : profileDetailsMap.keySet()) {
                     listOfChangedDetails.add(keys);
                 }
+
                 for (String list : listOfChangedDetails) {
-                    existingProfileDetails.put(list, profileDetailsMap.get(list));
+                    Map<String, Object> keyListRead = (Map<String, Object>) existingProfileDetails.get(list);
+                    Map<String, Object> keyListRequest = (Map<String, Object>) profileDetailsMap.get(list);
+                    for (String keysList : keyListRequest.keySet()) {
+                        keyListRead.put(keysList,keyListRequest.get(keysList));
+                    }
                 }
                 Map<String, Object> updateRequestValue = requestData;
                 updateRequestValue.put(Constants.PROFILE_DETAILS, existingProfileDetails);
