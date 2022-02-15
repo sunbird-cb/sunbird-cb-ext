@@ -169,6 +169,10 @@ public class ProfileServiceImpl implements ProfileService{
                     response.getParams().setMsgid("personal details updated");
                     response.getParams().setErrmsg((String) resultValue.get(Constants.MESSAGE));
                 }
+            }else {
+                response.setResponseCode(HttpStatus.OK);
+                response.getParams().setStatus("There are no fields updated which requires approval");
+
             }
         } catch (Exception e) {
             log.error(e);
