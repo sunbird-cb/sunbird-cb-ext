@@ -149,6 +149,9 @@ public class ProfileServiceImpl implements ProfileService{
                 transitionRequests.put(Constants.UPDATE_FIELD_VALUES, finalTransitionList);
                 url = new StringBuilder();
                 url.append(serverConfig.getWfServiceHost()).append(serverConfig.getWfServiceTransitionPath());
+                headerValues.put("rootOrg","igot");
+                headerValues.put(Constants.ROOT_ORG_CONSTANT,Constants.IGOT);
+                headerValues.put(Constants.ORG_CONSTANT,Constants.DOPT);
                 headerValues.put(Constants.X_AUTH_TOKEN,XAuthToken);
                 workflowResponse =  outboundRequestHandlerService.fetchResultUsingPost(serverConfig.getWfServiceHost()+serverConfig.getWfServiceTransitionPath(), transitionRequests, headerValues);
             }

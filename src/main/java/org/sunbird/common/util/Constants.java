@@ -232,7 +232,8 @@ public class Constants {
     public static final String WFID = "wfId";
     public static final String UPDATE_FIELD_VALUES = "updateFieldValues";
     public static final String PROFILE_UPDATE_FIELDS = "profileUpdateFields_";
-
+    public static final String IGOT = "igot";
+    public static final String DOPT = "dopt";
     // Redis
     public static final String API_REDIS_DELETE = "api.redis.delete";
     public static final String API_REDIS_GET_KEYS = "api.redis.get.keys";
