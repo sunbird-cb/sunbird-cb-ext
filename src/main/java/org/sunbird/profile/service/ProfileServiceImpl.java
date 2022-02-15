@@ -72,7 +72,7 @@ public class ProfileServiceImpl implements ProfileService{
 
                 url.append(serverConfig.getSbUrl()).append(serverConfig.getLmsUserUpdatePath());
                 updateResponse =
-                        outboundRequestHandlerService.fetchResultUsingPatch(serverConfig.getSbUrl()+serverConfig.getLmsUserReadPath(), updateRequest, headerValues);
+                        outboundRequestHandlerService.fetchResultUsingPatch(serverConfig.getSbUrl()+serverConfig.getLmsUserUpdatePath(), updateRequest, headerValues);
                 if (updateResponse.get(Constants.RESPONSE_CODE).equals(Constants.OK)){
                     response.getParams().setMsgid("personal details updated");
                 }else {
