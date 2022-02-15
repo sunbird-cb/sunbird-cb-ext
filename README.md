@@ -36,7 +36,7 @@ SB-CB-EXT uses a number of open source projects:
 
 - Update the work_order mapping using file @ https://github.com/sunbird-cb/sunbird-cb-ext/blob/cbrelease-3.0.1/src/main/resources/elasticsearch/index/workorderv1.json
 
-**ES Inxex Alias Details**
+**ES Index Alias Details**
 - Check any existing index has alias "work_allocation" or "work_order". If so, delete the alias mapping using following CURL in ElasticSerach server.
 	- curl --location --request DELETE 'http://localhost:9200/{{existingIndexName}}/_alias/{{aliasName}}'
 	- existingIndexName - refers the existing index in ES
