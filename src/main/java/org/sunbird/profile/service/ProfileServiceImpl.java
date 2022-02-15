@@ -63,7 +63,7 @@ public class ProfileServiceImpl implements ProfileService{
                     listOfChangedDetails.add(keys);
                 }
                 for (String list : listOfChangedDetails) {
-                    profileDetailsMap.put(list, existingProfileDetails.get(list));
+                    existingProfileDetails.put(list, profileDetailsMap.get(list));
                 }
                 Map<String, Object> updateRequestValue = requestData;
                 updateRequestValue.put(Constants.PROFILE_DETAILS, existingProfileDetails);
@@ -149,23 +149,22 @@ public class ProfileServiceImpl implements ProfileService{
                 transitionRequests.put(Constants.UPDATE_FIELD_VALUES, finalTransitionList);
                 url = new StringBuilder();
                 url.append(serverConfig.getWfServiceHost()).append(serverConfig.getWfServiceTransitionPath());
-                headerValues.put("rootOrg","igot");
-                headerValues.put(Constants.ROOT_ORG_CONSTANT,Constants.IGOT);
-                headerValues.put(Constants.ORG_CONSTANT,Constants.DOPT);
-                headerValues.put(Constants.X_AUTH_TOKEN,XAuthToken);
-                workflowResponse =  outboundRequestHandlerService.fetchResultUsingPost(serverConfig.getWfServiceHost()+serverConfig.getWfServiceTransitionPath(), transitionRequests, headerValues);
-            }
-            Map<String, Object> resultValue = (Map<String, Object>) workflowResponse.get(Constants.RESULT);
-                    if (resultValue.get(Constants.STATUS).equals(Constants.OK))
-                    {
-                        response.setResponseCode(HttpStatus.OK);
-                        response.getParams().setStatus((String) resultValue.get(Constants.MESSAGE));
-                    }else {
-                        response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
-                        response.getParams().setMsgid("personal details updated");
-                        response.getParams().setErrmsg((String) resultValue.get(Constants.MESSAGE));
-                    }
+                headerValues.put("rootOrg", "igot");
+                headerValues.put(Constants.ROOT_ORG_CONSTANT, Constants.IGOT);
+                headerValues.put(Constants.ORG_CONSTANT, Constants.DOPT);
+                headerValues.put(Constants.X_AUTH_TOKEN, XAuthToken);
+                workflowResponse = outboundRequestHandlerService.fetchResultUsingPost(serverConfig.getWfServiceHost() + serverConfig.getWfServiceTransitionPath(), transitionRequests, headerValues);
 
+                Map<String, Object> resultValue = (Map<String, Object>) workflowResponse.get(Constants.RESULT);
+                if (resultValue.get(Constants.STATUS).equals(Constants.OK)) {
+                    response.setResponseCode(HttpStatus.OK);
+                    response.getParams().setStatus((String) resultValue.get(Constants.MESSAGE));
+                } else {
+                    response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+                    response.getParams().setMsgid("personal details updated");
+                    response.getParams().setErrmsg((String) resultValue.get(Constants.MESSAGE));
+                }
+            }
         } catch (Exception e) {
             log.error(e);
             response.getParams().setStatus(Constants.FAILED);
