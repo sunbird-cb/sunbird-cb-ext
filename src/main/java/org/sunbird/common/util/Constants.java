@@ -69,6 +69,7 @@ public class Constants {
     public static final String DEPARTMENT = "department";
     public static final String DESIGNATION = "designation";
     public static final String PRIMARY_EMAIL = "primaryEmail";
+    public static final String RESPONSE_CODE = "responseCode";
     public static final String AUTH_TOKEN = "Authorization";
     public static final String X_AUTH_TOKEN = "x-authenticated-user-token";
 
@@ -230,6 +231,7 @@ public class Constants {
     public static final String PROFILE = "profile";
     public static final String WFID = "wfId";
     public static final String UPDATE_FIELD_VALUES = "updateFieldValues";
+    public static final String PROFILE_UPDATE_FIELDS = "profileUpdateFields_";
 
     // Redis
     public static final String API_REDIS_DELETE = "api.redis.delete";
