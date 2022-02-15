@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.sunbird.cache.RedisCacheMgr;
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
@@ -175,10 +176,10 @@ public class ProfileServiceImpl implements ProfileService{
 
     public List<String> approvalFields(String AuthToken,String XAuthToken){
 
-        Map<String, Object> assessmentQuestionSet = (Map<String, Object>) mapper.convertValue(redisCacheMgr.getCache(Constants.PROFILE_UPDATE_FIELDS),Map.class);
+        Map<String, Object> approvalFieldsCache = (Map<String, Object>) mapper.convertValue(redisCacheMgr.getCache(Constants.PROFILE_UPDATE_FIELDS),Map.class);
 
-        if(!assessmentQuestionSet.isEmpty()){
-            Map<String,Object> approvalResult = (Map<String, Object>) assessmentQuestionSet.get(Constants.RESULT);
+        if(!(CollectionUtils.isEmpty(approvalFieldsCache))){
+            Map<String,Object> approvalResult = (Map<String, Object>) approvalFieldsCache.get(Constants.RESULT);
             Map<String,Object> approvalResponse = (Map<String, Object>) approvalResult.get(Constants.RESPONSE);
             String value = (String) approvalResponse.get(Constants.VALUE);
             List<String> approvalValues = new ArrayList<>();
