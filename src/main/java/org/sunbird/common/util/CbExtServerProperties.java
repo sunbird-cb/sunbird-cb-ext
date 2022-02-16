@@ -9,6 +9,9 @@ public class CbExtServerProperties {
 	@Value("${wf.service.host}")
 	private String wfServiceHost;
 
+	@Value("${kafka.topics.userutility.telemetry.event}")
+	private String userUtilityTopic;
+
 	@Value("${wf.service.updateUserProfilePath}")
 	private String wfServicePath;
 
@@ -631,6 +634,14 @@ public class CbExtServerProperties {
 
 	public void setWfServicePath(String wfServicePath) {
 		this.wfServicePath = wfServicePath;
+	}
+
+	public String getUserUtilityTopic() {
+		return userUtilityTopic;
+	}
+
+	public void setUserUtilityTopic(String userUtilityTopic) {
+		this.userUtilityTopic = userUtilityTopic;
 	}
 
 	@Override

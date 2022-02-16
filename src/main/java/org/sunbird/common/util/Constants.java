@@ -41,6 +41,7 @@ public class Constants {
 	public static final String RESIDENCE_CITY = "residence_city";
 	public static final String TIME_INSERTED = "time_inserted";
 	public static final String TIME_UPDATED = "time_updated";
+	public static final String FIRSTLOGINTIME = "firstLoginTime";
 	public static final String JSON_UNMAPPED_FIELDS = "json_unmapped_fields";
 	public static final String IS_ACTIVE = "is_active";
 	public static final String ACCOUNT_EXPIRY_DATE = "account_expiry_date";
@@ -147,7 +148,7 @@ public class Constants {
 	public static final String APPLY_BATCH = " APPLY BATCH;";
 	// Database and Tables
 	public static final String DATABASE = "sunbird";
-
+	public static final String LOGIN_TABLE = "user_first_login_details";
 	public static final String BUDGET_TABLE = "org_budget_scheme";
 	public static final String AUDIT_TABLE = "org_audit";
 	public static final String STAFF_TABLE = "org_staff_position";

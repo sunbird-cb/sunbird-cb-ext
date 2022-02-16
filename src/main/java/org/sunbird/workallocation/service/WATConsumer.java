@@ -44,9 +44,6 @@ public class WATConsumer {
 			"submittedFromEmail", "submittedToName", "submittedToEmail", "createdByName", "updatedByName" };
 
 	@Autowired
-	private OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
-
-	@Autowired
 	private CbExtServerProperties cbExtServerProperties;
 
 	@Autowired
