@@ -7,29 +7,32 @@ import org.sunbird.common.model.SBApiResponse;
 
 /**
  * @desc this interface will hold functions for cassandra db interaction
- *
+ * 
  * @author fathima
  *
  */
 public interface CassandraOperation {
 
 	/**
-	 * @desc This method is used to delete record in cassandra db by their primary
-	 *       composite key
+	 * @desc This method is used to insert record in cassandra db
 	 * @param keyspaceName Keyspace name
 	 * @param tableName    Table name
-	 * @param keyMap       Column map for composite primary key
+	 * @param request      Map<String,Object>(i.e map of column name and their
+	 *                     value)
+	 * @return Response
 	 */
-	public void deleteRecord(String keyspaceName, String tableName, Map<String, Object> keyMap);
+
+	public SBApiResponse insertRecord(String keyspaceName, String tableName, Map<String, Object> request);
 
 	/**
-	 * To get count of all records
-	 *
-	 * @param keyspace String
-	 * @param table    String
-	 * @return Long
+	 * Insert bulk data using batch
+	 * 
+	 * @param keyspaceName String
+	 * @param tableName    String
+	 * @param request      List<Map<String, Object>>
+	 * @return SBApiResponse
 	 */
-	public Long getRecordCount(String keyspace, String table);
+	public SBApiResponse insertBulkRecord(String keyspaceName, String tableName, List<Map<String, Object>> request);
 
 	/**
 	 * Fetch records with specified columns (select all if null) for given column
@@ -46,25 +49,13 @@ public interface CassandraOperation {
 			Map<String, Object> propertyMap, List<String> fields);
 
 	/**
-	 * Insert bulk data using batch
-	 *
-	 * @param keyspaceName String
-	 * @param tableName    String
-	 * @param request      List<Map<String, Object>>
-	 * @return SBApiResponse
-	 */
-	public SBApiResponse insertBulkRecord(String keyspaceName, String tableName, List<Map<String, Object>> request);
-
-	/**
-	 * @desc This method is used to insert record in cassandra db
+	 * @desc This method is used to delete record in cassandra db by their primary
+	 *       composite key
 	 * @param keyspaceName Keyspace name
 	 * @param tableName    Table name
-	 * @param request      Map<String,Object>(i.e map of column name and their
-	 *                     value)
-	 * @return Response
+	 * @param keyMap       Column map for composite primary key
 	 */
-
-	public SBApiResponse insertRecord(String keyspaceName, String tableName, Map<String, Object> request);
+	public void deleteRecord(String keyspaceName, String tableName, Map<String, Object> keyMap);
 
 	/**
 	 * Method to update the record on basis of composite primary key.
@@ -77,5 +68,14 @@ public interface CassandraOperation {
 	 */
 	Map<String, Object> updateRecord(String keyspaceName, String tableName, Map<String, Object> updateAttributes,
 			Map<String, Object> compositeKey);
+
+	/**
+	 * To get count of all records
+	 * 
+	 * @param keyspace String
+	 * @param table    String
+	 * @return Long
+	 */
+	public Long getRecordCount(String keyspace, String table);
 
 }

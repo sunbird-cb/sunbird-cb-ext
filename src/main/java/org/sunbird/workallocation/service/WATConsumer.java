@@ -40,9 +40,6 @@ import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 @Service
 public class WATConsumer {
 
-	private static final String[] ignorableFieldsForPublishedState = { "userName", "userEmail", "submittedFromName",
-			"submittedFromEmail", "submittedToName", "submittedToEmail", "createdByName", "updatedByName" };
-
 	@Autowired
 	private CbExtServerProperties cbExtServerProperties;
 
@@ -59,11 +56,57 @@ public class WATConsumer {
 
 	SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-ddXHH:mm:ss.ms", Locale.getDefault());
 
-	private void extracted(ObjectMapper mapper, List<WorkAllocationDTOV2> workAllocations,
-			Map<String, Object> workAllocationCassandraModel) {
+	private static final String[] ignorableFieldsForPublishedState = { "userName", "userEmail", "submittedFromName",
+			"submittedFromEmail", "submittedToName", "submittedToEmail", "createdByName", "updatedByName" };
+
+	@KafkaListener(id = "id2", groupId = "watTelemetryTopic-consumer", topicPartitions = {
+			@TopicPartition(topic = "${kafka.topics.wat.telemetry.event}", partitions = { "0", "1", "2", "3" }) })
+	public void processMessage(ConsumerRecord<String, String> data) {
 		try {
-			workAllocations.add(mapper.readValue((String) workAllocationCassandraModel.get(Constants.DATA),
-					WorkAllocationDTOV2.class));
+			logger.info("Consuming the audit records for WAT .....");
+			ObjectMapper mapper = new ObjectMapper();
+			Map<String, Object> workAllocationObj = mapper.readValue(String.valueOf(data.value()), Map.class);
+
+			Map<String, Object> workOrderMap = new HashMap<>();
+			workOrderMap.put(Constants.ID, workAllocationObj.get("workorderId"));
+			List<Map<String, Object>> workOrderCassandraModelOptional = cassandraOperation.getRecordsByProperties(
+					Constants.KEYSPACE_SUNBIRD, Constants.TABLE_WORK_ORDER, workOrderMap, new ArrayList<>());
+
+			if (!workOrderCassandraModelOptional.isEmpty()) {
+				Map<String, Object> watObj = mapper
+						.readValue((String) workOrderCassandraModelOptional.get(0).get(Constants.DATA), Map.class);
+				logger.info("consumed record for WAT ...");
+				logger.info(mapper.writeValueAsString(watObj));
+				List<String> userIds = (List<String>) watObj.get("userIds");
+				if (!CollectionUtils.isEmpty(userIds)) {
+					Map<String, Object> workAllocationMap = new HashMap<>();
+					workAllocationMap.put(Constants.ID, userIds);
+					List<Map<String, Object>> workAllocationList = cassandraOperation.getRecordsByProperties(
+							Constants.KEYSPACE_SUNBIRD, Constants.TABLE_WORK_ALLOCATION, workAllocationMap,
+							new ArrayList<>());
+
+					List<WorkAllocationDTOV2> workAllocations = new ArrayList<>();
+					for (Map<String, Object> workAllocationCassandraModel : workAllocationList) {
+						try {
+							workAllocations
+									.add(mapper.readValue((String) workAllocationCassandraModel.get(Constants.DATA),
+											WorkAllocationDTOV2.class));
+						} catch (IOException e) {
+							logger.error(e);
+						}
+					}
+					watObj.put("users", workAllocations);
+
+					// update the user_workorder_mapping table
+					updateUserWorkOrderMappings(watObj, workAllocations);
+				}
+				watObj = getFilterObject(watObj);
+				Event event = getTelemetryEvent(watObj);
+				logger.info("Posting WAT event to telemetry ...");
+				logger.info(mapper.writeValueAsString(event));
+				// postTelemetryEvent(event);
+				producer.push(telemetryEventTopicName, event);
+			}
 		} catch (IOException e) {
 			logger.error(e);
 		}
@@ -116,51 +159,7 @@ public class WATConsumer {
 		objectData.setType(WorkAllocationConstants.WORK_ORDER_ID_CONST);
 		event.setObject(objectData);
 		return event;
-	}
 
-	@KafkaListener(id = "id2", groupId = "watTelemetryTopic-consumer", topicPartitions = {
-			@TopicPartition(topic = "${kafka.topics.wat.telemetry.event}", partitions = { "0", "1", "2", "3" }) })
-	public void processMessage(ConsumerRecord<String, String> data) {
-		try {
-			logger.info("Consuming the audit records for WAT .....");
-			ObjectMapper mapper = new ObjectMapper();
-			Map<String, Object> workAllocationObj = mapper.readValue(String.valueOf(data.value()), Map.class);
-
-			Map<String, Object> workOrderMap = new HashMap<>();
-			workOrderMap.put(Constants.ID, workAllocationObj.get("workorderId"));
-			List<Map<String, Object>> workOrderCassandraModelOptional = cassandraOperation
-					.getRecordsByProperties(Constants.DATABASE, Constants.WORK_ORDER, workOrderMap, new ArrayList<>());
-
-			if (!workOrderCassandraModelOptional.isEmpty()) {
-				Map<String, Object> watObj = mapper
-						.readValue((String) workOrderCassandraModelOptional.get(0).get(Constants.DATA), Map.class);
-				logger.info("consumed record for WAT ...");
-				logger.info(mapper.writeValueAsString(watObj));
-				List<String> userIds = (List<String>) watObj.get("userIds");
-				if (!CollectionUtils.isEmpty(userIds)) {
-					Map<String, Object> workAllocationMap = new HashMap<>();
-					workAllocationMap.put(Constants.ID, userIds);
-					List<Map<String, Object>> workAllocationList = cassandraOperation.getRecordsByProperties(
-							Constants.DATABASE, Constants.WORK_ALLOCATION, workAllocationMap, new ArrayList<>());
-
-					List<WorkAllocationDTOV2> workAllocations = new ArrayList<>();
-					for (Map<String, Object> workAllocationCassandraModel : workAllocationList) {
-						extracted(mapper, workAllocations, workAllocationCassandraModel);
-					}
-					watObj.put("users", workAllocations);
-
-					// update the user_workorder_mapping table
-					updateUserWorkOrderMappings(watObj, workAllocations);
-				}
-				watObj = getFilterObject(watObj);
-				Event event = getTelemetryEvent(watObj);
-				logger.info("Posting WAT event to telemetry ...");
-				logger.info(mapper.writeValueAsString(event));
-				producer.push(telemetryEventTopicName, event);
-			}
-		} catch (IOException e) {
-			logger.error(e);
-		}
 	}
 
 	public void updateUserWorkOrderMappings(Map<String, Object> workOrderMap,
@@ -182,8 +181,8 @@ public class WATConsumer {
 					}
 				});
 
-				cassandraOperation.insertBulkRecord(Constants.DATABASE, Constants.WORK_ALLOCATION_MAPPING,
-						userAllocationMappingList);
+				cassandraOperation.insertBulkRecord(Constants.KEYSPACE_SUNBIRD,
+						Constants.TABLE_USER_WORK_ALLOCATION_MAPPING, userAllocationMappingList);
 			}
 		} catch (Exception ex) {
 			logger.error(ex);

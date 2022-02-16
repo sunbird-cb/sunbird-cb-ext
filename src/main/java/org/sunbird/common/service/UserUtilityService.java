@@ -7,10 +7,12 @@ import org.sunbird.portal.department.model.LastLoginInfo;
 
 public interface UserUtilityService {
 
-	Map<String, Object> getUsersDataFromUserIds(String rootOrg, List<String> userIds, List<String> source);
-
 	boolean validateUser(String rootOrg, String userId);
 
 	Map<String, Object> updateLogin(LastLoginInfo userLoginInfo);
+
+	Map<String, Object> getUsersDataFromUserIds(List<String> userIds, List<String> fields, String authToken);
+
+	Map<String, Object> getUsersDataFromUserIds(String rootOrg, List<String> userIds, List<String> source);
 
 }

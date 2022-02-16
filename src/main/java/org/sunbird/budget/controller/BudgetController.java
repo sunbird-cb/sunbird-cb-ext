@@ -1,5 +1,7 @@
 package org.sunbird.budget.controller;
 
+import java.io.IOException;
+
 import javax.validation.Valid;
 
 import org.json.simple.parser.ParseException;
@@ -18,6 +20,7 @@ import org.sunbird.budget.model.BudgetDocInfo;
 import org.sunbird.budget.model.BudgetInfo;
 import org.sunbird.budget.service.BudgetService;
 import org.sunbird.common.model.SBApiResponse;
+import org.sunbird.exception.MyOwnRuntimeException;
 
 @RestController
 public class BudgetController {
@@ -67,14 +70,14 @@ public class BudgetController {
 
 	@GetMapping("/orghistory/{orgId}/budget")
 	public ResponseEntity<SBApiResponse> getBudgetHistoryDetails(@PathVariable("orgId") String orgId)
-			throws ParseException {
+			throws ParseException, IOException {
 		SBApiResponse response = budgetService.getBudgetAudit(orgId);
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
 
 	@PatchMapping("/budget/scheme")
 	public ResponseEntity<SBApiResponse> updateBudgetDetails(@RequestHeader("x-authenticated-userid") String userId,
-			@Valid @RequestBody BudgetInfo requestBody) {
+			@Valid @RequestBody BudgetInfo requestBody) throws MyOwnRuntimeException {
 		SBApiResponse response = budgetService.updateBudgetDetails(requestBody, userId);
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}

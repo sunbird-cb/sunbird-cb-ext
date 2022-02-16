@@ -1,5 +1,7 @@
 package org.sunbird.workallocation.controller;
 
+import java.io.IOException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -44,7 +46,7 @@ public class AllocationControllerV2 {
 	}
 
 	@GetMapping("/user/basicInfo/{userId}")
-	public ResponseEntity<Response> getUserBasicInfo(@PathVariable("userId") String userId) {
+	public ResponseEntity<Response> getUserBasicInfo(@PathVariable("userId") String userId) throws IOException {
 		return new ResponseEntity<>(allocationServiceV2.getUserBasicDetails(userId), HttpStatus.OK);
 	}
 

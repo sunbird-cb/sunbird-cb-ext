@@ -6,7 +6,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -66,6 +65,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Service
 public class AllocationServiceV2 {
 
+	private static final String EXCEPTION_OCCURRED_WHILE_UPDATING_THE_WORK_ORDER = "Exception occurred while updating the work order";
 	private static final String RESULT2 = "result";
 	private static final String WORKORDER_ID = "workorderId";
 	public static final String RESULT = RESULT2;
@@ -119,6 +119,90 @@ public class AllocationServiceV2 {
 
 	/**
 	 *
+	 * @param userId    user Id of the user
+	 * @param workOrder work order object
+	 * @return response message as success of failed
+	 */
+	public Response addWorkOrder(String userId, WorkOrderDTO workOrder) {
+		validator.validateWorkOrder(workOrder, WorkAllocationConstants.ADD);
+		enrichmentService.enrichWorkOrder(workOrder, userId, WorkAllocationConstants.ADD);
+		RestStatus restStatus = null;
+		try {
+			Map<String, Object> propertyMap = new HashMap<>();
+			propertyMap.put(Constants.ID, workOrder.getId());
+			propertyMap.put(Constants.DATA, mapper.writeValueAsString(workOrder));
+			cassandraOperation.insertRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_WORK_ORDER, propertyMap);
+
+			restStatus = indexerService.addEntity(workOrderIndex, workOrderIndexType, workOrder.getId(),
+					mapper.convertValue(workOrder, Map.class));
+		} catch (Exception ex) {
+			logger.error("Exception occurred while creating the work order", ex);
+			throw new ApplicationLogicError("Exception occurred while creating the work order", ex);
+		}
+		Response response = new Response();
+		if (!ObjectUtils.isEmpty(restStatus)) {
+			response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
+		} else {
+			response.put(Constants.MESSAGE, Constants.FAILED);
+		}
+		HashMap<String, String> watEventData = new HashMap<>();
+		watEventData.put(WORKORDER_ID, workOrder.getId());
+		producer.push(cbExtServerProperties.getKafkaTopicWatEvent(), watEventData);
+		HashMap<String, Object> data = new HashMap<>();
+		data.put("id", workOrder.getId());
+		response.put(Constants.DATA, data);
+		response.put(Constants.STATUS, HttpStatus.OK);
+		return response;
+	}
+
+	/**
+	 *
+	 * @param userId    user Id of the user
+	 * @param workOrder work order object
+	 * @return response message as success of failed
+	 */
+	public Response updateWorkOrder(String userId, WorkOrderDTO workOrder, String xAuthUser) {
+		validator.validateWorkOrder(workOrder, WorkAllocationConstants.UPDATE);
+		enrichmentService.enrichWorkOrder(workOrder, userId, WorkAllocationConstants.UPDATE);
+		RestStatus restStatus = null;
+		try {
+			Map<String, Object> propertyMap = new HashMap<>();
+			propertyMap.put(Constants.ID, workOrder.getId());
+			propertyMap.put(Constants.DATA, mapper.writeValueAsString(workOrder));
+			cassandraOperation.insertRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_WORK_ORDER, propertyMap);
+
+			restStatus = indexerService.updateEntity(workOrderIndex, workOrderIndexType, workOrder.getId(),
+					mapper.convertValue(workOrder, Map.class));
+			String publishedPdfLink = uploadPdfToContentService(workOrder, xAuthUser);
+			if (!StringUtils.isEmpty(publishedPdfLink)) {
+				workOrder.setPublishedPdfLink(publishedPdfLink);
+				propertyMap.put(Constants.ID, workOrder.getId());
+				propertyMap.put(Constants.DATA, mapper.writeValueAsString(workOrder));
+				cassandraOperation.insertRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_WORK_ORDER, propertyMap);
+
+				indexerService.updateEntity(workOrderIndex, workOrderIndexType, workOrder.getId(),
+						mapper.convertValue(workOrder, Map.class));
+			}
+		} catch (Exception ex) {
+			logger.error(EXCEPTION_OCCURRED_WHILE_UPDATING_THE_WORK_ORDER, ex);
+			throw new ApplicationLogicError(EXCEPTION_OCCURRED_WHILE_UPDATING_THE_WORK_ORDER, ex);
+		}
+		HashMap<String, String> watEventData = new HashMap<>();
+		watEventData.put(WORKORDER_ID, workOrder.getId());
+		producer.push(cbExtServerProperties.getKafkaTopicWatEvent(), watEventData);
+		Response response = new Response();
+		if (!ObjectUtils.isEmpty(restStatus)) {
+			response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
+		} else {
+			response.put(Constants.MESSAGE, Constants.FAILED);
+		}
+		response.put(Constants.DATA, restStatus);
+		response.put(Constants.STATUS, HttpStatus.OK);
+		return response;
+	}
+
+	/**
+	 *
 	 * @param authUserToken     auth token
 	 * @param userId            user Id
 	 * @param workAllocationDTO work allocation object
@@ -144,7 +228,7 @@ public class AllocationServiceV2 {
 			Map<String, Object> propertyMap = new HashMap<>();
 			propertyMap.put(Constants.ID, workAllocationDTO.getId());
 			propertyMap.put(Constants.DATA, mapper.writeValueAsString(workAllocationDTO));
-			cassandraOperation.insertRecord(Constants.DATABASE, Constants.WORK_ALLOCATION, propertyMap);
+			cassandraOperation.insertRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_WORK_ALLOCATION, propertyMap);
 
 			restStatus = indexerService.addEntity(workAllocationIndex, workAllocationIndexType,
 					workAllocationDTO.getId(), mapper.convertValue(workAllocationDTO, Map.class));
@@ -161,7 +245,7 @@ public class AllocationServiceV2 {
 			Map<String, Object> workOrderMap = new HashMap<>();
 			workOrderMap.put(Constants.ID, workOrder.getId());
 			workOrderMap.put(Constants.DATA, mapper.writeValueAsString(workOrder));
-			cassandraOperation.insertRecord(Constants.DATABASE, Constants.WORK_ORDER, workOrderMap);
+			cassandraOperation.insertRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_WORK_ORDER, workOrderMap);
 
 			indexerService.updateEntity(workOrderIndex, workOrderIndexType, workOrder.getId(),
 					mapper.convertValue(workOrder, Map.class));
@@ -189,36 +273,211 @@ public class AllocationServiceV2 {
 	 * @param workOrder work order object
 	 * @return response message as success of failed
 	 */
-	public Response addWorkOrder(String userId, WorkOrderDTO workOrder) {
-		validator.validateWorkOrder(workOrder, WorkAllocationConstants.ADD);
-		enrichmentService.enrichWorkOrder(workOrder, userId, WorkAllocationConstants.ADD);
+	public Response updateWorkAllocation(String authUserToken, String userId, WorkAllocationDTOV2 workAllocationDTO) {
+		validator.validateWorkAllocation(workAllocationDTO, WorkAllocationConstants.UPDATE);
+		enrichmentService.enrichWorkAllocation(workAllocationDTO, userId);
 		RestStatus restStatus = null;
+		if (!CollectionUtils.isEmpty(workAllocationDTO.getRoleCompetencyList())) {
+			verifyRoleActivity(authUserToken, workAllocationDTO);
+			verifyCompetencyDetails(authUserToken, workAllocationDTO);
+		}
+		if (StringUtils.isEmpty(workAllocationDTO.getPositionId())
+				&& !StringUtils.isEmpty(workAllocationDTO.getUserPosition())) {
+			workAllocationDTO.setPositionId(
+					allocationService.createUserPosition(authUserToken, workAllocationDTO.getUserPosition()));
+		}
 		try {
 			Map<String, Object> propertyMap = new HashMap<>();
-			propertyMap.put(Constants.ID, workOrder.getId());
-			propertyMap.put(Constants.DATA, mapper.writeValueAsString(workOrder));
-			cassandraOperation.insertRecord(Constants.DATABASE, Constants.WORK_ORDER, propertyMap);
+			propertyMap.put(Constants.ID, workAllocationDTO.getId());
+			propertyMap.put(Constants.DATA, mapper.writeValueAsString(workAllocationDTO));
+			cassandraOperation.insertRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_WORK_ALLOCATION, propertyMap);
 
-			restStatus = indexerService.addEntity(workOrderIndex, workOrderIndexType, workOrder.getId(),
+			restStatus = indexerService.updateEntity(workAllocationIndex, workAllocationIndexType,
+					workAllocationDTO.getId(), mapper.convertValue(workAllocationDTO, Map.class));
+			Map<String, Object> workOrderObject = indexerService.readEntity(workOrderIndex, workOrderIndexType,
+					workAllocationDTO.getWorkOrderId());
+			WorkOrderDTO workOrder = mapper.convertValue(workOrderObject, WorkOrderDTO.class);
+			if (CollectionUtils.isEmpty(workOrder.getUserIds())) {
+				workOrder.setUserIds(new ArrayList<>());
+			}
+			workOrder.addUserId(workAllocationDTO.getId());
+			updateWorkOderCount(workOrder);
+			enrichmentService.enrichWorkOrder(workOrder, userId, WorkAllocationConstants.UPDATE);
+
+			Map<String, Object> workOrderMap = new HashMap<>();
+			workOrderMap.put(Constants.ID, workOrder.getId());
+			workOrderMap.put(Constants.DATA, mapper.writeValueAsString(workOrder));
+			cassandraOperation.insertRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_WORK_ORDER, workOrderMap);
+			indexerService.updateEntity(workOrderIndex, workOrderIndexType, workOrder.getId(),
 					mapper.convertValue(workOrder, Map.class));
 		} catch (Exception ex) {
-			logger.error(String.format("Exception occurred while creating the work order %s", ex.getMessage()));
-			throw new ApplicationLogicError("Exception occurred while creating the work order", ex);
+			logger.error(String.format("Exception occurred while saving the work allocation!! %s", ex.getMessage()));
+			throw new ApplicationLogicError("Exception occurred while saving the work allocation!!", ex);
 		}
+		HashMap<String, String> watEventData = new HashMap<>();
+		watEventData.put(WORKORDER_ID, workAllocationDTO.getWorkOrderId());
+		producer.push(cbExtServerProperties.getKafkaTopicWatEvent(), watEventData);
 		Response response = new Response();
 		if (!ObjectUtils.isEmpty(restStatus)) {
 			response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
 		} else {
 			response.put(Constants.MESSAGE, Constants.FAILED);
 		}
-		HashMap<String, String> watEventData = new HashMap<>();
-		watEventData.put(WORKORDER_ID, workOrder.getId());
-		producer.push(cbExtServerProperties.getKafkaTopicWatEvent(), watEventData);
-		HashMap<String, Object> data = new HashMap<>();
-		data.put("id", workOrder.getId());
-		response.put(Constants.DATA, data);
+		response.put(Constants.DATA, restStatus);
 		response.put(Constants.STATUS, HttpStatus.OK);
 		return response;
+	}
+
+	private void verifyRoleActivity(String authUserToken, WorkAllocationDTOV2 workAllocation) {
+		for (RoleCompetency roleCompetency : workAllocation.getRoleCompetencyList()) {
+			Role oldRole = roleCompetency.getRoleDetails();
+			Role newRole = null;
+			try {
+				if (StringUtils.isEmpty(oldRole.getId())) {
+					newRole = allocationService.fetchAddedRole(authUserToken, oldRole, null);
+					maintainExtraRoleInfo(newRole, roleCompetency);
+					roleCompetency.setRoleDetails(newRole);
+				} else {
+					// Role is from FRAC - No need to create new.
+					// However, we need to check Activity is from FRAC or not.
+					if (!CollectionUtils.isEmpty(oldRole.getChildNodes())) {
+						List<ChildNode> newChildNodes = new ArrayList<>();
+						boolean isNewChildAdded = oldRole.getChildNodes().stream()
+								.anyMatch(childNode -> StringUtils.isEmpty(childNode.getId()));
+						if (isNewChildAdded) {
+							newRole = allocationService.fetchAddedRole(authUserToken, oldRole, null);
+							newChildNodes.addAll(newRole.getChildNodes());
+						} else {
+							newChildNodes.addAll(oldRole.getChildNodes());
+						}
+						oldRole.setChildNodes(newChildNodes);
+						maintainExtraRoleInfo(oldRole, roleCompetency);
+						roleCompetency.setRoleDetails(oldRole);
+					}
+				}
+			} catch (Exception e) {
+				logger.error("Failed to Add Role / Activity. Excption: ", e);
+			}
+		}
+	}
+
+	private void maintainExtraRoleInfo(Role role, RoleCompetency roleCompetency) {
+		if (!CollectionUtils.isEmpty(role.getChildNodes())) {
+			for (ChildNode childNode : role.getChildNodes()) {
+				if (!StringUtils.isEmpty(childNode.getDescription())) {
+					for (ChildNode childNode1 : roleCompetency.getRoleDetails().getChildNodes()) {
+						if (childNode.getDescription().equals(childNode1.getDescription())) {
+							childNode.setSubmittedFromId(childNode1.getSubmittedFromId());
+							childNode.setSubmittedFromName(childNode1.getSubmittedFromName());
+							childNode.setSubmittedFromEmail(childNode1.getSubmittedFromEmail());
+							childNode.setSubmittedToId(childNode1.getSubmittedToId());
+							childNode.setSubmittedToName(childNode1.getSubmittedToName());
+							childNode.setSubmittedToEmail(childNode1.getSubmittedToEmail());
+						}
+					}
+				}
+			}
+		}
+	}
+
+	private void verifyCompetencyDetails(String authUserToken, WorkAllocationDTOV2 workAllocation) {
+		for (RoleCompetency roleCompetency : workAllocation.getRoleCompetencyList()) {
+			List<CompetencyDetails> oldCompetencyDetails = roleCompetency.getCompetencyDetails();
+			List<CompetencyDetails> newCompetencyDetails = new ArrayList<>();
+			allocationService.addOrUpdateCompetencyToFrac(authUserToken, oldCompetencyDetails, newCompetencyDetails);
+			if (oldCompetencyDetails.size() == newCompetencyDetails.size()) {
+				roleCompetency.setCompetencyDetails(newCompetencyDetails);
+			} else {
+				logger.error(
+						"Failed to create FRAC Competency / CompetencyLevel. Old List Size: {} , New List Size: {}",
+						oldCompetencyDetails.size(), newCompetencyDetails.size());
+			}
+		}
+	}
+
+	public Response getWorkOrders(SearchCriteria criteria) {
+		validator.validateSearchCriteria(criteria);
+		final BoolQueryBuilder query = QueryBuilders.boolQuery();
+		if (!StringUtils.isEmpty(criteria.getStatus())) {
+			query.must(QueryBuilders.termQuery("status.keyword", criteria.getStatus()));
+		}
+		if (!StringUtils.isEmpty(criteria.getDepartmentName())) {
+			query.must(QueryBuilders.termQuery("deptName.keyword", criteria.getDepartmentName()));
+		}
+		if (!StringUtils.isEmpty(criteria.getQuery())) {
+			query.must(QueryBuilders.matchPhrasePrefixQuery("name", criteria.getQuery()));
+		}
+		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder().query(query);
+		sourceBuilder.from(criteria.getPageNo());
+		sourceBuilder.size(criteria.getPageSize());
+		sourceBuilder.sort(SortBuilders.fieldSort("updatedAt").order(SortOrder.DESC));
+
+		List<WorkOrderDTO> workOrderDTOList = new ArrayList<>();
+		long totalCount = 0;
+		try {
+			SearchResponse searchResponse = indexerService.getEsResult(workOrderIndex, workOrderIndexType,
+					sourceBuilder);
+			totalCount = searchResponse.getHits().getTotalHits();
+			for (SearchHit hit : searchResponse.getHits()) {
+				workOrderDTOList.add(mapper.convertValue(hit.getSourceAsMap(), WorkOrderDTO.class));
+			}
+		} catch (IOException e) {
+			logger.error("Elastic Search Exception", e);
+		}
+		Response response = new Response();
+		response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
+		response.put(Constants.DATA, workOrderDTOList);
+		response.put("totalHit", totalCount);
+		response.put(Constants.STATUS, HttpStatus.OK);
+		return response;
+	}
+
+	public Response getWorkOrderById(String workOrderId) {
+		Response response = new Response();
+		response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
+		response.put(Constants.DATA, getWorkOrderObject(workOrderId));
+		response.put(Constants.STATUS, HttpStatus.OK);
+		return response;
+	}
+
+	public Map<String, Object> getWorkOrderObject(String workOrderId) {
+		Map<String, Object> workOrderObject = indexerService.readEntity(workOrderIndex, workOrderIndexType,
+				workOrderId);
+		if (!CollectionUtils.isEmpty((Collection<?>) workOrderObject.get("userIds"))) {
+			List<WorkAllocationDTOV2> workAllocationDTOV2List = getWorkAllocationListByIds(
+					(List<String>) workOrderObject.get("userIds"));
+			workOrderObject.put("users", workAllocationDTOV2List);
+		} else {
+			workOrderObject.put("users", new ArrayList<>());
+		}
+		return workOrderObject;
+	}
+
+	public Response getWorkAllocationById(String workAllocationId) {
+		Map<String, Object> workAllocationObject = indexerService.readEntity(workAllocationIndex,
+				workAllocationIndexType, workAllocationId);
+		Response response = new Response();
+		response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
+		response.put(Constants.DATA, workAllocationObject);
+		response.put(Constants.STATUS, HttpStatus.OK);
+		return response;
+	}
+
+	private List<WorkAllocationDTOV2> getWorkAllocationListByIds(List<String> workAllocationIds) {
+		List<WorkAllocationDTOV2> workAllocationDTOV2List = new ArrayList<>();
+		if (!CollectionUtils.isEmpty(workAllocationIds)) {
+			workAllocationIds.forEach(id -> {
+				try {
+					WorkAllocationDTOV2 workAllocationDTOV2 = mapper.convertValue(
+							indexerService.readEntity(workAllocationIndex, workAllocationIndexType, id),
+							WorkAllocationDTOV2.class);
+					workAllocationDTOV2List.add(workAllocationDTOV2);
+				} catch (Exception ex) {
+					logger.error("Exception occurred while reading the work allocation for id, {}", id);
+				}
+			});
+		}
+		return workAllocationDTOV2List;
 	}
 
 	/**
@@ -251,7 +510,8 @@ public class AllocationServiceV2 {
 		prepareWorkAllocations(userId, workOrder, workAllocationIds, indexRequestList, cassandraModelList);
 		RestStatus restStatus = null;
 		if (!CollectionUtils.isEmpty(indexRequestList)) {
-			cassandraOperation.insertBulkRecord(Constants.DATABASE, Constants.WORK_ALLOCATION, cassandraModelList);
+			cassandraOperation.insertBulkRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_WORK_ALLOCATION,
+					cassandraModelList);
 			indexerService.bulkInsert(indexRequestList);
 		}
 		workOrder.setUserIds(workAllocationIds);
@@ -259,12 +519,12 @@ public class AllocationServiceV2 {
 			Map<String, Object> workOrderMap = new HashMap<>();
 			workOrderMap.put(Constants.ID, workOrder.getId());
 			workOrderMap.put(Constants.DATA, mapper.writeValueAsString(workOrder));
-			cassandraOperation.insertRecord(Constants.DATABASE, Constants.WORK_ORDER, workOrderMap);
+			cassandraOperation.insertRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_WORK_ORDER, workOrderMap);
 
 			restStatus = indexerService.addEntity(workOrderIndex, workOrderIndexType, workOrder.getId(),
 					mapper.convertValue(workOrder, Map.class));
 		} catch (JsonProcessingException e) {
-			logger.error(String.format("Exception occurred while saving the work order!! :  %s", e.getMessage()));
+			logger.error("Exception occurred while saving the work order!!", e);
 			throw new ApplicationLogicError("Exception occurred while saving the work order!!", e);
 		}
 		Response response = new Response();
@@ -274,254 +534,13 @@ public class AllocationServiceV2 {
 			response.put(Constants.MESSAGE, Constants.FAILED);
 		}
 		HashMap<String, String> watEventData = new HashMap<>();
-		watEventData.put(WORKORDER_ID, workOrder.getId());
+		watEventData.put("workorderId", workOrder.getId());
 		producer.push(cbExtServerProperties.getKafkaTopicWatEvent(), watEventData);
 		HashMap<String, Object> data = new HashMap<>();
 		data.put("id", workOrder.getId());
 		response.put(Constants.DATA, data);
 		response.put(Constants.STATUS, HttpStatus.OK);
 		return response;
-	}
-
-	private String createContentAndGetIdentifier(WorkOrderDTO workOrderDTO, String xAuthUser) {
-		String identifier = null;
-		ContentCreateRequest contentCreateRequest = new ContentCreateRequest("PDF Asset",
-				workOrderDTO.getUpdatedByName(), workOrderDTO.getUpdatedBy(), "pdf asset", "application/pdf", "Asset",
-				"Asset", Arrays.asList(cbExtServerProperties.getContentDefaultOrgId()),
-				Arrays.asList(cbExtServerProperties.getContentDefaultChannelId()));
-		HashMap<String, Object> request = new HashMap<>();
-		HashMap<String, Object> contentReq = new HashMap<>();
-		contentReq.put("content", contentCreateRequest);
-		request.put("request", contentReq);
-		HashMap<String, String> headers = new HashMap<>();
-		headers.put("x-channel-id", cbExtServerProperties.getContentDefaultChannelId());
-		headers.put("X-Authenticated-User-Token", xAuthUser);
-		headers.put("Authorization", cbExtServerProperties.getSbApiKey());
-		headers.put("Content-Type", "application/json");
-		Map<String, Object> response = outboundRequestHandlerService.fetchResultUsingPost(
-				cbExtServerProperties.getContentHost().concat(cbExtServerProperties.getContentCreateEndPoint()),
-				request, headers);
-		if (!ObjectUtils.isEmpty(response.get(RESULT))) {
-			identifier = (String) ((Map<String, Object>) response.get(RESULT)).get("identifier");
-		}
-		return identifier;
-	}
-
-	private Map<String, Object> getSearchObject(Set<String> userIds) {
-		Map<String, Object> request = new HashMap<>();
-		Map<String, Object> filters = new HashMap<>();
-		filters.put("userId", userIds);
-		request.put("filters", filters);
-		request.put("query", "");
-		Map<String, Object> requestWrapper = new HashMap<>();
-		requestWrapper.put("request", request);
-		return requestWrapper;
-	}
-
-	public Response getUserBasicDetails(String userId) {
-		Response response = new Response();
-		response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
-		Set<String> userIds = new HashSet<>();
-		userIds.add(userId);
-		response.put(Constants.DATA, getUsersResult(userIds).get(userId));
-		response.put(Constants.STATUS, HttpStatus.OK);
-		return response;
-	}
-
-	public Response getUserCompetencies(String userId) {
-		HashSet<CompetencyDetails> competencyDetails = new HashSet<>();
-		List<UserWorkAllocationMappingModel> userWorkAllocationMappings = new ArrayList<>();
-		Map<String, Object> propertyMap = new HashMap<>();
-		propertyMap.put(Constants.USER_ID_CONSTANT, userId);
-		List<Map<String, Object>> mappingList = cassandraOperation.getRecordsByProperties(Constants.DATABASE,
-				Constants.WORK_ALLOCATION_MAPPING, propertyMap, new ArrayList<>());
-		for (Map<String, Object> mapObj : mappingList) {
-			userWorkAllocationMappings.add(mapper.convertValue(mapObj, UserWorkAllocationMappingModel.class));
-		}
-
-		if (!CollectionUtils.isEmpty(userWorkAllocationMappings)) {
-			List<String> workAllocationIds = userWorkAllocationMappings.stream().filter(
-					allocationDetails -> WorkAllocationConstants.PUBLISHED_STATUS.equals(allocationDetails.getStatus()))
-					.map(UserWorkAllocationMappingModel::getWorkAllocationId).collect(Collectors.toList());
-			if (!CollectionUtils.isEmpty(workAllocationIds)) {
-				final BoolQueryBuilder query = QueryBuilders.boolQuery();
-				query.must(QueryBuilders.termsQuery("id.keyword", workAllocationIds));
-				SearchSourceBuilder sourceBuilder = new SearchSourceBuilder().query(query);
-				sourceBuilder.fetchSource(includeFields, new String[] {});
-				try {
-					SearchResponse searchResponse = indexerService.getEsResult(workAllocationIndex,
-							workAllocationIndexType, sourceBuilder);
-					for (SearchHit hit : searchResponse.getHits()) {
-						Map<String, Object> sourceAsMap = hit.getSourceAsMap();
-						List<RoleCompetency> roleCompetencies = mapper.convertValue(
-								sourceAsMap.get("roleCompetencyList"), new TypeReference<List<RoleCompetency>>() {
-								});
-						if (!CollectionUtils.isEmpty(roleCompetencies)) {
-							List<CompetencyDetails> competencyDetailsList = roleCompetencies.stream()
-									.map(RoleCompetency::getCompetencyDetails).flatMap(Collection::stream)
-									.collect(Collectors.toList());
-							competencyDetails.addAll(competencyDetailsList);
-						}
-					}
-				} catch (IOException e) {
-					logger.error(String.format("Elastic Search Exception :  %s", e.getMessage()));
-				}
-			}
-		}
-		Response response = new Response();
-		response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
-		response.put(Constants.DATA, competencyDetails);
-		response.put(Constants.STATUS, HttpStatus.OK);
-		return response;
-	}
-
-	public Map<String, Object> getUsersResult(Set<String> userIds) {
-		HashMap<String, Object> userResult = new HashMap<>();
-		Map<String, Object> request = getSearchObject(userIds);
-		Map<String, Object> record1;
-		HashMap<String, String> headersValue = new HashMap<>();
-		headersValue.put("Content-Type", "application/json");
-		try {
-			StringBuilder builder = new StringBuilder();
-			builder.append(cbExtServerProperties.getSbUrl()).append(cbExtServerProperties.getUserSearchEndPoint());
-			Map<String, Object> profileResponse = outboundRequestHandlerService.fetchResultUsingPost(builder.toString(),
-					request, headersValue);
-			if (profileResponse != null && "OK".equalsIgnoreCase((String) profileResponse.get("responseCode"))) {
-				Map<String, Object> map = (Map<String, Object>) profileResponse.get(RESULT2);
-				if (map.get("response") != null) {
-					Map<String, Object> profiles = (Map<String, Object>) map.get("response");
-					List<Map<String, Object>> userProfiles = (List<Map<String, Object>>) profiles.get("content");
-					if (!CollectionUtils.isEmpty(userProfiles)) {
-						for (Map<String, Object> userProfile : userProfiles) {
-							if (userProfile.get("profileDetails") != null) {
-								HashMap<String, Object> profileDetails = (HashMap<String, Object>) userProfile
-										.get("profileDetails");
-								HashMap<String, Object> personalDetails = (HashMap<String, Object>) profileDetails
-										.get("personalDetails");
-								record1 = new HashMap<>();
-								record1.put("wid", userProfile.get("userId"));
-								record1.put("first_name", personalDetails.get("firstname"));
-								record1.put("last_name", personalDetails.get("surname"));
-								record1.put("email", personalDetails.get("primaryEmail"));
-								if (profileDetails.get("employmentDetails") != null) {
-									record1.put("department_name",
-											((HashMap<String, Object>) profileDetails.get("employmentDetails"))
-													.get("departmentName"));
-								}
-								userResult.put(record1.get("wid").toString(), record1);
-							}
-						}
-					}
-				}
-			}
-		} catch (Exception e) {
-			logger.error(e.toString());
-		}
-		return userResult;
-	}
-
-	public Response getWorkAllocationById(String workAllocationId) {
-		Map<String, Object> workAllocationObject = indexerService.readEntity(workAllocationIndex,
-				workAllocationIndexType, workAllocationId);
-		Response response = new Response();
-		response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
-		response.put(Constants.DATA, workAllocationObject);
-		response.put(Constants.STATUS, HttpStatus.OK);
-		return response;
-	}
-
-	private List<WorkAllocationDTOV2> getWorkAllocationListByIds(List<String> workAllocationIds) {
-		List<WorkAllocationDTOV2> workAllocationDTOV2List = new ArrayList<>();
-		if (!CollectionUtils.isEmpty(workAllocationIds)) {
-			workAllocationIds.forEach(id -> {
-				try {
-					WorkAllocationDTOV2 workAllocationDTOV2 = mapper.convertValue(
-							indexerService.readEntity(workAllocationIndex, workAllocationIndexType, id),
-							WorkAllocationDTOV2.class);
-					workAllocationDTOV2List.add(workAllocationDTOV2);
-				} catch (Exception ex) {
-					logger.error(String.format("Exception occurred while reading the work allocation for id, %s", id));
-				}
-			});
-		}
-		return workAllocationDTOV2List;
-	}
-
-	public Response getWorkOrderById(String workOrderId) {
-		Response response = new Response();
-		response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
-		response.put(Constants.DATA, getWorkOrderObject(workOrderId));
-		response.put(Constants.STATUS, HttpStatus.OK);
-		return response;
-	}
-
-	public Map<String, Object> getWorkOrderObject(String workOrderId) {
-		Map<String, Object> workOrderObject = indexerService.readEntity(workOrderIndex, workOrderIndexType,
-				workOrderId);
-		if (!CollectionUtils.isEmpty((Collection<?>) workOrderObject.get("userIds"))) {
-			List<WorkAllocationDTOV2> workAllocationDTOV2List = getWorkAllocationListByIds(
-					(List<String>) workOrderObject.get("userIds"));
-			workOrderObject.put("users", workAllocationDTOV2List);
-		} else {
-			workOrderObject.put("users", new ArrayList<>());
-		}
-		return workOrderObject;
-	}
-
-	public Response getWorkOrders(SearchCriteria criteria) {
-		validator.validateSearchCriteria(criteria);
-		final BoolQueryBuilder query = QueryBuilders.boolQuery();
-		if (!StringUtils.isEmpty(criteria.getStatus())) {
-			query.must(QueryBuilders.termQuery("status.keyword", criteria.getStatus()));
-		}
-		if (!StringUtils.isEmpty(criteria.getDepartmentName())) {
-			query.must(QueryBuilders.termQuery("deptName.keyword", criteria.getDepartmentName()));
-		}
-		if (!StringUtils.isEmpty(criteria.getQuery())) {
-			query.must(QueryBuilders.matchPhrasePrefixQuery("name", criteria.getQuery()));
-		}
-		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder().query(query);
-		sourceBuilder.from(criteria.getPageNo());
-		sourceBuilder.size(criteria.getPageSize());
-		sourceBuilder.sort(SortBuilders.fieldSort("updatedAt").order(SortOrder.DESC));
-
-		List<WorkOrderDTO> workOrderDTOList = new ArrayList<>();
-		long totalCount = 0;
-		try {
-			SearchResponse searchResponse = indexerService.getEsResult(workOrderIndex, workOrderIndexType,
-					sourceBuilder);
-			totalCount = searchResponse.getHits().getTotalHits();
-			for (SearchHit hit : searchResponse.getHits()) {
-				workOrderDTOList.add(mapper.convertValue(hit.getSourceAsMap(), WorkOrderDTO.class));
-			}
-		} catch (IOException e) {
-			logger.error(String.format("Elastic Search Exception :  %s", e.getMessage()));
-		}
-		Response response = new Response();
-		response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
-		response.put(Constants.DATA, workOrderDTOList);
-		response.put("totalHit", totalCount);
-		response.put(Constants.STATUS, HttpStatus.OK);
-		return response;
-	}
-
-	private void maintainExtraRoleInfo(Role role, RoleCompetency roleCompetency) {
-		if (!CollectionUtils.isEmpty(role.getChildNodes())) {
-			for (ChildNode childNode : role.getChildNodes()) {
-				if (!StringUtils.isEmpty(childNode.getDescription())) {
-					for (ChildNode childNode1 : roleCompetency.getRoleDetails().getChildNodes()) {
-						if (childNode.getDescription().equals(childNode1.getDescription())) {
-							childNode.setSubmittedFromId(childNode1.getSubmittedFromId());
-							childNode.setSubmittedFromName(childNode1.getSubmittedFromName());
-							childNode.setSubmittedFromEmail(childNode1.getSubmittedFromEmail());
-							childNode.setSubmittedToId(childNode1.getSubmittedToId());
-							childNode.setSubmittedToName(childNode1.getSubmittedToName());
-							childNode.setSubmittedToEmail(childNode1.getSubmittedToEmail());
-						}
-					}
-				}
-			}
-		}
 	}
 
 	private void prepareWorkAllocations(String userId, WorkOrderDTO workOrder, ArrayList<String> workAllocationIds,
@@ -548,70 +567,18 @@ public class AllocationServiceV2 {
 					}
 				}
 			}
-		} catch (Exception e) {
-			logger.error("Exception occurred while preparing the copy work allocation! : ", e);
+		} catch (JsonProcessingException e) {
+			logger.error("Exception occurred while preparing the copy work allocation!", e);
 			throw new ApplicationLogicError("Exception occurred while preparing the copy work allocation!", e);
 		}
 	}
 
-	/**
-	 *
-	 * @param authUserToken     auth token
-	 * @param userId            user Id
-	 * @param workAllocationDTO work allocation object
-	 * @return
-	 */
-	public Response updateWorkAllocation(String authUserToken, String userId, WorkAllocationDTOV2 workAllocationDTO) {
-		validator.validateWorkAllocation(workAllocationDTO, WorkAllocationConstants.UPDATE);
-		enrichmentService.enrichWorkAllocation(workAllocationDTO, userId);
-		RestStatus restStatus = null;
-		if (!CollectionUtils.isEmpty(workAllocationDTO.getRoleCompetencyList())) {
-			verifyRoleActivity(authUserToken, workAllocationDTO);
-			verifyCompetencyDetails(authUserToken, workAllocationDTO);
-		}
-		if (StringUtils.isEmpty(workAllocationDTO.getPositionId())
-				&& !StringUtils.isEmpty(workAllocationDTO.getUserPosition())) {
-			workAllocationDTO.setPositionId(
-					allocationService.createUserPosition(authUserToken, workAllocationDTO.getUserPosition()));
-		}
-		try {
-			Map<String, Object> propertyMap = new HashMap<>();
-			propertyMap.put(Constants.ID, workAllocationDTO.getId());
-			propertyMap.put(Constants.DATA, mapper.writeValueAsString(workAllocationDTO));
-			cassandraOperation.insertRecord(Constants.DATABASE, Constants.WORK_ALLOCATION, propertyMap);
-
-			restStatus = indexerService.updateEntity(workAllocationIndex, workAllocationIndexType,
-					workAllocationDTO.getId(), mapper.convertValue(workAllocationDTO, Map.class));
-			Map<String, Object> workOrderObject = indexerService.readEntity(workOrderIndex, workOrderIndexType,
-					workAllocationDTO.getWorkOrderId());
-			WorkOrderDTO workOrder = mapper.convertValue(workOrderObject, WorkOrderDTO.class);
-			if (CollectionUtils.isEmpty(workOrder.getUserIds())) {
-				workOrder.setUserIds(new ArrayList<>());
-			}
-			workOrder.addUserId(workAllocationDTO.getId());
-			updateWorkOderCount(workOrder);
-			enrichmentService.enrichWorkOrder(workOrder, userId, WorkAllocationConstants.UPDATE);
-
-			Map<String, Object> workOrderMap = new HashMap<>();
-			workOrderMap.put(Constants.ID, workOrder.getId());
-			workOrderMap.put(Constants.DATA, mapper.writeValueAsString(workOrder));
-			cassandraOperation.insertRecord(Constants.DATABASE, Constants.WORK_ORDER, workOrderMap);
-			indexerService.updateEntity(workOrderIndex, workOrderIndexType, workOrder.getId(),
-					mapper.convertValue(workOrder, Map.class));
-		} catch (Exception ex) {
-			logger.error(String.format("Exception occurred while saving the work allocation!! :  %s", ex.getMessage()));
-			throw new ApplicationLogicError("Exception occurred while saving the work allocation!!", ex);
-		}
-		HashMap<String, String> watEventData = new HashMap<>();
-		watEventData.put(WORKORDER_ID, workAllocationDTO.getWorkOrderId());
-		producer.push(cbExtServerProperties.getKafkaTopicWatEvent(), watEventData);
+	public Response getUserBasicDetails(String userId) throws IOException {
 		Response response = new Response();
-		if (!ObjectUtils.isEmpty(restStatus)) {
-			response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
-		} else {
-			response.put(Constants.MESSAGE, Constants.FAILED);
-		}
-		response.put(Constants.DATA, restStatus);
+		response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
+		Set<String> userIds = new HashSet<>();
+		userIds.add(userId);
+		response.put(Constants.DATA, getUsersResult(userIds).get(userId));
 		response.put(Constants.STATUS, HttpStatus.OK);
 		return response;
 	}
@@ -628,13 +595,11 @@ public class AllocationServiceV2 {
 				rolesCount = rolesCount + workAllocationDTOV2.getRoleCompetencyList().size();
 				for (RoleCompetency roleCompetency : workAllocationDTOV2.getRoleCompetencyList()) {
 					if (!ObjectUtils.isEmpty(roleCompetency.getRoleDetails())
-							&& !CollectionUtils.isEmpty(roleCompetency.getRoleDetails().getChildNodes())) {
+							&& !CollectionUtils.isEmpty(roleCompetency.getRoleDetails().getChildNodes()))
 						activitiesCount = activitiesCount + roleCompetency.getRoleDetails().getChildNodes().size();
-					}
 					if (!ObjectUtils.isEmpty(roleCompetency.getRoleDetails())
-							&& !CollectionUtils.isEmpty(roleCompetency.getCompetencyDetails())) {
+							&& !CollectionUtils.isEmpty(roleCompetency.getCompetencyDetails()))
 						competenciesCount = competenciesCount + roleCompetency.getCompetencyDetails().size();
-					}
 				}
 			}
 			if (!CollectionUtils.isEmpty(workAllocationDTOV2.getUnmappedActivities())) {
@@ -656,50 +621,46 @@ public class AllocationServiceV2 {
 		workOrderDTO.setProgress(progress);
 	}
 
-	/**
-	 *
-	 * @param userId    user Id of the user
-	 * @param workOrder work order object
-	 * @return response message as success of failed
-	 */
-	public Response updateWorkOrder(String userId, WorkOrderDTO workOrder, String xAuthUser) {
-		validator.validateWorkOrder(workOrder, WorkAllocationConstants.UPDATE);
-		enrichmentService.enrichWorkOrder(workOrder, userId, WorkAllocationConstants.UPDATE);
-		RestStatus restStatus = null;
+	private String uploadPdfToContentService(WorkOrderDTO workOrderDTO, String xAuthUser) {
+		String pdfLink = null;
 		try {
-			Map<String, Object> propertyMap = new HashMap<>();
-			propertyMap.put(Constants.ID, workOrder.getId());
-			propertyMap.put(Constants.DATA, mapper.writeValueAsString(workOrder));
-			cassandraOperation.insertRecord(Constants.DATABASE, Constants.WORK_ORDER, propertyMap);
-
-			restStatus = indexerService.updateEntity(workOrderIndex, workOrderIndexType, workOrder.getId(),
-					mapper.convertValue(workOrder, Map.class));
-			String publishedPdfLink = uploadPdfToContentService(workOrder, xAuthUser);
-			if (!StringUtils.isEmpty(publishedPdfLink)) {
-				workOrder.setPublishedPdfLink(publishedPdfLink);
-				propertyMap.put(Constants.ID, workOrder.getId());
-				propertyMap.put(Constants.DATA, mapper.writeValueAsString(workOrder));
-				cassandraOperation.insertRecord(Constants.DATABASE, Constants.WORK_ORDER, propertyMap);
-
-				indexerService.updateEntity(workOrderIndex, workOrderIndexType, workOrder.getId(),
-						mapper.convertValue(workOrder, Map.class));
+			String pdfFilePath = pdfGeneratorService.generatePdfAndGetFilePath(workOrderDTO.getId());
+			String identifier = createContentAndGetIdentifier(workOrderDTO, xAuthUser);
+			if (StringUtils.isEmpty(identifier)) {
+				logger.error("Fail to generate the pdf asset");
+				return pdfLink;
 			}
+			pdfLink = uploadPdfAndgetArtifactURL(identifier, xAuthUser, pdfFilePath);
+
 		} catch (Exception ex) {
-			logger.error(String.format("Exception occurred while updating the work order :  %s", ex.getMessage()));
-			throw new ApplicationLogicError("Exception occurred while updating the work order", ex);
+			logger.error(String.format("Exception occurred while creating the pdf link for published work order! :  %s",
+					ex.getMessage()));
+			throw new ApplicationLogicError(EXCEPTION_OCCURRED_WHILE_UPDATING_THE_WORK_ORDER, ex);
 		}
-		HashMap<String, String> watEventData = new HashMap<>();
-		watEventData.put(WORKORDER_ID, workOrder.getId());
-		producer.push(cbExtServerProperties.getKafkaTopicWatEvent(), watEventData);
-		Response response = new Response();
-		if (!ObjectUtils.isEmpty(restStatus)) {
-			response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
-		} else {
-			response.put(Constants.MESSAGE, Constants.FAILED);
-		}
-		response.put(Constants.DATA, restStatus);
-		response.put(Constants.STATUS, HttpStatus.OK);
-		return response;
+		return pdfLink;
+	}
+
+	private String createContentAndGetIdentifier(WorkOrderDTO workOrderDTO, String xAuthUser) {
+		String identifier = null;
+		ContentCreateRequest contentCreateRequest = new ContentCreateRequest("PDF Asset",
+				workOrderDTO.getUpdatedByName(), workOrderDTO.getUpdatedBy(), "pdf asset", "application/pdf", "Asset",
+				"Asset", Arrays.asList(cbExtServerProperties.getContentDefaultOrgId()),
+				Arrays.asList(cbExtServerProperties.getContentDefaultChannelId()));
+		HashMap<String, Object> request = new HashMap<>();
+		HashMap<String, Object> contentReq = new HashMap<>();
+		contentReq.put("content", contentCreateRequest);
+		request.put("request", contentReq);
+		HashMap<String, String> headers = new HashMap<>();
+		headers.put("x-channel-id", cbExtServerProperties.getContentDefaultChannelId());
+		headers.put("X-Authenticated-User-Token", xAuthUser);
+		headers.put("Authorization", cbExtServerProperties.getSbApiKey());
+		headers.put("Content-Type", "application/json");
+		Map<String, Object> response = outboundRequestHandlerService.fetchResultUsingPost(
+				cbExtServerProperties.getContentHost().concat(cbExtServerProperties.getContentCreateEndPoint()),
+				request, headers);
+		if (!ObjectUtils.isEmpty(response.get(RESULT)))
+			identifier = (String) ((Map<String, Object>) response.get(RESULT)).get("identifier");
+		return identifier;
 	}
 
 	private String uploadPdfAndgetArtifactURL(String identifier, String xAuthUser, String filePath) {
@@ -715,81 +676,114 @@ public class AllocationServiceV2 {
 		String uploadURL = cbExtServerProperties.getContentUploadEndPoint().replace("{identifier}", identifier);
 		ResponseEntity<Map> response = restTemplate
 				.postForEntity(cbExtServerProperties.getContentHost().concat(uploadURL), requestEntity, Map.class);
-		Map<?, ?> b = response.getBody();
-		if (!ObjectUtils.isEmpty(b)) {
-			try {
-				downloadableLink = (String) ((Map<String, Object>) b.get(RESULT)).get("artifactUrl");
-			} catch (Exception e) {
-				logger.error(e.toString());
-			}
+		if (!ObjectUtils.isEmpty(response.getBody())) {
+			downloadableLink = (String) ((Map<String, Object>) response.getBody().get(RESULT)).get("artifactUrl");
 		}
 		return downloadableLink;
 	}
 
-	private String uploadPdfToContentService(WorkOrderDTO workOrderDTO, String xAuthUser) {
-		String pdfLink = null;
+	public HashMap<String, Object> getUsersResult(Set<String> userIds) {
+		HashMap<String, Object> userResult = new HashMap<>();
+		Map<String, Object> request = getSearchObject(userIds);
+		Map<String, Object> record;
+		HashMap<String, String> headersValue = new HashMap<>();
+		headersValue.put("Content-Type", "application/json");
 		try {
-			String pdfFilePath = pdfGeneratorService.generatePdfAndGetFilePath(workOrderDTO.getId());
-			String identifier = createContentAndGetIdentifier(workOrderDTO, xAuthUser);
-			if (StringUtils.isEmpty(identifier)) {
-				logger.error("Fail to generate the pdf asset");
-				return pdfLink;
+			StringBuilder builder = new StringBuilder();
+			builder.append(cbExtServerProperties.getSbUrl()).append(cbExtServerProperties.getUserSearchEndPoint());
+			Map<String, Object> profileResponse = outboundRequestHandlerService.fetchResultUsingPost(builder.toString(),
+					request, headersValue);
+			if (profileResponse != null && "OK".equalsIgnoreCase((String) profileResponse.get("responseCode"))) {
+				Map<String, Object> map = (Map<String, Object>) profileResponse.get(RESULT2);
+				if (map.get("response") != null) {
+					Map<String, Object> profiles = (Map<String, Object>) map.get("response");
+					List<Map<String, Object>> userProfiles = (List<Map<String, Object>>) profiles.get("content");
+					if (!CollectionUtils.isEmpty(userProfiles)) {
+						for (Map<String, Object> userProfile : userProfiles) {
+							if (userProfile.get("profileDetails") != null) {
+								HashMap<String, Object> profileDetails = (HashMap<String, Object>) userProfile
+										.get("profileDetails");
+								HashMap<String, Object> personalDetails = (HashMap<String, Object>) profileDetails
+										.get("personalDetails");
+								record = new HashMap<>();
+								record.put("wid", userProfile.get("userId"));
+								record.put("first_name", personalDetails.get("firstname"));
+								record.put("last_name", personalDetails.get("surname"));
+								record.put("email", personalDetails.get("primaryEmail"));
+								if (profileDetails.get("employmentDetails") != null) {
+									record.put("department_name",
+											((HashMap<String, Object>) profileDetails.get("employmentDetails"))
+													.get("departmentName"));
+								}
+								userResult.put(record.get("wid").toString(), record);
+							}
+						}
+					}
+				}
 			}
-			pdfLink = uploadPdfAndgetArtifactURL(identifier, xAuthUser, pdfFilePath);
-
 		} catch (Exception ex) {
 			logger.error(String.format("Exception occurred while creating the pdf link for published work order! :  %s",
 					ex.getMessage()));
 		}
-		return pdfLink;
+		return userResult;
 	}
 
-	private void verifyCompetencyDetails(String authUserToken, WorkAllocationDTOV2 workAllocation) {
-		for (RoleCompetency roleCompetency : workAllocation.getRoleCompetencyList()) {
-			List<CompetencyDetails> oldCompetencyDetails = roleCompetency.getCompetencyDetails();
-			List<CompetencyDetails> newCompetencyDetails = new ArrayList<>();
-			allocationService.addOrUpdateCompetencyToFrac(authUserToken, oldCompetencyDetails, newCompetencyDetails);
-			if (oldCompetencyDetails.size() == newCompetencyDetails.size()) {
-				roleCompetency.setCompetencyDetails(newCompetencyDetails);
-			} else {
-				String d = String.format(
-						"Failed to create FRAC Competency / CompetencyLevel. Old List Size: %d , New List Size: %d",
-						oldCompetencyDetails.size(), newCompetencyDetails.size());
-				logger.error(d);
-			}
+	private Map<String, Object> getSearchObject(Set<String> userIds) {
+		Map<String, Object> request = new HashMap<>();
+		Map<String, Object> filters = new HashMap<>();
+		filters.put("userId", userIds);
+		request.put("filters", filters);
+		request.put("query", "");
+		Map<String, Object> requestWrapper = new HashMap<>();
+		requestWrapper.put("request", request);
+		return requestWrapper;
+	}
+
+	public Response getUserCompetencies(String userId) {
+		HashSet<CompetencyDetails> competencyDetails = new HashSet<>();
+		List<UserWorkAllocationMappingModel> userWorkAllocationMappings = new ArrayList<>();
+		Map<String, Object> propertyMap = new HashMap<>();
+		propertyMap.put(Constants.USER_ID_CONSTANT, userId);
+		List<Map<String, Object>> mappingList = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
+				Constants.TABLE_USER_WORK_ALLOCATION_MAPPING, propertyMap, new ArrayList<>());
+		for (Map<String, Object> mapObj : mappingList) {
+			userWorkAllocationMappings.add(mapper.convertValue(mapObj, UserWorkAllocationMappingModel.class));
 		}
-	}
 
-	private void verifyRoleActivity(String authUserToken, WorkAllocationDTOV2 workAllocation) {
-		Iterator<RoleCompetency> itr = workAllocation.getRoleCompetencyList().iterator();
-		while (itr.hasNext()) {
-			RoleCompetency roleCompetency = itr.next();
-			Role oldRole = roleCompetency.getRoleDetails();
-			Role newRole = null;
-			try {
-				if (StringUtils.isEmpty(oldRole.getId())) {
-					newRole = allocationService.fetchAddedRole(authUserToken, oldRole, null);
-					maintainExtraRoleInfo(newRole, roleCompetency);
-					roleCompetency.setRoleDetails(newRole);
-				} else // Role is from FRAC - No need to create new.
-				// However, we need to check Activity is from FRAC or not.
-				if (!CollectionUtils.isEmpty(oldRole.getChildNodes())) {
-					List<ChildNode> newChildNodes = new ArrayList<>();
-					boolean isNewChildAdded = oldRole.getChildNodes().stream()
-							.anyMatch(childNode -> StringUtils.isEmpty(childNode.getId()));
-					if (isNewChildAdded) {
-						newRole = allocationService.fetchAddedRole(authUserToken, oldRole, null);
-						newChildNodes.addAll(newRole.getChildNodes());
-					} else {
-						newChildNodes.addAll(oldRole.getChildNodes());
+		if (!CollectionUtils.isEmpty(userWorkAllocationMappings)) {
+			List<String> workAllocationIds = userWorkAllocationMappings.stream().filter(
+					allocationDetails -> WorkAllocationConstants.PUBLISHED_STATUS.equals(allocationDetails.getStatus()))
+					.map(userWorkAllocationMapping -> userWorkAllocationMapping.getWorkAllocationId())
+					.collect(Collectors.toList());
+			if (!CollectionUtils.isEmpty(workAllocationIds)) {
+				final BoolQueryBuilder query = QueryBuilders.boolQuery();
+				query.must(QueryBuilders.termsQuery("id.keyword", workAllocationIds));
+				SearchSourceBuilder sourceBuilder = new SearchSourceBuilder().query(query);
+				sourceBuilder.fetchSource(includeFields, new String[] {});
+				try {
+					SearchResponse searchResponse = indexerService.getEsResult(workAllocationIndex,
+							workAllocationIndexType, sourceBuilder);
+					for (SearchHit hit : searchResponse.getHits()) {
+						Map<String, Object> sourceAsMap = hit.getSourceAsMap();
+						List<RoleCompetency> roleCompetencies = mapper.convertValue(
+								sourceAsMap.get("roleCompetencyList"), new TypeReference<List<RoleCompetency>>() {
+								});
+						if (!CollectionUtils.isEmpty(roleCompetencies)) {
+							List<CompetencyDetails> competencyDetailsList = roleCompetencies.stream()
+									.map(roleCompetency -> roleCompetency.getCompetencyDetails())
+									.flatMap(competencyList -> competencyList.stream()).collect(Collectors.toList());
+							competencyDetails.addAll(competencyDetailsList);
+						}
 					}
-					oldRole.setChildNodes(newChildNodes);
-					maintainExtraRoleInfo(oldRole, roleCompetency);
-					roleCompetency.setRoleDetails(oldRole);
+				} catch (IOException e) {
+					logger.error("Elastic Search Exception", e);
 				}
-			} catch (Exception e) {
-				logger.error(String.format("Failed to Add Role / Activity. Excption: %s ", e.getMessage()));
 			}
 		}
+		Response response = new Response();
+		response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
+		response.put(Constants.DATA, competencyDetails);
+		response.put(Constants.STATUS, HttpStatus.OK);
+		return response;
 	}
 }
