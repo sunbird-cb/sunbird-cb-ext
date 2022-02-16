@@ -168,7 +168,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 				request.put(Constants.FIRSTLOGINTIME, new Timestamp(System.currentTimeMillis()).toString());
 				cassandraOperation.insertRecord(Constants.DATABASE, Constants.LOGIN_TABLE, request);
 
-				userUtilityUtils.pushDataToKafka();
+				// userUtilityUtils.pushDataToKafka();
 			}
 		} catch (Exception e) {
 			throw new ApplicationLogicError("Sunbird Service ERROR: ", e);
