@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,21 +25,12 @@ public class SearchByController {
 	@Autowired
 	private SearchByService searchByService;
 
+	// v1/readCompetency
 	@GetMapping("/v1/browseByCompetency")
 	public ResponseEntity<Collection<CompetencyInfo>> browseByCompetency(
 			@RequestHeader("x-authenticated-user-token") String authUserToken)
 			throws JsonProcessingException, MyOwnRuntimeException {
 		return new ResponseEntity<>(searchByService.getCompetencyDetails(authUserToken), HttpStatus.OK);
-	}
-
-	@PostMapping("/v1/browseByCompetency")
-	public ResponseEntity<Collection<CompetencyInfo>> browseByCompetencyByFilter(
-			@RequestHeader("x-authenticated-user-token") String authUserToken,
-			@Valid @RequestBody SearchByFilter filter) throws MyOwnRuntimeException, JsonProcessingException {
-		if (filter == null) {
-			throw new MyOwnRuntimeException("Invalid Request");
-		}
-		return new ResponseEntity<>(searchByService.getCompetencyDetailsByFilter(authUserToken, filter), HttpStatus.OK);
 	}
 
 	@GetMapping("/v1/browseByProvider")

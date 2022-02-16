@@ -121,7 +121,9 @@ public class SearchByService {
 			logger.info("");
 			updateProviderDetails(authUserToken);
 		}
-		return (Collection<ProviderInfo>) redisCacheMgr.getCache(Constants.PROVIDER_CACHE_NAME);
+		Map<String, ProviderInfo> providerMap = (Map<String, ProviderInfo>) redisCacheMgr
+				.getCache(Constants.PROVIDER_CACHE_NAME);
+		return providerMap.values();
 	}
 
 	private List<String> listToLowerCase(List<String> convertString) {
@@ -163,6 +165,7 @@ public class SearchByService {
 					if (!CollectionUtils.isEmpty(facetValueList)) {
 						for (Map<String, Object> facetValueObj : facetValueList) {
 							CompetencyInfo compInfo = new CompetencyInfo();
+							// TODO - Make sure which competency field is unique
 							compInfo.setContentCount((int) facetValueObj.get("count"));
 							competencyMap.put((String) facetValueObj.get("name"), compInfo);
 						}
