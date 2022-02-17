@@ -168,16 +168,16 @@ public class ProfileServiceImpl implements ProfileService{
 
                 Map<String, Object> resultValue = (Map<String, Object>) workflowResponse.get(Constants.RESULT);
                 if (resultValue.get(Constants.STATUS).equals(Constants.OK)) {
-                    response.setResponseCode(HttpStatus.OK);
                     resultObject.setStatus(Constants.SUCCESS);
                     response.getResult().put(Constants.TRANSITION_DETAILS,resultObject);
+                    response.getParams().setStatus(Constants.SUCCESS);
                 } else {
-                    response.setResponseCode(HttpStatus.OK);
                     resultObject.setStatus(Constants.FAILED);
                     resultObject.setErrmsg((String) resultValue.get(Constants.MESSAGE));
                     response.getResult().put(Constants.TRANSITION_DETAILS,resultObject);
                 }
             }
+            response.setResponseCode(HttpStatus.OK);
         } catch (Exception e) {
             log.error(e);
             response.getParams().setStatus(Constants.FAILED);
