@@ -234,6 +234,10 @@ public class Constants {
     public static final String PROFILE_UPDATE_FIELDS = "profileUpdateFields_";
     public static final String IGOT = "igot";
     public static final String DOPT = "dopt";
+    public static final String PERSONAL_DETAILS = "personalDetails";
+    public static final String TRANSITION_DETAILS = "transitionDetails";
+
+
     // Redis
     public static final String API_REDIS_DELETE = "api.redis.delete";
     public static final String API_REDIS_GET_KEYS = "api.redis.get.keys";

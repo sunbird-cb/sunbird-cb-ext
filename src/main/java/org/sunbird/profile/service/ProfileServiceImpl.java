@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.sunbird.cache.RedisCacheMgr;
 import org.sunbird.common.model.SBApiResponse;
+import org.sunbird.common.model.SunbirdApiRespParam;
 import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
 import org.sunbird.common.service.UserUtilityServiceImpl;
 import org.sunbird.common.util.CbExtServerProperties;
@@ -36,6 +37,7 @@ public class ProfileServiceImpl implements ProfileService{
     @Override
     public SBApiResponse profileUpdate(Map<String,Object> request, String XAuthToken, String AuthToken) throws Exception {
         SBApiResponse response = new SBApiResponse(Constants.API_PROFILE_UPDATE);
+        SunbirdApiRespParam resultObject = new SunbirdApiRespParam();
         try {
             Map<String, Object> requestData = (Map<String, Object>) request.get(Constants.REQUEST);
             String userId = (String) requestData.get(Constants.USER_ID);
@@ -79,10 +81,15 @@ public class ProfileServiceImpl implements ProfileService{
                 updateResponse =
                         outboundRequestHandlerService.fetchResultUsingPatch(serverConfig.getSbUrl()+serverConfig.getLmsUserUpdatePath(), updateRequest, headerValues);
                 if (updateResponse.get(Constants.RESPONSE_CODE).equals(Constants.OK)){
-                    response.getParams().setMsgid("personal details updated");
+                    resultObject.setStatus(Constants.SUCCESS);
+                    response.setResponseCode(HttpStatus.OK);
+                    response.getResult().put(Constants.PERSONAL_DETAILS,resultObject);
+                    response.getParams().setStatus(Constants.SUCCESS);
                 }else {
-                    response.getParams().setErrmsg("personal details updatation failed");
+                    resultObject.setStatus(Constants.FAILED);
+                    response.getResult().put(Constants.PERSONAL_DETAILS,resultObject);
                     response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+                    response.getParams().setStatus(Constants.FAILED);
                     return response;
                 }
 
@@ -162,18 +169,12 @@ public class ProfileServiceImpl implements ProfileService{
 
                 Map<String, Object> resultValue = (Map<String, Object>) workflowResponse.get(Constants.RESULT);
                 if (resultValue.get(Constants.STATUS).equals(Constants.OK)) {
-                    response.setResponseCode(HttpStatus.OK);
-                    response.getParams().setStatus((String) resultValue.get(Constants.MESSAGE));
+                    resultObject.setStatus(Constants.SUCCESS);
+                    response.getResult().put(Constants.TRANSITION_DETAILS,resultObject);
                 } else {
-                    response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
-                    response.getParams().setMsgid("personal details updated");
-                    response.getParams().setErrmsg((String) resultValue.get(Constants.MESSAGE));
+                    resultObject.setStatus(Constants.FAILED);
+                    response.getResult().put(Constants.TRANSITION_DETAILS,resultObject);
                 }
-            }else {
-                response.setResponseCode(HttpStatus.OK);
-                response.getParams().setStatus("There are no fields updated which requires approval");
-                response.getResult().put("Personal","");
-
             }
         } catch (Exception e) {
             log.error(e);
