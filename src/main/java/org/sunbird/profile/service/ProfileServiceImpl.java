@@ -172,13 +172,14 @@ public class ProfileServiceImpl implements ProfileService{
             }else {
                 response.setResponseCode(HttpStatus.OK);
                 response.getParams().setStatus("There are no fields updated which requires approval");
+                response.getResult().put("Personal","");
 
             }
         } catch (Exception e) {
             log.error(e);
             response.getParams().setStatus(Constants.FAILED);
             response.getParams().setErr(String.valueOf(e));
-            response.setResponseCode(HttpStatus.FORBIDDEN);
+            response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
 
         }
         return response;
@@ -204,8 +205,8 @@ public class ProfileServiceImpl implements ProfileService{
             Map<String, Object> approvalResult = (Map<String, Object>) approvalData.get(Constants.RESULT);
             Map<String, Object> approvalResponse = (Map<String, Object>) approvalResult.get(Constants.RESPONSE);
             String value = (String) approvalResponse.get(Constants.VALUE);
-            List<String> approvalValues = new ArrayList<>();
-            approvalValues.add(value);
+            String strArray[] = value.split(" ");
+            List<String> approvalValues = Arrays.asList(strArray);
             return approvalValues;
         }
     }
