@@ -82,7 +82,6 @@ public class ProfileServiceImpl implements ProfileService{
                         outboundRequestHandlerService.fetchResultUsingPatch(serverConfig.getSbUrl()+serverConfig.getLmsUserUpdatePath(), updateRequest, headerValues);
                 if (updateResponse.get(Constants.RESPONSE_CODE).equals(Constants.OK)){
                     resultObject.setStatus(Constants.SUCCESS);
-                    response.setResponseCode(HttpStatus.OK);
                     response.getResult().put(Constants.PERSONAL_DETAILS,resultObject);
                     response.getParams().setStatus(Constants.SUCCESS);
                 }else {
@@ -169,10 +168,13 @@ public class ProfileServiceImpl implements ProfileService{
 
                 Map<String, Object> resultValue = (Map<String, Object>) workflowResponse.get(Constants.RESULT);
                 if (resultValue.get(Constants.STATUS).equals(Constants.OK)) {
+                    response.setResponseCode(HttpStatus.OK);
                     resultObject.setStatus(Constants.SUCCESS);
                     response.getResult().put(Constants.TRANSITION_DETAILS,resultObject);
                 } else {
+                    response.setResponseCode(HttpStatus.OK);
                     resultObject.setStatus(Constants.FAILED);
+                    resultObject.setErrmsg((String) resultValue.get(Constants.MESSAGE));
                     response.getResult().put(Constants.TRANSITION_DETAILS,resultObject);
                 }
             }

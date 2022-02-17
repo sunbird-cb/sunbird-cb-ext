@@ -177,7 +177,7 @@ public class Constants {
     public static final String QUE_MARK = "?";
     public static final String COMMA = ",";
     public static final String CLOSING_BRACE = ");";
-    public static final String SUCCESS = "SUCCESS";
+    public static final String SUCCESS = "success";
     public static final String UNKNOWN_IDENTIFIER = "Unknown identifier ";
     public static final String UNDEFINED_IDENTIFIER = "Undefined column name ";
     public static final String EXCEPTION_MSG_FETCH = "Exception occurred while fetching record from ";
