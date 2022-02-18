@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 import org.sunbird.cache.RedisCacheMgr;
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.model.SunbirdApiRespParam;
@@ -40,11 +41,13 @@ public class ProfileServiceImpl implements ProfileService{
         SunbirdApiRespParam resultObject = new SunbirdApiRespParam();
         try {
             Map<String, Object> requestData = (Map<String, Object>) request.get(Constants.REQUEST);
+            Boolean validation = ValidateRequest(requestData);
+            if (validation){
             String userId = (String) requestData.get(Constants.USER_ID);
             Map<String, Object> profileDetailsMap = (Map<String, Object>) requestData.get(Constants.PROFILE_DETAILS);
             List<String> approvalFieldList = approvalFields(AuthToken, XAuthToken);
             Map<String, Object> transitionData = new HashMap<>();
-            for (String approvalList : approvalFieldList){
+            for (String approvalList : approvalFieldList) {
                 if (profileDetailsMap.containsKey(approvalList)) {
                     transitionData.put(approvalList, profileDetailsMap.get(approvalList));
                     profileDetailsMap.remove(approvalList);
@@ -69,7 +72,7 @@ public class ProfileServiceImpl implements ProfileService{
                     Map<String, Object> keyListRead = (Map<String, Object>) existingProfileDetails.get(list);
                     Map<String, Object> keyListRequest = (Map<String, Object>) profileDetailsMap.get(list);
                     for (String keysList : keyListRequest.keySet()) {
-                        keyListRead.put(keysList,keyListRequest.get(keysList));
+                        keyListRead.put(keysList, keyListRequest.get(keysList));
                     }
                 }
                 Map<String, Object> updateRequestValue = requestData;
@@ -79,14 +82,14 @@ public class ProfileServiceImpl implements ProfileService{
 
                 url.append(serverConfig.getSbUrl()).append(serverConfig.getLmsUserUpdatePath());
                 updateResponse =
-                        outboundRequestHandlerService.fetchResultUsingPatch(serverConfig.getSbUrl()+serverConfig.getLmsUserUpdatePath(), updateRequest, headerValues);
-                if (updateResponse.get(Constants.RESPONSE_CODE).equals(Constants.OK)){
+                        outboundRequestHandlerService.fetchResultUsingPatch(serverConfig.getSbUrl() + serverConfig.getLmsUserUpdatePath(), updateRequest, headerValues);
+                if (updateResponse.get(Constants.RESPONSE_CODE).equals(Constants.OK)) {
                     resultObject.setStatus(Constants.SUCCESS);
-                    response.getResult().put(Constants.PERSONAL_DETAILS,resultObject);
+                    response.getResult().put(Constants.PERSONAL_DETAILS, resultObject);
                     response.getParams().setStatus(Constants.SUCCESS);
-                }else {
+                } else {
                     resultObject.setStatus(Constants.FAILED);
-                    response.getResult().put(Constants.PERSONAL_DETAILS,resultObject);
+                    response.getResult().put(Constants.PERSONAL_DETAILS, resultObject);
                     response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
                     response.getParams().setStatus(Constants.FAILED);
                     return response;
@@ -169,15 +172,20 @@ public class ProfileServiceImpl implements ProfileService{
                 Map<String, Object> resultValue = (Map<String, Object>) workflowResponse.get(Constants.RESULT);
                 if (resultValue.get(Constants.STATUS).equals(Constants.OK)) {
                     resultObject.setStatus(Constants.SUCCESS);
-                    response.getResult().put(Constants.TRANSITION_DETAILS,resultObject);
+                    response.getResult().put(Constants.TRANSITION_DETAILS, resultObject);
                     response.getParams().setStatus(Constants.SUCCESS);
                 } else {
                     resultObject.setStatus(Constants.FAILED);
                     resultObject.setErrmsg((String) resultValue.get(Constants.MESSAGE));
-                    response.getResult().put(Constants.TRANSITION_DETAILS,resultObject);
+                    response.getResult().put(Constants.TRANSITION_DETAILS, resultObject);
                 }
             }
             response.setResponseCode(HttpStatus.OK);
+        } else {
+                response.setResponseCode(HttpStatus.BAD_REQUEST);
+                response.getParams().setStatus(Constants.FAILED);
+                return response;
+            }
         } catch (Exception e) {
             log.error(e);
             response.getParams().setStatus(Constants.FAILED);
@@ -213,4 +221,13 @@ public class ProfileServiceImpl implements ProfileService{
             return approvalValues;
         }
     }
+
+    public boolean ValidateRequest(Map<String, Object> requestBody) {
+        if (!(ObjectUtils.isEmpty(requestBody.get(Constants.USER_ID))) && !(ObjectUtils.isEmpty(requestBody.get(Constants.PROFILE_DETAILS)))){
+           return true;
+        } else {
+            return false;
+        }
+    }
+
 }
