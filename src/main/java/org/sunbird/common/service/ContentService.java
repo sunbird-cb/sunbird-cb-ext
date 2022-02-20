@@ -9,9 +9,9 @@ public interface ContentService {
 
 	public SunbirdApiResp getHeirarchyResponse(String contentId);
 
-	public List<String> getParticipantsList(String xAuthUser, List<String> batchIdList);
-
 	public List<String> getParticipantsForBatch(String xAuthUser, String batchId);
+
+	public List<String> getParticipantsList(String xAuthUser, List<String> batchIdList);
 
 	public SunbirdApiUserCourseListResp getUserCourseListResponse(String authToken, String userId);
 }

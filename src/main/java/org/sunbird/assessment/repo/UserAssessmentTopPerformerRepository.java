@@ -12,7 +12,7 @@ public interface UserAssessmentTopPerformerRepository
 		extends CassandraRepository<UserAssessmentTopPerformerModel, UserAssessmentTopPerformerPrimaryKeyModel> {
 	/**
 	 * finds the top performers of given assessments(limit 250)
-	 * 
+	 *
 	 * @param ids
 	 * @return
 	 */

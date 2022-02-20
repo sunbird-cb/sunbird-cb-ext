@@ -7,19 +7,19 @@ public class FracResponse {
 	private FracStatusInfo statusInfo;
 	private ResponseData responseData;
 
-	public FracStatusInfo getStatusInfo() {
-		return statusInfo;
-	}
-
-	public void setStatusInfo(FracStatusInfo statusInfo) {
-		this.statusInfo = statusInfo;
-	}
-
 	public ResponseData getResponseData() {
 		return responseData;
 	}
 
+	public FracStatusInfo getStatusInfo() {
+		return statusInfo;
+	}
+
 	public void setResponseData(ResponseData responseData) {
 		this.responseData = responseData;
+	}
+
+	public void setStatusInfo(FracStatusInfo statusInfo) {
+		this.statusInfo = statusInfo;
 	}
 }

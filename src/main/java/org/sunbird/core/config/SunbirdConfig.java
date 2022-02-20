@@ -49,7 +49,7 @@ public class SunbirdConfig extends CassandraConfig {
 		try {
 			cluster.afterPropertiesSet();
 		} catch (Exception e) {
-			logger.error("Failed to construct Cassandra Cluster Object. ", e);
+			logger.error(String.format("Failed to construct Cassandra Cluster Object. %s", e.getMessage()));
 			return null;
 		}
 

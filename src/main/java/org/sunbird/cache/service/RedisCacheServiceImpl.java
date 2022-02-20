@@ -15,20 +15,22 @@ import org.sunbird.core.logger.CbExtLogger;
 @Service
 public class RedisCacheServiceImpl implements RedisCacheService {
 
+	private static final String NO_KEYS_FOUND_REDIS_CACHE_IS_EMPTY = "No Keys found, Redis cache is empty";
+
 	@Autowired
 	RedisCacheMgr redisCache;
 
 	private CbExtLogger logger = new CbExtLogger(getClass().getName());
 
 	@Override
-	public SBApiResponse deleteCache() throws Exception {
+	public SBApiResponse deleteCache() {
 		SBApiResponse response = new SBApiResponse(Constants.API_REDIS_DELETE);
 		boolean res = redisCache.deleteCache();
 		if (res) {
 			response.getParams().setStatus(Constants.SUCCESSFUL);
 			response.setResponseCode(HttpStatus.OK);
 		} else {
-			String errMsg = "No Keys found, Redis cache is empty";
+			String errMsg = NO_KEYS_FOUND_REDIS_CACHE_IS_EMPTY;
 			logger.info(errMsg);
 			response.getParams().setErrmsg(errMsg);
 			response.setResponseCode(HttpStatus.NOT_FOUND);
@@ -37,7 +39,7 @@ public class RedisCacheServiceImpl implements RedisCacheService {
 	}
 
 	@Override
-	public SBApiResponse getKeys() throws Exception {
+	public SBApiResponse getKeys() {
 		SBApiResponse response = new SBApiResponse(Constants.API_REDIS_GET_KEYS);
 		Set<String> res = redisCache.getAllKeys();
 		if (!res.isEmpty()) {
@@ -47,7 +49,7 @@ public class RedisCacheServiceImpl implements RedisCacheService {
 			response.setResponseCode(HttpStatus.OK);
 
 		} else {
-			String errMsg = "No Keys found, Redis cache is empty";
+			String errMsg = NO_KEYS_FOUND_REDIS_CACHE_IS_EMPTY;
 			logger.info(errMsg);
 			response.getParams().setErrmsg(errMsg);
 			response.setResponseCode(HttpStatus.NOT_FOUND);
@@ -56,7 +58,7 @@ public class RedisCacheServiceImpl implements RedisCacheService {
 	}
 
 	@Override
-	public SBApiResponse getKeysAndValues() throws Exception {
+	public SBApiResponse getKeysAndValues() {
 		SBApiResponse response = new SBApiResponse(Constants.API_REDIS_GET_KEYS_VALUE_SET);
 		List<Map<String, Object>> result = redisCache.getAllKeysAndValues();
 
@@ -66,7 +68,7 @@ public class RedisCacheServiceImpl implements RedisCacheService {
 			response.put(Constants.RESPONSE, result);
 			response.setResponseCode(HttpStatus.OK);
 		} else {
-			String errMsg = "No Keys found, Redis cache is empty";
+			String errMsg = NO_KEYS_FOUND_REDIS_CACHE_IS_EMPTY;
 			logger.info(errMsg);
 			response.getParams().setErrmsg(errMsg);
 			response.setResponseCode(HttpStatus.NOT_FOUND);

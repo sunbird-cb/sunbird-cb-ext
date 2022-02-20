@@ -1,5 +1,6 @@
 package org.sunbird.assessment.controller;
 
+import java.text.ParseException;
 import java.util.Map;
 
 import javax.validation.Valid;
@@ -23,22 +24,6 @@ public class AssessmentController {
 	AssessmentService assessmentService;
 
 	/**
-	 * validates, submits and inserts assessments and quizzes into the db
-	 *
-	 * @param requestBody
-	 * @param userId
-	 * @return
-	 * @throws Exception
-	 */
-	@PostMapping("/v2/user/{userId}/assessment/submit")
-	public ResponseEntity<Map<String, Object>> submitAssessment(@Valid @RequestBody AssessmentSubmissionDTO requestBody,
-			@PathVariable("userId") String userId, @RequestHeader("rootOrg") String rootOrg) throws Exception {
-
-		return new ResponseEntity<>(assessmentService.submitAssessment(rootOrg, requestBody, userId),
-				HttpStatus.CREATED);
-	}
-
-	/**
 	 * Controller to a get request to Fetch AssessmentData the request requires
 	 * user_id and course_id returns a JSON of processed data and list of
 	 * Assessments Given
@@ -51,28 +36,25 @@ public class AssessmentController {
 	 */
 	@GetMapping("/v2/content/{courseId}/user/{userId}/assessment")
 	public ResponseEntity<Map<String, Object>> getAssessmentByContentUser(@PathVariable String courseId,
-			@PathVariable("userId") String userId, @RequestHeader("rootOrg") String rootOrg) throws Exception {
+			@PathVariable("userId") String userId, @RequestHeader("rootOrg") String rootOrg) {
 		return new ResponseEntity<>(assessmentService.getAssessmentByContentUser(rootOrg, courseId, userId),
 				HttpStatus.OK);
 	}
 
-	// =======================
-	// KONG API Changes
 	/**
-	 * validates, submits and inserts assessments and quizzes into the db
+	 * To get the assessment question sets using the course and the assessment id
 	 *
-	 * @param requestBody
-	 * @param userId
+	 * @param courseId
+	 * @param assessmentContentId
+	 * @param rootOrg
 	 * @return
 	 * @throws Exception
 	 */
-	@PostMapping("/v2/user/assessment/submit")
-	public ResponseEntity<Map<String, Object>> submitUserAssessment(
-			@Valid @RequestBody AssessmentSubmissionDTO requestBody, @RequestHeader("userId") String userId,
-			@RequestHeader("rootOrg") String rootOrg) throws Exception {
-
-		return new ResponseEntity<>(assessmentService.submitAssessment(rootOrg, requestBody, userId),
-				HttpStatus.CREATED);
+	@GetMapping("/v2/{courseId}/assessment/{assessmentContentId}")
+	public ResponseEntity<Map<String, Object>> getAssessmentContent(@PathVariable("courseId") String courseId,
+			@PathVariable("assessmentContentId") String assessmentContentId, @RequestHeader("rootOrg") String rootOrg) {
+		return new ResponseEntity<>(assessmentService.getAssessmentContent(courseId, assessmentContentId),
+				HttpStatus.OK);
 	}
 
 	/**
@@ -88,25 +70,48 @@ public class AssessmentController {
 	 */
 	@GetMapping("/v2/content/user/assessment")
 	public ResponseEntity<Map<String, Object>> getUserAssessmentByContent(@RequestHeader("courseId") String courseId,
-			@RequestHeader("userId") String userId, @RequestHeader("rootOrg") String rootOrg) throws Exception {
+			@RequestHeader("userId") String userId, @RequestHeader("rootOrg") String rootOrg) {
 		return new ResponseEntity<>(assessmentService.getAssessmentByContentUser(rootOrg, courseId, userId),
 				HttpStatus.OK);
 	}
 
 	/**
-	 * To get the assessment question sets using the course and the assessment id
-	 * 
-	 * @param courseId
-	 * @param assessmentContentId
-	 * @param rootOrg
+	 * validates, submits and inserts assessments and quizzes into the db
+	 *
+	 * @param requestBody
+	 * @param userId
 	 * @return
+	 * @throws ParseException
+	 * @throws NumberFormatException
 	 * @throws Exception
 	 */
-	@GetMapping("/v2/{courseId}/assessment/{assessmentContentId}")
-	public ResponseEntity<Map<String, Object>> getAssessmentContent(@PathVariable("courseId") String courseId,
-			@PathVariable("assessmentContentId") String assessmentContentId, @RequestHeader("rootOrg") String rootOrg)
-			throws Exception {
-		return new ResponseEntity<>(assessmentService.getAssessmentContent(courseId, assessmentContentId),
-				HttpStatus.OK);
+	@PostMapping("/v2/user/{userId}/assessment/submit")
+	public ResponseEntity<Map<String, Object>> submitAssessment(@Valid @RequestBody AssessmentSubmissionDTO requestBody,
+			@PathVariable("userId") String userId, @RequestHeader("rootOrg") String rootOrg)
+			throws NumberFormatException, ParseException {
+
+		return new ResponseEntity<>(assessmentService.submitAssessment(rootOrg, requestBody, userId),
+				HttpStatus.CREATED);
+	}
+
+	// =======================
+	// KONG API Changes
+	/**
+	 * validates, submits and inserts assessments and quizzes into the db
+	 *
+	 * @param requestBody
+	 * @param userId
+	 * @return
+	 * @throws ParseException
+	 * @throws NumberFormatExceptio
+	 * @throws Exception
+	 */
+	@PostMapping("/v2/user/assessment/submit")
+	public ResponseEntity<Map<String, Object>> submitUserAssessment(
+			@Valid @RequestBody AssessmentSubmissionDTO requestBody, @RequestHeader("userId") String userId,
+			@RequestHeader("rootOrg") String rootOrg) throws NumberFormatException, ParseException {
+
+		return new ResponseEntity<>(assessmentService.submitAssessment(rootOrg, requestBody, userId),
+				HttpStatus.CREATED);
 	}
 }

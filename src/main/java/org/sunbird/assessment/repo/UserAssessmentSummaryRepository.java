@@ -10,7 +10,7 @@ public interface UserAssessmentSummaryRepository
 
 	/**
 	 * returns assessment count for a user
-	 * 
+	 *
 	 * @param userId
 	 * @return
 	 */

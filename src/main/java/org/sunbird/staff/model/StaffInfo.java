@@ -8,44 +8,44 @@ public class StaffInfo {
 	private Integer totalPositionsFilled;
 	private Integer totalPositionsVacant;
 
-	public String getPosition() {
-		return position;
-	}
-
-	public void setPosition(String position) {
-		this.position = position;
-	}
-
-	public Integer getTotalPositionsFilled() {
-		return totalPositionsFilled;
-	}
-
-	public void setTotalPositionsFilled(Integer totalPositionsFilled) {
-		this.totalPositionsFilled = totalPositionsFilled;
-	}
-
-	public Integer getTotalPositionsVacant() {
-		return totalPositionsVacant;
-	}
-
-	public void setTotalPositionsVacant(Integer totalPositionsVacant) {
-		this.totalPositionsVacant = totalPositionsVacant;
+	public String getId() {
+		return id;
 	}
 
 	public String getOrgId() {
 		return orgId;
 	}
 
-	public void setOrgId(String orgId) {
-		this.orgId = orgId;
+	public String getPosition() {
+		return position;
 	}
 
-	public String getId() {
-		return id;
+	public Integer getTotalPositionsFilled() {
+		return totalPositionsFilled;
+	}
+
+	public Integer getTotalPositionsVacant() {
+		return totalPositionsVacant;
 	}
 
 	public void setId(String id) {
 		this.id = id;
+	}
+
+	public void setOrgId(String orgId) {
+		this.orgId = orgId;
+	}
+
+	public void setPosition(String position) {
+		this.position = position;
+	}
+
+	public void setTotalPositionsFilled(Integer totalPositionsFilled) {
+		this.totalPositionsFilled = totalPositionsFilled;
+	}
+
+	public void setTotalPositionsVacant(Integer totalPositionsVacant) {
+		this.totalPositionsVacant = totalPositionsVacant;
 	}
 
 }

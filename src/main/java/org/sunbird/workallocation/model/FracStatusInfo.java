@@ -5,28 +5,28 @@ public class FracStatusInfo {
 	private String statusMessage;
 	private String errorMessage;
 
-	public int getStatusCode() {
-		return statusCode;
+	public String getErrorMessage() {
+		return errorMessage;
 	}
 
-	public void setStatusCode(int statusCode) {
-		this.statusCode = statusCode;
+	public int getStatusCode() {
+		return statusCode;
 	}
 
 	public String getStatusMessage() {
 		return statusMessage;
 	}
 
-	public void setStatusMessage(String statusMessage) {
-		this.statusMessage = statusMessage;
-	}
-
-	public String getErrorMessage() {
-		return errorMessage;
-	}
-
 	public void setErrorMessage(String errorMessage) {
 		this.errorMessage = errorMessage;
+	}
+
+	public void setStatusCode(int statusCode) {
+		this.statusCode = statusCode;
+	}
+
+	public void setStatusMessage(String statusMessage) {
+		this.statusMessage = statusMessage;
 	}
 
 }

@@ -4,29 +4,29 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class MandatoryContentResponse {
-    private boolean mandatoryCourseCompleted;
-    private Map<String, MandatoryContentInfo> contentDetails;
+	private boolean mandatoryCourseCompleted;
+	private Map<String, MandatoryContentInfo> contentDetails;
 
-    public void addContentInfo(String contentId, MandatoryContentInfo contentInfo) {
-        if (contentDetails == null) {
-            contentDetails = new HashMap<>();
-        }
-        contentDetails.put(contentId, contentInfo);
-    }
+	public void addContentInfo(String contentId, MandatoryContentInfo contentInfo) {
+		if (contentDetails == null) {
+			contentDetails = new HashMap<>();
+		}
+		contentDetails.put(contentId, contentInfo);
+	}
 
-    public boolean isMandatoryCourseCompleted() {
-        return mandatoryCourseCompleted;
-    }
+	public Map<String, MandatoryContentInfo> getContentDetails() {
+		return contentDetails;
+	}
 
-    public void setMandatoryCourseCompleted(boolean mandatoryCourseCompleted) {
-        this.mandatoryCourseCompleted = mandatoryCourseCompleted;
-    }
+	public boolean isMandatoryCourseCompleted() {
+		return mandatoryCourseCompleted;
+	}
 
-    public Map<String, MandatoryContentInfo> getContentDetails() {
-        return contentDetails;
-    }
+	public void setContentDetails(Map<String, MandatoryContentInfo> contentDetails) {
+		this.contentDetails = contentDetails;
+	}
 
-    public void setContentDetails(Map<String, MandatoryContentInfo> contentDetails) {
-        this.contentDetails = contentDetails;
-    }
+	public void setMandatoryCourseCompleted(boolean mandatoryCourseCompleted) {
+		this.mandatoryCourseCompleted = mandatoryCourseCompleted;
+	}
 }

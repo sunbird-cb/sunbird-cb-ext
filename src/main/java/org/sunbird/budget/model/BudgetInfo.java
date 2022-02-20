@@ -14,64 +14,64 @@ public class BudgetInfo {
 	private Long trainingBudgetUtilization;
 	private List<Map<String, String>> proofDocs;
 
-	public String getId() {
-		return id;
+	public String getBudgetYear() {
+		return budgetYear;
 	}
 
-	public void setId(String id) {
-		this.id = id;
+	public String getId() {
+		return id;
 	}
 
 	public String getOrgId() {
 		return orgId;
 	}
 
-	public void setOrgId(String orgId) {
-		this.orgId = orgId;
-	}
-
-	public String getBudgetYear() {
-		return budgetYear;
-	}
-
-	public void setBudgetYear(String budgetYear) {
-		this.budgetYear = budgetYear;
-	}
-
 	public List<Map<String, String>> getProofDocs() {
 		return proofDocs;
-	}
-
-	public void setProofDocs(List<Map<String, String>> proofDocs) {
-		this.proofDocs = proofDocs;
 	}
 
 	public Long getSalaryBudgetAllocated() {
 		return salaryBudgetAllocated;
 	}
 
-	public void setSalaryBudgetAllocated(Long salaryBudgetAllocated) {
-		this.salaryBudgetAllocated = salaryBudgetAllocated;
-	}
-
 	public String getSchemeName() {
 		return schemeName;
-	}
-
-	public void setSchemeName(String schemeName) {
-		this.schemeName = schemeName;
 	}
 
 	public Long getTrainingBudgetAllocated() {
 		return trainingBudgetAllocated;
 	}
 
-	public void setTrainingBudgetAllocated(Long trainingBudgetAllocated) {
-		this.trainingBudgetAllocated = trainingBudgetAllocated;
-	}
-
 	public Long getTrainingBudgetUtilization() {
 		return trainingBudgetUtilization;
+	}
+
+	public void setBudgetYear(String budgetYear) {
+		this.budgetYear = budgetYear;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	public void setOrgId(String orgId) {
+		this.orgId = orgId;
+	}
+
+	public void setProofDocs(List<Map<String, String>> proofDocs) {
+		this.proofDocs = proofDocs;
+	}
+
+	public void setSalaryBudgetAllocated(Long salaryBudgetAllocated) {
+		this.salaryBudgetAllocated = salaryBudgetAllocated;
+	}
+
+	public void setSchemeName(String schemeName) {
+		this.schemeName = schemeName;
+	}
+
+	public void setTrainingBudgetAllocated(Long trainingBudgetAllocated) {
+		this.trainingBudgetAllocated = trainingBudgetAllocated;
 	}
 
 	public void setTrainingBudgetUtilization(Long trainingBudgetUtilization) {

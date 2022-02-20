@@ -24,132 +24,132 @@ public class SunbirdApiHierarchyResultContent {
 	private List<SunbirdApiBatchResp> batches;
 	private int leafNodesCount;
 
-	public String getParent() {
-		return parent;
-	}
-
-	public void setParent(String parent) {
-		this.parent = parent;
-	}
-
-	public String getIdentifier() {
-		return identifier;
-	}
-
-	public void setIdentifier(String identifier) {
-		this.identifier = identifier;
-	}
-
-	public String getDownloadUrl() {
-		return downloadUrl;
-	}
-
-	public void setDownloadUrl(String downloadUrl) {
-		this.downloadUrl = downloadUrl;
-	}
-
-	public String getChannel() {
-		return channel;
-	}
-
-	public void setChannel(String channel) {
-		this.channel = channel;
-	}
-
-	public String getSource() {
-		return source;
-	}
-
-	public void setSource(String source) {
-		this.source = source;
-	}
-
-	public String getMimeType() {
-		return mimeType;
-	}
-
-	public void setMimeType(String mimeType) {
-		this.mimeType = mimeType;
-	}
-
-	public String getObjectType() {
-		return objectType;
-	}
-
-	public void setObjectType(String objectType) {
-		this.objectType = objectType;
-	}
-
-	public String getPrimaryCategory() {
-		return primaryCategory;
-	}
-
-	public void setPrimaryCategory(String primaryCategory) {
-		this.primaryCategory = primaryCategory;
-	}
-
 	public String getArtifactUrl() {
 		return artifactUrl;
-	}
-
-	public void setArtifactUrl(String artifactUrl) {
-		this.artifactUrl = artifactUrl;
-	}
-
-	public String getContentType() {
-		return contentType;
-	}
-
-	public void setContentType(String contentType) {
-		this.contentType = contentType;
-	}
-
-	public String getStatus() {
-		return status;
-	}
-
-	public void setStatus(String status) {
-		this.status = status;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getCode() {
-		return code;
-	}
-
-	public void setCode(String code) {
-		this.code = code;
-	}
-
-	public String getStreamingUrl() {
-		return streamingUrl;
-	}
-
-	public void setStreamingUrl(String streamingUrl) {
-		this.streamingUrl = streamingUrl;
-	}
-
-	public List<SunbirdApiHierarchyResultContent> getChildren() {
-		return children;
-	}
-
-	public void setChildren(List<SunbirdApiHierarchyResultContent> children) {
-		this.children = children;
 	}
 
 	public List<SunbirdApiBatchResp> getBatches() {
 		return batches;
 	}
 
+	public String getChannel() {
+		return channel;
+	}
+
+	public List<SunbirdApiHierarchyResultContent> getChildren() {
+		return children;
+	}
+
+	public String getCode() {
+		return code;
+	}
+
+	public String getContentType() {
+		return contentType;
+	}
+
+	public String getDownloadUrl() {
+		return downloadUrl;
+	}
+
+	public String getIdentifier() {
+		return identifier;
+	}
+
+	public String getMimeType() {
+		return mimeType;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public String getObjectType() {
+		return objectType;
+	}
+
+	public String getParent() {
+		return parent;
+	}
+
+	public String getPrimaryCategory() {
+		return primaryCategory;
+	}
+
+	public String getSource() {
+		return source;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public String getStreamingUrl() {
+		return streamingUrl;
+	}
+
+	public void setArtifactUrl(String artifactUrl) {
+		this.artifactUrl = artifactUrl;
+	}
+
 	public void setBatches(List<SunbirdApiBatchResp> batches) {
 		this.batches = batches;
+	}
+
+	public void setChannel(String channel) {
+		this.channel = channel;
+	}
+
+	public void setChildren(List<SunbirdApiHierarchyResultContent> children) {
+		this.children = children;
+	}
+
+	public void setCode(String code) {
+		this.code = code;
+	}
+
+	public void setContentType(String contentType) {
+		this.contentType = contentType;
+	}
+
+	public void setDownloadUrl(String downloadUrl) {
+		this.downloadUrl = downloadUrl;
+	}
+
+	public void setIdentifier(String identifier) {
+		this.identifier = identifier;
+	}
+
+	public void setMimeType(String mimeType) {
+		this.mimeType = mimeType;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public void setObjectType(String objectType) {
+		this.objectType = objectType;
+	}
+
+	public void setParent(String parent) {
+		this.parent = parent;
+	}
+
+	public void setPrimaryCategory(String primaryCategory) {
+		this.primaryCategory = primaryCategory;
+	}
+
+	public void setSource(String source) {
+		this.source = source;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
+
+	public void setStreamingUrl(String streamingUrl) {
+		this.streamingUrl = streamingUrl;
 	}
 
 	public int getLeafNodesCount() {

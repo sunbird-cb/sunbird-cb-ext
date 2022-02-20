@@ -18,7 +18,15 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.sunbird.assessment.repo.CohortUsers;
 import org.sunbird.assessment.repo.UserAssessmentTopPerformerRepository;
-import org.sunbird.common.model.*;
+import org.sunbird.common.model.OpenSaberApiUserProfile;
+import org.sunbird.common.model.Response;
+import org.sunbird.common.model.SearchUserApiContent;
+import org.sunbird.common.model.SunbirdApiBatchResp;
+import org.sunbird.common.model.SunbirdApiHierarchyResultContent;
+import org.sunbird.common.model.SunbirdApiResp;
+import org.sunbird.common.model.SunbirdApiUserCourse;
+import org.sunbird.common.model.SunbirdApiUserCourseListResp;
+import org.sunbird.common.model.SunbirdUserProfessionalDetail;
 import org.sunbird.common.service.ContentService;
 import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
 import org.sunbird.common.service.UserUtilityService;
@@ -29,6 +37,8 @@ import org.sunbird.core.logger.CbExtLogger;
 @Service
 public class CohortsServiceImpl implements CohortsService {
 
+	private static final String SUCCESSFUL = "successful";
+	private static final String OPEN_BATCH = "Open Batch";
 	public static final String TS_CREATED = "ts_created";
 	private CbExtLogger logger = new CbExtLogger(getClass().getName());
 
@@ -49,14 +59,6 @@ public class CohortsServiceImpl implements CohortsService {
 
 	@Override
 	public List<CohortUsers> getTopPerformers(String rootOrg, String contentId, String userId, int count) {
-		// Check User exists
-// 		if (!userUtilService.validateUser(rootOrg, userId)) {
-// 			throw new BadRequestException("Invalid UserId.");
-// 		}
-
-		// This contains the list of all the children for provided course(resourceId) if
-		// it is a learning-path.
-		// Else, it will contain the parents for provided course(resourceId)
 		List<String> assessmentIdList = new ArrayList<>();
 		assessmentIdList.add(contentId);
 		processChildContentId(contentId, assessmentIdList);
@@ -104,10 +106,10 @@ public class CohortsServiceImpl implements CohortsService {
 						&& !topLearnerUUID.equalsIgnoreCase(userId)) {
 					CohortUsers user = new CohortUsers();
 					user.setDesc("Top Learner");
-					user.setUser_id(userProfile.getPersonalDetails().getPrimaryEmail());
+					user.setUserId(userProfile.getPersonalDetails().getPrimaryEmail());
 					user.setEmail(userProfile.getPersonalDetails().getPrimaryEmail());
-					user.setFirst_name(userProfile.getPersonalDetails().getFirstname());
-					user.setLast_name(userProfile.getPersonalDetails().getSurname());
+					user.setFirstName(userProfile.getPersonalDetails().getFirstname());
+					user.setLastName(userProfile.getPersonalDetails().getSurname());
 					userNames.add(userProfile.getPersonalDetails().getPrimaryEmail());
 					topPerformers.add(user);
 					if (counter == count)
@@ -123,12 +125,7 @@ public class CohortsServiceImpl implements CohortsService {
 	@Override
 	@SuppressWarnings("unchecked")
 	public List<CohortUsers> getActiveUsers(String xAuthUser, String rootOrg, String contentId, String userId,
-			int count, Boolean toFilter) throws Exception {
-		// Check User exists
-// 		if (!userUtilService.validateUser(rootOrg, userId)) {
-// 			throw new BadRequestException("Invalid UserId.");
-// 		}
-
+			int count, Boolean toFilter) {
 		List<String> batchIdList = fetchBatchIdDetails(contentId);
 		if (CollectionUtils.isEmpty(batchIdList)) {
 			return Collections.emptyList();
@@ -137,8 +134,7 @@ public class CohortsServiceImpl implements CohortsService {
 	}
 
 	@Override
-	public Response autoEnrollmentInCourse(String authUserToken, String rootOrg, String contentId, String userUUID)
-			throws Exception {
+	public Response autoEnrollmentInCourse(String authUserToken, String rootOrg, String contentId, String userUUID) {
 		List<SunbirdApiBatchResp> batchResp = fetchBatchsDetails(contentId);
 		List<String> batchIdList = null;
 		if (!CollectionUtils.isEmpty(batchResp))
@@ -203,8 +199,8 @@ public class CohortsServiceImpl implements CohortsService {
 		HashMap<String, Object> req = new HashMap<>();
 		String date = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
 		batchObj.put("courseId", contentId);
-		batchObj.put("name", "Open Batch");
-		batchObj.put("description", "Open Batch");
+		batchObj.put("name", OPEN_BATCH);
+		batchObj.put("description", OPEN_BATCH);
 		batchObj.put("enrollmentType", "open");
 		batchObj.put("startDate", date);
 		batchObj.put("createdBy", userUUID);
@@ -223,12 +219,11 @@ public class CohortsServiceImpl implements CohortsService {
 		selectedBatch.setCreatedFor(new ArrayList<>());
 		selectedBatch.setEnrollmentEndDate(null);
 		selectedBatch.setEnrollmentType("open");
-		selectedBatch.setName("Open Batch");
+		selectedBatch.setName(OPEN_BATCH);
 		selectedBatch.setStartDate(date);
 		selectedBatch.setStatus(1);
 		selectedBatch.setBatchId(batchId);
-		Response response = constructAutoEnrollResponse(selectedBatch);
-		return response;
+		return constructAutoEnrollResponse(selectedBatch);
 	}
 
 	private Response constructAutoEnrollResponse(SunbirdApiBatchResp selectedBatch) {
@@ -242,8 +237,8 @@ public class CohortsServiceImpl implements CohortsService {
 		return response;
 	}
 
-	private void enrollInCourse(String contentId, String userUUID, Map<String, String> headers, String batchId) {
-		Response response = null;
+	private Map<String, Object> enrollInCourse(String contentId, String userUUID, Map<String, String> headers,
+			String batchId) {
 		HashMap<String, Object> req;
 		req = new HashMap<>();
 		HashMap<String, Object> enrollObj = new HashMap<>();
@@ -254,14 +249,14 @@ public class CohortsServiceImpl implements CohortsService {
 		Map<String, Object> enrollMentResponse = outboundRequestHandlerService.fetchResultUsingPost(
 				cbExtServerProperties.getCourseServiceHost() + cbExtServerProperties.getUserCourseEnroll(), req,
 				headers);
-		Map<String, Object> enrollmentresul = (Map<String, Object>) enrollMentResponse.get("result");
+		return (Map<String, Object>) enrollMentResponse.get("result");
 	}
 
 	private void processChildContentId(String givenContentId, List<String> assessmentIdList) {
 		try {
 			SunbirdApiResp contentHierarchy = contentService.getHeirarchyResponse(givenContentId);
 			if (contentHierarchy != null) {
-				if ("successful".equalsIgnoreCase(contentHierarchy.getParams().getStatus())) {
+				if (SUCCESSFUL.equalsIgnoreCase(contentHierarchy.getParams().getStatus())) {
 					List<SunbirdApiHierarchyResultContent> children = contentHierarchy.getResult().getContent()
 							.getChildren();
 					if (!CollectionUtils.isEmpty(children)) {
@@ -290,7 +285,7 @@ public class CohortsServiceImpl implements CohortsService {
 	private List<String> fetchBatchIdDetails(String contentId) {
 		try {
 			SunbirdApiResp contentHierarchy = contentService.getHeirarchyResponse(contentId);
-			if (contentHierarchy != null && "successful".equalsIgnoreCase(contentHierarchy.getParams().getStatus())) {
+			if (contentHierarchy != null && SUCCESSFUL.equalsIgnoreCase(contentHierarchy.getParams().getStatus())) {
 				List<SunbirdApiBatchResp> batches = contentHierarchy.getResult().getContent().getBatches();
 				if (!CollectionUtils.isEmpty(batches)) {
 					return batches.stream().map(SunbirdApiBatchResp::getBatchId).collect(Collectors.toList());
@@ -306,7 +301,7 @@ public class CohortsServiceImpl implements CohortsService {
 	private List<SunbirdApiBatchResp> fetchBatchsDetails(String contentId) {
 		try {
 			SunbirdApiResp contentHierarchy = contentService.getHeirarchyResponse(contentId);
-			if (contentHierarchy != null && "successful".equalsIgnoreCase(contentHierarchy.getParams().getStatus())) {
+			if (contentHierarchy != null && SUCCESSFUL.equalsIgnoreCase(contentHierarchy.getParams().getStatus())) {
 				return contentHierarchy.getResult().getContent().getBatches();
 			}
 		} catch (Exception e) {
@@ -334,16 +329,17 @@ public class CohortsServiceImpl implements CohortsService {
 		List<CohortUsers> activeUserCollection = new ArrayList<>();
 		if (participantList.size() > count) {
 			participantList = participantList.stream().limit(count).collect(Collectors.toList());
-		} else if (participantList.size() == 0) {
+		} else if (!participantList.isEmpty()) {
 			return activeUserCollection;
 		}
 		try {
 			Map<String, Object> participantMap = userUtilService.getUsersDataFromUserIds(rootOrg, participantList,
 					new ArrayList<>(Arrays.asList(Constants.FIRST_NAME, Constants.LAST_NAME, Constants.EMAIL,
 							Constants.DEPARTMENT_NAME)));
+
 			if (!CollectionUtils.isEmpty(participantMap)) {
-				logger.info("enrichDepartmentInfo UserIds -> " + participantList.toString()
-						+ ", fetched Information -> " + participantMap.size());
+				logger.info(String.format("enrichDepartmentInfo UserIds -> %s , fetched Information -> %d",
+						participantList.toString(), participantMap.size()));
 				int currentCount = 0;
 				String desc = "Started learning this course";
 				for (String userId : participantList) {
@@ -351,10 +347,10 @@ public class CohortsServiceImpl implements CohortsService {
 						SearchUserApiContent userInfo = (SearchUserApiContent) participantMap.get(userId);
 						CohortUsers user = new CohortUsers();
 						// User Id is assigning instead of email
-						user.setUser_id(userInfo.getUserId());
+						user.setUserId(userInfo.getUserId());
 						user.setEmail(userInfo.getEmail());
-						user.setFirst_name(userInfo.getFirstName());
-						user.setLast_name(userInfo.getLastName());
+						user.setFirstName(userInfo.getFirstName());
+						user.setLastName(userInfo.getLastName());
 						user.setDesc(desc);
 						user.setDepartment(userInfo.getChannel());
 						if (userInfo.getProfileDetails() != null

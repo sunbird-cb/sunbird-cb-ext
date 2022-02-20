@@ -3,181 +3,175 @@ package org.sunbird.common.model;
 import java.util.List;
 
 public class SunbirdApiUserCourse {
-    private long dateTime;
-    private Object lastReadContentStatus;
-    private String enrolledDate;
-    private String contentId;
-    private String description;
-    private String courseLogoUrl;
-    private String batchId;
-    private Object content;
-    private Object contentStatus;
-    private Object lastReadContentId;
-    private Object certstatus;
-    private String courseId;
-    private String collectionId;
-    private String addedBy;
-    private SunbirdApiBatch batch;
-    private boolean active;
-    private String userId;
-    private List<Object> issuedCertificates;
-    private Object completionPercentage;
-    private String courseName;
-    private List<Object> certificates;
-    private Object completedOn;
-    private int leafNodesCount;
-    private int progress;
-    private int status;
+	private long dateTime;
+	private Object lastReadContentStatus;
+	private String enrolledDate;
+	private String contentId;
+	private String description;
+	private String courseLogoUrl;
+	private String batchId;
+	private Object content;
+	private Object contentStatus;
+	private Object lastReadContentId;
+	private Object certstatus;
+	private String courseId;
+	private String collectionId;
+	private String addedBy;
+	private SunbirdApiBatch batch;
+	private boolean active;
+	private String userId;
+	private List<Object> issuedCertificates;
+	private Object completionPercentage;
 
-    public long getDateTime() {
-        return dateTime;
-    }
+	public String getAddedBy() {
+		return addedBy;
+	}
 
-    public void setDateTime(long dateTime) {
-        this.dateTime = dateTime;
-    }
+	public SunbirdApiBatch getBatch() {
+		return batch;
+	}
 
-    public Object getLastReadContentStatus() {
-        return lastReadContentStatus;
-    }
+	public String getBatchId() {
+		return batchId;
+	}
 
-    public void setLastReadContentStatus(Object lastReadContentStatus) {
-        this.lastReadContentStatus = lastReadContentStatus;
-    }
+	public Object getCertstatus() {
+		return certstatus;
+	}
 
-    public String getEnrolledDate() {
-        return enrolledDate;
-    }
+	public String getCollectionId() {
+		return collectionId;
+	}
 
-    public void setEnrolledDate(String enrolledDate) {
-        this.enrolledDate = enrolledDate;
-    }
+	public Object getCompletionPercentage() {
+		return completionPercentage;
+	}
 
-    public String getContentId() {
-        return contentId;
-    }
+	public Object getContent() {
+		return content;
+	}
 
-    public void setContentId(String contentId) {
-        this.contentId = contentId;
-    }
+	public String getContentId() {
+		return contentId;
+	}
 
-    public String getDescription() {
-        return description;
-    }
+	public Object getContentStatus() {
+		return contentStatus;
+	}
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
+	public String getCourseId() {
+		return courseId;
+	}
 
-    public String getCourseLogoUrl() {
-        return courseLogoUrl;
-    }
+	public String getCourseLogoUrl() {
+		return courseLogoUrl;
+	}
 
-    public void setCourseLogoUrl(String courseLogoUrl) {
-        this.courseLogoUrl = courseLogoUrl;
-    }
+	public long getDateTime() {
+		return dateTime;
+	}
 
-    public String getBatchId() {
-        return batchId;
-    }
+	public String getDescription() {
+		return description;
+	}
 
-    public void setBatchId(String batchId) {
-        this.batchId = batchId;
-    }
+	public String getEnrolledDate() {
+		return enrolledDate;
+	}
 
-    public Object getContent() {
-        return content;
-    }
+	public List<Object> getIssuedCertificates() {
+		return issuedCertificates;
+	}
 
-    public void setContent(Object content) {
-        this.content = content;
-    }
+	public Object getLastReadContentId() {
+		return lastReadContentId;
+	}
 
-    public Object getContentStatus() {
-        return contentStatus;
-    }
+	public Object getLastReadContentStatus() {
+		return lastReadContentStatus;
+	}
 
-    public void setContentStatus(Object contentStatus) {
-        this.contentStatus = contentStatus;
-    }
+	public String getUserId() {
+		return userId;
+	}
 
-    public Object getLastReadContentId() {
-        return lastReadContentId;
-    }
+	public boolean isActive() {
+		return active;
+	}
 
-    public void setLastReadContentId(Object lastReadContentId) {
-        this.lastReadContentId = lastReadContentId;
-    }
+	public void setActive(boolean active) {
+		this.active = active;
+	}
 
-    public Object getCertstatus() {
-        return certstatus;
-    }
+	public void setAddedBy(String addedBy) {
+		this.addedBy = addedBy;
+	}
 
-    public void setCertstatus(Object certstatus) {
-        this.certstatus = certstatus;
-    }
+	public void setBatch(SunbirdApiBatch batch) {
+		this.batch = batch;
+	}
 
-    public String getCourseId() {
-        return courseId;
-    }
+	public void setBatchId(String batchId) {
+		this.batchId = batchId;
+	}
 
-    public void setCourseId(String courseId) {
-        this.courseId = courseId;
-    }
+	public void setCertstatus(Object certstatus) {
+		this.certstatus = certstatus;
+	}
 
-    public String getCollectionId() {
-        return collectionId;
-    }
+	public void setCollectionId(String collectionId) {
+		this.collectionId = collectionId;
+	}
 
-    public void setCollectionId(String collectionId) {
-        this.collectionId = collectionId;
-    }
+	public void setCompletionPercentage(Object completionPercentage) {
+		this.completionPercentage = completionPercentage;
+	}
 
-    public String getAddedBy() {
-        return addedBy;
-    }
+	public void setContent(Object content) {
+		this.content = content;
+	}
 
-    public void setAddedBy(String addedBy) {
-        this.addedBy = addedBy;
-    }
+	public void setContentId(String contentId) {
+		this.contentId = contentId;
+	}
 
-    public SunbirdApiBatch getBatch() {
-        return batch;
-    }
+	public void setContentStatus(Object contentStatus) {
+		this.contentStatus = contentStatus;
+	}
 
-    public void setBatch(SunbirdApiBatch batch) {
-        this.batch = batch;
-    }
+	public void setCourseId(String courseId) {
+		this.courseId = courseId;
+	}
 
-    public boolean isActive() {
-        return active;
-    }
+	public void setCourseLogoUrl(String courseLogoUrl) {
+		this.courseLogoUrl = courseLogoUrl;
+	}
 
-    public void setActive(boolean active) {
-        this.active = active;
-    }
+	public void setDateTime(long dateTime) {
+		this.dateTime = dateTime;
+	}
 
-    public String getUserId() {
-        return userId;
-    }
+	public void setDescription(String description) {
+		this.description = description;
+	}
 
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
+	public void setEnrolledDate(String enrolledDate) {
+		this.enrolledDate = enrolledDate;
+	}
 
-    public List<Object> getIssuedCertificates() {
-        return issuedCertificates;
-    }
+	public void setIssuedCertificates(List<Object> issuedCertificates) {
+		this.issuedCertificates = issuedCertificates;
+	}
 
-    public void setIssuedCertificates(List<Object> issuedCertificates) {
-        this.issuedCertificates = issuedCertificates;
-    }
+	public void setLastReadContentId(Object lastReadContentId) {
+		this.lastReadContentId = lastReadContentId;
+	}
 
-    public Object getCompletionPercentage() {
-        return completionPercentage;
-    }
+	public void setLastReadContentStatus(Object lastReadContentStatus) {
+		this.lastReadContentStatus = lastReadContentStatus;
+	}
 
-    public void setCompletionPercentage(Object completionPercentage) {
-        this.completionPercentage = completionPercentage;
-    }
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
 }

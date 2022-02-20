@@ -1,8 +1,8 @@
 package org.sunbird.workallocation.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class WorkAllocationDTO {
@@ -17,83 +17,83 @@ public class WorkAllocationDTO {
 	private String positionId;
 	private String status;
 
-	public String getUserId() {
-		return userId;
-	}
-
-	public void setUserId(String userId) {
-		this.userId = userId;
-	}
-
-	public String getUserName() {
-		return userName;
-	}
-
-	public void setUserName(String userName) {
-		this.userName = userName;
-	}
-
-	public String getUserEmail() {
-		return userEmail;
-	}
-
-	public void setUserEmail(String userEmail) {
-		this.userEmail = userEmail;
-	}
-
-	public String getWaId() {
-		return waId;
-	}
-
-	public void setWaId(String waId) {
-		this.waId = waId;
-	}
-
 	public String getDeptId() {
 		return deptId;
-	}
-
-	public void setDeptId(String deptId) {
-		this.deptId = deptId;
 	}
 
 	public String getDeptName() {
 		return deptName;
 	}
 
-	public void setDeptName(String deptName) {
-		this.deptName = deptName;
+	public String getPositionId() {
+		return positionId;
 	}
 
 	public List<RoleCompetency> getRoleCompetencyList() {
 		return roleCompetencyList;
 	}
 
-	public void setRoleCompetencyList(List<RoleCompetency> roleCompetencyList) {
-		this.roleCompetencyList = roleCompetencyList;
+	public String getStatus() {
+		return status;
+	}
+
+	public String getUserEmail() {
+		return userEmail;
+	}
+
+	public String getUserId() {
+		return userId;
+	}
+
+	public String getUserName() {
+		return userName;
 	}
 
 	public String getUserPosition() {
 		return userPosition;
 	}
 
-	public void setUserPosition(String userPosition) {
-		this.userPosition = userPosition;
+	public String getWaId() {
+		return waId;
 	}
 
-	public String getPositionId() {
-		return positionId;
+	public void setDeptId(String deptId) {
+		this.deptId = deptId;
+	}
+
+	public void setDeptName(String deptName) {
+		this.deptName = deptName;
 	}
 
 	public void setPositionId(String positionId) {
 		this.positionId = positionId;
 	}
 
-	public String getStatus() {
-		return status;
+	public void setRoleCompetencyList(List<RoleCompetency> roleCompetencyList) {
+		this.roleCompetencyList = roleCompetencyList;
 	}
 
 	public void setStatus(String status) {
 		this.status = status;
+	}
+
+	public void setUserEmail(String userEmail) {
+		this.userEmail = userEmail;
+	}
+
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
+
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
+
+	public void setUserPosition(String userPosition) {
+		this.userPosition = userPosition;
+	}
+
+	public void setWaId(String waId) {
+		this.waId = waId;
 	}
 }

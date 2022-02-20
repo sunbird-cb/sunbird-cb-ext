@@ -22,16 +22,6 @@ public class CbExtLogger {
 		logger.log(Level.DEBUG, message);
 	}
 
-	public void info(String message) {
-
-		logger.log(Level.INFO, message);
-	}
-
-	public void warn(String message) {
-
-		logger.log(Level.WARN, message);
-	}
-
 	public void error(Exception exception) {
 
 		ObjectMapper ow = new ObjectMapper();
@@ -68,9 +58,9 @@ public class CbExtLogger {
 		}
 	}
 
-	public void trace(String message) {
+	public void info(String message) {
 
-		logger.log(Level.TRACE, message);
+		logger.log(Level.INFO, message);
 	}
 
 	public void performance(String message) {
@@ -78,6 +68,16 @@ public class CbExtLogger {
 		Level performance = Level.forName("PERF", 350);
 
 		logger.log(performance, message);
+	}
+
+	public void trace(String message) {
+
+		logger.log(Level.TRACE, message);
+	}
+
+	public void warn(String message) {
+
+		logger.log(Level.WARN, message);
 	}
 
 }

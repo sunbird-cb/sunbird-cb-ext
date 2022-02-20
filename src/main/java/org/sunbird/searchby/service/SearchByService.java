@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,14 +16,23 @@ import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.core.logger.CbExtLogger;
+import org.sunbird.exception.MyOwnRuntimeException;
 import org.sunbird.searchby.model.CompetencyInfo;
 import org.sunbird.searchby.model.ProviderInfo;
+import org.sunbird.searchby.model.SearchByFilter;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 @SuppressWarnings("unchecked")
 public class SearchByService {
+
+	private static final String RECEIVED_RESPONSE_S = "Received Response: %s";
+
+	private static final String SOURCE = "source";
+
+	private static final String RESULT = "result";
 
 	private CbExtLogger logger = new CbExtLogger(getClass().getName());
 
@@ -35,7 +45,8 @@ public class SearchByService {
 	@Autowired
 	OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
 
-	public Collection<CompetencyInfo> getCompetencyDetails(String authUserToken) throws Exception {
+	public Collection<CompetencyInfo> getCompetencyDetails(String authUserToken)
+			throws MyOwnRuntimeException, JsonProcessingException {
 		Object object = redisCacheMgr.getCache(Constants.COMPETENCY_CACHE_NAME);
 		if (object == null) {
 			logger.info("Initializing/Refreshing the Cache Value.");
@@ -46,18 +57,80 @@ public class SearchByService {
 				.getCache(Constants.COMPETENCY_CACHE_NAME);
 		return competencyMap.values();
 	}
-	
-	public Collection<ProviderInfo> getProviderDetails(String authUserToken) throws Exception {
+
+	public Collection<CompetencyInfo> getCompetencyDetailsByFilter(String authUserToken, SearchByFilter filter)
+			throws MyOwnRuntimeException, JsonProcessingException {
+
+		if (filter.isEmptyFilter()) {
+			return getCompetencyDetails(authUserToken);
+		}
+
+		Map<String, CompetencyInfo> objectNameCache = (Map<String, CompetencyInfo>) redisCacheMgr
+				.getCache(Constants.COMPETENCY_CACHE_NAME);
+		Object objectAreaCache = redisCacheMgr.getCache(Constants.COMPETENCY_CACHE_NAME_BY_AREA);
+		Object objectTypeCache = redisCacheMgr.getCache(Constants.COMPETENCY_CACHE_NAME_BY_TYPE);
+		if (CollectionUtils.isEmpty(objectNameCache) || objectAreaCache == null || objectTypeCache == null) {
+			logger.info("Initializing/Refreshing the Cache Value.");
+			updateCompetencyDetails(authUserToken);
+		}
+		objectNameCache = (Map<String, CompetencyInfo>) redisCacheMgr.getCache(Constants.COMPETENCY_CACHE_NAME);
+		objectAreaCache = redisCacheMgr.getCache(Constants.COMPETENCY_CACHE_NAME_BY_AREA);
+		objectTypeCache = redisCacheMgr.getCache(Constants.COMPETENCY_CACHE_NAME_BY_TYPE);
+
+		// Apply Name filter
+		Map<String, CompetencyInfo> afterFilter = new HashMap<>();
+		if (!CollectionUtils.isEmpty(filter.getCompetencyName())) {
+			List<String> lowerCaseNameFilter = listToLowerCase(filter.getCompetencyName());
+			for (CompetencyInfo eachInfo : objectNameCache.values()) {
+				if (lowerCaseNameFilter.contains(eachInfo.getName().toLowerCase().trim())) {
+					afterFilter.put(eachInfo.getId(), eachInfo);
+				}
+			}
+		}
+
+		if (!CollectionUtils.isEmpty(filter.getCompetencyType())) {
+			List<String> lowerCaseTypeFilter = listToLowerCase(filter.getCompetencyType());
+			Map<String, List<CompetencyInfo>> typeCache = (Map<String, List<CompetencyInfo>>) objectTypeCache;
+			for (Map.Entry<String, List<CompetencyInfo>> eachInfo : typeCache.entrySet()) {
+				if (lowerCaseTypeFilter.contains(eachInfo.getKey().toLowerCase().trim())) {
+					for (CompetencyInfo competencyInfo : eachInfo.getValue()) {
+						afterFilter.put(competencyInfo.getId(), competencyInfo);
+					}
+				}
+			}
+		}
+
+		if (!CollectionUtils.isEmpty(filter.getCompetencyArea())) {
+			List<String> lowerCaseAreaFilter = listToLowerCase(filter.getCompetencyArea());
+			Map<String, List<CompetencyInfo>> areaCache = (Map<String, List<CompetencyInfo>>) objectAreaCache;
+			for (Map.Entry<String, List<CompetencyInfo>> eachInfo : areaCache.entrySet()) {
+				if (lowerCaseAreaFilter.contains(eachInfo.getKey().toLowerCase().trim())) {
+					for (CompetencyInfo competencyInfo : eachInfo.getValue()) {
+						afterFilter.put(competencyInfo.getId(), competencyInfo);
+					}
+				}
+			}
+		}
+		return afterFilter.values();
+	}
+
+	public Collection<ProviderInfo> getProviderDetails(String authUserToken)
+			throws MyOwnRuntimeException, JsonProcessingException {
 		Object object = redisCacheMgr.getCache(Constants.PROVIDER_CACHE_NAME);
 		if (object == null) {
 			logger.info("");
 			updateProviderDetails(authUserToken);
 		}
-		Map<String, ProviderInfo> providerMap = (Map<String, ProviderInfo>) redisCacheMgr.getCache(Constants.PROVIDER_CACHE_NAME);
+		Map<String, ProviderInfo> providerMap = (Map<String, ProviderInfo>) redisCacheMgr
+				.getCache(Constants.PROVIDER_CACHE_NAME);
 		return providerMap.values();
 	}
 
-	private void updateCompetencyDetails(String authUserToken) throws Exception {
+	private List<String> listToLowerCase(List<String> convertString) {
+		return convertString.stream().map(String::toLowerCase).map(String::trim).collect(Collectors.toList());
+	}
+
+	private void updateCompetencyDetails(String authUserToken) throws MyOwnRuntimeException, JsonProcessingException {
 		Map<String, CompetencyInfo> competencyMap;
 		Map<String, List<CompetencyInfo>> comInfoByType = new HashMap<>();
 		Map<String, List<CompetencyInfo>> comInfoByArea = new HashMap<>();
@@ -81,7 +154,7 @@ public class SearchByService {
 				cbExtServerProperties.getKmBaseHost() + cbExtServerProperties.getKmCompositeSearchPath(), reqBody,
 				headers);
 
-		Map<String, Object> compositeSearchResult = (Map<String, Object>) compositeSearchRes.get("result");
+		Map<String, Object> compositeSearchResult = (Map<String, Object>) compositeSearchRes.get(RESULT);
 		List<Map<String, Object>> facetsList = (List<Map<String, Object>>) compositeSearchResult.get("facets");
 		if (!CollectionUtils.isEmpty(facetsList)) {
 			competencyMap = new HashMap<>();
@@ -92,7 +165,7 @@ public class SearchByService {
 					if (!CollectionUtils.isEmpty(facetValueList)) {
 						for (Map<String, Object> facetValueObj : facetValueList) {
 							CompetencyInfo compInfo = new CompetencyInfo();
-							//TODO - Make sure which competency field is unique
+							// TODO - Make sure which competency field is unique
 							compInfo.setContentCount((int) facetValueObj.get("count"));
 							competencyMap.put((String) facetValueObj.get("name"), compInfo);
 						}
@@ -100,12 +173,11 @@ public class SearchByService {
 				}
 			}
 		} else {
-			Exception err = new Exception("Failed to get facets value from Composite Search API.");
+			MyOwnRuntimeException err = new MyOwnRuntimeException(
+					"Failed to get facets value from Composite Search API.");
 			logger.error(err);
-			try {
-				logger.info("Received Response: " + (new ObjectMapper()).writeValueAsString(compositeSearchResult));
-			} catch (Exception e) {
-			}
+			logger.info(
+					String.format(RECEIVED_RESPONSE_S, new ObjectMapper().writeValueAsString(compositeSearchResult)));
 			throw err;
 		}
 
@@ -143,7 +215,7 @@ public class SearchByService {
 							((Map<String, String>) respObj.get("additionalProperties")).get("competencyType"));
 					compInfo.setDescription((String) respObj.get("description"));
 					compInfo.setId((String) respObj.get("id"));
-					compInfo.setSource((String) respObj.get("source"));
+					compInfo.setSource((String) respObj.get(SOURCE));
 					compInfo.setStatus((String) respObj.get("status"));
 					competencyMap.put(compName, compInfo);
 
@@ -175,12 +247,9 @@ public class SearchByService {
 
 			}
 		} else {
-			Exception err = new Exception("Failed to get competency info from FRAC API.");
+			MyOwnRuntimeException err = new MyOwnRuntimeException("Failed to get competency info from FRAC API.");
 			logger.error(err);
-			try {
-				logger.info("Received Response: " + (new ObjectMapper()).writeValueAsString(fracSearchRes));
-			} catch (Exception e) {
-			}
+			logger.info(String.format(RECEIVED_RESPONSE_S, new ObjectMapper().writeValueAsString(fracSearchRes)));
 			throw err;
 		}
 
@@ -189,7 +258,7 @@ public class SearchByService {
 		redisCacheMgr.putCache(Constants.COMPETENCY_CACHE_NAME_BY_AREA, comInfoByArea);
 	}
 
-	private void updateProviderDetails(String authUserToken) throws Exception {
+	private void updateProviderDetails(String authUserToken) throws MyOwnRuntimeException, JsonProcessingException {
 		Map<String, ProviderInfo> providerMap = null;
 
 		// Get facets from Composite Search
@@ -199,7 +268,7 @@ public class SearchByService {
 
 		HashMap<String, Object> reqBody = new HashMap<>();
 		HashMap<String, Object> req = new HashMap<>();
-		req.put(Constants.FACETS, Arrays.asList("source"));
+		req.put(Constants.FACETS, Arrays.asList(SOURCE));
 		Map<String, Object> filters = new HashMap<>();
 		filters.put(Constants.PRIMARY_CATEGORY, Arrays.asList("Course", "Program"));
 		filters.put(Constants.STATUS, Arrays.asList("Live"));
@@ -211,13 +280,13 @@ public class SearchByService {
 				cbExtServerProperties.getKmBaseHost() + cbExtServerProperties.getKmCompositeSearchPath(), reqBody,
 				headers);
 
-		Map<String, Object> compositeSearchResult = (Map<String, Object>) compositeSearchRes.get("result");
+		Map<String, Object> compositeSearchResult = (Map<String, Object>) compositeSearchRes.get(RESULT);
 		List<Map<String, Object>> facetsList = (List<Map<String, Object>>) compositeSearchResult.get("facets");
 		if (!CollectionUtils.isEmpty(facetsList)) {
-			providerMap = new HashMap<String, ProviderInfo>();
+			providerMap = new HashMap<>();
 			for (Map<String, Object> facetObj : facetsList) {
 				String name = (String) facetObj.get("name");
-				if ("source".equals(name)) {
+				if (SOURCE.equals(name)) {
 					List<Map<String, Object>> facetValueList = (List<Map<String, Object>>) facetObj.get("values");
 					if (!CollectionUtils.isEmpty(facetValueList)) {
 						for (Map<String, Object> facetValueObj : facetValueList) {
@@ -229,12 +298,11 @@ public class SearchByService {
 				}
 			}
 		} else {
-			Exception err = new Exception("Failed to get facets value from Composite Search API.");
+			MyOwnRuntimeException err = new MyOwnRuntimeException(
+					"Failed to get facets value from Composite Search API.");
 			logger.error(err);
-			try {
-				logger.info("Received Response: " + (new ObjectMapper()).writeValueAsString(compositeSearchResult));
-			} catch (Exception e) {
-			}
+			logger.info(
+					String.format(RECEIVED_RESPONSE_S, new ObjectMapper().writeValueAsString(compositeSearchResult)));
 			throw err;
 		}
 
@@ -250,7 +318,7 @@ public class SearchByService {
 		Map<String, Object> orgSearchRes = outboundRequestHandlerService.fetchResultUsingPost(
 				cbExtServerProperties.getSbUrl() + cbExtServerProperties.getSbOrgSearchPath(), reqBody, headers);
 
-		Map<String, Object> orgSearchResponse = (Map<String, Object>) ((Map<String, Object>) orgSearchRes.get("result"))
+		Map<String, Object> orgSearchResponse = (Map<String, Object>) ((Map<String, Object>) orgSearchRes.get(RESULT))
 				.get("response");
 
 		List<Map<String, Object>> orgResponseList = (List<Map<String, Object>>) orgSearchResponse.get("content");
@@ -268,15 +336,12 @@ public class SearchByService {
 				}
 			}
 		} else {
-			Exception err = new Exception("Failed to get competency info from FRAC API.");
+			MyOwnRuntimeException err = new MyOwnRuntimeException("Failed to get competency info from FRAC API.");
 			logger.error(err);
-			try {
-				logger.info("Received Response: " + (new ObjectMapper()).writeValueAsString(orgSearchRes));
-			} catch (Exception e) {
-			}
+			logger.info(String.format(RECEIVED_RESPONSE_S, new ObjectMapper().writeValueAsString(orgSearchRes)));
 			throw err;
 		}
 
-		redisCacheMgr.putCache(Constants.PROVIDER_CACHE_NAME, providerMap);
+		redisCacheMgr.putCache(Constants.PROVIDER_CACHE_NAME, providerMap.values());
 	}
 }

@@ -1,189 +1,192 @@
 package org.sunbird.workallocation.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.springframework.util.CollectionUtils;
-
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.util.CollectionUtils;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class WorkOrderDTO {
-    private String id;
-    private String name;
-    private String deptId;
-    private String deptName;
-    private String status;
-    private List<String> userIds;
-    private String createdBy;
-    private String createdByName;
-    private long createdAt;
-    private String updatedBy;
-    private String updatedByName;
-    private long updatedAt;
-    private int progress;
-    private int errorCount;
-    private int rolesCount;
-    private int activitiesCount;
-    private int competenciesCount;
-    private String publishedPdfLink;
-    private String signedPdfLink;
+	private String id;
+	private String name;
+	private String deptId;
+	private String deptName;
+	private String status;
+	private List<String> userIds;
+	private String createdBy;
+	private String createdByName;
+	private long createdAt;
+	private String updatedBy;
+	private String updatedByName;
+	private long updatedAt;
+	private int progress;
+	private int errorCount;
+	private int rolesCount;
+	private int activitiesCount;
+	private int competenciesCount;
+	private String publishedPdfLink;
+	private String signedPdfLink;
 
-    public String getId() {
-        return id;
-    }
+	public void addUserId(String userId) {
+		if (CollectionUtils.isEmpty(this.userIds)) {
+			this.userIds = new ArrayList<>();
+		}
+		if (!this.userIds.contains(userId)) {
+			this.userIds.add(userId);
+		}
+	}
 
-    public void setId(String id) {
-        this.id = id;
-    }
+	public int getActivitiesCount() {
+		return activitiesCount;
+	}
 
-    public String getName() {
-        return name;
-    }
+	public int getCompetenciesCount() {
+		return competenciesCount;
+	}
 
-    public void setName(String name) {
-        this.name = name;
-    }
+	public long getCreatedAt() {
+		return createdAt;
+	}
 
-    public String getDeptId() {
-        return deptId;
-    }
+	public String getCreatedBy() {
+		return createdBy;
+	}
 
-    public void setDeptId(String deptId) {
-        this.deptId = deptId;
-    }
+	public String getCreatedByName() {
+		return createdByName;
+	}
 
-    public String getDeptName() {
-        return deptName;
-    }
+	public String getDeptId() {
+		return deptId;
+	}
 
-    public void setDeptName(String deptName) {
-        this.deptName = deptName;
-    }
+	public String getDeptName() {
+		return deptName;
+	}
 
-    public String getStatus() {
-        return status;
-    }
+	public int getErrorCount() {
+		return errorCount;
+	}
 
-    public void setStatus(String status) {
-        this.status = status;
-    }
+	public String getId() {
+		return id;
+	}
 
-    public List<String> getUserIds() {
-        return userIds;
-    }
+	public String getName() {
+		return name;
+	}
 
-    public void setUserIds(List<String> userIds) {
-        this.userIds = userIds;
-    }
+	public int getProgress() {
+		return progress;
+	}
 
-    public String getCreatedBy() {
-        return createdBy;
-    }
+	public String getPublishedPdfLink() {
+		return publishedPdfLink;
+	}
 
-    public void setCreatedBy(String createdBy) {
-        this.createdBy = createdBy;
-    }
+	public int getRolesCount() {
+		return rolesCount;
+	}
 
-    public long getCreatedAt() {
-        return createdAt;
-    }
+	public String getSignedPdfLink() {
+		return signedPdfLink;
+	}
 
-    public void setCreatedAt(long createdAt) {
-        this.createdAt = createdAt;
-    }
+	public String getStatus() {
+		return status;
+	}
 
-    public String getUpdatedBy() {
-        return updatedBy;
-    }
+	public long getUpdatedAt() {
+		return updatedAt;
+	}
 
-    public void setUpdatedBy(String updatedBy) {
-        this.updatedBy = updatedBy;
-    }
+	public String getUpdatedBy() {
+		return updatedBy;
+	}
 
-    public long getUpdatedAt() {
-        return updatedAt;
-    }
+	public String getUpdatedByName() {
+		return updatedByName;
+	}
 
-    public void setUpdatedAt(long updatedAt) {
-        this.updatedAt = updatedAt;
-    }
+	public List<String> getUserIds() {
+		return userIds;
+	}
 
-    public void addUserId(String userId) {
-        if (CollectionUtils.isEmpty(this.userIds))
-            this.userIds = new ArrayList<>();
-        if(!this.userIds.contains(userId))
-                this.userIds.add(userId);
-    }
+	public void setActivitiesCount(int activitiesCount) {
+		this.activitiesCount = activitiesCount;
+	}
 
-    public String getCreatedByName() {
-        return createdByName;
-    }
+	public void setCompetenciesCount(int competenciesCount) {
+		this.competenciesCount = competenciesCount;
+	}
 
-    public void setCreatedByName(String createdByName) {
-        this.createdByName = createdByName;
-    }
+	public void setCreatedAt(long createdAt) {
+		this.createdAt = createdAt;
+	}
 
-    public String getUpdatedByName() {
-        return updatedByName;
-    }
+	public void setCreatedBy(String createdBy) {
+		this.createdBy = createdBy;
+	}
 
-    public void setUpdatedByName(String updatedByName) {
-        this.updatedByName = updatedByName;
-    }
+	public void setCreatedByName(String createdByName) {
+		this.createdByName = createdByName;
+	}
 
-    public int getProgress() {
-        return progress;
-    }
+	public void setDeptId(String deptId) {
+		this.deptId = deptId;
+	}
 
-    public void setProgress(int progress) {
-        this.progress = progress;
-    }
+	public void setDeptName(String deptName) {
+		this.deptName = deptName;
+	}
 
-    public int getErrorCount() {
-        return errorCount;
-    }
+	public void setErrorCount(int errorCount) {
+		this.errorCount = errorCount;
+	}
 
-    public void setErrorCount(int errorCount) {
-        this.errorCount = errorCount;
-    }
+	public void setId(String id) {
+		this.id = id;
+	}
 
-    public String getPublishedPdfLink() {
-        return publishedPdfLink;
-    }
+	public void setName(String name) {
+		this.name = name;
+	}
 
-    public void setPublishedPdfLink(String publishedPdfLink) {
-        this.publishedPdfLink = publishedPdfLink;
-    }
+	public void setProgress(int progress) {
+		this.progress = progress;
+	}
 
-    public String getSignedPdfLink() {
-        return signedPdfLink;
-    }
+	public void setPublishedPdfLink(String publishedPdfLink) {
+		this.publishedPdfLink = publishedPdfLink;
+	}
 
-    public void setSignedPdfLink(String signedPdfLink) {
-        this.signedPdfLink = signedPdfLink;
-    }
+	public void setRolesCount(int rolesCount) {
+		this.rolesCount = rolesCount;
+	}
 
-    public int getRolesCount() {
-        return rolesCount;
-    }
+	public void setSignedPdfLink(String signedPdfLink) {
+		this.signedPdfLink = signedPdfLink;
+	}
 
-    public void setRolesCount(int rolesCount) {
-        this.rolesCount = rolesCount;
-    }
+	public void setStatus(String status) {
+		this.status = status;
+	}
 
-    public int getActivitiesCount() {
-        return activitiesCount;
-    }
+	public void setUpdatedAt(long updatedAt) {
+		this.updatedAt = updatedAt;
+	}
 
-    public void setActivitiesCount(int activitiesCount) {
-        this.activitiesCount = activitiesCount;
-    }
+	public void setUpdatedBy(String updatedBy) {
+		this.updatedBy = updatedBy;
+	}
 
-    public int getCompetenciesCount() {
-        return competenciesCount;
-    }
+	public void setUpdatedByName(String updatedByName) {
+		this.updatedByName = updatedByName;
+	}
 
-    public void setCompetenciesCount(int competenciesCount) {
-        this.competenciesCount = competenciesCount;
-    }
+	public void setUserIds(List<String> userIds) {
+		this.userIds = userIds;
+	}
 }

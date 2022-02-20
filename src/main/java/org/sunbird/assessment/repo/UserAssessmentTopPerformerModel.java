@@ -19,58 +19,56 @@ public class UserAssessmentTopPerformerModel {
 	@Column("user_id")
 	private String userId;
 
-	public UserAssessmentTopPerformerPrimaryKeyModel getPrimaryKey() {
-		return primaryKey;
+	public UserAssessmentTopPerformerModel() {
 	}
 
-	public void setPrimaryKey(UserAssessmentTopPerformerPrimaryKeyModel primaryKey) {
+	public UserAssessmentTopPerformerModel(UserAssessmentTopPerformerPrimaryKeyModel primaryKey, BigDecimal passPercent,
+			String sourceId, String sourceTitle, String userId) {
 		this.primaryKey = primaryKey;
+		this.passPercent = passPercent;
+		this.sourceId = sourceId;
+		this.sourceTitle = sourceTitle;
+		this.userId = userId;
 	}
 
 	public BigDecimal getPassPercent() {
 		return passPercent;
 	}
 
-	public void setPassPercent(BigDecimal passPercent) {
-		this.passPercent = passPercent;
+	public UserAssessmentTopPerformerPrimaryKeyModel getPrimaryKey() {
+		return primaryKey;
 	}
 
 	public String getSourceId() {
 		return sourceId;
 	}
 
-	public void setSourceId(String sourceId) {
-		this.sourceId = sourceId;
-	}
-
 	public String getSourceTitle() {
 		return sourceTitle;
-	}
-
-	public void setSourceTitle(String sourceTitle) {
-		this.sourceTitle = sourceTitle;
 	}
 
 	public String getUserId() {
 		return userId;
 	}
 
+	public void setPassPercent(BigDecimal passPercent) {
+		this.passPercent = passPercent;
+	}
+
+	public void setPrimaryKey(UserAssessmentTopPerformerPrimaryKeyModel primaryKey) {
+		this.primaryKey = primaryKey;
+	}
+
+	public void setSourceId(String sourceId) {
+		this.sourceId = sourceId;
+	}
+
+	public void setSourceTitle(String sourceTitle) {
+		this.sourceTitle = sourceTitle;
+	}
+
 	public void setUserId(String userId) {
 		this.userId = userId;
-	}
-
-	public UserAssessmentTopPerformerModel(UserAssessmentTopPerformerPrimaryKeyModel primaryKey, BigDecimal passPercent,
-			String sourceId, String sourceTitle, String userId) {
-		super();
-		this.primaryKey = primaryKey;
-		this.passPercent = passPercent;
-		this.sourceId = sourceId;
-		this.sourceTitle = sourceTitle;
-		this.userId = userId;
-	}
-
-	public UserAssessmentTopPerformerModel() {
-		super();
 	}
 
 	@Override

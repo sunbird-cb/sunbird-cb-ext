@@ -13,47 +13,47 @@ public class Questions implements Serializable {
 	private String questionId;
 	private String question;
 	private String questionType;
-	private List<Map<String, Object>> options;
+	private transient List<Map<String, Object>> options;
 	private Boolean multiSelection;
 
-	public String getQuestionId() {
-		return questionId;
-	}
-
-	public void setQuestionId(String questionId) {
-		this.questionId = questionId;
-	}
-
-	public String getQuestion() {
-		return question;
-	}
-
-	public void setQuestion(String question) {
-		this.question = question;
-	}
-
-	public String getQuestionType() {
-		return questionType;
-	}
-
-	public void setQuestionType(String questionType) {
-		this.questionType = questionType;
+	public Boolean getMultiSelection() {
+		return multiSelection;
 	}
 
 	public List<Map<String, Object>> getOptions() {
 		return options;
 	}
 
-	public void setOptions(List<Map<String, Object>> options) {
-		this.options = options;
+	public String getQuestion() {
+		return question;
 	}
 
-	public Boolean getMultiSelection() {
-		return multiSelection;
+	public String getQuestionId() {
+		return questionId;
+	}
+
+	public String getQuestionType() {
+		return questionType;
 	}
 
 	public void setMultiSelection(Boolean multiSelection) {
 		this.multiSelection = multiSelection;
+	}
+
+	public void setOptions(List<Map<String, Object>> options) {
+		this.options = options;
+	}
+
+	public void setQuestion(String question) {
+		this.question = question;
+	}
+
+	public void setQuestionId(String questionId) {
+		this.questionId = questionId;
+	}
+
+	public void setQuestionType(String questionType) {
+		this.questionType = questionType;
 	}
 
 }

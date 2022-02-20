@@ -11,12 +11,12 @@ public class SunbirdApiHierarchyResultBatch {
 		return count;
 	}
 
-	public void setCount(int count) {
-		this.count = count;
-	}
-
 	public List<String> getParticipants() {
 		return participants;
+	}
+
+	public void setCount(int count) {
+		this.count = count;
 	}
 
 	public void setParticipants(List<String> participants) {

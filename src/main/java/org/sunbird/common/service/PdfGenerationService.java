@@ -1,6 +1,5 @@
 package org.sunbird.common.service;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -12,7 +11,6 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.util.ObjectUtils;
 import org.sunbird.core.logger.CbExtLogger;
 import org.sunbird.workallocation.model.ChildNode;
 import org.sunbird.workallocation.model.CompetencyDetails;
@@ -27,6 +25,22 @@ import net.glxn.qrgen.javase.QRCode;
 @Service
 @SuppressWarnings("unchecked")
 public class PdfGenerationService {
+
+	private static final String PDF_CELL = "pdf-cell";
+
+	private static final String CELL_BORDER = "cell-border";
+
+	private static final String WIDTH_PERCENT = "width-percent";
+
+	private static final String PDF_TABLE = "pdf-table";
+
+	private static final String PARAGRAPH = "paragraph";
+
+	private static final String SPACING_AFTER = "spacing-after";
+
+	private static final String BOTTOM = "bottom";
+
+	private static final String ALIGN = "align";
 
 	private CbExtLogger logger = new CbExtLogger(getClass().getName());
 
@@ -48,26 +62,7 @@ public class PdfGenerationService {
 		pageTable.add(getUserRoleActivities(wa, statusSelected));
 
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
-//		try {
-//			JsonPDF.writeToStream((new ByteArrayInputStream(pageTable.toJSONString().getBytes())), out, null);
-//		} catch (Exception e) {
-//			String errorMessage = "Failed to generate PDF from JSON Object. Exception: " + e.getMessage();
-//			logger.warn(errorMessage);
-//			logger.error(e);
-//			return getWaErrorPdf(errorMessage);
-//		}
-//
 		return out.toByteArray();
-	}
-
-	public byte[] getWaExpiredError(WorkAllocation wa, String oldWaId) {
-		if (ObjectUtils.isEmpty(wa.getActiveWAObject())) {
-			// There is no active WA object found. We can not create QR Code for
-			// redirection.
-			// TODO - Construct Error pdf and return.
-		}
-
-		return null;
 	}
 
 	public byte[] getWaErrorPdf(String errorMessage) {
@@ -80,23 +75,16 @@ public class PdfGenerationService {
 		pageTable.add(jPages);
 
 		JSONObject paragraphSpacing = new JSONObject();
-		paragraphSpacing.put("spacing-after", 5);
+		paragraphSpacing.put(SPACING_AFTER, 5);
 
 		JSONArray headerArray = new JSONArray();
-		headerArray.add("paragraph");
+		headerArray.add(PARAGRAPH);
 		headerArray.add(paragraphSpacing);
 		headerArray.add(errorMessage);
 
 		pageTable.add(headerArray);
-		
-		try {
-			ByteArrayOutputStream out = new ByteArrayOutputStream();
-//			JsonPDF.writeToStream((new ByteArrayInputStream(pageTable.toJSONString().getBytes())), out, null);
-			return out.toByteArray();
-		} catch (Exception e) {
-			logger.error(e);
-		}
-		return null;
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		return out.toByteArray();
 	}
 
 	/**
@@ -117,12 +105,25 @@ public class PdfGenerationService {
 		}
 
 		JSONArray pdfTable = new JSONArray();
-		pdfTable.add("pdf-table");
+		pdfTable.add(PDF_TABLE);
+		extracted1(wa, waObj, pdfTable);
+		return pdfTable;
+	}
+
+	private void extracted1(WorkAllocation wa, WAObject waObj, JSONArray pdfTable) {
+		extracted5(wa, waObj, pdfTable);
+	}
+
+	private void extracted5(WorkAllocation wa, WAObject waObj, JSONArray pdfTable) {
+		extracted4(wa, waObj, pdfTable);
+	}
+
+	private void extracted4(WorkAllocation wa, WAObject waObj, JSONArray pdfTable) {
 		{
 			JSONObject pdfTableProperties = new JSONObject();
-			pdfTableProperties.put("width-percent", 100);
-			pdfTableProperties.put("cell-border", false);
-			pdfTableProperties.put("spacing-after", 20);
+			pdfTableProperties.put(WIDTH_PERCENT, 100);
+			pdfTableProperties.put(CELL_BORDER, false);
+			pdfTableProperties.put(SPACING_AFTER, 20);
 			pdfTable.add(pdfTableProperties);
 
 			JSONArray widthColumn = new JSONArray();
@@ -131,125 +132,148 @@ public class PdfGenerationService {
 			pdfTable.add(widthColumn);
 
 			JSONArray firstRow = new JSONArray();
-
-			// Adding Department Details...
-			{
-				JSONArray deptColArray = new JSONArray();
-				deptColArray.add("pdf-table");
-				widthColumn = new JSONArray();
-				widthColumn.add(40);
-				widthColumn.add(60);
-				deptColArray.add(widthColumn);
-
-				JSONArray singleRow = new JSONArray();
-
-				// Cell for Logo
-				JSONArray deptLogoArray = new JSONArray();
-				deptLogoArray.add("pdf-cell");
-				JSONObject firstColProperties = new JSONObject();
-				firstColProperties.put("align", "left");
-				firstColProperties.put("border", true);
-				firstColProperties.put("border-width", 20);
-				JSONArray borderColor = new JSONArray();
-				borderColor.add(0);
-				borderColor.add(0);
-				borderColor.add(0);
-				firstColProperties.put("border-color", borderColor);
-				JSONArray borderEnabled = new JSONArray();
-				borderEnabled.add("top");
-				borderEnabled.add("bottom");
-				borderEnabled.add("left");
-				borderEnabled.add("right");
-				firstColProperties.put("set-border", borderEnabled);
-				deptLogoArray.add(firstColProperties);
-				// Add image
-				{
-					// TODO check the DeptRepo for Dept Image details.
-					JSONArray deptLogoImage = new JSONArray();
-					deptLogoImage.add("image");
-					JSONObject imageProperties = new JSONObject();
-					imageProperties.put("width", 100);
-					imageProperties.put("height", 100);
-					deptLogoImage.add(imageProperties);
-					deptLogoImage.add("classpath:government-of-india.jpg");
-					deptLogoArray.add(deptLogoImage);
-				}
-
-				singleRow.add(deptLogoArray);
-
-				// Cell for DeptName
-				JSONArray deptNameColArray = new JSONArray();
-				deptNameColArray.add("pdf-cell");
-				JSONObject secondColProperties = new JSONObject();
-				secondColProperties.put("valign", "bottom");
-				deptNameColArray.add(secondColProperties);
-				// Add Name
-				{
-					JSONArray deptName = new JSONArray();
-					deptName.add("paragraph");
-					deptName.add(waObj.getDeptName());
-
-					deptNameColArray.add(deptName);
-				}
-				singleRow.add(deptNameColArray);
-				deptColArray.add(singleRow);
-
-				firstRow.add(deptColArray);
-			}
-
-			// Adding QR Code
-			{
-				JSONArray deptColArray = new JSONArray();
-				deptColArray.add("pdf-table");
-				widthColumn = new JSONArray();
-				widthColumn.add(40);
-				widthColumn.add(60);
-				deptColArray.add(widthColumn);
-
-				JSONArray singleRow = new JSONArray();
-
-				// Cell for Logo
-				JSONArray deptLogoArray = new JSONArray();
-				deptLogoArray.add("pdf-cell");
-				JSONObject firstColProperties = new JSONObject();
-				firstColProperties.put("align", "left");
-				deptLogoArray.add(firstColProperties);
-				// Add image
-				{
-					JSONArray deptLogoImage = new JSONArray();
-					deptLogoImage.add("image");
-					baseUrl = baseUrl.concat(wa.getUserId()).concat("/").concat(waObj.getId());
-					File qrCodeFile = QRCode.from(baseUrl).to(ImageType.PNG).file();
-
-					deptLogoImage.add(qrCodeFile.getAbsolutePath());
-					deptLogoArray.add(deptLogoImage);
-				}
-
-				singleRow.add(deptLogoArray);
-
-				// Cell for DeptName
-				JSONArray deptNameColArray = new JSONArray();
-				deptNameColArray.add("pdf-cell");
-				firstColProperties = new JSONObject();
-				firstColProperties.put("valign", "bottom");
-				deptNameColArray.add(firstColProperties);
-				// Add Name
-				{
-					JSONArray deptName = new JSONArray();
-					deptName.add("paragraph");
-					deptName.add("Scan this QR code to find the latest updated digital version of this document");
-
-					deptNameColArray.add(deptName);
-				}
-				singleRow.add(deptNameColArray);
-				deptColArray.add(singleRow);
-
-				firstRow.add(deptColArray);
-			}
+			extracted(waObj, firstRow);
+			extracted(wa, waObj, firstRow);
 
 			pdfTable.add(firstRow);
 		}
-		return pdfTable;
+	}
+
+	private void extracted(WorkAllocation wa, WAObject waObj, JSONArray firstRow) {
+		extracted9(wa, waObj, firstRow);
+	}
+
+	private void extracted9(WorkAllocation wa, WAObject waObj, JSONArray firstRow) {
+		JSONArray widthColumn;
+		{
+			JSONArray deptColArray = new JSONArray();
+			deptColArray.add(PDF_TABLE);
+			widthColumn = new JSONArray();
+			widthColumn.add(40);
+			widthColumn.add(60);
+			deptColArray.add(widthColumn);
+
+			JSONArray singleRow = new JSONArray();
+
+			JSONArray deptLogoArray = new JSONArray();
+			deptLogoArray.add(PDF_CELL);
+			JSONObject firstColProperties = new JSONObject();
+			firstColProperties.put(ALIGN, "left");
+			deptLogoArray.add(firstColProperties);
+			// Add image
+			addImage(wa, waObj, deptLogoArray);
+
+			singleRow.add(deptLogoArray);
+
+			// Cell for DeptName
+			JSONArray deptNameColArray = new JSONArray();
+			deptNameColArray.add(PDF_CELL);
+			firstColProperties = new JSONObject();
+			firstColProperties.put("valign", BOTTOM);
+			deptNameColArray.add(firstColProperties);
+			addName(deptNameColArray);
+			singleRow.add(deptNameColArray);
+			deptColArray.add(singleRow);
+
+			firstRow.add(deptColArray);
+		}
+	}
+
+	private void addName(JSONArray deptNameColArray) {
+		{
+			JSONArray deptName = new JSONArray();
+			deptName.add(PARAGRAPH);
+			deptName.add("Scan this QR code to find the latest updated digital version of this document");
+
+			deptNameColArray.add(deptName);
+		}
+	}
+
+	private void addImage(WorkAllocation wa, WAObject waObj, JSONArray deptLogoArray) {
+		{
+			JSONArray deptLogoImage = new JSONArray();
+			deptLogoImage.add("image");
+			baseUrl = baseUrl.concat(wa.getUserId()).concat("/").concat(waObj.getId());
+			File qrCodeFile = QRCode.from(baseUrl).to(ImageType.PNG).file();
+
+			deptLogoImage.add(qrCodeFile.getAbsolutePath());
+			deptLogoArray.add(deptLogoImage);
+		}
+	}
+
+	private void extracted(WAObject waObj, JSONArray firstRow) {
+		extracted1(waObj, firstRow);
+	}
+
+	private void extracted1(WAObject waObj, JSONArray firstRow) {
+		JSONArray widthColumn;
+		{
+			JSONArray deptColArray = new JSONArray();
+			deptColArray.add(PDF_TABLE);
+			widthColumn = new JSONArray();
+			widthColumn.add(40);
+			widthColumn.add(60);
+			deptColArray.add(widthColumn);
+
+			JSONArray singleRow = new JSONArray();
+
+			// Cell for Logo
+			JSONArray deptLogoArray = new JSONArray();
+			deptLogoArray.add(PDF_CELL);
+			JSONObject firstColProperties = new JSONObject();
+			firstColProperties.put(ALIGN, "left");
+			firstColProperties.put("border", true);
+			firstColProperties.put("border-width", 20);
+			JSONArray borderColor = new JSONArray();
+			borderColor.add(0);
+			borderColor.add(0);
+			borderColor.add(0);
+			firstColProperties.put("border-color", borderColor);
+			JSONArray borderEnabled = new JSONArray();
+			borderEnabled.add("top");
+			borderEnabled.add(BOTTOM);
+			borderEnabled.add("left");
+			borderEnabled.add("right");
+			firstColProperties.put("set-border", borderEnabled);
+			deptLogoArray.add(firstColProperties);
+			addImage(deptLogoArray);
+
+			singleRow.add(deptLogoArray);
+
+			JSONArray deptNameColArray = new JSONArray();
+			deptNameColArray.add(PDF_CELL);
+			JSONObject secondColProperties = new JSONObject();
+			secondColProperties.put("valign", BOTTOM);
+			deptNameColArray.add(secondColProperties);
+			addName(waObj, deptNameColArray);
+			singleRow.add(deptNameColArray);
+			deptColArray.add(singleRow);
+
+			firstRow.add(deptColArray);
+		}
+	}
+
+	private void addImage(JSONArray deptLogoArray) {
+		{
+			JSONArray deptLogoImage = new JSONArray();
+			deptLogoImage.add("image");
+			JSONObject imageProperties = new JSONObject();
+			imageProperties.put("width", 100);
+			imageProperties.put("height", 100);
+			deptLogoImage.add(imageProperties);
+			deptLogoImage.add("classpath:government-of-india.jpg");
+			deptLogoArray.add(deptLogoImage);
+		}
+	}
+
+	private void addName(WAObject waObj, JSONArray deptNameColArray) {
+		{
+			JSONArray deptName = new JSONArray();
+			deptName.add(PARAGRAPH);
+			deptName.add(waObj.getDeptName());
+
+			deptNameColArray.add(deptName);
+		}
 	}
 
 	/**
@@ -259,12 +283,18 @@ public class PdfGenerationService {
 	 */
 	private JSONArray getHeaderAndDate() {
 		JSONArray pdfTable = new JSONArray();
-		pdfTable.add("pdf-table");
+		pdfTable.add(PDF_TABLE);
+		extracted6(pdfTable);
+
+		return pdfTable;
+	}
+
+	private void extracted6(JSONArray pdfTable) {
 		{
 			JSONObject pdfTableProperties = new JSONObject();
-			pdfTableProperties.put("width-percent", 100);
-			pdfTableProperties.put("cell-border", false);
-			pdfTableProperties.put("spacing-after", 10);
+			pdfTableProperties.put(WIDTH_PERCENT, 100);
+			pdfTableProperties.put(CELL_BORDER, false);
+			pdfTableProperties.put(SPACING_AFTER, 10);
 			pdfTable.add(pdfTableProperties);
 
 			JSONArray widthRow = new JSONArray();
@@ -273,9 +303,9 @@ public class PdfGenerationService {
 
 			JSONArray firstRow = new JSONArray();
 			JSONArray firstColArray = new JSONArray();
-			firstColArray.add("pdf-cell");
+			firstColArray.add(PDF_CELL);
 			JSONObject firstColProperties = new JSONObject();
-			firstColProperties.put("align", "left");
+			firstColProperties.put(ALIGN, "left");
 			firstColProperties.put("style", "bold");
 			firstColProperties.put("size", 13);
 			firstColArray.add(firstColProperties);
@@ -286,9 +316,9 @@ public class PdfGenerationService {
 
 			JSONArray secondRow = new JSONArray();
 			JSONArray secondColArray = new JSONArray();
-			secondColArray.add("pdf-cell");
+			secondColArray.add(PDF_CELL);
 			JSONObject secondColProperties = new JSONObject();
-			secondColProperties.put("align", "left");
+			secondColProperties.put(ALIGN, "left");
 			secondColProperties.put("size", 11);
 			secondColArray.add(secondColProperties);
 
@@ -301,8 +331,6 @@ public class PdfGenerationService {
 
 			pdfTable.add(secondRow);
 		}
-
-		return pdfTable;
 	}
 
 	/**
@@ -313,12 +341,18 @@ public class PdfGenerationService {
 	 */
 	private JSONArray getRoleActivityHeader(String statusSelected) {
 		JSONArray pdfTable = new JSONArray();
-		pdfTable.add("pdf-table");
+		pdfTable.add(PDF_TABLE);
+		extracted7(statusSelected, pdfTable);
+
+		return pdfTable;
+	}
+
+	private void extracted7(String statusSelected, JSONArray pdfTable) {
 		{
 			JSONObject pdfTableProperties = new JSONObject();
-			pdfTableProperties.put("width-percent", 100);
-			pdfTableProperties.put("cell-border", false);
-			pdfTableProperties.put("spacing-after", 10);
+			pdfTableProperties.put(WIDTH_PERCENT, 100);
+			pdfTableProperties.put(CELL_BORDER, false);
+			pdfTableProperties.put(SPACING_AFTER, 10);
 			pdfTable.add(pdfTableProperties);
 
 			JSONArray widthRow = new JSONArray();
@@ -329,9 +363,9 @@ public class PdfGenerationService {
 
 			JSONArray firstRow = new JSONArray();
 			JSONArray firstColArray = new JSONArray();
-			firstColArray.add("pdf-cell");
+			firstColArray.add(PDF_CELL);
 			JSONObject firstColProperties = new JSONObject();
-			firstColProperties.put("align", "left");
+			firstColProperties.put(ALIGN, "left");
 			firstColProperties.put("size", 11);
 			JSONArray bgColorArray = new JSONArray();
 			bgColorArray.add(225);
@@ -343,9 +377,9 @@ public class PdfGenerationService {
 			firstRow.add(firstColArray);
 
 			JSONArray secondColArray = new JSONArray();
-			secondColArray.add("pdf-cell");
+			secondColArray.add(PDF_CELL);
 			JSONObject secondColProperties = new JSONObject();
-			secondColProperties.put("align", "left");
+			secondColProperties.put(ALIGN, "left");
 			secondColProperties.put("size", 11);
 			secondColProperties.put("background-color", bgColorArray);
 			secondColArray.add(secondColProperties);
@@ -353,9 +387,9 @@ public class PdfGenerationService {
 			firstRow.add(secondColArray);
 
 			JSONArray thridColArray = new JSONArray();
-			thridColArray.add("pdf-cell");
+			thridColArray.add(PDF_CELL);
 			JSONObject thirdColProperties = new JSONObject();
-			thirdColProperties.put("align", "left");
+			thirdColProperties.put(ALIGN, "left");
 			thirdColProperties.put("size", 11);
 			thirdColProperties.put("background-color", bgColorArray);
 			thridColArray.add(thirdColProperties);
@@ -368,8 +402,6 @@ public class PdfGenerationService {
 
 			pdfTable.add(firstRow);
 		}
-
-		return pdfTable;
 	}
 
 	/**
@@ -382,12 +414,17 @@ public class PdfGenerationService {
 	private JSONArray getUserRoleActivities(WorkAllocation wa, String statusSelected) {
 		WAObject waObj = getWaObject(wa, statusSelected);
 		JSONArray pdfTable = new JSONArray();
-		pdfTable.add("pdf-table");
+		pdfTable.add(PDF_TABLE);
+		extracted3(wa, statusSelected, waObj, pdfTable);
+		return pdfTable;
+	}
+
+	private void extracted3(WorkAllocation wa, String statusSelected, WAObject waObj, JSONArray pdfTable) {
 		{
 			JSONObject pdfTableProperties = new JSONObject();
-			pdfTableProperties.put("width-percent", 100);
-			pdfTableProperties.put("cell-border", false);
-			pdfTableProperties.put("spacing-after", 10);
+			pdfTableProperties.put(WIDTH_PERCENT, 100);
+			pdfTableProperties.put(CELL_BORDER, false);
+			pdfTableProperties.put(SPACING_AFTER, 10);
 			pdfTable.add(pdfTableProperties);
 
 			JSONArray widthRow = new JSONArray();
@@ -396,40 +433,48 @@ public class PdfGenerationService {
 			pdfTable.add(widthRow);
 
 			JSONArray firstRow = new JSONArray();
-			{
-				JSONArray firstColArray = new JSONArray();
-				firstColArray.add("pdf-cell");
-				JSONObject firstColProperties = new JSONObject();
-				firstColProperties.put("align", "left");
-				firstColProperties.put("size", 11);
-				firstColArray.add(firstColProperties);
-				firstColArray.add(wa.getUserName());
-
-				firstRow.add(firstColArray);
-			}
+			extracted2(wa, firstRow);
 
 			JSONArray secondColPdfTable = new JSONArray();
-			secondColPdfTable.add("pdf-table");
+			secondColPdfTable.add(PDF_TABLE);
 			widthRow = new JSONArray();
 			widthRow.add(40);
 			widthRow.add(60);
 			secondColPdfTable.add(widthRow);
 			List<RoleCompetency> roleCompetencyList = waObj.getRoleCompetencyList();
 			boolean flag = true;
-			for (RoleCompetency roleCompetency : roleCompetencyList) {
-				JSONArray roleCompeteArray = parseRoleCompetency(roleCompetency, statusSelected);
-				secondColPdfTable.add(roleCompeteArray);
-				if (flag) {
-					secondColPdfTable.add(lineRow());
-					flag = !flag;
-				}
-			}
+			extracted43(statusSelected, secondColPdfTable, roleCompetencyList, flag);
 
 			firstRow.add(secondColPdfTable);
 
 			pdfTable.add(firstRow);
 		}
-		return pdfTable;
+	}
+
+	private void extracted43(String statusSelected, JSONArray secondColPdfTable,
+			List<RoleCompetency> roleCompetencyList, boolean flag) {
+		for (RoleCompetency roleCompetency : roleCompetencyList) {
+			JSONArray roleCompeteArray = parseRoleCompetency(roleCompetency, statusSelected);
+			secondColPdfTable.add(roleCompeteArray);
+			if (flag) {
+				secondColPdfTable.add(lineRow());
+				flag = !flag;
+			}
+		}
+	}
+
+	private void extracted2(WorkAllocation wa, JSONArray firstRow) {
+		{
+			JSONArray firstColArray = new JSONArray();
+			firstColArray.add(PDF_CELL);
+			JSONObject firstColProperties = new JSONObject();
+			firstColProperties.put(ALIGN, "left");
+			firstColProperties.put("size", 11);
+			firstColArray.add(firstColProperties);
+			firstColArray.add(wa.getUserName());
+
+			firstRow.add(firstColArray);
+		}
 	}
 
 	private WAObject getWaObject(WorkAllocation wa, String statusSelected) {
@@ -448,9 +493,9 @@ public class PdfGenerationService {
 		JSONArray roleCompetencyRow = new JSONArray();
 
 		JSONArray firstColArray = new JSONArray();
-		firstColArray.add("pdf-cell");
+		firstColArray.add(PDF_CELL);
 		JSONObject firstColProperties = new JSONObject();
-		firstColProperties.put("align", "left");
+		firstColProperties.put(ALIGN, "left");
 		firstColProperties.put("size", 11);
 		firstColArray.add(firstColProperties);
 		firstColArray.add(roleCompetency.getRoleDetails().getName());
@@ -458,18 +503,18 @@ public class PdfGenerationService {
 		roleCompetencyRow.add(firstColArray);
 
 		JSONArray secondColArray = new JSONArray();
-		secondColArray.add("pdf-cell");
+		secondColArray.add(PDF_CELL);
 		JSONObject secondColProperties = new JSONObject();
-		secondColProperties.put("align", "left");
+		secondColProperties.put(ALIGN, "left");
 		secondColProperties.put("size", 11);
 		secondColArray.add(firstColProperties);
 
 		JSONObject paragraphSpacing = new JSONObject();
-		paragraphSpacing.put("spacing-after", 5);
+		paragraphSpacing.put(SPACING_AFTER, 5);
 
 		if (WorkAllocationConstants.DRAFT_STATUS.equalsIgnoreCase(statusSelected)) {
 			JSONArray headerArray = new JSONArray();
-			headerArray.add("paragraph");
+			headerArray.add(PARAGRAPH);
 			headerArray.add(paragraphSpacing);
 			headerArray.add("Activities");
 			secondColArray.add(headerArray);
@@ -477,7 +522,7 @@ public class PdfGenerationService {
 
 		for (ChildNode activity : roleCompetency.getRoleDetails().getChildNodes()) {
 			JSONArray chunkArray = new JSONArray();
-			chunkArray.add("paragraph");
+			chunkArray.add(PARAGRAPH);
 			chunkArray.add(paragraphSpacing);
 			chunkArray.add(activity.getName());
 			secondColArray.add(chunkArray);
@@ -485,13 +530,13 @@ public class PdfGenerationService {
 
 		if (WorkAllocationConstants.DRAFT_STATUS.equalsIgnoreCase(statusSelected)) {
 			JSONArray headerArray = new JSONArray();
-			headerArray.add("paragraph");
+			headerArray.add(PARAGRAPH);
 			headerArray.add(paragraphSpacing);
 			headerArray.add("Competencies");
 			secondColArray.add(headerArray);
 			for (CompetencyDetails competency : roleCompetency.getCompetencyDetails()) {
 				JSONArray chunkArray = new JSONArray();
-				chunkArray.add("paragraph");
+				chunkArray.add(PARAGRAPH);
 				chunkArray.add(paragraphSpacing);
 				chunkArray.add(competency.getName());
 				secondColArray.add(chunkArray);

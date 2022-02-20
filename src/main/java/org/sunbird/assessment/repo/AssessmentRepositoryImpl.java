@@ -1,8 +1,13 @@
 package org.sunbird.assessment.repo;
 
 import java.math.BigDecimal;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,7 +25,7 @@ public class AssessmentRepositoryImpl implements AssessmentRepository {
 	public static final String SOURCE_ID = "sourceId";
 	public static final String USER_ID = "userId";
 	private CbExtLogger logger = new CbExtLogger(getClass().getName());
-	
+
 	@Autowired
 	UserAssessmentSummaryRepository userAssessmentSummaryRepo;
 
@@ -33,20 +38,25 @@ public class AssessmentRepositoryImpl implements AssessmentRepository {
 	SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 
 	@Override
-	public Map<String, Object> getAssessmentAnswerKey(String artifactUrl) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
+	public Map<String, Object> getAssessmentAnswerKey(String artifactUrl) {
+
+		return new HashMap<>();
 	}
 
 	@Override
-	public Map<String, Object> getQuizAnswerKey(AssessmentSubmissionDTO quizMap) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
+	public List<Map<String, Object>> getAssessmetbyContentUser(String rootOrg, String courseId, String userId) {
+		return Collections.emptyList();
+	}
+
+	@Override
+	public Map<String, Object> getQuizAnswerKey(AssessmentSubmissionDTO quizMap) {
+
+		return new HashMap<>();
 	}
 
 	@Override
 	public Map<String, Object> insertQuizOrAssessment(Map<String, Object> persist, Boolean isAssessment)
-			throws Exception {
+			throws NumberFormatException, ParseException {
 		Map<String, Object> response = new HashMap<>();
 		Date date = new Date();
 
@@ -67,7 +77,7 @@ public class AssessmentRepositoryImpl implements AssessmentRepository {
 							persist.get(USER_ID).toString(), persist.get(SOURCE_ID).toString()))
 					.orElse(null);
 
-			if (persist.get("parentContentType").toString().equalsIgnoreCase("course")) {
+			if ("course".equalsIgnoreCase(persist.get("parentContentType").toString())) {
 				if (data != null) {
 					if (data.getFirstMaxScore() < Float.parseFloat(persist.get(RESULT).toString())) {
 						summary = new UserAssessmentSummaryModel(
@@ -113,12 +123,5 @@ public class AssessmentRepositoryImpl implements AssessmentRepository {
 
 		response.put("response", "SUCCESS");
 		return response;
-	}
-
-	@Override
-	public List<Map<String, Object>> getAssessmetbyContentUser(String rootOrg, String courseId, String userId)
-			throws Exception {
-		// TODO Auto-generated method stub
-		return Collections.emptyList();
 	}
 }

@@ -4,7 +4,7 @@ public interface UserAssessmentMasterRepositoryCustom {
 
 	/**
 	 * updates assessment and assessment summary
-	 * 
+	 *
 	 * @param assessment
 	 * @param assessmentSummary
 	 * @return

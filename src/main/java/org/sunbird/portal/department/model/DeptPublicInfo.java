@@ -1,40 +1,52 @@
 package org.sunbird.portal.department.model;
 
 public class DeptPublicInfo {
-	int id;
-	String root_org;
-	String friendly_name;
+
+	String id;
 	String description;
+	String rootOrgId;
+	String orgName;
 
-	public int getId() {
-		return id;
+	public DeptPublicInfo() {
 	}
 
-	public void setId(int id) {
+	public DeptPublicInfo(String id, String description, String rootOrgId, String orgName) {
 		this.id = id;
-	}
-
-	public String getRoot_org() {
-		return root_org;
-	}
-
-	public void setRoot_org(String root_org) {
-		this.root_org = root_org;
-	}
-
-	public String getFriendly_name() {
-		return friendly_name;
-	}
-
-	public void setFriendly_name(String friendly_name) {
-		this.friendly_name = friendly_name;
+		this.description = description;
+		this.rootOrgId = rootOrgId;
+		this.orgName = orgName;
 	}
 
 	public String getDescription() {
 		return description;
 	}
 
+	public String getId() {
+		return id;
+	}
+
+	public String getOrgName() {
+		return orgName;
+	}
+
+	public String getRootOrgId() {
+		return rootOrgId;
+	}
+
 	public void setDescription(String description) {
 		this.description = description;
 	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	public void setOrgName(String orgName) {
+		this.orgName = orgName;
+	}
+
+	public void setRootOrgId(String rootOrgId) {
+		this.rootOrgId = rootOrgId;
+	}
+
 }

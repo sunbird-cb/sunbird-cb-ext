@@ -11,7 +11,7 @@ public class UserAssessmentMasterRepositoryImpl implements UserAssessmentMasterR
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.sunbird.assessment.repo.
 	 * UserAssessmentMasterRepositoryCustom#updateAssessment(org.sunbird.assessment.
 	 * repo.UserAssessmentMasterModel,
@@ -22,8 +22,9 @@ public class UserAssessmentMasterRepositoryImpl implements UserAssessmentMasterR
 			UserAssessmentSummaryModel assessmentSummary) {
 		CassandraBatchOperations batchOps = cassandraOperations.batchOps();
 		batchOps.insert(assessment);
-		if (assessmentSummary.getPrimaryKey() != null)
+		if (assessmentSummary.getPrimaryKey() != null) {
 			batchOps.insert(assessmentSummary);
+		}
 		batchOps.execute();
 		return assessment;
 	}

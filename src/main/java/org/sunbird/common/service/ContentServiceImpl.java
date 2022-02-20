@@ -29,72 +29,18 @@ public class ContentServiceImpl implements ContentService {
 	@Autowired
 	private ObjectMapper mapper;
 
+	@Override
 	public SunbirdApiResp getHeirarchyResponse(String contentId) {
 		StringBuilder url = new StringBuilder();
 		url.append(serverConfig.getContentHost()).append(serverConfig.getHierarchyEndPoint()).append("/" + contentId)
 				.append("?hierarchyType=detail");
 		SunbirdApiResp response = mapper.convertValue(outboundRequestHandlerService.fetchResult(url.toString()),
 				SunbirdApiResp.class);
-		if (response.getResponseCode().equalsIgnoreCase("Ok")) {
+		if ("Ok".equalsIgnoreCase(response.getResponseCode())) {
 			return response;
 		}
 
 		return null;
-	}
-
-	public SunbirdApiUserCourseListResp getUserCourseListResponse(String authToken, String userId) {
-		StringBuilder url = new StringBuilder();
-		String endPoint = serverConfig.getUserCoursesList().replace("{userUUID}", userId);
-		url.append(serverConfig.getCourseServiceHost()).append(endPoint);
-		Map<String, String> headers = new HashMap<>();
-		headers.put("x-authenticated-user-token", authToken);
-		SunbirdApiUserCourseListResp response = mapper.convertValue(outboundRequestHandlerService.fetchUsingGetWithHeaders(url.toString(), headers),
-				SunbirdApiUserCourseListResp.class);
-		if (response.getResponseCode().equalsIgnoreCase("Ok")) {
-			return response;
-		}
-		return null;
-	}
-
-	public List<String> getParticipantsList(String xAuthUser, List<String> batchIdList) {
-		List<String> participantList = new ArrayList<>();
-		StringBuilder url = new StringBuilder();
-		url.append(serverConfig.getCourseServiceHost()).append(serverConfig.getParticipantsEndPoint());
-
-		HashMap<String, String> headerValues = new HashMap<>();
-		headerValues.put("X-Authenticated-User-Token", xAuthUser);
-		headerValues.put("Authorization", serverConfig.getSbApiKey());
-		headerValues.put("Content-Type", "application/json");
-
-		Map<String, Object> requestBody = new HashMap<>();
-		Map<String, Object> request = new HashMap<>();
-		Map<String, Object> batch = new HashMap<>();
-		batch.put("active", true);
-		request.put("batch", batch);
-		requestBody.put("request", request);
-
-		for (String batchId : batchIdList) {
-			try {
-				batch.put("batchId", batchId);
-				SunbirdApiResp response = mapper.convertValue(
-						outboundRequestHandlerService.fetchResultUsingPost(url.toString(), requestBody, headerValues),
-						SunbirdApiResp.class);
-				if (response.getResponseCode().equalsIgnoreCase("Ok")) {
-					SunbirdApiHierarchyResultBatch batchResp = response.getResult().getBatch();
-					if (batchResp != null && batchResp.getCount() > 0) {
-						participantList.addAll(batchResp.getParticipants());
-					}
-					logger.info("Fetch Participants return - " + participantList.size() + " no. of users.");
-				} else {
-					logger.warn("Failed to get participants for BatchId - " + batchId);
-					logger.warn("Error Response -> " + mapper.writeValueAsString(response));
-				}
-			} catch (Exception e) {
-				logger.error(e);
-			}
-		}
-
-		return participantList;
 	}
 
 	@Override
@@ -119,7 +65,7 @@ public class ContentServiceImpl implements ContentService {
 			SunbirdApiResp response = mapper.convertValue(
 					outboundRequestHandlerService.fetchResultUsingPost(url.toString(), requestBody, headerValues),
 					SunbirdApiResp.class);
-			if (response.getResponseCode().equalsIgnoreCase("Ok")) {
+			if ("Ok".equalsIgnoreCase(response.getResponseCode())) {
 				SunbirdApiHierarchyResultBatch batchResp = response.getResult().getBatch();
 				if (batchResp != null && batchResp.getCount() > 0) {
 					participantList.addAll(batchResp.getParticipants());
@@ -132,5 +78,63 @@ public class ContentServiceImpl implements ContentService {
 			logger.error(e);
 		}
 		return participantList;
+	}
+
+	@Override
+	public List<String> getParticipantsList(String xAuthUser, List<String> batchIdList) {
+		List<String> participantList = new ArrayList<>();
+		StringBuilder url = new StringBuilder();
+		url.append(serverConfig.getCourseServiceHost()).append(serverConfig.getParticipantsEndPoint());
+
+		HashMap<String, String> headerValues = new HashMap<>();
+		headerValues.put("X-Authenticated-User-Token", xAuthUser);
+		headerValues.put("Authorization", serverConfig.getSbApiKey());
+		headerValues.put("Content-Type", "application/json");
+
+		Map<String, Object> requestBody = new HashMap<>();
+		Map<String, Object> request = new HashMap<>();
+		Map<String, Object> batch = new HashMap<>();
+		batch.put("active", true);
+		request.put("batch", batch);
+		requestBody.put("request", request);
+
+		for (String batchId : batchIdList) {
+			try {
+				batch.put("batchId", batchId);
+				SunbirdApiResp response = mapper.convertValue(
+						outboundRequestHandlerService.fetchResultUsingPost(url.toString(), requestBody, headerValues),
+						SunbirdApiResp.class);
+				if ("Ok".equalsIgnoreCase(response.getResponseCode())) {
+					SunbirdApiHierarchyResultBatch batchResp = response.getResult().getBatch();
+					if (batchResp != null && batchResp.getCount() > 0) {
+						participantList.addAll(batchResp.getParticipants());
+					}
+					logger.info(String.format("Fetch Participants return - %d no. of users.", participantList.size()));
+				} else {
+					logger.warn("Failed to get participants for BatchId - " + batchId);
+					logger.warn("Error Response -> " + mapper.writeValueAsString(response));
+				}
+			} catch (Exception e) {
+				logger.error(e);
+			}
+		}
+
+		return participantList;
+	}
+
+	@Override
+	public SunbirdApiUserCourseListResp getUserCourseListResponse(String authToken, String userId) {
+		StringBuilder url = new StringBuilder();
+		String endPoint = serverConfig.getUserCoursesList().replace("{userUUID}", userId);
+		url.append(serverConfig.getCourseServiceHost()).append(endPoint);
+		Map<String, String> headers = new HashMap<>();
+		headers.put("x-authenticated-user-token", authToken);
+		SunbirdApiUserCourseListResp response = mapper.convertValue(
+				outboundRequestHandlerService.fetchUsingGetWithHeaders(url.toString(), headers),
+				SunbirdApiUserCourseListResp.class);
+		if ("Ok".equalsIgnoreCase(response.getResponseCode())) {
+			return response;
+		}
+		return null;
 	}
 }

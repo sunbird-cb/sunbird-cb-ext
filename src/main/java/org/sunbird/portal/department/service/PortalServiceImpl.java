@@ -68,7 +68,6 @@ public class PortalServiceImpl implements PortalService {
 				count = resultResp.getCount();
 				iterateCount = iterateCount + resultResp.getContent().size();
 				for (SunbirdApiRespContent content : resultResp.getContent()) {
-					// return orgname only if cbp or mdo
 					if ((!ObjectUtils.isEmpty(content.getIsMdo()) && content.getIsMdo())
 							|| (!ObjectUtils.isEmpty(content.getIsCbp()) && content.getIsCbp())) {
 						orgNames.add(content.getChannel());

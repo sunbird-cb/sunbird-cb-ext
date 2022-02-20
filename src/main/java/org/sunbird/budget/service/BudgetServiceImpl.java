@@ -1,5 +1,6 @@
 package org.sunbird.budget.service;
 
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -23,6 +24,7 @@ import org.sunbird.budget.model.BudgetInfo;
 import org.sunbird.cassandra.utils.CassandraOperation;
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.util.Constants;
+import org.sunbird.exception.MyOwnRuntimeException;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -30,6 +32,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class BudgetServiceImpl implements BudgetService {
+	private static final String ONE_OR_MORE_REQUIRED_FIELDS_ARE_EMPTY_EMPTY_FIELDS = "One or more required fields are empty. Empty fields ";
+	private static final String FAILED_TO_FIND_BUDGET_SCHEME_FOR_ORG_ID = "Failed to find BudgetScheme for OrgId: ";
+	private static final String ID = ", Id: ";
+	private static final String BUDGET_YEAR = ", BudgetYear: ";
 	private ObjectMapper mapper = new ObjectMapper();
 	private SimpleDateFormat dateFormatter = new SimpleDateFormat(Constants.DATE_FORMAT);
 	private Logger logger = LoggerFactory.getLogger(getClass().getName());
@@ -38,7 +44,7 @@ public class BudgetServiceImpl implements BudgetService {
 	private CassandraOperation cassandraOperation;
 
 	@Override
-	public SBApiResponse submitBudgetDetails(BudgetInfo data, String userId) throws Exception {
+	public SBApiResponse submitBudgetDetails(BudgetInfo data, String userId) {
 		SBApiResponse response = new SBApiResponse(Constants.API_BUDGET_SCHEME_ADD);
 		try {
 			validateAddBudgetInfo(data);
@@ -47,12 +53,12 @@ public class BudgetServiceImpl implements BudgetService {
 			request.put(Constants.BUDGET_YEAR, data.getBudgetYear());
 			request.put(Constants.SCHEME_NAME, data.getSchemeName());
 
-			List<Map<String, Object>> existingDataList = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
-					Constants.TABLE_ORG_BUDGET_SCHEME, request, null);
+			List<Map<String, Object>> existingDataList = cassandraOperation.getRecordsByProperties(
+					Constants.KEYSPACE_SUNBIRD, Constants.TABLE_ORG_BUDGET_SCHEME, request, null);
 
 			if (!existingDataList.isEmpty()) {
 				String errMsg = "Budget Scheme exist for given name. Failed to create BudgetInfo for OrgId: "
-						+ data.getOrgId() + ", BudgetYear: " + data.getBudgetYear() + ", SchemeName: "
+						+ data.getOrgId() + BUDGET_YEAR + data.getBudgetYear() + ", SchemeName: "
 						+ data.getSchemeName();
 				logger.error(errMsg);
 				response.getParams().setErr(errMsg);
@@ -73,9 +79,11 @@ public class BudgetServiceImpl implements BudgetService {
 			response.getParams().setStatus(Constants.SUCCESSFUL);
 			response.put(Constants.DATA, request);
 			response.setResponseCode(HttpStatus.CREATED);
-		} catch (Exception ex) {
-			String errMsg = "Exception occurred while saving the Budget details. Exception: " + ex.getMessage();
-			logger.error(errMsg, ex);
+		} catch (Exception e) {
+			String errMsg = "Exception occurred while saving the Budget details. Exception: " + e.getMessage();
+			logger.error(String.format("Exception occurred while saving the Budget details. Exception:  %s",
+					e.getMessage()));
+
 			response.getParams().setErrmsg(errMsg);
 			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
 			return response;
@@ -83,7 +91,8 @@ public class BudgetServiceImpl implements BudgetService {
 		return response;
 	}
 
-	public SBApiResponse submitBudgetDocDetails(BudgetDocInfo docInfo, String userId) throws Exception {
+	@Override
+	public SBApiResponse submitBudgetDocDetails(BudgetDocInfo docInfo, String userId) {
 		SBApiResponse response = new SBApiResponse(Constants.API_BUDGET_SCHEME_DOC_ADD);
 		try {
 			validateAddBudgetDocInfo(docInfo);
@@ -92,12 +101,12 @@ public class BudgetServiceImpl implements BudgetService {
 			propertyMap.put(Constants.ORG_ID, docInfo.getOrgId());
 			propertyMap.put(Constants.ID, docInfo.getId());
 			propertyMap.put(Constants.BUDGET_YEAR, docInfo.getBudgetYear());
-			List<Map<String, Object>> existingBudgetInfo = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
-					Constants.TABLE_ORG_BUDGET_SCHEME, propertyMap, new ArrayList<>());
+			List<Map<String, Object>> existingBudgetInfo = cassandraOperation.getRecordsByProperties(
+					Constants.KEYSPACE_SUNBIRD, Constants.TABLE_ORG_BUDGET_SCHEME, propertyMap, new ArrayList<>());
 
 			if (existingBudgetInfo.isEmpty()) {
-				String errMsg = "Failed to find BudgetScheme for OrgId: " + docInfo.getOrgId() + ", Id: "
-						+ docInfo.getId() + ", BudgetYear: " + docInfo.getBudgetYear();
+				String errMsg = FAILED_TO_FIND_BUDGET_SCHEME_FOR_ORG_ID + docInfo.getOrgId() + ID + docInfo.getId()
+						+ BUDGET_YEAR + docInfo.getBudgetYear();
 				logger.error(errMsg);
 				response.getParams().setErrmsg(errMsg);
 				response.setResponseCode(HttpStatus.BAD_REQUEST);
@@ -142,9 +151,10 @@ public class BudgetServiceImpl implements BudgetService {
 			response.put(Constants.DATA, budgetMap);
 			response.getParams().setStatus(Constants.SUCCESSFUL);
 			response.setResponseCode(HttpStatus.OK);
-		} catch (Exception ex) {
-			String errMsg = "Exception occurred while saving the Budget Doc details. Exception: " + ex.getMessage();
-			logger.error(errMsg, ex);
+		} catch (Exception e) {
+			String errMsg = "Exception occurred while saving the Budget Doc details. Exception: " + e.getMessage();
+			logger.error(String.format("Exception occurred while saving the Budget Doc details. Exception:  %s",
+					e.getMessage()));
 			response.getParams().setErrmsg(errMsg);
 			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
 			return response;
@@ -154,7 +164,7 @@ public class BudgetServiceImpl implements BudgetService {
 	}
 
 	@Override
-	public SBApiResponse getBudgetDetails(String orgId, String budgetYear) throws Exception {
+	public SBApiResponse getBudgetDetails(String orgId, String budgetYear) {
 		SBApiResponse response = new SBApiResponse(Constants.API_BUDGET_SCHEME_READ);
 		List<Map<String, Object>> budgetResponseList = null;
 		String errMsg = null;
@@ -162,7 +172,7 @@ public class BudgetServiceImpl implements BudgetService {
 			errMsg = "No Budget Year Collection found for Org: " + orgId;
 		} else {
 			budgetResponseList = getSpecificBudgetYearDetails(orgId, budgetYear);
-			errMsg = "No Budget Scheme found for Org: " + orgId + ", BudgetYear: " + budgetYear;
+			errMsg = "No Budget Scheme found for Org: " + orgId + BUDGET_YEAR + budgetYear;
 		}
 
 		if (CollectionUtils.isEmpty(budgetResponseList)) {
@@ -177,8 +187,7 @@ public class BudgetServiceImpl implements BudgetService {
 		return response;
 	}
 
-	@Override
-	public SBApiResponse updateBudgetDetails(BudgetInfo data, String userId) throws Exception {
+	public SBApiResponse updateBudgetDetails(BudgetInfo data, String userId) {
 		SBApiResponse response = new SBApiResponse(Constants.API_BUDGET_SCHEME_UPDATE);
 		Map<String, Object> request = new HashMap<>();
 		Map<String, Object> keyMap = new HashMap<>();
@@ -188,11 +197,11 @@ public class BudgetServiceImpl implements BudgetService {
 		try {
 			validateUpdateBudgetInfo(data);
 
-			List<Map<String, Object>> existingBudgetInfo = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
-					Constants.TABLE_ORG_BUDGET_SCHEME, keyMap, null);
+			List<Map<String, Object>> existingBudgetInfo = cassandraOperation.getRecordsByProperties(
+					Constants.KEYSPACE_SUNBIRD, Constants.TABLE_ORG_BUDGET_SCHEME, keyMap, null);
 			if (existingBudgetInfo.isEmpty()) {
-				String errMsg = "Failed to find BudgetScheme for OrgId: " + data.getOrgId() + ", Id: " + data.getId()
-						+ ", BudgetYear: " + data.getBudgetYear();
+				String errMsg = FAILED_TO_FIND_BUDGET_SCHEME_FOR_ORG_ID + data.getOrgId() + ID + data.getId()
+						+ BUDGET_YEAR + data.getBudgetYear();
 				logger.error(errMsg);
 				response.getParams().setErrmsg(errMsg);
 				response.setResponseCode(HttpStatus.BAD_REQUEST);
@@ -201,21 +210,20 @@ public class BudgetServiceImpl implements BudgetService {
 			if (data.getSchemeName() != null) {
 				// Validate for duplicate schemeNames
 				keyMap.put(Constants.SCHEME_NAME, data.getSchemeName());
-				List<Map<String, Object>> existingList = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
-						Constants.TABLE_ORG_BUDGET_SCHEME, keyMap, null);
+				List<Map<String, Object>> existingList = cassandraOperation.getRecordsByProperties(
+						Constants.KEYSPACE_SUNBIRD, Constants.TABLE_ORG_BUDGET_SCHEME, keyMap, null);
 
 				if (!CollectionUtils.isEmpty(existingList)) {
 					boolean isOtherRecordExist = false;
 					for (Map<String, Object> map : existingList) {
-						if (!((String) map.get(Constants.ID)).equalsIgnoreCase(data.getId())) {
-							if (((String) map.get(Constants.SCHEME_NAME)).equalsIgnoreCase(data.getSchemeName())) {
-								isOtherRecordExist = true;
-							}
+						if (!((String) map.get(Constants.ID)).equalsIgnoreCase(data.getId())
+								&& ((String) map.get(Constants.SCHEME_NAME)).equalsIgnoreCase(data.getSchemeName())) {
+							isOtherRecordExist = true;
 						}
 					}
 					if (isOtherRecordExist) {
 						String errMsg = "Budget Scheme exist for given name. Failed to update BudgetInfo for OrgId: "
-								+ data.getOrgId() + ", BudgetYear: " + data.getBudgetYear() + ", SchemeName: "
+								+ data.getOrgId() + BUDGET_YEAR + data.getBudgetYear() + ", SchemeName: "
 								+ data.getSchemeName();
 						logger.error(errMsg);
 						response.getParams().setErr(errMsg);
@@ -236,7 +244,8 @@ public class BudgetServiceImpl implements BudgetService {
 				request.put(Constants.TRAINING_BUDGET_UTILIZATION, data.getTrainingBudgetUtilization());
 			}
 
-			cassandraOperation.updateRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_ORG_BUDGET_SCHEME, request, keyMap);
+			cassandraOperation.updateRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_ORG_BUDGET_SCHEME, request,
+					keyMap);
 
 			request.put(Constants.ID, data.getId());
 			request.put(Constants.ORG_ID, data.getOrgId());
@@ -248,9 +257,10 @@ public class BudgetServiceImpl implements BudgetService {
 			response.put(Constants.DATA, request);
 			response.getParams().setStatus(Constants.SUCCESSFUL);
 			response.setResponseCode(HttpStatus.OK);
-		} catch (Exception ex) {
-			String errMsg = "Exception occurred while updating the Budget details. Exception: " + ex.getMessage();
-			logger.error(errMsg, ex);
+		} catch (Exception e) {
+			String errMsg = "Exception occurred while updating the Budget details. Exception: " + e.getMessage();
+			logger.error(String.format("Exception occurred while updating the Budget details. Exception:  %s",
+					e.getMessage()));
 			response.getParams().setErrmsg(errMsg);
 			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -258,22 +268,21 @@ public class BudgetServiceImpl implements BudgetService {
 	}
 
 	@Override
-	public SBApiResponse deleteBudgetDetails(String orgId, String id, String budgetYear) throws Exception {
+	public SBApiResponse deleteBudgetDetails(String orgId, String id, String budgetYear) {
 		SBApiResponse response = new SBApiResponse(Constants.API_BUDGET_SCHEME_DELETE);
 		Map<String, Object> keyMap = new HashMap<>();
 		keyMap.put(Constants.ORG_ID, orgId);
 		keyMap.put(Constants.ID, id);
 		keyMap.put(Constants.BUDGET_YEAR, budgetYear);
 		try {
-			List<Map<String, Object>> existingDetails = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
-					Constants.TABLE_ORG_BUDGET_SCHEME, keyMap, null);
+			List<Map<String, Object>> existingDetails = cassandraOperation.getRecordsByProperties(
+					Constants.KEYSPACE_SUNBIRD, Constants.TABLE_ORG_BUDGET_SCHEME, keyMap, null);
 			if (!existingDetails.isEmpty()) {
 				cassandraOperation.deleteRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_ORG_BUDGET_SCHEME, keyMap);
 				response.getParams().setStatus(Constants.SUCCESSFUL);
 				response.setResponseCode(HttpStatus.OK);
 			} else {
-				String errMsg = "Failed to find BudgetScheme for OrgId: " + orgId + ", Id: " + id + ", BudgetYear: "
-						+ budgetYear;
+				String errMsg = FAILED_TO_FIND_BUDGET_SCHEME_FOR_ORG_ID + orgId + ID + id + BUDGET_YEAR + budgetYear;
 				logger.error(errMsg);
 				response.getParams().setErrmsg(errMsg);
 				response.setResponseCode(HttpStatus.BAD_REQUEST);
@@ -288,7 +297,7 @@ public class BudgetServiceImpl implements BudgetService {
 	}
 
 	public SBApiResponse deleteDocBudgetDetails(String orgId, String budgetDetailsId, String budgetYear,
-			String proofDocId) throws Exception {
+			String proofDocId) {
 		SBApiResponse response = new SBApiResponse(Constants.API_BUDGET_SCHEME_DELETE);
 		try {
 			Map<String, Object> propertyMap = new HashMap<>();
@@ -301,8 +310,8 @@ public class BudgetServiceImpl implements BudgetService {
 			if (!budgetInfo.isEmpty()) {
 				BudgetInfo budgetInfoModel = mapper.convertValue(budgetInfo.get(0), BudgetInfo.class);
 				if (CollectionUtils.isEmpty(budgetInfoModel.getProofDocs())) {
-					String errMsg = "Failed to find BudgetScheme for OrgId: " + orgId + ", Id: " + budgetDetailsId
-							+ ", BudgetYear: " + budgetYear;
+					String errMsg = FAILED_TO_FIND_BUDGET_SCHEME_FOR_ORG_ID + orgId + ID + budgetDetailsId + BUDGET_YEAR
+							+ budgetYear;
 					logger.error(errMsg);
 					response.getParams().setErrmsg(errMsg);
 					response.setResponseCode(HttpStatus.BAD_REQUEST);
@@ -328,7 +337,8 @@ public class BudgetServiceImpl implements BudgetService {
 
 					// Update the removed list
 					Map<String, Object> budgetMap = mapper.convertValue(budgetInfoModel, HashMap.class);
-					cassandraOperation.insertRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_ORG_BUDGET_SCHEME, budgetMap);
+					cassandraOperation.insertRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_ORG_BUDGET_SCHEME,
+							budgetMap);
 
 					response.getParams().setStatus(Constants.SUCCESSFUL);
 					response.setResponseCode(HttpStatus.OK);
@@ -350,7 +360,7 @@ public class BudgetServiceImpl implements BudgetService {
 	}
 
 	@Override
-	public SBApiResponse getBudgetAudit(String orgId) throws Exception {
+	public SBApiResponse getBudgetAudit(String orgId) throws IOException {
 		SBApiResponse response = new SBApiResponse(Constants.API_BUDGET_SCHEME_HISTORY_READ);
 
 		Map<String, Object> keyMap = new HashMap<>();
@@ -398,8 +408,8 @@ public class BudgetServiceImpl implements BudgetService {
 		return response;
 	}
 
-	private void validateAddBudgetInfo(BudgetInfo budgetInfo) throws Exception {
-		List<String> errObjList = new ArrayList<String>();
+	private void validateAddBudgetInfo(BudgetInfo budgetInfo) throws MyOwnRuntimeException {
+		List<String> errObjList = new ArrayList<>();
 		if (StringUtils.isEmpty(budgetInfo.getOrgId())) {
 			errObjList.add(Constants.ORG_ID);
 		}
@@ -408,12 +418,9 @@ public class BudgetServiceImpl implements BudgetService {
 		}
 		if (StringUtils.isEmpty(budgetInfo.getSchemeName())) {
 			errObjList.add(Constants.SCHEME_NAME);
-		} else {
-			if ("all".equalsIgnoreCase(budgetInfo.getSchemeName())) {
-				if (budgetInfo.getSalaryBudgetAllocated() == null || budgetInfo.getSalaryBudgetAllocated() < 0) {
-					errObjList.add(Constants.SALARY_BUDGET_ALLOCATED);
-				}
-			}
+		} else if ("all".equalsIgnoreCase(budgetInfo.getSchemeName())
+				&& (budgetInfo.getSalaryBudgetAllocated() == null || budgetInfo.getSalaryBudgetAllocated() < 0)) {
+			errObjList.add(Constants.SALARY_BUDGET_ALLOCATED);
 		}
 
 		if (budgetInfo.getTrainingBudgetAllocated() == null || budgetInfo.getTrainingBudgetAllocated() < 0) {
@@ -424,12 +431,12 @@ public class BudgetServiceImpl implements BudgetService {
 		}
 
 		if (!CollectionUtils.isEmpty(errObjList)) {
-			throw new Exception("One or more required fields are empty. Empty fields " + errObjList.toString());
+			throw new MyOwnRuntimeException(ONE_OR_MORE_REQUIRED_FIELDS_ARE_EMPTY_EMPTY_FIELDS + errObjList.toString());
 		}
 	}
 
-	private void validateUpdateBudgetInfo(BudgetInfo budgetInfo) throws Exception {
-		List<String> errObjList = new ArrayList<String>();
+	private void validateUpdateBudgetInfo(BudgetInfo budgetInfo) throws MyOwnRuntimeException {
+		List<String> errObjList = new ArrayList<>();
 		if (StringUtils.isEmpty(budgetInfo.getOrgId())) {
 			errObjList.add(Constants.ORG_ID);
 		}
@@ -440,7 +447,10 @@ public class BudgetServiceImpl implements BudgetService {
 			errObjList.add(Constants.BUDGET_YEAR);
 		}
 
-		boolean schemeName = false, sBudgetAllocated = false, tBudgetAllocated = false, tBudgetUtilization = false;
+		boolean schemeName = false;
+		boolean sBudgetAllocated = false;
+		boolean tBudgetAllocated = false;
+		boolean tBudgetUtilization = false;
 		if (budgetInfo.getSchemeName() != null) {
 			if (StringUtils.isEmpty(budgetInfo.getSchemeName())) {
 				errObjList.add(Constants.SCHEME_NAME);
@@ -477,37 +487,26 @@ public class BudgetServiceImpl implements BudgetService {
 		}
 
 		if (schemeName && sBudgetAllocated && tBudgetAllocated && tBudgetUtilization) {
-			throw new Exception("One or more required fields are empty. Empty fields " + errObjList.toString());
+			throw new MyOwnRuntimeException(ONE_OR_MORE_REQUIRED_FIELDS_ARE_EMPTY_EMPTY_FIELDS + errObjList.toString());
 		} else {
-			if (schemeName)
+			if (schemeName) {
 				errObjList.remove(Constants.SCHEME_NAME);
-			if (sBudgetAllocated)
+			}
+			if (sBudgetAllocated) {
 				errObjList.remove(Constants.SALARY_BUDGET_ALLOCATED);
-			if (tBudgetAllocated)
+			}
+			if (tBudgetAllocated) {
 				errObjList.remove(Constants.TRAINING_BUDGET_ALLOCATED);
-			if (tBudgetUtilization)
+			}
+			if (tBudgetUtilization) {
 				errObjList.remove(Constants.TRAINING_BUDGET_UTILIZATION);
+			}
 		}
 
 		if (!CollectionUtils.isEmpty(errObjList)) {
-			throw new Exception("One or more required fields are empty. Empty fields " + errObjList.toString());
+			throw new MyOwnRuntimeException(ONE_OR_MORE_REQUIRED_FIELDS_ARE_EMPTY_EMPTY_FIELDS + errObjList.toString());
 		}
 	}
-
-	// private List<Object> getAllBudgetYearDetails(String orgId) {
-	// List<BudgetInfoModel> budgetDetails =
-	// budgetRepository.getDistinctBudgetYear();
-	// if (CollectionUtils.isEmpty(budgetDetails)) {
-	// return Collections.emptyList();
-	// }
-	// List<Object> budgetResponse = new ArrayList<>();
-	// for (BudgetInfoModel budget : budgetDetails) {
-	// if (budget.getPrimaryKey().getOrgId().equals(orgId)) {
-	// budgetResponse.add(budget.getPrimaryKey().getBudgetYear());
-	// }
-	// }
-	// return budgetResponse;
-	// }
 
 	private List<Map<String, Object>> getSpecificBudgetYearDetails(String orgId, String budgetYear) {
 		Map<String, Object> propertyMap = new HashMap<>();
@@ -549,8 +548,8 @@ public class BudgetServiceImpl implements BudgetService {
 		return auditMap;
 	}
 
-	private void validateAddBudgetDocInfo(BudgetDocInfo budgetInfo) throws Exception {
-		List<String> errObjList = new ArrayList<String>();
+	private void validateAddBudgetDocInfo(BudgetDocInfo budgetInfo) throws MyOwnRuntimeException {
+		List<String> errObjList = new ArrayList<>();
 		if (StringUtils.isEmpty(budgetInfo.getOrgId())) {
 			errObjList.add(Constants.ORG_ID);
 		}
@@ -574,7 +573,7 @@ public class BudgetServiceImpl implements BudgetService {
 		}
 
 		if (!CollectionUtils.isEmpty(errObjList)) {
-			throw new Exception("One or more required fields are empty. Empty fields " + errObjList.toString());
+			throw new MyOwnRuntimeException(ONE_OR_MORE_REQUIRED_FIELDS_ARE_EMPTY_EMPTY_FIELDS + errObjList.toString());
 		}
 	}
 }

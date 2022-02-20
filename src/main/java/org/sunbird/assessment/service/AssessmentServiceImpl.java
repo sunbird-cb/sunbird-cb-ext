@@ -1,6 +1,7 @@
 package org.sunbird.assessment.service;
 
 import java.math.BigDecimal;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -61,9 +62,141 @@ public class AssessmentServiceImpl implements AssessmentService {
 	RedisCacheMgr redisCacheMgr;
 
 	@Override
+	public Map<String, Object> getAssessmentByContentUser(String rootOrg, String courseId, String userId) {
+		Map<String, Object> result = new TreeMap<>();
+		try {
+			List<Map<String, Object>> assessmentResults = repository.getAssessmetbyContentUser(rootOrg, courseId,
+					userId);
+			List<Map<String, Object>> assessments = getAssessments(assessmentResults);
+
+			Integer noOfAttemptsForPass = 0;
+			Integer noOfAttemptsForMaxScore = 0;
+			boolean passed = false;
+			Object firstPassTs = null;
+			BigDecimal max = BigDecimal.valueOf(-Double.MIN_VALUE);
+			Object maxScoreTs = null;
+
+			/*
+			 * Logic to Find The First Time Passed and The Max Score Attained along with
+			 * Their No of Attempts and Timestamps
+			 */
+			for (int i = assessments.size() - 1; i > -1; i--) {
+				Map<String, Object> row = assessments.get(i);
+				BigDecimal percentage = (BigDecimal) row.get(RESULT);
+				/*
+				 * Logic to Obtain the First Pass using a Passed flag to attain the Attempts as
+				 * well as the first Time passed Time Stamp
+				 */
+				if (!passed) {
+					noOfAttemptsForPass++;
+					if (percentage.doubleValue() >= 60.0) {
+						passed = true;
+						firstPassTs = row.get(TAKEN_ON);
+					}
+				}
+
+				/*
+				 * Logic to Obtain the max scored assessment comparison to attain the Attempts
+				 * as well as the Max Scored Assessment Time Stamp
+				 */
+				if (max.compareTo(percentage) < 0) {
+					max = (BigDecimal) row.get(RESULT);
+					maxScoreTs = row.get(TAKEN_ON);
+					noOfAttemptsForMaxScore = assessments.size() - i;
+				}
+			}
+
+			/* Populating the Response to give Processed Data to Front End */
+			if (!CollectionUtils.isEmpty(assessments)) {
+				if (passed) {
+					result.put("firstPassOn", firstPassTs);
+					result.put("attemptsToPass", noOfAttemptsForPass);
+				}
+
+				result.put("maxScore", max);
+				result.put("maxScoreAttainedOn", maxScoreTs);
+				result.put("attemptsForMaxScore", noOfAttemptsForMaxScore);
+			}
+			result.put("pastAssessments", assessments);
+		} catch (NullPointerException e) {
+			throw new ApplicationLogicError("REQUEST_COULD_NOT_BE_PROCESSED", e);
+		}
+		return result;
+	}
+
+	@Override
+	public Map<String, Object> getAssessmentContent(String courseId, String assessmentContentId) {
+		Map<String, Object> result = new HashMap<>();
+		try {
+			Object assessmentQuestionSet = redisCacheMgr.getCache(Constants.ASSESSMENT_QNS_SET + assessmentContentId);
+
+			if (ObjectUtils.isEmpty(assessmentQuestionSet)) {
+				String serviceURL = extServerProperties.getKmBaseHost()
+						+ extServerProperties.getContentHierarchyDetailEndPoint();
+				serviceURL = serviceURL.replace("{courseId}", courseId).replace("{hierarchyType}", "detail");
+				SunbirdApiResp response = mapper.convertValue(
+						outboundRequestHandlerService.fetchUsingGetWithHeaders(serviceURL, new HashMap<>()),
+						SunbirdApiResp.class);
+
+				if ("Ok".equalsIgnoreCase(response.getResponseCode())) {
+					// get course content
+					List<SunbirdApiHierarchyResultContent> children = response.getResult().getContent().getChildren();
+					for (SunbirdApiHierarchyResultContent child : children) {
+						// get assessment content with id
+						if (child.getIdentifier().equals(assessmentContentId)
+								&& child.getArtifactUrl().endsWith(".json")) {
+							// read assessment json file
+							QuestionSet assessmentContent = mapper.convertValue(outboundRequestHandlerService
+									.fetchUsingGetWithHeaders(child.getArtifactUrl(), new HashMap<>()),
+									QuestionSet.class);
+
+							QuestionSet assessmentQnsSet = assessUtilServ.removeAssessmentAnsKey(assessmentContent);
+							result.put(Constants.STATUS, Constants.SUCCESSFUL);
+							result.put(Constants.QUESTION_SET, assessmentQnsSet);
+							// cache the response
+							redisCacheMgr.putCache(Constants.ASSESSMENT_QNS_ANS_SET + assessmentContentId,
+									assessmentContent);
+							redisCacheMgr.putCache(Constants.ASSESSMENT_QNS_SET + assessmentContentId,
+									assessmentQnsSet);
+						}
+					}
+				}
+
+			} else {
+				result.put(Constants.STATUS, Constants.SUCCESSFUL);
+				result.put(Constants.QUESTION_SET, assessmentQuestionSet);
+			}
+
+			return result;
+		} catch (Exception e) {
+			logger.error(e);
+		}
+		result.put(Constants.STATUS, Constants.FAILED);
+		return result;
+	}
+
+	// A method to Format Data in the FrontEndFormat
+	@SuppressWarnings("deprecation")
+	private List<Map<String, Object>> getAssessments(List<Map<String, Object>> result) {
+		List<Map<String, Object>> assessments = new ArrayList<>();
+		for (Map<String, Object> map : result) {
+			Map<String, Object> assessmentData = new HashMap<>();
+			String res = map.get("result_percent").toString();
+			assessmentData.put(RESULT, new BigDecimal(res).setScale(2, BigDecimal.ROUND_UP));
+			assessmentData.put("correctlyAnswered", map.get("correct_count"));
+			assessmentData.put("wronglyAnswered", map.get("incorrect_count"));
+			assessmentData.put("notAttempted", map.get("not_answered_count"));
+			assessmentData.put(TAKEN_ON, map.get("ts_created"));
+			assessments.add(assessmentData);
+		}
+		return assessments;
+	}
+
+	@Override
 	public Map<String, Object> submitAssessment(String rootOrg, AssessmentSubmissionDTO data, String userId)
-			throws Exception {
-		logger.info("Submit Assessment: rootOrg: " + rootOrg + ", userId: " + userId + ", data: " + data.toString());
+			throws NumberFormatException, ParseException {
+		logger.info(String.format("Submit Assessment: rootOrg: %s, userId: %s, data: %s", rootOrg, userId,
+				data.toString()));
 		// Check User exists
 		if (!userUtilService.validateUser(rootOrg, userId)) {
 			throw new BadRequestException("Invalid UserId.");
@@ -71,7 +204,6 @@ public class AssessmentServiceImpl implements AssessmentService {
 
 		Map<String, Object> ret = new HashMap<>();
 
-		// TODO - Need to get the Assessment ContentMeta Data
 		// Get the assessment-key.json file. Current version has both the answers
 
 		Map<String, Object> resultMap = assessUtilServ.validateAssessment(data.getQuestions());
@@ -119,8 +251,7 @@ public class AssessmentServiceImpl implements AssessmentService {
 			persist.put("parentContentType", "");
 		}
 
-		logger.info("Trying to persist assessment data -> " + persist.toString());
-		// insert into assessment table
+		logger.info(String.format("Trying to persist assessment data -> %s", persist.toString()));
 		repository.insertQuizOrAssessment(persist, data.isAssessment());
 
 		ret.put(RESULT, result);
@@ -134,142 +265,8 @@ public class AssessmentServiceImpl implements AssessmentService {
 	}
 
 	@Override
-	public Map<String, Object> getAssessmentByContentUser(String rootOrg, String courseId, String userId)
-			throws Exception {
-		Map<String, Object> result = new TreeMap<>();
-		try {
-			// get all submission data from cassandra
-			List<Map<String, Object>> assessmentResults = repository.getAssessmetbyContentUser(rootOrg, courseId,
-					userId);
-			// retain only those fields that need to be sent to front end
-			List<Map<String, Object>> assessments = getAssessments(assessmentResults);
-
-			// initialize variables to calculate first attempt and max score
-			Integer noOfAttemptsForPass = 0;
-			Integer noOfAttemptsForMaxScore = 0;
-			boolean passed = false;
-			Object firstPassTs = null;
-			BigDecimal max = BigDecimal.valueOf(-Double.MIN_VALUE);
-			Object maxScoreTs = null;
-
-			/*
-			 * Logic to Find The First Time Passed and The Max Score Attained along with
-			 * Their No of Attempts and Timestamps
-			 */
-			for (int i = assessments.size() - 1; i > -1; i--) {
-				Map<String, Object> row = assessments.get(i);
-				BigDecimal percentage = (BigDecimal) row.get(RESULT);
-				/*
-				 * Logic to Obtain the First Pass using a Passed flag to attain the Attempts as
-				 * well as the first Time passed Time Stamp
-				 */
-				if (!passed) {
-					noOfAttemptsForPass++;
-					if (percentage.doubleValue() >= 60.0) {
-						passed = true;
-						firstPassTs = row.get(TAKEN_ON);
-					}
-				}
-
-				/*
-				 * Logic to Obtain the max scored assessment comparison to attain the Attempts
-				 * as well as the Max Scored Assessment Time Stamp
-				 */
-				if (max.compareTo(percentage) < 0) {
-					max = (BigDecimal) row.get(RESULT);
-					maxScoreTs = row.get(TAKEN_ON);
-					noOfAttemptsForMaxScore = (assessments.size() - i);
-				}
-			}
-
-			/* Populating the Response to give Processed Data to Front End */
-			if (!CollectionUtils.isEmpty(assessments)) {
-				if (passed) {
-					result.put("firstPassOn", firstPassTs);
-					result.put("attemptsToPass", noOfAttemptsForPass);
-				}
-
-				result.put("maxScore", max);
-				result.put("maxScoreAttainedOn", maxScoreTs);
-				result.put("attemptsForMaxScore", noOfAttemptsForMaxScore);
-			}
-			result.put("pastAssessments", assessments);
-		} catch (NullPointerException e) {
-			throw new ApplicationLogicError("REQUEST_COULD_NOT_BE_PROCESSED", e);
-		}
-		return result;
-	}
-
-	@Override
-	public Map<String, Object> submitAssessmentByIframe(String rootOrg, Map<String, Object> request) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	// A method to Format Data in the FrontEndFormat
-	private List<Map<String, Object>> getAssessments(List<Map<String, Object>> result) {
-		List<Map<String, Object>> assessments = new ArrayList<>();
-		for (Map<String, Object> map : result) {
-			Map<String, Object> assessmentData = new HashMap<>();
-			String res = map.get("result_percent").toString();
-			assessmentData.put(RESULT, new BigDecimal(res).setScale(2, BigDecimal.ROUND_UP));
-			assessmentData.put("correctlyAnswered", map.get("correct_count"));
-			assessmentData.put("wronglyAnswered", map.get("incorrect_count"));
-			assessmentData.put("notAttempted", map.get("not_answered_count"));
-			assessmentData.put(TAKEN_ON, map.get("ts_created"));
-			assessments.add(assessmentData);
-		}
-		return assessments;
-	}
-
-	@Override
-	public Map<String, Object> getAssessmentContent(String courseId, String assessmentContentId) {
-		Map<String, Object> result = new HashMap<>();
-		try {
-			Object assessmentQuestionSet = redisCacheMgr.getCache(Constants.ASSESSMENT_QNS_SET + assessmentContentId);
-
-			if (ObjectUtils.isEmpty(assessmentQuestionSet)) {
-				String serviceURL = extServerProperties.getKmBaseHost()
-						+ extServerProperties.getContentHierarchyDetailEndPoint();
-				serviceURL = (serviceURL.replace("{courseId}", courseId)).replace("{hierarchyType}", "detail");
-				SunbirdApiResp response = mapper.convertValue(
-						outboundRequestHandlerService.fetchUsingGetWithHeaders(serviceURL, new HashMap<>()),
-						SunbirdApiResp.class);
-
-				if (response.getResponseCode().equalsIgnoreCase("Ok")) {
-					// get course content
-					List<SunbirdApiHierarchyResultContent> children = response.getResult().getContent().getChildren();
-					for (SunbirdApiHierarchyResultContent child : children) {
-						// get assessment content with id
-						if (child.getIdentifier().equals(assessmentContentId)
-								&& child.getArtifactUrl().endsWith(".json")) {
-							// read assessment json file
-							QuestionSet assessmentContent = mapper.convertValue(outboundRequestHandlerService
-									.fetchUsingGetWithHeaders(child.getArtifactUrl(), new HashMap<>()),
-									QuestionSet.class);
-
-							QuestionSet assessmentQnsSet = assessUtilServ.removeAssessmentAnsKey(assessmentContent);
-							result.put(Constants.STATUS, Constants.SUCCESSFUL);
-							result.put(Constants.QUESTION_SET, assessmentQnsSet);
-							// cache the response
-							redisCacheMgr.putCache(Constants.ASSESSMENT_QNS_ANS_SET + assessmentContentId,
-									assessmentContent);
-							redisCacheMgr.putCache(Constants.ASSESSMENT_QNS_SET + assessmentContentId, assessmentQnsSet);
-						}
-					}
-				}
-
-			} else {
-				result.put(Constants.STATUS, Constants.SUCCESSFUL);
-				result.put(Constants.QUESTION_SET, assessmentQuestionSet);
-			}
-
-			return result;
-		} catch (Exception e) {
-			logger.error(e);
-		}
-		result.put(Constants.STATUS, Constants.FAILED);
-		return result;
+	public Map<String, Object> submitAssessmentByIframe(String rootOrg, Map<String, Object> request) {
+		return new HashMap<>();
 	}
 
 }

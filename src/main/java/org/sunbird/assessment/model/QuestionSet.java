@@ -13,28 +13,28 @@ public class QuestionSet implements Serializable {
 	private Boolean isAssessment;
 	private List<Questions> questions;
 
-	public Integer getTimeLimit() {
-		return timeLimit;
-	}
-
-	public void setTimeLimit(Integer timeLimit) {
-		this.timeLimit = timeLimit;
-	}
-
 	public Boolean getIsAssessment() {
 		return isAssessment;
-	}
-
-	public void setIsAssessment(Boolean isAssessment) {
-		this.isAssessment = isAssessment;
 	}
 
 	public List<Questions> getQuestions() {
 		return questions;
 	}
 
+	public Integer getTimeLimit() {
+		return timeLimit;
+	}
+
+	public void setIsAssessment(Boolean isAssessment) {
+		this.isAssessment = isAssessment;
+	}
+
 	public void setQuestions(List<Questions> questions) {
 		this.questions = questions;
+	}
+
+	public void setTimeLimit(Integer timeLimit) {
+		this.timeLimit = timeLimit;
 	}
 
 }

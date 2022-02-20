@@ -13,18 +13,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.ObjectUtils;
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.util.Constants;
 
 import com.datastax.driver.core.BatchStatement;
 import com.datastax.driver.core.BoundStatement;
-import com.datastax.driver.core.PagingState;
 import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
-import com.datastax.driver.core.SimpleStatement;
 import com.datastax.driver.core.Statement;
 import com.datastax.driver.core.querybuilder.Clause;
 import com.datastax.driver.core.querybuilder.Delete;
@@ -59,7 +56,8 @@ public class CassandraOperationImpl implements CassandraOperation {
 			connectionManager.getSession(keyspaceName).execute(boundStatement.bind(array));
 			response.put(Constants.RESPONSE, Constants.SUCCESS);
 		} catch (Exception e) {
-			logger.error("Exception occurred while inserting record to " + tableName + " : " + e, e.getMessage());
+			logger.error(
+					String.format("Exception occurred while inserting record to %s %s", tableName, e.getMessage()));
 		}
 		return response;
 	}
@@ -74,7 +72,7 @@ public class CassandraOperationImpl implements CassandraOperation {
 				PreparedStatement statement = connectionManager.getSession(keyspaceName).prepare(query);
 				BoundStatement boundStatement = new BoundStatement(statement);
 				Iterator<Object> iterator = requestMap.values().iterator();
-				Object[] array = new Object[requestMap.keySet().size()];
+				Object[] array = new Object[requestMap.size()];
 				int i = 0;
 				while (iterator.hasNext()) {
 					array[i++] = iterator.next();
@@ -85,9 +83,40 @@ public class CassandraOperationImpl implements CassandraOperation {
 			connectionManager.getSession(keyspaceName).execute(batchStatement);
 			response.put(Constants.RESPONSE, Constants.SUCCESS);
 		} catch (Exception e) {
-			logger.error("Exception occurred while inserting bulk record to " + tableName + " : " + e, e.getMessage());
+			logger.error(String.format("Exception occurred while inserting bulk record to %s %s", tableName,
+					e.getMessage()));
 		}
 		return response;
+	}
+
+	@Override
+	public void deleteRecord(String keyspaceName, String tableName, Map<String, Object> compositeKeyMap) {
+		Delete delete = null;
+		try {
+			delete = QueryBuilder.delete().from(keyspaceName, tableName);
+			Delete.Where deleteWhere = delete.where();
+			compositeKeyMap.entrySet().stream().forEach(x -> {
+				Clause clause = QueryBuilder.eq(x.getKey(), x.getValue());
+				deleteWhere.and(clause);
+			});
+			connectionManager.getSession(keyspaceName).execute(delete);
+		} catch (Exception e) {
+			logger.error(String.format("CassandraOperationImpl: deleteRecord by composite key. %s %s %s",
+					Constants.EXCEPTION_MSG_DELETE, tableName, e.getMessage()));
+
+		}
+	}
+
+	@Override
+	public Long getRecordCount(String keyspace, String table) {
+		try {
+			Select selectQuery = QueryBuilder.select().countAll().from(keyspace, table);
+			Row row = connectionManager.getSession(keyspace).execute(selectQuery).one();
+			return row.getLong(0);
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+		}
+		return 0L;
 	}
 
 	@Override
@@ -131,25 +160,6 @@ public class CassandraOperationImpl implements CassandraOperation {
 	}
 
 	@Override
-	public void deleteRecord(String keyspaceName, String tableName, Map<String, Object> compositeKeyMap) {
-		Delete delete = null;
-		try {
-			delete = QueryBuilder.delete().from(keyspaceName, tableName);
-			Delete.Where deleteWhere = delete.where();
-			compositeKeyMap.entrySet().stream().forEach(x -> {
-				Clause clause = QueryBuilder.eq(x.getKey(), x.getValue());
-				deleteWhere.and(clause);
-			});
-			connectionManager.getSession(keyspaceName).execute(delete);
-		} catch (Exception e) {
-			logger.error("CassandraOperationImpl: deleteRecord by composite key. " + Constants.EXCEPTION_MSG_DELETE
-					+ tableName + " : " + e.getMessage(), e);
-			throw e;
-
-		}
-	}
-
-	@Override
 	public Map<String, Object> updateRecord(String keyspaceName, String tableName, Map<String, Object> updateAttributes,
 			Map<String, Object> compositeKey) {
 		Map<String, Object> response = new HashMap<>();
@@ -159,30 +169,16 @@ public class CassandraOperationImpl implements CassandraOperation {
 			Update update = QueryBuilder.update(keyspaceName, tableName);
 			Assignments assignments = update.with();
 			Update.Where where = update.where();
-			updateAttributes.entrySet().stream().forEach(x -> {
-				assignments.and(QueryBuilder.set(x.getKey(), x.getValue()));
-			});
-			compositeKey.entrySet().stream().forEach(x -> {
-				where.and(QueryBuilder.eq(x.getKey(), x.getValue()));
-			});
+			updateAttributes.entrySet().stream()
+					.forEach(x -> assignments.and(QueryBuilder.set(x.getKey(), x.getValue())));
+			compositeKey.entrySet().stream().forEach(x -> where.and(QueryBuilder.eq(x.getKey(), x.getValue())));
 			updateQuery = where;
 			session.execute(updateQuery);
 			response.put(Constants.RESPONSE, Constants.SUCCESS);
 		} catch (Exception e) {
-			throw e;
+			logger.error(e.getMessage());
 		}
 		return response;
-	}
-
-	@Override
-	public Long getRecordCount(String keyspace, String table) {
-		try {
-			Select selectQuery = QueryBuilder.select().countAll().from(keyspace, table);
-			Row row = connectionManager.getSession(keyspace).execute(selectQuery).one();
-			return row.getLong(0);
-		} catch (Exception e) {
-			throw e;
-		}
 	}
 
 }

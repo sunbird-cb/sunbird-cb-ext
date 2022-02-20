@@ -22,135 +22,132 @@ public class AuditModel {
 	private long trainingBudgetAllocated;
 	private long trainingBudgetUtilization;
 
-	public String getBudgetYear() {
-		return budgetYear;
-	}
-
-	public void setBudgetYear(String budgetYear) {
-		this.budgetYear = budgetYear;
-	}
-
-	public List<Map<String, String>> getProofDocs() {
-		return proofDocs;
-	}
-
-	public void setProofDocs(List<Map<String, String>> proofDocs) {
-		this.proofDocs = proofDocs;
-	}
-
-	public long getSalaryBudgetAllocated() {
-		return salaryBudgetAllocated;
-	}
-
-	public void setSalaryBudgetAllocated(long salaryBudgetAllocated) {
-		this.salaryBudgetAllocated = salaryBudgetAllocated;
-	}
-
-	public String getSchemeName() {
-		return schemeName;
-	}
-
-	public void setSchemeName(String schemeName) {
-		this.schemeName = schemeName;
-	}
-
-	public long getTrainingBudgetAllocated() {
-		return trainingBudgetAllocated;
-	}
-
-	public void setTrainingBudgetAllocated(long trainingBudgetAllocated) {
-		this.trainingBudgetAllocated = trainingBudgetAllocated;
-	}
-
-	public long getTrainingBudgetUtilization() {
-		return trainingBudgetUtilization;
-	}
-
-	public void setTrainingBudgetUtilization(long trainingBudgetUtilization) {
-		this.trainingBudgetUtilization = trainingBudgetUtilization;
-	}
-
-//	public void setTransactionDetails(StaffInfo transactionDetails) {
-//		this.transactionDetails = transactionDetails;
-//	}
-	public String getPosition() {
-		return position;
-	}
-
-	public void setPosition(String position) {
-		this.position = position;
-	}
-
-	public int getTotalPositionsFilled() {
-		return totalPositionsFilled;
-	}
-
-	public void setTotalPositionsFilled(int totalPositionsFilled) {
-		this.totalPositionsFilled = totalPositionsFilled;
-	}
-
-	public int getTotalPositionsVacant() {
-		return totalPositionsVacant;
-	}
-
-	public void setTotalPositionsVacant(int totalPositionsVacant) {
-		this.totalPositionsVacant = totalPositionsVacant;
-	}
-
-	public String getOrgId() {
-		return orgId;
-	}
-
-	public void setOrgId(String orgId) {
-		this.orgId = orgId;
-	}
-
 	public String getAuditType() {
 		return auditType;
 	}
 
-	public void setAuditType(String auditType) {
-		this.auditType = auditType;
-	}
-
-	public String getCreatedDate() {
-		return createdDate;
-	}
-
-	public void setCreatedDate(String createdDate) {
-		this.createdDate = createdDate;
+	public String getBudgetYear() {
+		return budgetYear;
 	}
 
 	public String getCreatedBy() {
 		return createdBy;
 	}
 
-	public void setCreatedBy(String createdBy) {
-		this.createdBy = createdBy;
+	public String getCreatedDate() {
+		return createdDate;
 	}
 
-	public String getUpdatedDate() {
-		return updatedDate;
+	public String getOrgId() {
+		return orgId;
 	}
 
-	public void setUpdatedDate(String updatedDate) {
-		this.updatedDate = updatedDate;
+	public String getPosition() {
+		return position;
 	}
 
-	public String getUpdatedBy() {
-		return updatedBy;
+	public List<Map<String, String>> getProofDocs() {
+		return proofDocs;
 	}
 
-	public void setUpdatedBy(String updatedBy) {
-		this.updatedBy = updatedBy;
+	public long getSalaryBudgetAllocated() {
+		return salaryBudgetAllocated;
+	}
+
+	public String getSchemeName() {
+		return schemeName;
+	}
+
+	public int getTotalPositionsFilled() {
+		return totalPositionsFilled;
+	}
+
+	public int getTotalPositionsVacant() {
+		return totalPositionsVacant;
+	}
+
+	public long getTrainingBudgetAllocated() {
+		return trainingBudgetAllocated;
+	}
+
+	public long getTrainingBudgetUtilization() {
+		return trainingBudgetUtilization;
 	}
 
 	public Object getTransactionDetails() {
 		return transactionDetails;
 	}
 
+	public String getUpdatedBy() {
+		return updatedBy;
+	}
+
+	public String getUpdatedDate() {
+		return updatedDate;
+	}
+
+	public void setAuditType(String auditType) {
+		this.auditType = auditType;
+	}
+
+	public void setBudgetYear(String budgetYear) {
+		this.budgetYear = budgetYear;
+	}
+
+	public void setCreatedBy(String createdBy) {
+		this.createdBy = createdBy;
+	}
+
+	public void setCreatedDate(String createdDate) {
+		this.createdDate = createdDate;
+	}
+
+	public void setOrgId(String orgId) {
+		this.orgId = orgId;
+	}
+
+	public void setPosition(String position) {
+		this.position = position;
+	}
+
+	public void setProofDocs(List<Map<String, String>> proofDocs) {
+		this.proofDocs = proofDocs;
+	}
+
+	public void setSalaryBudgetAllocated(long salaryBudgetAllocated) {
+		this.salaryBudgetAllocated = salaryBudgetAllocated;
+	}
+
+	public void setSchemeName(String schemeName) {
+		this.schemeName = schemeName;
+	}
+
+	public void setTotalPositionsFilled(int totalPositionsFilled) {
+		this.totalPositionsFilled = totalPositionsFilled;
+	}
+
+	public void setTotalPositionsVacant(int totalPositionsVacant) {
+		this.totalPositionsVacant = totalPositionsVacant;
+	}
+
+	public void setTrainingBudgetAllocated(long trainingBudgetAllocated) {
+		this.trainingBudgetAllocated = trainingBudgetAllocated;
+	}
+
+	public void setTrainingBudgetUtilization(long trainingBudgetUtilization) {
+		this.trainingBudgetUtilization = trainingBudgetUtilization;
+	}
+
 	public void setTransactionDetails(Object transactionDetails) {
 		this.transactionDetails = transactionDetails;
+	}
+
+	public void setUpdatedBy(String updatedBy) {
+		this.updatedBy = updatedBy;
+	}
+
+	public void setUpdatedDate(String updatedDate) {
+		this.updatedDate = updatedDate;
 	}
 
 }

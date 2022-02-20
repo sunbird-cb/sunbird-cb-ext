@@ -36,45 +36,6 @@ public class StorageServiceImpl implements StorageService {
 	@Autowired
 	private CbExtServerProperties cbExtServerProperties;
 
-	@PostConstruct
-	public void init() {
-		if (storageService == null) {
-			storageService = StorageServiceFactory.getStorageService(new StorageConfig(
-					cbExtServerProperties.getAzureTypeName(), cbExtServerProperties.getAzureIdentityName(),
-					cbExtServerProperties.getAzureStorageKey(), null));
-		}
-	}
-
-	@Override
-	public SBApiResponse uploadFile(MultipartFile mFile) throws IOException {
-		SBApiResponse response = new SBApiResponse();
-		response.setId(Constants.API_FILE_UPLOAD);
-		try {
-			File file = new File(System.currentTimeMillis() + "_" + mFile.getOriginalFilename());
-			file.createNewFile();
-			FileOutputStream fos = new FileOutputStream(file);
-			fos.write(mFile.getBytes());
-			fos.close();
-			String objectKey = cbExtServerProperties.getAzureContainerName() + "/" + file.getName();
-			String url = storageService.upload(cbExtServerProperties.getAzureContainerName(), file.getAbsolutePath(),
-					objectKey, Option.apply(false), Option.apply(1), Option.apply(5), Option.empty());
-			file.delete();
-			Map<String, String> uploadedFile = new HashMap<>();
-			uploadedFile.put(Constants.NAME, file.getName());
-			uploadedFile.put(Constants.URL, url);
-			response.getParams().setStatus(Constants.SUCCESSFUL);
-			response.setResponseCode(HttpStatus.OK);
-			response.getResult().putAll(uploadedFile);
-			return response;
-		} catch (Exception e) {
-			logger.error("Failed to upload file. Exception: ", e);
-			response.getParams().setStatus(Constants.FAILED);
-			response.getParams().setErrmsg("Failed to upload file. Exception: " + e.getMessage());
-			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
-			return response;
-		}
-	}
-
 	@Override
 	public SBApiResponse deleteFile(String fileName) {
 		SBApiResponse response = new SBApiResponse();
@@ -95,12 +56,49 @@ public class StorageServiceImpl implements StorageService {
 	}
 
 	protected void finalize() {
+		if (storageService != null) {
+			storageService.closeContext();
+		}
+	}
+
+	@PostConstruct
+	public void init() {
+		if (storageService == null) {
+			storageService = StorageServiceFactory.getStorageService(new StorageConfig(
+					cbExtServerProperties.getAzureTypeName(), cbExtServerProperties.getAzureIdentityName(),
+					cbExtServerProperties.getAzureStorageKey(), null));
+		}
+	}
+
+	@Override
+	public SBApiResponse uploadFile(MultipartFile mFile) throws IOException {
+		SBApiResponse response = new SBApiResponse();
+		response.setId(Constants.API_FILE_UPLOAD);
 		try {
-			if (storageService != null) {
-				storageService.closeContext();
-				storageService = null;
+			File file = new File(System.currentTimeMillis() + "_" + mFile.getOriginalFilename());
+			boolean bool = file.createNewFile();
+			logger.info(String.format("File created: %b", bool));
+			try (FileOutputStream fos = new FileOutputStream(file)) {
+				fos.write(mFile.getBytes());
 			}
+			String objectKey = cbExtServerProperties.getAzureContainerName() + "/" + file.getName();
+			String url = storageService.upload(cbExtServerProperties.getAzureContainerName(), file.getAbsolutePath(),
+					objectKey, Option.apply(false), Option.apply(1), Option.apply(5), Option.empty());
+			boolean bool1 = file.delete();
+			logger.info(String.format("File deleted: %b", bool1));
+			Map<String, String> uploadedFile = new HashMap<>();
+			uploadedFile.put(Constants.NAME, file.getName());
+			uploadedFile.put(Constants.URL, url);
+			response.getParams().setStatus(Constants.SUCCESSFUL);
+			response.setResponseCode(HttpStatus.OK);
+			response.getResult().putAll(uploadedFile);
+			return response;
 		} catch (Exception e) {
+			logger.error(String.format("Failed to upload file. Exception: %s", e.getMessage()));
+			response.getParams().setStatus(Constants.FAILED);
+			response.getParams().setErrmsg("Failed to upload file. Exception:" + e.getMessage());
+			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+			return response;
 		}
 	}
 }

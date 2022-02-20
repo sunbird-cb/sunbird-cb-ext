@@ -1,180 +1,180 @@
 package org.sunbird.workallocation.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class WorkAllocationDTOV2 {
-    private String id;
-    private String userId;
-    private String userName;
-    private String userEmail;
-    private List<RoleCompetency> roleCompetencyList;
-    private List<ChildNode> unmappedActivities;
-    private List<CompetencyDetails> unmappedCompetencies;
-    private String userPosition;
-    private String positionId;
-    private String positionDescription;
-    private String workOrderId;
-    private long updatedAt;
-    private String updatedBy;
-    private String updatedByName;
-    private int errorCount;
-    private int progress;
-    private long createdAt;
-    private String createdBy;
-    private String createdByName;
+	private String id;
+	private String userId;
+	private String userName;
+	private String userEmail;
+	private List<RoleCompetency> roleCompetencyList;
+	private List<ChildNode> unmappedActivities;
+	private List<CompetencyDetails> unmappedCompetencies;
+	private String userPosition;
+	private String positionId;
+	private String positionDescription;
+	private String workOrderId;
+	private long updatedAt;
+	private String updatedBy;
+	private String updatedByName;
+	private int errorCount;
+	private int progress;
+	private long createdAt;
+	private String createdBy;
+	private String createdByName;
 
-    public String getUserId() {
-        return userId;
-    }
+	public long getCreatedAt() {
+		return createdAt;
+	}
 
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
+	public String getCreatedBy() {
+		return createdBy;
+	}
 
-    public String getUserName() {
-        return userName;
-    }
+	public String getCreatedByName() {
+		return createdByName;
+	}
 
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
+	public int getErrorCount() {
+		return errorCount;
+	}
 
-    public String getUserEmail() {
-        return userEmail;
-    }
+	public String getId() {
+		return id;
+	}
 
-    public void setUserEmail(String userEmail) {
-        this.userEmail = userEmail;
-    }
+	public String getPositionDescription() {
+		return positionDescription;
+	}
 
-    public List<RoleCompetency> getRoleCompetencyList() {
-        return roleCompetencyList;
-    }
+	public String getPositionId() {
+		return positionId;
+	}
 
-    public void setRoleCompetencyList(List<RoleCompetency> roleCompetencyList) {
-        this.roleCompetencyList = roleCompetencyList;
-    }
+	public int getProgress() {
+		return progress;
+	}
 
-    public String getUserPosition() {
-        return userPosition;
-    }
+	public List<RoleCompetency> getRoleCompetencyList() {
+		return roleCompetencyList;
+	}
 
-    public void setUserPosition(String userPosition) {
-        this.userPosition = userPosition;
-    }
+	public List<ChildNode> getUnmappedActivities() {
+		return unmappedActivities;
+	}
 
-    public String getPositionId() {
-        return positionId;
-    }
+	public List<CompetencyDetails> getUnmappedCompetencies() {
+		return unmappedCompetencies;
+	}
 
-    public void setPositionId(String positionId) {
-        this.positionId = positionId;
-    }
+	public long getUpdatedAt() {
+		return updatedAt;
+	}
 
-    public String getId() {
-        return id;
-    }
+	public String getUpdatedBy() {
+		return updatedBy;
+	}
 
-    public void setId(String id) {
-        this.id = id;
-    }
+	public String getUpdatedByName() {
+		return updatedByName;
+	}
 
-    public String getPositionDescription() {
-        return positionDescription;
-    }
+	public String getUserEmail() {
+		return userEmail;
+	}
 
-    public void setPositionDescription(String positionDescription) {
-        this.positionDescription = positionDescription;
-    }
+	public String getUserId() {
+		return userId;
+	}
 
-    public String getWorkOrderId() {
-        return workOrderId;
-    }
+	public String getUserName() {
+		return userName;
+	}
 
-    public void setWorkOrderId(String workOrderId) {
-        this.workOrderId = workOrderId;
-    }
+	public String getUserPosition() {
+		return userPosition;
+	}
 
-    public long getUpdatedAt() {
-        return updatedAt;
-    }
+	public String getWorkOrderId() {
+		return workOrderId;
+	}
 
-    public void setUpdatedAt(long updatedAt) {
-        this.updatedAt = updatedAt;
-    }
+	public void setCreatedAt(long createdAt) {
+		this.createdAt = createdAt;
+	}
 
-    public String getUpdatedBy() {
-        return updatedBy;
-    }
+	public void setCreatedBy(String createdBy) {
+		this.createdBy = createdBy;
+	}
 
-    public void setUpdatedBy(String updatedBy) {
-        this.updatedBy = updatedBy;
-    }
+	public void setCreatedByName(String createdByName) {
+		this.createdByName = createdByName;
+	}
 
-    public long getCreatedAt() {
-        return createdAt;
-    }
+	public void setErrorCount(int errorCount) {
+		this.errorCount = errorCount;
+	}
 
-    public void setCreatedAt(long createdAt) {
-        this.createdAt = createdAt;
-    }
+	public void setId(String id) {
+		this.id = id;
+	}
 
-    public String getCreatedBy() {
-        return createdBy;
-    }
+	public void setPositionDescription(String positionDescription) {
+		this.positionDescription = positionDescription;
+	}
 
-    public void setCreatedBy(String createdBy) {
-        this.createdBy = createdBy;
-    }
+	public void setPositionId(String positionId) {
+		this.positionId = positionId;
+	}
 
-    public String getUpdatedByName() {
-        return updatedByName;
-    }
+	public void setProgress(int progress) {
+		this.progress = progress;
+	}
 
-    public void setUpdatedByName(String updatedByName) {
-        this.updatedByName = updatedByName;
-    }
+	public void setRoleCompetencyList(List<RoleCompetency> roleCompetencyList) {
+		this.roleCompetencyList = roleCompetencyList;
+	}
 
-    public String getCreatedByName() {
-        return createdByName;
-    }
+	public void setUnmappedActivities(List<ChildNode> unmappedActivities) {
+		this.unmappedActivities = unmappedActivities;
+	}
 
-    public void setCreatedByName(String createdByName) {
-        this.createdByName = createdByName;
-    }
+	public void setUnmappedCompetencies(List<CompetencyDetails> unmappedCompetencies) {
+		this.unmappedCompetencies = unmappedCompetencies;
+	}
 
-    public List<ChildNode> getUnmappedActivities() {
-        return unmappedActivities;
-    }
+	public void setUpdatedAt(long updatedAt) {
+		this.updatedAt = updatedAt;
+	}
 
-    public void setUnmappedActivities(List<ChildNode> unmappedActivities) {
-        this.unmappedActivities = unmappedActivities;
-    }
+	public void setUpdatedBy(String updatedBy) {
+		this.updatedBy = updatedBy;
+	}
 
-    public List<CompetencyDetails> getUnmappedCompetencies() {
-        return unmappedCompetencies;
-    }
+	public void setUpdatedByName(String updatedByName) {
+		this.updatedByName = updatedByName;
+	}
 
-    public void setUnmappedCompetencies(List<CompetencyDetails> unmappedCompetencies) {
-        this.unmappedCompetencies = unmappedCompetencies;
-    }
+	public void setUserEmail(String userEmail) {
+		this.userEmail = userEmail;
+	}
 
-    public int getErrorCount() {
-        return errorCount;
-    }
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
 
-    public void setErrorCount(int errorCount) {
-        this.errorCount = errorCount;
-    }
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
 
-    public int getProgress() {
-        return progress;
-    }
+	public void setUserPosition(String userPosition) {
+		this.userPosition = userPosition;
+	}
 
-    public void setProgress(int progress) {
-        this.progress = progress;
-    }
+	public void setWorkOrderId(String workOrderId) {
+		this.workOrderId = workOrderId;
+	}
 }

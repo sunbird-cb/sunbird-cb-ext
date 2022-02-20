@@ -65,7 +65,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Service
 public class AllocationServiceV2 {
 
-	public static final String RESULT = "result";
+	private static final String EXCEPTION_OCCURRED_WHILE_UPDATING_THE_WORK_ORDER = "Exception occurred while updating the work order";
+	private static final String RESULT2 = "result";
+	private static final String WORKORDER_ID = "workorderId";
+	public static final String RESULT = RESULT2;
 	@Autowired
 	private IndexerService indexerService;
 
@@ -116,10 +119,8 @@ public class AllocationServiceV2 {
 
 	/**
 	 *
-	 * @param userId
-	 *            user Id of the user
-	 * @param workOrder
-	 *            work order object
+	 * @param userId    user Id of the user
+	 * @param workOrder work order object
 	 * @return response message as success of failed
 	 */
 	public Response addWorkOrder(String userId, WorkOrderDTO workOrder) {
@@ -145,7 +146,7 @@ public class AllocationServiceV2 {
 			response.put(Constants.MESSAGE, Constants.FAILED);
 		}
 		HashMap<String, String> watEventData = new HashMap<>();
-		watEventData.put("workorderId", workOrder.getId());
+		watEventData.put(WORKORDER_ID, workOrder.getId());
 		producer.push(cbExtServerProperties.getKafkaTopicWatEvent(), watEventData);
 		HashMap<String, Object> data = new HashMap<>();
 		data.put("id", workOrder.getId());
@@ -156,10 +157,8 @@ public class AllocationServiceV2 {
 
 	/**
 	 *
-	 * @param userId
-	 *            user Id of the user
-	 * @param workOrder
-	 *            work order object
+	 * @param userId    user Id of the user
+	 * @param workOrder work order object
 	 * @return response message as success of failed
 	 */
 	public Response updateWorkOrder(String userId, WorkOrderDTO workOrder, String xAuthUser) {
@@ -185,11 +184,11 @@ public class AllocationServiceV2 {
 						mapper.convertValue(workOrder, Map.class));
 			}
 		} catch (Exception ex) {
-			logger.error("Exception occurred while updating the work order", ex);
-			throw new ApplicationLogicError("Exception occurred while updating the work order", ex);
+			logger.error(EXCEPTION_OCCURRED_WHILE_UPDATING_THE_WORK_ORDER, ex);
+			throw new ApplicationLogicError(EXCEPTION_OCCURRED_WHILE_UPDATING_THE_WORK_ORDER, ex);
 		}
 		HashMap<String, String> watEventData = new HashMap<>();
-		watEventData.put("workorderId", workOrder.getId());
+		watEventData.put(WORKORDER_ID, workOrder.getId());
 		producer.push(cbExtServerProperties.getKafkaTopicWatEvent(), watEventData);
 		Response response = new Response();
 		if (!ObjectUtils.isEmpty(restStatus)) {
@@ -204,20 +203,18 @@ public class AllocationServiceV2 {
 
 	/**
 	 *
-	 * @param authUserToken
-	 *            auth token
-	 * @param userId
-	 *            user Id
-	 * @param workAllocationDTO
-	 *            work allocation object
+	 * @param authUserToken     auth token
+	 * @param userId            user Id
+	 * @param workAllocationDTO work allocation object
 	 * @return
 	 */
 	public Response addWorkAllocation(String authUserToken, String userId, WorkAllocationDTOV2 workAllocationDTO) {
 		validator.validateWorkAllocation(workAllocationDTO, WorkAllocationConstants.ADD);
 		enrichmentService.enrichWorkAllocation(workAllocationDTO, userId);
 		RestStatus restStatus = null;
-		if (StringUtils.isEmpty(workAllocationDTO.getId()))
+		if (StringUtils.isEmpty(workAllocationDTO.getId())) {
 			workAllocationDTO.setId(UUID.randomUUID().toString());
+		}
 		if (!CollectionUtils.isEmpty(workAllocationDTO.getRoleCompetencyList())) {
 			verifyRoleActivity(authUserToken, workAllocationDTO);
 			verifyCompetencyDetails(authUserToken, workAllocationDTO);
@@ -253,11 +250,11 @@ public class AllocationServiceV2 {
 			indexerService.updateEntity(workOrderIndex, workOrderIndexType, workOrder.getId(),
 					mapper.convertValue(workOrder, Map.class));
 		} catch (Exception ex) {
-			logger.error("Exception occurred while saving the work allocation!!", ex);
+			logger.error(String.format("Exception occurred while saving the work allocation!! :  %s", ex.getMessage()));
 			throw new ApplicationLogicError("Exception occurred while saving the work allocation!!", ex);
 		}
 		HashMap<String, String> watEventData = new HashMap<>();
-		watEventData.put("workorderId", workAllocationDTO.getWorkOrderId());
+		watEventData.put(WORKORDER_ID, workAllocationDTO.getWorkOrderId());
 		producer.push(cbExtServerProperties.getKafkaTopicWatEvent(), watEventData);
 		Response response = new Response();
 		if (!ObjectUtils.isEmpty(restStatus)) {
@@ -272,13 +269,9 @@ public class AllocationServiceV2 {
 
 	/**
 	 *
-	 * @param authUserToken
-	 *            auth token
-	 * @param userId
-	 *            user Id
-	 * @param workAllocationDTO
-	 *            work allocation object
-	 * @return
+	 * @param userId    user Id of the user
+	 * @param workOrder work order object
+	 * @return response message as success of failed
 	 */
 	public Response updateWorkAllocation(String authUserToken, String userId, WorkAllocationDTOV2 workAllocationDTO) {
 		validator.validateWorkAllocation(workAllocationDTO, WorkAllocationConstants.UPDATE);
@@ -318,11 +311,11 @@ public class AllocationServiceV2 {
 			indexerService.updateEntity(workOrderIndex, workOrderIndexType, workOrder.getId(),
 					mapper.convertValue(workOrder, Map.class));
 		} catch (Exception ex) {
-			logger.error("Exception occurred while saving the work allocation!!", ex);
+			logger.error(String.format("Exception occurred while saving the work allocation!! %s", ex.getMessage()));
 			throw new ApplicationLogicError("Exception occurred while saving the work allocation!!", ex);
 		}
 		HashMap<String, String> watEventData = new HashMap<>();
-		watEventData.put("workorderId", workAllocationDTO.getWorkOrderId());
+		watEventData.put(WORKORDER_ID, workAllocationDTO.getWorkOrderId());
 		producer.push(cbExtServerProperties.getKafkaTopicWatEvent(), watEventData);
 		Response response = new Response();
 		if (!ObjectUtils.isEmpty(restStatus)) {
@@ -470,13 +463,6 @@ public class AllocationServiceV2 {
 		return response;
 	}
 
-	private SearchResponse getSearchResponseForWorkOrder(List<String> workAllocationIds) throws IOException {
-		final BoolQueryBuilder query = QueryBuilders.boolQuery();
-		query.must(QueryBuilders.termsQuery("id.keyword", workAllocationIds));
-		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder().query(query);
-		return indexerService.getEsResult(workAllocationIndex, workAllocationIndexType, sourceBuilder);
-	}
-
 	private List<WorkAllocationDTOV2> getWorkAllocationListByIds(List<String> workAllocationIds) {
 		List<WorkAllocationDTOV2> workAllocationDTOV2List = new ArrayList<>();
 		if (!CollectionUtils.isEmpty(workAllocationIds)) {
@@ -496,10 +482,8 @@ public class AllocationServiceV2 {
 
 	/**
 	 *
-	 * @param userId
-	 *            user Id of the user
-	 * @param workOrderDTO
-	 *            work order object
+	 * @param userId       user Id of the user
+	 * @param workOrderDTO work order object
 	 * @return response message as success of failed
 	 */
 	public Response copyWorkOrder(String userId, WorkOrderDTO workOrderDTO) {
@@ -526,8 +510,9 @@ public class AllocationServiceV2 {
 		prepareWorkAllocations(userId, workOrder, workAllocationIds, indexRequestList, cassandraModelList);
 		RestStatus restStatus = null;
 		if (!CollectionUtils.isEmpty(indexRequestList)) {
-			cassandraOperation.insertBulkRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_WORK_ALLOCATION, cassandraModelList);
-			indexerService.BulkInsert(indexRequestList);
+			cassandraOperation.insertBulkRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_WORK_ALLOCATION,
+					cassandraModelList);
+			indexerService.bulkInsert(indexRequestList);
 		}
 		workOrder.setUserIds(workAllocationIds);
 		try {
@@ -648,7 +633,9 @@ public class AllocationServiceV2 {
 			pdfLink = uploadPdfAndgetArtifactURL(identifier, xAuthUser, pdfFilePath);
 
 		} catch (Exception ex) {
-			logger.error("Exception occurred while creating the pdf link for published work order!", ex);
+			logger.error(String.format("Exception occurred while creating the pdf link for published work order! :  %s",
+					ex.getMessage()));
+			throw new ApplicationLogicError(EXCEPTION_OCCURRED_WHILE_UPDATING_THE_WORK_ORDER, ex);
 		}
 		return pdfLink;
 	}
@@ -707,7 +694,7 @@ public class AllocationServiceV2 {
 			Map<String, Object> profileResponse = outboundRequestHandlerService.fetchResultUsingPost(builder.toString(),
 					request, headersValue);
 			if (profileResponse != null && "OK".equalsIgnoreCase((String) profileResponse.get("responseCode"))) {
-				Map<String, Object> map = (Map<String, Object>) profileResponse.get("result");
+				Map<String, Object> map = (Map<String, Object>) profileResponse.get(RESULT2);
 				if (map.get("response") != null) {
 					Map<String, Object> profiles = (Map<String, Object>) map.get("response");
 					List<Map<String, Object>> userProfiles = (List<Map<String, Object>>) profiles.get("content");
@@ -734,8 +721,9 @@ public class AllocationServiceV2 {
 					}
 				}
 			}
-		} catch (Exception e) {
-			logger.error(e.toString());
+		} catch (Exception ex) {
+			logger.error(String.format("Exception occurred while creating the pdf link for published work order! :  %s",
+					ex.getMessage()));
 		}
 		return userResult;
 	}

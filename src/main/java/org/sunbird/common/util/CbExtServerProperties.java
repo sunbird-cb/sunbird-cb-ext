@@ -9,6 +9,9 @@ public class CbExtServerProperties {
 	@Value("${wf.service.host}")
 	private String wfServiceHost;
 
+	@Value("${kafka.topics.userutility.telemetry.event}")
+	private String userUtilityTopic;
+
 	@Value("${wf.service.updateUserProfilePath}")
 	private String wfServicePath;
 
@@ -177,300 +180,468 @@ public class CbExtServerProperties {
 	@Value("${redis.timeout}")
 	private String redisTimeout;
 
-	public String getContentHost() {
-		return contentHost;
+	public String getAzureContainerName() {
+		return azureContainerName;
 	}
 
-	public void setContentHost(String contentHost) {
-		this.contentHost = contentHost;
+	public String getAzureIdentityName() {
+		return azureIdentityName;
 	}
 
-	public String getHierarchyEndPoint() {
-		return hierarchyEndPoint;
+	public String getAzureStorageKey() {
+		return azureStorageKey;
 	}
 
-	public void setHierarchyEndPoint(String hierarchyEndPoint) {
-		this.hierarchyEndPoint = hierarchyEndPoint;
+	public String getAzureTypeName() {
+		return azureTypeName;
 	}
 
-	public String getWfServiceHost() {
-		return wfServiceHost;
-	}
-
-	public void setWfServiceHost(String wfServiceHost) {
-		this.wfServiceHost = wfServiceHost;
-	}
-
-	public String getWfServicePath() {
-		return wfServicePath;
-	}
-
-	public void setWfServicePath(String wfServicePath) {
-		this.wfServicePath = wfServicePath;
-	}
-
-	public boolean isUserMultiMapDeptEnabled() {
-		return isUserMultiMapDeptEnabled;
-	}
-
-	public void setUserMultiMapDeptEnabled(boolean isUserMultiMapDeptEnabled) {
-		this.isUserMultiMapDeptEnabled = isUserMultiMapDeptEnabled;
-	}
-
-	public String getSbUrl() {
-		return sbUrl;
-	}
-
-	public void setSbUrl(String sbUrl) {
-		this.sbUrl = sbUrl;
-	}
-
-	public String getSbHubGraphServiceUrl() {
-		return sbHubGraphServiceUrl;
-	}
-
-	public void setSbHubGraphServiceUrl(String sbHubGraphServiceUrl) {
-		this.sbHubGraphServiceUrl = sbHubGraphServiceUrl;
-	}
-
-	public String getCassandraUserName() {
-		return cassandraUserName;
-	}
-
-	public void setCassandraUserName(String cassandraUserName) {
-		this.cassandraUserName = cassandraUserName;
+	public long getCacheMaxTTL() {
+		return cacheMaxTTL;
 	}
 
 	public String getCassandraPassword() {
 		return cassandraPassword;
 	}
 
-	public void setCassandraPassword(String cassandraPassword) {
-		this.cassandraPassword = cassandraPassword;
+	public String getCassandraUserName() {
+		return cassandraUserName;
 	}
 
-	public String getSbExtKeyspace() {
-		return sbExtKeyspace;
+	public String getContentCreateEndPoint() {
+		return contentCreateEndPoint;
 	}
 
-	public void setSbExtKeyspace(String sbExtKeyspace) {
-		this.sbExtKeyspace = sbExtKeyspace;
+	public String getContentDefaultChannelId() {
+		return contentDefaultChannelId;
 	}
 
-	public String getCourseServiceHost() {
-		return courseServiceHost;
+	public String getContentDefaultOrgId() {
+		return contentDefaultOrgId;
 	}
 
-	public void setCourseServiceHost(String courseServiceHost) {
-		this.courseServiceHost = courseServiceHost;
+	public String getContentHierarchyDetailEndPoint() {
+		return contentHierarchyDetailEndPoint;
 	}
 
-	public String getProgressReadEndPoint() {
-		return progressReadEndPoint;
+	public String getContentHost() {
+		return contentHost;
 	}
 
-	public void setProgressReadEndPoint(String progressReadEndPoint) {
-		this.progressReadEndPoint = progressReadEndPoint;
-	}
-
-	public String getSbApiKey() {
-		return sbApiKey;
-	}
-
-	public void setSbApiKey(String sbApiKey) {
-		this.sbApiKey = sbApiKey;
-	}
-
-	public String getEsHost() {
-		return esHost;
-	}
-
-	public void setEsHost(String esHost) {
-		this.esHost = esHost;
-	}
-
-	public String getEsPort() {
-		return esPort;
-	}
-
-	public void setEsPort(String esPort) {
-		this.esPort = esPort;
-	}
-
-	public String getEsUser() {
-		return esUser;
-	}
-
-	public void setEsUser(String esUser) {
-		this.esUser = esUser;
-	}
-
-	public String getEsPassword() {
-		return esPassword;
-	}
-
-	public void setEsPassword(String esPassword) {
-		this.esPassword = esPassword;
-	}
-
-	public String getEsProfileIndex() {
-		return esProfileIndex;
-	}
-
-	public void setEsProfileIndex(String esProfileIndex) {
-		this.esProfileIndex = esProfileIndex;
-	}
-
-	public String getEsProfileIndexType() {
-		return esProfileIndexType;
-	}
-
-	public void setEsProfileIndexType(String esProfileIndexType) {
-		this.esProfileIndexType = esProfileIndexType;
-	}
-
-	public String[] getEsProfileSourceFields() {
-		return esProfileSourceFields;
-	}
-
-	public void setEsProfileSourceFields(String[] esProfileSourceFields) {
-		this.esProfileSourceFields = esProfileSourceFields;
-	}
-
-	public String getOrgCreateEndPoint() {
-		return orgCreateEndPoint;
-	}
-
-	public void setOrgCreateEndPoint(String orgCreateEndPoint) {
-		this.orgCreateEndPoint = orgCreateEndPoint;
-	}
-
-	public String getOrgCreationKafkaTopic() {
-		return orgCreationKafkaTopic;
-	}
-
-	public void setOrgCreationKafkaTopic(String orgCreationKafkaTopic) {
-		this.orgCreationKafkaTopic = orgCreationKafkaTopic;
-	}
-
-	public String getKmBaseHost() {
-		return kmBaseHost;
-	}
-
-	public void setKmBaseHost(String kmBaseHost) {
-		this.kmBaseHost = kmBaseHost;
-	}
-
-	public String getKmFrameWorkPath() {
-		return kmFrameWorkPath;
-	}
-
-	public void setKmFrameWorkPath(String kmFrameWorkPath) {
-		this.kmFrameWorkPath = kmFrameWorkPath;
-	}
-
-	public String getFracHost() {
-		return fracHost;
-	}
-
-	public void setFracHost(String fracHost) {
-		this.fracHost = fracHost;
-	}
-
-	public String getFracNodePath() {
-		return fracNodePath;
-	}
-
-	public void setFracNodePath(String fracNodePath) {
-		this.fracNodePath = fracNodePath;
-	}
-
-	public String getFracActivityPath() {
-		return fracActivityPath;
-	}
-
-	public void setFracActivityPath(String fracActivityPath) {
-		this.fracActivityPath = fracActivityPath;
-	}
-
-	public String getFracSource() {
-		return fracSource;
-	}
-
-	public void setFracSource(String fracSource) {
-		this.fracSource = fracSource;
-	}
-
-	public boolean isFracSourceUseDeptName() {
-		return fracSourceUseDeptName;
-	}
-
-	public void setFracSourceUseDeptName(boolean fracSourceUseDeptName) {
-		this.fracSourceUseDeptName = fracSourceUseDeptName;
-	}
-
-	public String getTaxonomyFrameWorkName() {
-		return taxonomyFrameWorkName;
-	}
-
-	public void setTaxonomyFrameWorkName(String taxonomyFrameWorkName) {
-		this.taxonomyFrameWorkName = taxonomyFrameWorkName;
-	}
-
-	public String getTaxonomyCategoryName() {
-		return taxonomyCategoryName;
-	}
-
-	public void setTaxonomyCategoryName(String taxonomyCategoryName) {
-		this.taxonomyCategoryName = taxonomyCategoryName;
-	}
-
-	public String getUserRoleAuditTopic() {
-		return userRoleAuditTopic;
-	}
-
-	public void setUserRoleAuditTopic(String userRoleAuditTopic) {
-		this.userRoleAuditTopic = userRoleAuditTopic;
-	}
-
-	public String getParticipantsEndPoint() {
-		return participantsEndPoint;
-	}
-
-	public void setParticipantsEndPoint(String participantsEndPoint) {
-		this.participantsEndPoint = participantsEndPoint;
+	public String getContentUploadEndPoint() {
+		return contentUploadEndPoint;
 	}
 
 	public String getCourseBatchCreateEndpoint() {
 		return courseBatchCreateEndpoint;
 	}
 
-	public void setCourseBatchCreateEndpoint(String courseBatchCreateEndpoint) {
-		this.courseBatchCreateEndpoint = courseBatchCreateEndpoint;
+	public String getCourseServiceHost() {
+		return courseServiceHost;
 	}
 
-	public String getRedisPort() {
-		return redisPort;
+	public String getEsHost() {
+		return esHost;
 	}
 
-	public void setRedisPort(String redisPort) {
-		this.redisPort = redisPort;
+	public String getEsPassword() {
+		return esPassword;
+	}
+
+	public String getEsPort() {
+		return esPort;
+	}
+
+	public String getEsProfileIndex() {
+		return esProfileIndex;
+	}
+
+	public String getEsProfileIndexType() {
+		return esProfileIndexType;
+	}
+
+	public String[] getEsProfileSourceFields() {
+		return esProfileSourceFields;
+	}
+
+	public String getEsUser() {
+		return esUser;
+	}
+
+	public String getFracActivityPath() {
+		return fracActivityPath;
+	}
+
+	public String getFracHost() {
+		return fracHost;
+	}
+
+	public String getFracNodePath() {
+		return fracNodePath;
+	}
+
+	public String getFracSearchPath() {
+		return fracSearchPath;
+	}
+
+	public String getFracSource() {
+		return fracSource;
+	}
+
+	public String getHierarchyEndPoint() {
+		return hierarchyEndPoint;
+	}
+
+	public String getKafkaTopicWatEvent() {
+		return kafkaTopicWatEvent;
+	}
+
+	public String getKmBaseHost() {
+		return kmBaseHost;
+	}
+
+	public String getKmCompositeSearchPath() {
+		return kmCompositeSearchPath;
+	}
+
+	public String getKmFrameWorkPath() {
+		return kmFrameWorkPath;
+	}
+
+	public String getOrgCreateEndPoint() {
+		return orgCreateEndPoint;
+	}
+
+	public String getOrgCreationKafkaTopic() {
+		return orgCreationKafkaTopic;
+	}
+
+	public String getParticipantsEndPoint() {
+		return participantsEndPoint;
+	}
+
+	public String getProgressReadEndPoint() {
+		return progressReadEndPoint;
 	}
 
 	public String getRedisHostName() {
 		return redisHostName;
 	}
 
-	public void setRedisHostName(String redisHostName) {
-		this.redisHostName = redisHostName;
+	public String getRedisPort() {
+		return redisPort;
 	}
 
 	public String getRedisTimeout() {
 		return redisTimeout;
 	}
 
+	public String getSbApiKey() {
+		return sbApiKey;
+	}
+
+	public String getSbExtKeyspace() {
+		return sbExtKeyspace;
+	}
+
+	public String getSbHubGraphServiceUrl() {
+		return sbHubGraphServiceUrl;
+	}
+
+	public String getSbOrgSearchPath() {
+		return sbOrgSearchPath;
+	}
+
+	public String getSbUrl() {
+		return sbUrl;
+	}
+
+	public String getTaxonomyCategoryName() {
+		return taxonomyCategoryName;
+	}
+
+	public String getTaxonomyFrameWorkName() {
+		return taxonomyFrameWorkName;
+	}
+
+	public String getTelemetryBaseUrl() {
+		return telemetryBaseUrl;
+	}
+
+	public String getTelemetryEndpoint() {
+		return telemetryEndpoint;
+	}
+
+	public String getUserCourseEnroll() {
+		return userCourseEnroll;
+	}
+
+	public String getUserCoursesList() {
+		return userCoursesList;
+	}
+
+	public String getUserRoleAuditTopic() {
+		return userRoleAuditTopic;
+	}
+
+	public String getUserSearchEndPoint() {
+		return userSearchEndPoint;
+	}
+
+	public String getWatTelemetryEnv() {
+		return watTelemetryEnv;
+	}
+
+	public String getWfServiceHost() {
+		return wfServiceHost;
+	}
+
+	public String getWfServicePath() {
+		return wfServicePath;
+	}
+
+	public boolean isFracSourceUseDeptName() {
+		return fracSourceUseDeptName;
+	}
+
+	public boolean isUserMultiMapDeptEnabled() {
+		return isUserMultiMapDeptEnabled;
+	}
+
+	public void setAzureContainerName(String azureContainerName) {
+		this.azureContainerName = azureContainerName;
+	}
+
+	public void setAzureIdentityName(String azureIdentityName) {
+		this.azureIdentityName = azureIdentityName;
+	}
+
+	public void setAzureStorageKey(String azureStorageKey) {
+		this.azureStorageKey = azureStorageKey;
+	}
+
+	public void setAzureTypeName(String azureTypeName) {
+		this.azureTypeName = azureTypeName;
+	}
+
+	public void setCacheMaxTTL(long cacheMaxTTL) {
+		this.cacheMaxTTL = cacheMaxTTL;
+	}
+
+	public void setCassandraPassword(String cassandraPassword) {
+		this.cassandraPassword = cassandraPassword;
+	}
+
+	public void setCassandraUserName(String cassandraUserName) {
+		this.cassandraUserName = cassandraUserName;
+	}
+
+	public void setContentCreateEndPoint(String contentCreateEndPoint) {
+		this.contentCreateEndPoint = contentCreateEndPoint;
+	}
+
+	public void setContentDefaultChannelId(String contentDefaultChannelId) {
+		this.contentDefaultChannelId = contentDefaultChannelId;
+	}
+
+	public void setContentDefaultOrgId(String contentDefaultOrgId) {
+		this.contentDefaultOrgId = contentDefaultOrgId;
+	}
+
+	public void setContentHierarchyDetailEndPoint(String contentHierarchyDetailEndPoint) {
+		this.contentHierarchyDetailEndPoint = contentHierarchyDetailEndPoint;
+	}
+
+	public void setContentHost(String contentHost) {
+		this.contentHost = contentHost;
+	}
+
+	public void setContentUploadEndPoint(String contentUploadEndPoint) {
+		this.contentUploadEndPoint = contentUploadEndPoint;
+	}
+
+	public void setCourseBatchCreateEndpoint(String courseBatchCreateEndpoint) {
+		this.courseBatchCreateEndpoint = courseBatchCreateEndpoint;
+	}
+
+	public void setCourseServiceHost(String courseServiceHost) {
+		this.courseServiceHost = courseServiceHost;
+	}
+
+	public void setEsHost(String esHost) {
+		this.esHost = esHost;
+	}
+
+	public void setEsPassword(String esPassword) {
+		this.esPassword = esPassword;
+	}
+
+	public void setEsPort(String esPort) {
+		this.esPort = esPort;
+	}
+
+	public void setEsProfileIndex(String esProfileIndex) {
+		this.esProfileIndex = esProfileIndex;
+	}
+
+	public void setEsProfileIndexType(String esProfileIndexType) {
+		this.esProfileIndexType = esProfileIndexType;
+	}
+
+	public void setEsProfileSourceFields(String[] esProfileSourceFields) {
+		this.esProfileSourceFields = esProfileSourceFields;
+	}
+
+	public void setEsUser(String esUser) {
+		this.esUser = esUser;
+	}
+
+	public void setFracActivityPath(String fracActivityPath) {
+		this.fracActivityPath = fracActivityPath;
+	}
+
+	public void setFracHost(String fracHost) {
+		this.fracHost = fracHost;
+	}
+
+	public void setFracNodePath(String fracNodePath) {
+		this.fracNodePath = fracNodePath;
+	}
+
+	public void setFracSearchPath(String fracSearchPath) {
+		this.fracSearchPath = fracSearchPath;
+	}
+
+	public void setFracSource(String fracSource) {
+		this.fracSource = fracSource;
+	}
+
+	public void setFracSourceUseDeptName(boolean fracSourceUseDeptName) {
+		this.fracSourceUseDeptName = fracSourceUseDeptName;
+	}
+
+	public void setHierarchyEndPoint(String hierarchyEndPoint) {
+		this.hierarchyEndPoint = hierarchyEndPoint;
+	}
+
+	public void setKafkaTopicWatEvent(String kafkaTopicWatEvent) {
+		this.kafkaTopicWatEvent = kafkaTopicWatEvent;
+	}
+
+	public void setKmBaseHost(String kmBaseHost) {
+		this.kmBaseHost = kmBaseHost;
+	}
+
+	public void setKmCompositeSearchPath(String kmCompositeSearchPath) {
+		this.kmCompositeSearchPath = kmCompositeSearchPath;
+	}
+
+	public void setKmFrameWorkPath(String kmFrameWorkPath) {
+		this.kmFrameWorkPath = kmFrameWorkPath;
+	}
+
+	public void setOrgCreateEndPoint(String orgCreateEndPoint) {
+		this.orgCreateEndPoint = orgCreateEndPoint;
+	}
+
+	public void setOrgCreationKafkaTopic(String orgCreationKafkaTopic) {
+		this.orgCreationKafkaTopic = orgCreationKafkaTopic;
+	}
+
+	public void setParticipantsEndPoint(String participantsEndPoint) {
+		this.participantsEndPoint = participantsEndPoint;
+	}
+
+	public void setProgressReadEndPoint(String progressReadEndPoint) {
+		this.progressReadEndPoint = progressReadEndPoint;
+	}
+
+	public void setRedisHostName(String redisHostName) {
+		this.redisHostName = redisHostName;
+	}
+
+	public void setRedisPort(String redisPort) {
+		this.redisPort = redisPort;
+	}
+
 	public void setRedisTimeout(String redisTimeout) {
 		this.redisTimeout = redisTimeout;
+	}
+
+	public void setSbApiKey(String sbApiKey) {
+		this.sbApiKey = sbApiKey;
+	}
+
+	public void setSbExtKeyspace(String sbExtKeyspace) {
+		this.sbExtKeyspace = sbExtKeyspace;
+	}
+
+	public void setSbHubGraphServiceUrl(String sbHubGraphServiceUrl) {
+		this.sbHubGraphServiceUrl = sbHubGraphServiceUrl;
+	}
+
+	public void setSbOrgSearchPath(String sbOrgSearchPath) {
+		this.sbOrgSearchPath = sbOrgSearchPath;
+	}
+
+	public void setSbUrl(String sbUrl) {
+		this.sbUrl = sbUrl;
+	}
+
+	public void setTaxonomyCategoryName(String taxonomyCategoryName) {
+		this.taxonomyCategoryName = taxonomyCategoryName;
+	}
+
+	public void setTaxonomyFrameWorkName(String taxonomyFrameWorkName) {
+		this.taxonomyFrameWorkName = taxonomyFrameWorkName;
+	}
+
+	public void setTelemetryBaseUrl(String telemetryBaseUrl) {
+		this.telemetryBaseUrl = telemetryBaseUrl;
+	}
+
+	public void setTelemetryEndpoint(String telemetryEndpoint) {
+		this.telemetryEndpoint = telemetryEndpoint;
+	}
+
+	public void setUserCourseEnroll(String userCourseEnroll) {
+		this.userCourseEnroll = userCourseEnroll;
+	}
+
+	public void setUserCoursesList(String userCoursesList) {
+		this.userCoursesList = userCoursesList;
+	}
+
+	public void setUserMultiMapDeptEnabled(boolean isUserMultiMapDeptEnabled) {
+		this.isUserMultiMapDeptEnabled = isUserMultiMapDeptEnabled;
+	}
+
+	public void setUserRoleAuditTopic(String userRoleAuditTopic) {
+		this.userRoleAuditTopic = userRoleAuditTopic;
+	}
+
+	public void setUserSearchEndPoint(String userSearchEndPoint) {
+		this.userSearchEndPoint = userSearchEndPoint;
+	}
+
+	public void setWatTelemetryEnv(String watTelemetryEnv) {
+		this.watTelemetryEnv = watTelemetryEnv;
+	}
+
+	public void setWfServiceHost(String wfServiceHost) {
+		this.wfServiceHost = wfServiceHost;
+	}
+
+	public void setWfServicePath(String wfServicePath) {
+		this.wfServicePath = wfServicePath;
+	}
+
+	public String getUserUtilityTopic() {
+		return userUtilityTopic;
+	}
+
+	public void setUserUtilityTopic(String userUtilityTopic) {
+		this.userUtilityTopic = userUtilityTopic;
 	}
 
 	@Override
@@ -482,165 +653,5 @@ public class CbExtServerProperties {
 		str.append("[sbUrl=").append(sbUrl).append("],");
 		str.append("[sbHubGraphServiceUrl=").append(sbHubGraphServiceUrl).append("]");
 		return str.toString();
-	}
-
-	public String getUserCoursesList() {
-		return userCoursesList;
-	}
-
-	public void setUserCoursesList(String userCoursesList) {
-		this.userCoursesList = userCoursesList;
-	}
-
-	public String getUserCourseEnroll() {
-		return userCourseEnroll;
-	}
-
-	public void setUserCourseEnroll(String userCourseEnroll) {
-		this.userCourseEnroll = userCourseEnroll;
-	}
-
-	public String getContentCreateEndPoint() {
-		return contentCreateEndPoint;
-	}
-
-	public void setContentCreateEndPoint(String contentCreateEndPoint) {
-		this.contentCreateEndPoint = contentCreateEndPoint;
-	}
-
-	public String getContentUploadEndPoint() {
-		return contentUploadEndPoint;
-	}
-
-	public void setContentUploadEndPoint(String contentUploadEndPoint) {
-		this.contentUploadEndPoint = contentUploadEndPoint;
-	}
-
-	public String getContentHierarchyDetailEndPoint() {
-		return contentHierarchyDetailEndPoint;
-	}
-
-	public void setContentHierarchyDetailEndPoint(String contentHierarchyDetailEndPoint) {
-		this.contentHierarchyDetailEndPoint = contentHierarchyDetailEndPoint;
-	}
-
-	public String getContentDefaultChannelId() {
-		return contentDefaultChannelId;
-	}
-
-	public void setContentDefaultChannelId(String contentDefaultChannelId) {
-		this.contentDefaultChannelId = contentDefaultChannelId;
-	}
-
-	public String getUserSearchEndPoint() {
-		return userSearchEndPoint;
-	}
-
-	public void setUserSearchEndPoint(String userSearchEndPoint) {
-		this.userSearchEndPoint = userSearchEndPoint;
-	}
-
-	public String getContentDefaultOrgId() {
-		return contentDefaultOrgId;
-	}
-
-	public void setContentDefaultOrgId(String contentDefaultOrgId) {
-		this.contentDefaultOrgId = contentDefaultOrgId;
-	}
-
-	public String getKafkaTopicWatEvent() {
-		return kafkaTopicWatEvent;
-	}
-
-	public void setKafkaTopicWatEvent(String kafkaTopicWatEvent) {
-		this.kafkaTopicWatEvent = kafkaTopicWatEvent;
-	}
-
-	public String getTelemetryBaseUrl() {
-		return telemetryBaseUrl;
-	}
-
-	public void setTelemetryBaseUrl(String telemetryBaseUrl) {
-		this.telemetryBaseUrl = telemetryBaseUrl;
-	}
-
-	public String getTelemetryEndpoint() {
-		return telemetryEndpoint;
-	}
-
-	public void setTelemetryEndpoint(String telemetryEndpoint) {
-		this.telemetryEndpoint = telemetryEndpoint;
-	}
-
-	public String getWatTelemetryEnv() {
-		return watTelemetryEnv;
-	}
-
-	public void setWatTelemetryEnv(String watTelemetryEnv) {
-		this.watTelemetryEnv = watTelemetryEnv;
-	}
-
-	public String getSbOrgSearchPath() {
-		return sbOrgSearchPath;
-	}
-
-	public void setSbOrgSearchPath(String sbOrgSearchPath) {
-		this.sbOrgSearchPath = sbOrgSearchPath;
-	}
-
-	public String getKmCompositeSearchPath() {
-		return kmCompositeSearchPath;
-	}
-
-	public void setKmCompositeSearchPath(String kmCompositeSearchPath) {
-		this.kmCompositeSearchPath = kmCompositeSearchPath;
-	}
-
-	public String getFracSearchPath() {
-		return fracSearchPath;
-	}
-
-	public void setFracSearchPath(String fracSearchPath) {
-		this.fracSearchPath = fracSearchPath;
-	}
-
-	public long getCacheMaxTTL() {
-		return cacheMaxTTL;
-	}
-
-	public void setCacheMaxTTL(long cacheMaxTTL) {
-		this.cacheMaxTTL = cacheMaxTTL;
-	}
-
-	public String getAzureContainerName() {
-		return azureContainerName;
-	}
-
-	public void setAzureContainerName(String azureContainerName) {
-		this.azureContainerName = azureContainerName;
-	}
-
-	public String getAzureTypeName() {
-		return azureTypeName;
-	}
-
-	public void setAzureTypeName(String azureTypeName) {
-		this.azureTypeName = azureTypeName;
-	}
-
-	public String getAzureIdentityName() {
-		return azureIdentityName;
-	}
-
-	public void setAzureIdentityName(String azureIdentityName) {
-		this.azureIdentityName = azureIdentityName;
-	}
-
-	public String getAzureStorageKey() {
-		return azureStorageKey;
-	}
-
-	public void setAzureStorageKey(String azureStorageKey) {
-		this.azureStorageKey = azureStorageKey;
 	}
 }

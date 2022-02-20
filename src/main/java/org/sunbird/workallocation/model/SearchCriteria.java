@@ -1,58 +1,58 @@
 package org.sunbird.workallocation.model;
 
 public class SearchCriteria {
-    private int pageSize;
-    private int pageNo;
-    private String status;
-    private String userId;
-    private String departmentName;
-    private String query;
+	private int pageSize;
+	private int pageNo;
+	private String status;
+	private String userId;
+	private String departmentName;
+	private String query;
 
-    public int getPageSize() {
-        return pageSize;
-    }
+	public String getDepartmentName() {
+		return departmentName;
+	}
 
-    public void setPageSize(int pageSize) {
-        this.pageSize = pageSize;
-    }
+	public int getPageNo() {
+		return pageNo;
+	}
 
-    public int getPageNo() {
-        return pageNo;
-    }
+	public int getPageSize() {
+		return pageSize;
+	}
 
-    public void setPageNo(int pageNo) {
-        this.pageNo = pageNo;
-    }
+	public String getQuery() {
+		return query;
+	}
 
-    public String getDepartmentName() {
-        return departmentName;
-    }
+	public String getStatus() {
+		return status;
+	}
 
-    public void setDepartmentName(String departmentName) {
-        this.departmentName = departmentName;
-    }
+	public String getUserId() {
+		return userId;
+	}
 
-    public String getStatus() {
-        return status;
-    }
+	public void setDepartmentName(String departmentName) {
+		this.departmentName = departmentName;
+	}
 
-    public void setStatus(String status) {
-        this.status = status;
-    }
+	public void setPageNo(int pageNo) {
+		this.pageNo = pageNo;
+	}
 
-    public String getUserId() {
-        return userId;
-    }
+	public void setPageSize(int pageSize) {
+		this.pageSize = pageSize;
+	}
 
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
+	public void setQuery(String query) {
+		this.query = query;
+	}
 
-    public String getQuery() {
-        return query;
-    }
+	public void setStatus(String status) {
+		this.status = status;
+	}
 
-    public void setQuery(String query) {
-        this.query = query;
-    }
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
 }

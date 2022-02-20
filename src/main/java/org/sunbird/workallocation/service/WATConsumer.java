@@ -25,11 +25,11 @@ import org.sunbird.core.logger.CbExtLogger;
 import org.sunbird.core.producer.Producer;
 import org.sunbird.workallocation.model.PropertyFilterMixIn;
 import org.sunbird.workallocation.model.WorkAllocationDTOV2;
-import org.sunbird.workallocation.model.telemetryEvent.Actor;
-import org.sunbird.workallocation.model.telemetryEvent.Context;
-import org.sunbird.workallocation.model.telemetryEvent.Event;
-import org.sunbird.workallocation.model.telemetryEvent.ObjectData;
-import org.sunbird.workallocation.model.telemetryEvent.Pdata;
+import org.sunbird.workallocation.model.telemetryevent.Actor;
+import org.sunbird.workallocation.model.telemetryevent.Context;
+import org.sunbird.workallocation.model.telemetryevent.Event;
+import org.sunbird.workallocation.model.telemetryevent.ObjectData;
+import org.sunbird.workallocation.model.telemetryevent.Pdata;
 import org.sunbird.workallocation.util.WorkAllocationConstants;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -39,9 +39,6 @@ import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 
 @Service
 public class WATConsumer {
-
-	@Autowired
-	private OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
 
 	@Autowired
 	private CbExtServerProperties cbExtServerProperties;
@@ -71,9 +68,9 @@ public class WATConsumer {
 			Map<String, Object> workAllocationObj = mapper.readValue(String.valueOf(data.value()), Map.class);
 
 			Map<String, Object> workOrderMap = new HashMap<>();
-			workOrderMap.put(Constants.ID, (String) workAllocationObj.get("workorderId"));
-			List<Map<String, Object>> workOrderCassandraModelOptional = cassandraOperation
-					.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_WORK_ORDER, workOrderMap, new ArrayList<>());
+			workOrderMap.put(Constants.ID, workAllocationObj.get("workorderId"));
+			List<Map<String, Object>> workOrderCassandraModelOptional = cassandraOperation.getRecordsByProperties(
+					Constants.KEYSPACE_SUNBIRD, Constants.TABLE_WORK_ORDER, workOrderMap, new ArrayList<>());
 
 			if (!workOrderCassandraModelOptional.isEmpty()) {
 				Map<String, Object> watObj = mapper
@@ -85,7 +82,8 @@ public class WATConsumer {
 					Map<String, Object> workAllocationMap = new HashMap<>();
 					workAllocationMap.put(Constants.ID, userIds);
 					List<Map<String, Object>> workAllocationList = cassandraOperation.getRecordsByProperties(
-							Constants.KEYSPACE_SUNBIRD, Constants.TABLE_WORK_ALLOCATION, workAllocationMap, new ArrayList<>());
+							Constants.KEYSPACE_SUNBIRD, Constants.TABLE_WORK_ALLOCATION, workAllocationMap,
+							new ArrayList<>());
 
 					List<WorkAllocationDTOV2> workAllocations = new ArrayList<>();
 					for (Map<String, Object> workAllocationCassandraModel : workAllocationList) {
@@ -120,13 +118,7 @@ public class WATConsumer {
 		FilterProvider filters = new SimpleFilterProvider().addFilter("PropertyFilter",
 				SimpleBeanPropertyFilter.serializeAllExcept(ignorableFieldsForPublishedState));
 		String writer = mapper1.writer(filters).writeValueAsString(watObj);
-		watObj = mapper1.readValue(writer, Map.class);
-		return watObj;
-	}
-
-	private void postTelemetryEvent(Event event) {
-		outboundRequestHandlerService.fetchResultUsingPost(
-				cbExtServerProperties.getTelemetryBaseUrl() + cbExtServerProperties.getTelemetryEndpoint(), event);
+		return mapper1.readValue(writer, Map.class);
 	}
 
 	private Event getTelemetryEvent(Map<String, Object> watObject) {
@@ -166,8 +158,8 @@ public class WATConsumer {
 		objectData.setId((String) watObject.get("id"));
 		objectData.setType(WorkAllocationConstants.WORK_ORDER_ID_CONST);
 		event.setObject(objectData);
-		// event.setType(WorkAllocationConstants.EVENTS_NAME);
 		return event;
+
 	}
 
 	public void updateUserWorkOrderMappings(Map<String, Object> workOrderMap,
@@ -189,8 +181,8 @@ public class WATConsumer {
 					}
 				});
 
-				cassandraOperation.insertBulkRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_USER_WORK_ALLOCATION_MAPPING,
-						userAllocationMappingList);
+				cassandraOperation.insertBulkRecord(Constants.KEYSPACE_SUNBIRD,
+						Constants.TABLE_USER_WORK_ALLOCATION_MAPPING, userAllocationMappingList);
 			}
 		} catch (Exception ex) {
 			logger.error(ex);

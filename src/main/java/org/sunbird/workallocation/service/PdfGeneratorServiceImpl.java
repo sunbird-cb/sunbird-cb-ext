@@ -1,8 +1,24 @@
 package org.sunbird.workallocation.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import net.glxn.qrgen.core.image.ImageType;
-import net.glxn.qrgen.javase.QRCode;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.StringWriter;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+import java.util.TimeZone;
+import java.util.UUID;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
@@ -15,18 +31,19 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.client.RestTemplate;
 import org.sunbird.core.exception.BadRequestException;
 import org.sunbird.workallocation.model.PdfGeneratorRequest;
 import org.sunbird.workallocation.util.WorkAllocationConstants;
 
-import java.io.*;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import net.glxn.qrgen.core.image.ImageType;
+import net.glxn.qrgen.javase.QRCode;
 
 @Service
 public class PdfGeneratorServiceImpl implements PdfGeneratorService {
-
+	private static final String STRING = "/";
+	private static final String DEPT_ID = "deptId";
+	public static final String NUMBER_OF_BYTES_READ = "Number of bytes read: ";
+	private Logger logger = LoggerFactory.getLogger(getClass().getName());
 	public static final String DEPT_NAME = "deptName";
 	public static final String DEPT_IMG_URL = "deptImgUrl";
 	public static final String UD_HTML_FILE_PATH = "ud_htmlFilePath";
@@ -51,25 +68,19 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 	public String baseUrl;
 
 	@Autowired
-	private ObjectMapper mapper;
-
-	@Autowired
-	private RestTemplate restTemplate;
-
-	@Autowired
 	private AllocationServiceV2 allocationService;
 
 	static final String TEMPLATE_PATH = "templates/";
 
 	private Logger log = LoggerFactory.getLogger(PdfGeneratorServiceImpl.class);
 
-	public byte[] generatePdf(PdfGeneratorRequest request) throws Exception {
+	public byte[] generatePdf(PdfGeneratorRequest request) throws IOException {
 		if (StringUtils.isEmpty(request.getTemplateId())) {
 			throw new BadRequestException("Template Id is mandatory!");
 		}
 		String footerTemplateName = "templates/pdf-draft-footer.html";
 		Map<String, Object> headerDetails = new HashMap<>();
-		String deptId = (String) request.getTagValuePair().get("deptId");
+		String deptId = (String) request.getTagValuePair().get(DEPT_ID);
 		headerDetails.put(DEPT_NAME, request.getTagValuePair().get(DEPT_NAME));
 		headerDetails.put(DEPT_IMG_URL, request.getTagValuePair().get(DEPT_IMG_URL));
 		String headerMessage = readVm("pdf-header.vm", headerDetails);
@@ -85,10 +96,11 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 		InputStream inputStream = getClass().getClassLoader().getResourceAsStream(footerTemplateName);
 
 		byte[] buffer = new byte[inputStream.available()];
-		inputStream.read(buffer);
+		int buf = inputStream.read(buffer);
+		logger.info(NUMBER_OF_BYTES_READ + buf);
 
 		File htmlFooterPath = new File("/tmp/" + deptId + "pdf-draft-footer.html");
-		try(OutputStream outStream = new FileOutputStream(htmlFooterPath)){
+		try (OutputStream outStream = new FileOutputStream(htmlFooterPath)) {
 			outStream.write(buffer);
 		}
 		paramMap.put(UD_HTML_FOOTER_FILE_PATH, htmlFooterPath.getAbsolutePath());
@@ -102,7 +114,8 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 		File file = new File(pdfFilePath);
 		byte[] bytes = new byte[(int) file.length()];
 		try (FileInputStream fis = new FileInputStream(file)) {
-			fis.read(bytes);
+			int i = fis.read(bytes);
+			logger.info(NUMBER_OF_BYTES_READ + i);
 		}
 		return bytes;
 	}
@@ -110,16 +123,17 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 	public byte[] generatePdf(String woId) {
 		try {
 			String pdfFilePath = getPDFFilePath(woId);
-			if (pdfFilePath == null) return new byte[0];
+			if (pdfFilePath == null)
+				return new byte[0];
 			File file = new File(pdfFilePath);
 			byte[] bytes = new byte[(int) file.length()];
 			try (FileInputStream fis = new FileInputStream(file)) {
-				fis.read(bytes);
+				int i = fis.read(bytes);
+				logger.info(NUMBER_OF_BYTES_READ + i);
 			}
 			return bytes;
 
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			log.error("Failed to retrieve WorkOrder object for pdf generation.", e);
 		}
 		return new byte[0];
@@ -136,7 +150,7 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 		return null;
 	}
 
-	private String getPDFFilePath(String woId) throws Exception {
+	private String getPDFFilePath(String woId) throws IOException {
 		Map<String, Object> workOrder = allocationService.getWorkOrderObject(woId);
 		if (workOrder == null) {
 			return null;
@@ -149,12 +163,10 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 		workOrder.put("printedTime", printedTime);
 		String status = (String) workOrder.get("status");
 		String deptId = "";
-		if(workOrder.get("deptId") instanceof Integer){
-			deptId = String.valueOf(workOrder.get("deptId"));
-		}
-		else if(workOrder.get("deptId") instanceof String)
-		{
-			deptId = (String)workOrder.get("deptId");
+		if (workOrder.get(DEPT_ID) instanceof Integer) {
+			deptId = String.valueOf(workOrder.get(DEPT_ID));
+		} else if (workOrder.get(DEPT_ID) instanceof String) {
+			deptId = (String) workOrder.get(DEPT_ID);
 		}
 		String templateName = null;
 		String footerTemplateName = null;
@@ -162,7 +174,7 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 			templateName = draftTemplateName;
 			footerTemplateName = "templates/pdf-draft-footer.html";
 		} else if (WorkAllocationConstants.PUBLISHED_STATUS.equalsIgnoreCase(status)) {
-			String qrImageUrl = baseUrl + (String)workOrder.get("id");
+			String qrImageUrl = baseUrl + (String) workOrder.get("id");
 			File qrCodeFile = QRCode.from(qrImageUrl).to(ImageType.PNG).file();
 			workOrder.put("qrcodeurl", qrCodeFile.getAbsolutePath());
 			templateName = publishedTemplateName;
@@ -177,7 +189,7 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 			ClassPathResource classPathResource = new ClassPathResource("government-of-india.jpg");
 			InputStream inputStream = classPathResource.getInputStream();
 			File tempFile = File.createTempFile("government-of-india", ".jpg");
-			try(OutputStream outStream = new FileOutputStream(tempFile)){
+			try (OutputStream outStream = new FileOutputStream(tempFile)) {
 				byte[] buffer = new byte[8 * 1024];
 				int bytesRead;
 				while ((bytesRead = inputStream.read(buffer)) != -1) {
@@ -186,12 +198,11 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 				IOUtils.closeQuietly(inputStream);
 				IOUtils.closeQuietly(outStream);
 			}
-			headerDetails.put(DEPT_IMG_URL,  tempFile.getAbsolutePath());
-		}catch (Exception ex){
+			headerDetails.put(DEPT_IMG_URL, tempFile.getAbsolutePath());
+		} catch (Exception ex) {
 			log.error("Exception occurred while loading the default department logo");
 		}
-		headerDetails.put(DEPT_NAME,  workOrder.get(DEPT_NAME));
-//		headerDetails.put("deptImgUrl",  (String) workOrder.get("deptImgUrl"));
+		headerDetails.put(DEPT_NAME, workOrder.get(DEPT_NAME));
 		String headerMessage = readVm("pdf-header.vm", headerDetails);
 		String headerHtmlFilePath = createHTMLFile("pdf-header", headerMessage);
 
@@ -205,10 +216,11 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 		InputStream inputStream = getClass().getClassLoader().getResourceAsStream(footerTemplateName);
 
 		byte[] buffer = new byte[inputStream.available()];
-		inputStream.read(buffer);
+		int buf = inputStream.read(buffer);
+		logger.info(NUMBER_OF_BYTES_READ + buf);
 
 		File htmlFooterPath = new File("/tmp/" + deptId + "pdf-draft-footer.html");
-		try(OutputStream outStream = new FileOutputStream(htmlFooterPath)){
+		try (OutputStream outStream = new FileOutputStream(htmlFooterPath)) {
 			outStream.write(buffer);
 		}
 		paramMap.put(UD_HTML_FOOTER_FILE_PATH, htmlFooterPath.getAbsolutePath());
@@ -234,19 +246,19 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 
 	public String createHTMLFile(String fName, String htmlContent) throws IOException {
 		String prefix = UUID.randomUUID().toString().toUpperCase() + "-" + System.currentTimeMillis();
-		String htmlFilePath = htmlFolderPath + "/" + prefix + "_" + fName + HTML;
+		String htmlFilePath = htmlFolderPath + STRING + prefix + "_" + fName + HTML;
 		File theDir = new File(htmlFolderPath);
 		if (!theDir.exists()) {
 			theDir.mkdirs();
 		}
 		if (htmlContent.contains("â€˜")) {
-			htmlContent = htmlContent.replaceAll("â€˜", "'");
+			htmlContent = htmlContent.replace("â€˜", "'");
 		}
 		if (htmlContent.contains("â€™")) {
-			htmlContent = htmlContent.replaceAll("â€™", "'");
+			htmlContent = htmlContent.replace("â€™", "'");
 		}
 		BufferedWriter out = null;
-		try (FileWriter fstream = new FileWriter(htmlFilePath)){
+		try (FileWriter fstream = new FileWriter(htmlFilePath)) {
 			out = new BufferedWriter(fstream);
 			out.write(htmlContent);
 			out.close();
@@ -302,7 +314,8 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 			return null;
 		}
 		StringBuilder commandLine = new StringBuilder();
-		commandLine.append(" wkhtmltopdf --enable-local-file-access --margin-top 20.0 --margin-left 10.0 --margin-right 10.0 --footer-spacing 5 ");
+		commandLine.append(
+				" wkhtmltopdf --enable-local-file-access --margin-top 20.0 --margin-left 10.0 --margin-right 10.0 --footer-spacing 5 ");
 		commandLine.append("--header-spacing 5  --footer-font-size 8 --orientation Portrait --page-size A4 ");
 		commandLine.append("--load-media-error-handling ignore  --no-header-line --no-footer-line --enable-forms ");
 		commandLine.append("--load-error-handling ignore --header-right [page]/[toPage] ");
