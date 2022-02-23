@@ -2,11 +2,11 @@ package org.sunbird.ratings.model;
 
 public class LookupRequest {
 
-    String activity_Id;
-    String activity_Type;
-    Float rating;
-    int limit;
-    String updateOn;
+    private String activity_Id;
+    private String activity_Type;
+    private Float rating;
+    private int limit;
+    private String updateOn;
 
     public String getActivity_Id() {
         return activity_Id;

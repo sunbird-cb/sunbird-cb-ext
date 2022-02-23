@@ -41,9 +41,9 @@ public class RatingsController {
         return new ResponseEntity<>(response, response.getResponseCode());
     }
 
-    @PostMapping("/ratings/v1/search")
-    public ResponseEntity<?> search(@RequestBody LookupRequest request) {
-        SBApiResponse response = ratingService.search(request);
+    @PostMapping("/ratings/v1/ratingLookUp")
+    public ResponseEntity<?> ratingLookUp(@RequestBody LookupRequest request) {
+        SBApiResponse response = ratingService.ratingLookUp(request);
         return new ResponseEntity<>(response, response.getResponseCode());
     }
 }

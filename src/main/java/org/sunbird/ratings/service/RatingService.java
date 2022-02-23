@@ -11,5 +11,5 @@ public interface RatingService {
 
     public SBApiResponse getRatingSummary(String activity_Id, String activity_Type);
 
-    public SBApiResponse search(LookupRequest request);
+    public SBApiResponse ratingLookUp(LookupRequest request);
 }

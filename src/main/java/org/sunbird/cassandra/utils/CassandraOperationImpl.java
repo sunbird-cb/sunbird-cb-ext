@@ -7,6 +7,7 @@ import com.datastax.driver.core.querybuilder.Select.Where;
 import com.datastax.driver.core.querybuilder.Update.Assignments;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -96,7 +97,9 @@ public class CassandraOperationImpl implements CassandraOperation {
         try {
             selectQuery = processQuery(keyspaceName, tableName, propertyMap, fields);
             selectQuery.limit(limit);
-            selectQuery.where(QueryBuilder.lt("updatedon", UUID.fromString(updatedOn)));
+            if (!StringUtils.isEmpty(updatedOn)) {
+                selectQuery.where(QueryBuilder.lt("updatedon", UUID.fromString(updatedOn)));
+            }
             ResultSet results = connectionManager.getSession(keyspaceName).execute(selectQuery);
             response = CassandraUtil.createResponse(results);
         } catch (Exception e) {
@@ -105,7 +108,7 @@ public class CassandraOperationImpl implements CassandraOperation {
         return response;
     }
 
-    public Select processQuery(String keyspaceName, String tableName,
+    private Select processQuery(String keyspaceName, String tableName,
                                Map<String, Object> propertyMap, List<String> fields) {
         Select selectQuery = null;
 
