@@ -29,12 +29,22 @@ SB-CB-EXT uses a number of open source projects:
 
 **ES Index Details**
 - Need to create indexes 
-  - work_allocation_v2 with alias - work_allocation
-  - work_order_v1 with alias - work_order
+  - workallocationv2 - this name should be same as property value of workallocationv2.index.name
+  - workorderv1 - this name should be same as property value of workorder.index.name
 
 - Update the work_allocation mapping using file @ https://github.com/sunbird-cb/sunbird-cb-ext/blob/cbrelease-3.0.1/src/main/resources/elasticsearch/index/workallocationv2.json
 
 - Update the work_order mapping using file @ https://github.com/sunbird-cb/sunbird-cb-ext/blob/cbrelease-3.0.1/src/main/resources/elasticsearch/index/workorderv1.json
+
+**ES Index Alias Details**
+- Check any existing index has alias "work_allocation" or "work_order". If so, delete the alias mapping using following CURL in ElasticSerach server.
+	- curl --location --request DELETE 'http://localhost:9200/{{existingIndexName}}/_alias/{{aliasName}}'
+	- existingIndexName - refers the existing index in ES
+	- aliasName - refers either "work_allocation" or "work_order"
+
+- Add alias for newly created Indexes
+	- curl --location --request POST 'http://localhost:9200/_aliases' --header 'Content-Type: application/json' --data-raw '{"actions":[{"add":{"index":"workorderv1","alias":"work_order"}}]}'
+	- curl --location --request POST 'http://localhost:9200/_aliases' --header 'Content-Type: application/json' --data-raw '{"actions":[{"add":{"index":"workallocationv2","alias":"work_allocation"}}]}'
 
 **Postgresql table list**
 
