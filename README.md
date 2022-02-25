@@ -26,6 +26,8 @@ SB-CB-EXT uses a number of open source projects:
 
 - orgCreation - Used to create SB Org object when new Department is created
 - userRoleAuditTopic - Used to update the user_department_role record in Audit table 
+- dev.rating.event - Used to create rating summary in rating_summary table and lookup for the specific course ID and specific User ID 
+  in ratings_lookup table
 
 **ES Index Details**
 - Need to create indexes 
@@ -142,6 +144,9 @@ CREATE TABLE user_department_role_audit
 - org_staff_position
 - org_budget_scheme
 - org_audit
+- ratings
+- ratings_summary
+- ratings_lookup
 
 **Queries to create the cassandra table**
 
@@ -301,4 +306,44 @@ CREATE TABLE sunbird.org_audit (
 	transactionDetails text,
 	PRIMARY KEY (orgId, auditType, createdDate, updatedDate)
 );
+```
+```sh
+CREATE TABLE sunbird.ratings (
+    activity_id text,
+    activity_type text,
+    userid text,
+    comment text,
+    commentby text,
+    commentupdatedon timeuuid,
+    createdon timeuuid,
+    rating float,
+    review text,
+    updatedon timeuuid,
+    PRIMARY KEY ((activity_id, activity_type, userid))
+);
+```
+```sh
+CREATE TABLE sunbird.ratings_summary (
+    activity_id text,
+    activity_type text,
+    latest50reviews text,
+    sum_of_total_ratings float,
+    total_number_of_ratings float,
+    totalcount1stars float,
+    totalcount2stars float,
+    totalcount3stars float,
+    totalcount4stars float,
+    totalcount5stars float,
+    PRIMARY KEY (activity_id, activity_type)
+) WITH CLUSTERING ORDER BY (activity_type ASC);
+```
+```sh
+CREATE TABLE sunbird.ratings_lookup (
+    activity_id text,
+    activity_type text,
+    rating float,
+    updatedon timeuuid,
+    userid text,
+    PRIMARY KEY ((activity_id, activity_type, rating), updatedon)
+) WITH CLUSTERING ORDER BY (updatedon DESC); 
 ```
