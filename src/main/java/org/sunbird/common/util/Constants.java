@@ -210,7 +210,7 @@ public class Constants {
     public static final String NO_RATING_EXCEPTION_MESSAGE = "No ratings found for : ";
     public static final String NO_REVIEW_EXCEPTION_MESSAGE = "No reviews found for : ";
     public static final String RATING_GENERIC_EXCEPTION_MESSAGE = "Exception occurred while adding the course review : ";
-
+    public static final String KAFKA_TOPIC_EXCEPTION = "Exception occurred while connecting to kafka topic : ";
     // Redis
     public static final String API_REDIS_DELETE = "api.redis.delete";
     public static final String API_REDIS_GET_KEYS = "api.redis.get.keys";

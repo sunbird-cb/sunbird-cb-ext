@@ -3,6 +3,7 @@ package org.sunbird.ratings.service;
 import com.datastax.driver.core.utils.UUIDs;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang.StringUtils;
+import org.apache.kafka.common.KafkaException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -168,7 +169,11 @@ public class RatingServiceImpl implements RatingService {
         } catch (ValidationException ex) {
             logger.error(ex);
             return processExceptionBody(response, ex, "", HttpStatus.BAD_REQUEST);
-        } catch (Exception ex) {
+        } catch (KafkaException ex){
+            logger.error(ex);
+            return processExceptionBody(response, ex, Constants.KAFKA_TOPIC_EXCEPTION, HttpStatus.BAD_REQUEST);
+        }
+        catch (Exception ex) {
             logger.error(ex);
             String errMsg = Constants.RATING_GENERIC_EXCEPTION_MESSAGE;
             return processExceptionBody(response, ex, errMsg, HttpStatus.INTERNAL_SERVER_ERROR);
