@@ -1,6 +1,7 @@
 package org.sunbird.common.service;
 
 import java.sql.Timestamp;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -157,6 +158,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		Map<String, Object> response = new HashMap<>();
 		logger.info(String.format("Updating User Login: rootOrg: %s, userId: %s", userLoginInfo.getOrgId(),
 				userLoginInfo.getUserId()));
+		userLoginInfo.setLoginTime(new Timestamp(new Date().getTime()));
 		try {
 			Map<String, Object> propertyMap = new HashMap<>();
 			propertyMap.put(Constants.USER_ID, userLoginInfo.getUserId());
@@ -165,10 +167,9 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 			if (CollectionUtils.isEmpty(details)) {
 				Map<String, Object> request = new HashMap<>();
 				request.put(Constants.USER_ID, userLoginInfo.getUserId());
-				request.put(Constants.FIRSTLOGINTIME, new Timestamp(System.currentTimeMillis()).toString());
+				request.put(Constants.FIRSTLOGINTIME, userLoginInfo.getLoginTime());
 				cassandraOperation.insertRecord(Constants.DATABASE, Constants.LOGIN_TABLE, request);
-
-				// userUtilityUtils.pushDataToKafka();
+				userUtilityUtils.pushDataToKafka(userLoginInfo);
 			}
 		} catch (Exception e) {
 			throw new ApplicationLogicError("Sunbird Service ERROR: ", e);

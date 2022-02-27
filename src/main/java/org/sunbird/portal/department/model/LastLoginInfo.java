@@ -1,10 +1,13 @@
 package org.sunbird.portal.department.model;
 
+import java.util.Date;
+
 public class LastLoginInfo {
 
 	String userId;
-	String orgId;
-	String loginTime;
+	Long orgId;
+	Date loginTime;
+	String orgName;
 
 	public String getUserId() {
 		return userId;
@@ -14,36 +17,42 @@ public class LastLoginInfo {
 		this.userId = userId;
 	}
 
-	public String getOrgId() {
+	public Long getOrgId() {
 		return orgId;
 	}
 
-	public void setOrgId(String orgId) {
+	public void setOrgId(Long orgId) {
 		this.orgId = orgId;
 	}
 
-	public String getLoginTime() {
+	public Date getLoginTime() {
 		return loginTime;
 	}
 
-	public void setLoginTime(String loginTime) {
+	public void setLoginTime(Date loginTime) {
 		this.loginTime = loginTime;
+	}
+
+	public String getOrgName() {
+		return orgName;
+	}
+
+	public void setOrgName(String orgName) {
+		this.orgName = orgName;
 	}
 
 	@Override
 	public String toString() {
-		return "LastLoginInfo [userId=" + userId + ", orgId=" + orgId + ", loginTime=" + loginTime + "]";
+		return "LastLoginInfo [userId=" + userId + ", orgId=" + orgId + ", loginTime=" + loginTime + ", orgName="
+				+ orgName + "]";
 	}
 
-	public LastLoginInfo(String userId, String orgId, String loginTime) {
+	public LastLoginInfo(String userId, Long orgId, Date loginTime, String orgName) {
 		super();
 		this.userId = userId;
 		this.orgId = orgId;
 		this.loginTime = loginTime;
-	}
-
-	public LastLoginInfo() {
-		// TODO Auto-generated constructor stub
+		this.orgName = orgName;
 	}
 
 }
