@@ -172,8 +172,7 @@ public class RatingServiceImpl implements RatingService {
         } catch (KafkaException ex){
             logger.error(ex);
             return processExceptionBody(response, ex, Constants.KAFKA_RATING_EXCEPTION_MESSAGE, HttpStatus.BAD_REQUEST);
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             logger.error(ex);
             String errMsg = Constants.RATING_GENERIC_EXCEPTION_MESSAGE;
             return processExceptionBody(response, ex, errMsg, HttpStatus.INTERNAL_SERVER_ERROR);
