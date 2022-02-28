@@ -69,6 +69,9 @@ public class Constants {
     public static final String DEPARTMENT = "department";
     public static final String DESIGNATION = "designation";
     public static final String PRIMARY_EMAIL = "primaryEmail";
+    public static final String RESPONSE_CODE = "responseCode";
+    public static final String AUTH_TOKEN = "Authorization";
+    public static final String X_AUTH_TOKEN = "x-authenticated-user-token";
 
     public static final String SUCCESSFUL = "Successful";
     public static final String FAILED = "Failed";
@@ -123,6 +126,8 @@ public class Constants {
     public static final String API_BUDGET_SCHEME_HISTORY_READ = "api.budget.scheme.history.read";
     public static final String API_FILE_UPLOAD = "api.file.upload";
     public static final String API_FILE_DELETE = "api.file.delete";
+    public static final String API_PROFILE_UPDATE = "api.profile.update";
+
 
     public static final String ID = "id";
     public static final String ORG_ID = "orgId";
@@ -172,7 +177,7 @@ public class Constants {
     public static final String QUE_MARK = "?";
     public static final String COMMA = ",";
     public static final String CLOSING_BRACE = ");";
-    public static final String SUCCESS = "SUCCESS";
+    public static final String SUCCESS = "success";
     public static final String UNKNOWN_IDENTIFIER = "Unknown identifier ";
     public static final String UNDEFINED_IDENTIFIER = "Undefined column name ";
     public static final String EXCEPTION_MSG_FETCH = "Exception occurred while fetching record from ";
@@ -207,9 +212,35 @@ public class Constants {
     public static final String TABLE_RATINGS = "ratings";
     public static final String TABLE_RATINGS_LOOKUP = "ratings_lookup";
     public static final String TABLE_RATINGS_SUMMARY = "ratings_summary";
+
+    public static final String VALUE = "value";
+    public static final String DEPT_NAME = "deptName";
+    public static final String PROFILE_DETAILS = "profileDetails";
+    public static final String CONTENT_TYPE = "Content-Type";
+    public static final String APPLICATION_JSON = "application/json";
+    public static final String OSID = "osid";
+    public static final String INITIATE = "INITIATE";
+    public static final String FIELD_KEY = "fieldKey";
+    public static final String TO_VALUE = "toValue";
+    public static final String FROM_VALUE = "fromValue";
+    public static final String STATE = "state";
+    public static final String ACTION = "action";
+    public static final String APPLICATION_ID = "applicationId";
+    public static final String ACTOR_USER_ID = "actorUserId";
+    public static final String SERVICE_NAME = "serviceName";
+    public static final String PROFILE = "profile";
+    public static final String WFID = "wfId";
+    public static final String UPDATE_FIELD_VALUES = "updateFieldValues";
+    public static final String PROFILE_UPDATE_FIELDS = "profileUpdateFields_";
+    public static final String IGOT = "igot";
+    public static final String DOPT = "dopt";
+    public static final String PERSONAL_DETAILS = "personalDetails";
+    public static final String TRANSITION_DETAILS = "transitionDetails";
+
     public static final String NO_RATING_EXCEPTION_MESSAGE = "No ratings found for : ";
     public static final String NO_REVIEW_EXCEPTION_MESSAGE = "No reviews found for : ";
     public static final String RATING_GENERIC_EXCEPTION_MESSAGE = "Exception occurred while adding the course review : ";
+
 
     // Redis
     public static final String API_REDIS_DELETE = "api.redis.delete";
