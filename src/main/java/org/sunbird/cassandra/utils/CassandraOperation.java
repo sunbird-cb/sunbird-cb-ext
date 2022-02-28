@@ -6,10 +6,8 @@ import java.util.Map;
 import org.sunbird.common.model.SBApiResponse;
 
 /**
- * @desc this interface will hold functions for cassandra db interaction
- * 
  * @author fathima
- *
+ * @desc this interface will hold functions for cassandra db interaction
  */
 public interface CassandraOperation {
 
@@ -21,12 +19,11 @@ public interface CassandraOperation {
 	 *                     value)
 	 * @return Response
 	 */
-
 	public SBApiResponse insertRecord(String keyspaceName, String tableName, Map<String, Object> request);
 
 	/**
 	 * Insert bulk data using batch
-	 * 
+	 *
 	 * @param keyspaceName String
 	 * @param tableName    String
 	 * @param request      List<Map<String, Object>>
@@ -77,5 +74,8 @@ public interface CassandraOperation {
 	 * @return Long
 	 */
 	public Long getRecordCount(String keyspace, String table);
+
+	public List<Map<String, Object>> getRecordsByPropertiesWithPagination(String keyspaceName, String tableName,
+			Map<String, Object> propertyMap, List<String> fields, int limit, String updatedOn);
 
 }

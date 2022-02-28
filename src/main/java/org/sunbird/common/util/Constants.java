@@ -228,6 +228,9 @@ public class Constants {
 	public static final String TABLE_RATINGS = "ratings";
 	public static final String TABLE_RATINGS_LOOKUP = "ratings_lookup";
 	public static final String TABLE_RATINGS_SUMMARY = "ratings_summary";
+	public static final String NO_RATING_EXCEPTION_MESSAGE = "No ratings found for : ";
+	public static final String NO_REVIEW_EXCEPTION_MESSAGE = "No reviews found for : ";
+	public static final String RATING_GENERIC_EXCEPTION_MESSAGE = "Exception occurred while adding the course review : ";
 
 	// Redis
 	public static final String API_REDIS_DELETE = "api.redis.delete";

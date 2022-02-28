@@ -9,7 +9,8 @@ public interface ResponseMessage {
         String INVALID_REVIEW  = "Review must contain only alphanumeric string.";
         String INVALID_INPUT   = "Field must not be empty.";
         String SUCCESS_MESSAGE = "Success.";
-        String INVALID_USER    = "Invalid User.";
+        String INVALID_LIMIT   = "Limit must be greater than 1";
+        String INVALID_USER    = "user is invalid.";
 
     }
 
@@ -18,6 +19,7 @@ public interface ResponseMessage {
         String INVALID_REVIEW  = "INVALID_REVIEW";
         String INVALID_INPUT   = "INVALID_INPUT";
         String SUCCESS_MESSAGE = "SUCCESS_MESSAGE";
+        String INVALID_LIMIT   = "INVALID_LIMIT";
         String INVALID_USER    = "INVALID_USER";
     }
 }

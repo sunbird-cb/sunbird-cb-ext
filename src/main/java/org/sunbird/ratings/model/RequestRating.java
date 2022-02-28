@@ -1,11 +1,11 @@
 package org.sunbird.ratings.model;
 
 public class RequestRating {
-    String activity_Id;
-    String userId;
-    String activity_type;
-    Float rating;
-    String review ;
+    private String activity_Id;
+    private String userId;
+    private String activity_type;
+    private Float rating;
+    private String review ;
 
     public String getActivity_Id() {
         return activity_Id;
