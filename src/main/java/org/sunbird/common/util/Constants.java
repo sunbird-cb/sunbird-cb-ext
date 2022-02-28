@@ -158,6 +158,14 @@ public class Constants {
     public static final String RATING = "rating";
     public static final String REVIEW = "review";
     public static final String UPDATED_ON = "updatedon";
+    public static final String NO_RATING_EXCEPTION_MESSAGE = "No ratings found for : ";
+    public static final String NO_REVIEW_EXCEPTION_MESSAGE = "No reviews found for : ";
+    public static final String RATING_GENERIC_EXCEPTION_MESSAGE = "Exception occurred while adding the course review : ";
+    public static final String KAFKA_RATING_EXCEPTION_MESSAGE = "Exception occurred while connecting to kafka topic : ";
+    public static final String RATING_UPSERT_OPERATION = "upsert";
+    public static final String RATING_LOOKUP_RATING_OPERATION = "lookup";
+    public static final String RATING_GET_OPERATION = "getRating";
+    public static final String RATING_SUMMARY_OPERATION = "getSummary";
 
     // assessment
     public static final String QUESTION_SET = "questionSet";
@@ -207,9 +215,6 @@ public class Constants {
     public static final String TABLE_RATINGS = "ratings";
     public static final String TABLE_RATINGS_LOOKUP = "ratings_lookup";
     public static final String TABLE_RATINGS_SUMMARY = "ratings_summary";
-    public static final String NO_RATING_EXCEPTION_MESSAGE = "No ratings found for : ";
-    public static final String NO_REVIEW_EXCEPTION_MESSAGE = "No reviews found for : ";
-    public static final String RATING_GENERIC_EXCEPTION_MESSAGE = "Exception occurred while adding the course review : ";
 
     // Redis
     public static final String API_REDIS_DELETE = "api.redis.delete";

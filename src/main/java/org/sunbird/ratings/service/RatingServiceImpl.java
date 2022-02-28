@@ -3,6 +3,7 @@ package org.sunbird.ratings.service;
 import com.datastax.driver.core.utils.UUIDs;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang.StringUtils;
+import org.apache.kafka.common.KafkaException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -168,7 +169,11 @@ public class RatingServiceImpl implements RatingService {
         } catch (ValidationException ex) {
             logger.error(ex);
             return processExceptionBody(response, ex, "", HttpStatus.BAD_REQUEST);
-        } catch (Exception ex) {
+        } catch (KafkaException ex){
+            logger.error(ex);
+            return processExceptionBody(response, ex, Constants.KAFKA_RATING_EXCEPTION_MESSAGE, HttpStatus.BAD_REQUEST);
+        }
+        catch (Exception ex) {
             logger.error(ex);
             String errMsg = Constants.RATING_GENERIC_EXCEPTION_MESSAGE;
             return processExceptionBody(response, ex, errMsg, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -226,7 +231,7 @@ public class RatingServiceImpl implements RatingService {
 
         List<String> errObjList = new ArrayList<>();
 
-        if (flag == "upsert") {
+        if (flag == Constants.RATING_UPSERT_OPERATION) {
             if (StringUtils.isEmpty(validationBody.getRequestRating().getActivity_Id())) {
                 errObjList.add(ResponseMessage.Message.INVALID_INPUT);
             }
@@ -245,7 +250,7 @@ public class RatingServiceImpl implements RatingService {
             if (StringUtils.isEmpty(validationBody.getRequestRating().getUserId())) {
                 errObjList.add(ResponseMessage.Message.INVALID_USER);
             }
-        } else if (flag == "lookup") {
+        } else if (flag == Constants.RATING_LOOKUP_RATING_OPERATION) {
 
             if (StringUtils.isEmpty(validationBody.getLookupRequest().getActivity_Id())) {
                 errObjList.add(ResponseMessage.Message.INVALID_INPUT);
@@ -260,7 +265,7 @@ public class RatingServiceImpl implements RatingService {
             if (validationBody.getLookupRequest().getLimit() < 1) {
                 errObjList.add(ResponseMessage.Message.INVALID_LIMIT);
             }
-        } else if (flag == "getRating" || flag == "getSummary") {
+        } else if (flag == Constants.RATING_GET_OPERATION || flag == Constants.RATING_SUMMARY_OPERATION) {
             if (StringUtils.isEmpty(validationBody.getActivity_Id())) {
                 errObjList.add(ResponseMessage.Message.INVALID_INPUT);
             }
@@ -268,7 +273,7 @@ public class RatingServiceImpl implements RatingService {
                 errObjList.add(ResponseMessage.Message.INVALID_INPUT);
             }
 
-            if (flag == "getRating" && StringUtils.isEmpty(validationBody.getUserId())) {
+            if (flag == Constants.RATING_GET_OPERATION && StringUtils.isEmpty(validationBody.getUserId())) {
                 errObjList.add(ResponseMessage.Message.INVALID_INPUT);
             }
         }
