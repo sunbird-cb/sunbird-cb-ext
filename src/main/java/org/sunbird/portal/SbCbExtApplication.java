@@ -44,6 +44,8 @@ public class SbCbExtApplication {
                            .setSocketTimeout(timeout).build();
               CloseableHttpClient client = HttpClientBuilder.create().setMaxConnTotal(2000).setMaxConnPerRoute(500)
                            .setDefaultRequestConfig(config).build();
-              return new HttpComponentsClientHttpRequestFactory(client);
+              HttpComponentsClientHttpRequestFactory cRequestFactory = new HttpComponentsClientHttpRequestFactory(client);
+              cRequestFactory.setReadTimeout(timeout);
+              return cRequestFactory;
 	}
 }
