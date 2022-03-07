@@ -176,6 +176,19 @@ public class CbExtServerProperties {
 
 	@Value("${redis.timeout}")
 	private String redisTimeout;
+	
+	@Value("${kafka.topics.userutility.telemetry.event}")
+	private String userUtilityTopic;
+	
+	@Value("${version}")
+	private String version;
+
+	@Value("${userutility.telemetry.event.pdata.id}")
+	private String firstLoginId;
+
+	@Value("${userutility.telemetry.event.pdata.pid}")
+	private String firstLoginPid;
+
 
 	public String getContentHost() {
 		return contentHost;
@@ -643,4 +656,37 @@ public class CbExtServerProperties {
 	public void setAzureStorageKey(String azureStorageKey) {
 		this.azureStorageKey = azureStorageKey;
 	}
+	
+	public String getUserUtilityTopic() {
+		return userUtilityTopic;
+	}
+
+	public void setUserUtilityTopic(String userUtilityTopic) {
+		this.userUtilityTopic = userUtilityTopic;
+	}
+
+	public String getVersion() {
+		return version;
+	}
+
+	public void setVersion(String version) {
+		this.version = version;
+	}
+
+	public String getFirstLoginId() {
+		return firstLoginId;
+	}
+
+	public void setFirstLoginId(String firstLoginId) {
+		this.firstLoginId = firstLoginId;
+	}
+
+	public String getFirstLoginPid() {
+		return firstLoginPid;
+	}
+
+	public void setFirstLoginPid(String firstLoginPid) {
+		this.firstLoginPid = firstLoginPid;
+	}
+
 }

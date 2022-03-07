@@ -69,6 +69,7 @@ public class Constants {
     public static final String DEPARTMENT = "department";
     public static final String DESIGNATION = "designation";
     public static final String PRIMARY_EMAIL = "primaryEmail";
+    public static final String FIRSTLOGINTIME = "firstLoginTime";
 
     public static final String SUCCESSFUL = "Successful";
     public static final String FAILED = "Failed";
@@ -147,7 +148,8 @@ public class Constants {
     public static final String API_RATINGS_UPDATE = "api.ratings.update";
     public static final String API_RATINGS_SUMMARY = "api.ratings.summary";
     public static final String API_RATINGS_LOOKUP = "api.ratings.lookup";
-
+    public static final String DATABASE = "sunbird";
+    public static final String LOGIN_TABLE = "user_first_login_details";
     public static final String ACTIVITY_ID = "activity_id";
     public static final String ACTIVITY_TYPE = "activity_type";
     public static final String RATINGS_USER_ID = "userid";
