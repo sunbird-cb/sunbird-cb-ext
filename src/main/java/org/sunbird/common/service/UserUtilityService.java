@@ -11,4 +11,6 @@ public interface UserUtilityService {
 
 	Map<String, Object> getUsersDataFromUserIds(List<String> userIds, List<String> fields, String authToken);
 
+	Map<String, Object> getUsersReadData(String userId, String authToken, String X_authToken);
+
 }

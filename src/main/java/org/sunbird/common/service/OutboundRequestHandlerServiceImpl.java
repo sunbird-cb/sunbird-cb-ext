@@ -104,6 +104,30 @@ public class OutboundRequestHandlerServiceImpl {
 		return response.getBody();
 	}
 
+	public Object fetchUsingGetWithHeadersProfile(String uri, Map<String, String> headersValues) {
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+		Map<String,Object> response = null;
+		try {
+			StringBuilder str = new StringBuilder(this.getClass().getCanonicalName())
+					.append(Constants.FETCH_RESULT_CONSTANT).append(System.lineSeparator());
+			str.append(Constants.URI_CONSTANT).append(uri).append(System.lineSeparator());
+			log.info(str.toString());
+			HttpHeaders headers = new HttpHeaders();
+			if (!CollectionUtils.isEmpty(headersValues)) {
+				headersValues.forEach((k, v) -> headers.set(k, v));
+			}
+			HttpEntity<Object> entity = new HttpEntity<>(headers);
+			response = restTemplate.exchange(
+					uri, HttpMethod.GET, entity, Map.class).getBody();
+		} catch (HttpClientErrorException e) {
+			log.error(e);
+		} catch (Exception e) {
+			log.error(e);
+		}
+		return response;
+	}
+
 	public Map<String, Object> fetchResultUsingPost(String uri, Object request, Map<String, String> headersValues) {
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
@@ -121,6 +145,31 @@ public class OutboundRequestHandlerServiceImpl {
 			str.append("Request: ").append(mapper.writeValueAsString(request)).append(System.lineSeparator());
 			log.info(str.toString());
 			response = restTemplate.postForObject(uri, entity, Map.class);
+			str.append("Response: ").append(mapper.writeValueAsString(response)).append(System.lineSeparator());
+			log.debug(str.toString());
+		} catch (HttpClientErrorException | JsonProcessingException e) {
+			log.error(e);
+		}
+		return response;
+	}
+
+	public Map<String, Object> fetchResultUsingPatch(String uri, Object request, Map<String, String> headersValues) {
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+		Map<String, Object> response = null;
+		try {
+			HttpHeaders headers = new HttpHeaders();
+			if (!CollectionUtils.isEmpty(headersValues)) {
+				headersValues.forEach((k, v) -> headers.set(k, v));
+			}
+			headers.setContentType(MediaType.APPLICATION_JSON);
+			HttpEntity<Object> entity = new HttpEntity<>(request, headers);
+			StringBuilder str = new StringBuilder(this.getClass().getCanonicalName()).append(".fetchResult")
+					.append(System.lineSeparator());
+			str.append("URI: ").append(uri).append(System.lineSeparator());
+			str.append("Request: ").append(mapper.writeValueAsString(request)).append(System.lineSeparator());
+			log.info(str.toString());
+			response = restTemplate.patchForObject(uri, entity, Map.class);
 			str.append("Response: ").append(mapper.writeValueAsString(response)).append(System.lineSeparator());
 			log.debug(str.toString());
 		} catch (HttpClientErrorException | JsonProcessingException e) {
