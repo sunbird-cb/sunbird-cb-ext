@@ -181,6 +181,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		}
 		response.put(userLoginInfo.getUserId(), Boolean.TRUE);
 		return response;
+	}
 
 	@Override
 	public Map<String, Object> getUsersReadData(String userId, String authToken, String X_authToken) {
