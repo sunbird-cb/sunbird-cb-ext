@@ -15,4 +15,6 @@ public interface UserUtilityService {
 	
 	Map<String, Object> updateLogin(LastLoginInfo userLoginInfo);
 
+	Map<String, Object> getUsersReadData(String userId, String authToken, String X_authToken);
+
 }

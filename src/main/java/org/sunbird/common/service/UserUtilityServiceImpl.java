@@ -46,6 +46,13 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 	@Autowired
 	private CassandraOperation cassandraOperation;
 
+	@Autowired
+	OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
+
+	@Autowired
+	CbExtServerProperties serverConfig;
+
+
 	private CbExtLogger logger = new CbExtLogger(getClass().getName());
 	private final String SEARCH_RESULT = "Search API response: ";
 
@@ -92,7 +99,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		filters.put("userId", userIds);
 		request.put("filters", filters);
 		requestBody.put("request", request);
-		
+
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		try {
@@ -112,7 +119,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 
 		return result;
 	}
-	
+
 	@Override
 	public Map<String, Object> getUsersDataFromUserIds(List<String> userIds, List<String> fields, String authToken) {
 		Map<String, Object> result = new HashMap<>();
@@ -149,8 +156,8 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		}
 
 		return result;
-	}
-	
+	}	
+  
 	@Override
 	public Map<String, Object> updateLogin(LastLoginInfo userLoginInfo) {
 		Map<String, Object> response = new HashMap<>();
@@ -174,5 +181,15 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		}
 		response.put(userLoginInfo.getUserId(), Boolean.TRUE);
 		return response;
+
+	@Override
+	public Map<String, Object> getUsersReadData(String userId, String authToken, String X_authToken) {
+		Map<String, String> header = new HashMap<>();
+		header.put(Constants.AUTH_TOKEN,authToken);
+		header.put(Constants.X_AUTH_TOKEN,X_authToken);
+		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService.fetchUsingGetWithHeadersProfile(serverConfig.getSbUrl() + serverConfig.getLmsUserReadPath() + userId, header);
+		Map<String, Object> result = (Map<String, Object>) readData.get(Constants.RESULT);
+		Map<String, Object> responseMap = (Map<String, Object>) result.get(Constants.RESPONSE);
+		return responseMap;
 	}
 }

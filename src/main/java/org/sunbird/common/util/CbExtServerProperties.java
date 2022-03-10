@@ -9,8 +9,20 @@ public class CbExtServerProperties {
 	@Value("${wf.service.host}")
 	private String wfServiceHost;
 
+	@Value("${wf.service.transitionPath}")
+	private String wfServiceTransitionPath;
+
 	@Value("${wf.service.updateUserProfilePath}")
 	private String wfServicePath;
+
+	@Value("${lms.system.settings.path}")
+	private String lmsSystemSettingsPath;
+
+	@Value("${lms.user.update.path}")
+	private String lmsUserUpdatePath;
+
+	@Value("${lms.user.read.path}")
+	private String lmsUserReadPath;
 
 	@Value("${user.enable.multidept.mapping}")
 	private boolean isUserMultiMapDeptEnabled;
@@ -209,6 +221,22 @@ public class CbExtServerProperties {
 	public String getWfServiceHost() {
 		return wfServiceHost;
 	}
+
+	public String getWfServiceTransitionPath() { return wfServiceTransitionPath; }
+
+	public void setWfServiceTransitionPath(String wfServiceTransitionPath) { this.wfServiceTransitionPath = wfServiceTransitionPath; }
+
+	public String getLmsUserUpdatePath() { return lmsUserUpdatePath; }
+
+	public void setLmsUserUpdatePath(String lmsUserUpdatePath) { this.lmsUserUpdatePath = lmsUserUpdatePath; }
+
+	public String getLmsSystemSettingsPath() { return lmsSystemSettingsPath; }
+
+	public void setLmsSystemSettingsPath(String lmsSystemSettingsPath) { this.lmsSystemSettingsPath = lmsSystemSettingsPath; }
+
+	public String getLmsUserReadPath() { return lmsUserReadPath; }
+
+	public void setLmsUserReadPath(String lmsUserReadPath) { this.lmsUserReadPath = lmsUserReadPath; }
 
 	public void setWfServiceHost(String wfServiceHost) {
 		this.wfServiceHost = wfServiceHost;
