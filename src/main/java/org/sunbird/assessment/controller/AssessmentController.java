@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import org.sunbird.assessment.dto.AssessmentSubmissionDTO;
+import org.sunbird.assessment.model.Response;
 import org.sunbird.assessment.service.AssessmentService;
 
 @RestController
@@ -108,5 +109,19 @@ public class AssessmentController {
 			throws Exception {
 		return new ResponseEntity<>(assessmentService.getAssessmentContent(courseId, assessmentContentId),
 				HttpStatus.OK);
+	}
+
+	/**
+	 * 
+	 * @param assessmentIdentifier
+	 * @param rootOrg
+	 * @return
+	 * @throws Exception
+	 */
+
+	@GetMapping("/v1/quml/assessment/read/{assessmentIdentifier}")
+	public ResponseEntity<Response> readAssessment(@PathVariable("assessmentIdentifier") String assessmentIdentifier,
+			@RequestHeader("rootOrg") String rootOrg, @RequestHeader("x-authenticated-user-token") String token) {
+		return new ResponseEntity<>(assessmentService.readAssessment(assessmentIdentifier, token), HttpStatus.OK);
 	}
 }

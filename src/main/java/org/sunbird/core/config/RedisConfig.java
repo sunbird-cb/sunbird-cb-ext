@@ -25,6 +25,9 @@ public class RedisConfig {
 		redisStandaloneConfiguration.setPort(Integer.parseInt(cbProperties.getRedisPort()));
 
 		JedisConnectionFactory jedisConnectionFactory = new JedisConnectionFactory(redisStandaloneConfiguration);
+		jedisConnectionFactory.getPoolConfig().setMaxTotal(128);
+		jedisConnectionFactory.getPoolConfig().setMaxIdle(30);
+		jedisConnectionFactory.getPoolConfig().setMinIdle(10);
 		return jedisConnectionFactory;
 	}
 

@@ -2,17 +2,24 @@ package org.sunbird.assessment.service;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.sunbird.assessment.dto.AssessmentSubmissionDTO;
+import org.sunbird.assessment.model.Child;
 import org.sunbird.assessment.model.QuestionSet;
+import org.sunbird.assessment.model.QuestionSet1;
+import org.sunbird.assessment.model.Response;
+import org.sunbird.assessment.model.SubChild;
 import org.sunbird.assessment.repo.AssessmentRepository;
 import org.sunbird.cache.RedisCacheMgr;
 import org.sunbird.common.model.SunbirdApiHierarchyResultContent;
@@ -50,6 +57,9 @@ public class AssessmentServiceImpl implements AssessmentService {
 
 	@Autowired
 	AssessmentUtilService assessUtilServ;
+
+	@Autowired
+	CbExtServerProperties cbExtServerProperties;
 
 	@Autowired
 	OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
@@ -248,13 +258,14 @@ public class AssessmentServiceImpl implements AssessmentService {
 									.fetchUsingGetWithHeaders(child.getArtifactUrl(), new HashMap<>()),
 									QuestionSet.class);
 
-							QuestionSet assessmentQnsSet = assessUtilServ.removeAssessmentAnsKey(assessmentContent);
+							QuestionSet1 assessmentQnsSet = assessUtilServ.removeAssessmentAnsKey(assessmentContent);
 							result.put(Constants.STATUS, Constants.SUCCESSFUL);
 							result.put(Constants.QUESTION_SET, assessmentQnsSet);
 							// cache the response
 							redisCacheMgr.putCache(Constants.ASSESSMENT_QNS_ANS_SET + assessmentContentId,
 									assessmentContent);
-							redisCacheMgr.putCache(Constants.ASSESSMENT_QNS_SET + assessmentContentId, assessmentQnsSet);
+							redisCacheMgr.putCache(Constants.ASSESSMENT_QNS_SET + assessmentContentId,
+									assessmentQnsSet);
 						}
 					}
 				}
@@ -272,4 +283,52 @@ public class AssessmentServiceImpl implements AssessmentService {
 		return result;
 	}
 
+	@Override
+	public Response readAssessment(String assessmentIdentifier, String token) {
+		Map<String, Object> result = new HashMap<>();
+		try {
+			Response resp = (Response) redisCacheMgr.getCache(Constants.DO_QNS_SET + assessmentIdentifier);
+			if (ObjectUtils.isEmpty(resp)) {
+				String serviceURL = cbExtServerProperties.getReadHierarchyUrl().replace(Constants.ASSESSMENTIDENTIFIER,
+						assessmentIdentifier);
+				Map<String, String> headers = new HashMap<>();
+				headers.put(Constants.X_AUTH_TOKEN, token);
+				headers.put(Constants.AUTHORIZATION, cbExtServerProperties.getSbApiKey());
+				Response hierarcyReadApiResponse = mapper.convertValue(
+						outboundRequestHandlerService.fetchUsingGetWithHeaders(serviceURL, headers), Response.class);
+				if (hierarcyReadApiResponse.getResponseCode().equalsIgnoreCase("Ok")) {
+					redisCacheMgr.putCache(Constants.DO_QNS_SET + assessmentIdentifier, hierarcyReadApiResponse);
+					return extractMaxQuestionsAndCreateResultSet(assessmentIdentifier, result, hierarcyReadApiResponse);
+				}
+			} else {
+				return extractMaxQuestionsAndCreateResultSet(assessmentIdentifier, result, resp);
+			}
+		} catch (Exception e) {
+			throw new ApplicationLogicError("REQUEST_COULD_NOT_BE_PROCESSED", e);
+		}
+		return new Response();
+	}
+
+	private Response extractMaxQuestionsAndCreateResultSet(String assessmentIdentifier, Map<String, Object> result,
+			Response response) {
+		if (!ObjectUtils.isEmpty(response.getResult().getQuestionSet().getChildren())) {
+			Iterator<Child> sections = response.getResult().getQuestionSet().getChildren().iterator();
+			while (sections.hasNext()) {
+				{
+					Child section = sections.next();
+					if (section.getParent().equals(Constants.DO_QNS_SET + assessmentIdentifier)) {
+						List<SubChild> questions = section.getChildren();
+						if (!ObjectUtils.isEmpty(questions)) {
+							Collections.shuffle(questions);
+							if (section.getMaxQuestions() != null) {
+								section.setChildren(questions.stream().limit(section.getMaxQuestions())
+										.collect(Collectors.toList()));
+							}
+						}
+					}
+				}
+			}
+		}
+		return response;
+	}
 }

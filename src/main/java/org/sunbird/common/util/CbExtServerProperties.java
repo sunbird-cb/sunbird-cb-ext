@@ -200,7 +200,18 @@ public class CbExtServerProperties {
 
 	@Value("${userutility.telemetry.event.pdata.pid}")
 	private String firstLoginPid;
+	
+	@Value("${assessment.read.hierarchy.url}")
+	private String readHierarchyUrl;
 
+
+	public String getReadHierarchyUrl() {
+		return readHierarchyUrl;
+	}
+
+	public void setReadHierarchyUrl(String readHierarchyUrl) {
+		this.readHierarchyUrl = readHierarchyUrl;
+	}
 
 	public String getContentHost() {
 		return contentHost;

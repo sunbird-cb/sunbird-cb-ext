@@ -73,6 +73,7 @@ public class Constants {
     public static final String RESPONSE_CODE = "responseCode";
     public static final String AUTH_TOKEN = "Authorization";
     public static final String X_AUTH_TOKEN = "x-authenticated-user-token";
+    public static final String ASSESSMENTIDENTIFIER = "{identifier}";
 
     public static final String SUCCESSFUL = "Successful";
     public static final String FAILED = "Failed";
@@ -178,7 +179,8 @@ public class Constants {
     public static final String QUESTION_SET = "questionSet";
     public static final String ASSESSMENT_QNS_ANS_SET = "assessmentQnsAnsSet_";
     public static final String ASSESSMENT_QNS_SET = "assessmentQnsSet_";
-
+    public static final String DO_QNS_SET = "do_";
+    
     // Cassandra Constants
     public static final String INSERT_INTO = "INSERT INTO ";
     public static final String DOT = ".";
