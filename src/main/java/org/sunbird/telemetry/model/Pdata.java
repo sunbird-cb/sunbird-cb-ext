@@ -1,4 +1,4 @@
-package org.sunbird.portal.department.model;
+package org.sunbird.telemetry.model;
 
 import javax.annotation.Generated;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -8,32 +8,37 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
 "id",
-"type"
+"pid",
+"ver"
 })
 
-public class Actor {
+public class Pdata {
 
 @JsonProperty("id")
 private String id;
-@JsonProperty("type")
-private String type;
+@JsonProperty("pid")
+private String pid;
+@JsonProperty("ver")
+private String ver;
 
 /**
 * No args constructor for use in serialization
 *
 */
-public Actor() {
+public Pdata() {
 }
 
 /**
 *
+* @param ver
+* @param pid
 * @param id
-* @param type
 */
-public Actor(String id, String type) {
+public Pdata(String id, String pid, String ver) {
 super();
 this.id = id;
-this.type = type;
+this.pid = pid;
+this.ver = ver;
 }
 
 @JsonProperty("id")
@@ -46,14 +51,24 @@ public void setId(String id) {
 this.id = id;
 }
 
-@JsonProperty("type")
-public String getType() {
-return type;
+@JsonProperty("pid")
+public String getPid() {
+return pid;
 }
 
-@JsonProperty("type")
-public void setType(String type) {
-this.type = type;
+@JsonProperty("pid")
+public void setPid(String pid) {
+this.pid = pid;
 }
 
-} 
+@JsonProperty("ver")
+public String getVer() {
+return ver;
+}
+
+@JsonProperty("ver")
+public void setVer(String ver) {
+this.ver = ver;
+}
+
+}

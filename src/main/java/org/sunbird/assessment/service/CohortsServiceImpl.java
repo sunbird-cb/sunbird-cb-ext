@@ -29,10 +29,10 @@ import org.sunbird.common.model.SunbirdApiUserCourseListResp;
 import org.sunbird.common.model.SunbirdUserProfessionalDetail;
 import org.sunbird.common.service.ContentService;
 import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
-import org.sunbird.common.service.UserUtilityService;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.core.logger.CbExtLogger;
+import org.sunbird.user.service.UserUtilityService;
 
 @Service
 public class CohortsServiceImpl implements CohortsService {

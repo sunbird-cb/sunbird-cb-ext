@@ -192,14 +192,20 @@ public class CbExtServerProperties {
 	@Value("${kafka.topics.userutility.telemetry.event}")
 	private String userUtilityTopic;
 	
+<<<<<<< HEAD
 	@Value("${version}")
 	private String version;
+=======
+	@Value("${sunbird.cb.ext.version}")
+	private String sunbirdCbExtVersion;
+>>>>>>> b69ff1dddb348338bc9127e99ad79d851efa868d
 
 	@Value("${userutility.telemetry.event.pdata.id}")
 	private String firstLoginId;
 
 	@Value("${userutility.telemetry.event.pdata.pid}")
 	private String firstLoginPid;
+<<<<<<< HEAD
 	
 	@Value("${assessment.read.hierarchy.url}")
 	private String readHierarchyUrl;
@@ -212,6 +218,9 @@ public class CbExtServerProperties {
 	public void setReadHierarchyUrl(String readHierarchyUrl) {
 		this.readHierarchyUrl = readHierarchyUrl;
 	}
+=======
+
+>>>>>>> b69ff1dddb348338bc9127e99ad79d851efa868d
 
 	public String getContentHost() {
 		return contentHost;
@@ -705,11 +714,19 @@ public class CbExtServerProperties {
 	}
 
 	public String getVersion() {
+<<<<<<< HEAD
 		return version;
 	}
 
 	public void setVersion(String version) {
 		this.version = version;
+=======
+		return sunbirdCbExtVersion;
+	}
+
+	public void setVersion(String sunbirdCbExtVersion) {
+		this.sunbirdCbExtVersion = sunbirdCbExtVersion;
+>>>>>>> b69ff1dddb348338bc9127e99ad79d851efa868d
 	}
 
 	public String getFirstLoginId() {

@@ -1,4 +1,4 @@
-package org.sunbird.portal.department.model;
+package org.sunbird.telemetry.model;
 
 import javax.annotation.Generated;
 import com.fasterxml.jackson.annotation.JsonInclude;

@@ -1,4 +1,4 @@
-package org.sunbird.portal.department.controller;
+package org.sunbird.user.controller;
 
 import java.util.Map;
 
@@ -13,6 +13,7 @@ import org.sunbird.user.service.UserUtilityService;
 
 @RestController
 public class UserUtilityController {
+
 	@Autowired
 	UserUtilityService userUtilService;
 

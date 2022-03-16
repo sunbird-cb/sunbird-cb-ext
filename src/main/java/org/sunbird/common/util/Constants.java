@@ -279,6 +279,16 @@ public class Constants {
     public static final String BUDGET_DOC_FILE_SIZE = "fileSize";
     public static final String BUDGET_DOC_FILE_URL = "fileUrl";
 
+    //telemetry audit constants
     public static final String ORG_LIST = "ORGANISATION_LIST";
+	public static final String VERSION = "3.0.2";
+	public static final String EID = "AUDIT";
+	public static final String PDATA_ID = "dev.sunbird.cb.ext.service";
+	public static final String PDATA_PID = "sunbird-cb-ext-service";
+	public static final String TYPE = "WorkOrder";
+	public static final String CURRENTSTATE = "FirstLogin";
+	public static final String LOGIN_TIME = "login_time";
+	public static final List<String> PROPS = Collections.unmodifiableList(Arrays.asList("WAT"));
+	public static final String USER_CONST = "User";
 
 }
