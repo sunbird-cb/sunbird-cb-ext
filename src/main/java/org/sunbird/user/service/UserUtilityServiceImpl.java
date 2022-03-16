@@ -1,5 +1,7 @@
-package org.sunbird.common.service;
+package org.sunbird.user.service;
 
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,12 +11,20 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestTemplate;
-import org.sunbird.common.model.*;
+import org.sunbird.cassandra.utils.CassandraOperation;
+import org.sunbird.common.model.SearchUserApiContent;
+import org.sunbird.common.model.SearchUserApiResp;
+import org.sunbird.common.model.SunbirdApiRequest;
+import org.sunbird.common.model.SunbirdApiResp;
+import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.core.exception.ApplicationLogicError;
 import org.sunbird.core.logger.CbExtLogger;
+import org.sunbird.telemetry.model.LastLoginInfo;
+import org.sunbird.user.util.TelemetryUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -32,17 +42,22 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 	CbExtServerProperties props;
 
 	@Autowired
+	TelemetryUtils telemetryUtils;
+
+	@Autowired
+	private CassandraOperation cassandraOperation;
+
+	@Autowired
 	OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
 
 	@Autowired
 	CbExtServerProperties serverConfig;
 
-
 	private CbExtLogger logger = new CbExtLogger(getClass().getName());
 	private final String SEARCH_RESULT = "Search API response: ";
 
 	@Override
-	public boolean validateUser(String rootOrg, String userId){
+	public boolean validateUser(String rootOrg, String userId) {
 
 		Map<String, Object> requestMap = new HashMap<>();
 
@@ -66,7 +81,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 
 			boolean expression = (sunbirdApiResp != null && "OK".equalsIgnoreCase(sunbirdApiResp.getResponseCode())
 					&& sunbirdApiResp.getResult().getResponse().getCount() >= 1);
-				return expression;
+			return expression;
 
 		} catch (Exception e) {
 			throw new ApplicationLogicError("Sunbird Service ERROR: ", e);
@@ -91,10 +106,11 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 			HttpEntity<?> requestEnty = new HttpEntity<>(requestBody, headers);
 			String url = props.getSbUrl() + props.getUserSearchEndPoint();
 			SearchUserApiResp searchUserResult = restTemplate.postForObject(url, requestEnty, SearchUserApiResp.class);
-			logger.info("searchUserResult ---->"+ searchUserResult.toString());
-			if(searchUserResult !=null && "OK".equalsIgnoreCase(searchUserResult.getResponseCode())
-					&& searchUserResult.getResult().getResponse().getCount()>0){
-				for(SearchUserApiContent searchUserApiContent: searchUserResult.getResult().getResponse().getContent()){
+			logger.info("searchUserResult ---->" + searchUserResult.toString());
+			if (searchUserResult != null && "OK".equalsIgnoreCase(searchUserResult.getResponseCode())
+					&& searchUserResult.getResult().getResponse().getCount() > 0) {
+				for (SearchUserApiContent searchUserApiContent : searchUserResult.getResult().getResponse()
+						.getContent()) {
 					result.put(searchUserApiContent.getUserId(), searchUserApiContent);
 				}
 			}
@@ -144,11 +160,39 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 	}
 
 	@Override
+	public Map<String, Object> updateLogin(LastLoginInfo userLoginInfo) {
+		Map<String, Object> response = new HashMap<>();
+		logger.info(String.format("Updating User Login: rootOrg: %s, userId: %s", userLoginInfo.getOrgId(),
+				userLoginInfo.getUserId()));
+		userLoginInfo.setLoginTime(new Timestamp(new Date().getTime()));
+		try {
+			Map<String, Object> propertyMap = new HashMap<>();
+			propertyMap.put(Constants.USER_ID, userLoginInfo.getUserId());
+			List<Map<String, Object>> details = cassandraOperation.getRecordsByProperties(Constants.DATABASE,
+					Constants.LOGIN_TABLE, propertyMap, null);
+			if (CollectionUtils.isEmpty(details)) {
+				Map<String, Object> request = new HashMap<>();
+				request.put(Constants.USER_ID, userLoginInfo.getUserId());
+				request.put(Constants.FIRSTLOGINTIME, userLoginInfo.getLoginTime());
+				cassandraOperation.insertRecord(Constants.DATABASE, Constants.LOGIN_TABLE, request);
+				telemetryUtils.pushDataToKafka(telemetryUtils.getUserslastLoginTelemetryEventData(userLoginInfo),
+						serverConfig.getUserUtilityTopic());
+			}
+		} catch (Exception e) {
+			throw new ApplicationLogicError("Sunbird Service ERROR: ", e);
+		}
+		response.put(userLoginInfo.getUserId(), Boolean.TRUE);
+		return response;
+	}
+
+	@Override
 	public Map<String, Object> getUsersReadData(String userId, String authToken, String X_authToken) {
 		Map<String, String> header = new HashMap<>();
-		header.put(Constants.AUTH_TOKEN,authToken);
-		header.put(Constants.X_AUTH_TOKEN,X_authToken);
-		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService.fetchUsingGetWithHeadersProfile(serverConfig.getSbUrl() + serverConfig.getLmsUserReadPath() + userId, header);
+		header.put(Constants.AUTH_TOKEN, authToken);
+		header.put(Constants.X_AUTH_TOKEN, X_authToken);
+		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService
+				.fetchUsingGetWithHeadersProfile(serverConfig.getSbUrl() + serverConfig.getLmsUserReadPath() + userId,
+						header);
 		Map<String, Object> result = (Map<String, Object>) readData.get(Constants.RESULT);
 		Map<String, Object> responseMap = (Map<String, Object>) result.get(Constants.RESPONSE);
 		return responseMap;
