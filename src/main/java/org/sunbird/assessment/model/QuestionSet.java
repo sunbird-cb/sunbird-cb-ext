@@ -33,7 +33,7 @@ public class QuestionSet extends JdkSerializationRedisSerializer implements Seri
 	 */
 	private static final long serialVersionUID = 1L;
 	@JsonProperty("children")
-    private List<Child> children = null;
+    private List<Section> children = null;
     @JsonProperty("name")
     private String name;
     @JsonProperty("identifier")
@@ -76,7 +76,7 @@ public class QuestionSet extends JdkSerializationRedisSerializer implements Seri
      * @param objectType
      * @param status
      */
-    public QuestionSet(List<Child> children, String name, String identifier, String primaryCategory, String versionKey, String mimeType, String code, Long version, String objectType, String status, List<String> childNodes) {
+    public QuestionSet(List<Section> children, String name, String identifier, String primaryCategory, String versionKey, String mimeType, String code, Long version, String objectType, String status, List<String> childNodes) {
         super();
         this.children = children;
         this.name = name;
@@ -92,12 +92,12 @@ public class QuestionSet extends JdkSerializationRedisSerializer implements Seri
     }
 
     @JsonProperty("children")
-    public List<Child> getChildren() {
+    public List<Section> getChildren() {
         return children;
     }
 
     @JsonProperty("children")
-    public void setChildren(List<Child> children) {
+    public void setChildren(List<Section> children) {
         this.children = children;
     }
 

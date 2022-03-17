@@ -4,6 +4,7 @@ package org.sunbird.assessment.model;
 import java.io.Serializable;
 
 import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer;
+import org.sunbird.common.model.SunbirdApiRespParam;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -30,7 +31,7 @@ public class Response extends JdkSerializationRedisSerializer implements Seriali
     @JsonProperty("ts")
     private String ts;
     @JsonProperty("params")
-    private Params params;
+    private SunbirdApiRespParam params;
     @JsonProperty("responseCode")
     private String responseCode;
     @JsonProperty("result")
@@ -52,7 +53,7 @@ public class Response extends JdkSerializationRedisSerializer implements Seriali
      * @param ts
      * @param responseCode
      */
-    public Response(String id, String ver, String ts, Params params, String responseCode, Result result) {
+    public Response(String id, String ver, String ts, SunbirdApiRespParam params, String responseCode, Result result) {
         super();
         this.id = id;
         this.ver = ver;
@@ -108,16 +109,16 @@ public class Response extends JdkSerializationRedisSerializer implements Seriali
     }
 
     @JsonProperty("params")
-    public Params getParams() {
+    public SunbirdApiRespParam getParams() {
         return params;
     }
 
     @JsonProperty("params")
-    public void setParams(Params params) {
+    public void setParams(SunbirdApiRespParam params) {
         this.params = params;
     }
 
-    public Response withParams(Params params) {
+    public Response withParams(SunbirdApiRespParam params) {
         this.params = params;
         return this;
     }

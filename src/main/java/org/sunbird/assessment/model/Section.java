@@ -2,6 +2,7 @@
 package org.sunbird.assessment.model;
 
 import java.io.Serializable;
+import java.util.List;
 
 import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer;
 
@@ -9,13 +10,12 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder({ "parent", "name", "identifier", "primaryCategory", "versionKey", "mimeType", "code", "objectType",
-		"status", "qType", "index" })
+@JsonPropertyOrder({ "parent", "children", "name", "identifier", "description", "trackable", "primaryCategory",
+		"versionKey", "mimeType", "code", "version", "objectType", "status", "index", "maxQuestions" })
 
-public class SubChild extends JdkSerializationRedisSerializer implements Serializable {
+public class Section extends JdkSerializationRedisSerializer implements Serializable{
 
 	/**
 	 * 
@@ -23,10 +23,16 @@ public class SubChild extends JdkSerializationRedisSerializer implements Seriali
 	private static final long serialVersionUID = 1L;
 	@JsonProperty("parent")
 	private String parent;
+	@JsonProperty("children")
+	private List<Question> children = null;
 	@JsonProperty("name")
 	private String name;
 	@JsonProperty("identifier")
 	private String identifier;
+	@JsonProperty("description")
+	private String description;
+	@JsonProperty("trackable")
+	private Trackable trackable;
 	@JsonProperty("primaryCategory")
 	private String primaryCategory;
 	@JsonProperty("versionKey")
@@ -35,50 +41,61 @@ public class SubChild extends JdkSerializationRedisSerializer implements Seriali
 	private String mimeType;
 	@JsonProperty("code")
 	private String code;
+	@JsonProperty("version")
+	private Long version;
 	@JsonProperty("objectType")
 	private String objectType;
 	@JsonProperty("status")
 	private String status;
-	@JsonProperty("qType")
-	private String qType;
 	@JsonProperty("index")
 	private Long index;
+	@JsonProperty("maxQuestions")
+	private Long maxQuestions;
 
 	/**
 	 * No args constructor for use in serialization
 	 * 
 	 */
-	public SubChild() {
+	public Section() {
 	}
 
 	/**
 	 * 
+	 * @param trackable
 	 * @param parent
 	 * @param identifier
 	 * @param code
-	 * @param primaryCategory
-	 * @param name
+	 * @param description
 	 * @param index
 	 * @param mimeType
-	 * @param qType
+	 * @param version
 	 * @param versionKey
 	 * @param objectType
+	 * @param children
+	 * @param primaryCategory
+	 * @param name
 	 * @param status
+	 * @param maxQuestions
 	 */
-	public SubChild(String parent, String name, String identifier, String primaryCategory, String versionKey,
-			String mimeType, String code, String objectType, String status, String qType, Long index) {
+	public Section(String parent, List<Question> children, String name, String identifier, String description,
+			Trackable trackable, String primaryCategory, String versionKey, String mimeType, String code, Long version,
+			String objectType, String status, Long index, Long maxQuestions) {
 		super();
 		this.parent = parent;
+		this.children = children;
 		this.name = name;
 		this.identifier = identifier;
+		this.description = description;
+		this.trackable = trackable;
 		this.primaryCategory = primaryCategory;
 		this.versionKey = versionKey;
 		this.mimeType = mimeType;
 		this.code = code;
+		this.version = version;
 		this.objectType = objectType;
 		this.status = status;
-		this.qType = qType;
 		this.index = index;
+		this.maxQuestions = maxQuestions;
 	}
 
 	@JsonProperty("parent")
@@ -89,6 +106,16 @@ public class SubChild extends JdkSerializationRedisSerializer implements Seriali
 	@JsonProperty("parent")
 	public void setParent(String parent) {
 		this.parent = parent;
+	}
+
+	@JsonProperty("children")
+	public List<Question> getChildren() {
+		return children;
+	}
+
+	@JsonProperty("children")
+	public void setChildren(List<Question> children) {
+		this.children = children;
 	}
 
 	@JsonProperty("name")
@@ -109,6 +136,26 @@ public class SubChild extends JdkSerializationRedisSerializer implements Seriali
 	@JsonProperty("identifier")
 	public void setIdentifier(String identifier) {
 		this.identifier = identifier;
+	}
+
+	@JsonProperty("description")
+	public String getDescription() {
+		return description;
+	}
+
+	@JsonProperty("description")
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	@JsonProperty("trackable")
+	public Trackable getTrackable() {
+		return trackable;
+	}
+
+	@JsonProperty("trackable")
+	public void setTrackable(Trackable trackable) {
+		this.trackable = trackable;
 	}
 
 	@JsonProperty("primaryCategory")
@@ -151,6 +198,16 @@ public class SubChild extends JdkSerializationRedisSerializer implements Seriali
 		this.code = code;
 	}
 
+	@JsonProperty("version")
+	public Long getVersion() {
+		return version;
+	}
+
+	@JsonProperty("version")
+	public void setVersion(Long version) {
+		this.version = version;
+	}
+
 	@JsonProperty("objectType")
 	public String getObjectType() {
 		return objectType;
@@ -171,16 +228,6 @@ public class SubChild extends JdkSerializationRedisSerializer implements Seriali
 		this.status = status;
 	}
 
-	@JsonProperty("qType")
-	public String getqType() {
-		return qType;
-	}
-
-	@JsonProperty("qType")
-	public void setqType(String qType) {
-		this.qType = qType;
-	}
-
 	@JsonProperty("index")
 	public Long getIndex() {
 		return index;
@@ -193,59 +240,28 @@ public class SubChild extends JdkSerializationRedisSerializer implements Seriali
 
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append(SubChild.class.getName()).append('@').append(Integer.toHexString(System.identityHashCode(this)))
-				.append('[');
-		sb.append("parent");
-		sb.append('=');
-		sb.append(((this.parent == null) ? "<null>" : this.parent));
-		sb.append(',');
-		sb.append("name");
-		sb.append('=');
-		sb.append(((this.name == null) ? "<null>" : this.name));
-		sb.append(',');
-		sb.append("identifier");
-		sb.append('=');
-		sb.append(((this.identifier == null) ? "<null>" : this.identifier));
-		sb.append(',');
-		sb.append("primaryCategory");
-		sb.append('=');
-		sb.append(((this.primaryCategory == null) ? "<null>" : this.primaryCategory));
-		sb.append(',');
-		sb.append("versionKey");
-		sb.append('=');
-		sb.append(((this.versionKey == null) ? "<null>" : this.versionKey));
-		sb.append(',');
-		sb.append("mimeType");
-		sb.append('=');
-		sb.append(((this.mimeType == null) ? "<null>" : this.mimeType));
-		sb.append(',');
-		sb.append("code");
-		sb.append('=');
-		sb.append(((this.code == null) ? "<null>" : this.code));
-		sb.append(',');
-		sb.append("objectType");
-		sb.append('=');
-		sb.append(((this.objectType == null) ? "<null>" : this.objectType));
-		sb.append(',');
-		sb.append("status");
-		sb.append('=');
-		sb.append(((this.status == null) ? "<null>" : this.status));
-		sb.append(',');
-		sb.append("qType");
-		sb.append('=');
-		sb.append(((this.qType == null) ? "<null>" : this.qType));
-		sb.append(',');
-		sb.append("index");
-		sb.append('=');
-		sb.append(((this.index == null) ? "<null>" : this.index));
-		sb.append(',');
-		if (sb.charAt((sb.length() - 1)) == ',') {
-			sb.setCharAt((sb.length() - 1), ']');
-		} else {
-			sb.append(']');
-		}
-		return sb.toString();
+		return "Child [parent=" + parent + ", children=" + children + ", name=" + name + ", identifier=" + identifier
+				+ ", description=" + description + ", trackable=" + trackable + ", primaryCategory=" + primaryCategory
+				+ ", versionKey=" + versionKey + ", mimeType=" + mimeType + ", code=" + code + ", version=" + version
+				+ ", objectType=" + objectType + ", status=" + status + ", index=" + index + ", maxQuestions="
+				+ maxQuestions + ", getParent()=" + getParent() + ", getChildren()=" + getChildren() + ", getName()="
+				+ getName() + ", getIdentifier()=" + getIdentifier() + ", getDescription()=" + getDescription()
+				+ ", getTrackable()=" + getTrackable() + ", getPrimaryCategory()=" + getPrimaryCategory()
+				+ ", getVersionKey()=" + getVersionKey() + ", getMimeType()=" + getMimeType() + ", getCode()="
+				+ getCode() + ", getVersion()=" + getVersion() + ", getObjectType()=" + getObjectType()
+				+ ", getStatus()=" + getStatus() + ", getIndex()=" + getIndex() + ", getMaxQuestions()="
+				+ getMaxQuestions() + ", getClass()=" + getClass() + ", hashCode()=" + hashCode() + ", toString()="
+				+ super.toString() + "]";
+	}
+
+	@JsonProperty("maxQuestions")
+	public Long getMaxQuestions() {
+		return maxQuestions;
+	}
+
+	@JsonProperty("maxQuestions")
+	public void setMaxQuestions(Long maxQuestions) {
+		this.maxQuestions = maxQuestions;
 	}
 
 }

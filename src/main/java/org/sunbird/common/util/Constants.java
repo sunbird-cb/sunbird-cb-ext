@@ -179,7 +179,6 @@ public class Constants {
     public static final String QUESTION_SET = "questionSet";
     public static final String ASSESSMENT_QNS_ANS_SET = "assessmentQnsAnsSet_";
     public static final String ASSESSMENT_QNS_SET = "assessmentQnsSet_";
-    public static final String DO_QNS_SET = "do_";
     
     // Cassandra Constants
     public static final String INSERT_INTO = "INSERT INTO ";

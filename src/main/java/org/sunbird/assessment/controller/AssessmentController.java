@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.sunbird.assessment.dto.AssessmentSubmissionDTO;
 import org.sunbird.assessment.model.Response;
 import org.sunbird.assessment.service.AssessmentService;
+import org.sunbird.common.util.Constants;
 
 @RestController
 public class AssessmentController {
@@ -105,8 +106,7 @@ public class AssessmentController {
 	 */
 	@GetMapping("/v2/{courseId}/assessment/{assessmentContentId}")
 	public ResponseEntity<Map<String, Object>> getAssessmentContent(@PathVariable("courseId") String courseId,
-			@PathVariable("assessmentContentId") String assessmentContentId, @RequestHeader("rootOrg") String rootOrg)
-			throws Exception {
+			@PathVariable("assessmentContentId") String assessmentContentId) throws Exception {
 		return new ResponseEntity<>(assessmentService.getAssessmentContent(courseId, assessmentContentId),
 				HttpStatus.OK);
 	}
@@ -120,8 +120,9 @@ public class AssessmentController {
 	 */
 
 	@GetMapping("/v1/quml/assessment/read/{assessmentIdentifier}")
-	public ResponseEntity<Response> readAssessment(@PathVariable("assessmentIdentifier") String assessmentIdentifier,
-			@RequestHeader("rootOrg") String rootOrg, @RequestHeader("x-authenticated-user-token") String token) {
+	public ResponseEntity<Map<String, Object>> readAssessment(
+			@PathVariable("assessmentIdentifier") String assessmentIdentifier,
+			@RequestHeader(Constants.X_AUTH_TOKEN) String token) {
 		return new ResponseEntity<>(assessmentService.readAssessment(assessmentIdentifier, token), HttpStatus.OK);
 	}
 }

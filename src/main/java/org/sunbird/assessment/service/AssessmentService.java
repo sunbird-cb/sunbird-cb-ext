@@ -44,6 +44,6 @@ public interface AssessmentService {
 	 */
 	public Map<String, Object> getAssessmentContent(String courseId, String assessmentContentId);
 
-	public Response readAssessment(String assessmentIdentifier, String token);
+	public Map<String, Object> readAssessment(String assessmentIdentifier, String token);
 
 }

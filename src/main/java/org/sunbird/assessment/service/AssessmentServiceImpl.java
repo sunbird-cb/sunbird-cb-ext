@@ -15,11 +15,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.sunbird.assessment.dto.AssessmentSubmissionDTO;
-import org.sunbird.assessment.model.Child;
+import org.sunbird.assessment.model.Section;
 import org.sunbird.assessment.model.QuestionSet;
 import org.sunbird.assessment.model.QuestionSet1;
 import org.sunbird.assessment.model.Response;
-import org.sunbird.assessment.model.SubChild;
+import org.sunbird.assessment.model.Question;
 import org.sunbird.assessment.repo.AssessmentRepository;
 import org.sunbird.cache.RedisCacheMgr;
 import org.sunbird.common.model.SunbirdApiHierarchyResultContent;
@@ -284,10 +284,10 @@ public class AssessmentServiceImpl implements AssessmentService {
 	}
 
 	@Override
-	public Response readAssessment(String assessmentIdentifier, String token) {
+	public Map<String, Object> readAssessment(String assessmentIdentifier, String token) {
 		Map<String, Object> result = new HashMap<>();
 		try {
-			Response resp = (Response) redisCacheMgr.getCache(Constants.DO_QNS_SET + assessmentIdentifier);
+			Response resp = (Response) redisCacheMgr.getCache(assessmentIdentifier);
 			if (ObjectUtils.isEmpty(resp)) {
 				String serviceURL = cbExtServerProperties.getReadHierarchyUrl().replace(Constants.ASSESSMENTIDENTIFIER,
 						assessmentIdentifier);
@@ -296,8 +296,9 @@ public class AssessmentServiceImpl implements AssessmentService {
 				headers.put(Constants.AUTHORIZATION, cbExtServerProperties.getSbApiKey());
 				Response hierarcyReadApiResponse = mapper.convertValue(
 						outboundRequestHandlerService.fetchUsingGetWithHeaders(serviceURL, headers), Response.class);
-				if (hierarcyReadApiResponse.getResponseCode().equalsIgnoreCase("Ok")) {
-					redisCacheMgr.putCache(Constants.DO_QNS_SET + assessmentIdentifier, hierarcyReadApiResponse);
+				if (hierarcyReadApiResponse.getResponseCode().equalsIgnoreCase("Ok")
+						&& !ObjectUtils.isEmpty(hierarcyReadApiResponse.getResult().getQuestionSet().getChildren())) {
+					redisCacheMgr.putCache(assessmentIdentifier, hierarcyReadApiResponse);
 					return extractMaxQuestionsAndCreateResultSet(assessmentIdentifier, result, hierarcyReadApiResponse);
 				}
 			} else {
@@ -306,29 +307,28 @@ public class AssessmentServiceImpl implements AssessmentService {
 		} catch (Exception e) {
 			throw new ApplicationLogicError("REQUEST_COULD_NOT_BE_PROCESSED", e);
 		}
-		return new Response();
+		result.put(Constants.STATUS, Constants.FAILED);
+		return result;
 	}
 
-	private Response extractMaxQuestionsAndCreateResultSet(String assessmentIdentifier, Map<String, Object> result,
+	private Map<String, Object> extractMaxQuestionsAndCreateResultSet(String assessmentIdentifier, Map<String, Object> result,
 			Response response) {
-		if (!ObjectUtils.isEmpty(response.getResult().getQuestionSet().getChildren())) {
-			Iterator<Child> sections = response.getResult().getQuestionSet().getChildren().iterator();
-			while (sections.hasNext()) {
-				{
-					Child section = sections.next();
-					if (section.getParent().equals(Constants.DO_QNS_SET + assessmentIdentifier)) {
-						List<SubChild> questions = section.getChildren();
-						if (!ObjectUtils.isEmpty(questions)) {
-							Collections.shuffle(questions);
-							if (section.getMaxQuestions() != null) {
-								section.setChildren(questions.stream().limit(section.getMaxQuestions())
-										.collect(Collectors.toList()));
-							}
+		Iterator<Section> sections = response.getResult().getQuestionSet().getChildren().iterator();
+		while (sections.hasNext()) {
+			{
+				Section section = sections.next();
+					List<Question> questions = section.getChildren();
+					if (!ObjectUtils.isEmpty(questions)) {
+						Collections.shuffle(questions);
+						if (section.getMaxQuestions() != null) {
+							section.setChildren(
+									questions.stream().limit(section.getMaxQuestions()).collect(Collectors.toList()));
 						}
 					}
-				}
 			}
 		}
-		return response;
+		result.put(Constants.STATUS, Constants.SUCCESSFUL);
+		result.put(Constants.QUESTION_SET, response);
+		return result;
 	}
 }
