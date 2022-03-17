@@ -21,7 +21,6 @@ import org.sunbird.common.model.SunbirdApiResp;
 import org.sunbird.common.model.SunbirdUserProfileDetail;
 import org.sunbird.common.service.ContentServiceImpl;
 import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
-import org.sunbird.common.service.UserUtilityServiceImpl;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.core.logger.CbExtLogger;
@@ -29,6 +28,7 @@ import org.sunbird.progress.model.BatchEnrolment;
 import org.sunbird.progress.model.MandatoryContentInfo;
 import org.sunbird.progress.model.MandatoryContentResponse;
 import org.sunbird.progress.model.UserProgressRequest;
+import org.sunbird.user.service.UserUtilityServiceImpl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
