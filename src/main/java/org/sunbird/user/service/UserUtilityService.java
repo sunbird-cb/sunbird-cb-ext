@@ -12,7 +12,7 @@ public interface UserUtilityService {
 	Map<String, Object> getUsersDataFromUserIds(String rootOrg, List<String> userIds, List<String> source);
 
 	Map<String, Object> getUsersDataFromUserIds(List<String> userIds, List<String> fields, String authToken);
-
+	
 	Map<String, Object> getUsersReadData(String userId, String authToken, String X_authToken);
 
 	Map<String, Object> updateLogin(LastLoginInfo userLoginInfo);

@@ -23,7 +23,6 @@ import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.core.exception.ApplicationLogicError;
 import org.sunbird.core.logger.CbExtLogger;
-import org.sunbird.portal.department.service.UserUtilityUtils;
 import org.sunbird.telemetry.model.LastLoginInfo;
 import org.sunbird.user.util.TelemetryUtils;
 
@@ -41,9 +40,6 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 
 	@Autowired
 	CbExtServerProperties props;
-	
-	@Autowired
-	UserUtilityUtils userUtilityUtils;
 
 	@Autowired
 	private CassandraOperation cassandraOperation;
@@ -161,8 +157,8 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		}
 
 		return result;
-	}	
-  
+	}
+
 	@Override
 	public Map<String, Object> updateLogin(LastLoginInfo userLoginInfo) {
 		Map<String, Object> response = new HashMap<>();
@@ -177,7 +173,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 			if (CollectionUtils.isEmpty(details)) {
 				Map<String, Object> request = new HashMap<>();
 				request.put(Constants.USER_ID, userLoginInfo.getUserId());
-				request.put(Constants.FIRSTLOGINTIME, userLoginInfo.getLoginTime());
+				request.put(Constants.FIRST_LOGIN_TIME, userLoginInfo.getLoginTime());
 				cassandraOperation.insertRecord(Constants.DATABASE, Constants.LOGIN_TABLE, request);
 				telemetryUtils.pushDataToKafka(telemetryUtils.getUserslastLoginTelemetryEventData(userLoginInfo),
 						serverConfig.getUserUtilityTopic());

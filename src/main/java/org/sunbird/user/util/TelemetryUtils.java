@@ -48,7 +48,7 @@ public class TelemetryUtils {
 						cbExtServerProperties.getVersion()),
 				Constants.USER_CONST, new ArrayList<>(), new Rollup(userLoginInfo.getOrgId())));
 		event.setObject(new ObjectData(userLoginInfo.getUserId(), Constants.USER_CONST));
-		event.setEdata(new Edata(Constants.CURRENTSTATE, new ArrayList<>(Arrays.asList(Constants.LOGIN_TIME)),
+		event.setEdata(new Edata(Constants.CURRENT_STATE, new ArrayList<>(Arrays.asList(Constants.LOGIN_TIME)),
 				userLoginInfo.getLoginTime().getTime()));
 		return event;
 	}

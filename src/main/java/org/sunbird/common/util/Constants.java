@@ -69,7 +69,7 @@ public class Constants {
     public static final String DEPARTMENT = "department";
     public static final String DESIGNATION = "designation";
     public static final String PRIMARY_EMAIL = "primaryEmail";
-    public static final String FIRSTLOGINTIME = "firstLoginTime";
+    public static final String FIRST_LOGIN_TIME = "firstLoginTime";
     public static final String RESPONSE_CODE = "responseCode";
     public static final String AUTH_TOKEN = "Authorization";
     public static final String X_AUTH_TOKEN = "x-authenticated-user-token";
@@ -285,7 +285,7 @@ public class Constants {
 	public static final String PDATA_ID = "dev.sunbird.cb.ext.service";
 	public static final String PDATA_PID = "sunbird-cb-ext-service";
 	public static final String TYPE = "WorkOrder";
-	public static final String CURRENTSTATE = "FirstLogin";
+	public static final String CURRENT_STATE = "FirstLogin";
 	public static final String LOGIN_TIME = "login_time";
 	public static final List<String> PROPS = Collections.unmodifiableList(Arrays.asList("WAT"));
 	public static final String USER_CONST = "User";
