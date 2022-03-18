@@ -1,6 +1,12 @@
 package org.sunbird.profile.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -10,11 +16,12 @@ import org.sunbird.cache.RedisCacheMgr;
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.model.SunbirdApiRespParam;
 import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
-import org.sunbird.common.service.UserUtilityServiceImpl;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.core.logger.CbExtLogger;
-import java.util.*;
+import org.sunbird.user.service.UserUtilityServiceImpl;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class ProfileServiceImpl implements ProfileService{
