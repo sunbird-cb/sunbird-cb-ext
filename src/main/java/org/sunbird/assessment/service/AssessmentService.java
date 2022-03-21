@@ -3,7 +3,6 @@ package org.sunbird.assessment.service;
 import java.util.Map;
 
 import org.sunbird.assessment.dto.AssessmentSubmissionDTO;
-import org.sunbird.assessment.model.Response;
 import org.sunbird.common.model.SBApiResponse;
 
 public interface AssessmentService {

@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.sunbird.assessment.dto.AssessmentSubmissionDTO;
-import org.sunbird.assessment.model.QuestionSet1;
 import org.sunbird.assessment.model.QuestionSet;
 import org.sunbird.assessment.repo.AssessmentRepository;
 import org.sunbird.cache.RedisCacheMgr;
@@ -252,9 +251,9 @@ public class AssessmentServiceImpl implements AssessmentService {
 						if (child.getIdentifier().equals(assessmentContentId)
 								&& child.getArtifactUrl().endsWith(".json")) {
 							// read assessment json file
-							QuestionSet1 assessmentContent = mapper.convertValue(outboundRequestHandlerService
+							QuestionSet assessmentContent = mapper.convertValue(outboundRequestHandlerService
 									.fetchUsingGetWithHeaders(child.getArtifactUrl(), new HashMap<>()),
-									QuestionSet1.class);
+									QuestionSet.class);
 
 							QuestionSet assessmentQnsSet = assessUtilServ.removeAssessmentAnsKey(assessmentContent);
 							result.put(Constants.STATUS, Constants.SUCCESSFUL);
