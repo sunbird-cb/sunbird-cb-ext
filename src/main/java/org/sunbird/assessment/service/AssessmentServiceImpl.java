@@ -14,8 +14,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.sunbird.assessment.dto.AssessmentSubmissionDTO;
-import org.sunbird.assessment.model.QuestionSet;
 import org.sunbird.assessment.model.QuestionSet1;
+import org.sunbird.assessment.model.QuestionSet;
 import org.sunbird.assessment.repo.AssessmentRepository;
 import org.sunbird.cache.RedisCacheMgr;
 import org.sunbird.common.model.SBApiResponse;
@@ -252,11 +252,11 @@ public class AssessmentServiceImpl implements AssessmentService {
 						if (child.getIdentifier().equals(assessmentContentId)
 								&& child.getArtifactUrl().endsWith(".json")) {
 							// read assessment json file
-							QuestionSet assessmentContent = mapper.convertValue(outboundRequestHandlerService
+							QuestionSet1 assessmentContent = mapper.convertValue(outboundRequestHandlerService
 									.fetchUsingGetWithHeaders(child.getArtifactUrl(), new HashMap<>()),
-									QuestionSet.class);
+									QuestionSet1.class);
 
-							QuestionSet1 assessmentQnsSet = assessUtilServ.removeAssessmentAnsKey(assessmentContent);
+							QuestionSet assessmentQnsSet = assessUtilServ.removeAssessmentAnsKey(assessmentContent);
 							result.put(Constants.STATUS, Constants.SUCCESSFUL);
 							result.put(Constants.QUESTION_SET, assessmentQnsSet);
 							// cache the response

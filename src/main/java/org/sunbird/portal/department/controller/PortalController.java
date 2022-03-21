@@ -8,8 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.sunbird.portal.department.model.DeptPublicInfo;
 import org.sunbird.portal.department.service.PortalService;
-import org.sunbird.telemetry.model.DeptPublicInfo;
 
 @RestController
 public class PortalController {

@@ -1,4 +1,4 @@
-package org.sunbird.telemetry.model;
+package org.sunbird.portal.department.model;
 
 public class DeptPublicInfo {
 	int id;

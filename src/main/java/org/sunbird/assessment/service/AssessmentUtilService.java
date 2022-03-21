@@ -3,7 +3,7 @@ package org.sunbird.assessment.service;
 import java.util.List;
 import java.util.Map;
 
-import org.sunbird.assessment.model.QuestionSet1;
+import org.sunbird.assessment.model.QuestionSet;
 
 public interface AssessmentUtilService {
 
@@ -13,5 +13,5 @@ public interface AssessmentUtilService {
 
 	Map<String, Object> getAnswerKeyForAssessmentAuthoringPreview(Map<String, Object> contentMeta);
 
-	QuestionSet1 removeAssessmentAnsKey(Object assessmentContent);
+	QuestionSet removeAssessmentAnsKey(Object assessmentContent);
 }

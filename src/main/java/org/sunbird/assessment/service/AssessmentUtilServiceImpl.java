@@ -11,7 +11,7 @@ import org.apache.htrace.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
-import org.sunbird.assessment.model.QuestionSet1;
+import org.sunbird.assessment.model.QuestionSet;
 import org.sunbird.assessment.model.Questions;
 import org.sunbird.core.exception.ApplicationLogicError;
 
@@ -228,8 +228,8 @@ public class AssessmentUtilServiceImpl implements AssessmentUtilService {
 	 * @return QuestionSet
 	 */
 	@Override
-	public QuestionSet1 removeAssessmentAnsKey(Object assessmentContent) {
-		QuestionSet1 questionSet = new ObjectMapper().convertValue(assessmentContent, QuestionSet1.class);
+	public QuestionSet removeAssessmentAnsKey(Object assessmentContent) {
+		QuestionSet questionSet = new ObjectMapper().convertValue(assessmentContent, QuestionSet.class);
 		List<String> qnsTypes = Arrays.asList(MCQ_MCA, MCQ_SCA, FITB, MTF);
 		for (Questions question : questionSet.getQuestions()) {
 			if (qnsTypes.contains(question.getQuestionType()) && !ObjectUtils.isEmpty(question.getOptions())) {

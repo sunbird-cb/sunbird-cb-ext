@@ -21,7 +21,7 @@ public class Result extends JdkSerializationRedisSerializer implements Serializa
 	 */
 	private static final long serialVersionUID = 1L;
 	@JsonProperty("questionSet")
-    private QuestionSet questionSet;
+    private QuestionSet1 questionSet;
 
     /**
      * No args constructor for use in serialization
@@ -34,22 +34,22 @@ public class Result extends JdkSerializationRedisSerializer implements Serializa
      * 
      * @param questionSet
      */
-    public Result(QuestionSet questionSet) {
+    public Result(QuestionSet1 questionSet) {
         super();
         this.questionSet = questionSet;
     }
 
     @JsonProperty("questionSet")
-    public QuestionSet getQuestionSet() {
+    public QuestionSet1 getQuestionSet() {
         return questionSet;
     }
 
     @JsonProperty("questionSet")
-    public void setQuestionSet(QuestionSet questionSet) {
+    public void setQuestionSet(QuestionSet1 questionSet) {
         this.questionSet = questionSet;
     }
 
-    public Result withQuestionSet(QuestionSet questionSet) {
+    public Result withQuestionSet(QuestionSet1 questionSet) {
         this.questionSet = questionSet;
         return this;
     }
