@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import org.sunbird.assessment.dto.AssessmentSubmissionDTO;
-import org.sunbird.assessment.model.Response;
 import org.sunbird.assessment.service.AssessmentService;
+import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.util.Constants;
 
 @RestController
@@ -120,7 +120,7 @@ public class AssessmentController {
 	 */
 
 	@GetMapping("/v1/quml/assessment/read/{assessmentIdentifier}")
-	public ResponseEntity<Map<String, Object>> readAssessment(
+	public ResponseEntity<SBApiResponse> readAssessment(
 			@PathVariable("assessmentIdentifier") String assessmentIdentifier,
 			@RequestHeader(Constants.X_AUTH_TOKEN) String token) {
 		return new ResponseEntity<>(assessmentService.readAssessment(assessmentIdentifier, token), HttpStatus.OK);

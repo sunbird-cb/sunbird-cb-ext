@@ -289,5 +289,9 @@ public class Constants {
 	public static final String LOGIN_TIME = "login_time";
 	public static final List<String> PROPS = Collections.unmodifiableList(Arrays.asList("WAT"));
 	public static final String USER_CONST = "User";
+	
+	public static final String CHILDREN = "children";
+	public static final String PARAMS = "params";
+	public static final String MAX_QUESTIONS = "maxQuestions";
 
 }

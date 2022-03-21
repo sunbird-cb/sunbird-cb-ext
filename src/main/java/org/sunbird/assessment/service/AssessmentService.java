@@ -4,6 +4,7 @@ import java.util.Map;
 
 import org.sunbird.assessment.dto.AssessmentSubmissionDTO;
 import org.sunbird.assessment.model.Response;
+import org.sunbird.common.model.SBApiResponse;
 
 public interface AssessmentService {
 	/**
@@ -44,6 +45,6 @@ public interface AssessmentService {
 	 */
 	public Map<String, Object> getAssessmentContent(String courseId, String assessmentContentId);
 
-	public Map<String, Object> readAssessment(String assessmentIdentifier, String token);
+	public SBApiResponse readAssessment(String assessmentIdentifier, String token);
 
 }
