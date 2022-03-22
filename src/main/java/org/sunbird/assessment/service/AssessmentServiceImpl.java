@@ -2,10 +2,12 @@ package org.sunbird.assessment.service;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,8 +17,10 @@ import org.sunbird.assessment.dto.AssessmentSubmissionDTO;
 import org.sunbird.assessment.model.QuestionSet;
 import org.sunbird.assessment.repo.AssessmentRepository;
 import org.sunbird.cache.RedisCacheMgr;
+import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.model.SunbirdApiHierarchyResultContent;
 import org.sunbird.common.model.SunbirdApiResp;
+import org.sunbird.common.model.SunbirdApiRespParam;
 import org.sunbird.common.service.ContentService;
 import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
 import org.sunbird.common.util.CbExtServerProperties;
@@ -50,6 +54,9 @@ public class AssessmentServiceImpl implements AssessmentService {
 
 	@Autowired
 	AssessmentUtilService assessUtilServ;
+
+	@Autowired
+	CbExtServerProperties cbExtServerProperties;
 
 	@Autowired
 	OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
@@ -254,7 +261,8 @@ public class AssessmentServiceImpl implements AssessmentService {
 							// cache the response
 							redisCacheMgr.putCache(Constants.ASSESSMENT_QNS_ANS_SET + assessmentContentId,
 									assessmentContent);
-							redisCacheMgr.putCache(Constants.ASSESSMENT_QNS_SET + assessmentContentId, assessmentQnsSet);
+							redisCacheMgr.putCache(Constants.ASSESSMENT_QNS_SET + assessmentContentId,
+									assessmentQnsSet);
 						}
 					}
 				}
@@ -272,4 +280,122 @@ public class AssessmentServiceImpl implements AssessmentService {
 		return result;
 	}
 
+	@Override
+	public SBApiResponse readAssessment(String assessmentIdentifier, String token) {
+		try {
+			Map<String, Object> hierarcyReadApiResponse = (Map<String, Object>) redisCacheMgr
+					.getCache(assessmentIdentifier);
+			if (ObjectUtils.isEmpty(hierarcyReadApiResponse)) {
+				hierarcyReadApiResponse = getReadHierarchyApiResponse(assessmentIdentifier, token);
+				if (hierarcyReadApiResponse.get(Constants.RESPONSE_CODE).toString().equalsIgnoreCase(Constants.OK)) {
+					redisCacheMgr.putCache(assessmentIdentifier, hierarcyReadApiResponse);
+					return setResponseParams(hierarcyReadApiResponse);
+				}
+			} else {
+				return setResponseParams(hierarcyReadApiResponse);
+			}
+		} catch (Exception e) {
+			logger.error(e);
+			throw new ApplicationLogicError("REQUEST_COULD_NOT_BE_PROCESSED", e);
+		}
+		return null;
+	}
+
+	private Map<String, Object> getReadHierarchyApiResponse(String assessmentIdentifier, String token) {
+		Map<String, Object> hierarcyReadApiResponse;
+		String serviceURL = cbExtServerProperties.getReadHierarchyUrl().replace(Constants.ASSESSMENTIDENTIFIER,
+				assessmentIdentifier);
+		Map<String, String> headers = new HashMap<>();
+		headers.put(Constants.X_AUTH_TOKEN, token);
+		headers.put(Constants.AUTHORIZATION, cbExtServerProperties.getSbApiKey());
+		hierarcyReadApiResponse = mapper
+				.convertValue(outboundRequestHandlerService.fetchUsingGetWithHeaders(serviceURL, headers), Map.class);
+		return hierarcyReadApiResponse;
+	}
+
+	private SBApiResponse setResponseParams(Map<String, Object> hierarchyResponse) {
+		SBApiResponse outgoingResponse = new SBApiResponse();
+		Map<String, Object> responseParams = (Map<String, Object>) hierarchyResponse.get(Constants.MAX_QUESTIONS);
+		outgoingResponse.setId(hierarchyResponse.get("id").toString());
+		outgoingResponse.setVer(hierarchyResponse.get("ver").toString());
+		outgoingResponse.setTs(hierarchyResponse.get("ts").toString());
+		SunbirdApiRespParam params = new SunbirdApiRespParam();
+		params.setErr((String) responseParams.get("err"));
+		params.setErrmsg((String) responseParams.get("errmsg"));
+		params.setMsgid((String) responseParams.get("msgid"));
+		params.setResmsgid((String) responseParams.get("resmsgid"));
+		params.setStatus((String) responseParams.get("status"));
+		outgoingResponse.setParams(params);
+		return readAssessmentLevelData(hierarchyResponse, outgoingResponse);
+	}
+
+	private SBApiResponse readAssessmentLevelData(Map<String, Object> hierarchyResponse,
+			SBApiResponse outgoingResponse) {
+		Map<String, Object> value = new HashMap<>();
+		List<String> assessmentParams = cbExtServerProperties.getAssessmentLevelParams();
+		Map<String, Object> questionSet = (Map<String, Object>) ((Map<String, Object>) hierarchyResponse
+				.get(Constants.RESULT)).get(Constants.QUESTION_SET);
+		for (String assessmentParam : assessmentParams) {
+			if ((questionSet.containsKey(assessmentParam))) {
+				value.put(assessmentParam, questionSet.get(assessmentParam));
+			}
+		}
+		outgoingResponse.getResult().put(Constants.QUESTION_SET, value);
+		readSectionLevelParams(hierarchyResponse, outgoingResponse, questionSet);
+		return outgoingResponse;
+	}
+
+	private void readSectionLevelParams(Map<String, Object> hierarchyResponse, SBApiResponse outgoingResponse,
+			Map<String, Object> questionSet) {
+		List<Object> sectionResponse = new ArrayList<>();
+		List<String> sectionParams = cbExtServerProperties.getAssessmentSectionParams();
+		Map<String, Object> value = new HashMap<>();
+		List<Object> sections = (List<Object>) questionSet.get(Constants.CHILDREN);
+		for (int i = 0; i < sections.size(); i++) {
+			for (String sectionParam : sectionParams) {
+				if (((Map<String, Object>) sections.get(i)).containsKey(sectionParam)) {
+					value.put(sectionParam, ((Map<String, Object>) sections.get(i)).get(sectionParam));
+				}
+			}
+			sectionResponse.add(value);
+		}
+		((List<Object>) ((Map<String, Object>) outgoingResponse.getResult().get(Constants.QUESTION_SET))
+				.get(Constants.CHILDREN)).addAll(sectionResponse);
+		readQuestionLevelParams(hierarchyResponse, outgoingResponse, sections);
+	}
+
+	private void readQuestionLevelParams(Map<String, Object> hierarchyResponse, SBApiResponse outgoingResponse,
+			List<Object> sections) {
+
+		List<String> questionParams = cbExtServerProperties.getAssessmentQuestionParams();
+		Map<String, Object> value = new HashMap<>();
+		for (int i = 0; i < sections.size(); i++) {
+			List<Object> questionResponse = new ArrayList<Object>();
+			int maxQuestion = 0;
+			Map<String, Object> section = (Map<String, Object>) sections.get(i);
+			List<Object> questions = (List<Object>) section.get(Constants.CHILDREN);
+			if (section.containsKey(Constants.MAX_QUESTIONS)) {
+				maxQuestion = (int) section.get(Constants.MAX_QUESTIONS);
+			}
+			if (!ObjectUtils.isEmpty(questions)) {
+				Collections.shuffle(questions);
+				if (maxQuestion > 0) {
+					questions = questions.stream().limit(maxQuestion).collect(Collectors.toList());
+				}
+			}
+			for (int j = 0; j < questions.size(); j++) {
+				for (String questionParam : questionParams) {
+					Map<String, Object> map = (Map<String, Object>) questions.get(j);
+					if (map.containsKey(questionParam)) {
+						value.put(questionParam, map.get(questionParam));
+					}
+				}
+				questionResponse.add(value);
+			}
+			((Map<String, Object>) ((List<Object>) ((Map<String, Object>) outgoingResponse.getResult()
+					.get(Constants.QUESTION_SET)).get(Constants.CHILDREN)).get(i)).put(Constants.CHILDREN,
+							questionResponse);
+
+		}
+	}
 }

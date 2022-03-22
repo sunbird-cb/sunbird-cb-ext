@@ -42,10 +42,10 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 	CbExtServerProperties props;
 
 	@Autowired
-	TelemetryUtils telemetryUtils;
+	private CassandraOperation cassandraOperation;
 
 	@Autowired
-	private CassandraOperation cassandraOperation;
+	TelemetryUtils telemetryUtils;
 
 	@Autowired
 	OutboundRequestHandlerServiceImpl outboundRequestHandlerService;

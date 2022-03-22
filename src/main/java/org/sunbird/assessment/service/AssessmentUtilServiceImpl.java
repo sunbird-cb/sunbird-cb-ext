@@ -224,8 +224,7 @@ public class AssessmentUtilServiceImpl implements AssessmentUtilService {
 	/**
 	 * To remove answers from the assessment question sets
 	 * 
-	 * @param assessmentContent
-	 *            Object
+	 * @param assessmentContent Object
 	 * @return QuestionSet
 	 */
 	@Override

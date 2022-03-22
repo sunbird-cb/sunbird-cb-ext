@@ -3,6 +3,7 @@ package org.sunbird.assessment.service;
 import java.util.Map;
 
 import org.sunbird.assessment.dto.AssessmentSubmissionDTO;
+import org.sunbird.common.model.SBApiResponse;
 
 public interface AssessmentService {
 	/**
@@ -42,5 +43,7 @@ public interface AssessmentService {
 	 * @return
 	 */
 	public Map<String, Object> getAssessmentContent(String courseId, String assessmentContentId);
+
+	public SBApiResponse readAssessment(String assessmentIdentifier, String token);
 
 }

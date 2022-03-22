@@ -21,12 +21,12 @@ import java.util.Map.Entry;
 @Component
 public class CassandraOperationImpl implements CassandraOperation {
 
-    private Logger logger = LoggerFactory.getLogger(getClass().getName());
+	private Logger logger = LoggerFactory.getLogger(getClass().getName());
 
-    @Autowired
-    private CassandraConnectionManager connectionManager;
+	@Autowired
+	private CassandraConnectionManager connectionManager;
 
-    @Override
+	@Override
 	public SBApiResponse insertRecord(String keyspaceName, String tableName, Map<String, Object> request) {
 		SBApiResponse response = new SBApiResponse();
 		String query = CassandraUtil.getPreparedStatement(keyspaceName, tableName, request);
@@ -75,129 +75,129 @@ public class CassandraOperationImpl implements CassandraOperation {
 		return response;
 	}
 
-    @Override
-    public List<Map<String, Object>> getRecordsByProperties(String keyspaceName, String tableName,
-                                                            Map<String, Object> propertyMap, List<String> fields) {
-        Select selectQuery = null;
-        List<Map<String, Object>> response = new ArrayList<>();
-        try {
-            selectQuery = processQuery(keyspaceName, tableName, propertyMap, fields);
-            ResultSet results = connectionManager.getSession(keyspaceName).execute(selectQuery);
-            response = CassandraUtil.createResponse(results);
+	@Override
+	public List<Map<String, Object>> getRecordsByProperties(String keyspaceName, String tableName,
+			Map<String, Object> propertyMap, List<String> fields) {
+		Select selectQuery = null;
+		List<Map<String, Object>> response = new ArrayList<>();
+		try {
+			selectQuery = processQuery(keyspaceName, tableName, propertyMap, fields);
+			ResultSet results = connectionManager.getSession(keyspaceName).execute(selectQuery);
+			response = CassandraUtil.createResponse(results);
 
-        } catch (Exception e) {
-            logger.error(Constants.EXCEPTION_MSG_FETCH + tableName + " : " + e.getMessage(), e);
-        }
-        return response;
-    }
+		} catch (Exception e) {
+			logger.error(Constants.EXCEPTION_MSG_FETCH + tableName + " : " + e.getMessage(), e);
+		}
+		return response;
+	}
 
-    @Override
-    public List<Map<String, Object>> getRecordsByPropertiesWithPagination(String keyspaceName, String tableName,
-                                                                          Map<String, Object> propertyMap, List<String> fields, int limit, String updatedOn) {
-        Select selectQuery = null;
-        List<Map<String, Object>> response = new ArrayList<>();
-        try {
-            selectQuery = processQuery(keyspaceName, tableName, propertyMap, fields);
-            selectQuery.limit(limit);
-            if (!StringUtils.isEmpty(updatedOn)) {
-                selectQuery.where(QueryBuilder.lt("updatedon", UUID.fromString(updatedOn)));
-            }
-            ResultSet results = connectionManager.getSession(keyspaceName).execute(selectQuery);
-            response = CassandraUtil.createResponse(results);
-        } catch (Exception e) {
-            logger.error(Constants.EXCEPTION_MSG_FETCH + tableName + " : " + e.getMessage(), e);
-        }
-        return response;
-    }
+	@Override
+	public List<Map<String, Object>> getRecordsByPropertiesWithPagination(String keyspaceName, String tableName,
+			Map<String, Object> propertyMap, List<String> fields, int limit, String updatedOn) {
+		Select selectQuery = null;
+		List<Map<String, Object>> response = new ArrayList<>();
+		try {
+			selectQuery = processQuery(keyspaceName, tableName, propertyMap, fields);
+			selectQuery.limit(limit);
+			if (!StringUtils.isEmpty(updatedOn)) {
+				selectQuery.where(QueryBuilder.lt("updatedon", UUID.fromString(updatedOn)));
+			}
+			ResultSet results = connectionManager.getSession(keyspaceName).execute(selectQuery);
+			response = CassandraUtil.createResponse(results);
+		} catch (Exception e) {
+			logger.error(Constants.EXCEPTION_MSG_FETCH + tableName + " : " + e.getMessage(), e);
+		}
+		return response;
+	}
 
-    private Select processQuery(String keyspaceName, String tableName,
-                               Map<String, Object> propertyMap, List<String> fields) {
-        Select selectQuery = null;
+	private Select processQuery(String keyspaceName, String tableName, Map<String, Object> propertyMap,
+			List<String> fields) {
+		Select selectQuery = null;
 
-        Builder selectBuilder;
-        if (CollectionUtils.isNotEmpty(fields)) {
-            String[] dbFields = fields.toArray(new String[fields.size()]);
-            selectBuilder = QueryBuilder.select(dbFields);
-        } else {
-            selectBuilder = QueryBuilder.select().all();
-        }
-        selectQuery = selectBuilder.from(keyspaceName, tableName);
-        if (MapUtils.isNotEmpty(propertyMap)) {
-            Where selectWhere = selectQuery.where();
-            for (Entry<String, Object> entry : propertyMap.entrySet()) {
-                if (entry.getValue() instanceof List) {
-                    List<Object> list = (List) entry.getValue();
-                    if (null != list) {
-                        Object[] propertyValues = list.toArray(new Object[list.size()]);
-                        Clause clause = QueryBuilder.in(entry.getKey(), propertyValues);
-                        selectWhere.and(clause);
+		Builder selectBuilder;
+		if (CollectionUtils.isNotEmpty(fields)) {
+			String[] dbFields = fields.toArray(new String[fields.size()]);
+			selectBuilder = QueryBuilder.select(dbFields);
+		} else {
+			selectBuilder = QueryBuilder.select().all();
+		}
+		selectQuery = selectBuilder.from(keyspaceName, tableName);
+		if (MapUtils.isNotEmpty(propertyMap)) {
+			Where selectWhere = selectQuery.where();
+			for (Entry<String, Object> entry : propertyMap.entrySet()) {
+				if (entry.getValue() instanceof List) {
+					List<Object> list = (List) entry.getValue();
+					if (null != list) {
+						Object[] propertyValues = list.toArray(new Object[list.size()]);
+						Clause clause = QueryBuilder.in(entry.getKey(), propertyValues);
+						selectWhere.and(clause);
 
-                    }
-                } else {
+					}
+				} else {
 
-                    Clause clause = QueryBuilder.eq(entry.getKey(), entry.getValue());
-                    selectWhere.and(clause);
+					Clause clause = QueryBuilder.eq(entry.getKey(), entry.getValue());
+					selectWhere.and(clause);
 
-                }
-                selectQuery.allowFiltering();
-            }
-        }
-        return selectQuery;
-    }
+				}
+				selectQuery.allowFiltering();
+			}
+		}
+		return selectQuery;
+	}
 
-    @Override
-    public void deleteRecord(String keyspaceName, String tableName, Map<String, Object> compositeKeyMap) {
-        Delete delete = null;
-        try {
-            delete = QueryBuilder.delete().from(keyspaceName, tableName);
-            Delete.Where deleteWhere = delete.where();
-            compositeKeyMap.entrySet().stream().forEach(x -> {
-                Clause clause = QueryBuilder.eq(x.getKey(), x.getValue());
-                deleteWhere.and(clause);
-            });
-            connectionManager.getSession(keyspaceName).execute(delete);
-        } catch (Exception e) {
-        	logger.error(String.format("CassandraOperationImpl: deleteRecord by composite key. %s %s %s",
+	@Override
+	public void deleteRecord(String keyspaceName, String tableName, Map<String, Object> compositeKeyMap) {
+		Delete delete = null;
+		try {
+			delete = QueryBuilder.delete().from(keyspaceName, tableName);
+			Delete.Where deleteWhere = delete.where();
+			compositeKeyMap.entrySet().stream().forEach(x -> {
+				Clause clause = QueryBuilder.eq(x.getKey(), x.getValue());
+				deleteWhere.and(clause);
+			});
+			connectionManager.getSession(keyspaceName).execute(delete);
+		} catch (Exception e) {
+			logger.error(String.format("CassandraOperationImpl: deleteRecord by composite key. %s %s %s",
 					Constants.EXCEPTION_MSG_DELETE, tableName, e.getMessage()));
-        	throw e;
-        }
-    }
+			throw e;
+		}
+	}
 
-    @Override
-    public Map<String, Object> updateRecord(String keyspaceName, String tableName, Map<String, Object> updateAttributes,
-                                            Map<String, Object> compositeKey) {
-        Map<String, Object> response = new HashMap<>();
-        Statement updateQuery = null;
-        try {
-            Session session = connectionManager.getSession(keyspaceName);
-            Update update = QueryBuilder.update(keyspaceName, tableName);
-            Assignments assignments = update.with();
-            Update.Where where = update.where();
-            updateAttributes.entrySet().stream().forEach(x -> {
-                assignments.and(QueryBuilder.set(x.getKey(), x.getValue()));
-            });
-            compositeKey.entrySet().stream().forEach(x -> {
-                where.and(QueryBuilder.eq(x.getKey(), x.getValue()));
-            });
-            updateQuery = where;
-            session.execute(updateQuery);
-            response.put(Constants.RESPONSE, Constants.SUCCESS);
-        } catch (Exception e) {
-        	logger.error(e.getMessage());
-        	throw e;
-        }
-        return response;
-    }
+	@Override
+	public Map<String, Object> updateRecord(String keyspaceName, String tableName, Map<String, Object> updateAttributes,
+			Map<String, Object> compositeKey) {
+		Map<String, Object> response = new HashMap<>();
+		Statement updateQuery = null;
+		try {
+			Session session = connectionManager.getSession(keyspaceName);
+			Update update = QueryBuilder.update(keyspaceName, tableName);
+			Assignments assignments = update.with();
+			Update.Where where = update.where();
+			updateAttributes.entrySet().stream().forEach(x -> {
+				assignments.and(QueryBuilder.set(x.getKey(), x.getValue()));
+			});
+			compositeKey.entrySet().stream().forEach(x -> {
+				where.and(QueryBuilder.eq(x.getKey(), x.getValue()));
+			});
+			updateQuery = where;
+			session.execute(updateQuery);
+			response.put(Constants.RESPONSE, Constants.SUCCESS);
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+			throw e;
+		}
+		return response;
+	}
 
-    @Override
-    public Long getRecordCount(String keyspace, String table) {
-        try {
-            Select selectQuery = QueryBuilder.select().countAll().from(keyspace, table);
-            Row row = connectionManager.getSession(keyspace).execute(selectQuery).one();
-            return row.getLong(0);
-        } catch (Exception e) {
-        	throw e;
-        }
-    }
+	@Override
+	public Long getRecordCount(String keyspace, String table) {
+		try {
+			Select selectQuery = QueryBuilder.select().countAll().from(keyspace, table);
+			Row row = connectionManager.getSession(keyspace).execute(selectQuery).one();
+			return row.getLong(0);
+		} catch (Exception e) {
+			throw e;
+		}
+	}
 
 }

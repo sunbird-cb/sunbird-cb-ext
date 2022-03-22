@@ -1,5 +1,8 @@
 package org.sunbird.common.util;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -188,10 +191,10 @@ public class CbExtServerProperties {
 
 	@Value("${redis.timeout}")
 	private String redisTimeout;
-	
+
 	@Value("${kafka.topics.userutility.telemetry.event}")
 	private String userUtilityTopic;
-	
+
 	@Value("${sunbird.cb.ext.version}")
 	private String sunbirdCbExtVersion;
 
@@ -201,6 +204,25 @@ public class CbExtServerProperties {
 	@Value("${userutility.telemetry.event.pdata.pid}")
 	private String firstLoginPid;
 
+	@Value("${assessment.read.hierarchy.url}")
+	private String readHierarchyUrl;
+
+	@Value("${assessment.read.assessmentLevel.params}")
+	private String assessmentLevelParams;
+
+	@Value("${assessment.read.sectionLevel.params}")
+	private String assessmentSectionParams;
+
+	@Value("${assessment.read.questionLevel.params}")
+	private String assessmentQuestionParams;
+
+	public String getReadHierarchyUrl() {
+		return readHierarchyUrl;
+	}
+
+	public void setReadHierarchyUrl(String readHierarchyUrl) {
+		this.readHierarchyUrl = readHierarchyUrl;
+	}
 
 	public String getContentHost() {
 		return contentHost;
@@ -222,21 +244,37 @@ public class CbExtServerProperties {
 		return wfServiceHost;
 	}
 
-	public String getWfServiceTransitionPath() { return wfServiceTransitionPath; }
+	public String getWfServiceTransitionPath() {
+		return wfServiceTransitionPath;
+	}
 
-	public void setWfServiceTransitionPath(String wfServiceTransitionPath) { this.wfServiceTransitionPath = wfServiceTransitionPath; }
+	public void setWfServiceTransitionPath(String wfServiceTransitionPath) {
+		this.wfServiceTransitionPath = wfServiceTransitionPath;
+	}
 
-	public String getLmsUserUpdatePath() { return lmsUserUpdatePath; }
+	public String getLmsUserUpdatePath() {
+		return lmsUserUpdatePath;
+	}
 
-	public void setLmsUserUpdatePath(String lmsUserUpdatePath) { this.lmsUserUpdatePath = lmsUserUpdatePath; }
+	public void setLmsUserUpdatePath(String lmsUserUpdatePath) {
+		this.lmsUserUpdatePath = lmsUserUpdatePath;
+	}
 
-	public String getLmsSystemSettingsPath() { return lmsSystemSettingsPath; }
+	public String getLmsSystemSettingsPath() {
+		return lmsSystemSettingsPath;
+	}
 
-	public void setLmsSystemSettingsPath(String lmsSystemSettingsPath) { this.lmsSystemSettingsPath = lmsSystemSettingsPath; }
+	public void setLmsSystemSettingsPath(String lmsSystemSettingsPath) {
+		this.lmsSystemSettingsPath = lmsSystemSettingsPath;
+	}
 
-	public String getLmsUserReadPath() { return lmsUserReadPath; }
+	public String getLmsUserReadPath() {
+		return lmsUserReadPath;
+	}
 
-	public void setLmsUserReadPath(String lmsUserReadPath) { this.lmsUserReadPath = lmsUserReadPath; }
+	public void setLmsUserReadPath(String lmsUserReadPath) {
+		this.lmsUserReadPath = lmsUserReadPath;
+	}
 
 	public void setWfServiceHost(String wfServiceHost) {
 		this.wfServiceHost = wfServiceHost;
@@ -684,7 +722,7 @@ public class CbExtServerProperties {
 	public void setAzureStorageKey(String azureStorageKey) {
 		this.azureStorageKey = azureStorageKey;
 	}
-	
+
 	public String getUserUtilityTopic() {
 		return userUtilityTopic;
 	}
@@ -715,6 +753,38 @@ public class CbExtServerProperties {
 
 	public void setFirstLoginPid(String firstLoginPid) {
 		this.firstLoginPid = firstLoginPid;
+	}
+
+	public String getSunbirdCbExtVersion() {
+		return sunbirdCbExtVersion;
+	}
+
+	public void setSunbirdCbExtVersion(String sunbirdCbExtVersion) {
+		this.sunbirdCbExtVersion = sunbirdCbExtVersion;
+	}
+
+	public List<String> getAssessmentLevelParams() {
+		return Arrays.asList(assessmentLevelParams.split(",", -1));
+	}
+
+	public void setAssessmentLevelParams(String assessmentLevelParams) {
+		this.assessmentLevelParams = assessmentLevelParams;
+	}
+
+	public List<String> getAssessmentSectionParams() {
+		return Arrays.asList(assessmentSectionParams.split(",", -1));
+	}
+
+	public void setAssessmentSectionParams(String assessmentSectionParams) {
+		this.assessmentSectionParams = assessmentSectionParams;
+	}
+
+	public List<String> getAssessmentQuestionParams() {
+		return Arrays.asList(assessmentQuestionParams.split(",", -1));
+	}
+
+	public void setAssessmentQuestionParams(String assessmentQuestionParams) {
+		this.assessmentQuestionParams = assessmentQuestionParams;
 	}
 
 }
