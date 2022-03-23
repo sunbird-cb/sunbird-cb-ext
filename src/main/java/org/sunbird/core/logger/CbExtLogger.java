@@ -18,22 +18,18 @@ public class CbExtLogger {
 	}
 
 	public void debug(String message) {
-
 		logger.log(Level.DEBUG, message);
 	}
 
 	public void info(String message) {
-
 		logger.log(Level.INFO, message);
 	}
 
 	public void warn(String message) {
-
 		logger.log(Level.WARN, message);
 	}
 
 	public void error(Exception exception) {
-
 		ObjectMapper ow = new ObjectMapper();
 
 		// log the exception

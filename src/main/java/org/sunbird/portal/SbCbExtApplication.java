@@ -14,7 +14,6 @@ import org.springframework.web.client.RestTemplate;
 @ComponentScan(basePackages = "org.sunbird")
 @SpringBootApplication
 public class SbCbExtApplication {
-
 	/**
 	 * Runs The application
 	 * 
@@ -23,7 +22,7 @@ public class SbCbExtApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(SbCbExtApplication.class, args);
 	}
-	
+
 	/**
 	 * Initializes the rest template
 	 * 
@@ -33,19 +32,17 @@ public class SbCbExtApplication {
 
 	@Bean
 	public RestTemplate restTemplate() throws Exception {
-
 		return new RestTemplate(getClientHttpRequestFactory());
 	}
 
 	private ClientHttpRequestFactory getClientHttpRequestFactory() {
-
 		int timeout = 10000;
-              RequestConfig config = RequestConfig.custom().setConnectTimeout(timeout).setConnectionRequestTimeout(timeout)
-                           .setSocketTimeout(timeout).build();
-              CloseableHttpClient client = HttpClientBuilder.create().setMaxConnTotal(2000).setMaxConnPerRoute(500)
-                           .setDefaultRequestConfig(config).build();
-              HttpComponentsClientHttpRequestFactory cRequestFactory = new HttpComponentsClientHttpRequestFactory(client);
-              cRequestFactory.setReadTimeout(timeout);
-              return cRequestFactory;
+		RequestConfig config = RequestConfig.custom().setConnectTimeout(timeout).setConnectionRequestTimeout(timeout)
+				.setSocketTimeout(timeout).build();
+		CloseableHttpClient client = HttpClientBuilder.create().setMaxConnTotal(2000).setMaxConnPerRoute(500)
+				.setDefaultRequestConfig(config).build();
+		HttpComponentsClientHttpRequestFactory cRequestFactory = new HttpComponentsClientHttpRequestFactory(client);
+		cRequestFactory.setReadTimeout(timeout);
+		return cRequestFactory;
 	}
 }

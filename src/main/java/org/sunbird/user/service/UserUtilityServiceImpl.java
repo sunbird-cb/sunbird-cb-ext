@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -56,6 +57,10 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 	private CbExtLogger logger = new CbExtLogger(getClass().getName());
 	private final String SEARCH_RESULT = "Search API response: ";
 
+	public boolean validateUser(String userId) {
+		return validateUser(StringUtils.EMPTY, userId);
+	}
+	
 	@Override
 	public boolean validateUser(String rootOrg, String userId) {
 

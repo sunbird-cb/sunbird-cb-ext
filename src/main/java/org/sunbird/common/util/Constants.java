@@ -288,5 +288,20 @@ public class Constants {
 	public static final String LOGIN_TIME = "login_time";
 	public static final List<String> PROPS = Collections.unmodifiableList(Arrays.asList("WAT"));
 	public static final String USER_CONST = "User";
-
+	
+	public static final String ASSESSMENT_LEVEL_SCORE_CUTOFF = "assessmentlevel";
+    public static final String SECTION_LEVEL_SCORE_CUTOFF = "sectionlevel";
+    public static final String IDENTIFIER_REPLACER = "{identifier}";
+    public static final String CHILDREN = "children";
+	public static final String PARAMS = "params";
+	public static final String MAX_QUESTIONS = "maxQuestions";
+	public static final String CHILD_NODES = "childNodes";
+	public static final String SEARCH = "search";
+	public static final String QUESTION_ID = "qs_id_";
+	public static final String ASSESSMENT_ID = "assess_id_";
+	public static final String EDITOR_STATE = "editorState";
+	public static final String ANSWER = "answer";
+	public static final String QUESTION = "question";
+	public static final String OPTIONS = "options";
+	public static final String USER_ASSESS_REQ = "user_assess_req_";
 }

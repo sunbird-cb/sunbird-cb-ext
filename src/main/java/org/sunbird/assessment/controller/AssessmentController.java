@@ -15,12 +15,18 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import org.sunbird.assessment.dto.AssessmentSubmissionDTO;
 import org.sunbird.assessment.service.AssessmentService;
+import org.sunbird.assessment.service.AssessmentServiceV2;
+import org.sunbird.common.model.SBApiResponse;
+import org.sunbird.common.util.Constants;
 
 @RestController
 public class AssessmentController {
 
 	@Autowired
 	AssessmentService assessmentService;
+
+	@Autowired
+	AssessmentServiceV2 assessmentServiceV2;
 
 	/**
 	 * validates, submits and inserts assessments and quizzes into the db
@@ -109,4 +115,38 @@ public class AssessmentController {
 		return new ResponseEntity<>(assessmentService.getAssessmentContent(courseId, assessmentContentId),
 				HttpStatus.OK);
 	}
+
+	// =======================
+	// QUML based Assessment APIs
+	@PostMapping("/v3/user/assessment/submit")
+	public ResponseEntity<?> submitUserAssessmentV3(@Valid @RequestBody Map<String, Object> requestBody,
+			@RequestHeader("x-authenticated-user-token") String authUserToken) throws Exception {
+		SBApiResponse submitResponse = assessmentServiceV2.submitAssessment(requestBody, authUserToken);
+		return new ResponseEntity<>(submitResponse, submitResponse.getResponseCode());
+	}
+
+	/**
+	 * 
+	 * @param assessmentIdentifier
+	 * @param rootOrg
+	 * @return
+	 * @throws Exception
+	 */
+
+	@GetMapping("/v1/quml/assessment/read/{assessmentIdentifier}")
+	public ResponseEntity<SBApiResponse> readAssessment(
+			@PathVariable("assessmentIdentifier") String assessmentIdentifier,
+			@RequestHeader(Constants.X_AUTH_TOKEN) String token) throws Exception {
+		SBApiResponse readResponse = assessmentServiceV2.readAssessment(assessmentIdentifier, token);
+		return new ResponseEntity<>(readResponse, readResponse.getResponseCode());
+	}
+
+	@PostMapping("/v1/quml/question/list")
+	public ResponseEntity<?> readQuestionList(@Valid @RequestBody Map<String, Object> requestBody,
+			@RequestHeader("x-authenticated-user-token") String authUserToken) throws Exception {
+		SBApiResponse response = assessmentServiceV2.readQuestionList(requestBody, authUserToken);
+		return new ResponseEntity<>(response, response.getResponseCode());
+	}
+	// QUML based Assessment APIs
+	// =======================
 }
