@@ -75,16 +75,20 @@ public class ProfileServiceImpl implements ProfileService{
                     listOfChangedDetails.add(keys);
                 }
 
-                for (String list : listOfChangedDetails) {
-                     if (profileDetailsMap.get(list) instanceof ArrayList) {
-                        existingProfileDetails.put(list,profileDetailsMap.get(list));
-                        }else {
-                        Map<String, Object> keyListRead = (Map<String, Object>) existingProfileDetails.get(list);
-                        Map<String, Object> keyListRequest = (Map<String, Object>) profileDetailsMap.get(list);
-                        for (String keysList : keyListRequest.keySet()) {
-                            keyListRead.put(keysList, keyListRequest.get(keysList));
+               for (String changedObj : listOfChangedDetails) {
+                    if (profileDetailsMap.get(changedObj) instanceof ArrayList) {
+                        existingProfileDetails.put(changedObj, profileDetailsMap.get(changedObj));
+                    } else {
+                        if (existingProfileDetails.containsKey(changedObj)) {
+                            Map<String, Object> existingProfileChild = (Map<String, Object>) existingProfileDetails.get(changedObj);
+                            Map<String, Object> requestedProfileChild = (Map<String, Object>) profileDetailsMap.get(changedObj);
+                            for (String childKey : requestedProfileChild.keySet()) {
+                                existingProfileChild.put(childKey, requestedProfileChild.get(childKey));
+                            }
+                        } else {
+                            existingProfileDetails.put(changedObj, profileDetailsMap.get(changedObj));
                         }
-                     }
+                    }
                 }
                 Map<String, Object> updateRequestValue = requestData;
                 updateRequestValue.put(Constants.PROFILE_DETAILS, existingProfileDetails);
