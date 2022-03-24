@@ -2,26 +2,26 @@ package org.sunbird.ratings.model;
 
 public class LookupRequest {
 
-    private String activity_Id;
-    private String activity_Type;
+    private String activity_id;
+    private String activity_type;
     private Float rating;
     private int limit;
     private String updateOn;
 
-    public String getActivity_Id() {
-        return activity_Id;
+    public String getActivity_id() {
+        return activity_id;
     }
 
-    public void setActivity_Id(String activity_Id) {
-        this.activity_Id = activity_Id;
+    public void setActivity_id(String activity_id) {
+        this.activity_id = activity_id;
     }
 
-    public String getActivity_Type() {
-        return activity_Type;
+    public String getActivity_type() {
+        return activity_type;
     }
 
-    public void setActivity_Type(String activity_Type) {
-        this.activity_Type = activity_Type;
+    public void setActivity_type(String activity_type) {
+        this.activity_type = activity_type;
     }
 
     public Float getRating() {

@@ -5,11 +5,11 @@ import org.sunbird.ratings.model.LookupRequest;
 import org.sunbird.ratings.model.RequestRating;
 
 public interface RatingService {
-    public SBApiResponse getRatings(String activity_Id, String activity_Type, String userId);
+    public SBApiResponse getRatings(String activity_id, String activity_type, String user_id);
 
     public SBApiResponse upsertRating(RequestRating requestRating);
 
-    public SBApiResponse getRatingSummary(String activity_Id, String activity_Type);
+    public SBApiResponse getRatingSummary(String activity_id, String activity_type);
 
     public SBApiResponse ratingLookUp(LookupRequest request);
 }
