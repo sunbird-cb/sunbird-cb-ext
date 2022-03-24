@@ -69,19 +69,19 @@ public class ProfileServiceImpl implements ProfileService{
                 }
 
                for (String changedObj : listOfChangedDetails) {
-                     if (profileDetailsMap.get(changedObj) instanceof ArrayList) {
-                        existingProfileDetails.put(changedObj,profileDetailsMap.get(changedObj));
-                        }else {
-                         if (existingProfileDetails.containsKey(changedObj)) {
-                         Map<String, Object> existingProfileChild = (Map<String, Object>) existingProfileDetails.get(changedObj);
-                         Map<String, Object> requestedProfileChild = (Map<String, Object>) profileDetailsMap.get(changedObj);
-                         for (String childKey : requestedProfileChild.keySet()) {
-                             existingProfileChild.put(childKey, requestedProfileChild.get(childKey));
-                         }
-                        } else{
-                             existingProfileDetails.put(changedObj,profileDetailsMap.get(changedObj));
-                         }
-                     }
+                    if (profileDetailsMap.get(changedObj) instanceof ArrayList) {
+                        existingProfileDetails.put(changedObj, profileDetailsMap.get(changedObj));
+                    } else {
+                        if (existingProfileDetails.containsKey(changedObj)) {
+                            Map<String, Object> existingProfileChild = (Map<String, Object>) existingProfileDetails.get(changedObj);
+                            Map<String, Object> requestedProfileChild = (Map<String, Object>) profileDetailsMap.get(changedObj);
+                            for (String childKey : requestedProfileChild.keySet()) {
+                                existingProfileChild.put(childKey, requestedProfileChild.get(childKey));
+                            }
+                        } else {
+                            existingProfileDetails.put(changedObj, profileDetailsMap.get(changedObj));
+                        }
+                    }
                 }
                 Map<String, Object> updateRequestValue = requestData;
                 updateRequestValue.put(Constants.PROFILE_DETAILS, existingProfileDetails);
