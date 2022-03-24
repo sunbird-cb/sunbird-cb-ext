@@ -235,13 +235,36 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
 			}
 			Collections.shuffle(allQuestionIdList);
 			int maxQuestions = (int) section.get(Constants.MAX_QUESTIONS);
-			newSection.put(Constants.CHILD_NODES,
-					allQuestionIdList.stream().limit(maxQuestions).collect(Collectors.toList()));
+			List<String> childNodeList = allQuestionIdList.stream().limit(maxQuestions).collect(Collectors.toList());
+			newSection.put(Constants.CHILD_NODES, childNodeList);
+
+			readQuestionLevelMinParams(section, newSection, childNodeList);
 
 			sectionResponse.add(newSection);
 		}
 		assessmentFilteredDetail.put(Constants.CHILDREN, sectionResponse);
 		assessmentFilteredDetail.put(Constants.CHILD_NODES, sectionIdList);
+	}
+
+	private void readQuestionLevelMinParams(Map<String, Object> completeSection, Map<String, Object> newSection,
+			List<String> childNodeList) {
+		List<String> questionMinParams = cbExtServerProperties.getAssessmentMinQuestionParams();
+		List<Map<String, Object>> completeQuestionList = (List<Map<String, Object>>) completeSection
+				.get(Constants.CHILDREN);
+		List<Map<String, Object>> updatedQuestionList = new ArrayList<>();
+		for (Map<String, Object> question : completeQuestionList) {
+			String qsId = (String) question.get(Constants.IDENTIFIER);
+			if (childNodeList.contains(qsId)) {
+				Map<String, Object> newQuestion = new HashMap<String, Object>();
+				for (String questionParam : questionMinParams) {
+					if (question.containsKey(questionParam)) {
+						newQuestion.put(questionParam, question.get(questionParam));
+					}
+				}
+				updatedQuestionList.add(newQuestion);
+			}
+		}
+		newSection.put(Constants.CHILDREN, updatedQuestionList);
 	}
 
 	private List<String> getQuestionIdList(Map<String, Object> questionListReqeust) throws Exception {

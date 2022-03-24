@@ -222,6 +222,9 @@ public class CbExtServerProperties {
 	@Value("${assessment.read.questionLevel.params}")
 	private String assessmentQuestionParams;
 
+	@Value("${assessment.read.min.question.params}")
+	private String assessmentMinQuestionParams;
+
 	public String getContentHost() {
 		return contentHost;
 	}
@@ -807,5 +810,13 @@ public class CbExtServerProperties {
 
 	public void setAssessmentQuestionParams(String assessmentQuestionParams) {
 		this.assessmentQuestionParams = assessmentQuestionParams;
+	}
+
+	public List<String> getAssessmentMinQuestionParams() {
+		return Arrays.asList(assessmentMinQuestionParams.split(",", -1));
+	}
+
+	public void setAssessmentMinQuestionParams(String assessmentMinQuestionParams) {
+		this.assessmentMinQuestionParams = assessmentMinQuestionParams;
 	}
 }
