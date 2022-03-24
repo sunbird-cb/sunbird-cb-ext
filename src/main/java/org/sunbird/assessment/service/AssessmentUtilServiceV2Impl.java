@@ -72,7 +72,7 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 					case MCQ_MCA:
 						for (Map<String, Object> option : options) {
 							if ((boolean) option.get(SELECTED_ANSWER)) {
-								marked.add(Integer.toString((int) option.get(INDEX)));
+								marked.add((String) option.get(INDEX));
 							}
 						}
 						break;
@@ -131,23 +131,25 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 			if (question.containsKey(QUESTION_TYPE)) {
 				String questionType = ((String) question.get(QUESTION_TYPE)).toLowerCase();
 				Map<String, Object> editorStateObj = (Map<String, Object>) question.get(EDITOR_STATE);
+				List<Map<String, Object>> options = (List<Map<String, Object>>) editorStateObj.get(OPTIONS);
 				switch (questionType) {
 				case MTF:
-					for (Map<String, Object> options : (List<Map<String, Object>>) editorStateObj.get(OPTIONS)) {
-						Map<String, Object> valueObj = (Map<String, Object>) options.get(VALUE);
-						correctOption
-								.add(valueObj.get(VALUE).toString() + "-" + valueObj.get(BODY).toString().toLowerCase()
-										+ "-" + options.get(ANSWER).toString().toLowerCase());
+					for (Map<String, Object> option : options) {
+						Map<String, Object> valueObj = (Map<String, Object>) option.get(VALUE);
+						correctOption.add(
+								valueObj.get(VALUE).toString() + "-" + option.get(ANSWER).toString().toLowerCase());
 					}
 					break;
 				case FTB:
-					correctOption.add((String) editorStateObj.get(ANSWER));
+					for (Map<String, Object> option : options) {
+						correctOption.add((String) option.get(SELECTED_ANSWER));
+					}
 					break;
 				case MCQ_SCA:
 				case MCQ_MCA:
-					for (Map<String, Object> options : (List<Map<String, Object>>) editorStateObj.get(OPTIONS)) {
-						if ((boolean) options.get(ANSWER)) {
-							Map<String, Object> valueObj = (Map<String, Object>) options.get(VALUE);
+					for (Map<String, Object> option : options) {
+						if ((boolean) option.get(ANSWER)) {
+							Map<String, Object> valueObj = (Map<String, Object>) option.get(VALUE);
 							correctOption.add(valueObj.get(VALUE).toString());
 						}
 					}
