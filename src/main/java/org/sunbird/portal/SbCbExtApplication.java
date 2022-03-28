@@ -39,7 +39,7 @@ public class SbCbExtApplication {
 
 	private ClientHttpRequestFactory getClientHttpRequestFactory() {
 
-		int timeout = 10000;
+		int timeout = 30000;
               RequestConfig config = RequestConfig.custom().setConnectTimeout(timeout).setConnectionRequestTimeout(timeout)
                            .setSocketTimeout(timeout).build();
               CloseableHttpClient client = HttpClientBuilder.create().setMaxConnTotal(2000).setMaxConnPerRoute(500)
