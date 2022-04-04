@@ -4,19 +4,19 @@ public class RatingMessage {
     public Integer version = 1;
     private String action = "ratingUpdate";
     private String activity_id;
-    private String activity_Type;
+    private String activity_type;
     private String user_id;
-    private String created_Date;
+    private String created_date;
     private UpdatedValues prevValues;
     private UpdatedValues updatedValues;
 
 
-    public RatingMessage( String action, String activity_id, String activity_Type, String user_id, String created_Date) {
+    public RatingMessage( String action, String activity_id, String activity_type, String user_id, String created_date) {
         this.action = action;
         this.activity_id = activity_id;
-        this.activity_Type = activity_Type;
+        this.activity_type = activity_type;
         this.user_id = user_id;
-        this.created_Date = created_Date;
+        this.created_date = created_date;
     }
 
 
@@ -36,12 +36,12 @@ public class RatingMessage {
         this.action = action;
     }
 
-    public String getActivity_Type() {
-        return activity_Type;
+    public String getActivity_type() {
+        return activity_type;
     }
 
-    public void setActivity_Type(String activity_Type) {
-        this.activity_Type = activity_Type;
+    public void setActivity_type(String activity_type) {
+        this.activity_type = activity_type;
     }
 
     public String getUser_id() {
@@ -52,12 +52,12 @@ public class RatingMessage {
         this.user_id = user_id;
     }
 
-    public String getCreated_Date() {
-        return created_Date;
+    public String getCreated_date() {
+        return created_date;
     }
 
-    public void setCreated_Date(String created_Date) {
-        this.created_Date = created_Date;
+    public void setCreated_date(String created_date) {
+        this.created_date = created_date;
     }
 
     public UpdatedValues getPrevValues() {
