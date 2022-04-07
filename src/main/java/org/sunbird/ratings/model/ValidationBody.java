@@ -3,8 +3,8 @@ package org.sunbird.ratings.model;
 public class ValidationBody {
     private RequestRating requestRating;
     private LookupRequest lookupRequest;
-    private String activity_Id = "";
-    private String activity_Type = "";
+    private String activityId = "";
+    private String activityType = "";
     private String userId = "";
 
     public RequestRating getRequestRating() {
@@ -23,20 +23,20 @@ public class ValidationBody {
         this.lookupRequest = lookupRequest;
     }
 
-    public String getActivity_Id() {
-        return activity_Id;
+    public String getActivityId() {
+        return activityId;
     }
 
-    public void setActivity_Id(String activity_Id) {
-        this.activity_Id = activity_Id;
+    public void setActivityId(String activityId) {
+        this.activityId = activityId;
     }
 
-    public String getActivity_Type() {
-        return activity_Type;
+    public String getActivityType() {
+        return activityType;
     }
 
-    public void setActivity_Type(String activity_Type) {
-        this.activity_Type = activity_Type;
+    public void setActivityType(String activityType) {
+        this.activityType = activityType;
     }
 
     public String getUserId() {

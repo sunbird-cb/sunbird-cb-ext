@@ -1,7 +1,7 @@
 package org.sunbird.ratings.model;
 
 public class RatingMessage {
-    public Integer version = 1;
+    public String version = "1";
     private String action = "ratingUpdate";
     private String activity_id;
     private String activity_Type;
@@ -10,8 +10,7 @@ public class RatingMessage {
     private UpdatedValues prevValues;
     private UpdatedValues updatedValues;
 
-
-    public RatingMessage( String action, String activity_id, String activity_Type, String user_id, String created_Date) {
+    public RatingMessage(String action, String activity_id, String activity_Type, String user_id, String created_Date) {
         this.action = action;
         this.activity_id = activity_id;
         this.activity_Type = activity_Type;

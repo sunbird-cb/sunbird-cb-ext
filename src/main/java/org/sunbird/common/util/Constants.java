@@ -155,9 +155,12 @@ public class Constants {
     public static final String API_RATINGS_LOOKUP = "api.ratings.lookup";
     public static final String DATABASE = "sunbird";
     public static final String LOGIN_TABLE = "user_first_login_details";
-    public static final String ACTIVITY_ID = "activity_id";
-    public static final String ACTIVITY_TYPE = "activity_type";
-    public static final String RATINGS_USER_ID = "userid";
+    public static final String ACTIVITY_ID = "activityId";
+    public static final String ACTIVITY_TYPE = "activityType";
+    public static final String RATINGS_USER_ID = "userId";
+    public static final String USER_FIRST_NAME = "firstName";
+    public static final String USER_LAST_NAME = "lastName";
+    public static final String USERID = "id";
     public static final String COMMENT = "comment";
     public static final String COMMENT_BY = "commentby";
     public static final String COMMENT_UPDATED_ON = "commentupdatedon";
@@ -165,6 +168,8 @@ public class Constants {
     public static final String RATING = "rating";
     public static final String REVIEW = "review";
     public static final String UPDATED_ON = "updatedon";
+    public static final String LOOKUP_ACTIVITY_ID = "activityid";
+    public static final String LOOKUP_ACTIVITY_TYPE = "activitytype";
     public static final String NO_RATING_EXCEPTION_MESSAGE = "No ratings found for : ";
     public static final String NO_REVIEW_EXCEPTION_MESSAGE = "No reviews found for : ";
     public static final String RATING_GENERIC_EXCEPTION_MESSAGE = "Exception occurred while adding the course review : ";
@@ -222,7 +227,6 @@ public class Constants {
     public static final String TABLE_RATINGS = "ratings";
     public static final String TABLE_RATINGS_LOOKUP = "ratings_lookup";
     public static final String TABLE_RATINGS_SUMMARY = "ratings_summary";
-
     public static final String VALUE = "value";
     public static final String DEPT_NAME = "deptName";
     public static final String PROFILE_DETAILS = "profileDetails";

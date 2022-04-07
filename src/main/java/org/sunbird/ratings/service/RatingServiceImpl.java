@@ -15,10 +15,7 @@ import org.sunbird.common.util.Constants;
 import org.sunbird.core.logger.CbExtLogger;
 import org.sunbird.core.producer.Producer;
 import org.sunbird.ratings.exception.ValidationException;
-import org.sunbird.ratings.model.LookupRequest;
-import org.sunbird.ratings.model.RatingMessage;
-import org.sunbird.ratings.model.RequestRating;
-import org.sunbird.ratings.model.ValidationBody;
+import org.sunbird.ratings.model.*;
 import org.sunbird.ratings.responsecode.ResponseCode;
 import org.sunbird.ratings.responsecode.ResponseMessage;
 
@@ -42,20 +39,20 @@ public class RatingServiceImpl implements RatingService {
     public String updateRatingTopicName;
 
     @Override
-    public SBApiResponse getRatings(String activity_Id, String activity_Type, String userId) {
+    public SBApiResponse getRatings(String activityId, String activityType, String userId) {
         SBApiResponse response = new SBApiResponse(Constants.API_RATINGS_READ);
 
         try {
             validationBody = new ValidationBody();
-            validationBody.setActivity_Id(activity_Id);
-            validationBody.setActivity_Type(activity_Type);
+            validationBody.setActivityId(activityId);
+            validationBody.setActivityType(activityType);
             validationBody.setUserId(userId);
             validateRatingsInfo(validationBody, "getRating");
 
 
             Map<String, Object> request = new HashMap<>();
-            request.put(Constants.ACTIVITY_ID, activity_Id);
-            request.put(Constants.ACTIVITY_TYPE, activity_Type);
+            request.put(Constants.ACTIVITY_ID, activityId);
+            request.put(Constants.ACTIVITY_TYPE, activityType);
             request.put(Constants.RATINGS_USER_ID, userId);
             List<Map<String, Object>> existingDataList = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
                     Constants.TABLE_RATINGS, request, null);
@@ -64,7 +61,7 @@ public class RatingServiceImpl implements RatingService {
                 response.put(Constants.RESPONSE, existingDataList);
                 response.setResponseCode(HttpStatus.OK);
             } else {
-                String errMsg = Constants.NO_RATING_EXCEPTION_MESSAGE + activity_Id + ", activity_Type: " + activity_Type;
+                String errMsg = Constants.NO_RATING_EXCEPTION_MESSAGE + activityId + ", activity_Type: " + activityType;
                 response.put(Constants.MESSAGE, Constants.FAILED);
                 response.getParams().setErrmsg(errMsg);
                 response.setResponseCode(HttpStatus.BAD_REQUEST);
@@ -76,19 +73,19 @@ public class RatingServiceImpl implements RatingService {
     }
 
     @Override
-    public SBApiResponse getRatingSummary(String activity_Id, String activity_Type) {
+    public SBApiResponse getRatingSummary(String activityId, String activityType) {
         SBApiResponse response = new SBApiResponse(Constants.API_RATINGS_SUMMARY);
 
         try {
             validationBody = new ValidationBody();
-            validationBody.setActivity_Id(activity_Id);
-            validationBody.setActivity_Type(activity_Type);
+            validationBody.setActivityId(activityId);
+            validationBody.setActivityType(activityType);
 
             validateRatingsInfo(validationBody, "getSummary");
 
             Map<String, Object> request = new HashMap<>();
-            request.put(Constants.ACTIVITY_ID, activity_Id);
-            request.put(Constants.ACTIVITY_TYPE, activity_Type);
+            request.put(Constants.ACTIVITY_ID, activityId);
+            request.put(Constants.ACTIVITY_TYPE, activityType);
 
             List<Map<String, Object>> existingDataList = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
                     Constants.TABLE_RATINGS_SUMMARY, request, null);
@@ -97,7 +94,7 @@ public class RatingServiceImpl implements RatingService {
                 response.put(Constants.RESPONSE, existingDataList);
                 response.setResponseCode(HttpStatus.OK);
             } else {
-                String errMsg = Constants.NO_REVIEW_EXCEPTION_MESSAGE + activity_Id + ", activity_Type: " + activity_Type;
+                String errMsg = Constants.NO_REVIEW_EXCEPTION_MESSAGE + activityId + ", activityType: " + activityType;
                 response.put(Constants.MESSAGE, Constants.FAILED);
                 response.getParams().setErrmsg(errMsg);
                 response.setResponseCode(HttpStatus.BAD_REQUEST);
@@ -122,8 +119,8 @@ public class RatingServiceImpl implements RatingService {
             validateRatingsInfo(validationBody, "upsert");
 
             Map<String, Object> request = new HashMap<>();
-            request.put(Constants.ACTIVITY_ID, requestRating.getActivity_Id());
-            request.put(Constants.ACTIVITY_TYPE, requestRating.getActivity_type());
+            request.put(Constants.ACTIVITY_ID, requestRating.getActivityId());
+            request.put(Constants.ACTIVITY_TYPE, requestRating.getActivityType());
             request.put(Constants.RATINGS_USER_ID, requestRating.getUserId());
 
 
@@ -140,7 +137,7 @@ public class RatingServiceImpl implements RatingService {
                 Map<String, Object> prevInfo = existingDataList.get(0);
                 cassandraOperation.updateRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_RATINGS, updateRequest,
                         request);
-                ratingMessage = new RatingMessage("ratingUpdate", requestRating.getActivity_Id(), requestRating.getActivity_type(),
+                ratingMessage = new RatingMessage("ratingUpdate", requestRating.getActivityId(), requestRating.getActivityType(),
                         requestRating.getUserId(), String.valueOf((prevInfo.get("createdon"))));
 
                 ratingMessage.setPrevValues(processEventMessage(String.valueOf(prevInfo.get("createdon")),
@@ -155,7 +152,7 @@ public class RatingServiceImpl implements RatingService {
 
                 cassandraOperation.insertRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_RATINGS, request);
 
-                ratingMessage = new RatingMessage("ratingAdd", requestRating.getActivity_Id(), requestRating.getActivity_type(),
+                ratingMessage = new RatingMessage("ratingAdd", requestRating.getActivityId(), requestRating.getActivityType(),
                         requestRating.getUserId(), String.valueOf(timeBasedUuid));
 
                 ratingMessage.setUpdatedValues(processEventMessage(String.valueOf(request.get(Constants.CREATED_ON)),
@@ -165,11 +162,12 @@ public class RatingServiceImpl implements RatingService {
             }
             response.setResponseCode(HttpStatus.OK);
             response.getParams().setStatus(Constants.SUCCESSFUL);
+
             kafkaProducer.push(updateRatingTopicName, ratingMessage);
         } catch (ValidationException ex) {
             logger.error(ex);
             return processExceptionBody(response, ex, "", HttpStatus.BAD_REQUEST);
-        } catch (KafkaException ex){
+        } catch (KafkaException ex) {
             logger.error(ex);
             return processExceptionBody(response, ex, Constants.KAFKA_RATING_EXCEPTION_MESSAGE, HttpStatus.BAD_REQUEST);
         } catch (Exception ex) {
@@ -183,7 +181,7 @@ public class RatingServiceImpl implements RatingService {
 
     @Override
     public SBApiResponse ratingLookUp(LookupRequest lookupRequest) {
-
+        List<String> listOfUserId = new ArrayList<>();
         SBApiResponse response = new SBApiResponse(Constants.API_RATINGS_LOOKUP);
 
         try {
@@ -192,18 +190,48 @@ public class RatingServiceImpl implements RatingService {
             validateRatingsInfo(validationBody, "lookup");
 
             Map<String, Object> request = new HashMap<>();
-            request.put(Constants.ACTIVITY_ID, lookupRequest.getActivity_Id());
-            request.put(Constants.ACTIVITY_TYPE, lookupRequest.getActivity_Type());
-            request.put(Constants.RATING, lookupRequest.getRating());
+            request.put(Constants.ACTIVITY_ID, lookupRequest.getActivityId());
+            request.put(Constants.ACTIVITY_TYPE, lookupRequest.getActivityType());
+
+            if (lookupRequest.getRating() != null) {
+                request.put(Constants.RATING, lookupRequest.getRating());
+            }
 
             List<Map<String, Object>> existingDataList = cassandraOperation.getRecordsByPropertiesWithPagination(Constants.KEYSPACE_SUNBIRD,
                     Constants.TABLE_RATINGS_LOOKUP, request, null, lookupRequest.getLimit(), lookupRequest.getUpdateOn());
             if (!CollectionUtils.isEmpty(existingDataList)) {
+
+                for (int i = 0; i < existingDataList.size(); i++) {
+                    Map<String, Object> lookupData = existingDataList.get(i);
+                    listOfUserId.add(lookupData.get(Constants.RATINGS_USER_ID).toString());
+                }
+                Map<String, Object> request1 = new HashMap<>();
+                request1.put("id", listOfUserId);
+                List<Map<String, Object>> existingUserList = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
+                        Constants.TABLE_USER, request1, null);
+
+
+                List<LookupResponse> listOfLookupResponse = new ArrayList<>();
+                for (int i = 0; i < existingDataList.size(); i++) {
+                    for (int j = 0; j < existingUserList.size(); j++) {
+                        if ((existingUserList.get(j).get(Constants.USERID)).equals( existingDataList.get(i).get(Constants.USER_ID))) {
+
+                            listOfLookupResponse.add(new LookupResponse((String) existingDataList.get(i).get(Constants.LOOKUP_ACTIVITY_ID),
+                                    (String) existingDataList.get(i).get(Constants.REVIEW),
+                                    existingDataList.get(i).get(Constants.RATING).toString(),
+                                    existingDataList.get(i).get(Constants.UPDATED_ON).toString(),
+                                    (String) existingDataList.get(i).get(Constants.LOOKUP_ACTIVITY_TYPE),
+                                    (String) existingDataList.get(i).get(Constants.USER_ID),
+                                    (String) existingUserList.get(j).get(Constants.USER_FIRST_NAME),
+                                    (String) existingUserList.get(j).get(Constants.USER_LAST_NAME)));
+                        }
+                    }
+                }
                 response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
-                response.put(Constants.RESPONSE, existingDataList);
+                response.put(Constants.RESPONSE, listOfLookupResponse);
                 response.setResponseCode(HttpStatus.OK);
             } else {
-                String errMsg = Constants.NO_RATING_EXCEPTION_MESSAGE + lookupRequest.getActivity_Id() + ", activity_Type: " + lookupRequest.getActivity_Type();
+                String errMsg = Constants.NO_RATING_EXCEPTION_MESSAGE + lookupRequest.getActivityId() + ", activityType: " + lookupRequest.getActivityType();
                 response.put(Constants.MESSAGE, Constants.FAILED);
                 response.getParams().setErrmsg(errMsg);
                 response.setResponseCode(HttpStatus.BAD_REQUEST);
@@ -231,10 +259,10 @@ public class RatingServiceImpl implements RatingService {
         List<String> errObjList = new ArrayList<>();
 
         if (flag == Constants.RATING_UPSERT_OPERATION) {
-            if (StringUtils.isEmpty(validationBody.getRequestRating().getActivity_Id())) {
+            if (StringUtils.isEmpty(validationBody.getRequestRating().getActivityId())) {
                 errObjList.add(ResponseMessage.Message.INVALID_INPUT);
             }
-            if (StringUtils.isEmpty(validationBody.getRequestRating().getActivity_type())) {
+            if (StringUtils.isEmpty(validationBody.getRequestRating().getActivityType())) {
                 errObjList.add(ResponseMessage.Message.INVALID_INPUT);
             }
             if (StringUtils.isEmpty((String.valueOf(validationBody.getRequestRating().getRating())))
@@ -251,13 +279,13 @@ public class RatingServiceImpl implements RatingService {
             }
         } else if (flag == Constants.RATING_LOOKUP_RATING_OPERATION) {
 
-            if (StringUtils.isEmpty(validationBody.getLookupRequest().getActivity_Id())) {
+            if (StringUtils.isEmpty(validationBody.getLookupRequest().getActivityId())) {
                 errObjList.add(ResponseMessage.Message.INVALID_INPUT);
             }
-            if (StringUtils.isEmpty(validationBody.getLookupRequest().getActivity_Type())) {
+            if (StringUtils.isEmpty(validationBody.getLookupRequest().getActivityType())) {
                 errObjList.add(ResponseMessage.Message.INVALID_INPUT);
             }
-            if ((validationBody.getLookupRequest().getRating() < 1.0
+            if ((validationBody.getLookupRequest().getRating() != null) &&(validationBody.getLookupRequest().getRating() < 1.0
                     || validationBody.getLookupRequest().getRating() > 5.0)) {
                 errObjList.add(ResponseMessage.Message.INVALID_INPUT + ResponseMessage.Message.INVALID_RATING);
             }
@@ -265,10 +293,10 @@ public class RatingServiceImpl implements RatingService {
                 errObjList.add(ResponseMessage.Message.INVALID_LIMIT);
             }
         } else if (flag == Constants.RATING_GET_OPERATION || flag == Constants.RATING_SUMMARY_OPERATION) {
-            if (StringUtils.isEmpty(validationBody.getActivity_Id())) {
+            if (StringUtils.isEmpty(validationBody.getActivityId())) {
                 errObjList.add(ResponseMessage.Message.INVALID_INPUT);
             }
-            if (StringUtils.isEmpty(validationBody.getActivity_Type())) {
+            if (StringUtils.isEmpty(validationBody.getActivityType())) {
                 errObjList.add(ResponseMessage.Message.INVALID_INPUT);
             }
 

@@ -25,19 +25,19 @@ public class RatingsController {
 
     }
 
-    @GetMapping("/ratings/v1/read/{activity_Id}/{activity_Type}/{userId}")
-    public ResponseEntity<?> getRating(@PathVariable("activity_Id") String activity_Id,
-                                       @PathVariable("activity_Type") String activity_Type,
+    @GetMapping("/ratings/v1/read/{activityId}/{activityType}/{userId}")
+    public ResponseEntity<?> getRating(@PathVariable("activityId") String activityId,
+                                       @PathVariable("activityType") String activityType,
                                        @PathVariable("userId") String userId) {
-        SBApiResponse response = ratingService.getRatings(activity_Id, activity_Type, userId);
+        SBApiResponse response = ratingService.getRatings(activityId, activityType, userId);
         return new ResponseEntity<>(response, response.getResponseCode());
 
     }
 
-    @GetMapping("/ratings/v1/summary/{activity_Id}/{activity_Type}")
-    public ResponseEntity<?> getRatingSummary(@PathVariable("activity_Id") String activity_Id,
-                                              @PathVariable("activity_Type") String activity_Type) {
-        SBApiResponse response = ratingService.getRatingSummary(activity_Id, activity_Type);
+    @GetMapping("/ratings/v1/summary/{activityId}/{activityType}")
+    public ResponseEntity<?> getRatingSummary(@PathVariable("activityId") String activityId,
+                                              @PathVariable("activityType") String activityType) {
+        SBApiResponse response = ratingService.getRatingSummary(activityId, activityType);
         return new ResponseEntity<>(response, response.getResponseCode());
     }
 
