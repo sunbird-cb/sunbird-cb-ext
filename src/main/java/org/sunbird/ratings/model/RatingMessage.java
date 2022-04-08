@@ -1,7 +1,7 @@
 package org.sunbird.ratings.model;
 
 public class RatingMessage {
-    public String version = "1";
+    public Integer version = 1;
     private String action = "ratingUpdate";
     private String activity_id;
     private String activity_Type;
