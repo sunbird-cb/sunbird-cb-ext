@@ -21,6 +21,8 @@ import org.sunbird.ratings.responsecode.ResponseMessage;
 
 import java.util.*;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class RatingServiceImpl implements RatingService {
@@ -205,28 +207,32 @@ public class RatingServiceImpl implements RatingService {
                     Map<String, Object> lookupData = existingDataList.get(i);
                     listOfUserId.add(lookupData.get(Constants.RATINGS_USER_ID).toString());
                 }
-                Map<String, Object> request1 = new HashMap<>();
-                request1.put("id", listOfUserId);
+                Map<String, Object> userRequest = new HashMap<>();
+                userRequest.put(Constants.USERID, listOfUserId);
+                List<String> fields = new ArrayList<>();
+                fields.add(Constants.USERID);
+                fields.add(Constants.FIRSTNAME);
+                fields.add(Constants.LASTNAME);
                 List<Map<String, Object>> existingUserList = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
-                        Constants.TABLE_USER, request1, null);
+                        Constants.TABLE_USER, userRequest, fields);
 
+                Stream<Map<String, Object>> userStream = existingUserList.stream();
+                List<Map<String, Object>> userSortedList = userStream.sorted(RatingServiceImpl::comparator).collect(Collectors.toList());
+                Stream<Map<String, Object>> ratingLookupStream = existingDataList.stream();
+                List<Map<String, Object>> ratingLookupSortedList = ratingLookupStream.sorted(RatingServiceImpl::comparator).collect(Collectors.toList());
 
                 List<LookupResponse> listOfLookupResponse = new ArrayList<>();
-                for (int i = 0; i < existingDataList.size(); i++) {
-                    for (int j = 0; j < existingUserList.size(); j++) {
-                        if ((existingUserList.get(j).get(Constants.USERID)).equals( existingDataList.get(i).get(Constants.USER_ID))) {
-
-                            listOfLookupResponse.add(new LookupResponse((String) existingDataList.get(i).get(Constants.LOOKUP_ACTIVITY_ID),
-                                    (String) existingDataList.get(i).get(Constants.REVIEW),
-                                    existingDataList.get(i).get(Constants.RATING).toString(),
-                                    existingDataList.get(i).get(Constants.UPDATED_ON).toString(),
-                                    (String) existingDataList.get(i).get(Constants.LOOKUP_ACTIVITY_TYPE),
-                                    (String) existingDataList.get(i).get(Constants.USER_ID),
-                                    (String) existingUserList.get(j).get(Constants.USER_FIRST_NAME),
-                                    (String) existingUserList.get(j).get(Constants.USER_LAST_NAME)));
-                        }
-                    }
+                for (int k = 0; k < ratingLookupSortedList.size(); k++) {
+                    listOfLookupResponse.add(new LookupResponse(ratingLookupSortedList.get(k).get(Constants.LOOKUP_ACTIVITY_ID).toString(),
+                            ratingLookupSortedList.get(k).get(Constants.REVIEW).toString(),
+                            ratingLookupSortedList.get(k).get(Constants.RATING).toString(),
+                            ratingLookupSortedList.get(k).get(Constants.UPDATED_ON).toString(),
+                            ratingLookupSortedList.get(k).get(Constants.LOOKUP_ACTIVITY_TYPE).toString(),
+                            ratingLookupSortedList.get(k).get(Constants.USER_ID).toString(),
+                            userSortedList.get(k).get(Constants.USER_FIRST_NAME).toString(),
+                            userSortedList.get(k).get(Constants.USER_LAST_NAME).toString()));
                 }
+
                 response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
                 response.put(Constants.RESPONSE, listOfLookupResponse);
                 response.setResponseCode(HttpStatus.OK);
@@ -244,6 +250,27 @@ public class RatingServiceImpl implements RatingService {
         }
         return response;
 
+    }
+
+    public static int comparator(Map<String, Object> map1, Map<String, Object> map2) {
+        if (map1 == null && map2 == null)
+            return 0;
+
+        if (map1 == null || map2 == null) {
+            throw new NullPointerException();
+        }
+        String name1 = "";
+        String name2 = "";
+        if (map1.get("id") != null) {
+            name1 = (String) map1.get("id");
+            name2 = (String) map2.get("id");
+        }
+        if (map1.get("userId") != null) {
+            name1 = (String) map1.get("userId");
+            name2 = (String) map2.get("userId");
+        }
+        int c = name1.compareTo(name2);
+        return c;
     }
 
     public RatingMessage.UpdatedValues processEventMessage(String date, Float rating, String review) {
