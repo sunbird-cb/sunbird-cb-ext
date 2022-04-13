@@ -11,6 +11,7 @@ import org.sunbird.common.model.SunbirdApiHierarchyResultBatch;
 import org.sunbird.common.model.SunbirdApiResp;
 import org.sunbird.common.model.SunbirdApiUserCourseListResp;
 import org.sunbird.common.util.CbExtServerProperties;
+import org.sunbird.common.util.Constants;
 import org.sunbird.core.logger.CbExtLogger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -48,7 +49,8 @@ public class ContentServiceImpl implements ContentService {
 		url.append(serverConfig.getCourseServiceHost()).append(endPoint);
 		Map<String, String> headers = new HashMap<>();
 		headers.put("x-authenticated-user-token", authToken);
-		SunbirdApiUserCourseListResp response = mapper.convertValue(outboundRequestHandlerService.fetchUsingGetWithHeaders(url.toString(), headers),
+		SunbirdApiUserCourseListResp response = mapper.convertValue(
+				outboundRequestHandlerService.fetchUsingGetWithHeaders(url.toString(), headers),
 				SunbirdApiUserCourseListResp.class);
 		if (response.getResponseCode().equalsIgnoreCase("Ok")) {
 			return response;
@@ -132,5 +134,43 @@ public class ContentServiceImpl implements ContentService {
 			logger.error(e);
 		}
 		return participantList;
+	}
+
+	public SunbirdApiResp getAssessmentHierachyResponse(String assessmentId) {
+		StringBuilder url = new StringBuilder();
+		url.append(serverConfig.getAssessmentHost()).append(serverConfig.getAssessmentHierarchyReadPath());
+		SunbirdApiResp response = mapper.convertValue(
+				outboundRequestHandlerService.fetchResult(url.toString().replace(Constants.IDENTIFIER, assessmentId)),
+				SunbirdApiResp.class);
+		if (response.getResponseCode().equalsIgnoreCase("Ok")) {
+			return response;
+		}
+
+		return null;
+	}
+
+	public SunbirdApiResp getQustionListDetails(List<String> questionIdList) {
+		SunbirdApiResp response = null;
+		StringBuilder url = new StringBuilder();
+		url.append(serverConfig.getAssessmentHost()).append(serverConfig.getAssessmentQuestionListPath());
+
+		Map<String, Object> requestMap = new HashMap<>();
+		Map<String, Object> request = new HashMap<>();
+		Map<String, Object> search = new HashMap<>();
+		search.put(Constants.IDENTIFIER, questionIdList);
+		request.put("search", search);
+		requestMap.put("request", request);
+
+		Map<String, String> headerValues = new HashMap<>();
+		headerValues.put(Constants.AUTH_TOKEN, serverConfig.getSbApiKey());
+
+		response = mapper.convertValue(
+				outboundRequestHandlerService.fetchResultUsingPost(url.toString(), requestMap, headerValues),
+				SunbirdApiResp.class);
+		if (response.getResponseCode().equalsIgnoreCase("Ok")) {
+			return response;
+		}
+
+		return null;
 	}
 }
