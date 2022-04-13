@@ -1,14 +1,9 @@
 package org.sunbird.common.model;
 
-import java.util.List;
-import java.util.Map;
-
 public class SunbirdApiRespResult {
 	private SunbirdApiResultResponse response;
 	private SunbirdApiHierarchyResultContent content;
 	private SunbirdApiHierarchyResultBatch batch;
-	private Map<String, Object> questionSet;
-	private List<Map<String, Object>> questions;
 
 	public SunbirdApiResultResponse getResponse() {
 		return response;
@@ -32,21 +27,5 @@ public class SunbirdApiRespResult {
 
 	public void setBatch(SunbirdApiHierarchyResultBatch batch) {
 		this.batch = batch;
-	}
-
-	public Map<String, Object> getQuestionSet() {
-		return questionSet;
-	}
-
-	public void setQuestionSet(Map<String, Object> questionSet) {
-		this.questionSet = questionSet;
-	}
-
-	public List<Map<String, Object>> getQuestions() {
-		return questions;
-	}
-
-	public void setQuestions(List<Map<String, Object>> questions) {
-		this.questions = questions;
 	}
 }

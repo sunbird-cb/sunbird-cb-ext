@@ -94,7 +94,8 @@ public class OutboundRequestHandlerServiceImpl {
 				headersValues.forEach((k, v) -> headers.set(k, v));
 			}
 			HttpEntity entity = new HttpEntity(headers);
-			response = restTemplate.exchange(uri, HttpMethod.GET, entity, Map.class);
+			response = restTemplate.exchange(
+					uri, HttpMethod.GET, entity, Map.class);
 		} catch (HttpClientErrorException e) {
 			log.error(e);
 		} catch (Exception e) {
@@ -106,7 +107,7 @@ public class OutboundRequestHandlerServiceImpl {
 	public Object fetchUsingGetWithHeadersProfile(String uri, Map<String, String> headersValues) {
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-		Map<String, Object> response = null;
+		Map<String,Object> response = null;
 		try {
 			StringBuilder str = new StringBuilder(this.getClass().getCanonicalName())
 					.append(Constants.FETCH_RESULT_CONSTANT).append(System.lineSeparator());
@@ -117,7 +118,8 @@ public class OutboundRequestHandlerServiceImpl {
 				headersValues.forEach((k, v) -> headers.set(k, v));
 			}
 			HttpEntity<Object> entity = new HttpEntity<>(headers);
-			response = restTemplate.exchange(uri, HttpMethod.GET, entity, Map.class).getBody();
+			response = restTemplate.exchange(
+					uri, HttpMethod.GET, entity, Map.class).getBody();
 		} catch (HttpClientErrorException e) {
 			log.error(e);
 		} catch (Exception e) {
