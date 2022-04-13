@@ -90,12 +90,27 @@ public class CassandraOperationImpl implements CassandraOperation {
         }
         return response;
     }
+    @Override
+    public Map<String, Object> getRecordsByProperties(String keyspaceName, String tableName,
+                                                            Map<String, Object> propertyMap, List<String> fields,String key) {
+        Select selectQuery = null;
+        Map<String, Object> response = new HashMap<>();
+        try {
+            selectQuery = processQuery(keyspaceName, tableName, propertyMap, fields);
+            ResultSet results = connectionManager.getSession(keyspaceName).execute(selectQuery);
+            response = CassandraUtil.createResponse(results,key);
+
+        } catch (Exception e) {
+            logger.error(Constants.EXCEPTION_MSG_FETCH + tableName + " : " + e.getMessage(), e);
+        }
+        return response;
+    }
 
     @Override
-    public List<Map<String, Object>> getRecordsByPropertiesWithPagination(String keyspaceName, String tableName,
-                                                                          Map<String, Object> propertyMap, List<String> fields, int limit, String updatedOn) {
+    public Map<String, Object> getRecordsByPropertiesWithPagination(String keyspaceName, String tableName,
+                                                                          Map<String, Object> propertyMap, List<String> fields, int limit, String updatedOn,String key) {
         Select selectQuery = null;
-        List<Map<String, Object>> response = new ArrayList<>();
+        Map<String, Object> response = new HashMap<>();
         try {
             selectQuery = processQuery(keyspaceName, tableName, propertyMap, fields);
             selectQuery.limit(limit);
@@ -103,7 +118,7 @@ public class CassandraOperationImpl implements CassandraOperation {
                 selectQuery.where(QueryBuilder.lt("updatedon", UUID.fromString(updatedOn)));
             }
             ResultSet results = connectionManager.getSession(keyspaceName).execute(selectQuery);
-            response = CassandraUtil.createResponse(results);
+            response = CassandraUtil.createResponse(results,key);
         } catch (Exception e) {
             logger.error(Constants.EXCEPTION_MSG_FETCH + tableName + " : " + e.getMessage(), e);
         }

@@ -1,6 +1,7 @@
 package org.sunbird.ratings.service;
 
 import com.datastax.driver.core.utils.UUIDs;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang.StringUtils;
 import org.apache.kafka.common.KafkaException;
@@ -21,8 +22,6 @@ import org.sunbird.ratings.responsecode.ResponseMessage;
 
 import java.util.*;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 public class RatingServiceImpl implements RatingService {
@@ -91,9 +90,70 @@ public class RatingServiceImpl implements RatingService {
 
             List<Map<String, Object>> existingDataList = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
                     Constants.TABLE_RATINGS_SUMMARY, request, null);
+
             if (!CollectionUtils.isEmpty(existingDataList)) {
+            Map<String, Object> map = existingDataList.get(0);
+            String reviews = (String) map.get(Constants.LATEST50REVIEWS);
+            JsonNode actualObj = mapper.readTree(reviews);
+            List<String> userList = new ArrayList<>();
+            Map<String, SummaryNodeModel> reviewMap = new HashMap<>();
+
+            for (JsonNode jsonNode : actualObj) {
+                final SummaryNodeModel summaryModel = mapper.convertValue(jsonNode, SummaryNodeModel.class);
+                reviewMap.put(summaryModel.getUser_id(), summaryModel);
+                userList.add(jsonNode.get("user_id").asText());
+            }
+
+            Map<String, Object> userRequest = new HashMap<>();
+            userRequest.put(Constants.USERID, userList);
+            List<String> fields = new ArrayList<>();
+            fields.add(Constants.USERID);
+            fields.add(Constants.FIRSTNAME);
+            fields.add(Constants.LASTNAME);
+
+            Map<String, Object> existingUserList = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
+                    Constants.TABLE_USER, userRequest, fields, "id");
+            List<SummaryModel.latestReviews> latest50Reviews = new ArrayList<>();
+
+            String firstName = "";
+            String lastName = "";
+
+            for (String user : userList) {
+                final ObjectMapper mapper = new ObjectMapper();
+                final UserModel userModel = mapper.convertValue(existingUserList.get(user), UserModel.class);
+                final SummaryNodeModel summaryNodeModel = mapper.convertValue(reviewMap.get(user), SummaryNodeModel.class);
+                if (userModel.getFirstName() != null) {
+                    firstName = userModel.getFirstName();
+                }
+                if (userModel.getLastName() != null) {
+                    lastName = userModel.getLastName();
+                }
+                latest50Reviews.add(new SummaryModel.latestReviews(Constants.REVIEW,
+                        userModel.getId(),
+                        summaryNodeModel.getDate(),
+                        summaryNodeModel.getRating().floatValue(),
+                        summaryNodeModel.getReview(),
+                        firstName,
+                        lastName
+
+                ));
+            }
+            Map<String, Object> summaryData = existingDataList.get(0);
+
+            SummaryModel summaryModel = new SummaryModel(
+                    summaryData.get(Constants.SUMMARY_ACTIVITY_ID).toString(),
+                    summaryData.get(Constants.SUMMARY_ACTIVITY_TYPE).toString(),
+                    (Float) summaryData.get(Constants.TOTALCOUNT1STARS),
+                    (Float) summaryData.get(Constants.TOTALCOUNT2STARS),
+                    (Float) summaryData.get(Constants.TOTALCOUNT3STARS),
+                    (Float) summaryData.get(Constants.TOTALCOUNT4STARS),
+                    (Float) summaryData.get(Constants.TOTALCOUNT5STARS),
+                    (Float) summaryData.get(Constants.TOTALNUMBEROFRATINGS),
+                    (Float) summaryData.get(Constants.SUMOFTOTALRATINGS),
+                    mapper.writeValueAsString(latest50Reviews)
+            );
                 response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
-                response.put(Constants.RESPONSE, existingDataList);
+                response.put(Constants.RESPONSE, summaryModel);
                 response.setResponseCode(HttpStatus.OK);
             } else {
                 String errMsg = Constants.NO_REVIEW_EXCEPTION_MESSAGE + activityId + ", activityType: " + activityType;
@@ -198,14 +258,15 @@ public class RatingServiceImpl implements RatingService {
             if (lookupRequest.getRating() != null) {
                 request.put(Constants.RATING, lookupRequest.getRating());
             }
+            Map<String, Object> existingDataList = cassandraOperation.getRecordsByPropertiesWithPagination(Constants.KEYSPACE_SUNBIRD,
+                    Constants.TABLE_RATINGS_LOOKUP, request, null, lookupRequest.getLimit(), lookupRequest.getUpdateOn(), "userId");
+            List<LookupResponse> listOfLookupResponse = new ArrayList<>();
 
-            List<Map<String, Object>> existingDataList = cassandraOperation.getRecordsByPropertiesWithPagination(Constants.KEYSPACE_SUNBIRD,
-                    Constants.TABLE_RATINGS_LOOKUP, request, null, lookupRequest.getLimit(), lookupRequest.getUpdateOn());
             if (!CollectionUtils.isEmpty(existingDataList)) {
 
-                for (int i = 0; i < existingDataList.size(); i++) {
-                    Map<String, Object> lookupData = existingDataList.get(i);
-                    listOfUserId.add(lookupData.get(Constants.RATINGS_USER_ID).toString());
+                for (Map.Entry<String, Object> existingData : existingDataList.entrySet()) {
+
+                    listOfUserId.add(existingData.getKey());
                 }
                 Map<String, Object> userRequest = new HashMap<>();
                 userRequest.put(Constants.USERID, listOfUserId);
@@ -213,26 +274,30 @@ public class RatingServiceImpl implements RatingService {
                 fields.add(Constants.USERID);
                 fields.add(Constants.FIRSTNAME);
                 fields.add(Constants.LASTNAME);
-                List<Map<String, Object>> existingUserList = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
-                        Constants.TABLE_USER, userRequest, fields);
 
-                Stream<Map<String, Object>> userStream = existingUserList.stream();
-                List<Map<String, Object>> userSortedList = userStream.sorted(RatingServiceImpl::comparator).collect(Collectors.toList());
-                Stream<Map<String, Object>> ratingLookupStream = existingDataList.stream();
-                List<Map<String, Object>> ratingLookupSortedList = ratingLookupStream.sorted(RatingServiceImpl::comparator).collect(Collectors.toList());
+                Map<String, Object> existingUserList = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
+                        Constants.TABLE_USER, userRequest, fields, Constants.ID);
+                String firstName = "";
+                String lastName = "";
 
-                List<LookupResponse> listOfLookupResponse = new ArrayList<>();
-                for (int k = 0; k < ratingLookupSortedList.size(); k++) {
-                    listOfLookupResponse.add(new LookupResponse(ratingLookupSortedList.get(k).get(Constants.LOOKUP_ACTIVITY_ID).toString(),
-                            ratingLookupSortedList.get(k).get(Constants.REVIEW).toString(),
-                            ratingLookupSortedList.get(k).get(Constants.RATING).toString(),
-                            ratingLookupSortedList.get(k).get(Constants.UPDATED_ON).toString(),
-                            ratingLookupSortedList.get(k).get(Constants.LOOKUP_ACTIVITY_TYPE).toString(),
-                            ratingLookupSortedList.get(k).get(Constants.USER_ID).toString(),
-                            userSortedList.get(k).get(Constants.USER_FIRST_NAME).toString(),
-                            userSortedList.get(k).get(Constants.USER_LAST_NAME).toString()));
+                for (String user : listOfUserId) {
+                    final ObjectMapper mapper = new ObjectMapper();
+                    final UserModel userModel = mapper.convertValue(existingUserList.get(user), UserModel.class);
+                    final LookupDataModel lookupModel = mapper.convertValue(existingDataList.get(user), LookupDataModel.class);
+                    if (userModel.getFirstName() != null) {
+                        firstName = userModel.getFirstName();
+                    } else if (userModel.getLastName() != null) {
+                        lastName = userModel.getLastName();
+                    }
+                    listOfLookupResponse.add(new LookupResponse(lookupModel.getActivityid(),
+                            lookupModel.getReview(),
+                            lookupModel.getRating().toString(),
+                            lookupModel.getUpdatedon(),
+                            lookupModel.getUpdatedon(),
+                            lookupModel.getUserId(),
+                            firstName,
+                            lastName));
                 }
-
                 response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
                 response.put(Constants.RESPONSE, listOfLookupResponse);
                 response.setResponseCode(HttpStatus.OK);
@@ -250,27 +315,6 @@ public class RatingServiceImpl implements RatingService {
         }
         return response;
 
-    }
-
-    public static int comparator(Map<String, Object> map1, Map<String, Object> map2) {
-        if (map1 == null && map2 == null)
-            return 0;
-
-        if (map1 == null || map2 == null) {
-            throw new NullPointerException();
-        }
-        String name1 = "";
-        String name2 = "";
-        if (map1.get("id") != null) {
-            name1 = (String) map1.get("id");
-            name2 = (String) map2.get("id");
-        }
-        if (map1.get("userId") != null) {
-            name1 = (String) map1.get("userId");
-            name2 = (String) map2.get("userId");
-        }
-        int c = name1.compareTo(name2);
-        return c;
     }
 
     public RatingMessage.UpdatedValues processEventMessage(String date, Float rating, String review) {
@@ -312,7 +356,7 @@ public class RatingServiceImpl implements RatingService {
             if (StringUtils.isEmpty(validationBody.getLookupRequest().getActivityType())) {
                 errObjList.add(ResponseMessage.Message.INVALID_INPUT);
             }
-            if ((validationBody.getLookupRequest().getRating() != null) &&(validationBody.getLookupRequest().getRating() < 1.0
+            if ((validationBody.getLookupRequest().getRating() != null) && (validationBody.getLookupRequest().getRating() < 1.0
                     || validationBody.getLookupRequest().getRating() > 5.0)) {
                 errObjList.add(ResponseMessage.Message.INVALID_INPUT + ResponseMessage.Message.INVALID_RATING);
             }
