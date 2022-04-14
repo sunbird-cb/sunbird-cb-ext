@@ -14,7 +14,7 @@ public interface CassandraConnectionManager {
    *
    * @param hosts
    */
-  void createConnection(String[] hosts);
+  void createConnection();
 
   /**
    * Method to get the cassandra session oject on basis of keyspace name provided .

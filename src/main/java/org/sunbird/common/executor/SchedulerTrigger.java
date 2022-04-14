@@ -18,7 +18,7 @@ public class SchedulerTrigger implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) throws Exception {
         CassandraConnectionManager manager = CassandraConnectionMngrFactory.getInstance();
-        manager.createConnection(new String[]{Constants.LOCALHOST});
+        manager.createConnection();
         SchedulerManager.schedule();
     }
 

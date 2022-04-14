@@ -328,7 +328,7 @@ public class Constants {
     public static final String COURSE_URL = "course.url";
     public static final String OVERVIEW_BATCH_ID = "overview.batch";
     public static final String SENDER_MAIL = "sender.mail";
-
+    public static final String CASSANDRA_CONFIG_HOST = "cassandra.config.host";
     private Constants() {
         throw new IllegalStateException("Utility class");
     }
