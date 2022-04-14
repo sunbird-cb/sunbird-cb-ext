@@ -120,13 +120,17 @@ public class EmailNotificationService implements Runnable {
 
     private void getAndSetUserEmail() {
         ArrayList<String> userIds = new ArrayList<>(userCourseMap.keySet());
+        logger.info("UserIds :" + userIds.toString());
         Map<String, Object> propertyMap = new HashMap<>();
         propertyMap.put(Constants.ID, userIds);
         List<String> fields1 = new ArrayList<>(Arrays.asList(Constants.ID, Constants.EMAIL));
         List<Map<String, Object>> userEmail = cassandraOperation.getRecordsByProperties(Constants.SUNBIRD_KEY_SPACE_NAME, Constants.TABLE_USER, propertyMap, fields1);
         for (Map<String, Object> map : userEmail) {
+            logger.info(map.toString());
             if (map.get(Constants.EMAIL) != null && userCourseMap.get(map.get(Constants.ID)) != null)
                 userCourseMap.get(map.get(Constants.ID)).setEmail((String) map.get(Constants.EMAIL));
+                logger.info("email :" + (String) map.get(Constants.EMAIL));
+                logger.info("email :" + String.valueOf(map.get(Constants.EMAIL)));
         }
     }
 

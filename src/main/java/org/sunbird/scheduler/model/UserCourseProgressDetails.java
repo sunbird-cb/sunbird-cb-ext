@@ -12,6 +12,15 @@ public class UserCourseProgressDetails implements Serializable {
 
   private static final long serialVersionUID = 1L;
   private String email;
+
+  @Override
+  public String toString() {
+    return "UserCourseProgressDetails{" +
+            "email='" + email + '\'' +
+            ", incompleteCourses=" + incompleteCourses +
+            '}';
+  }
+
   private List<IncompleteCourses> incompleteCourses;
 
   public String getEmail() {
