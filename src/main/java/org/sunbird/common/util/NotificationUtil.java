@@ -49,6 +49,7 @@ public class NotificationUtil {
                     n.setDeliveryType(Constants.MESSAGE);
                     n.setIds(sendTo);
                     Logger.info(sendTo.toString());
+                    Logger.info(sendTo.get(0).toString());
                     n.setTemplate(t);
                     notifications.put("notifications", Arrays.asList(n));
                     notificationRequest.put("request", notifications);
