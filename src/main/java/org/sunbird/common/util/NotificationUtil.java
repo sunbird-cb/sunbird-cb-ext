@@ -35,6 +35,8 @@ public class NotificationUtil {
         new Thread(() -> {
             try {
                 if (sendNotification) {
+                    Logger.info(String.valueOf(sendNotification));
+                    Logger.info("Entering the send notification");
                     HttpHeaders headers = new HttpHeaders();
                     RestTemplate restTemplate = new RestTemplate();
                     headers.setContentType(MediaType.APPLICATION_JSON);
@@ -52,8 +54,10 @@ public class NotificationUtil {
                     n.setTemplate(t);
                     notifications.put("notifications", Arrays.asList(n));
                     notificationRequest.put("request", notifications);
+                    Logger.info(String.format("Notification Request : %s", notificationRequest));
                     HttpEntity<Object> req = new HttpEntity<>(notificationRequest, headers);
                     ResponseEntity<String> resp = restTemplate.postForEntity(notificationUrl, req, String.class);
+                    Logger.info(req.toString());
                 }
             } catch (Exception e) {
                 Logger.error(String.format(EXCEPTION, e.getMessage()));
