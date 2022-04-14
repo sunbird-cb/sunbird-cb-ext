@@ -48,7 +48,7 @@ public class NotificationUtil {
                     n.setMode(Constants.EMAIL);
                     n.setDeliveryType(Constants.MESSAGE);
                     n.setIds(sendTo);
-                    Template t = new Template(null, INCOMPLETE_COURSES, params));
+                    Template t = new Template(null, INCOMPLETE_COURSES, params);
                     n.setTemplate(t);
                     notifications.put("notifications", Arrays.asList(n));
                     notificationRequest.put("request", notifications);
