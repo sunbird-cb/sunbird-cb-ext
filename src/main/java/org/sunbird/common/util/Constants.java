@@ -329,6 +329,7 @@ public class Constants {
     public static final String OVERVIEW_BATCH_ID = "overview.batch";
     public static final String SENDER_MAIL = "sender.mail";
     public static final String CASSANDRA_CONFIG_HOST = "cassandra.config.host";
+    public static final String X_USER_TOKEN = "x-authenticated-user-token";
     private Constants() {
         throw new IllegalStateException("Utility class");
     }

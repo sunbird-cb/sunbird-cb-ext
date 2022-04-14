@@ -33,6 +33,8 @@ public class NotificationUtil {
                     HttpHeaders headers = new HttpHeaders();
                     RestTemplate restTemplate = new RestTemplate();
                     headers.setContentType(MediaType.APPLICATION_JSON);
+                    headers.set(Constants.AUTHORIZATION, authApiKey);
+                    //headers.set(Constants.X_USER_, params.getAuthToken());
                     Map<String, Object> notificationRequest = new HashMap<>();
                     List<Object> notificationTosend = new ArrayList<>(Arrays.asList(new Notification(Constants.EMAIL, Constants.MESSAGE,
                             new EmailConfig(senderMail, (String) params.get(SUBJECT_)), sendTo,
