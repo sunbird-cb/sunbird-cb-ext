@@ -38,7 +38,6 @@ public class EmailNotificationService implements Runnable {
 
     public static void sendIncompleteCourseEmail(Map.Entry<String, UserCourseProgressDetails> entry) {
         try {
-            logger.info("Entering the incomplete courses email module");
             if (!StringUtils.isEmpty(entry.getValue().getEmail()) && entry.getValue().getIncompleteCourses().size() > 0) {
                 Map<String, Object> params = new HashMap();
                 params.put(SUBJECT_, Constants.INCOMPLETE_COURSES_MAIL_SUBJECT);
@@ -50,7 +49,8 @@ public class EmailNotificationService implements Runnable {
                     params.put(COURSE + (i + 1) + _DURATION, String.valueOf(entry.getValue().getIncompleteCourses().get(i).getCompletionPercentage()));
 
                 }
-                notificationUtil.sendNotification(Arrays.asList(entry.getValue().getEmail()), params, senderMail, sendNotification, notificationUrl, authApiKey);
+                logger.info(entry.getValue().getEmail());
+                notificationUtil.sendNotification(Arrays.asList(entry.getValue().getEmail()), params, senderMail, sendNotification, notificationUrl);
             }
         } catch (Exception e) {
             logger.info(String.format("Error in the incomplete courses email module %s", e.getMessage()));

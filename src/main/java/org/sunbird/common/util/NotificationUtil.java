@@ -31,33 +31,31 @@ public class NotificationUtil {
         Logger = LoggerFactory.getLogger(NotificationUtil.class);
     }
 
-    public <params> void sendNotification(List<String> sendTo, Map<String, Object> params, String senderMail, Boolean sendNotification, String notificationUrl, String authApiKey) {
+    public <params> void sendNotification(List<String> sendTo, Map<String, Object> params, String senderMail, Boolean sendNotification, String notificationUrl) {
         new Thread(() -> {
             try {
                 if (sendNotification) {
-                    Logger.info(String.valueOf(sendNotification));
                     Logger.info("Entering the send notification");
                     HttpHeaders headers = new HttpHeaders();
                     RestTemplate restTemplate = new RestTemplate();
                     headers.setContentType(MediaType.APPLICATION_JSON);
-                    //headers.set(Constants.AUTHORIZATION, authApiKey);
-                    //headers.set(Constants.X_USER_, params.getAuthToken());
                     Map<String, Object> notificationRequest = new HashMap<>();
                     Map<String, List<Notification>> notifications = new HashMap<>();
                     EmailConfig ec =new EmailConfig(senderMail, (String) params.get(SUBJECT_));
+                    Template t = new Template(null, INCOMPLETE_COURSES, params);
                     Notification n = new Notification();
                     n.setConfig(ec);
                     n.setMode(Constants.EMAIL);
                     n.setDeliveryType(Constants.MESSAGE);
                     n.setIds(sendTo);
-                    Template t = new Template(null, INCOMPLETE_COURSES, params);
+                    Logger.info(sendTo.toString());
                     n.setTemplate(t);
                     notifications.put("notifications", Arrays.asList(n));
                     notificationRequest.put("request", notifications);
                     Logger.info(String.format("Notification Request : %s", notificationRequest));
                     HttpEntity<Object> req = new HttpEntity<>(notificationRequest, headers);
                     ResponseEntity<String> resp = restTemplate.postForEntity(notificationUrl, req, String.class);
-                    Logger.info(req.toString());
+                    Logger.info(resp.toString());
                 }
             } catch (Exception e) {
                 Logger.error(String.format(EXCEPTION, e.getMessage()));
