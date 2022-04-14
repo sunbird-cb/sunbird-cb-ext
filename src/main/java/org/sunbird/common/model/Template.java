@@ -11,6 +11,17 @@ public class Template {
     private String id;
     private Map<String, Object> params;
 
+
+
+    @Override
+    public String toString() {
+        return "Template{" +
+                "data='" + data + '\'' +
+                ", id='" + id + '\'' +
+                ", params=" + params +
+                '}';
+    }
+
     public Template(String data, String id, Map<String, Object> params) {
         this.data = data;
         this.id = id;
@@ -41,12 +52,4 @@ public class Template {
         this.params = params;
     }
 
-    @Override
-    public String toString() {
-        return "Template{" +
-                "data='" + data + '\'' +
-                ", id='" + id + '\'' +
-                ", params=" + params +
-                '}';
-    }
 }
