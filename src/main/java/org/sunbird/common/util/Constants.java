@@ -21,6 +21,7 @@ public class Constants {
     public static final String DOB = "dob";
     public static final String SALUTATION = "salutation";
     public static final String EMAIL = "email";
+    public static final String PROFILE_DETAILS_KEY = "profiledetails";
     public static final String SOURCE_PROFILE_PICTURE = "source_profile_picture";
     public static final String ROOT_ORG = "root_org";
     public static final String ORG = "org";

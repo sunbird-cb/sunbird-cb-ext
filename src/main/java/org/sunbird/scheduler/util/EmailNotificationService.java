@@ -1,9 +1,13 @@
 package org.sunbird.scheduler.util;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.sunbird.cassandra.utils.CassandraOperation;
+import org.sunbird.common.exceptions.ProjectCommonException;
+import org.sunbird.common.exceptions.ResponseCode;
 import org.sunbird.common.helper.cassandra.ServiceFactory;
 import org.sunbird.common.util.Constants;
 import org.sunbird.common.util.NotificationUtil;
@@ -49,11 +53,14 @@ public class EmailNotificationService implements Runnable {
                     params.put(COURSE + (i + 1) + _DURATION, String.valueOf(entry.getValue().getIncompleteCourses().get(i).getCompletionPercentage()));
 
                 }
-                logger.info(entry.getValue().getEmail());
                 notificationUtil.sendNotification(Arrays.asList(entry.getValue().getEmail()), params, senderMail, sendNotification, notificationUrl);
             }
         } catch (Exception e) {
-            logger.info(String.format("Error in the incomplete courses email module %s", e.getMessage()));
+            logger.error(e);
+            throw new ProjectCommonException(
+                    ResponseCode.internalError.getErrorCode(),
+                    e.getMessage(),
+                    ResponseCode.SERVER_ERROR.getResponseCode());
         }
     }
 
@@ -79,7 +86,11 @@ public class EmailNotificationService implements Runnable {
                 return userCourseMap;
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error(e);
+            throw new ProjectCommonException(
+                    ResponseCode.internalError.getErrorCode(),
+                    e.getMessage(),
+                    ResponseCode.SERVER_ERROR.getResponseCode());
         }
         return null;
     }
@@ -118,23 +129,30 @@ public class EmailNotificationService implements Runnable {
         }
     }
 
-    private void getAndSetUserEmail() {
+    private void getAndSetUserEmail() throws IOException {
         ArrayList<String> userIds = new ArrayList<>(userCourseMap.keySet());
-        logger.info("UserIds :" + userIds.toString());
         Map<String, Object> propertyMap = new HashMap<>();
-        propertyMap.put(Constants.ID, userIds);
-        List<String> fields1 = new ArrayList<>(Arrays.asList(Constants.ID, Constants.EMAIL));
-        List<Map<String, Object>> userEmail = cassandraOperation.getRecordsByProperties(Constants.SUNBIRD_KEY_SPACE_NAME, Constants.TABLE_USER, propertyMap, fields1);
+        propertyMap.put(ID, userIds);
+        List<String> fields1 = new ArrayList<>(Arrays.asList(ID, PROFILE_DETAILS_KEY));
+        List<Map<String, Object>> userEmail = cassandraOperation.getRecordsByProperties(SUNBIRD_KEY_SPACE_NAME, TABLE_USER, propertyMap, fields1);
         for (Map<String, Object> map : userEmail) {
             logger.info(map.toString());
-            if (map.get(Constants.EMAIL) != null && userCourseMap.get(map.get(Constants.ID)) != null)
-                userCourseMap.get(map.get(Constants.ID)).setEmail((String) map.get(Constants.EMAIL));
-                logger.info("email :" + (String) map.get(Constants.EMAIL));
-                logger.info("email :" + String.valueOf(map.get(Constants.EMAIL)));
+            String email = null;
+            String profileDetails = "";
+            if (map.get(PROFILE_DETAILS_KEY) != null && userCourseMap.get(map.get(ID)) != null) {
+                profileDetails = (String) map.get(PROFILE_DETAILS_KEY);
+                HashMap<String, Object> hashMap = new ObjectMapper().readValue(profileDetails, HashMap.class);
+                HashMap<String, Object> personalDetailsMap = (HashMap<String, Object>) hashMap.get("personalDetails");
+                if (personalDetailsMap.get("primaryEmail") != null)
+                {
+                    userCourseMap.get(map.get(ID)).setEmail((String) personalDetailsMap.get("primaryEmail"));
+                }
+            }
         }
     }
 
-    private void setUserCourseMap(List<Map<String, Object>> userCoursesList, Map<String, UserCourseProgressDetails> userCourseMap) {
+    private void setUserCourseMap
+            (List<Map<String, Object>> userCoursesList, Map<String, UserCourseProgressDetails> userCourseMap) {
         for (Map<String, Object> u : userCoursesList) {
             String courseId = (String) u.get(Constants.COURSE_ID);
             String batchId = (String) u.get(Constants.BATCH_ID);

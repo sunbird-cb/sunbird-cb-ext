@@ -41,22 +41,11 @@ public class NotificationUtil {
                     headers.setContentType(MediaType.APPLICATION_JSON);
                     Map<String, Object> notificationRequest = new HashMap<>();
                     Map<String, List<Notification>> notifications = new HashMap<>();
-                    EmailConfig ec =new EmailConfig(senderMail, (String) params.get(SUBJECT_));
-                    Template t = new Template(null, INCOMPLETE_COURSES, params);
-                    Notification n = new Notification();
-                    n.setConfig(ec);
-                    n.setMode(Constants.EMAIL);
-                    n.setDeliveryType(Constants.MESSAGE);
-                    n.setIds(sendTo);
-                    Logger.info(sendTo.toString());
-                    Logger.info(sendTo.get(0).toString());
-                    n.setTemplate(t);
-                    notifications.put("notifications", Arrays.asList(n));
+                    notifications.put("notifications", Arrays.asList(new Notification(Constants.EMAIL, Constants.MESSAGE, new EmailConfig(senderMail, (String) params.get(SUBJECT_)), sendTo, new Template(null, INCOMPLETE_COURSES, params))));
                     notificationRequest.put("request", notifications);
                     Logger.info(String.format("Notification Request : %s", notificationRequest));
                     HttpEntity<Object> req = new HttpEntity<>(notificationRequest, headers);
                     ResponseEntity<String> resp = restTemplate.postForEntity(notificationUrl, req, String.class);
-                    Logger.info(resp.toString());
                 }
             } catch (Exception e) {
                 Logger.error(String.format(EXCEPTION, e.getMessage()));
