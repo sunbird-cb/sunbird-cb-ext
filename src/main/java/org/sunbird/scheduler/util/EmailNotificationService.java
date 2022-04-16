@@ -83,6 +83,7 @@ public class EmailNotificationService implements Runnable {
                 fetchCourseIdsAndSetCourseNameAndThumbnail(userCoursesList);
                 setUserCourseMap(userCoursesList, userCourseMap);
                 getAndSetUserEmail();
+                logger.info(userCourseMap.toString());
                 Iterator<Map.Entry<String, UserCourseProgressDetails>> it = userCourseMap.entrySet().iterator();
                 while (it.hasNext()) {
                     logger.info(it.next().toString());
