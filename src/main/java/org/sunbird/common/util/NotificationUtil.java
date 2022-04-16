@@ -35,7 +35,7 @@ public class NotificationUtil {
         new Thread(() -> {
             try {
                 if (sendNotification) {
-                    Logger.info("Entering the send notification");
+                    Logger.info("Entering the send notification:"+String.valueOf(sendNotification));
                     HttpHeaders headers = new HttpHeaders();
                     RestTemplate restTemplate = new RestTemplate();
                     headers.setContentType(MediaType.APPLICATION_JSON);

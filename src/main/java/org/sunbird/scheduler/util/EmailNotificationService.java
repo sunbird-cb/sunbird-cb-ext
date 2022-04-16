@@ -42,7 +42,12 @@ public class EmailNotificationService implements Runnable {
 
     public static void sendIncompleteCourseEmail(Map.Entry<String, UserCourseProgressDetails> entry) {
         try {
+            logger.info("Send Incomplete Course Email");
+            logger.info(entry.getValue().getEmail());
+            logger.info(entry.getValue().getIncompleteCourses().toString());
+
             if (!StringUtils.isEmpty(entry.getValue().getEmail()) && entry.getValue().getIncompleteCourses().size() > 0) {
+                logger.info("Inside Send Incomplete Course Email");
                 Map<String, Object> params = new HashMap();
                 params.put(SUBJECT_, Constants.INCOMPLETE_COURSES_MAIL_SUBJECT);
                 for (int i = 0; i < entry.getValue().getIncompleteCourses().size(); i++) {
@@ -145,6 +150,7 @@ public class EmailNotificationService implements Runnable {
                 HashMap<String, Object> personalDetailsMap = (HashMap<String, Object>) hashMap.get("personalDetails");
                 if (personalDetailsMap.get("primaryEmail") != null)
                 {
+                    logger.info((String) personalDetailsMap.get("primaryEmail"));
                     userCourseMap.get(map.get(ID)).setEmail((String) personalDetailsMap.get("primaryEmail"));
                 }
             }
