@@ -29,7 +29,6 @@ public class EmailNotificationService implements Runnable {
     static PropertiesCache p = PropertiesCache.getInstance();
     static Boolean sendNotification = Boolean.parseBoolean(p.getProperty(SEND_NOTIFICATION_PROPERTIES));
     static String notificationUrl = String.valueOf(p.getProperty(NOTIFICATION_HOST)) + String.valueOf(p.getProperty(NOTIFICATION_ENDPOINT));
-    static String authApiKey = String.valueOf(p.getProperty(AUTH_API_KEY));
     static String courseUrl = String.valueOf(p.getProperty(COURSE_URL));
     static String overviewBatchId = String.valueOf(p.getProperty(OVERVIEW_BATCH_ID));
     static String senderMail = String.valueOf(p.getProperty(SENDER_MAIL));
@@ -82,11 +81,9 @@ public class EmailNotificationService implements Runnable {
             if (!CollectionUtils.isEmpty(userCoursesList)) {
                 fetchCourseIdsAndSetCourseNameAndThumbnail(userCoursesList);
                 setUserCourseMap(userCoursesList, userCourseMap);
-                getAndSetUserEmail();
                 logger.info(userCourseMap.toString());
                 Iterator<Map.Entry<String, UserCourseProgressDetails>> it = userCourseMap.entrySet().iterator();
                 while (it.hasNext()) {
-                    logger.info(it.next().toString());
                     Map.Entry<String, UserCourseProgressDetails> set = it.next();
                     sendIncompleteCourseEmail(set);
                 }
@@ -106,8 +103,10 @@ public class EmailNotificationService implements Runnable {
         List<String> courseIds = new ArrayList<>();
         for (Map<String, Object> next : userCoursesList) {
             if ((next.containsKey(Constants.COURSE_ID))) {
-                if (!courseIds.contains((String) next.get(Constants.COURSE_ID)))
+                if (!courseIds.contains((String) next.get(Constants.COURSE_ID))) {
                     courseIds.add((String) next.get(Constants.COURSE_ID));
+                    logger.info((String) next.get(Constants.COURSE_ID));
+                }
             }
         }
         getAndSetCourseName(courseIds);
@@ -132,6 +131,7 @@ public class EmailNotificationService implements Runnable {
                 courseIdAndCourseNameMap.put((String) map.get(Constants.IDENTIFIER), cd);
             }
         }
+        logger.info(courseIdAndCourseNameMap.toString());
     }
 
     private void getAndSetUserEmail() throws IOException {
@@ -150,13 +150,15 @@ public class EmailNotificationService implements Runnable {
                 if (personalDetailsMap.get("primaryEmail") != null) {
                     logger.info((String) personalDetailsMap.get("primaryEmail"));
                     userCourseMap.get(map.get(ID)).setEmail((String) personalDetailsMap.get("primaryEmail"));
+                    logger.info(userCourseMap.toString());
                 }
             }
         }
+        logger.info("End of get and set user email");
     }
 
     private void setUserCourseMap
-            (List<Map<String, Object>> userCoursesList, Map<String, UserCourseProgressDetails> userCourseMap) {
+            (List<Map<String, Object>> userCoursesList, Map<String, UserCourseProgressDetails> userCourseMap) throws IOException {
         for (Map<String, Object> u : userCoursesList) {
             String courseId = (String) u.get(Constants.COURSE_ID);
             String batchId = (String) u.get(Constants.BATCH_ID);
@@ -187,5 +189,6 @@ public class EmailNotificationService implements Runnable {
                 }
             }
         }
+        getAndSetUserEmail();
     }
 }
