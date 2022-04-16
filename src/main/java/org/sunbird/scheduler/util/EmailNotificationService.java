@@ -85,6 +85,7 @@ public class EmailNotificationService implements Runnable {
                 getAndSetUserEmail();
                 Iterator<Map.Entry<String, UserCourseProgressDetails>> it = userCourseMap.entrySet().iterator();
                 while (it.hasNext()) {
+                    logger.info(it.next().toString());
                     Map.Entry<String, UserCourseProgressDetails> set = it.next();
                     sendIncompleteCourseEmail(set);
                 }
@@ -118,18 +119,16 @@ public class EmailNotificationService implements Runnable {
         List<Map<String, Object>> coursesData = cassandraOperation.getRecordsByProperties(Constants.DEV_HIERARCHY_STORE, Constants.CONTENT_HIERARCHY, propertyMap, fields);
         for (Map<String, Object> map : coursesData) {
             if (map.get(Constants.IDENTIFIER) != null && map.get(Constants.HIERARCHY) != null && courseIdAndCourseNameMap.get(map.get(Constants.IDENTIFIER)) == null) {
-                if (map.get(Constants.IDENTIFIER) != null && map.get(Constants.HIERARCHY) != null && courseIdAndCourseNameMap.get(map.get(Constants.IDENTIFIER)) == null) {
-                    String courseData = map.get(Constants.HIERARCHY).toString();
-                    Map<String, Object> courseDataMap = gson.fromJson(courseData, Map.class);
-                    CourseDetails cd = new CourseDetails();
-                    if (courseDataMap.get(NAME) != null) {
-                        cd.setCourseName((String) courseDataMap.get(NAME));
-                    }
-                    if (courseDataMap.get(POSTER_IMAGE) != null) {
-                        cd.setThumbnail((String) courseDataMap.get(POSTER_IMAGE));
-                    }
-                    courseIdAndCourseNameMap.put((String) map.get(Constants.IDENTIFIER), cd);
+                String courseData = map.get(Constants.HIERARCHY).toString();
+                Map<String, Object> courseDataMap = gson.fromJson(courseData, Map.class);
+                CourseDetails cd = new CourseDetails();
+                if (courseDataMap.get(NAME) != null) {
+                    cd.setCourseName((String) courseDataMap.get(NAME));
                 }
+                if (courseDataMap.get(POSTER_IMAGE) != null) {
+                    cd.setThumbnail((String) courseDataMap.get(POSTER_IMAGE));
+                }
+                courseIdAndCourseNameMap.put((String) map.get(Constants.IDENTIFIER), cd);
             }
         }
     }
@@ -141,15 +140,13 @@ public class EmailNotificationService implements Runnable {
         List<String> fields1 = new ArrayList<>(Arrays.asList(ID, PROFILE_DETAILS_KEY));
         List<Map<String, Object>> userEmail = cassandraOperation.getRecordsByProperties(SUNBIRD_KEY_SPACE_NAME, TABLE_USER, propertyMap, fields1);
         for (Map<String, Object> map : userEmail) {
-            logger.info(map.toString());
             String email = null;
             String profileDetails = "";
             if (map.get(PROFILE_DETAILS_KEY) != null && userCourseMap.get(map.get(ID)) != null) {
                 profileDetails = (String) map.get(PROFILE_DETAILS_KEY);
                 HashMap<String, Object> hashMap = new ObjectMapper().readValue(profileDetails, HashMap.class);
                 HashMap<String, Object> personalDetailsMap = (HashMap<String, Object>) hashMap.get("personalDetails");
-                if (personalDetailsMap.get("primaryEmail") != null)
-                {
+                if (personalDetailsMap.get("primaryEmail") != null) {
                     logger.info((String) personalDetailsMap.get("primaryEmail"));
                     userCourseMap.get(map.get(ID)).setEmail((String) personalDetailsMap.get("primaryEmail"));
                 }
