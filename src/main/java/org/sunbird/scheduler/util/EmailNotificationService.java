@@ -138,11 +138,12 @@ public class EmailNotificationService implements Runnable {
                         userCourseMap.get(map.get(ID)).setEmail((String) personalDetailsMap.get("primaryEmail"));
                     }
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
+            } catch (Exception e) {
+                logger.info(String.format("Error in get and set user email %s", e.getMessage()));
             }
             logger.info("End of get and set user email");
         }
+        logger.info("End of get and set user email final");
     }
 
     private void setUserCourseMap(List<Map<String, Object>> userCoursesList, Map<String, UserCourseProgressDetails> userCourseMap) {
