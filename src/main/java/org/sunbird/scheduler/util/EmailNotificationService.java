@@ -119,7 +119,7 @@ public class EmailNotificationService implements Runnable {
         }
     }
 
-    private void getAndSetUserEmail() throws IOException {
+    private void getAndSetUserEmail() {
         ArrayList<String> userIds = new ArrayList<>(userCourseMap.keySet());
         Map<String, Object> propertyMap = new HashMap<>();
         propertyMap.put(Constants.ID, userIds);
@@ -128,14 +128,19 @@ public class EmailNotificationService implements Runnable {
         for (Map<String, Object> map : userEmail) {
             String email = null;
             String profileDetails = "";
-            if (map.get(PROFILE_DETAILS_KEY) != null && userCourseMap.get(map.get(Constants.ID)) != null){
-                profileDetails = (String) map.get(PROFILE_DETAILS_KEY);
-                HashMap<String, Object> hashMap = new ObjectMapper().readValue(profileDetails, HashMap.class);
-                HashMap<String, Object> personalDetailsMap = (HashMap<String, Object>) hashMap.get("personalDetails");
-                if (personalDetailsMap.get("primaryEmail") != null) {
-                    logger.info((String) personalDetailsMap.get("primaryEmail"));
-                    userCourseMap.get(map.get(ID)).setEmail((String) personalDetailsMap.get("primaryEmail"));
-                }}
+            try {
+                if (map.get(PROFILE_DETAILS_KEY) != null && userCourseMap.get(map.get(Constants.ID)) != null) {
+                    profileDetails = (String) map.get(PROFILE_DETAILS_KEY);
+                    HashMap<String, Object> hashMap = new ObjectMapper().readValue(profileDetails, HashMap.class);
+                    HashMap<String, Object> personalDetailsMap = (HashMap<String, Object>) hashMap.get("personalDetails");
+                    if (personalDetailsMap.get("primaryEmail") != null) {
+                        logger.info((String) personalDetailsMap.get("primaryEmail"));
+                        userCourseMap.get(map.get(ID)).setEmail((String) personalDetailsMap.get("primaryEmail"));
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             logger.info("End of get and set user email");
         }
     }
