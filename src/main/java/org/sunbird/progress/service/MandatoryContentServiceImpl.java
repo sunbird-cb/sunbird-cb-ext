@@ -236,7 +236,7 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
 
 	/**
 	 * Add user basic details with the response map
-	 * 
+	 *
 	 * @param response
 	 * @param userMap
 	 * @throws Exception
@@ -274,7 +274,7 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
 
 	/**
 	 * To update the course completion status & percentage
-	 * 
+	 *
 	 * @param responseObj
 	 * @param leafNodeCount
 	 */

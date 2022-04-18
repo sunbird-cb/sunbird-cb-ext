@@ -5,10 +5,6 @@ import java.util.Collections;
 import java.util.List;
 
 public class Constants {
-    private Constants() {
-        throw new IllegalStateException("Utility class");
-    }
-
     public static final String UUID = "wid";
     public static final String KID = "kid";
     public static final String SOURCE_ID = "source_id";
@@ -25,6 +21,7 @@ public class Constants {
     public static final String DOB = "dob";
     public static final String SALUTATION = "salutation";
     public static final String EMAIL = "email";
+    public static final String PROFILE_DETAILS_KEY = "profiledetails";
     public static final String SOURCE_PROFILE_PICTURE = "source_profile_picture";
     public static final String ROOT_ORG = "root_org";
     public static final String ORG = "org";
@@ -73,7 +70,6 @@ public class Constants {
     public static final String RESPONSE_CODE = "responseCode";
     public static final String AUTH_TOKEN = "Authorization";
     public static final String X_AUTH_TOKEN = "x-authenticated-user-token";
-
     public static final String SUCCESSFUL = "Successful";
     public static final String FAILED = "Failed";
     public static final String MESSAGE = "message";
@@ -81,11 +77,9 @@ public class Constants {
     public static final String STATUS = "status";
     public static final String RESULT = "result";
     public static final String OK = "OK";
-
     public static final String ADD = "add";
     public static final String UPDATE = "update";
     public static final String CREATE = "create";
-
     public static final String ROOT_ORG_CONSTANT = "rootOrg";
     public static final String ORG_CONSTANT = "org";
     public static final String USER_ID_CONSTANT = "userId";
@@ -106,12 +100,9 @@ public class Constants {
     public static final String SERVICE_ERROR_CONSTANT = "Http Client threw an Exception:";
     public static final String EXTERNAL_SERVICE_ERROR_CODE = "Exception while querying the external service:";
     public static final String CONTENT_ID_REPLACER = "{contentId}";
-
     // User assessment pass mark
     public static final Float ASSESSMENT_PASS_SCORE = 60.0f;
-
     public static final String DATE_FORMAT = "yyyy-mm-dd hh:mm:ss";
-
     public static final String RESPONSE = "response";
     public static final String STAFF = "staff";
     public static final String API_STAFF_POSITION_ADD = "api.staff.position.add";
@@ -128,8 +119,6 @@ public class Constants {
     public static final String API_FILE_UPLOAD = "api.file.upload";
     public static final String API_FILE_DELETE = "api.file.delete";
     public static final String API_PROFILE_UPDATE = "api.profile.update";
-
-
     public static final String ID = "id";
     public static final String ORG_ID = "orgId";
     public static final String POSITION = "position";
@@ -139,13 +128,13 @@ public class Constants {
     public static final String URL = "url";
     public static final String DELETED = "deleted";
     public static final String SCHEME_ID = "schemeId";
-
     public static final String BUDGET = "budget";
     public static final String BUDGET_YEAR = "budgetYear";
     public static final String SCHEME_NAME = "schemeName";
     public static final String SALARY_BUDGET_ALLOCATED = "salaryBudgetAllocated";
     public static final String TRAINING_BUDGET_ALLOCATED = "trainingBudgetAllocated";
     public static final String TRAINING_BUDGET_UTILIZATION = "trainingBudgetUtilization";
+
 
     //ratings and review
     public static final String API_RATINGS_ADD = "api.ratings.add";
@@ -173,12 +162,10 @@ public class Constants {
     public static final String RATING_LOOKUP_RATING_OPERATION = "lookup";
     public static final String RATING_GET_OPERATION = "getRating";
     public static final String RATING_SUMMARY_OPERATION = "getSummary";
-
     // assessment
     public static final String QUESTION_SET = "questionSet";
     public static final String ASSESSMENT_QNS_ANS_SET = "assessmentQnsAnsSet_";
     public static final String ASSESSMENT_QNS_SET = "assessmentQnsSet_";
-
     // Cassandra Constants
     public static final String INSERT_INTO = "INSERT INTO ";
     public static final String DOT = ".";
@@ -192,7 +179,6 @@ public class Constants {
     public static final String UNDEFINED_IDENTIFIER = "Undefined column name ";
     public static final String EXCEPTION_MSG_FETCH = "Exception occurred while fetching record from ";
     public static final String EXCEPTION_MSG_DELETE = "Exception occurred while deleting record from ";
-
     public static final String AUDIT_TYPE = "auditType";
     public static final String CREATED_DATE = "createdDate";
     public static final String CREATED_BY = "createdBy";
@@ -204,7 +190,6 @@ public class Constants {
     public static final String WORK_ALLOCATION_ID = "workAllocationId";
     public static final String BEGIN_BATCH = "BEGIN BATCH ";
     public static final String APPLY_BATCH = " APPLY BATCH;";
-
     // Database and Tables
     public static final String KEYSPACE_SUNBIRD = "sunbird";
     public static final String KEYSPACE_SUNBIRD_COURSES = "sunbird_courses";
@@ -222,7 +207,6 @@ public class Constants {
     public static final String TABLE_RATINGS = "ratings";
     public static final String TABLE_RATINGS_LOOKUP = "ratings_lookup";
     public static final String TABLE_RATINGS_SUMMARY = "ratings_summary";
-
     public static final String VALUE = "value";
     public static final String DEPT_NAME = "deptName";
     public static final String PROFILE_DETAILS = "profileDetails";
@@ -246,19 +230,17 @@ public class Constants {
     public static final String DOPT = "dopt";
     public static final String PERSONAL_DETAILS = "personalDetails";
     public static final String TRANSITION_DETAILS = "transitionDetails";
-
+    public static final String UNAUTHORIZED = "unauthorized";
     // Redis
     public static final String API_REDIS_DELETE = "api.redis.delete";
     public static final String API_REDIS_GET_KEYS = "api.redis.get.keys";
     public static final String API_REDIS_GET_KEYS_VALUE_SET = "api.redis.get.keys&values";
     public static final String REDIS_COMMON_KEY = "CB_EXT_";
-
     public static final String COMPETENCY_CACHE_NAME = "competency";
     public static final String COMPETENCY_CACHE_NAME_BY_AREA = "competencyByArea";
     public static final String COMPETENCY_CACHE_NAME_BY_TYPE = "competencyByType";
     public static final String PROVIDER_CACHE_NAME = "provider";
     public static final String COMPETENCY_FACET_NAME = "competencies_v3.name";
-
     public static final String IS_TENANT = "isTenant";
     public static final String CHANNEL = "channel";
     public static final String USER_TOKEN = "x-authenticated-user-token";
@@ -269,24 +251,84 @@ public class Constants {
     public static final String REQUEST = "request";
     public static final String FIELDS = "fields";
     public static final String OFFSET = "offset";
-
     public static final String BUDGET_DOC_UPLOADED_BY = "uploadedBy";
     public static final String BUDGET_DOC_UPLOADED_DATE = "uploadedDate";
     public static final String BUDGET_DOC_FILE_NAME = "fileName";
     public static final String BUDGET_DOC_FILE_TYPE = "fileType";
     public static final String BUDGET_DOC_FILE_SIZE = "fileSize";
     public static final String BUDGET_DOC_FILE_URL = "fileUrl";
-
     //telemetry audit constants
     public static final String ORG_LIST = "ORGANISATION_LIST";
-	public static final String VERSION = "3.0.2";
-	public static final String EID = "AUDIT";
-	public static final String PDATA_ID = "dev.sunbird.cb.ext.service";
-	public static final String PDATA_PID = "sunbird-cb-ext-service";
-	public static final String TYPE = "WorkOrder";
-	public static final String CURRENT_STATE = "FirstLogin";
-	public static final String LOGIN_TIME = "login_time";
-	public static final List<String> PROPS = Collections.unmodifiableList(Arrays.asList("WAT"));
-	public static final String USER_CONST = "User";
+    public static final String VERSION = "3.0.2";
+    public static final String EID = "AUDIT";
+    public static final String PDATA_ID = "dev.sunbird.cb.ext.service";
+    public static final String PDATA_PID = "sunbird-cb-ext-service";
+    public static final String TYPE = "WorkOrder";
+    public static final String CURRENT_STATE = "FirstLogin";
+    public static final String LOGIN_TIME = "login_time";
+    public static final List<String> PROPS = Collections.unmodifiableList(Arrays.asList("WAT"));
+    public static final String USER_CONST = "User";
+    public static final String ASSESSMENT_LEVEL_SCORE_CUTOFF = "assessmentlevel";
+    public static final String SECTION_LEVEL_SCORE_CUTOFF = "sectionlevel";
+    public static final String IDENTIFIER_REPLACER = "{identifier}";
+    public static final String CHILDREN = "children";
+    public static final String PARAMS = "params";
+    public static final String MAX_QUESTIONS = "maxQuestions";
+    public static final String CHILD_NODES = "childNodes";
+    public static final String SEARCH = "search";
+    public static final String QUESTION_ID = "qs_id_";
+    public static final String ASSESSMENT_ID = "assess_id_";
+    public static final String EDITOR_STATE = "editorState";
+    public static final String ANSWER = "answer";
+    public static final String QUESTION = "question";
+    public static final String OPTIONS = "options";
+    public static final String USER_ASSESS_REQ = "user_assess_req_";
+    public static final String HIERARCHY = "hierarchy";
+    public static final String DEV_HIERARCHY_STORE = "dev_hierarchy_store";
+    public static final String CONTENT_HIERARCHY = "content_hierarchy";
+    public static final String BATCH_ID_ = "batchid";
+    public static final String COURSE_ID_ = "courseid";
+    public static final String COMPLETION_PERCENTAGE_ = "completionpercentage";
+    public static final String LAST_ACCESS_TIME = "last_access_time";
+    public static final String SUNBIRD_KEY_SPACE_NAME = "sunbird";
+    public static final String SUNBIRD_COURSES_KEY_SPACE_NAME = "sunbird_courses";
+    public static final String LAST_ACCESS_TIME_GAP = "last.access.time.gap.millis";
+    public static final String USER_CONTENT_CONSUMPTION = "user_content_consumption";
+    public static final String NOTIFICATION_UTIL = "notificationUtil";
+    public static final String NOTIFICATIONS = "notifications";
+    public static final String CORE_CONNECTIONS_PER_HOST_FOR_LOCAL = "coreConnectionsPerHostForLocal";
+    public static final String CORE_CONNECTIONS_PER_HOST_FOR_REMOTE =
+            "coreConnectionsPerHostForRemote";
+    public static final String MAX_CONNECTIONS_PER_HOST_FOR_LOCAl = "maxConnectionsPerHostForLocal";
+    public static final String MAX_CONNECTIONS_PER_HOST_FOR_REMOTE = "maxConnectionsPerHostForRemote";
+    public static final String MAX_REQUEST_PER_CONNECTION = "maxRequestsPerConnection";
+    public static final String HEARTBEAT_INTERVAL = "heartbeatIntervalSeconds";
+    public static final String POOL_TIMEOUT = "poolTimeoutMillis";
+    public static final String CONTACT_POINT = "contactPoint";
+    public static final String PORT = "port";
+    public static final String QUERY_LOGGER_THRESHOLD = "queryLoggerConstantThreshold";
+    public static final String SUNBIRD_CASSANDRA_CONSISTENCY_LEVEL =
+            "sunbird_cassandra_consistency_level";
+    public static final String INCOMPLETE_COURSES_MAIL_SUBJECT = "Complete the courses you started";
+    public static final String COURSE = "course";
+    public static final String _URL = "_url";
+    public static final String THUMBNAIL = "_thumbnail";
+    public static final String _NAME = "_name";
+    public static final String _DURATION = "_duration";
+    public static final String SEND_NOTIFICATION_PROPERTIES = "send-notification";
+    public static final String NOTIFICATION_HOST = "notification.service.host";
+    public static final String NOTIFICATION_ENDPOINT = "notification.event.endpoint";
+    public static final String SUBJECT = "subject";
+    public static final String SCHEDULER_TIME_GAP = "scheduler-time-gap";
+    public static final String INCOMPLETE_COURSES = "incompletecourses";
+    public static final String SUBJECT_ = "subject";
+    public static final String POSTER_IMAGE = "posterImage";
+    public static final String COURSE_URL = "course.url";
+    public static final String OVERVIEW_BATCH_ID = "overview.batch";
+    public static final String SENDER_MAIL = "sender.mail";
+    public static final String CASSANDRA_CONFIG_HOST = "cassandra.config.host";
+    private Constants() {
+        throw new IllegalStateException("Utility class");
+    }
 
 }
