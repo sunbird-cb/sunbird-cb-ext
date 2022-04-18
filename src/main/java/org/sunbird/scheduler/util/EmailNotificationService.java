@@ -65,7 +65,8 @@ public class EmailNotificationService implements Runnable {
     public Map<String, UserCourseProgressDetails> incompleteCourses() {
         try {
             List<String> fields = new ArrayList<>(Arrays.asList(RATINGS_USER_ID, BATCH_ID_, COURSE_ID_, COMPLETION_PERCENTAGE_, LAST_ACCESS_TIME));
-            Date date = new Date(new Date().getTime() - lastAccessTimeGap);
+            Date date = new Date(new Date().getTime());
+            // - lastAccessTimeGap);
             List<Map<String, Object>> userCoursesList = cassandraOperation.searchByWhereClause(Constants.SUNBIRD_COURSES_KEY_SPACE_NAME, Constants.USER_CONTENT_CONSUMPTION, fields, date);
             if (!CollectionUtils.isEmpty(userCoursesList)) {
                 fetchCourseIdsAndSetCourseNameAndThumbnail(userCoursesList);
