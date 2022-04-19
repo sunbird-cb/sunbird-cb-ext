@@ -92,8 +92,8 @@ public class RatingServiceImpl implements RatingService {
                     Constants.TABLE_RATINGS_SUMMARY, request, null);
 
             if (!CollectionUtils.isEmpty(existingDataList)) {
-            Map<String, Object> map = existingDataList.get(0);
-            String reviews = (String) map.get(Constants.LATEST50REVIEWS);
+            Map<String, Object> summaryData = existingDataList.get(0);
+            String reviews = (String) summaryData.get(Constants.LATEST50REVIEWS);
             JsonNode actualObj = mapper.readTree(reviews);
             List<String> userList = new ArrayList<>();
             Map<String, SummaryNodeModel> reviewMap = new HashMap<>();
@@ -107,38 +107,28 @@ public class RatingServiceImpl implements RatingService {
             Map<String, Object> userRequest = new HashMap<>();
             userRequest.put(Constants.USERID, userList);
             List<String> fields = new ArrayList<>();
-            fields.add(Constants.USERID);
+            fields.add(Constants.ID);
             fields.add(Constants.FIRSTNAME);
             fields.add(Constants.LASTNAME);
 
             Map<String, Object> existingUserList = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
-                    Constants.TABLE_USER, userRequest, fields, "id");
+                    Constants.TABLE_USER, userRequest, fields, Constants.ID);
             List<SummaryModel.latestReviews> latest50Reviews = new ArrayList<>();
-
-            String firstName = "";
-            String lastName = "";
 
             for (String user : userList) {
                 final ObjectMapper mapper = new ObjectMapper();
                 final UserModel userModel = mapper.convertValue(existingUserList.get(user), UserModel.class);
                 final SummaryNodeModel summaryNodeModel = mapper.convertValue(reviewMap.get(user), SummaryNodeModel.class);
-                if (userModel.getFirstName() != null) {
-                    firstName = userModel.getFirstName();
-                }
-                if (userModel.getLastName() != null) {
-                    lastName = userModel.getLastName();
-                }
                 latest50Reviews.add(new SummaryModel.latestReviews(Constants.REVIEW,
                         userModel.getId(),
                         summaryNodeModel.getDate(),
                         summaryNodeModel.getRating().floatValue(),
                         summaryNodeModel.getReview(),
-                        firstName,
-                        lastName
+                        (userModel.getFirstName() != null) ? userModel.getFirstName() :"",
+                        (userModel.getLastName() != null) ? userModel.getLastName() : ""
 
                 ));
             }
-            Map<String, Object> summaryData = existingDataList.get(0);
 
             SummaryModel summaryModel = new SummaryModel(
                     summaryData.get(Constants.SUMMARY_ACTIVITY_ID).toString(),
@@ -277,26 +267,22 @@ public class RatingServiceImpl implements RatingService {
 
                 Map<String, Object> existingUserList = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
                         Constants.TABLE_USER, userRequest, fields, Constants.ID);
-                String firstName = "";
-                String lastName = "";
 
                 for (String user : listOfUserId) {
                     final ObjectMapper mapper = new ObjectMapper();
                     final UserModel userModel = mapper.convertValue(existingUserList.get(user), UserModel.class);
                     final LookupDataModel lookupModel = mapper.convertValue(existingDataList.get(user), LookupDataModel.class);
-                    if (userModel.getFirstName() != null) {
-                        firstName = userModel.getFirstName();
-                    } else if (userModel.getLastName() != null) {
-                        lastName = userModel.getLastName();
-                    }
+
                     listOfLookupResponse.add(new LookupResponse(lookupModel.getActivityid(),
                             lookupModel.getReview(),
                             lookupModel.getRating().toString(),
                             lookupModel.getUpdatedon(),
                             lookupModel.getUpdatedon(),
                             lookupModel.getUserId(),
-                            firstName,
-                            lastName));
+                            (userModel.getFirstName() != null) ? userModel.getFirstName() :"",
+                            (userModel.getLastName() != null) ? userModel.getLastName() : ""
+                    ));
+
                 }
                 response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
                 response.put(Constants.RESPONSE, listOfLookupResponse);
