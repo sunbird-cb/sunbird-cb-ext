@@ -10,8 +10,9 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.sunbird.common.helper.cassandra.CassandraConnectionManager;
+import org.sunbird.common.helper.cassandra.CassandraConnectionMngrFactory;
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.util.Constants;
 
@@ -22,9 +23,7 @@ import java.util.Map.Entry;
 public class CassandraOperationImpl implements CassandraOperation {
 
     private Logger logger = LoggerFactory.getLogger(getClass().getName());
-
-    @Autowired
-    private CassandraConnectionManager connectionManager;
+    protected CassandraConnectionManager connectionManager = CassandraConnectionMngrFactory.getInstance();
 
     @Override
     public SBApiResponse insertRecord(String keyspaceName, String tableName, Map<String, Object> request) {
@@ -104,6 +103,35 @@ public class CassandraOperationImpl implements CassandraOperation {
             logger.error(Constants.EXCEPTION_MSG_FETCH + tableName + " : " + e.getMessage(), e);
         }
         return response;
+    }
+
+    @Override
+    public List<Map<String, Object>> searchByWhereClause(
+            String keyspace,
+            String tableName,
+            List<String> fields,
+            Date date) {
+        Builder selectBuilder;
+        if (CollectionUtils.isNotEmpty(fields)) {
+            String[] dbFields = fields.toArray(new String[fields.size()]);
+            selectBuilder = QueryBuilder.select(dbFields);
+        } else {
+            selectBuilder = QueryBuilder.select().all();
+        }
+        Select selectQuery = selectBuilder.from(keyspace, tableName);
+        Where selectWhere = selectQuery.where();
+        Clause completionpercentagegreaterthanzero = QueryBuilder.gt("completionpercentage", 0);
+        selectWhere.and(completionpercentagegreaterthanzero);
+        Clause completionpercentagelessthanhundred= QueryBuilder.lt("completionpercentage", 100);
+        selectWhere.and(completionpercentagelessthanhundred);
+        Clause lastAccessTimeNotNull= QueryBuilder.gt("last_access_time", 0);
+        selectWhere.and(lastAccessTimeNotNull);
+        selectQuery.allowFiltering();
+        Clause lastAccessTime= QueryBuilder.lt("last_access_time", date);
+        selectWhere.and(lastAccessTime);
+        logger.debug("our query: "+selectQuery.getQueryString());
+        ResultSet resultSet = connectionManager.getSession(keyspace).execute(selectQuery);
+        return CassandraUtil.createResponse(resultSet);
     }
 
     @Override

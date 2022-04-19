@@ -188,10 +188,10 @@ public class CbExtServerProperties {
 
 	@Value("${redis.timeout}")
 	private String redisTimeout;
-	
+
 	@Value("${kafka.topics.userutility.telemetry.event}")
 	private String userUtilityTopic;
-	
+
 	@Value("${sunbird.cb.ext.version}")
 	private String sunbirdCbExtVersion;
 
@@ -684,7 +684,7 @@ public class CbExtServerProperties {
 	public void setAzureStorageKey(String azureStorageKey) {
 		this.azureStorageKey = azureStorageKey;
 	}
-	
+
 	public String getUserUtilityTopic() {
 		return userUtilityTopic;
 	}
