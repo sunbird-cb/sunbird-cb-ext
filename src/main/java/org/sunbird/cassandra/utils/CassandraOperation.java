@@ -2,6 +2,7 @@ package org.sunbird.cassandra.utils;
 
 import org.sunbird.common.model.SBApiResponse;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -74,8 +75,14 @@ public interface CassandraOperation {
      */
     public Long getRecordCount(String keyspace, String table);
 
-    public List<Map<String, Object>> getRecordsByPropertiesWithPagination(String keyspaceName, String tableName,
-                                                                          Map<String, Object> propertyMap, List<String> fields, int limit, String updatedOn);
-
+    public Map<String, Object> getRecordsByProperties(String keyspaceName, String tableName,
+                                                                        Map<String, Object> propertyMap, List<String> fields,String key);
+    public Map<String, Object> getRecordsByPropertiesWithPagination(String keyspaceName, String tableName,
+                                                                          Map<String, Object> propertyMap, List<String> fields, int limit, String updatedOn,String key);
+    List<Map<String, Object>> searchByWhereClause(
+            String keyspace,
+            String tableName,
+            List<String> fields,
+            Date date);
 
 }

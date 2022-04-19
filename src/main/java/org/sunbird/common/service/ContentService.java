@@ -1,3 +1,5 @@
+
+
 package org.sunbird.common.service;
 
 import java.util.List;
@@ -17,5 +19,6 @@ public interface ContentService {
 
 	public SunbirdApiUserCourseListResp getUserCourseListResponse(String authToken, String userId);
 	
-	public SunbirdApiResp getQustionListDetails(List<String> questionIdList);
+	public SunbirdApiResp getQuestionListDetails(List<String> questionIdList);
 }
+

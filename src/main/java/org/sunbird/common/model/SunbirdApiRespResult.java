@@ -25,7 +25,6 @@ public class SunbirdApiRespResult {
 	public void setContent(SunbirdApiHierarchyResultContent content) {
 		this.content = content;
 	}
-
 	public SunbirdApiHierarchyResultBatch getBatch() {
 		return batch;
 	}
@@ -50,3 +49,4 @@ public class SunbirdApiRespResult {
 		this.questions = questions;
 	}
 }
+

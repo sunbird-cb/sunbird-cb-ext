@@ -1,18 +1,18 @@
 package org.sunbird.ratings.model;
 
 public class RequestRating {
-    private String activity_Id;
+    private String activityId;
     private String userId;
-    private String activity_type;
+    private String activityType;
     private Float rating;
     private String review ;
 
-    public String getActivity_Id() {
-        return activity_Id;
+    public String getActivityId() {
+        return activityId;
     }
 
-    public void setActivity_Id(String activity_Id) {
-        this.activity_Id = activity_Id;
+    public void setActivityId(String activityId) {
+        this.activityId = activityId;
     }
 
     public String getUserId() {
@@ -23,12 +23,12 @@ public class RequestRating {
         this.userId = userId;
     }
 
-    public String getActivity_type() {
-        return activity_type;
+    public String getActivityType() {
+        return activityType;
     }
 
-    public void setActivity_type(String activity_type) {
-        this.activity_type = activity_type;
+    public void setActivityType(String activityType) {
+        this.activityType = activityType;
     }
 
     public Float getRating() {
@@ -46,7 +46,4 @@ public class RequestRating {
     public void setReview(String review) {
         this.review = review;
     }
-
-
-
 }

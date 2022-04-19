@@ -149,7 +149,7 @@ public class ContentServiceImpl implements ContentService {
 		return null;
 	}
 
-	public SunbirdApiResp getQustionListDetails(List<String> questionIdList) {
+	public SunbirdApiResp getQuestionListDetails(List<String> questionIdList) {
 		SunbirdApiResp response = null;
 		StringBuilder url = new StringBuilder();
 		url.append(serverConfig.getAssessmentHost()).append(serverConfig.getAssessmentQuestionListPath());
