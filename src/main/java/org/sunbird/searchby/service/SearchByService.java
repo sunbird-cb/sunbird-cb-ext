@@ -93,6 +93,7 @@ public class SearchByService {
 						for (Map<String, Object> facetValueObj : facetValueList) {
 							CompetencyInfo compInfo = new CompetencyInfo();
 							//TODO - Make sure which competency field is unique
+							compInfo.setName((String) facetValueObj.get("name"));
 							compInfo.setContentCount((int) facetValueObj.get("count"));
 							competencyMap.put((String) facetValueObj.get("name"), compInfo);
 						}
@@ -222,6 +223,7 @@ public class SearchByService {
 					if (!CollectionUtils.isEmpty(facetValueList)) {
 						for (Map<String, Object> facetValueObj : facetValueList) {
 							ProviderInfo provInfo = new ProviderInfo();
+							provInfo.setName((String) facetValueObj.get("name"));
 							provInfo.setContentCount((int) facetValueObj.get("count"));
 							providerMap.put((String) facetValueObj.get("name"), provInfo);
 						}
