@@ -5,24 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1f8359fe-dc08-476c-87bb-64ed16892434" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/sb-cb-ext.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/sunbird/common/model/KeyData.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/sunbird/common/util/AccessTokenValidator.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/sunbird/common/util/Base64Util.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/sunbird/common/util/CryptoUtil.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/sunbird/common/util/KeyCloakConnectionProvider.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/sunbird/common/util/KeyManager.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/sunbird/common/util/RequestInterceptor.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/sunbird/assessment/repo/AssessmentRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/sunbird/assessment/repo/AssessmentRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/sunbird/assessment/repo/AssessmentRepositoryImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/sunbird/assessment/repo/AssessmentRepositoryImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/sunbird/assessment/service/AssessmentServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/sunbird/assessment/service/AssessmentServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/sunbird/assessment/service/AssessmentServiceV2Impl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/sunbird/assessment/service/AssessmentServiceV2Impl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/sunbird/cache/RedisCacheMgr.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/sunbird/cache/RedisCacheMgr.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/sunbird/common/executor/SchedulerTrigger.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/sunbird/common/executor/SchedulerTrigger.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/sunbird/common/util/CbExtServerProperties.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/sunbird/common/util/CbExtServerProperties.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/sunbird/common/util/Constants.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/sunbird/common/util/Constants.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
