@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import org.sunbird.common.helper.cassandra.CassandraConnectionManager;
 import org.sunbird.common.helper.cassandra.CassandraConnectionMngrFactory;
 import org.sunbird.common.util.Constants;
+import org.sunbird.common.util.KeyManager;
 import org.sunbird.scheduler.util.SchedulerManager;
 
 @Component

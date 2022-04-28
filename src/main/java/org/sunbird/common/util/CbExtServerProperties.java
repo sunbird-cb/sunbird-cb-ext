@@ -225,6 +225,17 @@ public class CbExtServerProperties {
 	@Value("${assessment.read.min.question.params}")
 	private String assessmentMinQuestionParams;
 
+	@Value("${user.assessment.submission.duration}")
+	private String userAssessmentSubmissionDuration;
+
+	public String getUserAssessmentSubmissionDuration() {
+		return userAssessmentSubmissionDuration;
+	}
+
+	public void setUserAssessmentSubmissionDuration(String userAssessmentSubmissionDuration) {
+		this.userAssessmentSubmissionDuration = userAssessmentSubmissionDuration;
+	}
+
 	public String getContentHost() {
 		return contentHost;
 	}

@@ -207,6 +207,12 @@ public class Constants {
     public static final String KEYSPACE_SUNBIRD = "sunbird";
     public static final String KEYSPACE_SUNBIRD_COURSES = "sunbird_courses";
     public static final String TABLE_ORG_BUDGET_SCHEME = "org_budget_scheme";
+    public static final String TABLE_USER_ASSESSMENT_TIME= "user_assessment_time";
+    public static final String SHA_256_WITH_RSA = "SHA256withRSA";
+    public static final String SUB = "sub";
+    public static final String _UNAUTHORIZED = "Unauthorized";
+    public static final String DOT_SEPARATOR = ".";
+    public static final String ACCESS_TOKEN_PUBLICKEY_BASEPATH = "accesstoken.publickey.basepath";
     public static final String TABLE_ORG_AUDIT = "org_audit";
     public static final String TABLE_ORG_STAFF_POSITION = "org_staff_position";
     public static final String TABLE_WORK_ORDER = "work_order";
@@ -292,6 +298,7 @@ public class Constants {
     public static final String QUESTION_ID = "qs_id_";
     public static final String ASSESSMENT_ID = "assess_id_";
     public static final String EDITOR_STATE = "editorState";
+    public static final String CHOICES = "choices";
     public static final String ANSWER = "answer";
     public static final String QUESTION = "question";
     public static final String OPTIONS = "options";
@@ -340,6 +347,40 @@ public class Constants {
     public static final String OVERVIEW_BATCH_ID = "overview.batch";
     public static final String SENDER_MAIL = "sender.mail";
     public static final String CASSANDRA_CONFIG_HOST = "cassandra.config.host";
+    public static final String OBJECT_TYPE = "objectType";
+    public static final String QUESTIONS = "questions";
+    public static final String RHS_CHOICES = "rhsChoices";
+    public static final String MTF_QUESTION = "MTF Question";
+    public static final String FTB_QUESTION = "FTB Question";
+    public static final String API_QUESTIONSET_HIERARCHY_GET = "api.questionset.hierarchy.get";
+    public static final String VER = "3.0";
+    public static final String API_QUESTIONS_LIST = "api.questions.list";
+    public static final String MINIMUM_PASS_PERCENTAGE = "minimumPassPercentage";
+    public static final String SCORE_CUTOFF_TYPE = "scoreCutoffType";
+    public static final String PASS_PERCENTAGE = "passPercentage";
+    public static final String TOTAL = "total";
+    public static final String BLANK = "blank";
+    public static final String CORRECT = "correct";
+    public static final String INCORRECT = "incorrect";
+    public static final String PASS = "pass";
+    public static final String OVERALL_RESULT = "overallResult";
+    public static final String DO = "do_";
+    public static final String SSO_CLIENT_ID = "sso.client.id";
+    public static final String SSO_CLIENT_SECRET = "sso.client.secret";
+    public static final String SSO_PASSWORD = "sso.password";
+    public static final String SSO_POOL_SIZE = "sso.connection.pool.size";
+    public static final String SSO_PUBLIC_KEY = "sunbird_sso_publickey";
+    public static final String SSO_REALM = "sso.realm";
+    public static final String SSO_URL = "sso.url";
+    public static final String SSO_USERNAME = "sso.username";
+    public static final String SUNBIRD_SSO_CLIENT_ID = "sunbird_sso_client_id";
+    public static final String SUNBIRD_SSO_CLIENT_SECRET = "sunbird_sso_client_secret";
+    public static final String SUNBIRD_SSO_PASSWORD = "sunbird_sso_password";
+    public static final String SUNBIRD_SSO_RELAM = "sunbird_sso_realm";
+    public static final String SUNBIRD_SSO_URL = "sunbird_sso_url";
+    public static final String SUNBIRD_SSO_USERNAME = "sunbird_sso_username";
+    public static final String DURATION = "duration";
+
     private Constants() {
         throw new IllegalStateException("Utility class");
     }

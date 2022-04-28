@@ -1,11 +1,6 @@
 package org.sunbird.cache;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
@@ -19,117 +14,131 @@ import org.sunbird.core.logger.CbExtLogger;
 @Component
 public class RedisCacheMgr {
 
-	private static final int cache_ttl = 84600;
+    private static final int cache_ttl = 84600;
 
-	@Autowired
-	private RedisTemplate<String, Object> redisTemplate;
+    @Autowired
+    private RedisTemplate<String, Object> redisTemplate;
 
-	@Autowired
-	CbExtServerProperties cbExtServerProperties;
+    @Autowired
+    CbExtServerProperties cbExtServerProperties;
 
-	private CbExtLogger logger = new CbExtLogger(getClass().getName());
+    private CbExtLogger logger = new CbExtLogger(getClass().getName());
 
-	public void putCache(String key, Object object) {
-		try {
-			int ttl = cache_ttl;
-			if (!StringUtils.isEmpty(cbExtServerProperties.getRedisTimeout())) {
-				ttl = Integer.parseInt(cbExtServerProperties.getRedisTimeout());
-			}
-			redisTemplate.opsForValue().set(Constants.REDIS_COMMON_KEY + key, object);
-			redisTemplate.expire(Constants.REDIS_COMMON_KEY + key, ttl, TimeUnit.SECONDS);
-			logger.info("Cache_key_value " + Constants.REDIS_COMMON_KEY + key + " is saved in redis");
-		} catch (Exception e) {
-			logger.error(e);
-		}
-	}
+    public void putCache(String key, Object object) {
+        try {
+            int ttl = cache_ttl;
+            if (!StringUtils.isEmpty(cbExtServerProperties.getRedisTimeout())) {
+                ttl = Integer.parseInt(cbExtServerProperties.getRedisTimeout());
+            }
+            redisTemplate.opsForValue().set(Constants.REDIS_COMMON_KEY + key, object);
+            redisTemplate.expire(Constants.REDIS_COMMON_KEY + key, ttl, TimeUnit.SECONDS);
+            logger.info("Cache_key_value " + Constants.REDIS_COMMON_KEY + key + " is saved in redis");
+        } catch (Exception e) {
+            logger.error(e);
+        }
+    }
 
-	public boolean deleteKeyByName(String key) {
-		try {
-			key = key.toUpperCase();
-			redisTemplate.delete(Constants.REDIS_COMMON_KEY + key);
-			logger.info("Cache_key_value " + Constants.REDIS_COMMON_KEY + key + " is deleted from redis");
-			return true;
-		} catch (Exception e) {
-			logger.error(e);
-			return false;
-		}
-	}
+    public boolean deleteKeyByName(String key) {
+        try {
+            key = key.toUpperCase();
+            redisTemplate.delete(Constants.REDIS_COMMON_KEY + key);
+            logger.info("Cache_key_value " + Constants.REDIS_COMMON_KEY + key + " is deleted from redis");
+            return true;
+        } catch (Exception e) {
+            logger.error(e);
+            return false;
+        }
+    }
 
-	public boolean deleteAllKey() {
-		try {
-			String keyPattern = Constants.REDIS_COMMON_KEY + "*";
-			Set<String> keys = redisTemplate.keys(keyPattern);
-			for (String key : keys) {
-				redisTemplate.delete(key);
-			}
-			logger.info("All Keys starts with " + Constants.REDIS_COMMON_KEY + " is deleted from redis");
-			return true;
-		} catch (Exception e) {
-			logger.error(e);
-			return false;
-		}
-	}
+    public boolean deleteAllKey() {
+        try {
+            String keyPattern = Constants.REDIS_COMMON_KEY + "*";
+            Set<String> keys = redisTemplate.keys(keyPattern);
+            for (String key : keys) {
+                redisTemplate.delete(key);
+            }
+            logger.info("All Keys starts with " + Constants.REDIS_COMMON_KEY + " is deleted from redis");
+            return true;
+        } catch (Exception e) {
+            logger.error(e);
+            return false;
+        }
+    }
 
-	public Object getCache(String key) {
-		try {
-			return redisTemplate.opsForValue().get(Constants.REDIS_COMMON_KEY + key);
-		} catch (Exception e) {
-			logger.error(e);
-			return null;
-		}
-	}
+    public Object getCache(String key) {
+        try {
+            return redisTemplate.opsForValue().get(Constants.REDIS_COMMON_KEY + key);
+        } catch (Exception e) {
+            logger.error(e);
+            return null;
+        }
+    }
 
-	public boolean deleteCache() {
-		try {
-			String keyPattern = "*";
-			Set<String> keys = redisTemplate.keys(keyPattern);
-			if (!keys.isEmpty()) {
-				for (String key : keys) {
+    public List<Object> mget(List<String> fields) {
+        try {
+            List<String> ls = new ArrayList<>();
+            for (int i = 0; i < fields.size(); i++) {
+				ls.add(Constants.REDIS_COMMON_KEY + Constants.QUESTION_ID + fields.get(i));
+            }
+            Collection<String> questionIdList = ls;
+            return redisTemplate.opsForValue().multiGet(questionIdList);
+        } catch (Exception e) {
+            logger.error(e);
+        }
+        return null;
+    }
 
-					redisTemplate.delete(key);
-				}
-				logger.info("All Keys in Redis Cache is Deleted");
-				return true;
-			} else {
-				return false;
-			}
-		} catch (Exception e) {
-			logger.error(e);
-			return false;
-		}
-	}
+    public boolean deleteCache() {
+        try {
+            String keyPattern = "*";
+            Set<String> keys = redisTemplate.keys(keyPattern);
+            if (!keys.isEmpty()) {
+                for (String key : keys) {
 
-	public Set<String> getAllKeys() {
-		Set<String> keys = null;
-		try {
-			String keyPattern = "*";
-			keys = redisTemplate.keys(keyPattern);
+                    redisTemplate.delete(key);
+                }
+                logger.info("All Keys in Redis Cache is Deleted");
+                return true;
+            } else {
+                return false;
+            }
+        } catch (Exception e) {
+            logger.error(e);
+            return false;
+        }
+    }
 
-		} catch (Exception e) {
-			logger.error(e);
-			return Collections.emptySet();
-		}
-		return keys;
-	}
+    public Set<String> getAllKeys() {
+        Set<String> keys = null;
+        try {
+            String keyPattern = "*";
+            keys = redisTemplate.keys(keyPattern);
 
-	public List<Map<String, Object>> getAllKeysAndValues() {
-		List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
-		try {
-			String keyPattern = "*";
-			Map<String, Object> res = new HashMap<>();
-			Set<String> keys = redisTemplate.keys(keyPattern);
-			if (!keys.isEmpty()) {
-				for (String key : keys) {
-					Object entries;
-					entries = redisTemplate.opsForValue().get(key);
-					res.put(key, entries);
-				}
-				result.add(res);
-			}
-		} catch (Exception e) {
-			logger.error(e);
-			return Collections.emptyList();
-		}
-		return result;
-	}
+        } catch (Exception e) {
+            logger.error(e);
+            return Collections.emptySet();
+        }
+        return keys;
+    }
+
+    public List<Map<String, Object>> getAllKeysAndValues() {
+        List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
+        try {
+            String keyPattern = "*";
+            Map<String, Object> res = new HashMap<>();
+            Set<String> keys = redisTemplate.keys(keyPattern);
+            if (!keys.isEmpty()) {
+                for (String key : keys) {
+                    Object entries;
+                    entries = redisTemplate.opsForValue().get(key);
+                    res.put(key, entries);
+                }
+                result.add(res);
+            }
+        } catch (Exception e) {
+            logger.error(e);
+            return Collections.emptyList();
+        }
+        return result;
+    }
 }
