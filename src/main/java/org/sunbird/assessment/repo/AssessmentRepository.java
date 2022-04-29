@@ -1,5 +1,7 @@
 package org.sunbird.assessment.repo;
 
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -44,7 +46,10 @@ public interface AssessmentRepository {
 	 * @return
 	 * @throws Exception
 	 */
-	public List<Map<String, Object>> getAssessmetbyContentUser(String rootOrg, String courseId, String userId)
+	public List<Map<String, Object>> getAssessmentbyContentUser(String rootOrg, String courseId, String userId)
 			throws Exception;
 
+    boolean addUserAssesmentStartTime(String userId, String assessmentIdentifier, Timestamp startTime);
+
+	Date fetchUserAssessmentStartTime(String userId, String s);
 }

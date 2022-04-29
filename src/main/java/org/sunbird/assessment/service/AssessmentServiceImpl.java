@@ -139,7 +139,7 @@ public class AssessmentServiceImpl implements AssessmentService {
 		Map<String, Object> result = new TreeMap<>();
 		try {
 			// get all submission data from cassandra
-			List<Map<String, Object>> assessmentResults = repository.getAssessmetbyContentUser(rootOrg, courseId,
+			List<Map<String, Object>> assessmentResults = repository.getAssessmentbyContentUser(rootOrg, courseId,
 					userId);
 			// retain only those fields that need to be sent to front end
 			List<Map<String, Object>> assessments = getAssessments(assessmentResults);

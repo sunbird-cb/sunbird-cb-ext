@@ -1,16 +1,18 @@
 package org.sunbird.assessment.repo;
 
-import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
-import java.util.*;
-
+import com.datastax.driver.core.utils.UUIDs;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.sunbird.assessment.dto.AssessmentSubmissionDTO;
+import org.sunbird.cassandra.utils.CassandraOperation;
+import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.util.Constants;
 import org.sunbird.core.logger.CbExtLogger;
 
-import com.datastax.driver.core.utils.UUIDs;
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 @Service
 public class AssessmentRepositoryImpl implements AssessmentRepository {
@@ -29,6 +31,9 @@ public class AssessmentRepositoryImpl implements AssessmentRepository {
 
 	@Autowired
 	UserQuizMasterRepository userQuizMasterRepo;
+
+	@Autowired
+	CassandraOperation cassandraOperation;
 
 	SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 
@@ -116,9 +121,30 @@ public class AssessmentRepositoryImpl implements AssessmentRepository {
 	}
 
 	@Override
-	public List<Map<String, Object>> getAssessmetbyContentUser(String rootOrg, String courseId, String userId)
+	public List<Map<String, Object>> getAssessmentbyContentUser(String rootOrg, String courseId, String userId)
 			throws Exception {
 		// TODO Auto-generated method stub
 		return Collections.emptyList();
+	}
+
+	@Override
+	public boolean addUserAssesmentStartTime(String userId, String assessmentIdentifier, Timestamp startTime) {
+		Map<String, Object> request = new HashMap<>();
+		request.put(Constants.USER_ID, userId);
+		request.put(Constants.IDENTIFIER, assessmentIdentifier);
+		cassandraOperation.deleteRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_USER_ASSESSMENT_TIME, request);
+		request.put("starttime", startTime);
+		SBApiResponse resp = cassandraOperation.insertRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_USER_ASSESSMENT_TIME, request);
+		return resp.get(Constants.RESPONSE).equals(Constants.SUCCESS);
+	}
+
+    @Override
+    public Date fetchUserAssessmentStartTime(String userId, String assessmentIdentifier) {
+		Map<String, Object> request = new HashMap<>();
+		request.put(Constants.USER_ID, userId);
+		request.put(Constants.IDENTIFIER, assessmentIdentifier);
+		Map<String, Object> existingDataList = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
+				Constants.TABLE_USER_ASSESSMENT_TIME, request, null).get(0);
+		return (Date) existingDataList.get("starttime");
 	}
 }

@@ -31,7 +31,7 @@ public class NotificationUtil {
         Logger = LoggerFactory.getLogger(NotificationUtil.class);
     }
 
-    public <params> void sendNotification(List<String> sendTo, Map<String, Object> params, String senderMail, Boolean sendNotification, String notificationUrl) {
+    public <params> void  sendNotification(List<String> sendTo, Map<String, Object> params, String senderMail, Boolean sendNotification, String notificationUrl) {
         new Thread(() -> {
             try {
                 if (sendNotification) {
@@ -39,9 +39,14 @@ public class NotificationUtil {
                     RestTemplate restTemplate = new RestTemplate();
                     headers.setContentType(MediaType.APPLICATION_JSON);
                     Map<String, Object> notificationRequest = new HashMap<>();
-                    Map<String, List<Notification>> notifications = new HashMap<>();
-                    notifications.put("notifications", Arrays.asList(new Notification(Constants.EMAIL, Constants.MESSAGE, new EmailConfig(senderMail, (String) params.get(SUBJECT_)), sendTo, new Template(null, INCOMPLETE_COURSES, params))));
-                    notificationRequest.put("request", notifications);
+                    List<Object> notificationTosend = new ArrayList<>(Arrays.asList(new Notification(Constants.EMAIL, Constants.MESSAGE,
+                            new EmailConfig(senderMail, Constants.INCOMPLETE_COURSES_MAIL_SUBJECT), sendTo,
+                            new Template(null, INCOMPLETE_COURSES, params))));
+                    notificationRequest.put("request", new HashMap<String, List<Object>>() {
+                        {
+                            put("notifications", notificationTosend);
+                        }
+                    });
                     Logger.info(String.format("Notification Request : %s", notificationRequest));
                     HttpEntity<Object> req = new HttpEntity<>(notificationRequest, headers);
                     ResponseEntity<String> resp = restTemplate.postForEntity(notificationUrl, req, String.class);
