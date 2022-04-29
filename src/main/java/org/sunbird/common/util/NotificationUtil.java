@@ -40,7 +40,7 @@ public class NotificationUtil {
                     headers.setContentType(MediaType.APPLICATION_JSON);
                     Map<String, Object> notificationRequest = new HashMap<>();
                     Map<String, List<Notification>> notifications = new HashMap<>();
-                    notifications.put("notifications", Arrays.asList(new Notification(Constants.EMAIL, Constants.MESSAGE, new EmailConfig(senderMail, (String) params.get(SUBJECT_)), sendTo, new Template(null, INCOMPLETE_COURSES, params))));
+                    notifications.put("notifications", Arrays.asList(new Notification(Constants.EMAIL, Constants.MESSAGE, new EmailConfig(senderMail, Constants.INCOMPLETE_COURSES_MAIL_SUBJECT), sendTo, new Template(null, INCOMPLETE_COURSES, params))));
                     notificationRequest.put("request", notifications);
                     Logger.info(String.format("Notification Request : %s", notificationRequest));
                     HttpEntity<Object> req = new HttpEntity<>(notificationRequest, headers);
