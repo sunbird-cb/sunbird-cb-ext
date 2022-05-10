@@ -1,8 +1,5 @@
 package org.sunbird.common.util;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
@@ -15,12 +12,9 @@ import org.sunbird.common.model.EmailConfig;
 import org.sunbird.common.model.Notification;
 import org.sunbird.common.model.Template;
 
-import javax.validation.constraints.Email;
-import java.lang.reflect.Type;
 import java.util.*;
 
 import static org.sunbird.common.util.Constants.INCOMPLETE_COURSES;
-import static org.sunbird.common.util.Constants.SUBJECT_;
 
 @Service(Constants.NOTIFICATION_UTIL)
 public class NotificationUtil {
