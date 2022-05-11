@@ -14,7 +14,6 @@ import org.springframework.web.client.RestTemplate;
 @ComponentScan(basePackages = "org.sunbird")
 @SpringBootApplication
 public class SbCbExtApplication {
-
 	/**
 	 * Runs The application
 	 * 
@@ -23,7 +22,7 @@ public class SbCbExtApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(SbCbExtApplication.class, args);
 	}
-	
+
 	/**
 	 * Initializes the rest template
 	 * 
@@ -33,7 +32,6 @@ public class SbCbExtApplication {
 
 	@Bean
 	public RestTemplate restTemplate() throws Exception {
-
 		return new RestTemplate(getClientHttpRequestFactory());
 	}
 
