@@ -20,7 +20,6 @@ import org.sunbird.ratings.model.*;
 import org.sunbird.ratings.responsecode.ResponseCode;
 import org.sunbird.ratings.responsecode.ResponseMessage;
 
-import java.sql.Timestamp;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -61,20 +60,20 @@ public class RatingServiceImpl implements RatingService {
                     Constants.TABLE_RATINGS, request, null);
             if (!CollectionUtils.isEmpty(existingDataList)) {
                 Map<String, Object> ratingData = existingDataList.get(0);
-                GetRatingModel getRatingModel = new GetRatingModel();
-                getRatingModel.setActivityId((String) ratingData.get("activityid"));
-                getRatingModel.setReview((String) ratingData.get("review"));
-                getRatingModel.setRating((Float) ratingData.get("rating"));
+                RatingModelInfo ratingModelInfo = new RatingModelInfo();
+                ratingModelInfo.setActivityId((String) ratingData.get("activityid"));
+                ratingModelInfo.setReview((String) ratingData.get("review"));
+                ratingModelInfo.setRating((Float) ratingData.get("rating"));
                 timeBasedUuid = (UUID) ratingData.get("updatedon");
                 Long updatedTime = (timeBasedUuid.timestamp() - 0x01b21dd213814000L) / 10000L;
-                getRatingModel.setUpdatedOn(updatedTime.toString());
-                getRatingModel.setActivityType((String) ratingData.get("activitytype"));
-                getRatingModel.setUserId((String) ratingData.get("userId"));
+                ratingModelInfo.setUpdatedOn(updatedTime.toString());
+                ratingModelInfo.setActivityType((String) ratingData.get("activitytype"));
+                ratingModelInfo.setUserId((String) ratingData.get("userId"));
                 timeBasedUuid = (UUID) ratingData.get("createdon");
                 Long createdTime = (timeBasedUuid.timestamp() - 0x01b21dd213814000L) / 10000L;
-                getRatingModel.setCreatedOn(createdTime.toString());
+                ratingModelInfo.setCreatedOn(createdTime.toString());
                 response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
-                response.put(Constants.RESPONSE, getRatingModel);
+                response.put(Constants.RESPONSE, ratingModelInfo);
                 response.setResponseCode(HttpStatus.OK);
             } else {
                 String errMsg = Constants.NO_RATING_EXCEPTION_MESSAGE + activityId + ", activity_Type: " + activityType;
@@ -91,7 +90,6 @@ public class RatingServiceImpl implements RatingService {
     @Override
     public SBApiResponse getRatingSummary(String activityId, String activityType) {
         SBApiResponse response = new SBApiResponse(Constants.API_RATINGS_SUMMARY);
-        System.out.println("The time is :" + UUIDs.timeBased());
         try {
             validationBody = new ValidationBody();
             validationBody.setActivityId(activityId);

@@ -1,6 +1,6 @@
 package org.sunbird.ratings.model;
 
-public class GetRatingModel {
+public class RatingModelInfo {
     private String activityId;
     private String commentUpdatedOn;
     private String commentBy;
@@ -12,10 +12,10 @@ public class GetRatingModel {
     private String userId;
     private String createdOn;
 
-    public GetRatingModel() {
+    public RatingModelInfo() {
     }
 
-    public GetRatingModel(String activityId, String commentUpdatedOn, String commentBy, String review, Float rating, String comment, String updatedOn, String activityType, String userId, String createdOn) {
+    public RatingModelInfo(String activityId, String commentUpdatedOn, String commentBy, String review, Float rating, String comment, String updatedOn, String activityType, String userId, String createdOn) {
         this.activityId = activityId;
         this.commentUpdatedOn = commentUpdatedOn;
         this.commentBy = commentBy;
