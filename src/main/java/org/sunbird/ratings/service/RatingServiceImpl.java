@@ -42,6 +42,7 @@ public class RatingServiceImpl implements RatingService {
     @Override
     public SBApiResponse getRatings(String activityId, String activityType, String userId) {
         SBApiResponse response = new SBApiResponse(Constants.API_RATINGS_READ);
+        UUID timeBasedUuid;
 
         try {
             validationBody = new ValidationBody();
@@ -58,8 +59,21 @@ public class RatingServiceImpl implements RatingService {
             List<Map<String, Object>> existingDataList = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
                     Constants.TABLE_RATINGS, request, null);
             if (!CollectionUtils.isEmpty(existingDataList)) {
+                Map<String, Object> ratingData = existingDataList.get(0);
+                RatingModelInfo ratingModelInfo = new RatingModelInfo();
+                ratingModelInfo.setActivityId((String) ratingData.get("activityid"));
+                ratingModelInfo.setReview((String) ratingData.get("review"));
+                ratingModelInfo.setRating((Float) ratingData.get("rating"));
+                timeBasedUuid = (UUID) ratingData.get("updatedon");
+                Long updatedTime = (timeBasedUuid.timestamp() - 0x01b21dd213814000L) / 10000L;
+                ratingModelInfo.setUpdatedOn(updatedTime.toString());
+                ratingModelInfo.setActivityType((String) ratingData.get("activitytype"));
+                ratingModelInfo.setUserId((String) ratingData.get("userId"));
+                timeBasedUuid = (UUID) ratingData.get("createdon");
+                Long createdTime = (timeBasedUuid.timestamp() - 0x01b21dd213814000L) / 10000L;
+                ratingModelInfo.setCreatedOn(createdTime.toString());
                 response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
-                response.put(Constants.RESPONSE, existingDataList);
+                response.put(Constants.RESPONSE, ratingModelInfo);
                 response.setResponseCode(HttpStatus.OK);
             } else {
                 String errMsg = Constants.NO_RATING_EXCEPTION_MESSAGE + activityId + ", activity_Type: " + activityType;
@@ -76,7 +90,6 @@ public class RatingServiceImpl implements RatingService {
     @Override
     public SBApiResponse getRatingSummary(String activityId, String activityType) {
         SBApiResponse response = new SBApiResponse(Constants.API_RATINGS_SUMMARY);
-
         try {
             validationBody = new ValidationBody();
             validationBody.setActivityId(activityId);
@@ -92,56 +105,58 @@ public class RatingServiceImpl implements RatingService {
                     Constants.TABLE_RATINGS_SUMMARY, request, null);
 
             if (!CollectionUtils.isEmpty(existingDataList)) {
-            Map<String, Object> summaryData = existingDataList.get(0);
-            String reviews = (String) summaryData.get(Constants.LATEST50REVIEWS);
-            JsonNode actualObj = mapper.readTree(reviews);
-            List<String> userList = new ArrayList<>();
-            Map<String, SummaryNodeModel> reviewMap = new HashMap<>();
+                Map<String, Object> summaryData = existingDataList.get(0);
+                String reviews = (String) summaryData.get(Constants.LATEST50REVIEWS);
+                JsonNode actualObj = mapper.readTree(reviews);
+                List<String> userList = new ArrayList<>();
+                Map<String, SummaryNodeModel> reviewMap = new HashMap<>();
 
-            for (JsonNode jsonNode : actualObj) {
-                final SummaryNodeModel summaryModel = mapper.convertValue(jsonNode, SummaryNodeModel.class);
-                reviewMap.put(summaryModel.getUser_id(), summaryModel);
-                userList.add(jsonNode.get("user_id").asText());
-            }
+                for (JsonNode jsonNode : actualObj) {
+                    final SummaryNodeModel summaryModel = mapper.convertValue(jsonNode, SummaryNodeModel.class);
+                    reviewMap.put(summaryModel.getUser_id(), summaryModel);
+                    userList.add(jsonNode.get("user_id").asText());
+                }
 
-            Map<String, Object> userRequest = new HashMap<>();
-            userRequest.put(Constants.USERID, userList);
-            List<String> fields = new ArrayList<>();
-            fields.add(Constants.ID);
-            fields.add(Constants.FIRSTNAME);
-            fields.add(Constants.LASTNAME);
+                Map<String, Object> userRequest = new HashMap<>();
+                userRequest.put(Constants.USERID, userList);
+                List<String> fields = new ArrayList<>();
+                fields.add(Constants.ID);
+                fields.add(Constants.FIRSTNAME);
+                fields.add(Constants.LASTNAME);
 
-            Map<String, Object> existingUserList = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
-                    Constants.TABLE_USER, userRequest, fields, Constants.ID);
-            List<SummaryModel.latestReviews> latest50Reviews = new ArrayList<>();
+                Map<String, Object> existingUserList = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
+                        Constants.TABLE_USER, userRequest, fields, Constants.ID);
+                List<SummaryModel.latestReviews> latest50Reviews = new ArrayList<>();
 
-            for (String user : userList) {
-                final ObjectMapper mapper = new ObjectMapper();
-                final UserModel userModel = mapper.convertValue(existingUserList.get(user), UserModel.class);
-                final SummaryNodeModel summaryNodeModel = mapper.convertValue(reviewMap.get(user), SummaryNodeModel.class);
-                latest50Reviews.add(new SummaryModel.latestReviews(Constants.REVIEW,
-                        userModel.getId(),
-                        summaryNodeModel.getDate(),
-                        summaryNodeModel.getRating().floatValue(),
-                        summaryNodeModel.getReview(),
-                        (userModel.getFirstName() != null) ? userModel.getFirstName() :"",
-                        (userModel.getLastName() != null) ? userModel.getLastName() : ""
+                for (String user : userList) {
+                    final ObjectMapper mapper = new ObjectMapper();
+                    final UserModel userModel = mapper.convertValue(existingUserList.get(user), UserModel.class);
+                    final SummaryNodeModel summaryNodeModel = mapper.convertValue(reviewMap.get(user), SummaryNodeModel.class);
+                    Long updatedTime = ((UUID.fromString(summaryNodeModel.getDate()).timestamp() - 0x01b21dd213814000L) )/ 10000L;
 
-                ));
-            }
+                    latest50Reviews.add(new SummaryModel.latestReviews(Constants.REVIEW,
+                            userModel.getId(),
+                            updatedTime.toString(),
+                            summaryNodeModel.getRating().floatValue(),
+                            summaryNodeModel.getReview(),
+                            (userModel.getFirstName() != null) ? userModel.getFirstName() : "",
+                            (userModel.getLastName() != null) ? userModel.getLastName() : ""
 
-            SummaryModel summaryModel = new SummaryModel(
-                    summaryData.get(Constants.SUMMARY_ACTIVITY_ID).toString(),
-                    summaryData.get(Constants.SUMMARY_ACTIVITY_TYPE).toString(),
-                    (Float) summaryData.get(Constants.TOTALCOUNT1STARS),
-                    (Float) summaryData.get(Constants.TOTALCOUNT2STARS),
-                    (Float) summaryData.get(Constants.TOTALCOUNT3STARS),
-                    (Float) summaryData.get(Constants.TOTALCOUNT4STARS),
-                    (Float) summaryData.get(Constants.TOTALCOUNT5STARS),
-                    (Float) summaryData.get(Constants.TOTALNUMBEROFRATINGS),
-                    (Float) summaryData.get(Constants.SUMOFTOTALRATINGS),
-                    mapper.writeValueAsString(latest50Reviews)
-            );
+                    ));
+                }
+
+                SummaryModel summaryModel = new SummaryModel(
+                        summaryData.get(Constants.SUMMARY_ACTIVITY_ID).toString(),
+                        summaryData.get(Constants.SUMMARY_ACTIVITY_TYPE).toString(),
+                        (Float) summaryData.get(Constants.TOTALCOUNT1STARS),
+                        (Float) summaryData.get(Constants.TOTALCOUNT2STARS),
+                        (Float) summaryData.get(Constants.TOTALCOUNT3STARS),
+                        (Float) summaryData.get(Constants.TOTALCOUNT4STARS),
+                        (Float) summaryData.get(Constants.TOTALCOUNT5STARS),
+                        (Float) summaryData.get(Constants.TOTALNUMBEROFRATINGS),
+                        (Float) summaryData.get(Constants.SUMOFTOTALRATINGS),
+                        mapper.writeValueAsString(latest50Reviews)
+                );
                 response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
                 response.put(Constants.RESPONSE, summaryModel);
                 response.setResponseCode(HttpStatus.OK);
@@ -161,7 +176,6 @@ public class RatingServiceImpl implements RatingService {
     public SBApiResponse upsertRating(RequestRating requestRating) {
         UUID timeBasedUuid = UUIDs.timeBased();
         SBApiResponse response = new SBApiResponse(Constants.API_RATINGS_UPDATE);
-
         RatingMessage ratingMessage;
 
         try {
@@ -272,14 +286,14 @@ public class RatingServiceImpl implements RatingService {
                     final ObjectMapper mapper = new ObjectMapper();
                     final UserModel userModel = mapper.convertValue(existingUserList.get(user), UserModel.class);
                     final LookupDataModel lookupModel = mapper.convertValue(existingDataList.get(user), LookupDataModel.class);
-
+                   Long updatedTime= ((UUID.fromString(lookupModel.getUpdatedon()).timestamp() - 0x01b21dd213814000L) )/ 10000L;
                     listOfLookupResponse.add(new LookupResponse(lookupModel.getActivityid(),
                             lookupModel.getReview(),
                             lookupModel.getRating().toString(),
-                            lookupModel.getUpdatedon(),
-                            lookupModel.getUpdatedon(),
+                            updatedTime.toString(),
+                            lookupModel.getActivitytype(),
                             lookupModel.getUserId(),
-                            (userModel.getFirstName() != null) ? userModel.getFirstName() :"",
+                            (userModel.getFirstName() != null) ? userModel.getFirstName() : "",
                             (userModel.getLastName() != null) ? userModel.getLastName() : ""
                     ));
 
@@ -328,7 +342,7 @@ public class RatingServiceImpl implements RatingService {
                 errObjList.add(ResponseMessage.Message.INVALID_INPUT + ResponseMessage.Message.INVALID_RATING);
             }
             if (StringUtils.isEmpty(validationBody.getRequestRating().getReview())
-                    || (!Pattern.matches("^[A-Za-z0-9, ]++$", validationBody.getRequestRating().getReview()))) {
+                    || (!Pattern.matches("^[A-Za-z0-9.!;?@&\"\", ]++$", validationBody.getRequestRating().getReview()))) {
                 errObjList.add(ResponseMessage.Message.INVALID_REVIEW);
             }
             if (StringUtils.isEmpty(validationBody.getRequestRating().getUserId())) {

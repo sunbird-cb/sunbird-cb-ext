@@ -49,7 +49,7 @@ public class SchedulerManager<aDate> {
             delayInHours = delayInDays * 24 + ((24 - hour) + 11);
         }
         service.scheduleWithFixedDelay(new EmailNotificationService(), 0,
-                SCHEDULER_TIME_GAP, TimeUnit.HOURS);
+                24, TimeUnit.HOURS);
         logger.info("SchedulerManager:schedule: Started weekly job for incomplete course email to the users.");
     }
 }

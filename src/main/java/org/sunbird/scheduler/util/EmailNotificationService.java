@@ -40,7 +40,6 @@ public class EmailNotificationService implements Runnable {
         try {
             if (!StringUtils.isEmpty(entry.getValue().getEmail()) && entry.getValue().getIncompleteCourses().size() > 0) {
                 Map<String, Object> params = new HashMap();
-                params.put(SUBJECT_, Constants.INCOMPLETE_COURSES_MAIL_SUBJECT);
                 for (int i = 0; i < entry.getValue().getIncompleteCourses().size(); i++) {
                     int j=i+1;
                     params.put(COURSE + j, true);
