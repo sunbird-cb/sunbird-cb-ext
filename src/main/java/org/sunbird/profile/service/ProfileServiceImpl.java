@@ -53,19 +53,10 @@ public class ProfileServiceImpl implements ProfileService{
                     profileDetailsMap.remove(approvalList);
                 }
             }
-                Map<String, Object> responseMap = userUtilityService.getUsersReadData(userId, AuthToken, XAuthToken);
-                Map<String, Object> rootOrg = (Map<String, Object>) responseMap.get(Constants.ROOT_ORG_CONSTANT);
-                String deptName = (String) rootOrg.get(Constants.CHANNEL);
-                if (profileDetailsMap.containsKey(Constants.EMPLOYMENTDETAILS)) {
-                    Map<String, Object> empDetails = (Map<String, Object>) profileDetailsMap.get(Constants.EMPLOYMENTDETAILS);
-                    String requestDeptName = (String) empDetails.get(Constants.DEPARTMENTNAME);
-                    if (!requestDeptName.equals(deptName)) {
-                        response.setResponseCode(HttpStatus.BAD_REQUEST);
-                        response.getParams().setStatus(Constants.FAILED);
-                        response.getParams().setErrmsg("Department Name cannot be changed");
-                        return response;
-                    }
-                }
+            Map<String, Object> responseMap = userUtilityService.getUsersReadData(userId, AuthToken, XAuthToken);
+            Map<String, Object> rootOrg = (Map<String, Object>) responseMap.get(Constants.ROOT_ORG_CONSTANT);
+            String deptName = (String) rootOrg.get(Constants.CHANNEL);
+            ValidateDepartment(deptName,profileDetailsMap);
             Map<String, Object> existingProfileDetails = (Map<String, Object>) responseMap.get(Constants.PROFILE_DETAILS);
             StringBuilder url = new StringBuilder();
             HashMap<String, String> headerValues = new HashMap<>();
@@ -238,6 +229,16 @@ public class ProfileServiceImpl implements ProfileService{
             String strArray[] = value.split(" ");
             List<String> approvalValues = Arrays.asList(strArray);
             return approvalValues;
+        }
+    }
+
+    public void ValidateDepartment(String existingDept, Map<String, Object> RequestProfile) throws Exception {
+        if (RequestProfile.containsKey(Constants.EMPLOYMENTDETAILS)) {
+            Map<String, Object> empDetails = (Map<String, Object>) RequestProfile.get(Constants.EMPLOYMENTDETAILS);
+            String requestDeptName = (String) empDetails.get(Constants.DEPARTMENTNAME);
+            if (!requestDeptName.equals(existingDept)) {
+                throw new Exception("User belongs to Dept: " + existingDept + ". Can not update Dept Name to : " + requestDeptName + ". Request Admin to migrate Dept first.");
+            }
         }
     }
 
