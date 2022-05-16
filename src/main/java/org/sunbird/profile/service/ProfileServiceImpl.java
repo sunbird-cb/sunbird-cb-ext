@@ -62,6 +62,7 @@ public class ProfileServiceImpl implements ProfileService{
             }
             Map<String, Object> responseMap = userUtilityService.getUsersReadData(userId, AuthToken, XAuthToken);
             String deptName = (String) responseMap.get(Constants.CHANNEL);
+            validateDepartment(deptName,profileDetailsMap);
             Map<String, Object> existingProfileDetails = (Map<String, Object>) responseMap.get(Constants.PROFILE_DETAILS);
             StringBuilder url = new StringBuilder();
             HashMap<String, String> headerValues = new HashMap<>();
@@ -234,6 +235,16 @@ public class ProfileServiceImpl implements ProfileService{
             String strArray[] = value.split(" ");
             List<String> approvalValues = Arrays.asList(strArray);
             return approvalValues;
+        }
+    }
+
+    public void validateDepartment(String existingDept, Map<String, Object> requestProfile) throws Exception {
+        if (requestProfile.containsKey(Constants.EMPLOYMENTDETAILS)) {
+            Map<String, Object> empDetails = (Map<String, Object>) requestProfile.get(Constants.EMPLOYMENTDETAILS);
+            String requestDeptName = (String) empDetails.get(Constants.DEPARTMENTNAME);
+            if(!existingDept.equalsIgnoreCase(requestDeptName)) {
+                throw new Exception("User belongs to Dept: " + existingDept + ". Can not update Dept Name to : " + requestDeptName + ". Request Admin to migrate Dept first.");
+            }
         }
     }
 
