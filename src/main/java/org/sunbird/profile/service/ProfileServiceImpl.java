@@ -235,7 +235,7 @@ public class ProfileServiceImpl implements ProfileService{
         if (requestProfile.containsKey(Constants.EMPLOYMENTDETAILS)) {
             Map<String, Object> empDetails = (Map<String, Object>) requestProfile.get(Constants.EMPLOYMENTDETAILS);
             String requestDeptName = (String) empDetails.get(Constants.DEPARTMENTNAME);
-            if (!requestDeptName.equals(existingDept)) {
+            if(!existingDept.equalsIgnoreCase(requestDeptName)) {
                 throw new Exception("User belongs to Dept: " + existingDept + ". Can not update Dept Name to : " + requestDeptName + ". Request Admin to migrate Dept first.");
             }
         }
