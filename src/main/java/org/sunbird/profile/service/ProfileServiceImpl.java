@@ -54,9 +54,8 @@ public class ProfileServiceImpl implements ProfileService{
                 }
             }
             Map<String, Object> responseMap = userUtilityService.getUsersReadData(userId, AuthToken, XAuthToken);
-            Map<String, Object> rootOrg = (Map<String, Object>) responseMap.get(Constants.ROOT_ORG_CONSTANT);
-            String deptName = (String) rootOrg.get(Constants.CHANNEL);
-            ValidateDepartment(deptName,profileDetailsMap);
+            String deptName = (String) responseMap.get(Constants.CHANNEL);
+            validateDepartment(deptName,profileDetailsMap);
             Map<String, Object> existingProfileDetails = (Map<String, Object>) responseMap.get(Constants.PROFILE_DETAILS);
             StringBuilder url = new StringBuilder();
             HashMap<String, String> headerValues = new HashMap<>();
@@ -232,9 +231,9 @@ public class ProfileServiceImpl implements ProfileService{
         }
     }
 
-    public void ValidateDepartment(String existingDept, Map<String, Object> RequestProfile) throws Exception {
-        if (RequestProfile.containsKey(Constants.EMPLOYMENTDETAILS)) {
-            Map<String, Object> empDetails = (Map<String, Object>) RequestProfile.get(Constants.EMPLOYMENTDETAILS);
+    public void validateDepartment(String existingDept, Map<String, Object> requestProfile) throws Exception {
+        if (requestProfile.containsKey(Constants.EMPLOYMENTDETAILS)) {
+            Map<String, Object> empDetails = (Map<String, Object>) requestProfile.get(Constants.EMPLOYMENTDETAILS);
             String requestDeptName = (String) empDetails.get(Constants.DEPARTMENTNAME);
             if (!requestDeptName.equals(existingDept)) {
                 throw new Exception("User belongs to Dept: " + existingDept + ". Can not update Dept Name to : " + requestDeptName + ". Request Admin to migrate Dept first.");
