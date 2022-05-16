@@ -61,7 +61,6 @@ public class Constants {
     public static final String PROGRESS = "progress";
     public static final String PROFILEDETAILS = "profiledetails";
     public static final String EMPLOYMENTDETAILS = "employmentDetails";
-
     public static final String DEPARTMENTNAME = "departmentName";
     public static final String ISSUED_CERTIFICATES = "issued_certificates";
     public static final String IS_MDO = "isMdo";
