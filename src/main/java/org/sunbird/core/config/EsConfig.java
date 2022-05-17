@@ -32,5 +32,6 @@ public class EsConfig {
                         httpClientBuilder -> httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider));
 
         return new RestHighLevelClient(builder);
+
     }
 }
