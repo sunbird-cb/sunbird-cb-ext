@@ -257,6 +257,12 @@ public class Constants {
     public static final String API_REDIS_GET_KEYS = "api.redis.get.keys";
     public static final String API_REDIS_GET_KEYS_VALUE_SET = "api.redis.get.keys&values";
     public static final String REDIS_COMMON_KEY = "CB_EXT_";
+    public static final String QUERY = "query";
+    public static final String QUERY_FIELDS = "queryFields";
+    public static final String MULTI_QUERY_SEARCH_FIELDS = "multiQuerySearchFields";
+    public static final String EXISTS = "exists";
+    public static final String NOT_EXISTS = "not_exists";
+    public static final String SORT_BY = "sort_by";
     public static final String COMPETENCY_CACHE_NAME = "competency";
     public static final String COMPETENCY_CACHE_NAME_BY_AREA = "competencyByArea";
     public static final String COMPETENCY_CACHE_NAME_BY_TYPE = "competencyByType";
@@ -382,7 +388,23 @@ public class Constants {
     public static final String SUNBIRD_SSO_URL = "sunbird_sso_url";
     public static final String SUNBIRD_SSO_USERNAME = "sunbird_sso_username";
     public static final String DURATION = "duration";
-
+    public static final String EMAIL_VERIFIED = "emailVerified";
+    public static final String PHONE_VERIFIED = "phoneVerified";
+    public static final String CONTENT = "content";
+    public static final String COMPLETENESS = "completeness";
+    public static final String MISSING_FIELDS = "missingFields";
+    public static final String PROFILE_VISIBILITY = "profileVisibility";
+    public static final String LOGIN_ID = "loginId";
+    public static final String REPLACE_WITH_ASTERISK = "*";
+    public static final String SUNBIRD_ENCRYPTION = "sunbird_encryption";
+    public static final String ON = "ON";
+    public static final String ENCRYPTION_KEY = "sunbird_encryption_key";
+    public static final String GROUP_QUERY = "groupQuery";
+    public static final String SOFT_CONSTRAINTS = "softConstraints";
+    public static final String SUNBIRD_ES_CHANNEL = "es.channel.name";
+    public static final String ORDER = "order";
+    public static final String TERM = "term";
+    public static final String REST = "rest";
     private Constants() {
         throw new IllegalStateException("Utility class");
     }

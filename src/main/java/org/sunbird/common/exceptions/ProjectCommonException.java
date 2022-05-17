@@ -88,4 +88,5 @@ public class ProjectCommonException extends RuntimeException {
     public void setResponseCode(int responseCode) {
         this.responseCode = responseCode;
     }
+
 }
