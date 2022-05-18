@@ -1,5 +1,7 @@
 package org.sunbird.ratings.model;
 
+import java.sql.Timestamp;
+
 public class SummaryModel {
     private String activityId;
     private String activityType;
@@ -108,13 +110,13 @@ public class SummaryModel {
     static public class latestReviews {
         private String objectType;
         private String user_id;
-        private String date;
+        private Timestamp date;
         private Float rating;
         private String review;
         private String firstName;
         private String lastName;
 
-        public latestReviews(String objectType, String user_id, String date, Float rating, String review, String firstName, String lastName) {
+        public latestReviews(String objectType, String user_id, Timestamp date, Float rating, String review, String firstName, String lastName) {
             this.objectType = objectType;
             this.user_id = user_id;
             this.date = date;
@@ -140,11 +142,11 @@ public class SummaryModel {
             this.user_id = user_id;
         }
 
-        public String getDate() {
+        public Timestamp getDate() {
             return date;
         }
 
-        public void setDate(String date) {
+        public void setDate(Timestamp date) {
             this.date = date;
         }
 

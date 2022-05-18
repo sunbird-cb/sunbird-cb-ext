@@ -1,5 +1,7 @@
 package org.sunbird.ratings.model;
 
+import java.sql.Timestamp;
+
 public class RatingModelInfo {
     private String activityId;
     private String commentUpdatedOn;
@@ -7,15 +9,15 @@ public class RatingModelInfo {
     private String review;
     private Float rating;
     private String comment;
-    private String updatedOn;
+    private Timestamp updatedOn;
     private String activityType;
     private String userId;
-    private String createdOn;
+    private Timestamp createdOn;
 
     public RatingModelInfo() {
     }
 
-    public RatingModelInfo(String activityId, String commentUpdatedOn, String commentBy, String review, Float rating, String comment, String updatedOn, String activityType, String userId, String createdOn) {
+    public RatingModelInfo(String activityId, String commentUpdatedOn, String commentBy, String review, Float rating, String comment, Timestamp updatedOn, String activityType, String userId, Timestamp createdOn) {
         this.activityId = activityId;
         this.commentUpdatedOn = commentUpdatedOn;
         this.commentBy = commentBy;
@@ -76,11 +78,11 @@ public class RatingModelInfo {
         this.comment = comment;
     }
 
-    public String getUpdatedOn() {
+    public Timestamp getUpdatedOn() {
         return updatedOn;
     }
 
-    public void setUpdatedOn(String updatedOn) {
+    public void setUpdatedOn(Timestamp updatedOn) {
         this.updatedOn = updatedOn;
     }
 
@@ -100,11 +102,11 @@ public class RatingModelInfo {
         this.userId = userId;
     }
 
-    public String getCreatedOn() {
+    public Timestamp getCreatedOn() {
         return createdOn;
     }
 
-    public void setCreatedOn(String createdOn) {
+    public void setCreatedOn(Timestamp createdOn) {
         this.createdOn = createdOn;
     }
 }

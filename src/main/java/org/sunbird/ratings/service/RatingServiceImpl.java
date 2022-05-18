@@ -20,6 +20,7 @@ import org.sunbird.ratings.model.*;
 import org.sunbird.ratings.responsecode.ResponseCode;
 import org.sunbird.ratings.responsecode.ResponseMessage;
 
+import java.sql.Timestamp;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -66,12 +67,12 @@ public class RatingServiceImpl implements RatingService {
                 ratingModelInfo.setRating((Float) ratingData.get("rating"));
                 timeBasedUuid = (UUID) ratingData.get("updatedon");
                 Long updatedTime = (timeBasedUuid.timestamp() - 0x01b21dd213814000L) / 10000L;
-                ratingModelInfo.setUpdatedOn(updatedTime.toString());
+                ratingModelInfo.setUpdatedOn(new Timestamp(updatedTime));
                 ratingModelInfo.setActivityType((String) ratingData.get("activitytype"));
                 ratingModelInfo.setUserId((String) ratingData.get("userId"));
                 timeBasedUuid = (UUID) ratingData.get("createdon");
                 Long createdTime = (timeBasedUuid.timestamp() - 0x01b21dd213814000L) / 10000L;
-                ratingModelInfo.setCreatedOn(createdTime.toString());
+                ratingModelInfo.setCreatedOn(new Timestamp(createdTime));
                 response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
                 response.put(Constants.RESPONSE, ratingModelInfo);
                 response.setResponseCode(HttpStatus.OK);
@@ -136,12 +137,11 @@ public class RatingServiceImpl implements RatingService {
 
                     latest50Reviews.add(new SummaryModel.latestReviews(Constants.REVIEW,
                             userModel.getId(),
-                            updatedTime.toString(),
+                            new Timestamp(updatedTime),
                             summaryNodeModel.getRating().floatValue(),
                             summaryNodeModel.getReview(),
                             (userModel.getFirstName() != null) ? userModel.getFirstName() : "",
                             (userModel.getLastName() != null) ? userModel.getLastName() : ""
-
                     ));
                 }
 
@@ -228,7 +228,6 @@ public class RatingServiceImpl implements RatingService {
             }
             response.setResponseCode(HttpStatus.OK);
             response.getParams().setStatus(Constants.SUCCESSFUL);
-
             kafkaProducer.push(updateRatingTopicName, ratingMessage);
         } catch (ValidationException ex) {
             logger.error(ex);
@@ -286,11 +285,11 @@ public class RatingServiceImpl implements RatingService {
                     final ObjectMapper mapper = new ObjectMapper();
                     final UserModel userModel = mapper.convertValue(existingUserList.get(user), UserModel.class);
                     final LookupDataModel lookupModel = mapper.convertValue(existingDataList.get(user), LookupDataModel.class);
-                   Long updatedTime= ((UUID.fromString(lookupModel.getUpdatedon()).timestamp() - 0x01b21dd213814000L) )/ 10000L;
+                    Long updatedTime= ((UUID.fromString(lookupModel.getUpdatedon()).timestamp() - 0x01b21dd213814000L) )/ 10000L;
                     listOfLookupResponse.add(new LookupResponse(lookupModel.getActivityid(),
                             lookupModel.getReview(),
                             lookupModel.getRating().toString(),
-                            updatedTime.toString(),
+                            new Timestamp(updatedTime),
                             lookupModel.getActivitytype(),
                             lookupModel.getUserId(),
                             (userModel.getFirstName() != null) ? userModel.getFirstName() : "",
