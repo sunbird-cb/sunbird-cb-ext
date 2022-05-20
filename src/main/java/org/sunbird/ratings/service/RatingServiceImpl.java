@@ -21,6 +21,7 @@ import org.sunbird.ratings.responsecode.ResponseCode;
 import org.sunbird.ratings.responsecode.ResponseMessage;
 
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -95,7 +96,7 @@ public class RatingServiceImpl implements RatingService {
             validationBody = new ValidationBody();
             validationBody.setActivityId(activityId);
             validationBody.setActivityType(activityType);
-
+            List<SummaryModel.latestReviews> latest50Reviews = new ArrayList<>();
             validateRatingsInfo(validationBody, "getSummary");
 
             Map<String, Object> request = new HashMap<>();
@@ -107,44 +108,45 @@ public class RatingServiceImpl implements RatingService {
 
             if (!CollectionUtils.isEmpty(existingDataList)) {
                 Map<String, Object> summaryData = existingDataList.get(0);
-                String reviews = (String) summaryData.get(Constants.LATEST50REVIEWS);
-                JsonNode actualObj = mapper.readTree(reviews);
-                List<String> userList = new ArrayList<>();
-                Map<String, SummaryNodeModel> reviewMap = new HashMap<>();
+                if(summaryData.get(Constants.LATEST50REVIEWS)!=null) {
+                    String reviews = (String) summaryData.get(Constants.LATEST50REVIEWS);
+                    JsonNode actualObj = mapper.readTree(reviews);
 
-                for (JsonNode jsonNode : actualObj) {
-                    final SummaryNodeModel summaryModel = mapper.convertValue(jsonNode, SummaryNodeModel.class);
-                    reviewMap.put(summaryModel.getUser_id(), summaryModel);
-                    userList.add(jsonNode.get("user_id").asText());
+                    List<String> userList = new ArrayList<>();
+                    Map<String, SummaryNodeModel> reviewMap = new HashMap<>();
+
+                    for (JsonNode jsonNode : actualObj) {
+                        final SummaryNodeModel summaryModel = mapper.convertValue(jsonNode, SummaryNodeModel.class);
+                        reviewMap.put(summaryModel.getUser_id(), summaryModel);
+                        userList.add(jsonNode.get("user_id").asText());
+                    }
+
+                    Map<String, Object> userRequest = new HashMap<>();
+                    userRequest.put(Constants.USERID, userList);
+                    List<String> fields = new ArrayList<>();
+                    fields.add(Constants.ID);
+                    fields.add(Constants.FIRSTNAME);
+                    fields.add(Constants.LASTNAME);
+
+                    Map<String, Object> existingUserList = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
+                            Constants.TABLE_USER, userRequest, fields, Constants.ID);
+
+                    for (String user : userList) {
+                        final ObjectMapper mapper = new ObjectMapper();
+                        final UserModel userModel = mapper.convertValue(existingUserList.get(user), UserModel.class);
+                        final SummaryNodeModel summaryNodeModel = mapper.convertValue(reviewMap.get(user), SummaryNodeModel.class);
+                        Long updatedTime = ((UUID.fromString(summaryNodeModel.getDate()).timestamp() - 0x01b21dd213814000L)) / 10000L;
+
+                        latest50Reviews.add(new SummaryModel.latestReviews(Constants.REVIEW,
+                                userModel.getId(),
+                                new Timestamp(updatedTime),
+                                summaryNodeModel.getRating().floatValue(),
+                                summaryNodeModel.getReview(),
+                                (userModel.getFirstName() != null) ? userModel.getFirstName() : "",
+                                (userModel.getLastName() != null) ? userModel.getLastName() : ""
+                        ));
+                    }
                 }
-
-                Map<String, Object> userRequest = new HashMap<>();
-                userRequest.put(Constants.USERID, userList);
-                List<String> fields = new ArrayList<>();
-                fields.add(Constants.ID);
-                fields.add(Constants.FIRSTNAME);
-                fields.add(Constants.LASTNAME);
-
-                Map<String, Object> existingUserList = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
-                        Constants.TABLE_USER, userRequest, fields, Constants.ID);
-                List<SummaryModel.latestReviews> latest50Reviews = new ArrayList<>();
-
-                for (String user : userList) {
-                    final ObjectMapper mapper = new ObjectMapper();
-                    final UserModel userModel = mapper.convertValue(existingUserList.get(user), UserModel.class);
-                    final SummaryNodeModel summaryNodeModel = mapper.convertValue(reviewMap.get(user), SummaryNodeModel.class);
-                    Long updatedTime = ((UUID.fromString(summaryNodeModel.getDate()).timestamp() - 0x01b21dd213814000L) )/ 10000L;
-
-                    latest50Reviews.add(new SummaryModel.latestReviews(Constants.REVIEW,
-                            userModel.getId(),
-                            new Timestamp(updatedTime),
-                            summaryNodeModel.getRating().floatValue(),
-                            summaryNodeModel.getReview(),
-                            (userModel.getFirstName() != null) ? userModel.getFirstName() : "",
-                            (userModel.getLastName() != null) ? userModel.getLastName() : ""
-                    ));
-                }
-
                 SummaryModel summaryModel = new SummaryModel(
                         summaryData.get(Constants.SUMMARY_ACTIVITY_ID).toString(),
                         summaryData.get(Constants.SUMMARY_ACTIVITY_TYPE).toString(),
@@ -155,7 +157,7 @@ public class RatingServiceImpl implements RatingService {
                         (Float) summaryData.get(Constants.TOTALCOUNT5STARS),
                         (Float) summaryData.get(Constants.TOTALNUMBEROFRATINGS),
                         (Float) summaryData.get(Constants.SUMOFTOTALRATINGS),
-                        mapper.writeValueAsString(latest50Reviews)
+                        (summaryData.get(Constants.LATEST50REVIEWS)!=null) ? mapper.writeValueAsString(latest50Reviews) :null
                 );
                 response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
                 response.put(Constants.RESPONSE, summaryModel);
@@ -248,6 +250,7 @@ public class RatingServiceImpl implements RatingService {
     public SBApiResponse ratingLookUp(LookupRequest lookupRequest) {
         List<String> listOfUserId = new ArrayList<>();
         SBApiResponse response = new SBApiResponse(Constants.API_RATINGS_LOOKUP);
+        UUID uuid;
 
         try {
             validationBody = new ValidationBody();
@@ -261,8 +264,16 @@ public class RatingServiceImpl implements RatingService {
             if (lookupRequest.getRating() != null) {
                 request.put(Constants.RATING, lookupRequest.getRating());
             }
+            if(lookupRequest.getUpdateOn() !=null){
+                java.util.Date time=new java.util.Date((lookupRequest.getUpdateOn())*10000L);
+                 uuid = UUIDs.startOf(time.getTime());
+             }
+            else {
+                uuid = UUIDs.timeBased();
+            }
+
             Map<String, Object> existingDataList = cassandraOperation.getRecordsByPropertiesWithPagination(Constants.KEYSPACE_SUNBIRD,
-                    Constants.TABLE_RATINGS_LOOKUP, request, null, lookupRequest.getLimit(), lookupRequest.getUpdateOn(), "userId");
+                    Constants.TABLE_RATINGS_LOOKUP, request, null, lookupRequest.getLimit(), String.valueOf(uuid), "userId");
             List<LookupResponse> listOfLookupResponse = new ArrayList<>();
 
             if (!CollectionUtils.isEmpty(existingDataList)) {
@@ -285,11 +296,12 @@ public class RatingServiceImpl implements RatingService {
                     final ObjectMapper mapper = new ObjectMapper();
                     final UserModel userModel = mapper.convertValue(existingUserList.get(user), UserModel.class);
                     final LookupDataModel lookupModel = mapper.convertValue(existingDataList.get(user), LookupDataModel.class);
-                    Long updatedTime= ((UUID.fromString(lookupModel.getUpdatedon()).timestamp() - 0x01b21dd213814000L) )/ 10000L;
+                    Long updatedTime= (UUID.fromString(lookupModel.getUpdatedon()).timestamp()) / 10000L;
+
                     listOfLookupResponse.add(new LookupResponse(lookupModel.getActivityid(),
                             lookupModel.getReview(),
                             lookupModel.getRating().toString(),
-                            new Timestamp(updatedTime),
+                            updatedTime,
                             lookupModel.getActivitytype(),
                             lookupModel.getUserId(),
                             (userModel.getFirstName() != null) ? userModel.getFirstName() : "",
@@ -297,6 +309,11 @@ public class RatingServiceImpl implements RatingService {
                     ));
 
                 }
+                Collections.sort(listOfLookupResponse, (l1, l2) -> {
+                    if(l1.getUpdatedon() == l2.getUpdatedon())
+                        return 0;
+                    return l1.getUpdatedon() < l1.getUpdatedon() ? -1 : 1;
+                });
                 response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
                 response.put(Constants.RESPONSE, listOfLookupResponse);
                 response.setResponseCode(HttpStatus.OK);
@@ -341,7 +358,7 @@ public class RatingServiceImpl implements RatingService {
                 errObjList.add(ResponseMessage.Message.INVALID_INPUT + ResponseMessage.Message.INVALID_RATING);
             }
             if (StringUtils.isEmpty(validationBody.getRequestRating().getReview())
-                    || (!Pattern.matches("^[A-Za-z0-9.!;?@&\"\", ]++$", validationBody.getRequestRating().getReview()))) {
+                    || (!Pattern.matches("^[-A-Za-z0-9.!;_?@&\n\"\", ]++$", validationBody.getRequestRating().getReview()))) {
                 errObjList.add(ResponseMessage.Message.INVALID_REVIEW);
             }
             if (StringUtils.isEmpty(validationBody.getRequestRating().getUserId())) {
