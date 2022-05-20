@@ -6,13 +6,13 @@ public class LookupResponse {
     private String activityId;
     private String review;
     private String rating;
-    private Timestamp updatedon;
+    private Long updatedon;
     private String activityType;
     private String userId;
     private String firstName;
     private String lastName;
 
-    public LookupResponse(String activityId, String review, String rating, Timestamp updatedon, String activityType, String userId, String firstName, String lastName) {
+    public LookupResponse(String activityId, String review, String rating, Long updatedon, String activityType, String userId, String firstName, String lastName) {
         this.activityId = activityId;
         this.review = review;
         this.rating = rating;
@@ -47,11 +47,11 @@ public class LookupResponse {
         this.rating = rating;
     }
 
-    public Timestamp getUpdatedon() {
+    public Long getUpdatedon() {
         return updatedon;
     }
 
-    public void setUpdatedon(Timestamp updatedon) {
+    public void setUpdatedon(Long updatedon) {
         this.updatedon = updatedon;
     }
 
