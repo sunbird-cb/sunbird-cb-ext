@@ -4,7 +4,7 @@ import java.sql.Timestamp;
 
 public class RatingModelInfo {
     private String activityId;
-    private String commentUpdatedOn;
+    private Timestamp commentUpdatedOn;
     private String commentBy;
     private String review;
     private Float rating;
@@ -17,7 +17,7 @@ public class RatingModelInfo {
     public RatingModelInfo() {
     }
 
-    public RatingModelInfo(String activityId, String commentUpdatedOn, String commentBy, String review, Float rating, String comment, Timestamp updatedOn, String activityType, String userId, Timestamp createdOn) {
+    public RatingModelInfo(String activityId, Timestamp commentUpdatedOn, String commentBy, String review, Float rating, String comment, Timestamp updatedOn, String activityType, String userId, Timestamp createdOn) {
         this.activityId = activityId;
         this.commentUpdatedOn = commentUpdatedOn;
         this.commentBy = commentBy;
@@ -38,11 +38,11 @@ public class RatingModelInfo {
         this.activityId = activityId;
     }
 
-    public String getCommentUpdatedOn() {
+    public Timestamp getCommentUpdatedOn() {
         return commentUpdatedOn;
     }
 
-    public void setCommentUpdatedOn(String commentUpdatedOn) {
+    public void setCommentUpdatedOn(Timestamp commentUpdatedOn) {
         this.commentUpdatedOn = commentUpdatedOn;
     }
 
