@@ -7,16 +7,18 @@ public class LookupResponse {
     private String review;
     private String rating;
     private Long updatedon;
+    private String updatedOnUUID;
     private String activityType;
     private String userId;
     private String firstName;
     private String lastName;
 
-    public LookupResponse(String activityId, String review, String rating, Long updatedon, String activityType, String userId, String firstName, String lastName) {
+    public LookupResponse(String activityId, String review, String rating, Long updatedon,String updatedOnUUID, String activityType, String userId, String firstName, String lastName) {
         this.activityId = activityId;
         this.review = review;
         this.rating = rating;
         this.updatedon = updatedon;
+        this.updatedOnUUID = updatedOnUUID;
         this.activityType = activityType;
         this.userId = userId;
         this.firstName = firstName;
@@ -53,6 +55,14 @@ public class LookupResponse {
 
     public void setUpdatedon(Long updatedon) {
         this.updatedon = updatedon;
+    }
+
+    public String getUpdatedOnUUID() {
+        return updatedOnUUID;
+    }
+
+    public void setUpdatedOnUUID(String updatedOnUUID) {
+        this.updatedOnUUID = updatedOnUUID;
     }
 
     public String getActivityType() {

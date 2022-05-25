@@ -153,7 +153,7 @@ public class Constants {
     public static final String USER_LAST_NAME = "lastName";
     public static final String USERID = "id";
     public static final String COMMENT = "comment";
-    public static final String COMMENT_BY = "commentby";
+    public static final String COMMENT_BY = "commentBy";
     public static final String COMMENT_UPDATED_ON = "commentupdatedon";
     public static final String CREATED_ON = "createdon";
     public static final String RATING = "rating";

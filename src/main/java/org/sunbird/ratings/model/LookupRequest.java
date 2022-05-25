@@ -6,7 +6,7 @@ public class LookupRequest {
     private String activityType;
     private Float rating;
     private int limit;
-    private Long updateOn;
+    private String updateOn;
 
     public String getActivityId() {
         return activityId;
@@ -40,11 +40,11 @@ public class LookupRequest {
         this.limit = limit;
     }
 
-    public Long getUpdateOn() {
+    public String getUpdateOn() {
         return updateOn;
     }
 
-    public void setUpdateOn(Long updateOn) {
+    public void setUpdateOn(String updateOn) {
         this.updateOn = updateOn;
     }
 }

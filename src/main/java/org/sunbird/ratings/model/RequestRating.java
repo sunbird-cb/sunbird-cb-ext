@@ -6,6 +6,8 @@ public class RequestRating {
     private String activityType;
     private Float rating;
     private String review ;
+    private String comment;
+    private String commentBy;
 
     public String getActivityId() {
         return activityId;
@@ -45,5 +47,21 @@ public class RequestRating {
 
     public void setReview(String review) {
         this.review = review;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
+
+    public String getCommentBy() {
+        return commentBy;
+    }
+
+    public void setCommentBy(String commentBy) {
+        this.commentBy = commentBy;
     }
 }

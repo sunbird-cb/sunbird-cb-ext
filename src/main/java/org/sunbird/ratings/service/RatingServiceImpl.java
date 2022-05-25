@@ -66,6 +66,15 @@ public class RatingServiceImpl implements RatingService {
                 ratingModelInfo.setActivityId((String) ratingData.get("activityid"));
                 ratingModelInfo.setReview((String) ratingData.get("review"));
                 ratingModelInfo.setRating((Float) ratingData.get("rating"));
+                ratingModelInfo.setComment(ratingData.get("comment")!=null ?(String) ratingData.get("comment") : null);
+                ratingModelInfo.setCommentBy(ratingData.get("commentby")!=null ?(String) ratingData.get("commentby") : null);
+
+                if(ratingData.get("commentupdatedon")!=null){
+                    UUID commentupdatedOn = (UUID) ratingData.get("commentupdatedon");
+                    Long CommentUpdatedTime = (commentupdatedOn.timestamp() - 0x01b21dd213814000L) / 10000L;
+                    ratingModelInfo.setCommentUpdatedOn(new Timestamp(CommentUpdatedTime));
+                }
+
                 timeBasedUuid = (UUID) ratingData.get("updatedon");
                 Long updatedTime = (timeBasedUuid.timestamp() - 0x01b21dd213814000L) / 10000L;
                 ratingModelInfo.setUpdatedOn(new Timestamp(updatedTime));
@@ -198,17 +207,23 @@ public class RatingServiceImpl implements RatingService {
             if (!CollectionUtils.isEmpty(existingDataList)) {
 
                 Map<String, Object> updateRequest = new HashMap<>();
-                updateRequest.put(Constants.RATING, requestRating.getRating());
-                updateRequest.put(Constants.REVIEW, requestRating.getReview());
-                updateRequest.put(Constants.UPDATED_ON, timeBasedUuid);
-
+                if(requestRating.getComment()==null) {
+                    updateRequest.put(Constants.RATING, requestRating.getRating());
+                    updateRequest.put(Constants.REVIEW, requestRating.getReview());
+                    updateRequest.put(Constants.UPDATED_ON, timeBasedUuid);
+                }
+                if(requestRating.getComment()!=null && requestRating.getCommentBy()!=null) {
+                    updateRequest.put(Constants.COMMENT, requestRating.getComment());
+                    updateRequest.put(Constants.COMMENT_BY, requestRating.getCommentBy());
+                    updateRequest.put(Constants.COMMENT_UPDATED_ON,timeBasedUuid);
+                }
                 Map<String, Object> prevInfo = existingDataList.get(0);
                 cassandraOperation.updateRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_RATINGS, updateRequest,
                         request);
                 ratingMessage = new RatingMessage("ratingUpdate", requestRating.getActivityId(), requestRating.getActivityType(),
                         requestRating.getUserId(), String.valueOf((prevInfo.get("createdon"))));
 
-                ratingMessage.setPrevValues(processEventMessage(String.valueOf(prevInfo.get("createdon")),
+                ratingMessage.setPrevValues(processEventMessage(String.valueOf(prevInfo.get("updatedon")),
                         (Float) prevInfo.get("rating"), (String) prevInfo.get("review")));
                 ratingMessage.setUpdatedValues(processEventMessage(String.valueOf(updateRequest.get(Constants.UPDATED_ON)),
                         requestRating.getRating(), requestRating.getReview()));
@@ -217,7 +232,6 @@ public class RatingServiceImpl implements RatingService {
                 request.put(Constants.RATING, requestRating.getRating());
                 request.put(Constants.REVIEW, requestRating.getReview());
                 request.put(Constants.UPDATED_ON, timeBasedUuid);
-
                 cassandraOperation.insertRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_RATINGS, request);
 
                 ratingMessage = new RatingMessage("ratingAdd", requestRating.getActivityId(), requestRating.getActivityType(),
@@ -250,7 +264,7 @@ public class RatingServiceImpl implements RatingService {
     public SBApiResponse ratingLookUp(LookupRequest lookupRequest) {
         List<String> listOfUserId = new ArrayList<>();
         SBApiResponse response = new SBApiResponse(Constants.API_RATINGS_LOOKUP);
-        UUID uuid;
+        String uuid;
 
         try {
             validationBody = new ValidationBody();
@@ -265,15 +279,14 @@ public class RatingServiceImpl implements RatingService {
                 request.put(Constants.RATING, lookupRequest.getRating());
             }
             if(lookupRequest.getUpdateOn() !=null){
-                java.util.Date time=new java.util.Date((lookupRequest.getUpdateOn())*10000L);
-                 uuid = UUIDs.startOf(time.getTime());
+                uuid = lookupRequest.getUpdateOn();
              }
             else {
-                uuid = UUIDs.timeBased();
+                uuid = String.valueOf(UUIDs.timeBased());
             }
 
             Map<String, Object> existingDataList = cassandraOperation.getRecordsByPropertiesWithPagination(Constants.KEYSPACE_SUNBIRD,
-                    Constants.TABLE_RATINGS_LOOKUP, request, null, lookupRequest.getLimit(), String.valueOf(uuid), "userId");
+                    Constants.TABLE_RATINGS_LOOKUP, request, null, lookupRequest.getLimit(), uuid, "userId");
             List<LookupResponse> listOfLookupResponse = new ArrayList<>();
 
             if (!CollectionUtils.isEmpty(existingDataList)) {
@@ -296,12 +309,12 @@ public class RatingServiceImpl implements RatingService {
                     final ObjectMapper mapper = new ObjectMapper();
                     final UserModel userModel = mapper.convertValue(existingUserList.get(user), UserModel.class);
                     final LookupDataModel lookupModel = mapper.convertValue(existingDataList.get(user), LookupDataModel.class);
-                    Long updatedTime= (UUID.fromString(lookupModel.getUpdatedon()).timestamp()) / 10000L;
-
+                    Long updatedTime= ((UUID.fromString(lookupModel.getUpdatedon()).timestamp() - 0x01b21dd213814000L) )/ 10000L;
                     listOfLookupResponse.add(new LookupResponse(lookupModel.getActivityid(),
                             lookupModel.getReview(),
                             lookupModel.getRating().toString(),
                             updatedTime,
+                            lookupModel.getUpdatedon(),
                             lookupModel.getActivitytype(),
                             lookupModel.getUserId(),
                             (userModel.getFirstName() != null) ? userModel.getFirstName() : "",
