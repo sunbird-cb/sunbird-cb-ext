@@ -1,5 +1,6 @@
 package org.sunbird.user.service;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -19,4 +20,5 @@ public interface UserUtilityService {
 
 	Map<String, Object> getUsersReadData(String userId, String authToken, String X_authToken);
 
+	Map<String, Object>  autoSearchUser(String key) throws IOException;
 }
