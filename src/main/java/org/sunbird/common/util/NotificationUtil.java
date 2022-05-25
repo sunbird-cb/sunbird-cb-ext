@@ -25,10 +25,9 @@ public class NotificationUtil {
         Logger = LoggerFactory.getLogger(NotificationUtil.class);
     }
 
-    public <params> void  sendNotification(List<String> sendTo, Map<String, Object> params, String senderMail, Boolean sendNotification, String notificationUrl) {
+    public <params> void  sendNotification(List<String> sendTo, Map<String, Object> params, String senderMail, String notificationUrl) {
         new Thread(() -> {
             try {
-                if (sendNotification) {
                     HttpHeaders headers = new HttpHeaders();
                     RestTemplate restTemplate = new RestTemplate();
                     headers.setContentType(MediaType.APPLICATION_JSON);
@@ -44,7 +43,6 @@ public class NotificationUtil {
                     Logger.info(String.format("Notification Request : %s", notificationRequest));
                     HttpEntity<Object> req = new HttpEntity<>(notificationRequest, headers);
                     ResponseEntity<String> resp = restTemplate.postForEntity(notificationUrl, req, String.class);
-                }
             } catch (Exception e) {
                 Logger.error(String.format(EXCEPTION, e.getMessage()));
             }

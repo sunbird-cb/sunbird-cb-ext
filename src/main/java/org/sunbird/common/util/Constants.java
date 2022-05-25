@@ -342,9 +342,14 @@ public class Constants {
     public static final String NOTIFICATION_ENDPOINT = "notification.event.endpoint";
     public static final String SUBJECT = "subject";
     public static final String SCHEDULER_TIME_GAP = "scheduler-time-gap";
+    public static final String SCHEDULER_RUN_DAY = "scheduler-run-day";
+    public static final String SCHEDULER_RUN_TIME = "scheduler-run-time";
+    public static final String IS_DELETED = "isDeleted";
+    public static final String EXCLUDE_USER_EMAILS = "exclude_user_emails";
     public static final String INCOMPLETE_COURSES = "incompletecourses";
     public static final String SUBJECT_ = "subject";
     public static final String POSTER_IMAGE = "posterImage";
+
     public static final String COURSE_URL = "course.url";
     public static final String OVERVIEW_BATCH_ID = "overview.batch";
     public static final String SENDER_MAIL = "sender.mail";
