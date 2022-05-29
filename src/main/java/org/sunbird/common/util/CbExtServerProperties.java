@@ -228,6 +228,15 @@ public class CbExtServerProperties {
 	@Value("${user.assessment.submission.duration}")
 	private String userAssessmentSubmissionDuration;
 
+	@Value("${es.user.registration.index}")
+	private String userRegistrationIndex;
+
+	@Value("${user.registration.code}")
+	private String userRegistrationCode;
+
+	@Value("${kafka.topics.user.registration.register.event}")
+	private String userRegistrationTopic;
+
 	public String getUserAssessmentSubmissionDuration() {
 		return userAssessmentSubmissionDuration;
 	}
@@ -830,4 +839,29 @@ public class CbExtServerProperties {
 	public void setAssessmentMinQuestionParams(String assessmentMinQuestionParams) {
 		this.assessmentMinQuestionParams = assessmentMinQuestionParams;
 	}
+
+	public String getUserRegistrationIndex() {
+		return userRegistrationIndex;
+	}
+
+	public void setUserRegistrationIndex(String userRegistrationIndex) {
+		this.userRegistrationIndex = userRegistrationIndex;
+	}
+
+	public String getUserRegistrationCode() {
+		return userRegistrationCode;
+	}
+
+	public void setUserRegistrationCode(String userRegistrationCode) {
+		this.userRegistrationCode = userRegistrationCode;
+	}
+
+	public String getUserRegistrationTopic() {
+		return userRegistrationTopic;
+	}
+
+	public void setUserRegistrationTopic(String userRegistrationTopic) {
+		this.userRegistrationTopic = userRegistrationTopic;
+	}
+
 }
