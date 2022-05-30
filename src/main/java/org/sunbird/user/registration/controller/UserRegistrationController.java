@@ -34,4 +34,10 @@ public class UserRegistrationController {
 		SBApiResponse response = userRegService.getUserRegistrationDetails(regCode);
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
+
+	@GetMapping("/user/registration/v1/getDeptDetails")
+	public ResponseEntity<SBApiResponse> getDeptDetails() throws Exception {
+		SBApiResponse response = userRegService.getDeptDetails();
+		return new ResponseEntity<>(response, response.getResponseCode());
+	}
 }

@@ -240,6 +240,9 @@ public class CbExtServerProperties {
 	@Value("${user.registration.domain}")
 	private String userRegistrationDomain;
 
+	@Value("${user.registration.dept.exclude.list}")
+	private String userRegistrationDeptExcludeList;
+
 	public String getUserAssessmentSubmissionDuration() {
 		return userAssessmentSubmissionDuration;
 	}
@@ -875,4 +878,11 @@ public class CbExtServerProperties {
 		this.userRegistrationDomain = userRegistrationDomain;
 	}
 
+	public void setUserRegistrationDeptExcludeList(String userRegistrationDeptExcludeList) {
+		this.userRegistrationDeptExcludeList = userRegistrationDeptExcludeList;
+	}
+
+	public List<String> getUserRegistrationDeptExcludeList() {
+		return Arrays.asList(userRegistrationDeptExcludeList.split(",", -1));
+	}
 }
