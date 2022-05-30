@@ -1,0 +1,145 @@
+{
+  "mappings": {
+    "_doc": {
+      "properties": {
+        "id": {
+          "type": "keyword",
+          "fields": {
+            "raw": {
+              "type": "keyword"
+            }
+          }
+        },
+        "registrationCode": {
+          "type": "keyword",
+          "fields": {
+            "raw": {
+              "type": "keyword"
+            }
+          }
+        },
+        "firstName": {
+          "type": "text",
+          "fields": {
+            "raw": {
+              "type": "text",
+              "analyzer": "keylower"
+            }
+          },
+          "analyzer": "cs_index_analyzer",
+          "search_analyzer": "cs_search_analyzer"
+        },
+        "lastName": {
+          "type": "text",
+          "fields": {
+            "raw": {
+              "type": "text",
+              "analyzer": "keylower"
+            }
+          },
+          "analyzer": "cs_index_analyzer",
+          "search_analyzer": "cs_search_analyzer"
+        },
+        "email": {
+          "type": "keyword",
+          "fields": {
+            "raw": {
+              "type": "text",
+              "analyzer": "keylower"
+            }
+          }
+        },
+        "deptName": {
+          "type": "text",
+          "fields": {
+            "raw": {
+              "type": "text",
+              "analyzer": "keylower"
+            }
+          },
+          "analyzer": "cs_search_analyzer",
+          "search_analyzer": "cs_search_analyzer"
+        },
+        "deptId": {
+          "type": "keyword",
+          "fields": {
+            "raw": {
+              "type": "keyword"
+            }
+          }
+        },
+        "position": {
+          "type": "text",
+          "fields": {
+            "raw": {
+              "type": "text",
+              "analyzer": "keylower"
+            }
+          },
+          "analyzer": "cs_search_analyzer",
+          "search_analyzer": "cs_search_analyzer"
+        },
+        "source": {
+          "type": "keyword",
+          "fields": {
+            "raw": {
+              "type": "keyword"
+            }
+          }
+        },
+        "status": {
+          "type": "keyword",
+          "fields": {
+            "raw": {
+              "type": "keyword"
+            }
+          }
+        },
+        "priviousStatus": {
+          "type": "keyword",
+          "fields": {
+            "raw": {
+              "type": "keyword"
+            }
+          }
+        },
+        "createdBy": {
+          "type": "keyword",
+          "fields": {
+            "raw": {
+              "type": "keyword"
+            }
+          }
+        },
+        "createdOn": {
+          "type": "text",
+          "fields": {
+            "raw": {
+              "type": "keyword"
+            }
+          },
+          "analyzer": "cs_search_analyzer",
+          "search_analyzer": "cs_search_analyzer"
+        },
+        "updatedBy": {
+          "type": "keyword",
+          "fields": {
+            "raw": {
+              "type": "keyword"
+            }
+          }
+        },
+        "updatedOn": {
+          "type": "text",
+          "fields": {
+            "raw": {
+              "type": "keyword"
+            }
+          },
+          "analyzer": "cs_search_analyzer",
+          "search_analyzer": "cs_search_analyzer"
+        }
+      }
+    }
+  }
+}
