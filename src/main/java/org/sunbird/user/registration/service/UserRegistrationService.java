@@ -1,6 +1,5 @@
 package org.sunbird.user.registration.service;
 
-import org.springframework.stereotype.Service;
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.user.registration.model.UserRegistrationInfo;
 
@@ -10,12 +9,12 @@ import org.sunbird.user.registration.model.UserRegistrationInfo;
  * @author karthik
  *
  */
-@Service
 public interface UserRegistrationService {
 	/**
 	 * Registers the given user and creates WorkFlow Service request for approval.
 	 * 
-	 * @param userRegInfo - User Registration Information
+	 * @param userRegInfo
+	 *            - User Registration Information
 	 * @return - Returns the API Response object which contains success / failure
 	 *         message
 	 */
@@ -25,18 +24,11 @@ public interface UserRegistrationService {
 	 * Retrieves the User Registration Code details if exists for the given
 	 * Registration Code value.
 	 * 
-	 * @param registrationCode - Registration Code which used to identify the object
+	 * @param registrationCode
+	 *            - Registration Code which used to identify the object
 	 * @return - Returns the API Response object which contains success / failure
 	 *         message
 	 */
 	public SBApiResponse getUserRegistrationDetails(String registrationCode);
 
-	/**
-	 * Retrieves the department details which can be provided user to select upon
-	 * while creating Register request
-	 * 
-	 * @return - Returns the API response object which contains success / failure
-	 *         message
-	 */
-	public SBApiResponse getDeptDetails();
 }
