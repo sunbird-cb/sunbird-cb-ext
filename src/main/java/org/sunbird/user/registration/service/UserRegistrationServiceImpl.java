@@ -6,9 +6,11 @@ import java.util.Map;
 
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
+import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.rest.RestStatus;
+import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -20,12 +22,12 @@ import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.model.SunbirdApiRespParam;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
+import org.sunbird.common.util.IndexerService;
 import org.sunbird.core.producer.Producer;
 import org.sunbird.user.registration.model.UserRegistration;
 import org.sunbird.user.registration.model.UserRegistrationInfo;
 import org.sunbird.user.registration.util.UserRegistrationStatus;
 import org.sunbird.user.registration.util.Utility;
-import org.sunbird.workallocation.service.IndexerService;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -45,23 +47,26 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 	@Autowired
 	Producer kafkaProducer;
 
+	@Override
 	public SBApiResponse registerUser(UserRegistrationInfo userRegInfo) {
 
 		SBApiResponse response = createDefaultResponse(Constants.USER_REGISTRATION_REGISTER_API);
 		String payloadvalidation = validateRegisterationPayload(userRegInfo);
 		if (StringUtils.isBlank(payloadvalidation)) {
 			try {
-				// verify the given email is exist in ES Server
-				SearchSourceBuilder searchSourceBuilder = queryBuilder(new HashMap<String, Object>() {
+				// verify the given email exist in ES Server
+				UserRegistration regDocument = getUserRegistrationDocument(new HashMap<String, Object>() {
 					{
 						put(Constants.EMAIL, userRegInfo.getEmail());
 					}
 				});
-				long emailExist = indexerService.getDocumentCount(serverProperties.getUserRegistrationIndex(),
-						searchSourceBuilder);
-				if (emailExist == 0l) {
+				if (regDocument == null || (regDocument.getStatus().equals(UserRegistrationStatus.FAILED.name())
+						&& regDocument.getRegistrationCode().equals(regDocument.getRegistrationCode()))) {
 					// create the doc in ES
 					UserRegistration userRegistration = getRegistrationObject(userRegInfo);
+					if (StringUtils.isBlank(userRegistration.getId())) {
+						userRegistration.setId(regDocument.getId());
+					}
 					RestStatus status = indexerService.addEntity(serverProperties.getUserRegistrationIndex(),
 							serverProperties.getEsProfileIndexType(), userRegistration.getId(),
 							mapper.convertValue(userRegistration, Map.class));
@@ -71,8 +76,11 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 						response.setResponseCode(HttpStatus.ACCEPTED);
 					}
 				} else {
-					payloadvalidation = "Email id already exists";
+					payloadvalidation = regDocument.getStatus().equals(UserRegistrationStatus.FAILED.name())
+							? "Registration code is missing"
+							: "Email id already exists";
 				}
+
 			} catch (Exception e) {
 				LOGGER.error(String.format("Exception in %s : %s", "registerUser", e.getMessage()));
 			}
@@ -86,13 +94,29 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 		return response;
 	}
 
+	@Override
 	public SBApiResponse getUserRegistrationDetails(String registrationCode) {
 		SBApiResponse response = createDefaultResponse(Constants.USER_REGISTRATION_RETRIEVE_API);
-		return response;
-	}
+		UserRegistration userRegistration = null;
+		try {
+			userRegistration = getUserRegistrationDocument(new HashMap<String, Object>() {
+				{
+					put("registrationCode", registrationCode);
+				}
+			});
 
-	public SBApiResponse getDeptDetails() {
-		SBApiResponse response = createDefaultResponse(Constants.USER_REGISTRATION_DEPT_INFO_API);
+		} catch (Exception e) {
+			LOGGER.error(String.format("Exception in %s : %s", "getUserRegistrationDetails", e.getMessage()));
+		}
+
+		if (userRegistration != null) {
+			response.put(Constants.RESULT, userRegistration);
+		} else {
+			response.getParams().setStatus(Constants.FAILED);
+			response.getParams().setErrmsg("Failed to get response");
+			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+
 		return response;
 	}
 
@@ -137,6 +161,24 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 		return StringUtils.EMPTY;
 	}
 
+	private UserRegistration getUserRegistrationDocument(Map<String, Object> mustMatch) throws Exception {
+		UserRegistration userRegistration = null;
+		SearchSourceBuilder searchSourceBuilder = queryBuilder(mustMatch);
+		SearchResponse searchResponse = indexerService.getEsResult(serverProperties.getUserRegistrationIndex(),
+				serverProperties.getEsProfileIndexType(), searchSourceBuilder);
+
+		if (searchResponse.getHits().totalHits > 0) {
+			SearchHit[] searchHit = searchResponse.getHits().getHits();
+
+			for (SearchHit hit : searchHit) {
+				Map<String, Object> sourceObj = hit.getSourceAsMap();
+				userRegistration = mapper.convertValue(sourceObj, UserRegistration.class);
+			}
+		}
+
+		return userRegistration;
+	}
+
 	private UserRegistration getRegistrationObject(UserRegistrationInfo userRegInfo) {
 		UserRegistration userRegistration = new UserRegistration();
 		userRegistration.setFirstName(userRegInfo.getFirstName());
@@ -147,11 +189,16 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 		userRegistration.setPosition(userRegInfo.getPosition());
 		userRegistration.setSource(userRegInfo.getSource());
 
-		userRegistration.setRegistrationCode(serverProperties.getUserRegistrationCode() + "-"
-				+ userRegInfo.getDeptName() + "-" + RandomStringUtils.random(15, Boolean.TRUE, Boolean.TRUE));
-		userRegistration.setId(RandomStringUtils.random(15, Boolean.TRUE, Boolean.TRUE));
-		userRegistration.setStatus(UserRegistrationStatus.INITIATED.name());
-		userRegistration.setCreatedOn(new Date().getTime());
+		if (StringUtils.isBlank(userRegInfo.getRegistrationCode())) {
+			userRegistration.setRegistrationCode(serverProperties.getUserRegCodePrefix() + "-"
+					+ userRegInfo.getDeptName() + "-" + RandomStringUtils.random(6, Boolean.TRUE, Boolean.TRUE));
+			userRegistration.setId(RandomStringUtils.random(15, Boolean.TRUE, Boolean.TRUE));
+			userRegistration.setCreatedOn(new Date().getTime());
+		} else {
+			userRegistration.setUpdatedOn(new Date().getTime());
+		}
+		userRegistration.setStatus(UserRegistrationStatus.CREATED.name());
+
 		return userRegistration;
 	}
 

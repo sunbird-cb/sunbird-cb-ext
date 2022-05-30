@@ -31,12 +31,4 @@ public interface UserRegistrationService {
 	 */
 	public SBApiResponse getUserRegistrationDetails(String registrationCode);
 
-	/**
-	 * Retrieves the department details which can be provided user to select upon
-	 * while creating Register request
-	 * 
-	 * @return - Returns the API response object which contains success / failure
-	 *         message
-	 */
-	public SBApiResponse getDeptDetails();
 }

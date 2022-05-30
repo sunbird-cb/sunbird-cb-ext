@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.user.registration.model.UserRegistrationInfo;
@@ -28,9 +29,9 @@ public class UserRegistrationController {
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
 
-	@GetMapping("/user/registration/v1/getDeptDetails")
-	public ResponseEntity<SBApiResponse> getDeptDetails() throws Exception {
-		SBApiResponse response = userRegService.getDeptDetails();
+	@GetMapping("/user/registration/v1/getUserRegistrationDetails")
+	public ResponseEntity<SBApiResponse> getUserRegistrationDetails(@RequestParam String regCode) throws Exception {
+		SBApiResponse response = userRegService.getUserRegistrationDetails(regCode);
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
 }

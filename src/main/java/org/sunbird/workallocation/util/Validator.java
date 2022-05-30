@@ -5,12 +5,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+import org.sunbird.common.util.IndexerService;
 import org.sunbird.core.exception.BadRequestException;
 import org.sunbird.workallocation.model.SearchCriteria;
 import org.sunbird.workallocation.model.WorkAllocationDTO;
 import org.sunbird.workallocation.model.WorkAllocationDTOV2;
 import org.sunbird.workallocation.model.WorkOrderDTO;
-import org.sunbird.workallocation.service.IndexerService;
 
 import java.util.Arrays;
 import java.util.List;

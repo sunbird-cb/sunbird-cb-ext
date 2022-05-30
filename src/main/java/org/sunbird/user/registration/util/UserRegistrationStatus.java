@@ -8,7 +8,7 @@ package org.sunbird.user.registration.util;
  */
 public enum UserRegistrationStatus {
 
-	INITIATED(0), CREATED(1), APPROVED(2), DENIED(3), FAILED(4);
+	CREATED(1), WF_INITIATED(2), WF_APPROVED(3), WF_DENIED(4), FAILED(5);
 
 	private int status = 0;
 

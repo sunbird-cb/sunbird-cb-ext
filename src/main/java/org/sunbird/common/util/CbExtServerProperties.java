@@ -231,11 +231,14 @@ public class CbExtServerProperties {
 	@Value("${es.user.registration.index}")
 	private String userRegistrationIndex;
 
-	@Value("${user.registration.code}")
-	private String userRegistrationCode;
+	@Value("${user.registration.code.prefix}")
+	private String userRegCodePrefix;
 
 	@Value("${kafka.topics.user.registration.register.event}")
 	private String userRegistrationTopic;
+
+	@Value("${user.registration.domain}")
+	private String userRegistrationDomain;
 
 	public String getUserAssessmentSubmissionDuration() {
 		return userAssessmentSubmissionDuration;
@@ -848,12 +851,12 @@ public class CbExtServerProperties {
 		this.userRegistrationIndex = userRegistrationIndex;
 	}
 
-	public String getUserRegistrationCode() {
-		return userRegistrationCode;
+	public String getUserRegCodePrefix() {
+		return userRegCodePrefix;
 	}
 
-	public void setUserRegistrationCode(String userRegistrationCode) {
-		this.userRegistrationCode = userRegistrationCode;
+	public void setUserRegCodePrefix(String userRegCodePrefix) {
+		this.userRegCodePrefix = userRegCodePrefix;
 	}
 
 	public String getUserRegistrationTopic() {
@@ -862,6 +865,14 @@ public class CbExtServerProperties {
 
 	public void setUserRegistrationTopic(String userRegistrationTopic) {
 		this.userRegistrationTopic = userRegistrationTopic;
+	}
+
+	public String getUserRegistrationDomain() {
+		return userRegistrationDomain;
+	}
+
+	public void setUserRegistrationDomain(String userRegistrationDomain) {
+		this.userRegistrationDomain = userRegistrationDomain;
 	}
 
 }

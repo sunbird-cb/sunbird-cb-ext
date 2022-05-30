@@ -7,6 +7,7 @@ package org.sunbird.user.registration.model;
  *
  */
 public class UserRegistrationInfo {
+	private String registrationCode;
 	private String firstName;
 	private String lastName;
 	private String email;
@@ -14,6 +15,14 @@ public class UserRegistrationInfo {
 	private String deptName;
 	private String position;
 	private String source;
+
+	public String getRegistrationCode() {
+		return registrationCode;
+	}
+
+	public void setRegistrationCode(String registrationCode) {
+		this.registrationCode = registrationCode;
+	}
 
 	public String getFirstName() {
 		return firstName;
@@ -70,4 +79,5 @@ public class UserRegistrationInfo {
 	public void setSource(String source) {
 		this.source = source;
 	}
+
 }

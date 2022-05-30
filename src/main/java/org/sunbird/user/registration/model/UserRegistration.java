@@ -8,7 +8,7 @@ package org.sunbird.user.registration.model;
  */
 public class UserRegistration extends UserRegistrationInfo {
 	private String id;
-	private String registrationCode;
+	private String wfId;
 	private String priviousStatus;
 	private String status;
 	private long createdOn;
@@ -24,12 +24,12 @@ public class UserRegistration extends UserRegistrationInfo {
 		this.id = id;
 	}
 
-	public String getRegistrationCode() {
-		return registrationCode;
+	public String getWfId() {
+		return wfId;
 	}
 
-	public void setRegistrationCode(String registrationCode) {
-		this.registrationCode = registrationCode;
+	public void setWfId(String wfId) {
+		this.wfId = wfId;
 	}
 
 	public String getPriviousStatus() {
@@ -79,4 +79,5 @@ public class UserRegistration extends UserRegistrationInfo {
 	public void setUpdatedBy(String updatedBy) {
 		this.updatedBy = updatedBy;
 	}
+
 }

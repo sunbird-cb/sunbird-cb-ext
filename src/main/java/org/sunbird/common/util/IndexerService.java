@@ -1,4 +1,4 @@
-package org.sunbird.workallocation.service;
+package org.sunbird.common.util;
 
 import java.io.IOException;
 import java.util.List;
