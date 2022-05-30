@@ -62,8 +62,8 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 	@Override
 	public SBApiResponse registerUser(UserRegistrationInfo userRegInfo) {
 		SBApiResponse response = createDefaultResponse(Constants.USER_REGISTRATION_REGISTER_API);
-		String payloadvalidation = validateRegisterationPayload(userRegInfo);
-		if (StringUtils.isBlank(payloadvalidation)) {
+		String errMsg = validateRegisterationPayload(userRegInfo);
+		if (StringUtils.isBlank(errMsg)) {
 			try {
 				// verify the given email exist in ES Server
 				UserRegistration regDocument = getUserRegistrationDocument(new HashMap<String, Object>() {
@@ -86,18 +86,22 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 						kafkaProducer.push(serverProperties.getUserRegistrationTopic(), userRegistration);
 						response.setResponseCode(HttpStatus.ACCEPTED);
 						response.getResult().put(Constants.RESULT, userRegistration);
+					} else {
+						response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+						response.getParams().setErrmsg("Failed to add details to ES Service");
 					}
 				} else {
-					payloadvalidation = "Email id already exists";
+					errMsg = "Email id already exists";
 				}
 
 			} catch (Exception e) {
 				LOGGER.error(String.format("Exception in %s : %s", "registerUser", e.getMessage()));
+				errMsg = "Failed to process message. Exception: " + e.getMessage();
 			}
 		}
-		if (StringUtils.isNotBlank(payloadvalidation)) {
+		if (StringUtils.isNotBlank(errMsg)) {
 			response.getParams().setStatus(Constants.FAILED);
-			response.getParams().setErrmsg(payloadvalidation);
+			response.getParams().setErrmsg(errMsg);
 			response.setResponseCode(HttpStatus.BAD_REQUEST);
 		}
 
@@ -141,7 +145,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 				// request body
 				Map<String, Object> requestMap = new HashMap<>();
 				requestMap.put(Constants.OFFSET, iterateCount);
-				requestMap.put(Constants.LIMIT, 100);
+				requestMap.put(Constants.LIMIT, 1000);
 				requestMap.put(Constants.FIELDS,
 						new ArrayList<>(Arrays.asList(Constants.CHANNEL, Constants.IDENTIFIER)));
 				requestMap.put(Constants.FILTERS, new HashMap<String, Object>() {
@@ -163,7 +167,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 				iterateCount = iterateCount + resultResp.getContent().size();
 				List<String> excludeList = serverProperties.getUserRegistrationDeptExcludeList();
 				for (SunbirdApiRespContent content : resultResp.getContent()) {
-					if (!excludeList.isEmpty() && excludeList.contains(content.getIdentifier())) {
+					if (!excludeList.isEmpty() && !excludeList.contains(content.getIdentifier())) {
 						orgList.add(new DeptPublicInfo(content.getIdentifier(), content.getChannel()));
 					}
 				}
@@ -220,7 +224,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 			str.append("Failed to Register User Details. Missing Params - [").append(errList.toString()).append("]");
 		}
 		// email Validation
-		if (!Utility.emailValidation(userRegInfo.getEmail())) {
+		if (StringUtils.isNotBlank(userRegInfo.getEmail()) && !Utility.emailValidation(userRegInfo.getEmail())) {
 			str.setLength(0);
 			str.append("Invalid email id");
 		}
