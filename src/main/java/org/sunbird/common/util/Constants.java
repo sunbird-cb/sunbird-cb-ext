@@ -388,6 +388,9 @@ public class Constants {
 	public static final String USER_REGISTRATION_UPDATE_API = "api.user.registration.update";
 	public static final String USER_REGISTRATION_RETRIEVE_API = "api.user.registration.retrieve";
 	public static final String USER_REGISTRATION_DEPT_INFO_API = "api.user.registration.dept.info";
+	public static final String COUNT = "count";
+	
+	public static final String EMAIL_EXIST_ERROR = "Email id already registered";
 
 	public static final String API_VERSION_1 = "1.0";
 

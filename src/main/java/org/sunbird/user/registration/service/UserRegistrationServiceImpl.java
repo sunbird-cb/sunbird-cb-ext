@@ -22,7 +22,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import org.sunbird.common.model.SBApiResponse;
+import org.sunbird.common.model.SunbirdApiRequest;
 import org.sunbird.common.model.SunbirdApiResp;
 import org.sunbird.common.model.SunbirdApiRespContent;
 import org.sunbird.common.model.SunbirdApiRespParam;
@@ -31,6 +33,7 @@ import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.common.util.IndexerService;
+import org.sunbird.core.exception.ApplicationLogicError;
 import org.sunbird.core.producer.Producer;
 import org.sunbird.portal.department.model.DeptPublicInfo;
 import org.sunbird.user.registration.model.UserRegistration;
@@ -59,41 +62,48 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 	@Autowired
 	OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
 
+	@Autowired
+	RestTemplate restTemplate;
+
 	@Override
 	public SBApiResponse registerUser(UserRegistrationInfo userRegInfo) {
 		SBApiResponse response = createDefaultResponse(Constants.USER_REGISTRATION_REGISTER_API);
 		String errMsg = validateRegisterationPayload(userRegInfo);
 		if (StringUtils.isBlank(errMsg)) {
 			try {
-				// verify the given email exist in ES Server
-				UserRegistration regDocument = getUserRegistrationDocument(new HashMap<String, Object>() {
-					{
-						put(Constants.EMAIL, userRegInfo.getEmail());
-					}
-				});
-				if (regDocument == null
-						|| UserRegistrationStatus.FAILED.name().equalsIgnoreCase(regDocument.getStatus())) {
-					// create the doc in ES
-					UserRegistration userRegistration = getRegistrationObject(userRegInfo);
-					if (StringUtils.isBlank(userRegistration.getId())) {
-						userRegistration.setId(regDocument.getId());
-					}
-					RestStatus status = indexerService.addEntity(serverProperties.getUserRegistrationIndex(),
-							serverProperties.getEsProfileIndexType(), userRegistration.getId(),
-							mapper.convertValue(userRegistration, Map.class));
-					if (status.equals(RestStatus.CREATED)) {
-						// fire Kafka topic event
-						kafkaProducer.push(serverProperties.getUserRegistrationTopic(), userRegistration);
-						response.setResponseCode(HttpStatus.ACCEPTED);
-						response.getResult().put(Constants.RESULT, userRegistration);
-					} else {
-						response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
-						response.getParams().setErrmsg("Failed to add details to ES Service");
-					}
+				if (isUserExist(userRegInfo.getEmail().toLowerCase())) {
+					errMsg = Constants.EMAIL_EXIST_ERROR;
 				} else {
-					errMsg = "Email id already exists";
-				}
+					// verify the given email exist in ES Server
+					UserRegistration regDocument = getUserRegistrationDocument(new HashMap<String, Object>() {
+						{
+							put(Constants.EMAIL, userRegInfo.getEmail());
+						}
+					});
 
+					if (regDocument == null
+							|| UserRegistrationStatus.FAILED.name().equalsIgnoreCase(regDocument.getStatus())) {
+						// create the doc in ES
+						UserRegistration userRegistration = getRegistrationObject(userRegInfo);
+						if (StringUtils.isBlank(userRegistration.getId())) {
+							userRegistration.setId(regDocument.getId());
+						}
+						RestStatus status = indexerService.addEntity(serverProperties.getUserRegistrationIndex(),
+								serverProperties.getEsProfileIndexType(), userRegistration.getId(),
+								mapper.convertValue(userRegistration, Map.class));
+						if (status.equals(RestStatus.CREATED)) {
+							// fire Kafka topic event
+							kafkaProducer.push(serverProperties.getUserRegistrationTopic(), userRegistration);
+							response.setResponseCode(HttpStatus.ACCEPTED);
+							response.getResult().put(Constants.RESULT, userRegistration);
+						} else {
+							response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+							response.getParams().setErrmsg("Failed to add details to ES Service");
+						}
+					} else {
+						errMsg = Constants.EMAIL_EXIST_ERROR;
+					}
+				}
 			} catch (Exception e) {
 				LOGGER.error(String.format("Exception in %s : %s", "registerUser", e.getMessage()));
 				errMsg = "Failed to process message. Exception: " + e.getMessage();
@@ -233,14 +243,12 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 	}
 
 	private UserRegistration getUserRegistrationDocument(Map<String, Object> mustMatch) throws Exception {
-		SearchSourceBuilder searchSourceBuilder = queryBuilder(mustMatch);
 		SearchResponse searchResponse = indexerService.getEsResult(serverProperties.getUserRegistrationIndex(),
-				serverProperties.getEsProfileIndexType(), searchSourceBuilder);
+				serverProperties.getEsProfileIndexType(), queryBuilder(mustMatch));
 
-		if (searchResponse.getHits().totalHits > 0) {
-			// Record already exists. will return the existing one.
-			SearchHit[] searchHit = searchResponse.getHits().getHits();
-			return mapper.convertValue(searchHit[0], UserRegistration.class);
+		if (searchResponse.getHits().getTotalHits() > 0) {
+			SearchHit hit = searchResponse.getHits().getAt(0);
+			return mapper.convertValue(hit.getSourceAsMap(), UserRegistration.class);
 		}
 
 		return null;
@@ -277,10 +285,47 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 	 */
 	private SearchSourceBuilder queryBuilder(Map<String, Object> mustMatch) {
 		BoolQueryBuilder boolBuilder = new BoolQueryBuilder();
-		SearchSourceBuilder searchBuilder = new SearchSourceBuilder().query(boolBuilder);
+
 		for (Map.Entry<String, Object> entry : mustMatch.entrySet()) {
-			boolBuilder.must(QueryBuilders.matchQuery(entry.getKey() + ".keyword", entry.getValue()));
+			boolBuilder.must(QueryBuilders.termQuery(entry.getKey() + ".raw", entry.getValue()));
 		}
-		return searchBuilder;
+		return new SearchSourceBuilder().query(boolBuilder);
+	}
+
+	private boolean isUserExist(String email) {
+		// request body
+		SunbirdApiRequest requestObj = new SunbirdApiRequest();
+		Map<String, Object> reqMap = new HashMap<>();
+		reqMap.put(Constants.FILTERS, new HashMap<String, Object>() {
+			{
+				put(Constants.EMAIL, email);
+			}
+		});
+		requestObj.setRequest(reqMap);
+
+		HashMap<String, String> headersValue = new HashMap<>();
+		headersValue.put(Constants.CONTENT_TYPE, "application/json");
+		headersValue.put(Constants.AUTHORIZATION, serverProperties.getSbApiKey());
+
+		try {
+			String url = serverProperties.getSbUrl() + serverProperties.getUserSearchEndPoint();
+
+			Map<String, Object> response = outboundRequestHandlerService.fetchResultUsingPost(url, requestObj,
+					headersValue);
+			if (response != null && "OK".equalsIgnoreCase((String) response.get("responseCode"))) {
+				Map<String, Object> map = (Map<String, Object>) response.get("result");
+				if (map.get("response") != null) {
+					Map<String, Object> responseObj = (Map<String, Object>) map.get("response");
+					int count = (int) responseObj.get(Constants.COUNT);
+					if (count == 0)
+						return false;
+					else
+						return true;
+				}
+			}
+		} catch (Exception e) {
+			throw new ApplicationLogicError("Sunbird Service ERROR: ", e);
+		}
+		return true;
 	}
 }
