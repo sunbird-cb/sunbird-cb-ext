@@ -6,7 +6,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
@@ -83,19 +82,25 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 
 					if (regDocument == null
 							|| UserRegistrationStatus.FAILED.name().equalsIgnoreCase(regDocument.getStatus())) {
-						// create the doc in ES
-						UserRegistration userRegistration = getRegistrationObject(userRegInfo);
-						if (StringUtils.isBlank(userRegistration.getId())) {
-							userRegistration.setId(regDocument.getId());
+						// create / update the doc in ES
+						RestStatus status = null;
+						if(regDocument == null) {
+							regDocument = getRegistrationObject(userRegInfo);
+							status = indexerService.addEntity(serverProperties.getUserRegistrationIndex(),
+									serverProperties.getEsProfileIndexType(), regDocument.getRegistrationCode(),
+									mapper.convertValue(regDocument, Map.class));
+						} else {
+							regDocument.setStatus(UserRegistrationStatus.CREATED.name());
+							status = indexerService.updateEntity(serverProperties.getUserRegistrationIndex(),
+									serverProperties.getEsProfileIndexType(), regDocument.getRegistrationCode(),
+									mapper.convertValue(regDocument, Map.class));
 						}
-						RestStatus status = indexerService.addEntity(serverProperties.getUserRegistrationIndex(),
-								serverProperties.getEsProfileIndexType(), userRegistration.getId(),
-								mapper.convertValue(userRegistration, Map.class));
-						if (status.equals(RestStatus.CREATED)) {
+						
+						if (status.equals(RestStatus.CREATED) || status.equals(RestStatus.OK)) {
 							// fire Kafka topic event
-							kafkaProducer.push(serverProperties.getUserRegistrationTopic(), userRegistration);
+							kafkaProducer.push(serverProperties.getUserRegistrationTopic(), regDocument);
 							response.setResponseCode(HttpStatus.ACCEPTED);
-							response.getResult().put(Constants.RESULT, userRegistration);
+							response.getResult().put(Constants.RESULT, regDocument);
 						} else {
 							response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
 							response.getParams().setErrmsg("Failed to add details to ES Service");
@@ -123,12 +128,9 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 		SBApiResponse response = createDefaultResponse(Constants.USER_REGISTRATION_RETRIEVE_API);
 		UserRegistration userRegistration = null;
 		try {
-			userRegistration = getUserRegistrationDocument(new HashMap<String, Object>() {
-				{
-					put("registrationCode", registrationCode);
-				}
-			});
-
+			Map<String, Object> esObject = indexerService.readEntity(serverProperties.getUserRegistrationIndex(),
+					serverProperties.getEsProfileIndexType(), registrationCode);
+			userRegistration = mapper.convertValue(esObject, UserRegistration.class);
 		} catch (Exception e) {
 			LOGGER.error(String.format("Exception in %s : %s", "getUserRegistrationDetails", e.getMessage()));
 		}
@@ -266,8 +268,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 
 		if (StringUtils.isBlank(userRegInfo.getRegistrationCode())) {
 			userRegistration.setRegistrationCode(serverProperties.getUserRegCodePrefix() + "-"
-					+ userRegInfo.getDeptName() + "-" + RandomStringUtils.random(6, Boolean.TRUE, Boolean.TRUE));
-			userRegistration.setId(UUID.randomUUID().toString());
+					+ userRegInfo.getDeptName() + "-" + RandomStringUtils.random(8, Boolean.TRUE, Boolean.TRUE));
 			userRegistration.setCreatedOn(new Date().getTime());
 		} else {
 			userRegistration.setUpdatedOn(new Date().getTime());

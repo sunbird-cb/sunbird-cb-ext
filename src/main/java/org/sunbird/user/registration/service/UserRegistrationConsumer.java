@@ -49,7 +49,8 @@ public class UserRegistrationConsumer {
 	@Autowired
 	IndexerService indexerService;
 
-	@KafkaListener(id = "id1", groupId = "userRegistrationTopic-consumer", topicPartitions = {
+	@SuppressWarnings("unchecked")
+	@KafkaListener(topicPartitions = {
 			@TopicPartition(topic = "${kafka.topics.user.registration.register.event}", partitions = { "0", "1", "2",
 					"3" }) })
 	public void processMessage(ConsumerRecord<String, String> data) {
@@ -76,19 +77,34 @@ public class UserRegistrationConsumer {
 			List<String> wfIds = (List<String>) wfTransitionData.get("wfIds");
 			userRegistration.setStatus((String) wfTransitionData.get(Constants.STATUS));
 			userRegistration.setWfId(wfIds.get(0));
-			RestStatus status = indexerService.addEntity(serverProperties.getUserRegistrationIndex(),
-					serverProperties.getEsProfileIndexType(), userRegistration.getId(),
-					mapper.convertValue(userRegistration, Map.class));
-
-			if (!status.equals(RestStatus.CREATED)) {
-				LOGGER.info("Failed to update registration status for the document id : "
-						+ userRegistration.getRegistrationCode() + "and status : " + userRegistration.getStatus());
-			}
 		} else {
 			userRegistration.setStatus(UserRegistrationStatus.FAILED.name());
 		}
+		RestStatus status = indexerService.updateEntity(serverProperties.getUserRegistrationIndex(),
+				serverProperties.getEsProfileIndexType(), userRegistration.getRegistrationCode(),
+				mapper.convertValue(userRegistration, Map.class));
+
+		LOGGER.info("Successfully called ES update request. REST Status ? " + (status != null ? status.name() : null));
+
+		if (!RestStatus.OK.equals(status)) {
+			LOGGER.info("Failed to update registration status for the document id : "
+					+ userRegistration.getRegistrationCode() + "and status : " + userRegistration.getStatus());
+		}
 		// send notification
 		sendNotification(userRegistration);
+	}
+
+	@KafkaListener(topicPartitions = {
+			@TopicPartition(topic = "${kafka.topics.user.registration.createUser}", partitions = { "0", "1", "2",
+					"3" }) })
+	public void processCreateUserMessage(ConsumerRecord<String, String> data) {
+		try {
+			WfRequest wfRequest = gson.fromJson(data.value(), WfRequest.class);
+			LOGGER.info("Consumed Request in Topic to create user in registration:: "
+					+ mapper.writeValueAsString(wfRequest));
+		} catch (Exception e) {
+			LOGGER.error("Failed to process message in Topic to create user in registration.", e);
+		}
 	}
 
 	private WfRequest wfRequestObj(UserRegistration userRegistration) {
@@ -98,7 +114,7 @@ public class UserRegistrationConsumer {
 		String uuid = UUID.randomUUID().toString();
 		wfRequest.setUserId(uuid);
 		wfRequest.setActorUserId(uuid);
-		wfRequest.setApplicationId(userRegistration.getId());
+		wfRequest.setApplicationId(userRegistration.getRegistrationCode());
 		wfRequest.setDeptName(userRegistration.getDeptName());
 		wfRequest.setServiceName(serverProperties.getUserRegistrationWorkFlowServiceName());
 		wfRequest.setUpdateFieldValues(Arrays.asList(new HashMap<>()));
@@ -167,7 +183,7 @@ public class UserRegistrationConsumer {
 			break;
 		case "WF_APPROVED":
 			params.put(Constants.DESCRIPTION, serverProperties.getUserRegistrationApprovedMessage());
-			params.put("btn-url", "https://igot-dev.in");
+			params.put("btn-url", serverProperties.getUserRegistrationDomainName());
 			params.put("btn-name", serverProperties.getUserRegisterationButtonName());
 			break;
 		case "WF_DENIED":

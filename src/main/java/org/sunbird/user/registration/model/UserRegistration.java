@@ -7,7 +7,6 @@ package org.sunbird.user.registration.model;
  *
  */
 public class UserRegistration extends UserRegistrationInfo {
-	private String id;
 	private String wfId;
 	private String priviousStatus;
 	private String status;
@@ -15,14 +14,6 @@ public class UserRegistration extends UserRegistrationInfo {
 	private long updatedOn;
 	private String createdBy;
 	private String updatedBy;
-
-	public String getId() {
-		return id;
-	}
-
-	public void setId(String id) {
-		this.id = id;
-	}
 
 	public String getWfId() {
 		return wfId;

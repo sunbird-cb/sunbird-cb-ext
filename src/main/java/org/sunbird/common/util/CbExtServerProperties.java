@@ -269,6 +269,9 @@ public class CbExtServerProperties {
 
 	@Value("${user.registeration.route.button.name}")
 	private String userRegisterationButtonName;
+	
+	@Value("${user.registration.domain.name}")
+	private String userRegistrationDomainName;
 
 	public String getUserAssessmentSubmissionDuration() {
 		return userAssessmentSubmissionDuration;
@@ -985,4 +988,11 @@ public class CbExtServerProperties {
 		this.userRegistrationSubject = userRegistrationSubject;
 	}
 
+	public String getUserRegistrationDomainName() {
+		return userRegistrationDomainName;
+	}
+
+	public void setUserRegistrationDomainName(String userRegistrationDomainName) {
+		this.userRegistrationDomainName = userRegistrationDomainName;
+	}
 }
