@@ -23,6 +23,7 @@ import org.sunbird.common.util.NotificationUtil;
 import org.sunbird.common.util.PropertiesCache;
 import org.sunbird.user.registration.model.UserRegistration;
 import org.sunbird.user.registration.model.WfRequest;
+import org.sunbird.user.registration.util.UserRegistrationStatus;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
@@ -79,20 +80,15 @@ public class UserRegistrationConsumer {
 					serverProperties.getEsProfileIndexType(), userRegistration.getId(),
 					mapper.convertValue(userRegistration, Map.class));
 
-			if (status.equals(RestStatus.CREATED)) {
-				// send notification
-				List<String> sendTo = new ArrayList<String>() {
-					{
-						add(userRegistration.getEmail());
-					}
-				};
-				Map<String, Object> params = notificationPayload();
-				notificationUtil.sendNotification(sendTo, params,
-						PropertiesCache.getInstance().getProperty(Constants.SENDER_MAIL),
-						PropertiesCache.getInstance().getProperty(Constants.NOTIFICATION_HOST)
-								+ PropertiesCache.getInstance().getProperty(Constants.NOTIFICATION_ENDPOINT));
+			if (!status.equals(RestStatus.CREATED)) {
+				LOGGER.info("Failed to update registration status for the document id : "
+						+ userRegistration.getRegistrationCode() + "and status : " + userRegistration.getStatus());
 			}
+		} else {
+			userRegistration.setStatus(UserRegistrationStatus.FAILED.name());
 		}
+		// send notification
+		sendNotification(userRegistration);
 	}
 
 	private WfRequest wfRequestObj(UserRegistration userRegistration) {
@@ -129,32 +125,62 @@ public class UserRegistrationConsumer {
 		return null;
 	}
 
-	private Map<String, Object> notificationPayload() {
+	private void sendNotification(UserRegistration userRegistration) {
+		List<String> sendTo = new ArrayList<String>() {
+			{
+				add(userRegistration.getEmail());
+			}
+		};
+
 		Map<String, Object> notificationObj = new HashMap<>();
-		notificationObj.put("mode", "email");
-		notificationObj.put("deliveryType", "message");
+		notificationObj.put("mode", Constants.EMAIL);
+		notificationObj.put("deliveryType", Constants.MESSAGE);
 		notificationObj.put("config", new HashMap<String, Object>() {
 			{
-				put("sender", "");
-				put("subject", "");
+				put(Constants.SUBJECT, serverProperties.getUserRegistrationSubject());
 			}
 		});
-		notificationObj.put("ids", new ArrayList<String>() {
-			{
-				add("");
-			}
-		});
-		notificationObj.put("template", new HashMap<String, Object>() {
-			{
-				put("data", "");
-				put("params", new HashMap<String, Object>() {
-					{
-						put("", "");
-					}
-				});
-			}
-		});
-		return notificationObj;
+		notificationObj.put("ids", sendTo);
+		notificationObj.put(Constants.TEMPLATE,
+				notificationMessage(userRegistration.getStatus(), userRegistration.getRegistrationCode()));
+
+		if (notificationObj.get(Constants.TEMPLATE) != null) {
+			notificationUtil.sendNotification(sendTo, notificationObj,
+					PropertiesCache.getInstance().getProperty(Constants.SENDER_MAIL),
+					PropertiesCache.getInstance().getProperty(Constants.NOTIFICATION_HOST)
+							+ PropertiesCache.getInstance().getProperty(Constants.NOTIFICATION_ENDPOINT));
+		}
+	}
+
+	private Map<String, Object> notificationMessage(String status, String regCode) {
+		Map<String, Object> template = new HashMap<>();
+		template.put(Constants.ID, Constants.USER_REGISTERATION_TEMPLATE);
+		Map<String, Object> params = new HashMap<>();
+		params.put(Constants.STATUS, serverProperties.getUserRegistrationStatus().replace("{status}", status));
+		params.put(Constants.TITLE, serverProperties.getUserRegistrationTitle().replace("{status}", status));
+		template.put("params", params);
+		switch (status) {
+		case "WF_INITIATED":
+			params.put(Constants.TITLE, serverProperties.getUserRegistrationThankyouMessage());
+			params.put(Constants.DESCRIPTION, serverProperties.getUserRegistrationInitiatedMessage()
+					.replace("{regCode}", "<b>" + regCode + "</b>"));
+			break;
+		case "WF_APPROVED":
+			params.put(Constants.DESCRIPTION, serverProperties.getUserRegistrationApprovedMessage());
+			params.put("btn-url", "https://igot-dev.in");
+			params.put("btn-name", serverProperties.getUserRegisterationButtonName());
+			break;
+		case "WF_DENIED":
+			break;
+		case "FAILED":
+			params.put(Constants.STATUS, serverProperties.getUserRegistrationFailedMessage());
+			break;
+
+		default:
+			template = null;
+			break;
+		}
+		return template;
 	}
 
 }
