@@ -161,7 +161,8 @@ public class UserRegistrationConsumer {
 		case "WF_INITIATED":
 			params.put(Constants.TITLE, "Thankyou for registering in iGOT!");
 			params.put(Constants.STATUS, "Your request is initiated.");
-			params.put(Constants.DESCRIPTION, "Please use the code " + regCode + " for further process.");
+			params.put(Constants.DESCRIPTION,
+					"Please use the code " + "<b>" + regCode + "</b>" + " for further process.");
 			break;
 		case "WF_APPROVED":
 			params.put(Constants.TITLE, "iGOT registration approved");
