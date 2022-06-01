@@ -27,6 +27,10 @@ public class SummaryModel {
         this.latest50Reviews = latest50Reviews;
     }
 
+    public SummaryModel() {
+
+    }
+
     public String getActivityId() {
         return activityId;
     }
