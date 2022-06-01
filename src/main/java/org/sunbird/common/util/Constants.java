@@ -344,7 +344,6 @@ public class Constants {
 	public static final String IS_DELETED = "isDeleted";
 	public static final String EXCLUDE_USER_EMAILS = "exclude_user_emails";
 	public static final String INCOMPLETE_COURSES = "incompletecourses";
-	public static final String SUBJECT_ = "subject";
 	public static final String POSTER_IMAGE = "posterImage";
 
 	public static final String COURSE_URL = "course.url";
@@ -389,7 +388,12 @@ public class Constants {
 	public static final String USER_REGISTRATION_RETRIEVE_API = "api.user.registration.retrieve";
 	public static final String USER_REGISTRATION_DEPT_INFO_API = "api.user.registration.dept.info";
 	public static final String COUNT = "count";
-	
+
+	// email params
+	public static final String TITLE = "title";
+	public static final String DESCRIPTION = "description";
+	public static final String TEMPLATE = "template";
+
 	public static final String EMAIL_EXIST_ERROR = "Email id already registered";
 
 	public static final String API_VERSION_1 = "1.0";
