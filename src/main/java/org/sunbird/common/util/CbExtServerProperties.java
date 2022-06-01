@@ -242,6 +242,9 @@ public class CbExtServerProperties {
 
 	@Value("${user.registration.dept.exclude.list}")
 	private String userRegistrationDeptExcludeList;
+	
+	@Value("${user.registration.workflow.service.name}")
+	private String userRegistrationWorkFlowServiceName;
 
 	public String getUserAssessmentSubmissionDuration() {
 		return userAssessmentSubmissionDuration;
@@ -884,5 +887,13 @@ public class CbExtServerProperties {
 
 	public List<String> getUserRegistrationDeptExcludeList() {
 		return Arrays.asList(userRegistrationDeptExcludeList.split(",", -1));
+	}
+
+	public String getUserRegistrationWorkFlowServiceName() {
+		return userRegistrationWorkFlowServiceName;
+	}
+
+	public void setUserRegistrationWorkFlowServiceName(String userRegistrationWorkFlowServiceName) {
+		this.userRegistrationWorkFlowServiceName = userRegistrationWorkFlowServiceName;
 	}
 }

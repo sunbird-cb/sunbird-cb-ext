@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.elasticsearch.rest.RestStatus;
@@ -91,19 +92,18 @@ public class UserRegistrationConsumer {
 						PropertiesCache.getInstance().getProperty(Constants.NOTIFICATION_HOST)
 								+ PropertiesCache.getInstance().getProperty(Constants.NOTIFICATION_ENDPOINT));
 			}
-
 		}
-
 	}
 
 	private WfRequest wfRequestObj(UserRegistration userRegistration) {
 		WfRequest wfRequest = new WfRequest();
 		wfRequest.setState(userRegistration.getStatus());
 		wfRequest.setAction(userRegistration.getStatus());
-		wfRequest.setUserId("1234");
-		wfRequest.setActorUserId("1234");
+		String uuid = UUID.randomUUID().toString();
+		wfRequest.setUserId(uuid);
+		wfRequest.setActorUserId(uuid);
 		wfRequest.setApplicationId(userRegistration.getId());
-		wfRequest.setServiceName("user-registration");
+		wfRequest.setServiceName(serverProperties.getUserRegistrationWorkFlowServiceName());
 		wfRequest.setUpdateFieldValues(Arrays.asList(new HashMap<>()));
 		return wfRequest;
 	}
