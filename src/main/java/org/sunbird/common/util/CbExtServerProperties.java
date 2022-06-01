@@ -242,9 +242,33 @@ public class CbExtServerProperties {
 
 	@Value("${user.registration.dept.exclude.list}")
 	private String userRegistrationDeptExcludeList;
-	
+
 	@Value("${user.registration.workflow.service.name}")
 	private String userRegistrationWorkFlowServiceName;
+
+	@Value("${user.registration.subject}")
+	private String userRegistrationSubject;
+
+	@Value("${user.registration.title}")
+	private String userRegistrationTitle;
+
+	@Value("${user.registration.status}")
+	private String userRegistrationStatus;
+
+	@Value("${user.registration.thankyou.message}")
+	private String userRegistrationThankyouMessage;
+
+	@Value("${user.registration.initiated.message}")
+	private String userRegistrationInitiatedMessage;
+
+	@Value("${user.registration.approved.message}")
+	private String userRegistrationApprovedMessage;
+
+	@Value("${user.registration.failed.message}")
+	private String userRegistrationFailedMessage;
+
+	@Value("${user.registeration.route.button.name}")
+	private String userRegisterationButtonName;
 
 	public String getUserAssessmentSubmissionDuration() {
 		return userAssessmentSubmissionDuration;
@@ -896,4 +920,69 @@ public class CbExtServerProperties {
 	public void setUserRegistrationWorkFlowServiceName(String userRegistrationWorkFlowServiceName) {
 		this.userRegistrationWorkFlowServiceName = userRegistrationWorkFlowServiceName;
 	}
+
+	public String getUserRegistrationTitle() {
+		return userRegistrationTitle;
+	}
+
+	public void setUserRegistrationTitle(String userRegistrationTitle) {
+		this.userRegistrationTitle = userRegistrationTitle;
+	}
+
+	public String getUserRegistrationStatus() {
+		return userRegistrationStatus;
+	}
+
+	public void setUserRegistrationStatus(String userRegistrationStatus) {
+		this.userRegistrationStatus = userRegistrationStatus;
+	}
+
+	public String getUserRegistrationThankyouMessage() {
+		return userRegistrationThankyouMessage;
+	}
+
+	public void setUserRegistrationThankyouMessage(String userRegistrationThankyouMessage) {
+		this.userRegistrationThankyouMessage = userRegistrationThankyouMessage;
+	}
+
+	public String getUserRegistrationInitiatedMessage() {
+		return userRegistrationInitiatedMessage;
+	}
+
+	public void setUserRegistrationInitiatedMessage(String userRegistrationInitiatedMessage) {
+		this.userRegistrationInitiatedMessage = userRegistrationInitiatedMessage;
+	}
+
+	public String getUserRegistrationApprovedMessage() {
+		return userRegistrationApprovedMessage;
+	}
+
+	public void setUserRegistrationApprovedMessage(String userRegistrationApprovedMessage) {
+		this.userRegistrationApprovedMessage = userRegistrationApprovedMessage;
+	}
+
+	public String getUserRegistrationFailedMessage() {
+		return userRegistrationFailedMessage;
+	}
+
+	public void setUserRegistrationFailedMessage(String userRegistrationFailedMessage) {
+		this.userRegistrationFailedMessage = userRegistrationFailedMessage;
+	}
+
+	public String getUserRegisterationButtonName() {
+		return userRegisterationButtonName;
+	}
+
+	public void setUserRegisterationButtonName(String userRegisterationButtonName) {
+		this.userRegisterationButtonName = userRegisterationButtonName;
+	}
+
+	public String getUserRegistrationSubject() {
+		return userRegistrationSubject;
+	}
+
+	public void setUserRegistrationSubject(String userRegistrationSubject) {
+		this.userRegistrationSubject = userRegistrationSubject;
+	}
+
 }

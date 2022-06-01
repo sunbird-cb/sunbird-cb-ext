@@ -137,7 +137,7 @@ public class UserRegistrationConsumer {
 		notificationObj.put("deliveryType", Constants.MESSAGE);
 		notificationObj.put("config", new HashMap<String, Object>() {
 			{
-				put(Constants.SUBJECT, "iGOT - Registration");
+				put(Constants.SUBJECT, serverProperties.getUserRegistrationSubject());
 			}
 		});
 		notificationObj.put("ids", sendTo);
@@ -154,30 +154,26 @@ public class UserRegistrationConsumer {
 
 	private Map<String, Object> notificationMessage(String status, String regCode) {
 		Map<String, Object> template = new HashMap<>();
-		template.put(Constants.ID, "user-registration");
+		template.put(Constants.ID, Constants.USER_REGISTERATION_TEMPLATE);
 		Map<String, Object> params = new HashMap<>();
+		params.put(Constants.STATUS, serverProperties.getUserRegistrationStatus().replace("{status}", status));
+		params.put(Constants.TITLE, serverProperties.getUserRegistrationTitle().replace("{status}", status));
 		template.put("params", params);
 		switch (status) {
 		case "WF_INITIATED":
-			params.put(Constants.TITLE, "Thankyou for registering in iGOT!");
-			params.put(Constants.STATUS, "Your request is initiated.");
-			params.put(Constants.DESCRIPTION,
-					"Please use the code " + "<b>" + regCode + "</b>" + " for further process.");
+			params.put(Constants.TITLE, serverProperties.getUserRegistrationThankyouMessage());
+			params.put(Constants.DESCRIPTION, serverProperties.getUserRegistrationInitiatedMessage()
+					.replace("{regCode}", "<b>" + regCode + "</b>"));
 			break;
 		case "WF_APPROVED":
-			params.put(Constants.TITLE, "iGOT registration approved");
-			params.put(Constants.STATUS, "Your request is approved and your account is active now.");
-			params.put(Constants.DESCRIPTION, "Click on the below link to set your password and explore iGOT.");
+			params.put(Constants.DESCRIPTION, serverProperties.getUserRegistrationApprovedMessage());
 			params.put("btn-url", "https://igot-dev.in");
-			params.put("btn-name", "Click here");
+			params.put("btn-name", serverProperties.getUserRegisterationButtonName());
 			break;
 		case "WF_DENIED":
-			params.put(Constants.TITLE, "iGOT registration denied");
-			params.put(Constants.STATUS, "Your request is denied");
 			break;
 		case "FAILED":
-			params.put(Constants.TITLE, "iGOT registration failed");
-			params.put(Constants.STATUS, "Your registration request is failed. Please try again later.");
+			params.put(Constants.STATUS, serverProperties.getUserRegistrationFailedMessage());
 			break;
 
 		default:

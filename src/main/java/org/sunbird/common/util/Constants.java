@@ -393,6 +393,7 @@ public class Constants {
 	public static final String TITLE = "title";
 	public static final String DESCRIPTION = "description";
 	public static final String TEMPLATE = "template";
+	public static final String USER_REGISTERATION_TEMPLATE = "user-registration";
 
 	public static final String EMAIL_EXIST_ERROR = "Email id already registered";
 
