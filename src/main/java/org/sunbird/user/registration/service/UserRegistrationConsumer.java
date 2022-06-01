@@ -97,12 +97,13 @@ public class UserRegistrationConsumer {
 
 	private WfRequest wfRequestObj(UserRegistration userRegistration) {
 		WfRequest wfRequest = new WfRequest();
-		wfRequest.setState(userRegistration.getStatus());
-		wfRequest.setAction(userRegistration.getStatus());
+		wfRequest.setState(Constants.INITIATE);
+		wfRequest.setAction(Constants.INITIATE);
 		String uuid = UUID.randomUUID().toString();
 		wfRequest.setUserId(uuid);
 		wfRequest.setActorUserId(uuid);
 		wfRequest.setApplicationId(userRegistration.getId());
+		wfRequest.setDeptName(userRegistration.getDeptName());
 		wfRequest.setServiceName(serverProperties.getUserRegistrationWorkFlowServiceName());
 		wfRequest.setUpdateFieldValues(Arrays.asList(new HashMap<>()));
 		return wfRequest;
