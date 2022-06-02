@@ -1,10 +1,7 @@
 package org.sunbird.user.service;
 
 import java.sql.Timestamp;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +10,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.sunbird.cassandra.utils.CassandraOperation;
 import org.sunbird.common.model.SearchUserApiContent;
@@ -24,7 +22,7 @@ import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.core.exception.ApplicationLogicError;
 import org.sunbird.core.logger.CbExtLogger;
-import org.sunbird.telemetry.model.LastLoginInfo;
+import org.sunbird.telemetry.model.UserInfo;
 import org.sunbird.user.registration.model.UserRegistration;
 import org.sunbird.user.util.TelemetryUtils;
 
@@ -166,7 +164,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 	}
 
 	@Override
-	public Map<String, Object> updateLogin(LastLoginInfo userLoginInfo) {
+	public Map<String, Object> updateLogin(UserInfo userLoginInfo) {
 		Map<String, Object> response = new HashMap<>();
 		logger.info(String.format("Updating User Login: rootOrg: %s, userId: %s", userLoginInfo.getOrgId(),
 				userLoginInfo.getUserId()));
@@ -205,26 +203,213 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 	}
 
 	@Override
-	public boolean createUser(UserRegistration userRegistration) {
-		// TODO Auto-generated method stub
+	public Boolean createUser(UserInfo userInfo, String xAuthToken) {
+		try {
+			Map<String, String> headers = new HashMap<>();
+			headers.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
+			headers.put(Constants.USER_TOKEN, xAuthToken);
+			headers.put(Constants.AUTHORIZATION, props.getSbApiKey());
+			Map<String, Object> request = new HashMap<>();
+			Map<String, Object> requestBody = new HashMap<>();
+			requestBody.put(Constants.CHANNEL, userInfo.getChannel());
+			requestBody.put(Constants.EMAIL, userInfo.getEmail());
+			requestBody.put(Constants.EMAIL_VERIFIED, userInfo.getEmail());
+			requestBody.put(Constants.FIRSTNAME, userInfo.getFirstName());
+			requestBody.put(Constants.LASTNAME, userInfo.getLastName());
+			request.put(Constants.REQUEST, requestBody);
+			Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService
+					.fetchResultUsingPost(props.getSbUrl() + props.getUserCreateEndPoint(), request,
+							headers);
+			if (readData.get(Constants.RESPONSE_CODE).toString().equalsIgnoreCase(Constants.OK)) {
+				Map<String, Object> result = (Map<String, Object>) readData.get(Constants.RESULT);
+				readUser((String) result.get(Constants.USER_ID), xAuthToken);
+				userInfo.setUserId((String) result.get(Constants.USER_ID));
+				updateUser(userInfo, xAuthToken);
+				assignRole(userInfo, xAuthToken);
+				return resetPassword(userInfo, xAuthToken);
+			}
+		} catch (RestClientException e) {
+			logger.info(e.getMessage());
+		}
 		return false;
 	}
 
-	@Override
-	public boolean updateUser(UserRegistration userRegistration) {
-		// TODO Auto-generated method stub
+	public boolean readUser(String userId, String xAuthToken) {
+		try {
+			Map<String, String> headers = new HashMap<>();
+			headers.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
+			headers.put(Constants.USER_TOKEN, xAuthToken);
+			headers.put(Constants.AUTHORIZATION, props.getSbApiKey());
+			Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService
+					.fetchUsingGetWithHeadersProfile(props.getSbUrl() + props.getUserReadEndPoint() + userId,
+							headers);
+			if (readData.get(Constants.RESPONSE_CODE).toString().equalsIgnoreCase(Constants.OK)) {
+				Map<String, Object> result = (Map<String, Object>) readData.get(Constants.RESULT);
+				Map<String, Object> responseMap = (Map<String, Object>) result.get(Constants.RESPONSE);
+				if (!responseMap.isEmpty()) {
+					String userName = (String) responseMap.get(Constants.USER_NAME);
+					String identifier = (String) responseMap.get(Constants.IDENTIFIER);
+					String firstName = (String) responseMap.get(Constants.FIRSTNAME);
+					String lastName = (String) responseMap.get(Constants.LASTNAME);
+					String rootOrgId = (String) responseMap.get(Constants.ROOT_ORG_ID);
+					return createNodeBBUser(userName, identifier, firstName, lastName, xAuthToken);
+				}
+
+			}
+		} catch (RestClientException e) {
+			logger.info(e.getMessage());
+		}
 		return false;
 	}
 
-	@Override
-	public String getActivationLink(UserRegistration userRegistration) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public boolean createNodeBBUser(UserRegistration userRegistration) {
-		// TODO Auto-generated method stub
+	public boolean createNodeBBUser(String userName, String identifier, String firstName, String lastName, String xAuthToken) {
+		try {
+			Map<String, Object> request = new HashMap<>();
+			Map<String, Object> requestBody = new HashMap<>();
+			Map<String, String> headers = new HashMap<>();
+			headers.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
+			headers.put(Constants.USER_TOKEN, xAuthToken);
+			headers.put(Constants.AUTHORIZATION, props.getSbApiKey());
+			requestBody.put(Constants.USERNAME, userName);
+			requestBody.put(Constants.IDENTIFIER, identifier);
+			requestBody.put(Constants.FULLNAME, firstName + " " + lastName);
+			request.put(Constants.REQUEST, requestBody);
+			Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService
+					.fetchResultUsingPost(props.getSbUrl() + props.getUserCreateBBUserEndPoint(), request, headers);
+			if (readData.get(Constants.RESPONSE_CODE).toString().equalsIgnoreCase(Constants.OK)) {
+				Map<String, Object> result = (Map<String, Object>) readData.get(Constants.RESULT);
+				if (!result.isEmpty() && result != null) {
+					if (((String) result.get(Constants.USER_NAME)).equalsIgnoreCase(userName)) {
+						return true;
+					}
+				}
+			}
+		} catch (Exception e) {
+			logger.info(e.getMessage());
+		}
 		return false;
 	}
+
+	public boolean updateUser(UserInfo userInfo, String xAuthToken) {
+		try {
+			Map<String, Object> request = new HashMap<>();
+			Map<String, String> headers = new HashMap<>();
+			headers.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
+			headers.put(Constants.USER_TOKEN, xAuthToken);
+			headers.put(Constants.AUTHORIZATION, props.getSbApiKey());
+			Map<String, Object> profileDetails = new HashMap<>();
+			Map<String, Object> employmentDetails = new HashMap<>();
+			employmentDetails.put(Constants.DEPARTMENTNAME, userInfo.getChannel());
+			Map<String, Object> personalDetails = new HashMap<>();
+			personalDetails.put(Constants.FIRST_NAME_, userInfo.getFirstName());
+			personalDetails.put(Constants.PRIMARY_EMAIL, userInfo.getEmail());
+			personalDetails.put(Constants.SURNAME, userInfo.getLastName());
+			profileDetails.put(Constants.EMPLOYMENTDETAILS, employmentDetails);
+			profileDetails.put(Constants.PERSONAL_DETAILS, personalDetails);
+			if (userInfo.getDesignation() != null) {
+				Map<String, Object> designation = new HashMap<>();
+				designation.put(Constants.DESIGNATION, userInfo.getDesignation());
+				profileDetails.put(Constants.PROFESSIONAL_DETAILS, designation);
+			}
+			request.put(Constants.PROFILE_DETAILS, profileDetails);
+			request.put(Constants.USER_ID, userInfo.getUserId());
+			Map<String, Object> requestBody = new HashMap<>();
+			requestBody.put(Constants.REQUEST, request);
+			Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService
+					.fetchResultUsingPatch(props.getSbUrl() + props.getUserUpdateEndPoint(), requestBody, headers);
+			if (readData.get(Constants.RESPONSE_CODE).toString().equalsIgnoreCase(Constants.OK)) {
+				Map<String, Object> result = (Map<String, Object>) readData.get(Constants.RESULT);
+				Map<String, Object> responseMap = (Map<String, Object>) result.get(Constants.RESPONSE);
+				return true;
+			}
+		} catch (Exception e) {
+			logger.info(e.getMessage());
+		}
+		return false;
+	}
+
+	public boolean resetPassword(UserInfo userInfo, String xAuthToken) {
+		try {
+			Map<String, Object> request = new HashMap<>();
+			Map<String, Object> requestBody = new HashMap<>();
+			Map<String, String> headers = new HashMap<>();
+			headers.put(Constants.USER_TOKEN, xAuthToken);
+			headers.put(Constants.AUTHORIZATION, props.getSbApiKey());
+			requestBody.put(Constants.KEY, userInfo.getEmail());
+			requestBody.put(Constants.TYPES, Constants.EMAIL);
+			requestBody.put(Constants.USER_ID, userInfo.getUserId());
+			request.put(Constants.REQUEST, requestBody);
+			Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService
+					.fetchResultUsingPost(props.getSbUrl() + props.getUserResetPasswordEndPoint(), request, headers);
+			if (readData.get(Constants.RESPONSE_CODE).toString().equalsIgnoreCase(Constants.OK)) {
+				Map<String, Object> result = (Map<String, Object>) readData.get(Constants.RESULT);
+				if (result != null && ((String) result.get(Constants.RESPONSE)).equalsIgnoreCase(Constants.SUCCESS)) {
+					String emailLink = (String) result.get(Constants.LINK);
+					userInfo.setEmailLink(emailLink);
+					return sendWelcomeEmail(userInfo, xAuthToken);
+				}
+			}
+		} catch (Exception e) {
+			logger.info(e.getMessage());
+		}
+		return false;
+	}
+
+	public boolean assignRole(UserInfo userInfo, String xAuthToken) {
+		try {
+			Map<String, Object> requestBody = new HashMap<>();
+			Map<String, Object> request = new HashMap<>();
+			Map<String, String> headers = new HashMap<>();
+			headers.put(Constants.USER_TOKEN, xAuthToken);
+			headers.put(Constants.AUTHORIZATION, props.getSbApiKey());
+			requestBody.put(Constants.ORGANISATION_ID, userInfo.getOrgId());
+			requestBody.put(Constants.ROLES, Arrays.asList(Constants.PUBLIC));
+			requestBody.put(Constants.USER_ID, userInfo.getUserId());
+			request.put(Constants.REQUEST, requestBody);
+			Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService
+					.fetchResultUsingPost(props.getSbUrl() + props.getUserAssignRoleEndPoint(), request, headers);
+			if (readData.get(Constants.RESPONSE_CODE).toString().equalsIgnoreCase(Constants.OK)) {
+				Map<String, Object> result = (Map<String, Object>) readData.get(Constants.RESULT);
+				Map<String, Object> responseMap = (Map<String, Object>) result.get(Constants.RESPONSE);
+				return true;
+			}
+		} catch (Exception e) {
+			logger.info(e.getMessage());
+		}
+		return false;
+	}
+
+	public boolean sendWelcomeEmail(UserInfo userInfo, String xAuthToken) {
+		try {
+			Map<String, String> headers = new HashMap<>();
+			Map<String, Object> requestBody = new HashMap<>();
+			headers.put(Constants.USER_TOKEN, xAuthToken);
+			headers.put(Constants.AUTHORIZATION, props.getSbApiKey());
+			requestBody.put(Constants.ALLOWED_LOGING, "You can use your email to Login");
+			requestBody.put(Constants.BODY, "Hello");
+			requestBody.put(Constants.EMAIL_TEMPLATE_TYPE, "iGotWelcome");
+			requestBody.put(Constants.FIRSTNAME, userInfo.getFirstName());
+			requestBody.put(Constants.LINK, userInfo.getEmailLink());
+			requestBody.put(Constants.MODE, Constants.EMAIL);
+			requestBody.put(Constants.ORG_NAME, userInfo.getChannel());
+			requestBody.put(Constants.RECIPIENT_EMAILS, Arrays.asList(userInfo.getEmail()));
+			requestBody.put(Constants.SET_PASSWORD_LINK, true);
+			requestBody.put(Constants.SUBJECT, "Welcome Email");
+			requestBody.put(Constants.WELCOME_MESSAGE, "Hello");
+			Map<String, Object> request = new HashMap<>();
+			request.put(Constants.REQUEST, requestBody);
+			Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService
+					.fetchResultUsingPost(props.getSbUrl() + props.getUserNotificationEmailEndpoint(), request, headers);
+			if (readData.get(Constants.RESPONSE_CODE).toString().equalsIgnoreCase(Constants.OK)) {
+				Map<String, Object> result = (Map<String, Object>) readData.get(Constants.RESULT);
+				if (result != null && ((String) result.get(Constants.RESPONSE)).equalsIgnoreCase(Constants.SUCCESS)) {
+					return true;
+				}
+			}
+		} catch (Exception e) {
+			logger.info(String.format("Error while sending the welcome email %s", e.getMessage()));
+		}
+		return false;
+	}
+
 }

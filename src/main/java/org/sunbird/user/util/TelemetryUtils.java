@@ -17,7 +17,7 @@ import org.sunbird.telemetry.model.Actor;
 import org.sunbird.telemetry.model.AuditEvents;
 import org.sunbird.telemetry.model.Context;
 import org.sunbird.telemetry.model.Edata;
-import org.sunbird.telemetry.model.LastLoginInfo;
+import org.sunbird.telemetry.model.UserInfo;
 import org.sunbird.telemetry.model.ObjectData;
 import org.sunbird.telemetry.model.Pdata;
 import org.sunbird.telemetry.model.Rollup;
@@ -35,7 +35,7 @@ public class TelemetryUtils {
 
 	private CbExtLogger logger = new CbExtLogger(getClass().getName());
 
-	public AuditEvents getUserslastLoginTelemetryEventData(LastLoginInfo userLoginInfo) {
+	public AuditEvents getUserslastLoginTelemetryEventData(UserInfo userLoginInfo) {
 		AuditEvents event = new AuditEvents();
 		event.setEid(Constants.EID);
 		long ts = new Timestamp(new Date().getTime()).getTime();
