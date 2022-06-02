@@ -9,7 +9,6 @@ import org.sunbird.user.registration.model.UserRegistration;
  * @author karthik
  *
  */
-@Service
 public interface UserRegistrationNotificationService {
 
 	public void sendNotification(UserRegistration userRegistration);

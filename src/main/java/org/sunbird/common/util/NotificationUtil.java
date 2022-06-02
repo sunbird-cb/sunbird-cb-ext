@@ -2,6 +2,7 @@ package org.sunbird.common.util;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -20,6 +21,9 @@ import static org.sunbird.common.util.Constants.INCOMPLETE_COURSES;
 public class NotificationUtil {
     public static final Logger Logger;
     private static final String EXCEPTION = "Exception in Send Notification %s";
+    
+	@Autowired
+	RestTemplate restTemplate;
 
     static {
         Logger = LoggerFactory.getLogger(NotificationUtil.class);
@@ -48,5 +52,29 @@ public class NotificationUtil {
             }
         }).start();
     }
+
+	public void sendNotification(List<Map<String, Object>> notifications) {
+		new Thread(() -> {
+			try {
+				String notificationUrl = PropertiesCache.getInstance().getProperty(Constants.NOTIFICATION_HOST)
+						+ PropertiesCache.getInstance().getProperty(Constants.NOTIFICATION_ENDPOINT);
+
+				HttpHeaders headers = new HttpHeaders();
+				headers.setContentType(MediaType.APPLICATION_JSON);
+				Map<String, Object> notificationRequest = new HashMap<>();
+				notificationRequest.put(Constants.REQUEST, new HashMap<String, Object>() {
+					{
+						put(Constants.NOTIFICATIONS, notifications);
+					}
+				});
+
+				HttpEntity<Object> req = new HttpEntity<>(notificationRequest, headers);
+				Logger.info(String.format("Notification Request : %s", notificationRequest));
+				restTemplate.postForEntity(notificationUrl, req, Object.class);
+			} catch (Exception e) {
+				Logger.error(String.format(EXCEPTION, e.getMessage()));
+			}
+		}).start();
+	}
 
 }
