@@ -12,6 +12,7 @@ import org.sunbird.common.util.Constants;
 import org.sunbird.common.util.NotificationUtil;
 import org.sunbird.common.util.PropertiesCache;
 import org.sunbird.user.registration.model.UserRegistration;
+
 @Service
 public class UserRegistrationNotificationServiceImpl implements UserRegistrationNotificationService {
 
