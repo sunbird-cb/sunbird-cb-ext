@@ -30,7 +30,7 @@ public class CbExtServerProperties {
 	@Value("${user.enable.multidept.mapping}")
 	private boolean isUserMultiMapDeptEnabled;
 
-	@Value("${sb.service.url}")
+	@Value("${sb.learner.service.url}")
 	private String sbUrl;
 
 	@Value("${sunbird.user.search.endpoint}")
@@ -278,8 +278,42 @@ public class CbExtServerProperties {
 
 	@Value("${user.registration.preApproved.domain}")
 	private String userRegistrationPreApprovedDomainList;
-	
-	
+
+	@Value("${sb.user.create.endpoint}")
+	private String userCreateEndPoint;
+
+	@Value("${sb.user.notification.email.endpoint}")
+	private String userNotificationEmailEndpoint;
+
+	@Value("${sb.user.read.endpoint}")
+	private String userReadEndPoint;
+
+	@Value("${sb.user.update.endpoint}")
+	private String userUpdateEndPoint;
+
+	@Value("${sb.user.create.bbuser.endpoint}")
+	private String userCreateBBUserEndPoint;
+
+	@Value("${sb.user.reset.password.endpoint}")
+	private String userResetPasswordEndPoint;
+
+	@Value("${sb.user.assign.role.endpoint}")
+	private String userAssignRoleEndPoint;
+
+	@Value("${sb.user.welcome.email.allowed.login}")
+	private String userEmailAllowedLogin;
+
+	@Value("${sb.user.welcome.email.body}")
+	private String userWelcomeEmailBody;
+
+	@Value("${sb.user.welcome.email.template.type}")
+	private String userWelcomeEmailTemplateType;
+
+	@Value("${sb.user.welcome.email.subject}")
+	private String userWelcomeEmailSubject;
+
+	@Value("${sb.user.welcome.email.welcome.msg}")
+	private String userWelcomeEmailMsg;
 	
 	public String getUserAssessmentSubmissionDuration() {
 		return userAssessmentSubmissionDuration;
@@ -1019,4 +1053,101 @@ public class CbExtServerProperties {
 	public void setUserRegistrationPreApprovedDomainList(String userRegistrationPreApprovedDomainList) {
 		this.userRegistrationPreApprovedDomainList = userRegistrationPreApprovedDomainList;
 	}
+
+	public String getUserCreateEndPoint() {
+		return userCreateEndPoint;
+	}
+
+	public void setUserCreateEndPoint(String userCreateEndPoint) {
+		this.userCreateEndPoint = userCreateEndPoint;
+	}
+
+	public String getUserNotificationEmailEndpoint() {
+		return userNotificationEmailEndpoint;
+	}
+
+	public void setUserNotificationEmailEndpoint(String userNotificationEmailEndpoint) {
+		this.userNotificationEmailEndpoint = userNotificationEmailEndpoint;
+	}
+
+	public String getUserReadEndPoint() {
+		return userReadEndPoint;
+	}
+
+	public void setUserReadEndPoint(String userReadEndPoint) {
+		this.userReadEndPoint = userReadEndPoint;
+	}
+
+	public String getUserUpdateEndPoint() {
+		return userUpdateEndPoint;
+	}
+
+	public void setUserUpdateEndPoint(String userUpdateEndPoint) {
+		this.userUpdateEndPoint = userUpdateEndPoint;
+	}
+
+	public String getUserCreateBBUserEndPoint() {
+		return userCreateBBUserEndPoint;
+	}
+
+	public void setUserCreateBBUserEndPoint(String userCreateBBUserEndPoint) {
+		this.userCreateBBUserEndPoint = userCreateBBUserEndPoint;
+	}
+
+	public String getUserResetPasswordEndPoint() {
+		return userResetPasswordEndPoint;
+	}
+
+	public void setUserResetPasswordEndPoint(String userResetPasswordEndPoint) {
+		this.userResetPasswordEndPoint = userResetPasswordEndPoint;
+	}
+
+	public String getUserAssignRoleEndPoint() {
+		return userAssignRoleEndPoint;
+	}
+
+	public void setUserAssignRoleEndPoint(String userAssignRoleEndPoint) {
+		this.userAssignRoleEndPoint = userAssignRoleEndPoint;
+	}
+
+	public String getUserEmailAllowedLogin() {
+		return userEmailAllowedLogin;
+	}
+
+	public void setUserEmailAllowedLogin(String userEmailAllowedLogin) {
+		this.userEmailAllowedLogin = userEmailAllowedLogin;
+	}
+
+	public String getUserWelcomeEmailBody() {
+		return userWelcomeEmailBody;
+	}
+
+	public void setUserWelcomeEmailBody(String userWelcomeEmailBody) {
+		this.userWelcomeEmailBody = userWelcomeEmailBody;
+	}
+
+	public String getUserWelcomeEmailTemplateType() {
+		return userWelcomeEmailTemplateType;
+	}
+
+	public void setUserWelcomeEmailTemplateType(String userWelcomeEmailTemplateType) {
+		this.userWelcomeEmailTemplateType = userWelcomeEmailTemplateType;
+	}
+
+	public String getUserWelcomeEmailSubject() {
+		return userWelcomeEmailSubject;
+	}
+
+	public void setUserWelcomeEmailSubject(String userWelcomeEmailSubject) {
+		this.userWelcomeEmailSubject = userWelcomeEmailSubject;
+	}
+
+	public String getUserWelcomeEmailMsg() {
+		return userWelcomeEmailMsg;
+	}
+
+	public void setUserWelcomeEmailMsg(String userWelcomeEmailMsg) {
+		this.userWelcomeEmailMsg = userWelcomeEmailMsg;
+	}
+
 }

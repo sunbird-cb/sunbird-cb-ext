@@ -399,6 +399,29 @@ public class Constants {
 
 	public static final String API_VERSION_1 = "1.0";
 
+	public static final String EMAIL_VERIFIED = "emailVerified";
+	public static final String USER_NAME = "userName";
+	public static final String ROOT_ORG_ID = "rootOrgId";
+	public static final String USERNAME = "username";
+	public static final String FULLNAME = "fullname";
+	public static final String KEY = "key";
+	public static final String TYPES = "type";
+	public static final String LINK = "link";
+	public static final String WELCOME_MESSAGE = "welcomeMessage";
+	public static final String SET_PASSWORD_LINK = "setPasswordLink";
+	public static final String RECIPIENT_EMAILS = "recipientEmails";
+	public static final String ORG_NAME = "orgName";
+	public static final String MODE = "mode";
+	public static final String EMAIL_TEMPLATE_TYPE = "emailTemplateType";
+	public static final String BODY = "body";
+	public static final String ALLOWED_LOGING = "allowedLoging";
+	public static final String ROLES = "roles";
+	public static final String ORGANISATION_ID = "organisationId";
+	public static final String PUBLIC = "PUBLIC";
+	public static final String FIRST_NAME_ = "firstname";
+	public static final String SURNAME = "surname";
+	public static final String PROFESSIONAL_DETAILS = "professionalDetails";
+
 	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}
