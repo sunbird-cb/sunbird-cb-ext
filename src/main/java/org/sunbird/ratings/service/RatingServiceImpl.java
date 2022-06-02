@@ -87,10 +87,9 @@ public class RatingServiceImpl implements RatingService {
                 response.put(Constants.RESPONSE, ratingModelInfo);
                 response.setResponseCode(HttpStatus.OK);
             } else {
-                String errMsg = Constants.NO_RATING_EXCEPTION_MESSAGE + activityId + ", activity_Type: " + activityType;
-                response.put(Constants.MESSAGE, Constants.FAILED);
-                response.getParams().setErrmsg(errMsg);
-                response.setResponseCode(HttpStatus.BAD_REQUEST);
+                response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
+                response.put(Constants.RESPONSE, null);
+                response.setResponseCode(HttpStatus.OK);
             }
         } catch (Exception e) {
             logger.error(e);
@@ -172,10 +171,9 @@ public class RatingServiceImpl implements RatingService {
                 response.put(Constants.RESPONSE, summaryModel);
                 response.setResponseCode(HttpStatus.OK);
             } else {
-                String errMsg = Constants.NO_REVIEW_EXCEPTION_MESSAGE + activityId + ", activityType: " + activityType;
-                response.put(Constants.MESSAGE, Constants.FAILED);
-                response.getParams().setErrmsg(errMsg);
-                response.setResponseCode(HttpStatus.BAD_REQUEST);
+                response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
+                response.put(Constants.RESPONSE, null);
+                response.setResponseCode(HttpStatus.OK);
             }
         } catch (Exception e) {
             logger.error(e);
@@ -331,10 +329,10 @@ public class RatingServiceImpl implements RatingService {
                 response.put(Constants.RESPONSE, listOfLookupResponse);
                 response.setResponseCode(HttpStatus.OK);
             } else {
-                String errMsg = Constants.NO_RATING_EXCEPTION_MESSAGE + lookupRequest.getActivityId() + ", activityType: " + lookupRequest.getActivityType();
-                response.put(Constants.MESSAGE, Constants.FAILED);
-                response.getParams().setErrmsg(errMsg);
-                response.setResponseCode(HttpStatus.BAD_REQUEST);
+                response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
+                response.put(Constants.RESPONSE, null);
+                response.setResponseCode(HttpStatus.OK);
+
             }
         } catch (ValidationException ex) {
             logger.error(ex);
