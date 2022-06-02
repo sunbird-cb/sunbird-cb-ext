@@ -88,7 +88,7 @@ public class RatingServiceImpl implements RatingService {
                 response.setResponseCode(HttpStatus.OK);
             } else {
                 response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
-                response.put(Constants.RESPONSE, new RatingModelInfo());
+                response.put(Constants.RESPONSE, null);
                 response.setResponseCode(HttpStatus.OK);
             }
         } catch (Exception e) {
@@ -172,7 +172,7 @@ public class RatingServiceImpl implements RatingService {
                 response.setResponseCode(HttpStatus.OK);
             } else {
                 response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
-                response.put(Constants.RESPONSE, new SummaryModel());
+                response.put(Constants.RESPONSE, null);
                 response.setResponseCode(HttpStatus.OK);
             }
         } catch (Exception e) {
@@ -329,9 +329,8 @@ public class RatingServiceImpl implements RatingService {
                 response.put(Constants.RESPONSE, listOfLookupResponse);
                 response.setResponseCode(HttpStatus.OK);
             } else {
-                String errMsg = Constants.NO_RATING_EXCEPTION_MESSAGE + lookupRequest.getActivityId() + ", activityType: " + lookupRequest.getActivityType();
-                response.put(Constants.MESSAGE, Constants.FAILED);
-                response.getParams().setErrmsg(errMsg);
+                response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
+                response.put(Constants.RESPONSE, null);
                 response.setResponseCode(HttpStatus.OK);
 
             }
