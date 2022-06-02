@@ -6,12 +6,14 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.common.util.NotificationUtil;
 import org.sunbird.common.util.PropertiesCache;
 import org.sunbird.user.registration.model.UserRegistration;
 
+@Service
 public class UserRegistrationNotificationServiceImpl implements UserRegistrationNotificationService {
 
 	@Autowired
