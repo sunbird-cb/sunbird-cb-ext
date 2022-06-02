@@ -37,4 +37,11 @@ public interface UserRegistrationService {
 	 *         message
 	 */
 	public SBApiResponse getDeptDetails();
+
+	/**
+	 * Initiates the User Registration process
+	 * 
+	 * @param registrationCode - User Registration Code
+	 */
+	public void initiateCreateUserFlow(String registrationCode);
 }

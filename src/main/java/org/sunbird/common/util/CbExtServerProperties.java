@@ -236,6 +236,9 @@ public class CbExtServerProperties {
 
 	@Value("${kafka.topics.user.registration.register.event}")
 	private String userRegistrationTopic;
+	
+	@Value("${kafka.topics.user.registration.createUser}")
+	private String userRegistrationCreateUserTopic;
 
 	@Value("${user.registration.domain}")
 	private String userRegistrationDomain;
@@ -273,6 +276,11 @@ public class CbExtServerProperties {
 	@Value("${user.registration.domain.name}")
 	private String userRegistrationDomainName;
 
+	@Value("${user.registration.preApproved.domain}")
+	private String userRegistrationPreApprovedDomainList;
+	
+	
+	
 	public String getUserAssessmentSubmissionDuration() {
 		return userAssessmentSubmissionDuration;
 	}
@@ -899,9 +907,17 @@ public class CbExtServerProperties {
 	public void setUserRegistrationTopic(String userRegistrationTopic) {
 		this.userRegistrationTopic = userRegistrationTopic;
 	}
+	
+	public String getUserRegistrationCreateUserTopic() {
+		return userRegistrationCreateUserTopic;
+	}
 
-	public String getUserRegistrationDomain() {
-		return userRegistrationDomain;
+	public void setUserRegistrationCreateUserTopic(String userRegistrationCreateUserTopic) {
+		this.userRegistrationCreateUserTopic = userRegistrationCreateUserTopic;
+	}
+
+	public List<String> getUserRegistrationDomain() {
+		return Arrays.asList(userRegistrationDomain.split(",", -1));
 	}
 
 	public void setUserRegistrationDomain(String userRegistrationDomain) {
@@ -994,5 +1010,13 @@ public class CbExtServerProperties {
 
 	public void setUserRegistrationDomainName(String userRegistrationDomainName) {
 		this.userRegistrationDomainName = userRegistrationDomainName;
+	}
+
+	public List<String> getUserRegistrationPreApprovedDomainList() {
+		return Arrays.asList(userRegistrationPreApprovedDomainList.split(",", -1));
+	}
+
+	public void setUserRegistrationPreApprovedDomainList(String userRegistrationPreApprovedDomainList) {
+		this.userRegistrationPreApprovedDomainList = userRegistrationPreApprovedDomainList;
 	}
 }

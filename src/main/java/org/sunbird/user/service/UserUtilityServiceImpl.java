@@ -25,6 +25,7 @@ import org.sunbird.common.util.Constants;
 import org.sunbird.core.exception.ApplicationLogicError;
 import org.sunbird.core.logger.CbExtLogger;
 import org.sunbird.telemetry.model.LastLoginInfo;
+import org.sunbird.user.registration.model.UserRegistration;
 import org.sunbird.user.util.TelemetryUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -60,7 +61,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 	public boolean validateUser(String userId) {
 		return validateUser(StringUtils.EMPTY, userId);
 	}
-	
+
 	@Override
 	public boolean validateUser(String rootOrg, String userId) {
 
@@ -201,5 +202,29 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		Map<String, Object> result = (Map<String, Object>) readData.get(Constants.RESULT);
 		Map<String, Object> responseMap = (Map<String, Object>) result.get(Constants.RESPONSE);
 		return responseMap;
+	}
+
+	@Override
+	public boolean createUser(UserRegistration userRegistration) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean updateUser(UserRegistration userRegistration) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public String getActivationLink(UserRegistration userRegistration) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public boolean createNodeBBUser(UserRegistration userRegistration) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 }

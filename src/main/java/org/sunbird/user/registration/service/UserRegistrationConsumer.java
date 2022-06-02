@@ -1,6 +1,5 @@
 package org.sunbird.user.registration.service;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -20,7 +19,6 @@ import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.common.util.IndexerService;
 import org.sunbird.common.util.NotificationUtil;
-import org.sunbird.common.util.PropertiesCache;
 import org.sunbird.user.registration.model.UserRegistration;
 import org.sunbird.user.registration.model.WfRequest;
 import org.sunbird.user.registration.util.UserRegistrationStatus;
@@ -48,6 +46,12 @@ public class UserRegistrationConsumer {
 
 	@Autowired
 	IndexerService indexerService;
+
+	@Autowired
+	UserRegistrationService userRegService;
+
+	@Autowired
+	UserRegistrationNotificationService userRegNotificationService;
 
 	@SuppressWarnings("unchecked")
 	@KafkaListener(topicPartitions = {
@@ -91,7 +95,7 @@ public class UserRegistrationConsumer {
 					+ userRegistration.getRegistrationCode() + "and status : " + userRegistration.getStatus());
 		}
 		// send notification
-		sendNotification(userRegistration);
+		userRegNotificationService.sendNotification(userRegistration);
 	}
 
 	@KafkaListener(topicPartitions = {
@@ -102,6 +106,7 @@ public class UserRegistrationConsumer {
 			WfRequest wfRequest = gson.fromJson(data.value(), WfRequest.class);
 			LOGGER.info("Consumed Request in Topic to create user in registration:: "
 					+ mapper.writeValueAsString(wfRequest));
+			userRegService.initiateCreateUserFlow(wfRequest.getApplicationId());
 		} catch (Exception e) {
 			LOGGER.error("Failed to process message in Topic to create user in registration.", e);
 		}
@@ -140,63 +145,4 @@ public class UserRegistrationConsumer {
 		}
 		return null;
 	}
-
-	private void sendNotification(UserRegistration userRegistration) {
-		List<String> sendTo = new ArrayList<String>() {
-			{
-				add(userRegistration.getEmail());
-			}
-		};
-
-		Map<String, Object> notificationObj = new HashMap<>();
-		notificationObj.put("mode", Constants.EMAIL);
-		notificationObj.put("deliveryType", Constants.MESSAGE);
-		notificationObj.put("config", new HashMap<String, Object>() {
-			{
-				put(Constants.SUBJECT, serverProperties.getUserRegistrationSubject());
-			}
-		});
-		notificationObj.put("ids", sendTo);
-		notificationObj.put(Constants.TEMPLATE,
-				notificationMessage(userRegistration.getStatus(), userRegistration.getRegistrationCode()));
-
-		if (notificationObj.get(Constants.TEMPLATE) != null) {
-			notificationUtil.sendNotification(sendTo, notificationObj,
-					PropertiesCache.getInstance().getProperty(Constants.SENDER_MAIL),
-					PropertiesCache.getInstance().getProperty(Constants.NOTIFICATION_HOST)
-							+ PropertiesCache.getInstance().getProperty(Constants.NOTIFICATION_ENDPOINT));
-		}
-	}
-
-	private Map<String, Object> notificationMessage(String status, String regCode) {
-		Map<String, Object> template = new HashMap<>();
-		template.put(Constants.ID, Constants.USER_REGISTERATION_TEMPLATE);
-		Map<String, Object> params = new HashMap<>();
-		params.put(Constants.STATUS, serverProperties.getUserRegistrationStatus().replace("{status}", status));
-		params.put(Constants.TITLE, serverProperties.getUserRegistrationTitle().replace("{status}", status));
-		template.put("params", params);
-		switch (status) {
-		case "WF_INITIATED":
-			params.put(Constants.TITLE, serverProperties.getUserRegistrationThankyouMessage());
-			params.put(Constants.DESCRIPTION, serverProperties.getUserRegistrationInitiatedMessage()
-					.replace("{regCode}", "<b>" + regCode + "</b>"));
-			break;
-		case "WF_APPROVED":
-			params.put(Constants.DESCRIPTION, serverProperties.getUserRegistrationApprovedMessage());
-			params.put("btn-url", serverProperties.getUserRegistrationDomainName());
-			params.put("btn-name", serverProperties.getUserRegisterationButtonName());
-			break;
-		case "WF_DENIED":
-			break;
-		case "FAILED":
-			params.put(Constants.STATUS, serverProperties.getUserRegistrationFailedMessage());
-			break;
-
-		default:
-			template = null;
-			break;
-		}
-		return template;
-	}
-
 }

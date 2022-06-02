@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
@@ -38,7 +39,7 @@ import org.sunbird.portal.department.model.DeptPublicInfo;
 import org.sunbird.user.registration.model.UserRegistration;
 import org.sunbird.user.registration.model.UserRegistrationInfo;
 import org.sunbird.user.registration.util.UserRegistrationStatus;
-import org.sunbird.user.registration.util.Utility;
+import org.sunbird.user.service.UserUtilityService;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -64,6 +65,9 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 	@Autowired
 	RestTemplate restTemplate;
 
+	@Autowired
+	UserUtilityService userUtilityService;
+
 	@Override
 	public SBApiResponse registerUser(UserRegistrationInfo userRegInfo) {
 		SBApiResponse response = createDefaultResponse(Constants.USER_REGISTRATION_REGISTER_API);
@@ -75,6 +79,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 				} else {
 					// verify the given email exist in ES Server
 					UserRegistration regDocument = getUserRegistrationDocument(new HashMap<String, Object>() {
+						private static final long serialVersionUID = 1L;
 						{
 							put(Constants.EMAIL, userRegInfo.getEmail());
 						}
@@ -84,7 +89,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 							|| UserRegistrationStatus.FAILED.name().equalsIgnoreCase(regDocument.getStatus())) {
 						// create / update the doc in ES
 						RestStatus status = null;
-						if(regDocument == null) {
+						if (regDocument == null) {
 							regDocument = getRegistrationObject(userRegInfo);
 							status = indexerService.addEntity(serverProperties.getUserRegistrationIndex(),
 									serverProperties.getEsProfileIndexType(), regDocument.getRegistrationCode(),
@@ -95,10 +100,15 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 									serverProperties.getEsProfileIndexType(), regDocument.getRegistrationCode(),
 									mapper.convertValue(regDocument, Map.class));
 						}
-						
+
 						if (status.equals(RestStatus.CREATED) || status.equals(RestStatus.OK)) {
-							// fire Kafka topic event
-							kafkaProducer.push(serverProperties.getUserRegistrationTopic(), regDocument);
+							if (isPreApprovedDomain(regDocument.getEmail())) {
+								// Fire createUser event
+								kafkaProducer.push(serverProperties.getUserRegistrationCreateUserTopic(), regDocument);
+							} else {
+								// Fire register event
+								kafkaProducer.push(serverProperties.getUserRegistrationTopic(), regDocument);
+							}
 							response.setResponseCode(HttpStatus.ACCEPTED);
 							response.getResult().put(Constants.RESULT, regDocument);
 						} else {
@@ -197,6 +207,19 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 		return response;
 	}
 
+	public void initiateCreateUserFlow(String registrationCode) {
+		try {
+			/**
+			 * 1. Create User 2. Read created User 3. Update User 4. Create NodeBB user Id
+			 * 5. Assign Role 6. Reset Password and get activation link
+			 */
+			LOGGER.info("Initiated User Creation flow for Reg. Code :: " + registrationCode);
+
+		} catch (Exception e) {
+			LOGGER.error("Failed to process user create flow.", e);
+		}
+	}
+
 	private SBApiResponse createDefaultResponse(String api) {
 		SBApiResponse response = new SBApiResponse();
 		response.setId(api);
@@ -236,7 +259,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 			str.append("Failed to Register User Details. Missing Params - [").append(errList.toString()).append("]");
 		}
 		// email Validation
-		if (StringUtils.isNotBlank(userRegInfo.getEmail()) && !Utility.emailValidation(userRegInfo.getEmail())) {
+		if (StringUtils.isNotBlank(userRegInfo.getEmail()) && !emailValidation(userRegInfo.getEmail())) {
 			str.setLength(0);
 			str.append("Invalid email id");
 		}
@@ -328,5 +351,28 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 			throw new ApplicationLogicError("Sunbird Service ERROR: ", e);
 		}
 		return true;
+	}
+
+	/**
+	 * Check the email id is valid or not
+	 * 
+	 * @param email String
+	 * @return Boolean
+	 */
+	public Boolean emailValidation(String email) {
+		String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\." + "[a-zA-Z0-9_+&*-]+)*@" + "(?:[a-zA-Z0-9-]+\\.)+[a-z"
+				+ "A-Z]{2,7}$";
+		Boolean retValue = Boolean.FALSE;
+		Pattern pat = Pattern.compile(emailRegex);
+		if (pat.matcher(email).matches()) {
+			String emailDomain = email.split("@")[1];
+			retValue = serverProperties.getUserRegistrationDomain().contains(emailDomain)
+					|| serverProperties.getUserRegistrationPreApprovedDomainList().contains(emailDomain);
+		}
+		return retValue;
+	}
+
+	private Boolean isPreApprovedDomain(String email) {
+		return serverProperties.getUserRegistrationPreApprovedDomainList().contains(email.split("@")[1]);
 	}
 }
