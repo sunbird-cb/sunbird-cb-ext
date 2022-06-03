@@ -9,13 +9,14 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.sunbird.cassandra.utils.CassandraOperation;
 import org.sunbird.common.model.SearchUserApiContent;
@@ -26,7 +27,6 @@ import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.core.exception.ApplicationLogicError;
-import org.sunbird.core.logger.CbExtLogger;
 import org.sunbird.telemetry.model.LastLoginInfo;
 import org.sunbird.user.registration.model.UserRegistration;
 import org.sunbird.user.util.TelemetryUtils;
@@ -58,7 +58,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 	@Autowired
 	CbExtServerProperties serverConfig;
 
-	private CbExtLogger logger = new CbExtLogger(getClass().getName());
+	private Logger logger = LoggerFactory.getLogger(UserUtilityServiceImpl.class);
 
 	public boolean validateUser(String userId) {
 		return validateUser(StringUtils.EMPTY, userId);
@@ -226,33 +226,14 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 						StringUtils.EMPTY);
 				if (!CollectionUtils.isEmpty(userData)) {
 					userRegistration.setUserName((String) userData.get(Constants.USER_NAME));
-					retValue = createNodeBBUser(userRegistration);
+					retValue = updateUser(userRegistration);
 				}
 			}
-		} catch (RestClientException e) {
-			logger.info(e.getMessage());
+		} catch (Exception e) {
+			logger.error("Failed to run the create user flow. UserRegCode : " + userRegistration.getRegistrationCode(),
+					e);
 		}
 		printMethodExecutionResult("Create User", userRegistration.toMininumString(), retValue);
-		return retValue;
-	}
-
-	@Override
-	public boolean createNodeBBUser(UserRegistration userRegistration) {
-		boolean retValue = false;
-		Map<String, Object> request = new HashMap<>();
-		Map<String, Object> requestBody = new HashMap<String, Object>();
-		requestBody.put(Constants.USER_NAME.toLowerCase(), userRegistration.getUserName());
-		requestBody.put(Constants.IDENTIFIER, userRegistration.getUserId());
-		requestBody.put(Constants.USER_FULL_NAME.toLowerCase(),
-				userRegistration.getFirstName() + " " + userRegistration.getLastName());
-		request.put(Constants.REQUEST, requestBody);
-
-		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPost(
-				props.getDiscussionHubHost() + props.getDiscussionHubCreateUserPath(), request, getDefaultHeaders());
-		if (Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
-			retValue = updateUser(userRegistration);
-		}
-		printMethodExecutionResult("Create NodeBB User", userRegistration.toMininumString(), retValue);
 		return retValue;
 	}
 
@@ -285,9 +266,46 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService
 				.fetchResultUsingPatch(props.getSbUrl() + props.getLmsUserUpdatePath(), request, getDefaultHeaders());
 		if (Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
-			retValue = getActivationLink(userRegistration);
+			retValue = assignRole(userRegistration);
 		}
 		printMethodExecutionResult("UpdateUser", userRegistration.toMininumString(), retValue);
+		return retValue;
+	}
+
+	public boolean assignRole(UserRegistration userRegistration) {
+		boolean retValue = false;
+		Map<String, Object> request = new HashMap<>();
+		Map<String, Object> requestBody = new HashMap<String, Object>();
+		requestBody.put(Constants.ORGANIZATION_ID, userRegistration.getDeptId());
+		requestBody.put(Constants.USER_ID, userRegistration.getUserId());
+		requestBody.put(Constants.ROLES, Arrays.asList(Constants.PUBLIC));
+		request.put(Constants.REQUEST, requestBody);
+		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService
+				.fetchResultUsingPost(props.getSbUrl() + props.getSbAssignRolePath(), request, getDefaultHeaders());
+		if (Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
+			retValue = createNodeBBUser(userRegistration);
+		}
+		printMethodExecutionResult("AssignRole", userRegistration.toMininumString(), retValue);
+		return retValue;
+	}
+	
+	@Override
+	public boolean createNodeBBUser(UserRegistration userRegistration) {
+		boolean retValue = false;
+		Map<String, Object> request = new HashMap<>();
+		Map<String, Object> requestBody = new HashMap<String, Object>();
+		requestBody.put(Constants.USER_NAME.toLowerCase(), userRegistration.getUserName());
+		requestBody.put(Constants.IDENTIFIER, userRegistration.getUserId());
+		requestBody.put(Constants.USER_FULL_NAME.toLowerCase(),
+				userRegistration.getFirstName() + " " + userRegistration.getLastName());
+		request.put(Constants.REQUEST, requestBody);
+
+		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPost(
+				props.getDiscussionHubHost() + props.getDiscussionHubCreateUserPath(), request, getDefaultHeaders());
+		if (Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
+			retValue = getActivationLink(userRegistration);
+		}
+		printMethodExecutionResult("Create NodeBB User", userRegistration.toMininumString(), retValue);
 		return retValue;
 	}
 
@@ -295,9 +313,11 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 	public boolean getActivationLink(UserRegistration userRegistration) {
 		boolean retValue = false;
 		Map<String, Object> request = new HashMap<String, Object>();
-		request.put(Constants.USER_ID, userRegistration.getUserId());
-		request.put(Constants.KEY, Constants.EMAIL);
-		request.put(Constants.TYPE, Constants.EMAIL);
+		Map<String, Object> requestBody = new HashMap<String, Object>();
+		requestBody.put(Constants.USER_ID, userRegistration.getUserId());
+		requestBody.put(Constants.KEY, Constants.EMAIL);
+		requestBody.put(Constants.TYPE, Constants.EMAIL);
+		request.put(Constants.REQUEST, requestBody);
 		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService
 				.fetchResultUsingPost(props.getSbUrl() + props.getSbResetPasswordPath(), request, getDefaultHeaders());
 		if (Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
@@ -331,26 +351,9 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPost(
 				props.getSbUrl() + props.getSbSendNotificationEmailPath(), request, getDefaultHeaders());
 		if (Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
-			retValue = assignRole(userRegistration);
-		}
-		printMethodExecutionResult("SendWelcomeEmail", userRegistration.toMininumString(), retValue);
-		return retValue;
-	}
-
-	public boolean assignRole(UserRegistration userRegistration) {
-		boolean retValue = false;
-		Map<String, Object> request = new HashMap<>();
-		Map<String, Object> requestBody = new HashMap<String, Object>();
-		requestBody.put(Constants.ORGANIZATION_ID, userRegistration.getDeptId());
-		requestBody.put(Constants.USER_ID, userRegistration.getUserId());
-		requestBody.put(Constants.ROLES, Arrays.asList(Constants.PUBLIC));
-		request.put(Constants.REQUEST, requestBody);
-		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService
-				.fetchResultUsingPost(props.getSbUrl() + props.getSbAssignRolePath(), request, getDefaultHeaders());
-		if (Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
 			retValue = true;
 		}
-		printMethodExecutionResult("AssignRole", userRegistration.toMininumString(), retValue);
+		printMethodExecutionResult("SendWelcomeEmail", userRegistration.toMininumString(), retValue);
 		return retValue;
 	}
 

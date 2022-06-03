@@ -121,7 +121,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 					}
 				}
 			} catch (Exception e) {
-				LOGGER.error(String.format("Exception in %s : %s", "registerUser", e.getMessage()));
+				LOGGER.error(String.format("Exception in %s : %s", "registerUser", e.getMessage()), e);
 				errMsg = "Failed to process message. Exception: " + e.getMessage();
 			}
 		}
