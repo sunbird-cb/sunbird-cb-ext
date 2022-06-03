@@ -136,15 +136,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 	@Override
 	public SBApiResponse getUserRegistrationDetails(String registrationCode) {
 		SBApiResponse response = createDefaultResponse(Constants.USER_REGISTRATION_RETRIEVE_API);
-		UserRegistration userRegistration = null;
-		try {
-			Map<String, Object> esObject = indexerService.readEntity(serverProperties.getUserRegistrationIndex(),
-					serverProperties.getEsProfileIndexType(), registrationCode);
-			userRegistration = mapper.convertValue(esObject, UserRegistration.class);
-		} catch (Exception e) {
-			LOGGER.error(String.format("Exception in %s : %s", "getUserRegistrationDetails", e.getMessage()));
-		}
-
+		UserRegistration userRegistration = getUserRegistrationForRegCode(registrationCode);
 		if (userRegistration != null) {
 			response.getResult().put(Constants.RESULT, userRegistration);
 		} else {
@@ -214,7 +206,11 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 			 * 5. Assign Role 6. Reset Password and get activation link
 			 */
 			LOGGER.info("Initiated User Creation flow for Reg. Code :: " + registrationCode);
-
+			if (userUtilityService.createUser(getUserRegistrationForRegCode(registrationCode))) {
+				LOGGER.info("Successfully completed user creation flow.");
+			} else {
+				// TODO - Need to handle error cases
+			}
 		} catch (Exception e) {
 			LOGGER.error("Failed to process user create flow.", e);
 		}
@@ -374,5 +370,16 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 
 	private Boolean isPreApprovedDomain(String email) {
 		return serverProperties.getUserRegistrationPreApprovedDomainList().contains(email.split("@")[1]);
+	}
+
+	private UserRegistration getUserRegistrationForRegCode(String registrationCode) {
+		try {
+			Map<String, Object> esObject = indexerService.readEntity(serverProperties.getUserRegistrationIndex(),
+					serverProperties.getEsProfileIndexType(), registrationCode);
+			return mapper.convertValue(esObject, UserRegistration.class);
+		} catch (Exception e) {
+			LOGGER.error(String.format("Exception in %s : %s", "getUserRegistrationDetails", e.getMessage()));
+		}
+		return null;
 	}
 }

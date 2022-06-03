@@ -24,7 +24,7 @@ public interface UserUtilityService {
 
 	boolean updateUser(UserRegistration userRegistration);
 
-	String getActivationLink(UserRegistration userRegistration);
+	boolean getActivationLink(UserRegistration userRegistration);
 
 	boolean createNodeBBUser(UserRegistration userRegistration);
 }
