@@ -283,7 +283,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		requestBody.put(Constants.PROFILE_DETAILS, profileDetails);
 		request.put(Constants.REQUEST, requestBody);
 		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService
-				.fetchResultUsingPost(props.getSbUrl() + props.getLmsUserUpdatePath(), request, getDefaultHeaders());
+				.fetchResultUsingPatch(props.getSbUrl() + props.getLmsUserUpdatePath(), request, getDefaultHeaders());
 		if (Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
 			retValue = getActivationLink(userRegistration);
 		}
