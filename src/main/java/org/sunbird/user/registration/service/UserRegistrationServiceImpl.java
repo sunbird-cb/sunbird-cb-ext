@@ -104,7 +104,8 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 						if (status.equals(RestStatus.CREATED) || status.equals(RestStatus.OK)) {
 							if (isPreApprovedDomain(regDocument.getEmail())) {
 								// Fire createUser event
-								kafkaProducer.push(serverProperties.getUserRegistrationCreateUserTopic(), regDocument);
+								kafkaProducer.push(serverProperties.getUserRegistrationAutoCreateUserTopic(),
+										regDocument);
 							} else {
 								// Fire register event
 								kafkaProducer.push(serverProperties.getUserRegistrationTopic(), regDocument);
@@ -209,7 +210,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 			if (userUtilityService.createUser(getUserRegistrationForRegCode(registrationCode))) {
 				LOGGER.info("Successfully completed user creation flow.");
 			} else {
-				// TODO - Need to handle error cases
+				LOGGER.error("Failed to create user for Reg.Code :: " + registrationCode);
 			}
 		} catch (Exception e) {
 			LOGGER.error("Failed to process user create flow.", e);

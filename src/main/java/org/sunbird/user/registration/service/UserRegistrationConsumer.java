@@ -112,6 +112,20 @@ public class UserRegistrationConsumer {
 		}
 	}
 
+	@KafkaListener(topicPartitions = {
+			@TopicPartition(topic = "${kafka.topics.user.registration.auto.createUser}", partitions = { "0", "1", "2",
+					"3" }) })
+	public void processAutoCreateUserEvent(ConsumerRecord<String, String> data) {
+		try {
+			UserRegistration userRegistration = gson.fromJson(data.value(), UserRegistration.class);
+			LOGGER.info("Consumed Request in Topic to auto create user in registration:: "
+					+ mapper.writeValueAsString(userRegistration));
+			userRegService.initiateCreateUserFlow(userRegistration.getRegistrationCode());
+		} catch (Exception e) {
+			LOGGER.error("Failed to process message in Topic to auto create user in registration.", e);
+		}
+	}
+
 	private WfRequest wfRequestObj(UserRegistration userRegistration) {
 		WfRequest wfRequest = new WfRequest();
 		wfRequest.setState(Constants.INITIATE);

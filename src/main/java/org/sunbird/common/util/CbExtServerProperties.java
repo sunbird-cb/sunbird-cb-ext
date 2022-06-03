@@ -240,8 +240,8 @@ public class CbExtServerProperties {
 	@Value("${kafka.topics.user.registration.register.event}")
 	private String userRegistrationTopic;
 	
-	@Value("${kafka.topics.user.registration.createUser}")
-	private String userRegistrationCreateUserTopic;
+	@Value("${kafka.topics.user.registration.auto.createUser}")
+	private String userRegistrationAutoCreateUserTopic;
 
 	@Value("${user.registration.domain}")
 	private String userRegistrationDomain;
@@ -932,12 +932,12 @@ public class CbExtServerProperties {
 		this.userRegistrationTopic = userRegistrationTopic;
 	}
 	
-	public String getUserRegistrationCreateUserTopic() {
-		return userRegistrationCreateUserTopic;
+	public String getUserRegistrationAutoCreateUserTopic() {
+		return userRegistrationAutoCreateUserTopic;
 	}
 
-	public void setUserRegistrationCreateUserTopic(String userRegistrationCreateUserTopic) {
-		this.userRegistrationCreateUserTopic = userRegistrationCreateUserTopic;
+	public void setUserRegistrationAutoCreateUserTopic(String userRegistrationAutoCreateUserTopic) {
+		this.userRegistrationAutoCreateUserTopic = userRegistrationAutoCreateUserTopic;
 	}
 
 	public List<String> getUserRegistrationDomain() {
