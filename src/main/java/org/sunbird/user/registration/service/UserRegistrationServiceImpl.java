@@ -207,11 +207,28 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 			 * 5. Assign Role 6. Reset Password and get activation link
 			 */
 			LOGGER.info("Initiated User Creation flow for Reg. Code :: " + registrationCode);
-			if (userUtilityService.createUser(getUserRegistrationForRegCode(registrationCode))) {
+			UserRegistration userReg = getUserRegistrationForRegCode(registrationCode);
+			UserRegistrationStatus regStatus = UserRegistrationStatus.WF_APPROVED;
+			if (userUtilityService.createUser(userReg)) {
 				LOGGER.info("Successfully completed user creation flow.");
 			} else {
 				LOGGER.error("Failed to create user for Reg.Code :: " + registrationCode);
+				regStatus = UserRegistrationStatus.FAILED;
 			}
+
+			userReg.setStatus(regStatus.name());
+			RestStatus status = indexerService.updateEntity(serverProperties.getUserRegistrationIndex(),
+					serverProperties.getEsProfileIndexType(), userReg.getRegistrationCode(),
+					mapper.convertValue(userReg, Map.class));
+
+			StringBuilder strBuilder = new StringBuilder();
+			strBuilder.append("UserRegistration Code :: '").append(userReg.getRegistrationCode());
+			strBuilder.append("'. Create User Flow is ")
+					.append(regStatus == UserRegistrationStatus.WF_APPROVED ? " successful" : " failed");
+			strBuilder.append(". ES object update operation is ")
+					.append(status == RestStatus.OK ? " successful." : " failed.");
+
+			LOGGER.info(strBuilder.toString());
 		} catch (Exception e) {
 			LOGGER.error("Failed to process user create flow.", e);
 		}
