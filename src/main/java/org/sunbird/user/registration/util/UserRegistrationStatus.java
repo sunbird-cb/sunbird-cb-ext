@@ -8,22 +8,16 @@ package org.sunbird.user.registration.util;
  */
 public enum UserRegistrationStatus {
 
-	CREATED(1, "Created"), WF_INITIATED(2, "Initiated"), WF_APPROVED(3, "Approved"), WF_DENIED(4, "Denied"), FAILED(5,
-			"Failed");
+	CREATED(1), WF_INITIATED(2), WF_APPROVED(3), WF_DENIED(4), FAILED(5);
 
 	private int status = 0;
-	private String name;
 
-	UserRegistrationStatus(int status, String name) {
+	UserRegistrationStatus(int status) {
 		this.status = status;
-		this.name = name;
 	}
 
 	public int getStatus() {
 		return status;
 	}
 
-	public String getName() {
-		return name;
-	}
 }

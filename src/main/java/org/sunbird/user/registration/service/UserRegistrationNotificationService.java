@@ -1,6 +1,5 @@
 package org.sunbird.user.registration.service;
 
-import org.springframework.stereotype.Service;
 import org.sunbird.user.registration.model.UserRegistration;
 
 /**

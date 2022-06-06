@@ -12,17 +12,16 @@ import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.common.util.NotificationUtil;
 import org.sunbird.user.registration.model.UserRegistration;
-import org.sunbird.user.registration.util.UserRegistrationStatus;
 
 @Service
 public class UserRegistrationNotificationServiceImpl implements UserRegistrationNotificationService {
 
 	@Autowired
 	CbExtServerProperties serverProperties;
-	
+
 	@Autowired
 	NotificationUtil notificationUtil;
-	
+
 	@Override
 	public void sendNotification(UserRegistration userRegistration) {
 		List<String> sendTo = new ArrayList<String>() {
@@ -34,14 +33,14 @@ public class UserRegistrationNotificationServiceImpl implements UserRegistration
 		};
 
 		Map<String, Object> notificationObj = new HashMap<>();
-		notificationObj.put("mode", Constants.EMAIL);
-		notificationObj.put("deliveryType", Constants.MESSAGE);
-		notificationObj.put("config", new HashMap<String, Object>() {
+		notificationObj.put(Constants.MODE, Constants.EMAIL);
+		notificationObj.put(Constants.DELIVERY_TYPE, Constants.MESSAGE);
+		notificationObj.put(Constants.CONFIG, new HashMap<String, Object>() {
 			{
 				put(Constants.SUBJECT, serverProperties.getUserRegistrationSubject());
 			}
 		});
-		notificationObj.put("ids", sendTo);
+		notificationObj.put(Constants.IDS, sendTo);
 		notificationObj.put(Constants.TEMPLATE,
 				notificationMessage(userRegistration.getStatus(), userRegistration.getRegistrationCode()));
 
@@ -49,43 +48,43 @@ public class UserRegistrationNotificationServiceImpl implements UserRegistration
 			notificationUtil.sendNotification(Arrays.asList(notificationObj));
 		}
 	}
-	
+
 	private Map<String, Object> notificationMessage(String status, String regCode) {
 		Map<String, Object> template = new HashMap<>();
 		template.put(Constants.ID, Constants.USER_REGISTERATION_TEMPLATE);
 		Map<String, Object> params = new HashMap<>();
 
-		template.put("params", params);
+		template.put(Constants.PARAMS, params);
 		switch (status) {
 		case "WF_INITIATED":
 			params.put(Constants.TITLE, serverProperties.getUserRegistrationThankyouMessage());
-			params.put(Constants.STATUS, serverProperties.getUserRegistrationStatus().replace("{status}",
-					UserRegistrationStatus.WF_INITIATED.getName()));
-			params.put(Constants.TITLE, serverProperties.getUserRegistrationTitle().replace("{status}",
-					UserRegistrationStatus.WF_INITIATED.getName()));
+			params.put(Constants.STATUS,
+					serverProperties.getUserRegistrationStatus().replace(Constants.STATUS_PARAM, "initiated"));
+			params.put(Constants.TITLE,
+					serverProperties.getUserRegistrationTitle().replace(Constants.STATUS_PARAM, "initiated"));
 			params.put(Constants.DESCRIPTION, serverProperties.getUserRegistrationInitiatedMessage()
-					.replace("{regCode}", "<b>" + regCode + "</b>"));
+					.replace(Constants.REG_CODE_PARAM, "<b>" + regCode + "</b>"));
 			break;
 		case "WF_APPROVED":
-			params.put(Constants.STATUS, serverProperties.getUserRegistrationStatus().replace("{status}",
-					UserRegistrationStatus.WF_APPROVED.getName()));
-			params.put(Constants.TITLE, serverProperties.getUserRegistrationTitle().replace("{status}",
-					UserRegistrationStatus.WF_APPROVED.getName()));
+			params.put(Constants.STATUS,
+					serverProperties.getUserRegistrationStatus().replace(Constants.STATUS_PARAM, "approved"));
+			params.put(Constants.TITLE,
+					serverProperties.getUserRegistrationTitle().replace(Constants.STATUS_PARAM, "approved"));
 			params.put(Constants.DESCRIPTION, serverProperties.getUserRegistrationApprovedMessage());
-			params.put("btn-url", serverProperties.getUserRegistrationDomainName());
-			params.put("btn-name", serverProperties.getUserRegisterationButtonName());
+			params.put(Constants.BUTTON_URL, serverProperties.getUserRegistrationDomainName());
+			params.put(Constants.BUTTON_NAME, serverProperties.getUserRegisterationButtonName());
 			break;
 		case "WF_DENIED":
-			params.put(Constants.STATUS, serverProperties.getUserRegistrationStatus().replace("{status}",
-					UserRegistrationStatus.WF_DENIED.getName()));
-			params.put(Constants.TITLE, serverProperties.getUserRegistrationTitle().replace("{status}",
-					UserRegistrationStatus.WF_DENIED.getName()));
+			params.put(Constants.STATUS,
+					serverProperties.getUserRegistrationStatus().replace(Constants.STATUS_PARAM, "denied"));
+			params.put(Constants.TITLE,
+					serverProperties.getUserRegistrationTitle().replace(Constants.STATUS_PARAM, "denied"));
 			break;
 		case "FAILED":
-			params.put(Constants.STATUS, serverProperties.getUserRegistrationStatus().replace("{status}",
-					UserRegistrationStatus.FAILED.getName()));
-			params.put(Constants.TITLE, serverProperties.getUserRegistrationTitle().replace("{status}",
-					UserRegistrationStatus.FAILED.getName()));
+			params.put(Constants.STATUS,
+					serverProperties.getUserRegistrationStatus().replace(Constants.STATUS_PARAM, "failed"));
+			params.put(Constants.TITLE,
+					serverProperties.getUserRegistrationTitle().replace(Constants.STATUS_PARAM, "failed"));
 			params.put(Constants.STATUS, serverProperties.getUserRegistrationFailedMessage());
 			break;
 

@@ -394,6 +394,21 @@ public class Constants {
 	public static final String DESCRIPTION = "description";
 	public static final String TEMPLATE = "template";
 	public static final String USER_REGISTERATION_TEMPLATE = "user-registration";
+	public static final String STATUS_PARAM = "{status}";
+	public static final String REG_CODE_PARAM = "{regCode}";
+	public static final String BUTTON_URL = "btn-url";
+	public static final String BUTTON_NAME = "btn-name";
+
+	// notification reuest params
+	public static final String MODE = "mode";
+	public static final String DELIVERY_TYPE = "deliveryType";
+	public static final String CONFIG = "config";
+	public static final String IDS = "ids";
+
+	// wf status
+	public static final String INITIATED = "initiated";
+	public static final String APPROVED = "approved";
+	public static final String DENIED = "denied";
 
 	public static final String EMAIL_EXIST_ERROR = "Email id already registered";
 
