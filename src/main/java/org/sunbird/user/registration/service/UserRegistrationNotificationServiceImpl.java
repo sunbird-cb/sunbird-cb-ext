@@ -59,32 +59,32 @@ public class UserRegistrationNotificationServiceImpl implements UserRegistration
 		case "WF_INITIATED":
 			params.put(Constants.TITLE, serverProperties.getUserRegistrationThankyouMessage());
 			params.put(Constants.STATUS,
-					serverProperties.getUserRegistrationStatus().replace(Constants.STATUS_PARAM, "initiated"));
+					serverProperties.getUserRegistrationStatus().replace(Constants.STATUS_PARAM, Constants.INITIATED));
 			params.put(Constants.TITLE,
-					serverProperties.getUserRegistrationTitle().replace(Constants.STATUS_PARAM, "initiated"));
+					serverProperties.getUserRegistrationTitle().replace(Constants.STATUS_PARAM, Constants.INITIATED));
 			params.put(Constants.DESCRIPTION, serverProperties.getUserRegistrationInitiatedMessage()
 					.replace(Constants.REG_CODE_PARAM, "<b>" + regCode + "</b>"));
 			break;
 		case "WF_APPROVED":
 			params.put(Constants.STATUS,
-					serverProperties.getUserRegistrationStatus().replace(Constants.STATUS_PARAM, "approved"));
+					serverProperties.getUserRegistrationStatus().replace(Constants.STATUS_PARAM, Constants.APPROVED));
 			params.put(Constants.TITLE,
-					serverProperties.getUserRegistrationTitle().replace(Constants.STATUS_PARAM, "approved"));
+					serverProperties.getUserRegistrationTitle().replace(Constants.STATUS_PARAM, Constants.APPROVED));
 			params.put(Constants.DESCRIPTION, serverProperties.getUserRegistrationApprovedMessage());
 			params.put(Constants.BUTTON_URL, serverProperties.getUserRegistrationDomainName());
 			params.put(Constants.BUTTON_NAME, serverProperties.getUserRegisterationButtonName());
 			break;
 		case "WF_DENIED":
 			params.put(Constants.STATUS,
-					serverProperties.getUserRegistrationStatus().replace(Constants.STATUS_PARAM, "denied"));
+					serverProperties.getUserRegistrationStatus().replace(Constants.STATUS_PARAM, Constants.DENIED));
 			params.put(Constants.TITLE,
-					serverProperties.getUserRegistrationTitle().replace(Constants.STATUS_PARAM, "denied"));
+					serverProperties.getUserRegistrationTitle().replace(Constants.STATUS_PARAM, Constants.DENIED));
 			break;
 		case "FAILED":
-			params.put(Constants.STATUS,
-					serverProperties.getUserRegistrationStatus().replace(Constants.STATUS_PARAM, "failed"));
-			params.put(Constants.TITLE,
-					serverProperties.getUserRegistrationTitle().replace(Constants.STATUS_PARAM, "failed"));
+			params.put(Constants.STATUS, serverProperties.getUserRegistrationStatus().replace(Constants.STATUS_PARAM,
+					Constants.FAILED.toLowerCase()));
+			params.put(Constants.TITLE, serverProperties.getUserRegistrationTitle().replace(Constants.STATUS_PARAM,
+					Constants.FAILED.toLowerCase()));
 			params.put(Constants.STATUS, serverProperties.getUserRegistrationFailedMessage());
 			break;
 

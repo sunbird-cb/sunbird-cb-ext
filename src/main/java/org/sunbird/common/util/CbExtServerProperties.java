@@ -33,6 +33,9 @@ public class CbExtServerProperties {
 	@Value("${sb.service.url}")
 	private String sbUrl;
 
+	@Value("${sb.service.user.create.path}")
+	private String lmsUserCreatePath;
+	
 	@Value("${sunbird.user.search.endpoint}")
 	private String userSearchEndPoint;
 
@@ -237,8 +240,8 @@ public class CbExtServerProperties {
 	@Value("${kafka.topics.user.registration.register.event}")
 	private String userRegistrationTopic;
 	
-	@Value("${kafka.topics.user.registration.createUser}")
-	private String userRegistrationCreateUserTopic;
+	@Value("${kafka.topics.user.registration.auto.createUser}")
+	private String userRegistrationAutoCreateUserTopic;
 
 	@Value("${user.registration.domain}")
 	private String userRegistrationDomain;
@@ -279,7 +282,20 @@ public class CbExtServerProperties {
 	@Value("${user.registration.preApproved.domain}")
 	private String userRegistrationPreApprovedDomainList;
 	
+	@Value("${sb.discussion.hub.host}")
+	private String discussionHubHost;
 	
+	@Value("${sb.node.bb.user.create.path}")
+	private String discussionHubCreateUserPath;
+	
+	@Value("${sb.service.reset.password.path}")
+	private String sbResetPasswordPath;
+	
+	@Value("${sb.service.send.notify.email.path}")
+	private String sbSendNotificationEmailPath;
+	
+	@Value("${sb.service.assign.role.path}")
+	private String sbAssignRolePath;
 	
 	public String getUserAssessmentSubmissionDuration() {
 		return userAssessmentSubmissionDuration;
@@ -367,6 +383,14 @@ public class CbExtServerProperties {
 
 	public void setSbUrl(String sbUrl) {
 		this.sbUrl = sbUrl;
+	}
+
+	public String getLmsUserCreatePath() {
+		return lmsUserCreatePath;
+	}
+
+	public void setLmsUserCreatePath(String lmsUserCreatePath) {
+		this.lmsUserCreatePath = lmsUserCreatePath;
 	}
 
 	public String getSbHubGraphServiceUrl() {
@@ -908,12 +932,12 @@ public class CbExtServerProperties {
 		this.userRegistrationTopic = userRegistrationTopic;
 	}
 	
-	public String getUserRegistrationCreateUserTopic() {
-		return userRegistrationCreateUserTopic;
+	public String getUserRegistrationAutoCreateUserTopic() {
+		return userRegistrationAutoCreateUserTopic;
 	}
 
-	public void setUserRegistrationCreateUserTopic(String userRegistrationCreateUserTopic) {
-		this.userRegistrationCreateUserTopic = userRegistrationCreateUserTopic;
+	public void setUserRegistrationAutoCreateUserTopic(String userRegistrationAutoCreateUserTopic) {
+		this.userRegistrationAutoCreateUserTopic = userRegistrationAutoCreateUserTopic;
 	}
 
 	public List<String> getUserRegistrationDomain() {
@@ -1018,5 +1042,45 @@ public class CbExtServerProperties {
 
 	public void setUserRegistrationPreApprovedDomainList(String userRegistrationPreApprovedDomainList) {
 		this.userRegistrationPreApprovedDomainList = userRegistrationPreApprovedDomainList;
+	}
+
+	public String getDiscussionHubHost() {
+		return discussionHubHost;
+	}
+
+	public void setDiscussionHubHost(String discussionHubHost) {
+		this.discussionHubHost = discussionHubHost;
+	}
+
+	public String getDiscussionHubCreateUserPath() {
+		return discussionHubCreateUserPath;
+	}
+
+	public void setDiscussionHubCreateUserPath(String discussionHubCreateUserPath) {
+		this.discussionHubCreateUserPath = discussionHubCreateUserPath;
+	}
+
+	public String getSbResetPasswordPath() {
+		return sbResetPasswordPath;
+	}
+
+	public void setSbResetPasswordPath(String sbResetPasswordPath) {
+		this.sbResetPasswordPath = sbResetPasswordPath;
+	}
+
+	public String getSbSendNotificationEmailPath() {
+		return sbSendNotificationEmailPath;
+	}
+
+	public void setSbSendNotificationEmailPath(String sbSendNotificationEmailPath) {
+		this.sbSendNotificationEmailPath = sbSendNotificationEmailPath;
+	}
+
+	public String getSbAssignRolePath() {
+		return sbAssignRolePath;
+	}
+
+	public void setSbAssignRolePath(String sbAssignRolePath) {
+		this.sbAssignRolePath = sbAssignRolePath;
 	}
 }

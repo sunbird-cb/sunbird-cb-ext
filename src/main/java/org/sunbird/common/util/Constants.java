@@ -12,6 +12,7 @@ public class Constants {
 	public static final String LAST_NAME = "last_name";
 	public static final String MIDDLE_NAME = "middle_name";
 	public static final String FIRSTNAME = "firstName";
+	public static final String SURNAME = "surname";
 	public static final String LASTNAME = "lastName";
 	public static final String CONTACT_PHONE_NUMBER_OFFICE = "contact_phone_number_office";
 	public static final String CONTACT_PHONE_NUMBER_HOME = "contact_phone_number_home";
@@ -230,6 +231,7 @@ public class Constants {
 	public static final String VALUE = "value";
 	public static final String DEPT_NAME = "deptName";
 	public static final String PROFILE_DETAILS = "profileDetails";
+	public static final String PROFESSIONAL_DETAILS = "professionalDetails";
 	public static final String CONTENT_TYPE = "Content-Type";
 	public static final String APPLICATION_JSON = "application/json";
 	public static final String OSID = "osid";
@@ -283,7 +285,6 @@ public class Constants {
 	public static final String EID = "AUDIT";
 	public static final String PDATA_ID = "dev.sunbird.cb.ext.service";
 	public static final String PDATA_PID = "sunbird-cb-ext-service";
-	public static final String TYPE = "WorkOrder";
 	public static final String CURRENT_STATE = "FirstLogin";
 	public static final String LOGIN_TIME = "login_time";
 	public static final List<String> PROPS = Collections.unmodifiableList(Arrays.asList("WAT"));
@@ -400,7 +401,6 @@ public class Constants {
 	public static final String BUTTON_NAME = "btn-name";
 
 	// notification reuest params
-	public static final String MODE = "mode";
 	public static final String DELIVERY_TYPE = "deliveryType";
 	public static final String CONFIG = "config";
 	public static final String IDS = "ids";
@@ -411,8 +411,30 @@ public class Constants {
 	public static final String DENIED = "denied";
 
 	public static final String EMAIL_EXIST_ERROR = "Email id already registered";
+	public static final String EMAIL_VERIFIED = "emailVerified";
+	public static final String USER_NAME = "userName";
+	public static final String USER_FULL_NAME = "fullName";
+
+	public static final String MANDATORY_FIELDS_EXISTS = "mandatoryFieldsExists";
+	public static final String KEY = "key";
+	public static final String TYPE = "type";
+	public static final String LINK = "link";
+	public static final String ALLOWED_LOGGING = "allowedLoging";
 
 	public static final String API_VERSION_1 = "1.0";
+	public static final String BODY = "body";
+	public static final String EMAIL_TEMPLATE_TYPE = "emailTemplateType";
+	public static final String MODE = "mode";
+	public static final String ORG_NAME = "orgName";
+	public static final String RECIPIENT_EMAILS = "recipientEmails";
+	public static final String SET_PASSWORD_LINK = "setPasswordLink";
+	public static final String WELCOME_MESSAGE = "welcomeMessage";
+	public static final String HELLO = "Hello";
+	public static final String WELCOME_EMAIL_TEMPLATE_TYPE = "iGotWelcome";
+	public static final String WELCOME_EMAIL_MESSAGE = "Welcome Email";
+	public static final String ORGANIZATION_ID = "organisationId";
+	public static final String ROLES = "roles";
+	public static final String PUBLIC = "PUBLIC";
 
 	private Constants() {
 		throw new IllegalStateException("Utility class");
