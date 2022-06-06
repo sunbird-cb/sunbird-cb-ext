@@ -33,6 +33,9 @@ public class CbExtServerProperties {
 	@Value("${sb.service.url}")
 	private String sbUrl;
 
+	@Value("${sb.service.user.create.path}")
+	private String lmsUserCreatePath;
+	
 	@Value("${sunbird.user.search.endpoint}")
 	private String userSearchEndPoint;
 
@@ -228,6 +231,72 @@ public class CbExtServerProperties {
 	@Value("${user.assessment.submission.duration}")
 	private String userAssessmentSubmissionDuration;
 
+	@Value("${es.user.registration.index}")
+	private String userRegistrationIndex;
+
+	@Value("${user.registration.code.prefix}")
+	private String userRegCodePrefix;
+
+	@Value("${kafka.topics.user.registration.register.event}")
+	private String userRegistrationTopic;
+	
+	@Value("${kafka.topics.user.registration.auto.createUser}")
+	private String userRegistrationAutoCreateUserTopic;
+
+	@Value("${user.registration.domain}")
+	private String userRegistrationDomain;
+
+	@Value("${user.registration.dept.exclude.list}")
+	private String userRegistrationDeptExcludeList;
+
+	@Value("${user.registration.workflow.service.name}")
+	private String userRegistrationWorkFlowServiceName;
+
+	@Value("${user.registration.subject}")
+	private String userRegistrationSubject;
+
+	@Value("${user.registration.title}")
+	private String userRegistrationTitle;
+
+	@Value("${user.registration.status}")
+	private String userRegistrationStatus;
+
+	@Value("${user.registration.thankyou.message}")
+	private String userRegistrationThankyouMessage;
+
+	@Value("${user.registration.initiated.message}")
+	private String userRegistrationInitiatedMessage;
+
+	@Value("${user.registration.approved.message}")
+	private String userRegistrationApprovedMessage;
+
+	@Value("${user.registration.failed.message}")
+	private String userRegistrationFailedMessage;
+
+	@Value("${user.registeration.route.button.name}")
+	private String userRegisterationButtonName;
+	
+	@Value("${user.registration.domain.name}")
+	private String userRegistrationDomainName;
+
+	@Value("${user.registration.preApproved.domain}")
+	private String userRegistrationPreApprovedDomainList;
+	
+	@Value("${sb.discussion.hub.host}")
+	private String discussionHubHost;
+	
+	@Value("${sb.node.bb.user.create.path}")
+	private String discussionHubCreateUserPath;
+	
+	@Value("${sb.service.reset.password.path}")
+	private String sbResetPasswordPath;
+	
+	@Value("${sb.service.send.notify.email.path}")
+	private String sbSendNotificationEmailPath;
+	
+	@Value("${sb.service.assign.role.path}")
+	private String sbAssignRolePath;
+	
 	public String getUserAssessmentSubmissionDuration() {
 		return userAssessmentSubmissionDuration;
 	}
@@ -314,6 +383,14 @@ public class CbExtServerProperties {
 
 	public void setSbUrl(String sbUrl) {
 		this.sbUrl = sbUrl;
+	}
+
+	public String getLmsUserCreatePath() {
+		return lmsUserCreatePath;
+	}
+
+	public void setLmsUserCreatePath(String lmsUserCreatePath) {
+		this.lmsUserCreatePath = lmsUserCreatePath;
 	}
 
 	public String getSbHubGraphServiceUrl() {
@@ -829,5 +906,181 @@ public class CbExtServerProperties {
 
 	public void setAssessmentMinQuestionParams(String assessmentMinQuestionParams) {
 		this.assessmentMinQuestionParams = assessmentMinQuestionParams;
+	}
+
+	public String getUserRegistrationIndex() {
+		return userRegistrationIndex;
+	}
+
+	public void setUserRegistrationIndex(String userRegistrationIndex) {
+		this.userRegistrationIndex = userRegistrationIndex;
+	}
+
+	public String getUserRegCodePrefix() {
+		return userRegCodePrefix;
+	}
+
+	public void setUserRegCodePrefix(String userRegCodePrefix) {
+		this.userRegCodePrefix = userRegCodePrefix;
+	}
+
+	public String getUserRegistrationTopic() {
+		return userRegistrationTopic;
+	}
+
+	public void setUserRegistrationTopic(String userRegistrationTopic) {
+		this.userRegistrationTopic = userRegistrationTopic;
+	}
+	
+	public String getUserRegistrationAutoCreateUserTopic() {
+		return userRegistrationAutoCreateUserTopic;
+	}
+
+	public void setUserRegistrationAutoCreateUserTopic(String userRegistrationAutoCreateUserTopic) {
+		this.userRegistrationAutoCreateUserTopic = userRegistrationAutoCreateUserTopic;
+	}
+
+	public List<String> getUserRegistrationDomain() {
+		return Arrays.asList(userRegistrationDomain.split(",", -1));
+	}
+
+	public void setUserRegistrationDomain(String userRegistrationDomain) {
+		this.userRegistrationDomain = userRegistrationDomain;
+	}
+
+	public void setUserRegistrationDeptExcludeList(String userRegistrationDeptExcludeList) {
+		this.userRegistrationDeptExcludeList = userRegistrationDeptExcludeList;
+	}
+
+	public List<String> getUserRegistrationDeptExcludeList() {
+		return Arrays.asList(userRegistrationDeptExcludeList.split(",", -1));
+	}
+
+	public String getUserRegistrationWorkFlowServiceName() {
+		return userRegistrationWorkFlowServiceName;
+	}
+
+	public void setUserRegistrationWorkFlowServiceName(String userRegistrationWorkFlowServiceName) {
+		this.userRegistrationWorkFlowServiceName = userRegistrationWorkFlowServiceName;
+	}
+
+	public String getUserRegistrationTitle() {
+		return userRegistrationTitle;
+	}
+
+	public void setUserRegistrationTitle(String userRegistrationTitle) {
+		this.userRegistrationTitle = userRegistrationTitle;
+	}
+
+	public String getUserRegistrationStatus() {
+		return userRegistrationStatus;
+	}
+
+	public void setUserRegistrationStatus(String userRegistrationStatus) {
+		this.userRegistrationStatus = userRegistrationStatus;
+	}
+
+	public String getUserRegistrationThankyouMessage() {
+		return userRegistrationThankyouMessage;
+	}
+
+	public void setUserRegistrationThankyouMessage(String userRegistrationThankyouMessage) {
+		this.userRegistrationThankyouMessage = userRegistrationThankyouMessage;
+	}
+
+	public String getUserRegistrationInitiatedMessage() {
+		return userRegistrationInitiatedMessage;
+	}
+
+	public void setUserRegistrationInitiatedMessage(String userRegistrationInitiatedMessage) {
+		this.userRegistrationInitiatedMessage = userRegistrationInitiatedMessage;
+	}
+
+	public String getUserRegistrationApprovedMessage() {
+		return userRegistrationApprovedMessage;
+	}
+
+	public void setUserRegistrationApprovedMessage(String userRegistrationApprovedMessage) {
+		this.userRegistrationApprovedMessage = userRegistrationApprovedMessage;
+	}
+
+	public String getUserRegistrationFailedMessage() {
+		return userRegistrationFailedMessage;
+	}
+
+	public void setUserRegistrationFailedMessage(String userRegistrationFailedMessage) {
+		this.userRegistrationFailedMessage = userRegistrationFailedMessage;
+	}
+
+	public String getUserRegisterationButtonName() {
+		return userRegisterationButtonName;
+	}
+
+	public void setUserRegisterationButtonName(String userRegisterationButtonName) {
+		this.userRegisterationButtonName = userRegisterationButtonName;
+	}
+
+	public String getUserRegistrationSubject() {
+		return userRegistrationSubject;
+	}
+
+	public void setUserRegistrationSubject(String userRegistrationSubject) {
+		this.userRegistrationSubject = userRegistrationSubject;
+	}
+
+	public String getUserRegistrationDomainName() {
+		return userRegistrationDomainName;
+	}
+
+	public void setUserRegistrationDomainName(String userRegistrationDomainName) {
+		this.userRegistrationDomainName = userRegistrationDomainName;
+	}
+
+	public List<String> getUserRegistrationPreApprovedDomainList() {
+		return Arrays.asList(userRegistrationPreApprovedDomainList.split(",", -1));
+	}
+
+	public void setUserRegistrationPreApprovedDomainList(String userRegistrationPreApprovedDomainList) {
+		this.userRegistrationPreApprovedDomainList = userRegistrationPreApprovedDomainList;
+	}
+
+	public String getDiscussionHubHost() {
+		return discussionHubHost;
+	}
+
+	public void setDiscussionHubHost(String discussionHubHost) {
+		this.discussionHubHost = discussionHubHost;
+	}
+
+	public String getDiscussionHubCreateUserPath() {
+		return discussionHubCreateUserPath;
+	}
+
+	public void setDiscussionHubCreateUserPath(String discussionHubCreateUserPath) {
+		this.discussionHubCreateUserPath = discussionHubCreateUserPath;
+	}
+
+	public String getSbResetPasswordPath() {
+		return sbResetPasswordPath;
+	}
+
+	public void setSbResetPasswordPath(String sbResetPasswordPath) {
+		this.sbResetPasswordPath = sbResetPasswordPath;
+	}
+
+	public String getSbSendNotificationEmailPath() {
+		return sbSendNotificationEmailPath;
+	}
+
+	public void setSbSendNotificationEmailPath(String sbSendNotificationEmailPath) {
+		this.sbSendNotificationEmailPath = sbSendNotificationEmailPath;
+	}
+
+	public String getSbAssignRolePath() {
+		return sbAssignRolePath;
+	}
+
+	public void setSbAssignRolePath(String sbAssignRolePath) {
+		this.sbAssignRolePath = sbAssignRolePath;
 	}
 }

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.sunbird.telemetry.model.LastLoginInfo;
+import org.sunbird.user.registration.model.UserRegistration;
 
 public interface UserUtilityService {
 
@@ -19,4 +20,11 @@ public interface UserUtilityService {
 
 	Map<String, Object> getUsersReadData(String userId, String authToken, String X_authToken);
 
+	boolean createUser(UserRegistration userRegistration);
+
+	boolean updateUser(UserRegistration userRegistration);
+
+	boolean getActivationLink(UserRegistration userRegistration);
+
+	boolean createNodeBBUser(UserRegistration userRegistration);
 }

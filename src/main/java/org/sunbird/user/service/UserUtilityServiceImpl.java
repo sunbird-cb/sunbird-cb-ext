@@ -1,12 +1,16 @@
 package org.sunbird.user.service;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -23,8 +27,8 @@ import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.core.exception.ApplicationLogicError;
-import org.sunbird.core.logger.CbExtLogger;
 import org.sunbird.telemetry.model.LastLoginInfo;
+import org.sunbird.user.registration.model.UserRegistration;
 import org.sunbird.user.util.TelemetryUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -54,25 +58,21 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 	@Autowired
 	CbExtServerProperties serverConfig;
 
-	private CbExtLogger logger = new CbExtLogger(getClass().getName());
-	private final String SEARCH_RESULT = "Search API response: ";
+	private Logger logger = LoggerFactory.getLogger(UserUtilityServiceImpl.class);
 
 	public boolean validateUser(String userId) {
 		return validateUser(StringUtils.EMPTY, userId);
 	}
-	
+
 	@Override
 	public boolean validateUser(String rootOrg, String userId) {
-
 		Map<String, Object> requestMap = new HashMap<>();
-
 		Map<String, Object> request = new HashMap<>();
-
 		Map<String, String> filters = new HashMap<>();
 		filters.put(Constants.USER_ID, userId);
 		request.put(Constants.FILTERS, filters);
 
-		requestMap.put("request", request);
+		requestMap.put(Constants.REQUEST, request);
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		try {
@@ -80,7 +80,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 
 			HttpEntity<String> requestEnty = new HttpEntity<>(reqBodyData, headers);
 
-			String serverUrl = props.getSbUrl() + "private/user/v1/search";
+			String serverUrl = props.getSbUrl() + props.getUserSearchEndPoint();
 
 			SunbirdApiResp sunbirdApiResp = restTemplate.postForObject(serverUrl, requestEnty, SunbirdApiResp.class);
 
@@ -91,7 +91,6 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		} catch (Exception e) {
 			throw new ApplicationLogicError("Sunbird Service ERROR: ", e);
 		}
-
 	}
 
 	@Override
@@ -149,7 +148,6 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 			String url = props.getSbUrl() + props.getUserSearchEndPoint();
 			HttpEntity<?> requestEnty = new HttpEntity<>(requestObj, headers);
 			SearchUserApiResp searchUserResult = restTemplate.postForObject(url, requestEnty, SearchUserApiResp.class);
-			logger.debug(SEARCH_RESULT + searchUserResult.toString());
 			if (searchUserResult != null && Constants.OK.equalsIgnoreCase(searchUserResult.getResponseCode())
 					&& searchUserResult.getResult().getResponse().getCount() > 0) {
 				for (SearchUserApiContent searchUserApiContent : searchUserResult.getResult().getResponse()
@@ -191,15 +189,188 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 	}
 
 	@Override
-	public Map<String, Object> getUsersReadData(String userId, String authToken, String X_authToken) {
+	public Map<String, Object> getUsersReadData(String userId, String authToken, String userAuthToken) {
 		Map<String, String> header = new HashMap<>();
-		header.put(Constants.AUTH_TOKEN, authToken);
-		header.put(Constants.X_AUTH_TOKEN, X_authToken);
+		if (StringUtils.isNotEmpty(authToken)) {
+			header.put(Constants.AUTH_TOKEN, authToken);
+		}
+		if (StringUtils.isNotEmpty(userAuthToken)) {
+			header.put(Constants.X_AUTH_TOKEN, userAuthToken);
+		}
 		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService
 				.fetchUsingGetWithHeadersProfile(serverConfig.getSbUrl() + serverConfig.getLmsUserReadPath() + userId,
 						header);
 		Map<String, Object> result = (Map<String, Object>) readData.get(Constants.RESULT);
 		Map<String, Object> responseMap = (Map<String, Object>) result.get(Constants.RESPONSE);
 		return responseMap;
+	}
+
+	@Override
+	public boolean createUser(UserRegistration userRegistration) {
+		boolean retValue = false;
+		Map<String, Object> request = new HashMap<>();
+		Map<String, Object> requestBody = new HashMap<String, Object>();
+		requestBody.put(Constants.EMAIL, userRegistration.getEmail());
+		requestBody.put(Constants.CHANNEL, userRegistration.getDeptName());
+		requestBody.put(Constants.FIRSTNAME, userRegistration.getFirstName());
+		requestBody.put(Constants.LASTNAME, userRegistration.getLastName());
+		requestBody.put(Constants.EMAIL_VERIFIED, true);
+		request.put(Constants.REQUEST, requestBody);
+		try {
+			Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPost(
+					props.getSbUrl() + props.getLmsUserCreatePath(), request, getDefaultHeaders());
+			if (Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
+				Map<String, Object> result = (Map<String, Object>) readData.get(Constants.RESULT);
+				userRegistration.setUserId((String) result.get(Constants.USER_ID));
+				Map<String, Object> userData = getUsersReadData(userRegistration.getUserId(), StringUtils.EMPTY,
+						StringUtils.EMPTY);
+				if (!CollectionUtils.isEmpty(userData)) {
+					userRegistration.setUserName((String) userData.get(Constants.USER_NAME));
+					retValue = updateUser(userRegistration);
+				}
+			}
+		} catch (Exception e) {
+			logger.error("Failed to run the create user flow. UserRegCode : " + userRegistration.getRegistrationCode(),
+					e);
+		}
+		printMethodExecutionResult("Create User", userRegistration.toMininumString(), retValue);
+		return retValue;
+	}
+
+	@Override
+	public boolean updateUser(UserRegistration userRegistration) {
+		boolean retValue = false;
+		Map<String, Object> request = new HashMap<>();
+		Map<String, Object> requestBody = new HashMap<String, Object>();
+		requestBody.put(Constants.USER_ID, userRegistration.getUserId());
+		Map<String, Object> profileDetails = new HashMap<String, Object>();
+		profileDetails.put(Constants.MANDATORY_FIELDS_EXISTS, false);
+		Map<String, Object> employementDetails = new HashMap<String, Object>();
+		employementDetails.put(Constants.DEPARTMENTNAME, userRegistration.getDeptName());
+		profileDetails.put(Constants.EMPLOYMENTDETAILS, employementDetails);
+		Map<String, Object> personalDetails = new HashMap<String, Object>();
+		personalDetails.put(Constants.FIRSTNAME.toLowerCase(), userRegistration.getFirstName());
+		personalDetails.put(Constants.SURNAME, userRegistration.getLastName());
+		personalDetails.put(Constants.PRIMARY_EMAIL, userRegistration.getEmail());
+		profileDetails.put(Constants.PERSONAL_DETAILS, personalDetails);
+
+		if (StringUtils.isNotEmpty(userRegistration.getPosition())) {
+			Map<String, Object> professionDetailObj = new HashMap<String, Object>();
+			professionDetailObj.put(Constants.DESIGNATION, userRegistration.getPosition());
+			List<Map<String, Object>> professionalDetailsList = new ArrayList<Map<String, Object>>();
+			professionalDetailsList.add(professionDetailObj);
+			profileDetails.put(Constants.PROFESSIONAL_DETAILS, professionalDetailsList);
+		}
+		requestBody.put(Constants.PROFILE_DETAILS, profileDetails);
+		request.put(Constants.REQUEST, requestBody);
+		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService
+				.fetchResultUsingPatch(props.getSbUrl() + props.getLmsUserUpdatePath(), request, getDefaultHeaders());
+		if (Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
+			retValue = assignRole(userRegistration);
+		}
+		printMethodExecutionResult("UpdateUser", userRegistration.toMininumString(), retValue);
+		return retValue;
+	}
+
+	public boolean assignRole(UserRegistration userRegistration) {
+		boolean retValue = false;
+		Map<String, Object> request = new HashMap<>();
+		Map<String, Object> requestBody = new HashMap<String, Object>();
+		requestBody.put(Constants.ORGANIZATION_ID, userRegistration.getDeptId());
+		requestBody.put(Constants.USER_ID, userRegistration.getUserId());
+		requestBody.put(Constants.ROLES, Arrays.asList(Constants.PUBLIC));
+		request.put(Constants.REQUEST, requestBody);
+		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService
+				.fetchResultUsingPost(props.getSbUrl() + props.getSbAssignRolePath(), request, getDefaultHeaders());
+		if (Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
+			retValue = createNodeBBUser(userRegistration);
+		}
+		printMethodExecutionResult("AssignRole", userRegistration.toMininumString(), retValue);
+		return retValue;
+	}
+	
+	@Override
+	public boolean createNodeBBUser(UserRegistration userRegistration) {
+		boolean retValue = false;
+		Map<String, Object> request = new HashMap<>();
+		Map<String, Object> requestBody = new HashMap<String, Object>();
+		requestBody.put(Constants.USER_NAME.toLowerCase(), userRegistration.getUserName());
+		requestBody.put(Constants.IDENTIFIER, userRegistration.getUserId());
+		requestBody.put(Constants.USER_FULL_NAME.toLowerCase(),
+				userRegistration.getFirstName() + " " + userRegistration.getLastName());
+		request.put(Constants.REQUEST, requestBody);
+
+		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPost(
+				props.getDiscussionHubHost() + props.getDiscussionHubCreateUserPath(), request, getDefaultHeaders());
+		if (Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
+			retValue = getActivationLink(userRegistration);
+		}
+		printMethodExecutionResult("Create NodeBB User", userRegistration.toMininumString(), retValue);
+		return retValue;
+	}
+
+	@Override
+	public boolean getActivationLink(UserRegistration userRegistration) {
+		boolean retValue = false;
+		Map<String, Object> request = new HashMap<String, Object>();
+		Map<String, Object> requestBody = new HashMap<String, Object>();
+		requestBody.put(Constants.USER_ID, userRegistration.getUserId());
+		requestBody.put(Constants.KEY, Constants.EMAIL);
+		requestBody.put(Constants.TYPE, Constants.EMAIL);
+		request.put(Constants.REQUEST, requestBody);
+		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService
+				.fetchResultUsingPost(props.getSbUrl() + props.getSbResetPasswordPath(), request, getDefaultHeaders());
+		if (Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
+			Map<String, Object> result = (Map<String, Object>) readData.get(Constants.RESULT);
+			if (!CollectionUtils.isEmpty(result)) {
+				retValue = sendWelcomeEmail((String) result.get(Constants.LINK), userRegistration);
+			}
+		}
+		printMethodExecutionResult("GetActivationLink", userRegistration.toMininumString(), retValue);
+		return retValue;
+	}
+
+	public boolean sendWelcomeEmail(String activationLink, UserRegistration userRegistration) {
+		boolean retValue = false;
+		Map<String, Object> request = new HashMap<>();
+		Map<String, Object> requestBody = new HashMap<String, Object>();
+		requestBody.put(Constants.ALLOWED_LOGGING, "You can use your email to Login");
+		requestBody.put(Constants.BODY, Constants.HELLO);
+		requestBody.put(Constants.EMAIL_TEMPLATE_TYPE, Constants.WELCOME_EMAIL_TEMPLATE_TYPE);
+		requestBody.put(Constants.FIRSTNAME, userRegistration.getFirstName());
+		requestBody.put(Constants.LINK, activationLink);
+		requestBody.put(Constants.MODE, Constants.EMAIL);
+		requestBody.put(Constants.ORG_NAME, userRegistration.getDeptName());
+		requestBody.put(Constants.RECIPIENT_EMAILS, Arrays.asList(userRegistration.getEmail()));
+		requestBody.put(Constants.SET_PASSWORD_LINK, true);
+		requestBody.put(Constants.SUBJECT, Constants.WELCOME_EMAIL_MESSAGE);
+		requestBody.put(Constants.WELCOME_MESSAGE, Constants.HELLO);
+
+		request.put(Constants.REQUEST, requestBody);
+
+		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPost(
+				props.getSbUrl() + props.getSbSendNotificationEmailPath(), request, getDefaultHeaders());
+		if (Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
+			retValue = true;
+		}
+		printMethodExecutionResult("SendWelcomeEmail", userRegistration.toMininumString(), retValue);
+		return retValue;
+	}
+
+	private void printMethodExecutionResult(String methodAction, String objectDetails, boolean isSuccess) {
+		StringBuilder strBuilder = new StringBuilder("Action : [").append(methodAction).append("] ");
+		if (isSuccess) {
+			strBuilder.append(" is successfully executed. ");
+		} else {
+			strBuilder.append(" is failed to execute. ");
+		}
+		strBuilder.append("For UserRegistration : ").append(objectDetails);
+		logger.info(strBuilder.toString());
+	}
+
+	private Map<String, String> getDefaultHeaders() {
+		Map<String, String> headers = new HashMap<String, String>();
+		headers.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
+		return headers;
 	}
 }
