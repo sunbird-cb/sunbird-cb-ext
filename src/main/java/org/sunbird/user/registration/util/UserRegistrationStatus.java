@@ -19,4 +19,5 @@ public enum UserRegistrationStatus {
 	public int getStatus() {
 		return status;
 	}
+
 }
