@@ -1,0 +1,705 @@
+Ministry of Agriculture and Farmers Welfare
+Ministry of Chemicals and Fertilizers
+Ministry of Civil Aviation
+Ministry of Coal
+Ministry of Commerce and Industry
+Ministry of Communications
+Ministry of Consumer Affairs, Food and Public Distribution
+Ministry of Corporate Affairs
+Ministry of Culture
+Ministry of Defence
+Ministry of Earth Sciences
+Ministry of Environment, Forest and Climate Change
+Ministry of External Affairs
+Ministry of Finance
+Ministry of Food Processing Industries
+Ministry of Health and Family Welfare
+Ministry of Heavy Industries and Public Enterprises
+Ministry of Home Affairs
+Ministry of Housing and Urban Affairs
+Ministry of Education
+Ministry of Information and Broadcasting
+Ministry of Labour and Employment
+Ministry of Law and Justice
+Ministry of Mines
+Ministry of Minority Affairs
+Ministry of New and Renewable Energy
+Ministry of Panchayati Raj
+Ministry of Parliamentary Affairs
+Ministry of Personnel, Public Grievances and Pensions
+Ministry of Petroleum and Natural Gas
+Ministry of Power
+Ministry of Railways
+Ministry of Rural Development
+Ministry of Science and Technology
+Ministry of Road Transport and Highways
+Ministry of Micro, Small and Medium Enterprises
+Ministry of Social Justice and Empowerment
+Ministry of Statistics and Programme Implementation
+Ministry of Steel
+Ministry of Textiles
+Ministry of Tourism
+Ministry of Tribal Affairs
+Ministry of Jal Shakti
+Ministry of Women and Child Development
+Ministry of Youth Affairs and Sports
+Department of Atomic Energy
+Department of Space
+Ministry of Development of North Eastern Region
+Ministry of Electronics and Information Technology
+Ministry of AYUSH
+Ministry of Shipping
+Ministry of Skill Development and Entrepreneurship
+Ministry of Fisheries, Animal Husbandry and Dairying
+Department of Agricultural Research and Education (DARE)
+Department of Agriculture, Cooperation and Farmers Welfare
+Department of Chemicals and Petrochemicals
+Department of Fertilizers
+Department of Pharmaceuticals
+Department for Promotion of Industry and Internal Trade
+Department of Commerce
+Department of Posts
+Department of Telecommunications (DOT)
+Department of Consumer Affairs
+Department of Food and Public Distribution
+Department of Defence
+Department of Defence Production
+Department of Defence Research &amp; Development
+Department of Ex-Servicemen Welfare
+Indian Armed Forces
+India Meteorological Department (IMD)
+Department of Economic Affairs
+Department of Expenditure
+Department of Financial Services
+Department of Investment and Public Asset Management
+Department of Revenue
+Department of Health and Family Welfare
+Department of Health Research, Ministry of Health &amp; Family Welfare
+Department of Heavy Industry
+Department of Public Enterprises
+Central Armed Police Forces
+Central Police Organisation
+Department of Border Management
+Department of Home
+Department of Internal Security
+Department of Jammu &amp; Kashmir (J &amp; K) Affairs
+Department of Official Language
+Department of States
+Department of Higher Education
+Department of School Education and Literacy
+Department of Justice
+Department of Legal Affairs
+Legislative Department
+Department of Administrative Reforms and Public Grievances (DARPG)
+Department of Pension &amp; Pensioner&#039;s Welfare
+Department of Personnel and Training
+Department of Land Resources (DLR)
+Department of Rural Development (DRD)
+Department of Biotechnology (DBT), Government of India
+Department of Science and Technology (DST)
+Department of Scientific and Industrial Research (DSIR)
+Department of Empowerment of Persons with Disabilities
+Department of Social Justice and Empowerment
+Department of Drinking Water and Sanitation
+Department of Water Resources, River Development and Ganga Rejuvenation
+Department of Sports
+Department of Youth Affairs
+Department of Animal Husbandry and Dairying
+Department of Fisheries
+Agricultural Technology Information Centre (ATIC)
+Agrinnovate India
+Central Agricultural University, Imphal, Manipur
+Indian Council of Agricultural Research (ICAR)
+Indian Institute of Horticultural Research (IIHR)
+Indira Gandhi Agricultural University, Raipur
+Rani Lakshmi Bai Central Agricultural University
+Agriculture Marketing Information System Network (AGMARKNET)
+Central Fertilizer Quality Control and Training Institute
+Central Insecticides Board and Registration Committee
+Central Institute of Horticulture, Nagaland
+Coconut Development Board
+Commission for Agricultural Costs and Prices (CACP)
+Directorate of Arecanut and Spices Development (DSAD)
+Directorate of Cashewnut and Cocoa Development (DCCD)
+Directorate of Economics and Statistics (DES)
+Directorate of Extension, Department of Agriculture,Cooperation &amp; Farmers Welfare
+Directorate of Jute Development
+Directorate of Marketing and Inspection (DMI), Ministry of Agriculture and Farmers Welfare
+Directorate of Plant Protection Quarantine and Storage, Ministry of Agriculture
+Directorate of Pulses Development, Department of Agriculture,Cooperation &amp; Farmers Welfare
+Directorate of Rice Development, Patna
+Institute of Co-Operative Management (ICM), Imphal, Manipur
+Mahalanobis National Crop Forecast Centre (NCFC), New Delhi
+National Bee Board (NBB)
+National Centre for Cold-chain Development (NCCD)
+National Centre of Organic Farming
+National Commission on Farmers
+National Co-operative Development Corporation (NCDC)
+National Council for Co-operative Training (NCCT)
+National Horticulture Board NHB
+National Horticulture Mission
+National Institute of Agricultural Extension Management (MANAGE)
+National Institute of Agricultural Marketing (NIAM)
+National Institute of Plant Health Management (NIPHM)
+National Mission on Oilseeds and Oil Palm (NMOOP), Ministry of Agriculture
+National Oilseeds and Vegetable Oils Development (NOVOD) Board, Haryana
+National Seed Research and Training Centre (NSRTC)
+National Seeds Corporation Limited (NSC)
+North Eastern Farm Machinery Training and Testing Institute, Chariali
+Northern Farm Machinery Training &amp; Testing Institute, Hissar
+Soil and Land Use Survey of India
+State Farms Corporation of India Limited (SFCI)
+Brahmaputra Cracker and Polymer Limited (BCPL), Guwahati, Assam
+Central Institute of Plastics Engineering and Technology (CIPET)
+Hindustan Flurocarbons Limited (HFL), Hyderabad
+Hindustan Insecticides Limited (HIL)
+Hindustan Organic Chemicals Limited
+Brahmaputra Valley Fertilizer Corporation Limited (BVFCL)
+FCI Aravali Gypsum and Minerals India Limited (FAGMIL)
+Fertilizer Corporation of India Limited (FCIL)
+Krishak Bharati Cooperative Limited (KRIBHCO)
+Madras Fertilizers Limited (MFL)
+National Fertilizers Limited (NFL)
+Projects and Development India Limited (PDIL)
+Pyrites, Phosphates and Chemicals Limited (PPCL)
+Rashtriya Chemicals and Fertilizers Limited (RCF)
+Bengal Chemicals and Pharmaceuticals Limited (BCPL)
+Hindustan Antibiotics Limited (HAL)
+Indian Drugs and Pharmaceuticals Limited (IDPL)
+Jan Aushadhi - Bureau of Pharma PSUs of India (BPPI)
+Karnataka Antibiotics and Pharmaceuticals Limited (KAPL), Bangalore
+National Institute of Pharmaceutical Education and Research (NIPER) - Ahmedabad
+National Institute of Pharmaceutical Education and Research (NIPER), Guwahati
+National Institute of Pharmaceutical Education and Research (NIPER), Hyderabad
+National Institute of Pharmaceutical Education and Research (NIPER), Kolkata
+National Institute of Pharmaceutical Education and Research (NIPER),Mohali
+National Institute of Pharmaceutical Education and Research (NIPER), Rae Bareli
+National lnstitute of Pharmaceutical Education and Research (NIPER),Hajipur
+National Pharmaceutical Pricing Authority (NPPA)
+Rajasthan Drugs and  Pharmaceuticals Limited (RDPL)
+Cell for IPR Promotion and Management (CIPAM)
+Central Manufacturing Technology Institute (CMTI)
+Central Pulp and Paper Research Institute (CPPRI), Saharanpur
+Commercial Courts, Department of Industrial Policy &amp; Promotion
+Controller General of Patents, Designs &amp; Trade Marks
+Delhi Mumbai Industrial Corridor Development Corporation Limited, New Delhi
+Geographical Indications Registry (GIR)
+Indian Rubber Manufactures Research Association (IRMRA), Thane
+Intellectual Property Appellate Board (IPAB)
+National Accreditation Board for Certification Bodies (NABCB)
+National Accreditation Board for Education and Training  (NABET)
+National Board for Quality Promotion (NBQP)
+National Council for Cement and Building Materials (NCCBM)
+National Council of Applied Economic Research (NCAER), New Delhi
+National Institute of Design (NID)
+National Productivity Council (NPC)
+Office of Chief Controller of Accounts, DIPP, Ministry of Commerce and Industry
+Office of the Economic Adviser
+Petroleum and Explosives Safety Organisation
+Quality Council of India
+Tariff Commission
+Agricultural and Processed Food Products Export Development Authority
+CHEMEXCIL - Basic Chemicals, Pharmaceuticals and Cosmetics Export Promotion Council
+Coffee Board, India
+Directorate General of Commercial Intelligence and Statistics (DGCI&amp;S)
+Directorate General of Foreign Trade (DGFT)
+Directorate General Of Trade Remedies (Directorate General of Anti-Dumping and Allied Duties)
+eSCOPE - Forum for Facilitating Exports
+Export Credit Guarantee Corporation of India Limited (ECGC)
+Export Inspection Council of India (EIC)
+Export Promotion Council for EOUs and SEZs, New Delhi
+Export Promotion Councils (EPCs)
+Footwear Design and Development Institute (FDDI)
+India Brand Equity Foundation (IBEF), Haryana
+Indian Diamond Institute
+Indian Institute of Foreign Trade (IIFT)
+Indian Institute of Packaging
+Indian Institute of Plantation Management,Bangalore
+Indian Oilseed and Produce Export Promotion Council (IOPEPC)
+India Trade Promotion Organisation (ITPO)
+Marine Products Export Development Authority (MPEDA)
+Minerals and Metals Trading Corporation Limited (MMTC)
+National Centre for Trade Information (NCTI)
+PEC Limited
+Pharmaceuticals Export Promotion Council (PHARMEXCIL)
+Project Exports Promotion Council of India (PEPC)
+Rubber Board, India
+Services Export Promotion Council, Gurgaon
+Shellac and Forest Products Export Promotion Council, Kolkata
+Special Economic Zones
+Spices Board, India
+Sports Goods Export Promotion Council (SGEPC)
+State Trading Corporation of India Limited (STCI)
+Tea Board of India, Kolkata, West Bengal
+Tobacco Board, India
+AP Postal Circle, Department of Posts
+Assam Post Circle
+Center for Excellence in Postal Technology  (CEPT)
+Chhattisgarh Postal Circle, Department of Posts
+Directorate of Postal Life Insurance, Department of Posts
+Gujarat Postal Circle, Department of Posts
+Haryana Postal Circle
+Himachal Pradesh Postal Circle, Department of Posts
+Jammu and Kashmir Postal Circle, Department of Posts
+Karnataka Postal Circle, Department of Posts
+Kerala Postal Circle, Department of Posts
+Madhya Pradesh Postal Circle, Department of Posts 
+Maharashtra Postal Circle, Department of Posts
+Mizoram Postal Division
+National Centre of Geo-Informatics
+Odisha Postal Circle, Department of Posts
+Postal Training Centre (PTC), Guwahati, Assam
+Postal Training Centre (PTC), Mysore
+Rafi Ahmed Kidwai National Postal Academy (RAKNPA), Ghaziabad, Uttarpradesh
+South Karnataka Postal Region, Bangalore
+Tamil Nadu Postal Circle, Department of Posts
+Uttarakhand Postal Circle
+Bharat Broadband Network Limited (BBNL)
+Bharat Sanchar Nigam Limited Portal(BSNL)
+Centre for Development of Telematics (C-DOT)
+Controllers of Communication Accounts, Department of Telecom
+Employability Enhancement Training Program (EETP), BSNL
+Indian Telephone Industries Limited (ITI)
+Joint Controller of Communication Accounts, Chhattisgarh
+Telecom Equipment and Services Export Promotion Council (TEPC), New Delhi
+Telecommunications Consultants India Limited (TCIL)
+Telecom Regulatory Authority of India (TRAI)
+Universal Service Obligation Fund (USOF)
+Wireless Planning &amp; Coordination Wing (WPC)
+Bureau of Indian Standards (BIS)
+Consumer Online Resource and Empowerment Centre (CORE)
+National Consumer Disputes Redressal Commission (NCDRC)
+National Test House
+Central Grain Analysis Laboratory(CGAL)
+Central Vigilance Committee on Public Distribution System, New Delhi
+Central Warehousing Corporation (CWC)
+Directorate of Sugar
+Directorate of Vanaspati, Vegetable Oils and Fats (DVVOF)
+Food Corporation of India (FCI)
+Hindustan Vegetable Oils Corporation Ltd. (HVOC)
+Indian Grain Storage Management and Research Institute (IGMRI)
+National Sugar Institute
+Quality Control Cells (QCC)
+Warehousing Development and Regulatory Authority (WDRA)
+Chief Engineer Delhi Zone, Military Engineer Services
+Controller of Defence Accounts, Chennai
+Defence Services Staff College, Wellington
+National Institute of Hydrography, Goa
+PAO(ORs) Corps of Signal, Pay and Accounts Office, Jabalpur, Madhya Pradesh
+Pay and Accounts Office(Other Ranks) - PAO (ORs) 39GTC, PCDA (CC)
+Principal Controller of Defence Accounts (Border Roads)
+Principal Controller of Defence Accounts (R &amp; D), Hyderabad
+Rashtriya Indian Military College (RIMC), Uttarakhand
+Rashtriya Military schools
+Sainik School Ghorakhal, Nainital, Uttarakhand
+Bharat Earth Movers Limited (BEML)
+Bharat Electronics Limited (BEL)
+Defence Exports Promotion, Ministry of Defence
+Defence Investor Cell, Department of Defence Production, Ministry of Defence
+Directorate General of Quality Assurance ( DGQA)
+Directorate of Standardisation
+Directorate of Standardisation, New Delhi
+Garden Reach Ship Builders and Engineers Limited (GRSE)
+Goa Shipyard Limited
+Gun Carriage Factory (GCF), Jabalpur, Madhya Pradesh
+Hindustan Aeronautics Limited (HAL)
+Hindustan Shipyard Limited (HSL)
+Indian Ordnance Factories
+Mazagon Dock Shipbuilders Limited
+Mishra Dhatu Nigam Limited (MIDHANI)
+National Academy of Defence Production (NADP), Nagpur
+NIRDESH - National Institute for Research and Development in Defence Shipbuilding
+Ordnance Factory Dehu Road, Pune, Maharashtra
+Rifle Factory Ishapore, West Bengal
+The Directorate General of Aeronautical Quality Assurance
+Aeronautical Development Agency, Ministry of Defence
+Defence Research and Development Organisation (DRDO)
+Directorate General Resettlement (DGR), Ministry of Defence
+Kendriya Sainik Board Secretariat (KSB), Ministry of Defence
+Armed Forces Medical College (AFMC)
+Cateen Stores Department, Ministry of Defence
+Indian Air Force
+Indian Army
+Indian Coast Guard
+Indian Navy
+Integrated Defence Staff (IDS)
+Jhansi Cantonment Board
+National Cadet Corps (NCC)
+National Defence Academy (NDA)
+National Hydrographic Office - Navarea VIII Notices to Mariners
+Agricultural Meteorology Division
+Meteorological Center, Bengaluru
+Meteorological Center, Gangtok
+Meteorological Center, Pune
+Meteorological Center, Raipur
+Meteorological Centre, Ahmedabad
+Meteorological Centre, Bhubaneswar
+Meteorological Centre, Goa
+Meteorological Centre, Hyderabad
+Meteorological Centre, Shimla
+Meteorological Centre, Thiruvananthapuram
+Positional Astronomy Centre (PAC), Kolkata
+Regional Meteorological Centre, Chennai
+Regional Meteorological Centre, Guwahati
+Regional Meteorological Centre, Kolkata
+Regional Meteorological Centre, Mumbai
+Regional Meteorological Centre, Nagpur
+Regional Meteorological Centre, New Delhi
+Regional Specialized Meteorological Centre (RSMC) for Tropical Cyclones over North Indian Ocean
+Aid Accounts and Audit Division, New Delhi
+Asian Development Bank, Department of Economic Affairs
+Board for Industrial and Financial Reconstruction (BIFR)
+Debt Recovery Tribunal, Madurai
+Debts Recovery Tribunal, Ernakulam (Kerala and Lakshadweep)
+Debts Recovery Tribunal No 3, Chennai
+Empowered Committee of State Finance Ministers
+India Infrastructure Finance CompanyLimited (IIFCL)
+National Savings Institute (NSI)
+Oriental Insurance Company Limited (OICL)
+Security Printing and Minting Corporation of India Limited (SPMCIL)
+United India Insurance Company Limited
+Central Pension Accounting Office (CPAO)
+Chief Adviser Cost
+Controller General of Accounts (CGA)
+Director General of Audit (Central Expenditure)
+Expenditure Finance Committee (EFC), Planning Commission
+Pension Fund Regulatory and Development Authority (PFRDA)
+Allahabad Bank
+Andhra Bank
+Bank of Baroda
+Bank of India
+Bank of Maharashtra
+Canara Bank
+Corporation Bank
+Debt Recovery Appellate Tribunal (DRAT), Chennai, Tamil Nadu
+Debts Recovery Tribunal, Coimbatore, Tamil Nadu
+Debts Recovery Tribunal (DRT) &amp; Debts Recovery Appellate Tribunal (DRAT)
+Debts Recovery Tribunal-II, Chandigarh
+Debts Recovery Tribunal No 1, Chennai, Tamil Nadu
+Debts Recovery Tribunal No 2, Chennai, Tamil Nadu
+Debts Recovery Tribunals, Aurangabad
+Dena Bank
+Electronic Data Information Filing and Retrieval System (EDIFAR), SEBI, Mumbai
+General Insurance Corporation of India (GIC)
+Indian Bank
+Indian Overseas Bank
+Industrial Finance Corporation of India (IFCI)
+LIC - Life Insurance Corporation of India
+National Housing Bank (NHB)
+National Institute of Public Finance and Policy (NIPFP), New Delhi
+National Insurance Company Limited (NICL)
+New India Assurance Company Limited (NIACL)
+Oriental Bank of Commerce (OBC)
+Pay Accounts Office (GREF), Dighi Camp, Pune
+Punjab and Sind Bank
+Punjab National Bank (PNB)
+Regional Rural Banks (RRB)
+Reserve Bank of India (RBI)
+Securities Appellate Tribunal, Mumbai
+State Bank of India (SBI)
+State Bank of Patiala (SBP)
+Syndicate Bank
+UCO Bank
+Union Bank of India (UBI)
+United Bank of India (UBI)
+UTI Infrastructure Technology And Services Limited (UTIITSL)
+Vijaya Bank
+Appellate Tribunal for Forfeited Property (ATFP)
+Central Board of Direct Taxes (CBDT)
+Central Board of Indirect Taxes and Customs (CBIC)
+Central Economic Intelligence Bureau (CEIB)
+Competent Authority (CA), Chennai
+Custom Commissionerate, Inland Container Depot (ICD), Tughlakabad, New Delhi
+Directorate of Enforcement
+Goods and Services Tax (GST) Council
+Joint Chief Departmental Representative Customs, Excise and Service Tax Appellate Tribunal, Ahmedabad
+Kandla Customs
+National Academy of Customs, Indirect Taxes &amp; Narcotics (NACIN), Faridabad
+National Anti-profiteering Authority (NAA)
+Seventh Central Pay Commission, New Delhi
+All India Institute of Medical Sciences (AIIMS)
+All India Institute of Physical Medicine and Rehabilitation, Mumbai
+All India Institute of Speech and Hearing (AIISH), Mysore
+All India Institutes of Medical Sciences (AIIMS), Bibinagar, Telangana
+Central Drugs Standard Control Organization (CDSCO)
+Central Health Service, Ministry of Health and Family Welfare
+Central Institute of Psychiatry (CIP)
+Central Medical Services Society (CMSS)
+Central Research Institute (CRI), Kasauli, Himachal Pradesh
+COVID-19 Updates by Ministry of Health and Family Welfare
+Dental Council of India
+Family Welfare and Training Centre, Mumbai
+HLL Biotech Limited, Chennai, Tamilnadu
+HLL Lifecare Limited
+Hospital Services Consultancy Corporation (I) Limited (HSCC)
+Indian Pharmacopoeia Commission (IPC)
+International Institute for Population Sciences (IIPS)
+Jawaharlal Institute of Postgraduate Medical Education and Research (JIPMER)
+Lady Hardinge Medical College, New Delhi
+Lala Ram Swarup Institute of Tuberculosis and Respiratory Diseases
+Medical Council of India (MCI)
+National Board of Examinations
+National Institute of Health and Family Welfare (NIHFW), New Delhi
+National Institute of Immunohaematology, ICMR, Mumbai
+National Institute of Mental Health and Neuro Sciences (NIMHANS)
+National Tuberculosis Institute (NTI), Bangalore
+National Vector Borne Disease Control Programme (NVBDCP)
+North Eastern Indira Gandhi Regional Institute of Health and Medical Sciences (NEIGRIHMS)
+Nutrition Society of India (NSI), Hyderabad
+Office of the Chief Controller of Accounts, Ministry of Health and Family Welfare
+Post Graduate Institute of Medical Education and Research, Chandigarh
+Pradhan Mantri Swasthya Suraksha Yojana (PMSSY)
+Regional Institute of Medical Sciences, Imphal, Manipur
+Regional Leprosy Training and Research Institute and Regional Office of Health and Family Welfare, Raipur, Chhattisgarh
+Regional Resource Centre for North Eastern States,  Guwahati, Assam
+Indian Council of Medical Research (ICMR)
+National Ethics Committee Registry for Biomedical and Health Research (NECRBHR)
+Bharat Bhari Udyog Nigam Limited (BBUNL), Kolkata
+Bharat Heavy Electricals Limited (BHEL)
+Bharat Pumps and Compressors Limited, Allahabad
+Bridge and Roof Company (India) Limited
+Burn Standard Company Limited (BSCL)
+Cement Corporation of India Limited (CCI)
+Engineering Projects (India) Ltd.
+Heavy Engineering Corporation Limited (HEC)
+Hindustan Cables Limited (HCL), Kolkata
+Hindustan Newsprint Limited (HNL)
+Hindustan Paper Corporation Ltd.
+Hindustan Photo Films Manufacturing Company Limited (HPF), Ootacamund, Tamil Nadu
+Hindustan Salts Limited
+HMT Limited
+Hooghly Printing Company Limited, Kolkata
+Instrumentation Limited, Kota
+Nagaland Pulp and Paper Company Limited (NPPC)
+Nepa Mills Limited, Nepanagar, Burhanpur
+Rajasthan Electronics and Instruments Limited (REIL) - Solar PV Monitoring System, Jaipur
+Scooters India Ltd.
+The Braithwaite Burn and Jessop Construction Company Limited
+Tyre Corporation of India Limited (TCIL), West Bengal
+Counselling, Retraining and Redeployment of VRS Employees
+Department of Public Enterprises (DPE), MOU Division
+Standing Conference of Public Enterprises (SCOPE)
+Assam Rifles
+Border Security Force (BSF)
+Central Industrial Security Force (CISF)
+Central Reserve Police Force (CRPF)
+Directorate of Coordination Police Wireless
+Indo Tibetan Border Police (ITBP)
+National Security Guard (NSG)
+Sashastra Seema Bal (SSB)
+Bureau of Police Research and Development (BPR&amp;D)
+National Institute of Criminology and Forensic Science (NICFS)
+National Investigation Agency (NIA)
+North Eastern Police Academy (NEPA)
+Sardar Vallabhbhai Patel National Police Academy
+Directorate General of Fire Services, Civil Defence &amp; Home Guards, Ministry of Home Affairs
+Directorate of Forensic Science Services (DFSS)
+Director General of Civil Defence
+India Disaster Resource Network,IDRN
+Indian Military Academy
+Narcotics Control Bureau (NCB)
+National Disaster Management Authority (NDMA)
+National Fire Service College
+Office of the Registrar General and Census Commissioner, Census of India
+Regional Institute of Correctional Administration (RICA)
+Scheduled Tribes and Other Traditional Forest Dwellers
+Welfare and Rehabilitation Board (WARB), New Delhi
+Committee of Parliament on Official Language
+Nagar Rajbhasha Karyanavayan Samiti, Karnal
+Town Official Language Implementation Committee, Ahmedabad
+Inter-State Council
+National Crime Records Bureau (NCRB)
+Aligarh Muslim University (AMU)
+All India Council of Technical Education (AICTE)
+Assam University
+Board Of Apprenticeship Training, Northern Region, Kanpur
+Board of Apprenticeship Training (Southern Region), Chennai
+Board of Apprenticeship Training, Western Region - eGovernance Portal
+Board of Practical Training (BOPT), Easter Region
+Central Institute of Classical Tamil (CICT)
+Central Institute of Indian Languages (CIIL)
+Central Universities , Ministry of Human Resource Development
+Central University of Odisha (CUO)
+Commisssion for Scientific and Technical Terminology (CSTT)
+Copyright Office, India
+Council of Architecture
+Educational Consultants India Limited (EDCIL)
+Hemwati Nandan Bahuguna Garhwal University, Uttarakhand
+Indian Council of Historical Research (ICHR),  New Delhi
+Indian Council of Philosophical Research, ICPR, New Delhi
+Indian Council of Social Science Research (ICSSR)
+Indian Institute of Advanced Study (IIAS)
+Indian Institute of Information Tehnology(IIITs)
+Indian Institute of Management (IIM)
+Indian Institute of Science Education and Research  (IISERs)
+Indian Institute of Science (IISC), Bangalore
+Indian Institute of Technology (IIT)
+Indian Institutes of Science Education and Research (IISER), Pune
+Indira Gandhi National Open University (IGNOU)
+Institute for Studies in Industrial Development (ISID)
+Institute of Company Secretaries of India (ICSI)
+International Institute of Information Technology (IIT), Bhubaneswar
+Jamia Millia Islamia
+Jawaharlal Nehru University (JNU)
+Maharsi Sandipani Rashtriya Veda Vidya Pratishtan, Ujjain, Madhya Pradesh
+Mahatma Gandhi Antarrashtriya Hindi Vishwavidyalaya
+Mahila Samakhya Society, Chhattisgarh
+Maulana Azad National Urdu University
+Nalanda University
+National Book Trust (NBT), India
+National Council for Promotion of Sindhi Language (NCPSL)
+National Council for Promotion of Urdu Language (NCPUL)
+National Council for Teacher Education, Eastern Regional Committee (ERC)
+National Council of Rural Institutes, Hyderabad
+National Institute of Foundry and Forge Technology (NIFFT), Hatia, Ranchi
+National Institute of Technical Teachers Training and Research (NITTTRs)
+National Institute of Technology (NIT)
+National Testing Agency (NTA)
+National University of Educational Planning and Administration (NUEPA)
+Navodaya Leadership Institute, Canancona, Goa
+North Eastern Hill University (NEHU), Shillong, Meghalaya
+Pondicherry University
+Rashtriya Sanskrit Sansthan
+Sant Longowal Institute of Engineering and Technology (SLIET)
+School of Planning and Architecture, Bhopal
+State Academy of Training (SAT), Manipur
+State Institute of Education Technology, Patna
+Tezpur University
+University Grants Commission (UGC)
+University of Allahabad
+University of Delhi
+University of Hyderabad, Andhra Pradesh
+Vardhaman Mahaveer Open University (VMOU), Kota, Rajasthan
+Visva-Bharati, Santiniketan
+Central Board of Secondary Education (CBSE)
+Central Institute of Educational Technology (CIET)
+Central school for Tibetans, Shimla, Himachal Pradesh
+Central Tibetan Schools Administration (CTSA)
+Jawahar Navodaya Vidyalaya, Gadag, Karnataka
+Kendriya Hindi Sansthan, Agra, Uttar Pradesh
+Kendriya Vidyalaya Sangathan (KVS)
+National Bal Bhavan
+National Commission for Minority Educational Institutions (NCMEI)
+National Council for Teacher Education (NCTE)
+National Council of Educational Research and Training (NCERT)
+National Institute of Open Schooling (NIOS)
+Navodaya Vidyalaya Samiti (NVS)
+Legal Information Institute of India (LII of India)
+National Judicial Academy, Bhopal
+National Legal Services Authority (NALSA)
+International Centre for Alternative Dispute Resolution (ICADR)
+Law Commission of India
+Central Bureau of Investigation (CBI)
+Central Information Commission (CIC)
+Central Vigilance Commission(CVC)
+Grih Kalyan Kendra
+Indian Institute of Public Administration (IIPA)
+Institute of Secretariat Training and Management (ISTM)
+Lal Bahadur Shastri National Academy of Administration (LBSNAA)
+Network of Public Service Training Institutions
+Public Enterprises Selection Board (PESB)
+Staff Selection Commission (SSC)
+Union Public Service Commission (UPSC)
+Council for Advancement of Peoples Action and Rural Technology (CAPART)
+Mahatma Gandhi State Institute of Rural Development, Jabalpur, Madhya Pradesh.
+National Institute of Rural Development (NIRD)
+National Rural Livelihoods Mission (NRLM) - Aajeevika
+National Rural Roads Development Agency (NRRDA)
+Aquaculture and Marine Biotechnology, Department of Biotechnology, New Delhi
+Bharat Immunologicals and Biologicals Corporation Limited (BIBCOL), Uttar Pradesh
+Bioinformatics Infrastructure Facility (BIF), College of Veterinary Science, Assam Agricultural University
+Bio-Processing Unit (BPU), Mohali, Punjab
+Biotech Consortium India Limited (BCIL)
+Biotechnology Industry Research Assistance Council (BIRAC), New Delhi
+Biotechnology Information System Network (BTISNET)
+Centre for Cellular and Molecular Platforms (C-CAMP), Bangalore
+Centre for DNA Fingerprinting and Diagnostics (CDFD)
+Consortium on Micropropagation Research and Technology Development
+Institute for Stem Cell Biology and Regenerative Medicine (inStem)
+Institute of Bioresources and Sustainable Development (IBSD)
+Institute of Life Sciences
+Microbial Type Culture Collection and Gene Bank (MTCC), Chandigarh
+National Agri-Food Biotechnology Institute (NABI), Mohali, Punjab
+National Brain Research Centre (NBRC)
+National Centre for Cell Sciences (NCCS)
+National Institute of Animal Biotechnology (NIAB), Hyderabad, Andhra Pradesh
+National Institute of Biomedical Genomics
+National Institute of Immunology (NII)
+National Institute of Plant Genome Research, New Delhi
+Rajiv Gandhi Centre for Biotechnology (RGCB)
+Regional Centre for Biotechnology (RCB), Gurgaon
+Small Business Innovation Research Initiative
+Translational Health Science and Technology Institute (THSTI), Gurgaon, Haryana
+Agharkar Research Institute (ARI)
+Aryabhatta Research Institute of Observational Sciences (ARIES)
+Birbal Sahni Institute of Palaeobotany
+Controller Of Accounts (MST), New Delhi
+Indian Academy of Sciences, Bangalore, Karnataka
+Indian Association for the Cultivation of Science (IACS), Kolkata
+Indian Institute of Astrophysics (IIA)
+Indian Institute of Geomagnetism
+Indian National Science Academy (INSA)
+Indian Science Congress Association, Kolkata
+Institute of Advanced Study in Science and Technology (IASST)
+International Advanced Research Centre for Powder Metallurgy and New Materials
+Jawaharlal Nehru Centre for Advanced Scientific Research (JNCASR)
+National Academy of Sciences
+National Accreditation Board for Testing and Calibration Laboratories (NABL)
+National Atlas and Thematic Mapping Organisation (NATMO)
+National Good Laboratory Practice (GLP) Compliance Monitoring Authority (NGCMA)
+National Innovation Foundation, Gujarat
+Natural Resources Data Management System (NRDMS)
+Patent Facilitating Centre, New Delhi
+Raman Research Institute, Bangalore, Karnataka
+Raman Science Centre and Planetarium, Nagpur
+S and T International Cooperation Division, New Delhi
+Science and Engineering Research Board (SERB)
+Science for Equity, Empowerment and Development (SEED) Division, Department of Science and Technology
+Sophisticated Instrumentation Centre for Applied Research and Testing (SICART), Gujarat
+Sree Chitra Tirunal Institute for Medical Sciences and Technology (SCTIMST)
+Survey Of India, Dehradun, Uttarakhand
+Technology Development Board (TDB), New Delhi
+Technology Information, Forecasting and Assessment Council (TIFAC)
+Vigyan Prasar Science Portal
+Wadia Institute of Himalayan Geology, Dehradun, Uttarakhand
+Central Electronics Limited
+Central Glass and Ceramic Research Institute
+Consultancy Development Centre (CDC), DSIR 
+Council of Scientific and Industrial Research (CSIR)
+Institute of Minerals and Materials Technology
+National Automotive Testing and R&amp;D Infrastructure Project (NATRIP)
+National Research Development Corporation (NRDC)
+Ali Yavar Jung National Institute for the Hearing Handicapped (AYJNIHH), Southern Regional Centre, Secunderabad
+Indian Sign Language Research and Training Centre (ISLRTC)
+National Institute for the Empowerment of Persons with Intellectual Disabilities
+Swami Vivekanand National Institute of Rehabilitation Training and Research (SVNIRTAR), Olatpur, Odisha
+Artificial Limbs Manufacturing Corporation of India (ALIMCO), Kanpur, Uttar Pradesh
+Dr.Ambedkar Foundation
+Dr. Ambedkar International Centre
+National Commission for Backward Classes(NCBC)
+National Commission for Denotified, Nomadic and Semi-Nomadic Tribes (NCDNSNT)
+National Commission for Safai Karamcharis (NCSK)
+National Commission for Scheduled Castes(NCSC)
+National Institute of Social Defence (NISD)
+Krishna River Management Board (KRMB)
+Indian Hockey Federation (IHF)
+Lakshmibai National Institute of Physical Education (LNIPE), Gwalior
+National Anti-Doping Agency (NADA)
+National Dope Testing Laboratory (NDTL)
+National Sports University, Imphal, Manipur
+Sports Authority of India (SAI)
+Tug-of-War Federation of India (TWFI)
+National Service Scheme (NSS)
+Nehru Yuva Kendra Sangathan (NYKS), Delhi
+Nehru Yuva Kendra Sangathan Youth Informatics (Employment)
+Rajiv Gandhi National Institute of Youth Development (RGNIYD)
+Youth Hostel, Mysore, Karnataka
+Cattle and Dairy Development Division - Department of Animal Husbandry, Dairying and Fisheries
+Central Poultry Development Organisation (Western Region),Goregaon (East), Mumbai
+Fisheries Division - Department of  Animal Husbandry, Dairying and Fisheries
+National Institute of Fisheries Post Harvest Technology and Training (NIFPHATT),  Kochi, Kerala
+National Livestock Mission - Department of Animal Husbandry, Dairying and Fisheries
+Regional Station For Forage Production &amp; Demonstration, Pahadi Sharif, Hyderabad, Telangana
+Veterinary Council of India (VCI)
+Central Institute of Coastal Engineering for Fishery, Bangalore
+National Fisheries Development Board (NFDB), Hyderabad

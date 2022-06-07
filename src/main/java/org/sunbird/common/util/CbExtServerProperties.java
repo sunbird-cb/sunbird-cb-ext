@@ -35,7 +35,7 @@ public class CbExtServerProperties {
 
 	@Value("${sb.service.user.create.path}")
 	private String lmsUserCreatePath;
-	
+
 	@Value("${sunbird.user.search.endpoint}")
 	private String userSearchEndPoint;
 
@@ -239,7 +239,7 @@ public class CbExtServerProperties {
 
 	@Value("${kafka.topics.user.registration.register.event}")
 	private String userRegistrationTopic;
-	
+
 	@Value("${kafka.topics.user.registration.auto.createUser}")
 	private String userRegistrationAutoCreateUserTopic;
 
@@ -275,28 +275,37 @@ public class CbExtServerProperties {
 
 	@Value("${user.registeration.route.button.name}")
 	private String userRegisterationButtonName;
-	
+
 	@Value("${user.registration.domain.name}")
 	private String userRegistrationDomainName;
 
 	@Value("${user.registration.preApproved.domain}")
 	private String userRegistrationPreApprovedDomainList;
-	
+
 	@Value("${sb.discussion.hub.host}")
 	private String discussionHubHost;
-	
+
 	@Value("${sb.node.bb.user.create.path}")
 	private String discussionHubCreateUserPath;
-	
+
 	@Value("${sb.service.reset.password.path}")
 	private String sbResetPasswordPath;
-	
+
 	@Value("${sb.service.send.notify.email.path}")
 	private String sbSendNotificationEmailPath;
-	
+
 	@Value("${sb.service.assign.role.path}")
 	private String sbAssignRolePath;
-	
+
+	@Value("${user.registration.dept.master.list.file}")
+	private String masterOrgListFileName;
+
+	@Value("${user.registration.custodian.orgId}")
+	private String custodianOrgId;
+
+	@Value("${user.registration.custodian.orgName}")
+	private String custodianOrgName;
+
 	public String getUserAssessmentSubmissionDuration() {
 		return userAssessmentSubmissionDuration;
 	}
@@ -931,7 +940,7 @@ public class CbExtServerProperties {
 	public void setUserRegistrationTopic(String userRegistrationTopic) {
 		this.userRegistrationTopic = userRegistrationTopic;
 	}
-	
+
 	public String getUserRegistrationAutoCreateUserTopic() {
 		return userRegistrationAutoCreateUserTopic;
 	}
@@ -1082,5 +1091,29 @@ public class CbExtServerProperties {
 
 	public void setSbAssignRolePath(String sbAssignRolePath) {
 		this.sbAssignRolePath = sbAssignRolePath;
+	}
+
+	public String getMasterOrgListFileName() {
+		return masterOrgListFileName;
+	}
+
+	public void setMasterOrgListFileName(String masterOrgListFileName) {
+		this.masterOrgListFileName = masterOrgListFileName;
+	}
+
+	public String getCustodianOrgId() {
+		return custodianOrgId;
+	}
+
+	public void setCustodianOrgId(String custodianOrgId) {
+		this.custodianOrgId = custodianOrgId;
+	}
+
+	public String getCustodianOrgName() {
+		return custodianOrgName;
+	}
+
+	public void setCustodianOrgName(String custodianOrgName) {
+		this.custodianOrgName = custodianOrgName;
 	}
 }

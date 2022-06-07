@@ -16,6 +16,7 @@ public class UserRegistration extends UserRegistrationInfo {
 	private String updatedBy;
 	private String userId;
 	private String userName;
+	private String proposedDeptName;
 
 	public String getWfId() {
 		return wfId;
@@ -87,6 +88,14 @@ public class UserRegistration extends UserRegistrationInfo {
 
 	public void setUserName(String userName) {
 		this.userName = userName;
+	}
+
+	public String getProposedDeptName() {
+		return proposedDeptName;
+	}
+
+	public void setProposedDeptName(String proposedDeptName) {
+		this.proposedDeptName = proposedDeptName;
 	}
 
 	public String toMininumString() {

@@ -1,11 +1,16 @@
 package org.sunbird.user.registration.service;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang.RandomStringUtils;
@@ -153,6 +158,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 		SBApiResponse response = createDefaultResponse(Constants.USER_REGISTRATION_DEPT_INFO_API);
 
 		try {
+			Set<String> orgNameList = new HashSet<String>();
 			List<DeptPublicInfo> orgList = new ArrayList<>();
 			int count = 0;
 			int iterateCount = 0;
@@ -163,6 +169,9 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 				requestMap.put(Constants.LIMIT, 1000);
 				requestMap.put(Constants.FIELDS,
 						new ArrayList<>(Arrays.asList(Constants.CHANNEL, Constants.IDENTIFIER)));
+				Map<String, Object> sortByMap = new HashMap<String, Object>();
+				sortByMap.put(Constants.CHANNEL, Constants.ASC_ORDER);
+				requestMap.put(Constants.SORT_BY, sortByMap);
 				requestMap.put(Constants.FILTERS, new HashMap<String, Object>() {
 					{
 						put(Constants.IS_TENANT, Boolean.TRUE);
@@ -184,6 +193,14 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 				for (SunbirdApiRespContent content : resultResp.getContent()) {
 					if (!excludeList.isEmpty() && !excludeList.contains(content.getIdentifier())) {
 						orgList.add(new DeptPublicInfo(content.getIdentifier(), content.getChannel()));
+						orgNameList.add(content.getChannel());
+					}
+				}
+
+				List<String> masterOrgList = getMasterOrgList();
+				for (String orgName : masterOrgList) {
+					if (!orgNameList.contains(orgName)) {
+						orgList.add(new DeptPublicInfo(serverProperties.getCustodianOrgId(), orgName));
 					}
 				}
 			} while (count != iterateCount);
@@ -302,15 +319,21 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 		userRegistration.setDeptName(userRegInfo.getDeptName());
 		userRegistration.setPosition(userRegInfo.getPosition());
 		userRegistration.setSource(userRegInfo.getSource());
-
+		if (userRegInfo.getDeptId().equalsIgnoreCase(serverProperties.getCustodianOrgId())) {
+			userRegistration.setProposedDeptName(userRegInfo.getDeptName());
+			userRegistration.setDeptName(serverProperties.getCustodianOrgName());
+		}
+		
 		if (StringUtils.isBlank(userRegInfo.getRegistrationCode())) {
 			userRegistration.setRegistrationCode(serverProperties.getUserRegCodePrefix() + "-"
-					+ userRegInfo.getDeptName() + "-" + RandomStringUtils.random(8, Boolean.TRUE, Boolean.TRUE));
+					+ userRegistration.getDeptName() + "-" + RandomStringUtils.random(8, Boolean.TRUE, Boolean.TRUE));
 			userRegistration.setCreatedOn(new Date().getTime());
 		} else {
 			userRegistration.setUpdatedOn(new Date().getTime());
 		}
 		userRegistration.setStatus(UserRegistrationStatus.CREATED.name());
+
+	
 
 		return userRegistration;
 	}
@@ -399,5 +422,23 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 			LOGGER.error(String.format("Exception in %s : %s", "getUserRegistrationDetails", e.getMessage()));
 		}
 		return null;
+	}
+
+	private List<String> getMasterOrgList() {
+		List<String> orgList = new ArrayList<String>();
+		// read file into stream, try-with-resources
+
+		InputStream in = this.getClass().getClassLoader()
+				.getResourceAsStream(serverProperties.getMasterOrgListFileName());
+		try (BufferedReader br = new BufferedReader(new InputStreamReader(in))) {
+			String line;
+			while ((line = br.readLine()) != null) {
+				orgList.add(line.trim());
+			}
+		} catch (Exception e) {
+			LOGGER.error("Failed to read the master org list. Exception: ", e);
+		}
+
+		return orgList;
 	}
 }
