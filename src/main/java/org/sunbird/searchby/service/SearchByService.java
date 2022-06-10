@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 import org.sunbird.cache.RedisCacheMgr;
 import org.sunbird.common.model.FracApiResponse;
 import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
@@ -69,18 +70,21 @@ public class SearchByService {
 		response.setStatusInfo(new FracStatusInfo());
 		response.getStatusInfo().setStatusCode(HttpStatus.OK.value());
 
-		List<Map<String, Object>> positionList = (List<Map<String, Object>>) redisCacheMgr
+		Map<String, List<Map<String, Object>>> positionList = (Map<String, List<Map<String, Object>>>) redisCacheMgr
 				.getCache(Constants.POSITIONS_CACHE_NAME);
-		if (CollectionUtils.isEmpty(positionList)) {
+		if (ObjectUtils.isEmpty(positionList)
+				|| CollectionUtils.isEmpty(positionList.get(Constants.POSITIONS_CACHE_NAME))) {
 			logger.info("Initializing / Refreshing the Cache value for key : " + Constants.POSITIONS_CACHE_NAME);
 			try {
 				positionList = updateDesignationDetails(userToken);
-				response.setResponseData(positionList);
+				response.setResponseData(positionList.get(Constants.POSITIONS_CACHE_NAME));
 			} catch (Exception e) {
 				logger.error(e);
 				response.getStatusInfo().setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
 				response.getStatusInfo().setErrorMessage(e.getMessage());
 			}
+		} else {
+			response.setResponseData(positionList.get(Constants.POSITIONS_CACHE_NAME));
 		}
 
 		return response;
@@ -318,7 +322,7 @@ public class SearchByService {
 		return providerMap;
 	}
 
-	private List<Map<String, Object>> updateDesignationDetails(String authUserToken) throws Exception {
+	private Map<String, List<Map<String, Object>>> updateDesignationDetails(String authUserToken) throws Exception {
 		Map<String, String> headers = new HashMap<>();
 		HashMap<String, Object> reqBody = new HashMap<>();
 		headers = new HashMap<>();
@@ -366,8 +370,10 @@ public class SearchByService {
 			}
 			throw err;
 		}
-		redisCacheMgr.putCache(Constants.POSITIONS_CACHE_NAME, positionList);
-		return positionList;
+		Map<String, List<Map<String, Object>>> positionMap = new HashMap<String, List<Map<String, Object>>>();
+		positionMap.put(Constants.POSITIONS_CACHE_NAME, positionList);
+		redisCacheMgr.putCache(Constants.POSITIONS_CACHE_NAME, positionMap);
+		return positionMap;
 	}
 
 	private List<Map<String, Object>> getMasterPositionList(List<String> positionNameList) throws Exception {
