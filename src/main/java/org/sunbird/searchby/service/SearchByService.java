@@ -148,7 +148,7 @@ public class SearchByService {
 
 		for (String compName : competencyMap.keySet()) {
 			Map<String, Object> compSearchObj = new HashMap<>();
-			compSearchObj.put(Constants.TYPE, Constants.COMPETENCY);
+			compSearchObj.put(Constants.TYPE, Constants.COMPETENCY.toUpperCase());
 			compSearchObj.put(Constants.FIELD, Constants.NAME);
 			compSearchObj.put(Constants.KEYWORD, compName);
 			searchList.add(compSearchObj);
