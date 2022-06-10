@@ -262,6 +262,7 @@ public class Constants {
 	public static final String COMPETENCY_CACHE_NAME_BY_AREA = "competencyByArea";
 	public static final String COMPETENCY_CACHE_NAME_BY_TYPE = "competencyByType";
 	public static final String PROVIDER_CACHE_NAME = "provider";
+	public static final String POSITIONS_CACHE_NAME = "positions";
 	public static final String COMPETENCY_FACET_NAME = "competencies_v3.name";
 	public static final String IS_TENANT = "isTenant";
 	public static final String CHANNEL = "channel";
@@ -297,6 +298,7 @@ public class Constants {
 	public static final String MAX_QUESTIONS = "maxQuestions";
 	public static final String CHILD_NODES = "childNodes";
 	public static final String SEARCH = "search";
+	public static final String SEARCHES = "searches";
 	public static final String QUESTION_ID = "qs_id_";
 	public static final String ASSESSMENT_ID = "assess_id_";
 	public static final String EDITOR_STATE = "editorState";
@@ -330,7 +332,7 @@ public class Constants {
 	public static final String QUERY_LOGGER_THRESHOLD = "queryLoggerConstantThreshold";
 	public static final String SUNBIRD_CASSANDRA_CONSISTENCY_LEVEL = "sunbird_cassandra_consistency_level";
 	public static final String INCOMPLETE_COURSES_MAIL_SUBJECT = "Complete the courses you started";
-	public static final String COURSE = "course";
+	public static final String COURSE = "Course";
 	public static final String _URL = "_url";
 	public static final String THUMBNAIL = "_thumbnail";
 	public static final String _NAME = "_name";
@@ -437,6 +439,24 @@ public class Constants {
 	public static final String PUBLIC = "PUBLIC";
 	public static final String ASC_ORDER = "asc";
 	public static final String SORT_BY = "sort_by";
+	public static final String FIELD = "field";
+	public static final String KEYWORD = "keyword";
+	public static final String VERIFIED = "VERIFIED";
+	public static final String COMPETENCY_AREA = "competencyArea";
+	public static final String COMPETENCY_TYPE = "competencyType";
+	public static final String SOURCE = "source";
+	public static final String ADDITIONAL_PROPERTIES = "additionalProperties";
+	public static final String CONTENT = "content";
+	public static final String COMPETENCY = "competency";
+	public static final String CHILD_COUNT = "childCount";
+	public static final String RESPONSE_DATA = "responseData";
+	public static final String DEPARTMENT_LIST_CACHE_NAME = "deptCacheList";
+	public static final String POSITIONS = "positions";
+	public static final String BEARER = "bearer ";
+	public static final String IMG_URL = "imgurl";
+	public static final String VALUES = "values";
+	public static final String PROGRAM = "Program";
+	public static final String LIVE = "Live";
 
 	private Constants() {
 		throw new IllegalStateException("Utility class");

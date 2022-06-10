@@ -305,6 +305,9 @@ public class CbExtServerProperties {
 
 	@Value("${user.registration.custodian.orgName}")
 	private String custodianOrgName;
+	
+	@Value("${user.position.master.list.file}")
+	private String masterPositionListFileName;
 
 	public String getUserAssessmentSubmissionDuration() {
 		return userAssessmentSubmissionDuration;
@@ -1115,5 +1118,13 @@ public class CbExtServerProperties {
 
 	public void setCustodianOrgName(String custodianOrgName) {
 		this.custodianOrgName = custodianOrgName;
+	}
+
+	public String getMasterPositionListFileName() {
+		return masterPositionListFileName;
+	}
+
+	public void setMasterPositionListFileName(String masterPositionListFileName) {
+		this.masterPositionListFileName = masterPositionListFileName;
 	}
 }

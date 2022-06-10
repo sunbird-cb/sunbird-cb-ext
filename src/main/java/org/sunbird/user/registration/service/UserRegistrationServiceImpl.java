@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.action.search.SearchResponse;
@@ -28,6 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.sunbird.cache.RedisCacheMgr;
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.model.SunbirdApiRequest;
 import org.sunbird.common.model.SunbirdApiResp;
@@ -72,6 +74,9 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 
 	@Autowired
 	UserUtilityService userUtilityService;
+
+	@Autowired
+	RedisCacheMgr redisCacheMgr;
 
 	@Override
 	public SBApiResponse registerUser(UserRegistrationInfo userRegInfo) {
@@ -158,56 +163,13 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 		SBApiResponse response = createDefaultResponse(Constants.USER_REGISTRATION_DEPT_INFO_API);
 
 		try {
-			Set<String> orgNameList = new HashSet<String>();
-			List<DeptPublicInfo> orgList = new ArrayList<>();
-			int count = 0;
-			int iterateCount = 0;
-			do {
-				// request body
-				Map<String, Object> requestMap = new HashMap<>();
-				requestMap.put(Constants.OFFSET, iterateCount);
-				requestMap.put(Constants.LIMIT, 1000);
-				requestMap.put(Constants.FIELDS,
-						new ArrayList<>(Arrays.asList(Constants.CHANNEL, Constants.IDENTIFIER)));
-				Map<String, Object> sortByMap = new HashMap<String, Object>();
-				sortByMap.put(Constants.CHANNEL, Constants.ASC_ORDER);
-				requestMap.put(Constants.SORT_BY, sortByMap);
-				requestMap.put(Constants.FILTERS, new HashMap<String, Object>() {
-					{
-						put(Constants.IS_TENANT, Boolean.TRUE);
-					}
-				});
-
-				String serviceURL = serverProperties.getSbUrl() + serverProperties.getSbOrgSearchPath();
-				SunbirdApiResp orgResponse = mapper.convertValue(
-						outboundRequestHandlerService.fetchResultUsingPost(serviceURL, new HashMap<String, Object>() {
-							{
-								put(Constants.REQUEST, requestMap);
-							}
-						}), SunbirdApiResp.class);
-
-				SunbirdApiResultResponse resultResp = orgResponse.getResult().getResponse();
-				count = resultResp.getCount();
-				iterateCount = iterateCount + resultResp.getContent().size();
-				List<String> excludeList = serverProperties.getUserRegistrationDeptExcludeList();
-				for (SunbirdApiRespContent content : resultResp.getContent()) {
-					if (!excludeList.isEmpty() && !excludeList.contains(content.getIdentifier())) {
-						orgList.add(new DeptPublicInfo(content.getIdentifier(), content.getChannel()));
-						orgNameList.add(content.getChannel());
-					}
-				}
-
-				List<String> masterOrgList = getMasterOrgList();
-				for (String orgName : masterOrgList) {
-					if (!orgNameList.contains(orgName)) {
-						orgList.add(new DeptPublicInfo(serverProperties.getCustodianOrgId(), orgName));
-					}
-				}
-			} while (count != iterateCount);
-
-			response.getResult().put("count", orgList.size());
-			response.getResult().put("content", orgList);
-
+			List<DeptPublicInfo> orgList = (List<DeptPublicInfo>) redisCacheMgr
+					.getCache(Constants.DEPARTMENT_LIST_CACHE_NAME);
+			if (CollectionUtils.isEmpty(orgList)) {
+				orgList = getDepartmentDetails();
+			}
+			response.getResult().put(Constants.COUNT, orgList.size());
+			response.getResult().put(Constants.CONTENT, orgList);
 		} catch (Exception e) {
 			LOGGER.error("Exception occurred in getDeptDetails", e);
 			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -323,7 +285,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 			userRegistration.setProposedDeptName(userRegInfo.getDeptName());
 			userRegistration.setDeptName(serverProperties.getCustodianOrgName());
 		}
-		
+
 		if (StringUtils.isBlank(userRegInfo.getRegistrationCode())) {
 			userRegistration.setRegistrationCode(serverProperties.getUserRegCodePrefix() + "-"
 					+ userRegistration.getDeptName() + "-" + RandomStringUtils.random(8, Boolean.TRUE, Boolean.TRUE));
@@ -332,8 +294,6 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 			userRegistration.setUpdatedOn(new Date().getTime());
 		}
 		userRegistration.setStatus(UserRegistrationStatus.CREATED.name());
-
-	
 
 		return userRegistration;
 	}
@@ -439,6 +399,61 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 			LOGGER.error("Failed to read the master org list. Exception: ", e);
 		}
 
+		return orgList;
+	}
+
+	private List<DeptPublicInfo> getDepartmentDetails() throws Exception {
+		Set<String> orgNameList = new HashSet<String>();
+		List<DeptPublicInfo> orgList = new ArrayList<>();
+		int count = 0;
+		int iterateCount = 0;
+		do {
+			// request body
+			Map<String, Object> requestMap = new HashMap<>();
+			requestMap.put(Constants.OFFSET, iterateCount);
+			requestMap.put(Constants.LIMIT, 1000);
+			requestMap.put(Constants.FIELDS, new ArrayList<>(Arrays.asList(Constants.CHANNEL, Constants.IDENTIFIER)));
+			Map<String, Object> sortByMap = new HashMap<String, Object>();
+			sortByMap.put(Constants.CHANNEL, Constants.ASC_ORDER);
+			requestMap.put(Constants.SORT_BY, sortByMap);
+			requestMap.put(Constants.FILTERS, new HashMap<String, Object>() {
+				{
+					put(Constants.IS_TENANT, Boolean.TRUE);
+				}
+			});
+
+			String serviceURL = serverProperties.getSbUrl() + serverProperties.getSbOrgSearchPath();
+			SunbirdApiResp orgResponse = mapper.convertValue(
+					outboundRequestHandlerService.fetchResultUsingPost(serviceURL, new HashMap<String, Object>() {
+						{
+							put(Constants.REQUEST, requestMap);
+						}
+					}), SunbirdApiResp.class);
+
+			SunbirdApiResultResponse resultResp = orgResponse.getResult().getResponse();
+			count = resultResp.getCount();
+			iterateCount = iterateCount + resultResp.getContent().size();
+			List<String> excludeList = serverProperties.getUserRegistrationDeptExcludeList();
+			for (SunbirdApiRespContent content : resultResp.getContent()) {
+				if (!excludeList.isEmpty() && !excludeList.contains(content.getIdentifier())) {
+					orgList.add(new DeptPublicInfo(content.getIdentifier(), content.getChannel()));
+					orgNameList.add(content.getChannel());
+				}
+			}
+
+			List<String> masterOrgList = getMasterOrgList();
+			for (String orgName : masterOrgList) {
+				if (!orgNameList.contains(orgName)) {
+					orgList.add(new DeptPublicInfo(serverProperties.getCustodianOrgId(), orgName));
+				}
+			}
+		} while (count != iterateCount);
+
+		if (CollectionUtils.isEmpty(orgList)) {
+			throw new Exception("Failed to retrieve organisation details.");
+		}
+
+		redisCacheMgr.putCache(Constants.DEPARTMENT_LIST_CACHE_NAME, orgList);
 		return orgList;
 	}
 }
