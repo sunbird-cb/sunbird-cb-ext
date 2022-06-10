@@ -21,6 +21,7 @@ import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.core.logger.CbExtLogger;
 import org.sunbird.searchby.model.CompetencyInfo;
+import org.sunbird.searchby.model.FracCommonInfo;
 import org.sunbird.searchby.model.ProviderInfo;
 import org.sunbird.workallocation.model.FracStatusInfo;
 
@@ -65,26 +66,26 @@ public class SearchByService {
 		return providerMap.values();
 	}
 
-	public FracApiResponse listDesignations(String userToken) {
+	public FracApiResponse listPositions(String userToken) {
 		FracApiResponse response = new FracApiResponse();
 		response.setStatusInfo(new FracStatusInfo());
 		response.getStatusInfo().setStatusCode(HttpStatus.OK.value());
 
-		Map<String, List<Map<String, Object>>> positionList = (Map<String, List<Map<String, Object>>>) redisCacheMgr
+		Map<String, List<FracCommonInfo>> positionMap = (Map<String, List<FracCommonInfo>>) redisCacheMgr
 				.getCache(Constants.POSITIONS_CACHE_NAME);
-		if (ObjectUtils.isEmpty(positionList)
-				|| CollectionUtils.isEmpty(positionList.get(Constants.POSITIONS_CACHE_NAME))) {
+		if (ObjectUtils.isEmpty(positionMap)
+				|| CollectionUtils.isEmpty(positionMap.get(Constants.POSITIONS_CACHE_NAME))) {
 			logger.info("Initializing / Refreshing the Cache value for key : " + Constants.POSITIONS_CACHE_NAME);
 			try {
-				positionList = updateDesignationDetails(userToken);
-				response.setResponseData(positionList.get(Constants.POSITIONS_CACHE_NAME));
+				positionMap = updateDesignationDetails(userToken);
+				response.setResponseData(positionMap.get(Constants.POSITIONS_CACHE_NAME));
 			} catch (Exception e) {
 				logger.error(e);
 				response.getStatusInfo().setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
 				response.getStatusInfo().setErrorMessage(e.getMessage());
 			}
 		} else {
-			response.setResponseData(positionList.get(Constants.POSITIONS_CACHE_NAME));
+			response.setResponseData(positionMap.get(Constants.POSITIONS_CACHE_NAME));
 		}
 
 		return response;
@@ -322,7 +323,7 @@ public class SearchByService {
 		return providerMap;
 	}
 
-	private Map<String, List<Map<String, Object>>> updateDesignationDetails(String authUserToken) throws Exception {
+	private Map<String, List<FracCommonInfo>> updateDesignationDetails(String authUserToken) throws Exception {
 		Map<String, String> headers = new HashMap<>();
 		HashMap<String, Object> reqBody = new HashMap<>();
 		headers = new HashMap<>();
@@ -344,7 +345,7 @@ public class SearchByService {
 		reqBody.put(Constants.SEARCHES, searchList);
 
 		List<String> positionNameList = new ArrayList<String>();
-		List<Map<String, Object>> positionList = getMasterPositionList(positionNameList);
+		List<FracCommonInfo> positionList = getMasterPositionList(positionNameList);
 
 		Map<String, Object> fracSearchRes = outboundRequestHandlerService.fetchResultUsingPost(
 				cbExtServerProperties.getFracHost() + cbExtServerProperties.getFracSearchPath(), reqBody, headers);
@@ -353,11 +354,8 @@ public class SearchByService {
 		if (!CollectionUtils.isEmpty(fracResponseList)) {
 			for (Map<String, Object> respObj : fracResponseList) {
 				if (!positionNameList.contains((String) respObj.get(Constants.NAME))) {
-					Map<String, Object> fracInfo = new HashMap<String, Object>();
-					fracInfo.put(Constants.DESCRIPTION, (String) respObj.get(Constants.DESCRIPTION));
-					fracInfo.put(Constants.ID, (String) respObj.get(Constants.ID));
-					fracInfo.put(Constants.NAME, (String) respObj.get(Constants.NAME));
-					positionList.add(fracInfo);
+					positionList.add(new FracCommonInfo((String) respObj.get(Constants.ID),
+							(String) respObj.get(Constants.NAME), (String) respObj.get(Constants.DESCRIPTION)));
 					positionNameList.add((String) respObj.get(Constants.NAME));
 				}
 			}
@@ -370,14 +368,14 @@ public class SearchByService {
 			}
 			throw err;
 		}
-		Map<String, List<Map<String, Object>>> positionMap = new HashMap<String, List<Map<String, Object>>>();
+		Map<String, List<FracCommonInfo>> positionMap = new HashMap<String, List<FracCommonInfo>>();
 		positionMap.put(Constants.POSITIONS_CACHE_NAME, positionList);
 		redisCacheMgr.putCache(Constants.POSITIONS_CACHE_NAME, positionMap);
 		return positionMap;
 	}
 
-	private List<Map<String, Object>> getMasterPositionList(List<String> positionNameList) throws Exception {
-		List<Map<String, Object>> positionList = new ArrayList<Map<String, Object>>();
+	private List<FracCommonInfo> getMasterPositionList(List<String> positionNameList) throws Exception {
+		List<FracCommonInfo> positionList = new ArrayList<FracCommonInfo>();
 		JsonNode jsonTree = new ObjectMapper().readTree(this.getClass().getClassLoader()
 				.getResourceAsStream(cbExtServerProperties.getMasterPositionListFileName()));
 		JsonNode positionsObj = jsonTree.get(Constants.POSITIONS);
@@ -386,15 +384,8 @@ public class SearchByService {
 		while (positionsItr.hasNext()) {
 			JsonNode position = positionsItr.next();
 			positionNameList.add(position.get(Constants.NAME).asText());
-			Map<String, Object> positionObj = new HashMap<String, Object>() {
-				private static final long serialVersionUID = 1L;
-				{
-					put(Constants.ID, position.get(Constants.ID).asText());
-					put(Constants.NAME, position.get(Constants.NAME).asText());
-					put(Constants.DESCRIPTION, position.get(Constants.DESCRIPTION).asText());
-				}
-			};
-			positionList.add(positionObj);
+			positionList.add(new FracCommonInfo(position.get(Constants.ID).asText(),
+					position.get(Constants.NAME).asText(), position.get(Constants.DESCRIPTION).asText()));
 		}
 		return positionList;
 	}

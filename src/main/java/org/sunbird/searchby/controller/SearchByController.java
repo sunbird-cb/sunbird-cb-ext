@@ -29,8 +29,8 @@ public class SearchByController {
 	}
 
 	@GetMapping("/v1/listPositions")
-	public ResponseEntity<?> listDesignations(@RequestHeader(Constants.X_AUTH_TOKEN) String userToken) {
-		FracApiResponse response = searchByService.listDesignations(userToken);
+	public ResponseEntity<?> listPositions(@RequestHeader(Constants.X_AUTH_TOKEN) String userToken) {
+		FracApiResponse response = searchByService.listPositions(userToken);
 		return new ResponseEntity<>(response, HttpStatus.valueOf(response.getStatusInfo().getStatusCode()));
 	}
 }
