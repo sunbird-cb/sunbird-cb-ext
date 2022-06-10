@@ -457,6 +457,8 @@ public class Constants {
 	public static final String VALUES = "values";
 	public static final String PROGRAM = "Program";
 	public static final String LIVE = "Live";
+	public static final String GOVERNMENT = "Government";
+	public static final String ORGANIZATION_TYPE = "organisationType";
 
 	private Constants() {
 		throw new IllegalStateException("Utility class");

@@ -254,13 +254,15 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		personalDetails.put(Constants.PRIMARY_EMAIL, userRegistration.getEmail());
 		profileDetails.put(Constants.PERSONAL_DETAILS, personalDetails);
 
+		Map<String, Object> professionDetailObj = new HashMap<String, Object>();
+		professionDetailObj.put(Constants.ORGANIZATION_TYPE, Constants.GOVERNMENT);
 		if (StringUtils.isNotEmpty(userRegistration.getPosition())) {
-			Map<String, Object> professionDetailObj = new HashMap<String, Object>();
 			professionDetailObj.put(Constants.DESIGNATION, userRegistration.getPosition());
-			List<Map<String, Object>> professionalDetailsList = new ArrayList<Map<String, Object>>();
-			professionalDetailsList.add(professionDetailObj);
-			profileDetails.put(Constants.PROFESSIONAL_DETAILS, professionalDetailsList);
 		}
+		List<Map<String, Object>> professionalDetailsList = new ArrayList<Map<String, Object>>();
+		professionalDetailsList.add(professionDetailObj);
+		profileDetails.put(Constants.PROFESSIONAL_DETAILS, professionalDetailsList);
+		
 		requestBody.put(Constants.PROFILE_DETAILS, profileDetails);
 		request.put(Constants.REQUEST, requestBody);
 		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService
