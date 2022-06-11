@@ -308,6 +308,12 @@ public class CbExtServerProperties {
 	
 	@Value("${user.position.master.list.file}")
 	private String masterPositionListFileName;
+	
+	@Value("${user.registration.welcome.email.template}")
+	private String welcomeEmailTemplate;
+	
+	@Value("${user.registration.welcome.email.subject}")
+	private String welcomeEmailSubject;
 
 	public String getUserAssessmentSubmissionDuration() {
 		return userAssessmentSubmissionDuration;
@@ -1126,5 +1132,21 @@ public class CbExtServerProperties {
 
 	public void setMasterPositionListFileName(String masterPositionListFileName) {
 		this.masterPositionListFileName = masterPositionListFileName;
+	}
+
+	public String getWelcomeEmailTemplate() {
+		return welcomeEmailTemplate;
+	}
+
+	public void setWelcomeEmailTemplate(String welcomeEmailTemplate) {
+		this.welcomeEmailTemplate = welcomeEmailTemplate;
+	}
+
+	public String getWelcomeEmailSubject() {
+		return welcomeEmailSubject;
+	}
+
+	public void setWelcomeEmailSubject(String welcomeEmailSubject) {
+		this.welcomeEmailSubject = welcomeEmailSubject;
 	}
 }

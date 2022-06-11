@@ -338,14 +338,14 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		Map<String, Object> requestBody = new HashMap<String, Object>();
 		requestBody.put(Constants.ALLOWED_LOGGING, "You can use your email to Login");
 		requestBody.put(Constants.BODY, Constants.HELLO);
-		requestBody.put(Constants.EMAIL_TEMPLATE_TYPE, Constants.WELCOME_EMAIL_TEMPLATE_TYPE);
+		requestBody.put(Constants.EMAIL_TEMPLATE_TYPE, props.getWelcomeEmailTemplate());
 		requestBody.put(Constants.FIRSTNAME, userRegistration.getFirstName());
 		requestBody.put(Constants.LINK, activationLink);
 		requestBody.put(Constants.MODE, Constants.EMAIL);
 		requestBody.put(Constants.ORG_NAME, userRegistration.getDeptName());
 		requestBody.put(Constants.RECIPIENT_EMAILS, Arrays.asList(userRegistration.getEmail()));
 		requestBody.put(Constants.SET_PASSWORD_LINK, true);
-		requestBody.put(Constants.SUBJECT, Constants.WELCOME_EMAIL_MESSAGE);
+		requestBody.put(Constants.SUBJECT, props.getWelcomeEmailSubject());
 		requestBody.put(Constants.WELCOME_MESSAGE, Constants.HELLO);
 
 		request.put(Constants.REQUEST, requestBody);
