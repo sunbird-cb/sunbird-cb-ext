@@ -110,7 +110,6 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 			HttpEntity<?> requestEnty = new HttpEntity<>(requestBody, headers);
 			String url = props.getSbUrl() + props.getUserSearchEndPoint();
 			SearchUserApiResp searchUserResult = restTemplate.postForObject(url, requestEnty, SearchUserApiResp.class);
-			logger.info("searchUserResult ---->" + searchUserResult.toString());
 			if (searchUserResult != null && "OK".equalsIgnoreCase(searchUserResult.getResponseCode())
 					&& searchUserResult.getResult().getResponse().getCount() > 0) {
 				for (SearchUserApiContent searchUserApiContent : searchUserResult.getResult().getResponse()

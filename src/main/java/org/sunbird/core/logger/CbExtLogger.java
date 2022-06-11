@@ -12,9 +12,15 @@ import com.google.common.base.Throwables;
 
 public class CbExtLogger {
 	private Logger logger;
+	private boolean isDebugEnabled;
+	private boolean isInfoEnabled;
+	private boolean isTraceEnabled;
 
 	public CbExtLogger(String className) {
 		this.logger = LogManager.getLogger(className);
+		isDebugEnabled = logger.isDebugEnabled();
+		isInfoEnabled = logger.isInfoEnabled();
+		isTraceEnabled = logger.isTraceEnabled();
 	}
 
 	public void debug(String message) {
@@ -47,7 +53,6 @@ public class CbExtLogger {
 	}
 
 	public void fatal(Exception exception) {
-
 		ObjectMapper ow = new ObjectMapper();
 
 		// log the exception
@@ -65,15 +70,23 @@ public class CbExtLogger {
 	}
 
 	public void trace(String message) {
-
 		logger.log(Level.TRACE, message);
 	}
 
 	public void performance(String message) {
-
 		Level performance = Level.forName("PERF", 350);
-
 		logger.log(performance, message);
 	}
 
+	public boolean isDebugEnabled() {
+		return isDebugEnabled;
+	}
+
+	public boolean isInfoEnabled() {
+		return isInfoEnabled;
+	}
+
+	public boolean isTraceEnabled() {
+		return isTraceEnabled;
+	}
 }
