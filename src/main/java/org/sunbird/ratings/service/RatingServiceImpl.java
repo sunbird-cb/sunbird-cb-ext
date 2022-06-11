@@ -21,7 +21,6 @@ import org.sunbird.ratings.responsecode.ResponseCode;
 import org.sunbird.ratings.responsecode.ResponseMessage;
 
 import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -93,6 +92,7 @@ public class RatingServiceImpl implements RatingService {
             }
         } catch (Exception e) {
             logger.error(e);
+            processExceptionBody(response, e, "", HttpStatus.INTERNAL_SERVER_ERROR);
         }
         return response;
     }
@@ -177,6 +177,7 @@ public class RatingServiceImpl implements RatingService {
             }
         } catch (Exception e) {
             logger.error(e);
+            processExceptionBody(response, e, "", HttpStatus.INTERNAL_SERVER_ERROR);
         }
         return response;
     }
@@ -245,14 +246,14 @@ public class RatingServiceImpl implements RatingService {
             kafkaProducer.push(updateRatingTopicName, ratingMessage);
         } catch (ValidationException ex) {
             logger.error(ex);
-            return processExceptionBody(response, ex, "", HttpStatus.BAD_REQUEST);
+            processExceptionBody(response, ex, "", HttpStatus.BAD_REQUEST);
         } catch (KafkaException ex) {
             logger.error(ex);
-            return processExceptionBody(response, ex, Constants.KAFKA_RATING_EXCEPTION_MESSAGE, HttpStatus.BAD_REQUEST);
+            processExceptionBody(response, ex, Constants.KAFKA_RATING_EXCEPTION_MESSAGE, HttpStatus.BAD_REQUEST);
         } catch (Exception ex) {
             logger.error(ex);
             String errMsg = Constants.RATING_GENERIC_EXCEPTION_MESSAGE;
-            return processExceptionBody(response, ex, errMsg, HttpStatus.INTERNAL_SERVER_ERROR);
+            processExceptionBody(response, ex, errMsg, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         return response;
@@ -336,9 +337,10 @@ public class RatingServiceImpl implements RatingService {
             }
         } catch (ValidationException ex) {
             logger.error(ex);
-            return processExceptionBody(response, ex, "", HttpStatus.BAD_REQUEST);
+            processExceptionBody(response, ex, "", HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             logger.error(e);
+            processExceptionBody(response, e, "", HttpStatus.INTERNAL_SERVER_ERROR);
         }
         return response;
 
@@ -408,13 +410,12 @@ public class RatingServiceImpl implements RatingService {
 
     }
 
-    public SBApiResponse processExceptionBody(SBApiResponse response, Exception ex,
+    public void processExceptionBody(SBApiResponse response, Exception ex,
                                               String exceptionMessage, HttpStatus status) {
         String errMsg = exceptionMessage + ex.getMessage();
         logger.info("Exception: " + errMsg);
         response.getParams().setErrmsg(errMsg);
         response.setResponseCode(status);
-        return response;
     }
 
 }
