@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.client.RestTemplate;
 import org.sunbird.cache.RedisCacheMgr;
 import org.sunbird.common.model.SBApiResponse;
@@ -163,10 +164,14 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 		SBApiResponse response = createDefaultResponse(Constants.USER_REGISTRATION_DEPT_INFO_API);
 
 		try {
-			List<DeptPublicInfo> orgList = (List<DeptPublicInfo>) redisCacheMgr
+			Map<String, List<DeptPublicInfo>> deptListMap = (Map<String, List<DeptPublicInfo>>) redisCacheMgr
 					.getCache(Constants.DEPARTMENT_LIST_CACHE_NAME);
-			if (CollectionUtils.isEmpty(orgList)) {
+			List<DeptPublicInfo> orgList = null;
+			if (ObjectUtils.isEmpty(deptListMap)
+					|| CollectionUtils.isEmpty(deptListMap.get(Constants.DEPARTMENT_LIST_CACHE_NAME))) {
 				orgList = getDepartmentDetails();
+			} else {
+				orgList = deptListMap.get(Constants.DEPARTMENT_LIST_CACHE_NAME);
 			}
 			response.getResult().put(Constants.COUNT, orgList.size());
 			response.getResult().put(Constants.CONTENT, orgList);
@@ -453,7 +458,9 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 			throw new Exception("Failed to retrieve organisation details.");
 		}
 
-		redisCacheMgr.putCache(Constants.DEPARTMENT_LIST_CACHE_NAME, orgList);
+		Map<String, List<DeptPublicInfo>> deptListMap = new HashMap<String, List<DeptPublicInfo>>();
+		deptListMap.put(Constants.DEPARTMENT_LIST_CACHE_NAME, orgList);
+		redisCacheMgr.putCache(Constants.DEPARTMENT_LIST_CACHE_NAME, deptListMap);
 		return orgList;
 	}
 }
