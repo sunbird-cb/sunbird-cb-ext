@@ -282,10 +282,10 @@ public class ProfileServiceImpl implements ProfileService {
 					if (StringUtils.isNotEmpty(value)) {
 						switch (paramName) {
 						case Constants.FIRST_NAME_LOWER_CASE:
-							updatedRequest.put(Constants.FIRSTNAME.toLowerCase(), value);
+							updatedRequest.put(Constants.FIRSTNAME, value);
 							break;
 						case Constants.SURNAME:
-							updatedRequest.put(Constants.LASTNAME.toLowerCase(), value);
+							updatedRequest.put(Constants.LASTNAME, value);
 							break;
 						}
 					}
