@@ -104,8 +104,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                 }
             }
             return prepareQuestionResponse(questionList, questionList.size() > 0);
-        } catch (
-                Exception e) {
+        } catch (Exception e) {
             logger.error(e);
             throw new ApplicationLogicError("REQUEST_COULD_NOT_BE_PROCESSED", e);
         }
@@ -178,13 +177,14 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
         try {
             StringBuilder sbUrl = new StringBuilder(cbExtServerProperties.getAssessmentHost());
             sbUrl.append(cbExtServerProperties.getAssessmentHierarchyReadPath());
-            String serviceURL = sbUrl.toString().replace(Constants.IDENTIFIER_REPLACER, Constants.DO+assessmentIdentifier);
+            String serviceURL = sbUrl.toString().replace(Constants.IDENTIFIER_REPLACER, assessmentIdentifier);
             Map<String, String> headers = new HashMap<>();
             headers.put(Constants.X_AUTH_TOKEN, token);
             headers.put(Constants.AUTHORIZATION, cbExtServerProperties.getSbApiKey());
             Object o = outboundRequestHandlerService.fetchUsingGetWithHeaders(serviceURL, headers);
             return mapper.convertValue(o, Map.class);
         } catch (Exception e) {
+            logger.error(e);
             throw new ApplicationLogicError(e.getMessage());
         }
     }
@@ -257,6 +257,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
             requestBody.put(Constants.REQUEST, requestData);
             return outboundRequestHandlerService.fetchResultUsingPost(sbUrl.toString(), requestBody, headers);
         } catch (Exception e) {
+            logger.error(e);
             throw new Exception("Failed to process the readQuestionDetails.");
         }
     }
