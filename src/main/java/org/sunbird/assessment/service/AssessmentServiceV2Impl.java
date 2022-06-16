@@ -63,7 +63,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                 response = prepareAssessmentResponse(assessmentAllDetail, isSuccess);
                 redisCacheMgr.putCache(Constants.USER_ASSESS_REQ + token, response.getResult().get(Constants.QUESTION_SET));
                 if (assessmentAllDetail.get(Constants.DURATION) != null) {
-                    boolean resp = assessmentRepository.addUserAssesmentStartTime(userId, Constants.ASSESSMENT_ID + Constants.DO + assessmentIdentifier, new Timestamp(new Date().getTime()));
+                    boolean resp = assessmentRepository.addUserAssesmentStartTime(userId, Constants.ASSESSMENT_ID + assessmentIdentifier, new Timestamp(new Date().getTime()));
                     return response;
                 }
             }
