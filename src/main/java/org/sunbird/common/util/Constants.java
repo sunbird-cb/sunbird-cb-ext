@@ -94,7 +94,7 @@ public class Constants {
 	public static final boolean FETCH_ON_LEVEL = false;
 	public static final boolean SKIP_ACCESS_CHECK = true;
 	public static final List<String> MINIMUL_FIELDS = Collections
-			.unmodifiableList(Arrays.asList("identifier", "duration", "downloadUrl", "description", "mimeType",
+			.unmodifiableList(Arrays.asList("identifier", "expectedDuration", "downloadUrl", "description", "mimeType",
 					"artifactUrl", "name", STATUS, "resourceType", "categoryType", "category"));
 	public static final String FETCH_RESULT_CONSTANT = ".fetchResult:";
 	public static final String URI_CONSTANT = "URI: ";
@@ -385,7 +385,7 @@ public class Constants {
 	public static final String SUNBIRD_SSO_RELAM = "sunbird_sso_realm";
 	public static final String SUNBIRD_SSO_URL = "sunbird_sso_url";
 	public static final String SUNBIRD_SSO_USERNAME = "sunbird_sso_username";
-	public static final String DURATION = "duration";
+	public static final String DURATION = "expectedDuration";
 	public static final String USER_REGISTRATION_REGISTER_API = "api.user.registration.register";
 	public static final String USER_REGISTRATION_UPDATE_API = "api.user.registration.update";
 	public static final String USER_REGISTRATION_RETRIEVE_API = "api.user.registration.retrieve";
