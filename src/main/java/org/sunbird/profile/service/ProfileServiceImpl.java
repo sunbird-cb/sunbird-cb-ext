@@ -243,41 +243,43 @@ public class ProfileServiceImpl implements ProfileService {
 		SBApiResponse response = new SBApiResponse(Constants.ORG_PROFILE_UPDATE);
 		Map<String, Object> requestData = (Map<String, Object>) request.get(Constants.REQUEST);
 		String errMsg = validateOrgRegistrationPayload(requestData);
-		try {
-			String orgId = (String) requestData.get(Constants.ORG_ID);
-			Map<String, Object> esOrgProfileMap = getOrgRegistrationForRegCode(orgId);//Fetching ES data corresponding to id if any exist
-			Boolean esOrgProfileMapStatus = true;
-			if (null == esOrgProfileMap) {
-				esOrgProfileMap = new HashMap<>();
-				esOrgProfileMapStatus = false;
-			}
-			Map<String, Object> orgProfileDetailsMap = (Map<String, Object>) requestData.get(Constants.PROFILE_DETAILS);
-			for (String keys : orgProfileDetailsMap.keySet()) {
-				esOrgProfileMap.put(keys, orgProfileDetailsMap.get(keys));
-			}
-			RestStatus status = null;
-			if (esOrgProfileMapStatus) {
-				status = indexerService.updateEntity(serverConfig.getOrgRegistrationIndex(),
-						serverConfig.getEsProfileIndexType(), orgId,
-						esOrgProfileMap);
-			} else {
-				status = indexerService.addEntity(serverConfig.getOrgRegistrationIndex(),
-						serverConfig.getEsProfileIndexType(), orgId,
-						esOrgProfileMap);
-			}
-			if (status.equals(RestStatus.CREATED) || status.equals(RestStatus.OK)) {
-				response.setResponseCode(HttpStatus.ACCEPTED);
-				response.getResult().put(Constants.RESULT, esOrgProfileMap);
-			} else {
-				response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
-				response.getParams().setErrmsg("Failed to add details to ES Service");
-			}
+		if (org.apache.commons.lang.StringUtils.isBlank(errMsg)) {
+			try {
+				String orgId = (String) requestData.get(Constants.ORG_ID);
+				Map<String, Object> esOrgProfileMap = getOrgRegistrationForRegCode(orgId);//Fetching ES data corresponding to id if any exist
+				Boolean esOrgProfileMapStatus = true;
+				if (null == esOrgProfileMap) {
+					esOrgProfileMap = new HashMap<>();
+					esOrgProfileMapStatus = false;
+				}
+				Map<String, Object> orgProfileDetailsMap = (Map<String, Object>) requestData.get(Constants.PROFILE_DETAILS);
+				for (String keys : orgProfileDetailsMap.keySet()) {
+					esOrgProfileMap.put(keys, orgProfileDetailsMap.get(keys));
+				}
+				RestStatus status = null;
+				if (esOrgProfileMapStatus) {
+					status = indexerService.updateEntity(serverConfig.getOrgRegistrationIndex(),
+							serverConfig.getEsProfileIndexType(), orgId,
+							esOrgProfileMap);
+				} else {
+					status = indexerService.addEntity(serverConfig.getOrgRegistrationIndex(),
+							serverConfig.getEsProfileIndexType(), orgId,
+							esOrgProfileMap);
+				}
+				if (status.equals(RestStatus.CREATED) || status.equals(RestStatus.OK)) {
+					response.setResponseCode(HttpStatus.ACCEPTED);
+					response.getResult().put(Constants.RESULT, esOrgProfileMap);
+				} else {
+					response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+					response.getParams().setErrmsg("Failed to add details to ES Service");
+				}
 
-		} catch (Exception e) {
-			log.error(e);
-			log.warn(String.format("Exception in %s : %s", "registerUser"));
-			errMsg = "Failed to process message. Exception: " + e.getMessage();
+			} catch (Exception e) {
+				log.error(e);
+				log.warn(String.format("Exception in %s : %s", "registerUser"));
+				errMsg = "Failed to process message. Exception: " + e.getMessage();
 
+			}
 		}
 		if (org.apache.commons.lang.StringUtils.isNotBlank(errMsg)) {
 			response.getParams().setStatus(Constants.FAILED);
@@ -397,6 +399,9 @@ public class ProfileServiceImpl implements ProfileService {
 		}
 		if (ObjectUtils.isEmpty(orgRegInfo.get(Constants.PROFILE_DETAILS))) {
 			errList.add(Constants.PROFILE_DETAILS);
+		}
+		if (!errList.isEmpty()) {
+			str.append("Failed to Register User Details. Missing Params - [").append(errList.toString()).append("]");
 		}
 		return str.toString();
 	}
