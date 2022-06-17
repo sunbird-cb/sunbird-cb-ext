@@ -234,6 +234,9 @@ public class CbExtServerProperties {
 	@Value("${es.user.registration.index}")
 	private String userRegistrationIndex;
 
+	@Value("${es.org.registration.index}")
+	private String orgRegistrationIndex;
+
 	@Value("${user.registration.code.prefix}")
 	private String userRegCodePrefix;
 
@@ -928,6 +931,10 @@ public class CbExtServerProperties {
 
 	public String getUserRegistrationIndex() {
 		return userRegistrationIndex;
+	}
+
+	public String getOrgRegistrationIndex() {
+		return orgRegistrationIndex;
 	}
 
 	public void setUserRegistrationIndex(String userRegistrationIndex) {

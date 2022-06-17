@@ -22,4 +22,18 @@ public class ProfileController {
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
 
+	@PatchMapping("/org/patch")
+	public ResponseEntity<?> orgProfileUpdate(@RequestBody Map<String, Object> request)
+			throws Exception {
+		SBApiResponse response = profileService.orgProfileUpdate(request);
+		return new ResponseEntity<>(response, response.getResponseCode());
+	}
+
+	@GetMapping("/org/read")
+	public ResponseEntity<?> orgProfileRead(@RequestParam String orgId)
+			throws Exception {
+		SBApiResponse response = profileService.orgProfileRead(orgId);
+		return new ResponseEntity<>(response, response.getResponseCode());
+	}
+
 }
