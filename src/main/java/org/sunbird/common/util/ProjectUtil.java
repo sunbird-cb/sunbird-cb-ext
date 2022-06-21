@@ -2,8 +2,12 @@ package org.sunbird.common.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.DateTime;
+import org.springframework.http.HttpStatus;
 import org.sunbird.common.exceptions.ProjectCommonException;
 import org.sunbird.common.exceptions.ResponseCode;
+import org.sunbird.common.model.SBApiResponse;
+import org.sunbird.common.model.SunbirdApiRespParam;
 import org.sunbird.core.logger.CbExtLogger;
 
 /**
@@ -59,6 +63,17 @@ public class ProjectUtil {
                 responseCode.getErrorMessage(),
                 ResponseCode.CLIENT_ERROR.getResponseCode());
     }
+    
+    public static SBApiResponse createDefaultResponse(String api) {
+		SBApiResponse response = new SBApiResponse();
+		response.setId(api);
+		response.setVer(Constants.API_VERSION_1);
+		response.setParams(new SunbirdApiRespParam());
+		response.getParams().setStatus(Constants.SUCCESS);
+		response.setResponseCode(HttpStatus.OK);
+		response.setTs(DateTime.now().toString());
+		return response;
+	}
 
 
     public enum Method {

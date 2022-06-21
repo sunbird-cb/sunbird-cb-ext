@@ -160,6 +160,10 @@ public class OutboundRequestHandlerServiceImpl {
 			}
 		} catch (HttpClientErrorException | JsonProcessingException e) {
 			log.error(e);
+			try {
+				log.warn("Error Response: " + mapper.writeValueAsString(response));
+			} catch (Exception e1) {
+			}
 		}
 		return response;
 	}

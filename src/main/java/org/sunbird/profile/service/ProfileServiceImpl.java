@@ -8,14 +8,11 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.rest.RestStatus;
-import org.elasticsearch.search.SearchHit;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.sunbird.cache.RedisCacheMgr;
 import org.sunbird.common.model.SBApiResponse;
@@ -25,8 +22,6 @@ import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.common.util.IndexerService;
 import org.sunbird.core.logger.CbExtLogger;
-import org.sunbird.user.registration.model.UserRegistration;
-import org.sunbird.user.registration.model.UserRegistrationInfo;
 import org.sunbird.user.service.UserUtilityServiceImpl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -238,33 +233,32 @@ public class ProfileServiceImpl implements ProfileService {
 	}
 
 	@Override
-	public SBApiResponse orgProfileUpdate(Map<String, Object> request)
-			throws Exception {
+	public SBApiResponse orgProfileUpdate(Map<String, Object> request) throws Exception {
 		SBApiResponse response = new SBApiResponse(Constants.ORG_PROFILE_UPDATE);
 		Map<String, Object> requestData = (Map<String, Object>) request.get(Constants.REQUEST);
-		String errMsg = validateOrgRegistrationPayload(requestData);
-		if (org.apache.commons.lang.StringUtils.isBlank(errMsg)) {
+		String errMsg = validateOrgProfilePayload(requestData);
+		if (StringUtils.isBlank(errMsg)) {
 			try {
 				String orgId = (String) requestData.get(Constants.ORG_ID);
-				Map<String, Object> esOrgProfileMap = getOrgRegistrationForRegCode(orgId);//Fetching ES data corresponding to id if any exist
-				Boolean esOrgProfileMapStatus = true;
-				if (null == esOrgProfileMap) {
+				Map<String, Object> esOrgProfileMap = getOrgProfileForOrgId(orgId);
+				boolean isOrgProfileExist = true;
+				if (ObjectUtils.isEmpty(esOrgProfileMap)) {
+					isOrgProfileExist = false;
 					esOrgProfileMap = new HashMap<>();
-					esOrgProfileMapStatus = false;
 				}
-				Map<String, Object> orgProfileDetailsMap = (Map<String, Object>) requestData.get(Constants.PROFILE_DETAILS);
+
+				Map<String, Object> orgProfileDetailsMap = (Map<String, Object>) requestData
+						.get(Constants.PROFILE_DETAILS);
 				for (String keys : orgProfileDetailsMap.keySet()) {
 					esOrgProfileMap.put(keys, orgProfileDetailsMap.get(keys));
 				}
 				RestStatus status = null;
-				if (esOrgProfileMapStatus) {
-					status = indexerService.updateEntity(serverConfig.getOrgRegistrationIndex(),
-							serverConfig.getEsProfileIndexType(), orgId,
-							esOrgProfileMap);
+				if (isOrgProfileExist) {
+					status = indexerService.updateEntity(serverConfig.getOrgOnboardingIndex(),
+							serverConfig.getEsProfileIndexType(), orgId, esOrgProfileMap);
 				} else {
-					status = indexerService.addEntity(serverConfig.getOrgRegistrationIndex(),
-							serverConfig.getEsProfileIndexType(), orgId,
-							esOrgProfileMap);
+					status = indexerService.addEntity(serverConfig.getOrgOnboardingIndex(),
+							serverConfig.getEsProfileIndexType(), orgId, esOrgProfileMap);
 				}
 				if (status.equals(RestStatus.CREATED) || status.equals(RestStatus.OK)) {
 					response.setResponseCode(HttpStatus.ACCEPTED);
@@ -273,15 +267,13 @@ public class ProfileServiceImpl implements ProfileService {
 					response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
 					response.getParams().setErrmsg("Failed to add details to ES Service");
 				}
-
 			} catch (Exception e) {
 				log.error(e);
-				log.warn(String.format("Exception in %s : %s", "registerUser"));
-				errMsg = "Failed to process message. Exception: " + e.getMessage();
-
+				errMsg = String.format("Failed to process org profile update request. Exception: %s", e.getMessage());
+				log.warn(errMsg);
 			}
 		}
-		if (org.apache.commons.lang.StringUtils.isNotBlank(errMsg)) {
+		if (StringUtils.isNotBlank(errMsg)) {
 			response.getParams().setStatus(Constants.FAILED);
 			response.getParams().setErrmsg(errMsg);
 			response.setResponseCode(HttpStatus.BAD_REQUEST);
@@ -290,18 +282,16 @@ public class ProfileServiceImpl implements ProfileService {
 		return response;
 	}
 
-
 	@Override
-	public SBApiResponse orgProfileRead(String orgId)
-			throws Exception {
-		SBApiResponse response = createDefaultResponse(Constants.ORG_REGISTRATION_RETRIEVE_API);
-		Map<String, Object> orgRegistration = getOrgRegistrationForRegCode(orgId);
-		if (orgRegistration != null) {
-			response.getResult().put(Constants.RESULT, orgRegistration);
+	public SBApiResponse orgProfileRead(String orgId) throws Exception {
+		SBApiResponse response = createDefaultResponse(Constants.ORG_ONBOARDING_PROFILE_RETRIEVE_API);
+		Map<String, Object> orgProfile = getOrgProfileForOrgId(orgId);
+		if (!ObjectUtils.isEmpty(orgProfile)) {
+			response.getResult().put(Constants.RESULT, orgProfile);
 		} else {
-			response.getParams().setStatus(Constants.FAILED);
-			response.getParams().setErrmsg("Failed to get response");
-			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+			response.getParams().setStatus(HttpStatus.NOT_FOUND.name());
+			response.getParams().setErrmsg(String.format("Org details not found for Id :  %s", orgId));
+			response.setResponseCode(HttpStatus.NOT_FOUND);
 		}
 
 		return response;
@@ -379,25 +369,25 @@ public class ProfileServiceImpl implements ProfileService {
 		}
 	}
 
-	public Map<String, Object> getOrgRegistrationForRegCode(String registrationCode) {
+	public Map<String, Object> getOrgProfileForOrgId(String registrationCode) {
 		try {
-			Map<String, Object> esObject = indexerService.readEntity(serverConfig.getOrgRegistrationIndex(),
+			Map<String, Object> esObject = indexerService.readEntity(serverConfig.getOrgOnboardingIndex(),
 					serverConfig.getEsProfileIndexType(), registrationCode);
 			return esObject;
 		} catch (Exception e) {
 			log.error(e);
-			log.warn(String.format("Exception in %s : %s", "getUserRegistrationDetails"));
+			log.warn(String.format("Exception in %s : %s", "getUserRegistrationDetails", e.getMessage()));
 		}
 		return null;
 	}
 
-	private String validateOrgRegistrationPayload(Map<String, Object> orgRegInfo) {
+	private String validateOrgProfilePayload(Map<String, Object> orgProfileInfo) {
 		StringBuffer str = new StringBuffer();
 		List<String> errList = new ArrayList<String>();
-		if (org.apache.commons.lang.StringUtils.isBlank((String) orgRegInfo.get(Constants.ORG_ID))) {
+		if (StringUtils.isBlank((String) orgProfileInfo.get(Constants.ORG_ID))) {
 			errList.add(Constants.ORG_ID);
 		}
-		if (ObjectUtils.isEmpty(orgRegInfo.get(Constants.PROFILE_DETAILS))) {
+		if (ObjectUtils.isEmpty(orgProfileInfo.get(Constants.PROFILE_DETAILS))) {
 			errList.add(Constants.PROFILE_DETAILS);
 		}
 		if (!errList.isEmpty()) {

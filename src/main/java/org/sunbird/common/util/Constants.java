@@ -391,8 +391,10 @@ public class Constants {
 	public static final String USER_REGISTRATION_REGISTER_API = "api.user.registration.register";
 	public static final String USER_REGISTRATION_UPDATE_API = "api.user.registration.update";
 	public static final String USER_REGISTRATION_RETRIEVE_API = "api.user.registration.retrieve";
-	public static final String ORG_REGISTRATION_RETRIEVE_API = "api.org.registration.retrieve";
+	public static final String ORG_ONBOARDING_PROFILE_RETRIEVE_API = "api.org.onboarding.retrieve";
 	public static final String USER_REGISTRATION_DEPT_INFO_API = "api.user.registration.dept.info";
+	public static final String API_ORG_LIST = "api.org.list";
+	public static final String API_ORG_EXT_CREATE = "api.org.extended.created";
 	public static final String COUNT = "count";
 
 	// email params
@@ -462,7 +464,15 @@ public class Constants {
 	public static final String LIVE = "Live";
 	public static final String GOVERNMENT = "Government";
 	public static final String ORGANIZATION_TYPE = "organisationType";
+	public static final String ORGANIZATION_SUB_TYPE = "organisationSubType";
 	public static final String FIRST_NAME_LOWER_CASE = "firstname";
+	public static final String SPV = "SPV";
+	public static final String TABLE_ORG_HIERARCHY = "org_hierarchy";
+	public static final String PARENT_MAP_ID = "parentMapId";
+	public static final String MINISTRY = "ministry";
+	public static final String SB_ORG_TYPE = "sbOrgType";
+	public static final String SB_ORG_ID = "sborgid";
+	public static final String MAP_ID = "mapId";
 
 	private Constants() {
 		throw new IllegalStateException("Utility class");
