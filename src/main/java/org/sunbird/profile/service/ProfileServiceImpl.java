@@ -287,7 +287,10 @@ public class ProfileServiceImpl implements ProfileService {
 		SBApiResponse response = createDefaultResponse(Constants.ORG_ONBOARDING_PROFILE_RETRIEVE_API);
 		Map<String, Object> orgProfile = getOrgProfileForOrgId(orgId);
 		if (!ObjectUtils.isEmpty(orgProfile)) {
-			response.getResult().put(Constants.RESULT, orgProfile);
+			Map<String, Object> resultMap = new HashMap<String, Object>();
+			resultMap.put(Constants.ORG_ID, orgId);
+			resultMap.put(Constants.PROFILE_DETAILS, orgProfile);
+			response.getResult().put(Constants.RESULT, resultMap);
 		} else {
 			response.getParams().setStatus(HttpStatus.NOT_FOUND.name());
 			response.getParams().setErrmsg(String.format("Org details not found for Id :  %s", orgId));
