@@ -262,7 +262,10 @@ public class ProfileServiceImpl implements ProfileService {
 				}
 				if (status.equals(RestStatus.CREATED) || status.equals(RestStatus.OK)) {
 					response.setResponseCode(HttpStatus.ACCEPTED);
-					response.getResult().put(Constants.RESULT, esOrgProfileMap);
+					Map<String, Object> resultMap = new HashMap<String, Object>();
+					resultMap.put(Constants.ORG_ID, orgId);
+					resultMap.put(Constants.PROFILE_DETAILS, esOrgProfileMap);
+					response.getResult().put(Constants.RESULT, resultMap);
 				} else {
 					response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
 					response.getParams().setErrmsg("Failed to add details to ES Service");
