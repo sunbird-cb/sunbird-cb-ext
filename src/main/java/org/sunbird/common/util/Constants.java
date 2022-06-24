@@ -394,7 +394,8 @@ public class Constants {
 	public static final String ORG_ONBOARDING_PROFILE_RETRIEVE_API = "api.org.onboarding.retrieve";
 	public static final String USER_REGISTRATION_DEPT_INFO_API = "api.user.registration.dept.info";
 	public static final String API_ORG_LIST = "api.org.list";
-	public static final String API_ORG_EXT_CREATE = "api.org.extended.created";
+	public static final String API_ORG_EXT_CREATE = "api.org.extended.create";
+	public static final String API_ORG_EXT_SEARCH = "api.org.extended.search";
 	public static final String COUNT = "count";
 
 	// email params
@@ -473,6 +474,7 @@ public class Constants {
 	public static final String SB_ORG_TYPE = "sbOrgType";
 	public static final String SB_ORG_ID = "sborgid";
 	public static final String MAP_ID = "mapId";
+	public static final String SB_ROOT_ORG_ID = "sbRootOrgId";
 
 	private Constants() {
 		throw new IllegalStateException("Utility class");
