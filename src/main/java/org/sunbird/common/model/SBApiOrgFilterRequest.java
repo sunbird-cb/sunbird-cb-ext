@@ -5,15 +5,19 @@ import java.util.List;
 public class SBApiOrgFilterRequest {
 	private boolean isTenant = true;
 	private List<String> id;
-	public boolean isTenant() {
+
+	public boolean getIsTenant() {
 		return isTenant;
 	}
-	public void setTenant(boolean isTenant) {
+
+	public void setIsTenant(boolean isTenant) {
 		this.isTenant = isTenant;
 	}
+
 	public List<String> getId() {
 		return id;
 	}
+
 	public void setId(List<String> id) {
 		this.id = id;
 	}
