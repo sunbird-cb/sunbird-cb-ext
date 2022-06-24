@@ -1,6 +1,7 @@
 package org.sunbird.org.service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -41,44 +42,40 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_ORG_EXT_CREATE);
 		try {
 			String errMsg = validateOrgRequest(request);
-			if (StringUtils.isEmpty(errMsg)) {
-				Map<String, Object> requestData = (Map<String, Object>) request.get(Constants.REQUEST);
-				String url = configProperties.getSbUrl() + configProperties.getLmsOrgCreatePath();
-				Map<String, String> headers = new HashMap<String, String>();
-				headers.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
-				headers.put(Constants.X_AUTH_TOKEN, userToken);
-
-				Map<String, Object> apiResponse = (Map<String, Object>) outboundService.fetchResultUsingPost(url,
-						request, headers);
-				if (Constants.OK.equalsIgnoreCase((String) apiResponse.get(Constants.RESPONSE_CODE))) {
-					Map<String, Object> result = (Map<String, Object>) apiResponse.get(Constants.RESULT);
-					String orgId = (String) result.get(Constants.ORGANIZATION_ID);
-					log.info(String.format("Org onboarded successfully for Name: %s, with orgId: %s",
-							requestData.get(Constants.ORG_NAME), orgId));
-					Map<String, Object> updateRequest = new HashMap<String, Object>() {
-						private static final long serialVersionUID = 1L;
-						{
-							put(Constants.SB_ORG_ID, orgId);
-							if (requestData.containsKey(Constants.SB_ROOT_ORG_ID)) {
-								put(Constants.SB_ROOT_ORG_ID, (String) requestData.get(Constants.SB_ROOT_ORG_ID));
-							}
-						}
-					};
-					Map<String, Object> compositeKey = new HashMap<String, Object>() {
-						private static final long serialVersionUID = 1L;
-						{
-							put(Constants.ORG_NAME, requestData.get(Constants.ORG_NAME));
-							put(Constants.MAP_ID, requestData.get(Constants.MAP_ID));
-						}
-					};
-					cassandraOperation.updateRecord(Constants.SUNBIRD_KEY_SPACE_NAME, Constants.TABLE_ORG_HIERARCHY,
-							updateRequest, compositeKey);
-					response.getResult().put(Constants.ORGANIZATION_ID, orgId);
-					response.getResult().put(Constants.RESPONSE, Constants.SUCCESS);
-				}
-			} else {
+			if (!StringUtils.isEmpty(errMsg)) {
 				response.getParams().setErrmsg(errMsg);
 				response.setResponseCode(HttpStatus.BAD_REQUEST);
+				return response;
+			}
+
+			Map<String, Object> requestData = (Map<String, Object>) request.get(Constants.REQUEST);
+
+			String orgId = checkOrgExist((String) requestData.get(Constants.CHANNEL), userToken);
+
+			if (StringUtils.isEmpty(orgId)) {
+				orgId = createOrgInSunbird(request, (String) requestData.get(Constants.CHANNEL), userToken);
+			}
+
+			if (!StringUtils.isEmpty(orgId)) {
+				Map<String, Object> updateRequest = new HashMap<String, Object>();
+				updateRequest.put(Constants.SB_ORG_ID, orgId);
+				if (requestData.containsKey(Constants.SB_ROOT_ORG_ID)) {
+					updateRequest.put(Constants.SB_ROOT_ORG_ID, (String) requestData.get(Constants.SB_ROOT_ORG_ID));
+				}
+				Map<String, Object> compositeKey = new HashMap<String, Object>() {
+					private static final long serialVersionUID = 1L;
+					{
+						put(Constants.ORG_NAME, requestData.get(Constants.ORG_NAME));
+						put(Constants.MAP_ID, requestData.get(Constants.MAP_ID));
+					}
+				};
+				cassandraOperation.updateRecord(Constants.SUNBIRD_KEY_SPACE_NAME, Constants.TABLE_ORG_HIERARCHY,
+						updateRequest, compositeKey);
+				response.getResult().put(Constants.ORGANIZATION_ID, orgId);
+				response.getResult().put(Constants.RESPONSE, Constants.SUCCESS);
+			} else {
+				response.getParams().setErrmsg("Failed to create organisation in Sunbird.");
+				response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
 			}
 		} catch (Exception e) {
 			log.error(e);
@@ -244,6 +241,63 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 		}
 
 		return strBuilder.toString();
+	}
 
+	private String checkOrgExist(String channel, String userToken) {
+		Map<String, String> headers = new HashMap<String, String>();
+		headers.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
+		headers.put(Constants.X_AUTH_TOKEN, userToken);
+		Map<String, Object> filterMap = new HashMap<String, Object>() {
+			private static final long serialVersionUID = 1L;
+			{
+				put(Constants.CHANNEL, channel);
+			}
+		};
+		Map<String, Object> searchRequest = new HashMap<String, Object>() {
+			private static final long serialVersionUID = 1L;
+			{
+				put(Constants.FILTERS, filterMap);
+				put(Constants.FIELDS, Arrays.asList(Constants.CHANNEL, Constants.IDENTIFIER));
+			}
+		};
+		Map<String, Object> searchRequestBody = new HashMap<String, Object>() {
+			private static final long serialVersionUID = 1L;
+			{
+				put(Constants.REQUEST, searchRequest);
+			}
+		};
+		String url = configProperties.getSbUrl() + configProperties.getSbOrgSearchPath();
+		Map<String, Object> apiResponse = (Map<String, Object>) outboundService.fetchResultUsingPost(url,
+				searchRequestBody, headers);
+		if (Constants.OK.equalsIgnoreCase((String) apiResponse.get(Constants.RESPONSE_CODE))) {
+			Map<String, Object> result = (Map<String, Object>) apiResponse.get(Constants.RESULT);
+			Map<String, Object> searchResponse = (Map<String, Object>) result.get(Constants.RESPONSE);
+			int count = (int) searchResponse.get(Constants.COUNT);
+			if (count > 0) {
+				// The org is already exist - need to update the org details in org_hierarchy
+				// table
+				List<Map<String, Object>> orgList = (List<Map<String, Object>>) searchResponse.get(Constants.CONTENT);
+				Map<String, Object> existingOrg = orgList.get(0);
+				return (String) existingOrg.get(Constants.IDENTIFIER);
+			}
+		}
+		return StringUtils.EMPTY;
+	}
+
+	private String createOrgInSunbird(Map<String, Object> request, String channel, String userToken) {
+		String url = configProperties.getSbUrl() + configProperties.getLmsOrgCreatePath();
+		Map<String, String> headers = new HashMap<String, String>();
+		headers.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
+		headers.put(Constants.X_AUTH_TOKEN, userToken);
+
+		Map<String, Object> apiResponse = (Map<String, Object>) outboundService.fetchResultUsingPost(url, request,
+				headers);
+		if (Constants.OK.equalsIgnoreCase((String) apiResponse.get(Constants.RESPONSE_CODE))) {
+			Map<String, Object> result = (Map<String, Object>) apiResponse.get(Constants.RESULT);
+			log.info(String.format("Org onboarded successfully for Name: %s, with orgId: %s", channel,
+					result.get(Constants.ORGANIZATION_ID)));
+			return (String) result.get(Constants.ORGANIZATION_ID);
+		}
+		return StringUtils.EMPTY;
 	}
 }
