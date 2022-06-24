@@ -197,16 +197,8 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 			params.add(Constants.ORG_NAME);
 		}
 
-		String orgType = (String) request.get(Constants.ORGANIZATION_TYPE);
-		if (StringUtils.isEmpty(orgType)) {
+		if (StringUtils.isEmpty((String) request.get(Constants.ORGANIZATION_TYPE))) {
 			params.add(Constants.ORGANIZATION_TYPE);
-		} else {
-			// We do have OrgType Value
-			if (!Constants.MINISTRY.equalsIgnoreCase(orgType) && !Constants.STATE.equalsIgnoreCase(orgType)) {
-				// orgType is not ministry or state - in this case sbOrgRootId parameter is
-				// required
-				params.add(Constants.SB_ROOT_ORG_ID);
-			}
 		}
 
 		if (StringUtils.isEmpty((String) request.get(Constants.ORGANIZATION_SUB_TYPE))) {
