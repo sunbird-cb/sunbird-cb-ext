@@ -243,7 +243,10 @@ public class RatingServiceImpl implements RatingService {
             }
             response.setResponseCode(HttpStatus.OK);
             response.getParams().setStatus(Constants.SUCCESSFUL);
-            kafkaProducer.push(updateRatingTopicName, ratingMessage);
+            if(requestRating.getComment()==null && requestRating.getCommentBy()==null) {
+                System.out.println("Message "+mapper.writeValueAsString(ratingMessage));
+                kafkaProducer.push(updateRatingTopicName, ratingMessage);
+            }
         } catch (ValidationException ex) {
             logger.error(ex);
             processExceptionBody(response, ex, "", HttpStatus.BAD_REQUEST);
@@ -370,9 +373,10 @@ public class RatingServiceImpl implements RatingService {
                     || validationBody.getRequestRating().getRating() > 5) {
                 errObjList.add(ResponseMessage.Message.INVALID_INPUT + ResponseMessage.Message.INVALID_RATING);
             }
-            if (StringUtils.isEmpty(validationBody.getRequestRating().getReview())
-                    || (!Pattern.matches("^[-A-Za-z0-9.!;_?@&\n\"\", ]++$", validationBody.getRequestRating().getReview()))) {
+            if (validationBody.getRequestRating().getReview()!=null){
+                    if(!Pattern.matches("^[-A-Za-z0-9.!;_?@&\n\"\", ]++$", validationBody.getRequestRating().getReview())) {
                 errObjList.add(ResponseMessage.Message.INVALID_REVIEW);
+            }
             }
             if (StringUtils.isEmpty(validationBody.getRequestRating().getUserId())) {
                 errObjList.add(ResponseMessage.Message.INVALID_USER);
