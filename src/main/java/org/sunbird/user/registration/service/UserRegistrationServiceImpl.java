@@ -206,7 +206,11 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 					LOGGER.info(String.format("Auto on-boarded organisation with Name: %s, MapId: %s, OrgId: %s",
 							userReg.getOrgName(), userReg.getMapId(), userReg.getSbOrgId()));
 				} else {
-					LOGGER.error("Failed to auto onboard organisation.");
+					try {
+						LOGGER.error("Failed to auto onboard organisation. Error: "
+								+ (new ObjectMapper()).writeValueAsString(orgResponse));
+					} catch (Exception e) {
+					}
 				}
 			}
 
