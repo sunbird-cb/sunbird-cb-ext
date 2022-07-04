@@ -311,6 +311,8 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 		userRegistration.setPosition(userRegInfo.getPosition());
 		userRegistration.setSource(userRegInfo.getSource());
 		userRegistration.setMapId(userRegInfo.getMapId());
+		userRegistration.setOrganisationType(userRegInfo.getOrganisationType());
+		userRegistration.setOrganisationSubType(userRegInfo.getOrganisationSubType());
 
 		if (StringUtils.isBlank(userRegInfo.getRegistrationCode())) {
 			userRegistration.setRegistrationCode(serverProperties.getUserRegCodePrefix() + "-"
