@@ -268,7 +268,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 			errList.add("DeptId [or] MapId is mandatory.");
 		}
 		if (StringUtils.isBlank(userRegInfo.getOrgName())) {
-			errList.add("Department");
+			errList.add("OrgName");
 		}
 		if (StringUtils.isBlank(userRegInfo.getPosition())) {
 			errList.add("Position");
