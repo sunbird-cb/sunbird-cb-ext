@@ -110,6 +110,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 									serverProperties.getEsProfileIndexType(), regDocument.getRegistrationCode(),
 									mapper.convertValue(regDocument, Map.class));
 						} else {
+							updateValues(regDocument, userRegInfo);
 							regDocument.setStatus(UserRegistrationStatus.CREATED.name());
 							status = indexerService.updateEntity(serverProperties.getUserRegistrationIndex(),
 									serverProperties.getEsProfileIndexType(), regDocument.getRegistrationCode(),
@@ -499,5 +500,14 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 		orgRequest.put(Constants.SB_ROOT_ORG_ID, userReg.getSbRootOrgId());
 		orgRequestBody.put(Constants.REQUEST, orgRequest);
 		return orgRequestBody;
+	}
+
+	private void updateValues(UserRegistration userReg, UserRegistrationInfo userRegInfo) {
+		userReg.setOrgName(userRegInfo.getOrgName());
+		userReg.setChannel(userRegInfo.getOrgName());
+		userReg.setOrganisationType(userRegInfo.getOrganisationType());
+		userReg.setOrganisationSubType(userRegInfo.getOrganisationSubType());
+		userReg.setSbRootOrgId(userRegInfo.getSbRootOrgId());
+		userReg.setSbOrgId(userRegInfo.getSbOrgId());
 	}
 }
