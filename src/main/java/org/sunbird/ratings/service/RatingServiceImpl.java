@@ -327,7 +327,7 @@ public class RatingServiceImpl implements RatingService {
                 Collections.sort(listOfLookupResponse, (l1, l2) -> {
                     if(l1.getUpdatedon() == l2.getUpdatedon())
                         return 0;
-                    return l1.getUpdatedon() < l1.getUpdatedon() ? -1 : 1;
+                    return l2.getUpdatedon() < l1.getUpdatedon() ? -1 : 1;
                 });
                 response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
                 response.put(Constants.RESPONSE, listOfLookupResponse);
