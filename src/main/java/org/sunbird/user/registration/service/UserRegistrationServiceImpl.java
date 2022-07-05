@@ -43,7 +43,6 @@ import org.sunbird.common.util.Constants;
 import org.sunbird.common.util.IndexerService;
 import org.sunbird.core.exception.ApplicationLogicError;
 import org.sunbird.core.producer.Producer;
-import org.sunbird.org.service.ExtendedOrgService;
 import org.sunbird.portal.department.model.DeptPublicInfo;
 import org.sunbird.user.registration.model.UserRegistration;
 import org.sunbird.user.registration.model.UserRegistrationInfo;
@@ -80,9 +79,6 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 	@Autowired
 	RedisCacheMgr redisCacheMgr;
 
-	@Autowired
-	ExtendedOrgService extOrgService;
-
 	@Override
 	public SBApiResponse registerUser(UserRegistrationInfo userRegInfo) {
 		SBApiResponse response = createDefaultResponse(Constants.USER_REGISTRATION_REGISTER_API);
@@ -110,7 +106,6 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 									serverProperties.getEsProfileIndexType(), regDocument.getRegistrationCode(),
 									mapper.convertValue(regDocument, Map.class));
 						} else {
-							updateValues(regDocument, userRegInfo);
 							regDocument.setStatus(UserRegistrationStatus.CREATED.name());
 							status = indexerService.updateEntity(serverProperties.getUserRegistrationIndex(),
 									serverProperties.getEsProfileIndexType(), regDocument.getRegistrationCode(),
@@ -197,24 +192,6 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 			 */
 			LOGGER.info("Initiated User Creation flow for Reg. Code :: " + registrationCode);
 			UserRegistration userReg = getUserRegistrationForRegCode(registrationCode);
-
-			// Create the org if it's not already onboarded.
-			if (StringUtils.isEmpty(userReg.getSbOrgId())) {
-				SBApiResponse orgResponse = extOrgService.createOrg(getOrgCreateRequest(userReg), StringUtils.EMPTY);
-				if (orgResponse.getResponseCode() == HttpStatus.OK) {
-					String orgId = (String) orgResponse.getResult().get(Constants.ORGANIZATION_ID);
-					userReg.setSbOrgId(orgId);
-					LOGGER.info(String.format("Auto on-boarded organisation with Name: %s, MapId: %s, OrgId: %s",
-							userReg.getOrgName(), userReg.getMapId(), userReg.getSbOrgId()));
-				} else {
-					try {
-						LOGGER.error("Failed to auto onboard organisation. Error: "
-								+ (new ObjectMapper()).writeValueAsString(orgResponse));
-					} catch (Exception e) {
-					}
-				}
-			}
-
 			UserRegistrationStatus regStatus = UserRegistrationStatus.WF_APPROVED;
 			if (userUtilityService.createUser(userReg)) {
 				LOGGER.info("Successfully completed user creation flow.");
@@ -264,11 +241,11 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 		if (StringUtils.isBlank(userRegInfo.getEmail())) {
 			errList.add("Email");
 		}
-		if (StringUtils.isBlank(userRegInfo.getSbOrgId()) && StringUtils.isBlank(userRegInfo.getMapId())) {
-			errList.add("DeptId [or] MapId is mandatory.");
+		if (StringUtils.isBlank(userRegInfo.getDeptId())) {
+			errList.add("DeptId");
 		}
-		if (StringUtils.isBlank(userRegInfo.getOrgName())) {
-			errList.add("OrgName");
+		if (StringUtils.isBlank(userRegInfo.getDeptName())) {
+			errList.add("Department");
 		}
 		if (StringUtils.isBlank(userRegInfo.getPosition())) {
 			errList.add("Position");
@@ -305,19 +282,18 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 		userRegistration.setFirstName(userRegInfo.getFirstName());
 		userRegistration.setLastName(userRegInfo.getLastName());
 		userRegistration.setEmail(userRegInfo.getEmail());
-		userRegistration.setSbOrgId(userRegInfo.getSbOrgId());
-		userRegistration.setOrgName(userRegInfo.getOrgName());
-		userRegistration.setChannel(userRegistration.getChannel());
-		userRegistration.setSbRootOrgId(userRegInfo.getSbRootOrgId());
+		userRegistration.setDeptId(userRegInfo.getDeptId());
+		userRegistration.setDeptName(userRegInfo.getDeptName());
 		userRegistration.setPosition(userRegInfo.getPosition());
 		userRegistration.setSource(userRegInfo.getSource());
-		userRegistration.setMapId(userRegInfo.getMapId());
-		userRegistration.setOrganisationType(userRegInfo.getOrganisationType());
-		userRegistration.setOrganisationSubType(userRegInfo.getOrganisationSubType());
+		if (userRegInfo.getDeptId().equalsIgnoreCase(serverProperties.getCustodianOrgId())) {
+			userRegistration.setProposedDeptName(userRegInfo.getDeptName());
+			userRegistration.setDeptName(serverProperties.getCustodianOrgName());
+		}
 
 		if (StringUtils.isBlank(userRegInfo.getRegistrationCode())) {
 			userRegistration.setRegistrationCode(serverProperties.getUserRegCodePrefix() + "-"
-					+ userRegistration.getMapId() + "-" + RandomStringUtils.random(8, Boolean.TRUE, Boolean.TRUE));
+					+ userRegistration.getDeptName() + "-" + RandomStringUtils.random(8, Boolean.TRUE, Boolean.TRUE));
 			userRegistration.setCreatedOn(new Date().getTime());
 		} else {
 			userRegistration.setUpdatedOn(new Date().getTime());
@@ -486,28 +462,5 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 		deptListMap.put(Constants.DEPARTMENT_LIST_CACHE_NAME, orgList);
 		redisCacheMgr.putCache(Constants.DEPARTMENT_LIST_CACHE_NAME, deptListMap);
 		return orgList;
-	}
-
-	private Map<String, Object> getOrgCreateRequest(UserRegistration userReg) {
-		Map<String, Object> orgRequestBody = new HashMap<String, Object>();
-		Map<String, Object> orgRequest = new HashMap<String, Object>();
-		orgRequest.put(Constants.ORG_NAME, userReg.getOrgName());
-		orgRequest.put(Constants.CHANNEL, userReg.getOrgName());
-		orgRequest.put(Constants.ORGANIZATION_TYPE, userReg.getOrganisationType());
-		orgRequest.put(Constants.ORGANIZATION_SUB_TYPE, userReg.getOrganisationSubType());
-		orgRequest.put(Constants.MAP_ID, userReg.getMapId());
-		orgRequest.put(Constants.IS_TENANT, true);
-		orgRequest.put(Constants.SB_ROOT_ORG_ID, userReg.getSbRootOrgId());
-		orgRequestBody.put(Constants.REQUEST, orgRequest);
-		return orgRequestBody;
-	}
-
-	private void updateValues(UserRegistration userReg, UserRegistrationInfo userRegInfo) {
-		userReg.setOrgName(userRegInfo.getOrgName());
-		userReg.setChannel(userRegInfo.getOrgName());
-		userReg.setOrganisationType(userRegInfo.getOrganisationType());
-		userReg.setOrganisationSubType(userRegInfo.getOrganisationSubType());
-		userReg.setSbRootOrgId(userRegInfo.getSbRootOrgId());
-		userReg.setSbOrgId(userRegInfo.getSbOrgId());
 	}
 }

@@ -11,15 +11,10 @@ public class UserRegistrationInfo {
 	private String firstName;
 	private String lastName;
 	private String email;
+	private String deptId;
+	private String deptName;
 	private String position;
 	private String source;
-	private String orgName;
-	private String channel;
-	private String organisationType;
-	private String organisationSubType;
-	private String mapId;
-	private String sbRootOrgId;
-	private String sbOrgId;
 
 	public String getRegistrationCode() {
 		return registrationCode;
@@ -53,6 +48,22 @@ public class UserRegistrationInfo {
 		this.email = email;
 	}
 
+	public String getDeptId() {
+		return deptId;
+	}
+
+	public void setDeptId(String deptId) {
+		this.deptId = deptId;
+	}
+
+	public String getDeptName() {
+		return deptName;
+	}
+
+	public void setDeptName(String deptName) {
+		this.deptName = deptName;
+	}
+
 	public String getPosition() {
 		return position;
 	}
@@ -69,59 +80,4 @@ public class UserRegistrationInfo {
 		this.source = source;
 	}
 
-	public String getOrgName() {
-		return orgName;
-	}
-
-	public void setOrgName(String orgName) {
-		this.orgName = orgName;
-	}
-
-	public String getChannel() {
-		return channel;
-	}
-
-	public void setChannel(String channel) {
-		this.channel = channel;
-	}
-
-	public String getOrganisationType() {
-		return organisationType;
-	}
-
-	public void setOrganisationType(String organisationType) {
-		this.organisationType = organisationType;
-	}
-
-	public String getOrganisationSubType() {
-		return organisationSubType;
-	}
-
-	public void setOrganisationSubType(String organisationSubType) {
-		this.organisationSubType = organisationSubType;
-	}
-
-	public String getMapId() {
-		return mapId;
-	}
-
-	public void setMapId(String mapId) {
-		this.mapId = mapId;
-	}
-
-	public String getSbRootOrgId() {
-		return sbRootOrgId;
-	}
-
-	public void setSbRootOrgId(String sbRootOrgId) {
-		this.sbRootOrgId = sbRootOrgId;
-	}
-
-	public String getSbOrgId() {
-		return sbOrgId;
-	}
-
-	public void setSbOrgId(String sbOrgId) {
-		this.sbOrgId = sbOrgId;
-	}
 }

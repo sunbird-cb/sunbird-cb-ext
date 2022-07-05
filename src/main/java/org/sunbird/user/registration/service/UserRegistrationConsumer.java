@@ -134,7 +134,7 @@ public class UserRegistrationConsumer {
 		wfRequest.setUserId(uuid);
 		wfRequest.setActorUserId(uuid);
 		wfRequest.setApplicationId(userRegistration.getRegistrationCode());
-		wfRequest.setDeptName(userRegistration.getOrgName());
+		wfRequest.setDeptName(userRegistration.getDeptName());
 		wfRequest.setServiceName(serverProperties.getUserRegistrationWorkFlowServiceName());
 		wfRequest.setUpdateFieldValues(Arrays.asList(new HashMap<>()));
 		return wfRequest;

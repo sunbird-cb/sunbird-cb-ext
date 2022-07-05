@@ -246,9 +246,7 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 	private String checkOrgExist(String channel, String userToken) {
 		Map<String, String> headers = new HashMap<String, String>();
 		headers.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
-		if (StringUtils.isNotEmpty(userToken)) {
-			headers.put(Constants.X_AUTH_TOKEN, userToken);
-		}
+		headers.put(Constants.X_AUTH_TOKEN, userToken);
 		Map<String, Object> filterMap = new HashMap<String, Object>() {
 			private static final long serialVersionUID = 1L;
 			{
@@ -290,9 +288,7 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 		String url = configProperties.getSbUrl() + configProperties.getLmsOrgCreatePath();
 		Map<String, String> headers = new HashMap<String, String>();
 		headers.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
-		if (StringUtils.isNotEmpty(userToken)) {
-			headers.put(Constants.X_AUTH_TOKEN, userToken);
-		}
+		headers.put(Constants.X_AUTH_TOKEN, userToken);
 
 		Map<String, Object> apiResponse = (Map<String, Object>) outboundService.fetchResultUsingPost(url, request,
 				headers);
