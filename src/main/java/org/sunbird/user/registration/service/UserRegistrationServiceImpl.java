@@ -206,12 +206,18 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 					userReg.setSbOrgId(orgId);
 					LOGGER.info(String.format("Auto on-boarded organisation with Name: %s, MapId: %s, OrgId: %s",
 							userReg.getOrgName(), userReg.getMapId(), userReg.getSbOrgId()));
+					// TODO - Need to find a best way to give time for org creation takes effect.
+					try {
+						Thread.sleep(1000);
+					} catch (Exception e) {
+					}
 				} else {
 					try {
 						LOGGER.error("Failed to auto onboard organisation. Error: "
 								+ (new ObjectMapper()).writeValueAsString(orgResponse));
 					} catch (Exception e) {
 					}
+					return;
 				}
 			}
 
