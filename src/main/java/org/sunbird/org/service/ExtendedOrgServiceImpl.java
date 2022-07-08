@@ -59,8 +59,18 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 			if (!StringUtils.isEmpty(orgId)) {
 				Map<String, Object> updateRequest = new HashMap<String, Object>();
 				updateRequest.put(Constants.SB_ORG_ID, orgId);
+				String orgType = (String) requestData.get(Constants.ORGANIZATION_TYPE);
 				if (requestData.containsKey(Constants.SB_ROOT_ORG_ID)) {
 					updateRequest.put(Constants.SB_ROOT_ORG_ID, (String) requestData.get(Constants.SB_ROOT_ORG_ID));
+				} else if (!(Constants.STATE.equalsIgnoreCase(orgType)
+						|| Constants.MINISTRY.equalsIgnoreCase(orgType))) {
+					// OrgType is not state / ministry and sbRootOrgId value given as Null... let's
+					// find the rootOrgId
+					String sbRootOrgId = findRootOrgId((String) requestData.get(Constants.ORG_NAME),
+							(String) requestData.get(Constants.MAP_ID));
+					if (StringUtils.isNotEmpty(sbRootOrgId)) {
+						updateRequest.put(Constants.SB_ROOT_ORG_ID, sbRootOrgId);
+					}
 				}
 				Map<String, Object> compositeKey = new HashMap<String, Object>() {
 					private static final long serialVersionUID = 1L;
@@ -302,6 +312,35 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 					result.get(Constants.ORGANIZATION_ID)));
 			return (String) result.get(Constants.ORGANIZATION_ID);
 		}
+		return StringUtils.EMPTY;
+	}
+
+	private String findRootOrgId(String orgName, String mapId) {
+		String parentMapId = StringUtils.EMPTY;
+		// We are going to search only 3 times
+		for (int i = 0; i < 3; i++) {
+			Map<String, Object> searchRequest = new HashMap<String, Object>();
+			searchRequest.put(Constants.ORG_NAME, orgName);
+			searchRequest.put(Constants.MAP_ID, mapId);
+
+			List<Map<String, Object>> existingDataList = cassandraOperation.getRecordsByProperties(
+					Constants.KEYSPACE_SUNBIRD, Constants.TABLE_ORG_HIERARCHY, searchRequest, null);
+			if (CollectionUtils.isNotEmpty(existingDataList)) {
+				Map<String, Object> data = existingDataList.get(0);
+				parentMapId = (String) data.get(Constants.PARENT_MAP_ID);
+				// We found the 1st level object
+				if (Constants.SPV.equalsIgnoreCase(parentMapId)) {
+					return (String) data.get(Constants.SB_ORG_ID);
+				} else {
+					mapId = (String) data.get(Constants.MAP_ID);
+					orgName = (String) data.get(Constants.ORG_NAME);
+					continue;
+				}
+			} else {
+				break;
+			}
+		}
+
 		return StringUtils.EMPTY;
 	}
 }
