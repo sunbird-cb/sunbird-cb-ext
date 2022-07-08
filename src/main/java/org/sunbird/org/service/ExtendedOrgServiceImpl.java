@@ -320,7 +320,9 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 		// We are going to search only 3 times
 		for (int i = 0; i < 3; i++) {
 			Map<String, Object> searchRequest = new HashMap<String, Object>();
-			searchRequest.put(Constants.ORG_NAME, orgName);
+			if (StringUtils.isNotEmpty(orgName)) {
+				searchRequest.put(Constants.ORG_NAME, orgName);
+			}
 			searchRequest.put(Constants.MAP_ID, mapId);
 
 			List<Map<String, Object>> existingDataList = cassandraOperation.getRecordsByProperties(
@@ -332,8 +334,8 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 				if (Constants.SPV.equalsIgnoreCase(parentMapId)) {
 					return (String) data.get(Constants.SB_ORG_ID);
 				} else {
-					mapId = (String) data.get(Constants.MAP_ID);
-					orgName = (String) data.get(Constants.ORG_NAME);
+					mapId = (String) data.get(Constants.PARENT_MAP_ID);
+					orgName = StringUtils.EMPTY;
 					continue;
 				}
 			} else {
