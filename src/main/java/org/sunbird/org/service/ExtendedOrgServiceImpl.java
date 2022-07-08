@@ -60,7 +60,8 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 				Map<String, Object> updateRequest = new HashMap<String, Object>();
 				updateRequest.put(Constants.SB_ORG_ID, orgId);
 				String orgType = (String) requestData.get(Constants.ORGANIZATION_TYPE);
-				if (requestData.containsKey(Constants.SB_ROOT_ORG_ID)) {
+				if (requestData.containsKey(Constants.SB_ROOT_ORG_ID)
+						&& StringUtils.isNotEmpty((String) requestData.get(Constants.SB_ROOT_ORG_ID))) {
 					updateRequest.put(Constants.SB_ROOT_ORG_ID, (String) requestData.get(Constants.SB_ROOT_ORG_ID));
 				} else if (!(Constants.STATE.equalsIgnoreCase(orgType)
 						|| Constants.MINISTRY.equalsIgnoreCase(orgType))) {
@@ -329,12 +330,12 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 					Constants.KEYSPACE_SUNBIRD, Constants.TABLE_ORG_HIERARCHY, searchRequest, null);
 			if (CollectionUtils.isNotEmpty(existingDataList)) {
 				Map<String, Object> data = existingDataList.get(0);
-				parentMapId = (String) data.get(Constants.PARENT_MAP_ID);
+				parentMapId = (String) data.get(Constants.PARENT_MAP_ID.toLowerCase());
 				// We found the 1st level object
 				if (Constants.SPV.equalsIgnoreCase(parentMapId)) {
-					return (String) data.get(Constants.SB_ORG_ID);
+					return (String) data.get(Constants.SB_ORG_ID.toLowerCase());
 				} else {
-					mapId = (String) data.get(Constants.PARENT_MAP_ID);
+					mapId = (String) data.get(Constants.PARENT_MAP_ID.toLowerCase());
 					orgName = StringUtils.EMPTY;
 					continue;
 				}
