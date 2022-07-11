@@ -178,9 +178,9 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
         try {
             StringBuilder sbUrl = new StringBuilder(cbExtServerProperties.getAssessmentHost());
             sbUrl.append(cbExtServerProperties.getAssessmentHierarchyReadPath());
-            String serviceURL = sbUrl.toString().replace(Constants.IDENTIFIER_REPLACER, Constants.DO+assessmentIdentifier);
+            String serviceURL = sbUrl.toString().replace(Constants.IDENTIFIER_REPLACER, assessmentIdentifier);
             Map<String, String> headers = new HashMap<>();
-            // headers.put(Constants.X_AUTH_TOKEN, token);
+            //headers.put(Constants.X_AUTH_TOKEN, token);
             //headers.put(Constants.AUTHORIZATION, cbExtServerProperties.getSbApiKey());
             Object o = outboundRequestHandlerService.fetchUsingGetWithHeaders(serviceURL, headers);
             return mapper.convertValue(o, Map.class);
