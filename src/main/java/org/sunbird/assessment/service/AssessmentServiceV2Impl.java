@@ -176,7 +176,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
 
     private Map<String, Object> getReadHierarchyApiResponse(String assessmentIdentifier, String token) {
         try {
-            StringBuilder sbUrl = new StringBuilder(cbExtServerProperties.getContentHost());
+            StringBuilder sbUrl = new StringBuilder(cbExtServerProperties.getAssessmentHost());
             sbUrl.append(cbExtServerProperties.getAssessmentHierarchyReadPath());
             String serviceURL = sbUrl.toString().replace(Constants.IDENTIFIER_REPLACER, Constants.DO+assessmentIdentifier);
             Map<String, String> headers = new HashMap<>();
