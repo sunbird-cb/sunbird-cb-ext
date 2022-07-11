@@ -176,12 +176,12 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
 
     private Map<String, Object> getReadHierarchyApiResponse(String assessmentIdentifier, String token) {
         try {
-            StringBuilder sbUrl = new StringBuilder(cbExtServerProperties.getAssessmentHost());
+            StringBuilder sbUrl = new StringBuilder(cbExtServerProperties.getContentHost());
             sbUrl.append(cbExtServerProperties.getAssessmentHierarchyReadPath());
             String serviceURL = sbUrl.toString().replace(Constants.IDENTIFIER_REPLACER, Constants.DO+assessmentIdentifier);
             Map<String, String> headers = new HashMap<>();
-            headers.put(Constants.X_AUTH_TOKEN, token);
-            headers.put(Constants.AUTHORIZATION, cbExtServerProperties.getSbApiKey());
+            // headers.put(Constants.X_AUTH_TOKEN, token);
+            //headers.put(Constants.AUTHORIZATION, cbExtServerProperties.getSbApiKey());
             Object o = outboundRequestHandlerService.fetchUsingGetWithHeaders(serviceURL, headers);
             return mapper.convertValue(o, Map.class);
         } catch (Exception e) {
