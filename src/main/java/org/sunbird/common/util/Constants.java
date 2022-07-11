@@ -122,6 +122,8 @@ public class Constants {
 	public static final String API_FILE_UPLOAD = "api.file.upload";
 	public static final String API_FILE_DELETE = "api.file.delete";
 	public static final String API_PROFILE_UPDATE = "api.profile.update";
+
+	public static final String ORG_PROFILE_UPDATE = "org.profile.update";
 	public static final String ID = "id";
 	public static final String ORG_ID = "orgId";
 	public static final String POSITION = "position";
@@ -389,7 +391,11 @@ public class Constants {
 	public static final String USER_REGISTRATION_REGISTER_API = "api.user.registration.register";
 	public static final String USER_REGISTRATION_UPDATE_API = "api.user.registration.update";
 	public static final String USER_REGISTRATION_RETRIEVE_API = "api.user.registration.retrieve";
+	public static final String ORG_ONBOARDING_PROFILE_RETRIEVE_API = "api.org.onboarding.retrieve";
 	public static final String USER_REGISTRATION_DEPT_INFO_API = "api.user.registration.dept.info";
+	public static final String API_ORG_LIST = "api.org.list";
+	public static final String API_ORG_EXT_CREATE = "api.org.extended.create";
+	public static final String API_ORG_EXT_SEARCH = "api.org.extended.search";
 	public static final String COUNT = "count";
 
 	// email params
@@ -457,6 +463,18 @@ public class Constants {
 	public static final String VALUES = "values";
 	public static final String PROGRAM = "Program";
 	public static final String LIVE = "Live";
+	public static final String GOVERNMENT = "Government";
+	public static final String ORGANIZATION_TYPE = "organisationType";
+	public static final String ORGANIZATION_SUB_TYPE = "organisationSubType";
+	public static final String FIRST_NAME_LOWER_CASE = "firstname";
+	public static final String SPV = "SPV";
+	public static final String TABLE_ORG_HIERARCHY = "org_hierarchy";
+	public static final String PARENT_MAP_ID = "parentMapId";
+	public static final String MINISTRY = "ministry";
+	public static final String SB_ORG_TYPE = "sbOrgType";
+	public static final String SB_ORG_ID = "sborgid";
+	public static final String MAP_ID = "mapId";
+	public static final String SB_ROOT_ORG_ID = "sbRootOrgId";
 
 	private Constants() {
 		throw new IllegalStateException("Utility class");

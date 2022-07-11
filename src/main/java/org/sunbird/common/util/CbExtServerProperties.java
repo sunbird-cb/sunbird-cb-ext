@@ -234,6 +234,9 @@ public class CbExtServerProperties {
 	@Value("${es.user.registration.index}")
 	private String userRegistrationIndex;
 
+	@Value("${es.org.onboarding.index}")
+	private String orgOnboardingIndex;
+
 	@Value("${user.registration.code.prefix}")
 	private String userRegCodePrefix;
 
@@ -308,6 +311,15 @@ public class CbExtServerProperties {
 	
 	@Value("${user.position.master.list.file}")
 	private String masterPositionListFileName;
+	
+	@Value("${user.registration.welcome.email.template}")
+	private String welcomeEmailTemplate;
+	
+	@Value("${user.registration.welcome.email.subject}")
+	private String welcomeEmailSubject;
+	
+	@Value("${sb.org.create.path}")
+	private String lmsOrgCreatePath;
 
 	public String getUserAssessmentSubmissionDuration() {
 		return userAssessmentSubmissionDuration;
@@ -1126,5 +1138,37 @@ public class CbExtServerProperties {
 
 	public void setMasterPositionListFileName(String masterPositionListFileName) {
 		this.masterPositionListFileName = masterPositionListFileName;
+	}
+
+	public String getWelcomeEmailTemplate() {
+		return welcomeEmailTemplate;
+	}
+
+	public void setWelcomeEmailTemplate(String welcomeEmailTemplate) {
+		this.welcomeEmailTemplate = welcomeEmailTemplate;
+	}
+
+	public String getWelcomeEmailSubject() {
+		return welcomeEmailSubject;
+	}
+
+	public void setWelcomeEmailSubject(String welcomeEmailSubject) {
+		this.welcomeEmailSubject = welcomeEmailSubject;
+	}
+
+	public String getOrgOnboardingIndex() {
+		return orgOnboardingIndex;
+	}
+
+	public void setOrgOnboardingIndex(String orgOnboardingIndex) {
+		this.orgOnboardingIndex = orgOnboardingIndex;
+	}
+
+	public String getLmsOrgCreatePath() {
+		return lmsOrgCreatePath;
+	}
+
+	public void setLmsOrgCreatePath(String lmsOrgCreatePath) {
+		this.lmsOrgCreatePath = lmsOrgCreatePath;
 	}
 }

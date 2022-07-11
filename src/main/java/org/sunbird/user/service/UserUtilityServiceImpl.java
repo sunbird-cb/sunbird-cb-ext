@@ -110,7 +110,6 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 			HttpEntity<?> requestEnty = new HttpEntity<>(requestBody, headers);
 			String url = props.getSbUrl() + props.getUserSearchEndPoint();
 			SearchUserApiResp searchUserResult = restTemplate.postForObject(url, requestEnty, SearchUserApiResp.class);
-			logger.info("searchUserResult ---->" + searchUserResult.toString());
 			if (searchUserResult != null && "OK".equalsIgnoreCase(searchUserResult.getResponseCode())
 					&& searchUserResult.getResult().getResponse().getCount() > 0) {
 				for (SearchUserApiContent searchUserApiContent : searchUserResult.getResult().getResponse()
@@ -211,7 +210,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		Map<String, Object> request = new HashMap<>();
 		Map<String, Object> requestBody = new HashMap<String, Object>();
 		requestBody.put(Constants.EMAIL, userRegistration.getEmail());
-		requestBody.put(Constants.CHANNEL, userRegistration.getDeptName());
+		requestBody.put(Constants.CHANNEL, userRegistration.getOrgName());
 		requestBody.put(Constants.FIRSTNAME, userRegistration.getFirstName());
 		requestBody.put(Constants.LASTNAME, userRegistration.getLastName());
 		requestBody.put(Constants.EMAIL_VERIFIED, true);
@@ -246,7 +245,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		Map<String, Object> profileDetails = new HashMap<String, Object>();
 		profileDetails.put(Constants.MANDATORY_FIELDS_EXISTS, false);
 		Map<String, Object> employementDetails = new HashMap<String, Object>();
-		employementDetails.put(Constants.DEPARTMENTNAME, userRegistration.getDeptName());
+		employementDetails.put(Constants.DEPARTMENTNAME, userRegistration.getOrgName());
 		profileDetails.put(Constants.EMPLOYMENTDETAILS, employementDetails);
 		Map<String, Object> personalDetails = new HashMap<String, Object>();
 		personalDetails.put(Constants.FIRSTNAME.toLowerCase(), userRegistration.getFirstName());
@@ -254,13 +253,15 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		personalDetails.put(Constants.PRIMARY_EMAIL, userRegistration.getEmail());
 		profileDetails.put(Constants.PERSONAL_DETAILS, personalDetails);
 
+		Map<String, Object> professionDetailObj = new HashMap<String, Object>();
+		professionDetailObj.put(Constants.ORGANIZATION_TYPE, Constants.GOVERNMENT);
 		if (StringUtils.isNotEmpty(userRegistration.getPosition())) {
-			Map<String, Object> professionDetailObj = new HashMap<String, Object>();
 			professionDetailObj.put(Constants.DESIGNATION, userRegistration.getPosition());
-			List<Map<String, Object>> professionalDetailsList = new ArrayList<Map<String, Object>>();
-			professionalDetailsList.add(professionDetailObj);
-			profileDetails.put(Constants.PROFESSIONAL_DETAILS, professionalDetailsList);
 		}
+		List<Map<String, Object>> professionalDetailsList = new ArrayList<Map<String, Object>>();
+		professionalDetailsList.add(professionDetailObj);
+		profileDetails.put(Constants.PROFESSIONAL_DETAILS, professionalDetailsList);
+
 		requestBody.put(Constants.PROFILE_DETAILS, profileDetails);
 		request.put(Constants.REQUEST, requestBody);
 		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService
@@ -276,7 +277,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		boolean retValue = false;
 		Map<String, Object> request = new HashMap<>();
 		Map<String, Object> requestBody = new HashMap<String, Object>();
-		requestBody.put(Constants.ORGANIZATION_ID, userRegistration.getDeptId());
+		requestBody.put(Constants.ORGANIZATION_ID, userRegistration.getSbOrgId());
 		requestBody.put(Constants.USER_ID, userRegistration.getUserId());
 		requestBody.put(Constants.ROLES, Arrays.asList(Constants.PUBLIC));
 		request.put(Constants.REQUEST, requestBody);
@@ -288,7 +289,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		printMethodExecutionResult("AssignRole", userRegistration.toMininumString(), retValue);
 		return retValue;
 	}
-	
+
 	@Override
 	public boolean createNodeBBUser(UserRegistration userRegistration) {
 		boolean retValue = false;
@@ -336,14 +337,14 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		Map<String, Object> requestBody = new HashMap<String, Object>();
 		requestBody.put(Constants.ALLOWED_LOGGING, "You can use your email to Login");
 		requestBody.put(Constants.BODY, Constants.HELLO);
-		requestBody.put(Constants.EMAIL_TEMPLATE_TYPE, Constants.WELCOME_EMAIL_TEMPLATE_TYPE);
+		requestBody.put(Constants.EMAIL_TEMPLATE_TYPE, props.getWelcomeEmailTemplate());
 		requestBody.put(Constants.FIRSTNAME, userRegistration.getFirstName());
 		requestBody.put(Constants.LINK, activationLink);
 		requestBody.put(Constants.MODE, Constants.EMAIL);
-		requestBody.put(Constants.ORG_NAME, userRegistration.getDeptName());
+		requestBody.put(Constants.ORG_NAME, userRegistration.getOrgName());
 		requestBody.put(Constants.RECIPIENT_EMAILS, Arrays.asList(userRegistration.getEmail()));
 		requestBody.put(Constants.SET_PASSWORD_LINK, true);
-		requestBody.put(Constants.SUBJECT, Constants.WELCOME_EMAIL_MESSAGE);
+		requestBody.put(Constants.SUBJECT, props.getWelcomeEmailSubject());
 		requestBody.put(Constants.WELCOME_MESSAGE, Constants.HELLO);
 
 		request.put(Constants.REQUEST, requestBody);

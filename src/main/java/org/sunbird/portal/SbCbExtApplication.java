@@ -36,14 +36,13 @@ public class SbCbExtApplication {
 	}
 
 	private ClientHttpRequestFactory getClientHttpRequestFactory() {
-
-		int timeout = 30000;
-              RequestConfig config = RequestConfig.custom().setConnectTimeout(timeout).setConnectionRequestTimeout(timeout)
-                           .setSocketTimeout(timeout).build();
-              CloseableHttpClient client = HttpClientBuilder.create().setMaxConnTotal(2000).setMaxConnPerRoute(500)
-                           .setDefaultRequestConfig(config).build();
-              HttpComponentsClientHttpRequestFactory cRequestFactory = new HttpComponentsClientHttpRequestFactory(client);
-              cRequestFactory.setReadTimeout(timeout);
-              return cRequestFactory;
+		int timeout = 45000;
+		RequestConfig config = RequestConfig.custom().setConnectTimeout(timeout).setConnectionRequestTimeout(timeout)
+				.setSocketTimeout(timeout).build();
+		CloseableHttpClient client = HttpClientBuilder.create().setMaxConnTotal(2000).setMaxConnPerRoute(500)
+				.setDefaultRequestConfig(config).build();
+		HttpComponentsClientHttpRequestFactory cRequestFactory = new HttpComponentsClientHttpRequestFactory(client);
+		cRequestFactory.setReadTimeout(timeout);
+		return cRequestFactory;
 	}
 }

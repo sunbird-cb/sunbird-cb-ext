@@ -1,13 +1,13 @@
 package org.sunbird.common.model;
 
 import java.util.List;
-import java.util.Map;
 
+import org.sunbird.searchby.model.FracCommonInfo;
 import org.sunbird.workallocation.model.FracStatusInfo;
 
 public class FracApiResponse {
 	private FracStatusInfo statusInfo;
-	private List<Map<String, Object>> responseData;
+	private List<FracCommonInfo> responseData;
 
 	public FracStatusInfo getStatusInfo() {
 		return statusInfo;
@@ -17,11 +17,11 @@ public class FracApiResponse {
 		this.statusInfo = statusInfo;
 	}
 
-	public List<Map<String, Object>> getResponseData() {
+	public List<FracCommonInfo> getResponseData() {
 		return responseData;
 	}
 
-	public void setResponseData(List<Map<String, Object>> responseData) {
+	public void setResponseData(List<FracCommonInfo> responseData) {
 		this.responseData = responseData;
 	}
 }

@@ -1,6 +1,9 @@
 package org.sunbird.portal.department.model;
 
-public class DeptPublicInfo {
+import java.io.Serializable;
+
+public class DeptPublicInfo implements Serializable {
+	private static final long serialVersionUID = 1L;
 	private String identifier;
 	private String channel;
 

@@ -63,7 +63,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                 response = prepareAssessmentResponse(assessmentAllDetail, isSuccess);
                 redisCacheMgr.putCache(Constants.USER_ASSESS_REQ + token, response.getResult().get(Constants.QUESTION_SET));
                 if (assessmentAllDetail.get(Constants.DURATION) != null) {
-                    boolean resp = assessmentRepository.addUserAssesmentStartTime(userId, Constants.ASSESSMENT_ID + Constants.DO + assessmentIdentifier, new Timestamp(new Date().getTime()));
+                    boolean resp = assessmentRepository.addUserAssesmentStartTime(userId, Constants.ASSESSMENT_ID + assessmentIdentifier, new Timestamp(new Date().getTime()));
                     return response;
                 }
             }
@@ -104,8 +104,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                 }
             }
             return prepareQuestionResponse(questionList, questionList.size() > 0);
-        } catch (
-                Exception e) {
+        } catch (Exception e) {
             logger.error(e);
             throw new ApplicationLogicError("REQUEST_COULD_NOT_BE_PROCESSED", e);
         }
@@ -185,6 +184,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
             Object o = outboundRequestHandlerService.fetchUsingGetWithHeaders(serviceURL, headers);
             return mapper.convertValue(o, Map.class);
         } catch (Exception e) {
+            logger.error(e);
             throw new ApplicationLogicError(e.getMessage());
         }
     }
@@ -257,6 +257,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
             requestBody.put(Constants.REQUEST, requestData);
             return outboundRequestHandlerService.fetchResultUsingPost(sbUrl.toString(), requestBody, headers);
         } catch (Exception e) {
+            logger.error(e);
             throw new Exception("Failed to process the readQuestionDetails.");
         }
     }
