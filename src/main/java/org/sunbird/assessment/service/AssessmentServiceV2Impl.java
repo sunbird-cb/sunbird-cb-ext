@@ -242,7 +242,8 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
             List<String> childNodeList = new ArrayList<>();
             if(!ObjectUtils.isEmpty(section.get(Constants.MAX_QUESTIONS))){
                 int maxQuestions = (int) section.get(Constants.MAX_QUESTIONS);
-                childNodeList = allQuestionIdList.stream().limit(maxQuestions).collect(Collectors.toList());}
+                childNodeList = allQuestionIdList.stream().limit(maxQuestions).collect(Collectors.toList());
+            }
             newSection.put(Constants.CHILD_NODES, childNodeList);
             sectionResponse.add(newSection);
         }
