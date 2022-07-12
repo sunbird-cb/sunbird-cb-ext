@@ -43,7 +43,6 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
     @Autowired
     AssessmentRepository assessmentRepository;
 
-
     public SBApiResponse readAssessment(String assessmentIdentifier, String token) throws Exception {
         SBApiResponse response = new SBApiResponse();
         try {
@@ -240,7 +239,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
             }
             Collections.shuffle(allQuestionIdList);
             List<String> childNodeList = new ArrayList<>();
-            if(!ObjectUtils.isEmpty(section.get(Constants.MAX_QUESTIONS))){
+            if (!ObjectUtils.isEmpty(section.get(Constants.MAX_QUESTIONS))) {
                 int maxQuestions = (int) section.get(Constants.MAX_QUESTIONS);
                 childNodeList = allQuestionIdList.stream().limit(maxQuestions).collect(Collectors.toList());
             }
