@@ -19,6 +19,7 @@ import org.sunbird.core.logger.CbExtLogger;
 
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @SuppressWarnings("unchecked")
@@ -41,6 +42,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
 
     @Autowired
     AssessmentRepository assessmentRepository;
+
 
     public SBApiResponse readAssessment(String assessmentIdentifier, String token) throws Exception {
         SBApiResponse response = new SBApiResponse();
@@ -219,11 +221,30 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
 
     private void readSectionLevelParams(Map<String, Object> assessmentAllDetail,
                                         Map<String, Object> assessmentFilteredDetail) {
+        List<Map<String, Object>> sectionResponse = new ArrayList<>();
+        List<String> sectionParams = cbExtServerProperties.getAssessmentSectionParams();
         List<Map<String, Object>> sections = (List<Map<String, Object>>) assessmentAllDetail.get(Constants.CHILDREN);
         List<String> sectionIdList = new ArrayList<String>();
         for (Map<String, Object> section : sections) {
             sectionIdList.add((String) section.get(Constants.IDENTIFIER));
+            Map<String, Object> newSection = new HashMap<>();
+            for (String sectionParam : sectionParams) {
+                if (section.containsKey(sectionParam)) {
+                    newSection.put(sectionParam, section.get(sectionParam));
+                }
+            }
+            List<String> allQuestionIdList = new ArrayList<String>();
+            List<Map<String, Object>> questions = (List<Map<String, Object>>) section.get(Constants.CHILDREN);
+            for (Map<String, Object> question : questions) {
+                allQuestionIdList.add((String) question.get(Constants.IDENTIFIER));
+            }
+            Collections.shuffle(allQuestionIdList);
+            int maxQuestions = (int) section.get(Constants.MAX_QUESTIONS);
+            List<String> childNodeList = allQuestionIdList.stream().limit(maxQuestions).collect(Collectors.toList());
+            newSection.put(Constants.CHILD_NODES, childNodeList);
+            sectionResponse.add(newSection);
         }
+        assessmentFilteredDetail.put(Constants.CHILDREN, sectionResponse);
         assessmentFilteredDetail.put(Constants.CHILD_NODES, sectionIdList);
     }
 
