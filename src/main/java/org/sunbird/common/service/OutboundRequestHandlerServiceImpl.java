@@ -100,7 +100,6 @@ public class OutboundRequestHandlerServiceImpl {
 				headersValues.forEach((k, v) -> headers.set(k, v));
 			}
 			HttpEntity entity = new HttpEntity(headers);
-			log.info(uri.toString());
 			response = restTemplate.exchange(uri, HttpMethod.GET, entity, Map.class);
 		} catch (HttpClientErrorException e) {
 			log.error(e);
