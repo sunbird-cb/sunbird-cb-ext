@@ -64,7 +64,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                 response = prepareAssessmentResponse(assessmentAllDetail, isSuccess);
                 redisCacheMgr.putCache(Constants.USER_ASSESS_REQ + token, response.getResult().get(Constants.QUESTION_SET));
                 logger.info("Adding the user assessment start time 1");
-                if (assessmentAllDetail.get(Constants.DURATION) != null) {
+                if (assessmentAllDetail.get(Constants.EXPECTED_DURATION) != null) {
                     boolean resp = assessmentRepository.addUserAssesmentStartTime(userId, Constants.ASSESSMENT_ID + assessmentIdentifier, new Timestamp(new Date().getTime()));
                     logger.info(String.valueOf(resp));
                     return response;
@@ -133,7 +133,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                 Timestamp submissionTime = new Timestamp(new Date().getTime());
                 Calendar cal = Calendar.getInstance();
                 cal.setTimeInMillis(new Timestamp(assessmentStartTime.getTime()).getTime());
-                cal.add(Calendar.SECOND, Integer.valueOf((String) assessmentHierarchy.get(Constants.DURATION)).intValue() + Integer.valueOf(cbExtServerProperties.getUserAssessmentSubmissionDuration()));
+                cal.add(Calendar.SECOND, Integer.valueOf((String) assessmentHierarchy.get(Constants.EXPECTED_DURATION)).intValue() + Integer.valueOf(cbExtServerProperties.getUserAssessmentSubmissionDuration()));
                 Timestamp later = new Timestamp(cal.getTime().getTime());
                 int time = submissionTime.compareTo(later);
                 if (time <= 0) {
