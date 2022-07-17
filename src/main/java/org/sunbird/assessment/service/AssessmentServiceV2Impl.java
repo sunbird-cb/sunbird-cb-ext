@@ -133,7 +133,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                 Timestamp submissionTime = new Timestamp(new Date().getTime());
                 Calendar cal = Calendar.getInstance();
                 cal.setTimeInMillis(new Timestamp(assessmentStartTime.getTime()).getTime());
-                cal.add(Calendar.SECOND, Integer.valueOf((String) assessmentHierarchy.get(Constants.EXPECTED_DURATION)).intValue() + Integer.valueOf(cbExtServerProperties.getUserAssessmentSubmissionDuration()));
+                cal.add(Calendar.SECOND, ((Integer) assessmentHierarchy.get(Constants.EXPECTED_DURATION)).intValue() + Integer.valueOf(cbExtServerProperties.getUserAssessmentSubmissionDuration()));
                 Timestamp later = new Timestamp(cal.getTime().getTime());
                 int time = submissionTime.compareTo(later);
                 if (time <= 0) {
