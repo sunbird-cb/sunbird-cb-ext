@@ -63,8 +63,10 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                 }
                 response = prepareAssessmentResponse(assessmentAllDetail, isSuccess);
                 redisCacheMgr.putCache(Constants.USER_ASSESS_REQ + token, response.getResult().get(Constants.QUESTION_SET));
+                logger.info("Adding the user assessment start time 1");
                 if (assessmentAllDetail.get(Constants.DURATION) != null) {
                     boolean resp = assessmentRepository.addUserAssesmentStartTime(userId, Constants.ASSESSMENT_ID + assessmentIdentifier, new Timestamp(new Date().getTime()));
+                    logger.info(String.valueOf(resp));
                     return response;
                 }
             }
@@ -169,6 +171,10 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                         // throw error if no section details.
                     }
                 }
+            }
+            else
+            {
+                outgoingResponse.setResponseCode(HttpStatus.NOT_IMPLEMENTED);
             }
         }
         return outgoingResponse;

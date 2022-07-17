@@ -129,12 +129,17 @@ public class AssessmentRepositoryImpl implements AssessmentRepository {
 
 	@Override
 	public boolean addUserAssesmentStartTime(String userId, String assessmentIdentifier, Timestamp startTime) {
+		logger.info("Inside the user assessment start time");
+		logger.info("userid" + userId.toString());
+		logger.info("identifier" + assessmentIdentifier);
+
 		Map<String, Object> request = new HashMap<>();
 		request.put(Constants.USER_ID, userId);
 		request.put(Constants.IDENTIFIER, assessmentIdentifier);
 		cassandraOperation.deleteRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_USER_ASSESSMENT_TIME, request);
 		request.put("starttime", startTime);
 		SBApiResponse resp = cassandraOperation.insertRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_USER_ASSESSMENT_TIME, request);
+		logger.info(resp.toString());
 		return resp.get(Constants.RESPONSE).equals(Constants.SUCCESS);
 	}
 
@@ -143,8 +148,11 @@ public class AssessmentRepositoryImpl implements AssessmentRepository {
 		Map<String, Object> request = new HashMap<>();
 		request.put(Constants.USER_ID, userId);
 		request.put(Constants.IDENTIFIER, assessmentIdentifier);
-		Map<String, Object> existingDataList = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
-				Constants.TABLE_USER_ASSESSMENT_TIME, request, null).get(0);
-		return (Date) existingDataList.get("starttime");
+		List<Map<String, Object>> existingDataList = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
+				Constants.TABLE_USER_ASSESSMENT_TIME, request, null);
+		if(!existingDataList.isEmpty())
+			return (Date) existingDataList.get(0).get("starttime");
+		else
+			return null;
 	}
 }
