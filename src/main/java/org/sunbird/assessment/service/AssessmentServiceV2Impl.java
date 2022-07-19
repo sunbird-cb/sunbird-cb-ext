@@ -82,8 +82,16 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
             List<String> identifierList = getQuestionIdList(requestBody);
             List<Object> questionList = new ArrayList<>();
             List<String> newIdentifierList = new ArrayList<>();
+            Map<String, Object> questionSetFromAssessment = (Map<String, Object>) redisCacheMgr.getCache(Constants.USER_ASSESS_REQ + authUserToken);
+            if (questionSetFromAssessment != null && questionSetFromAssessment.get(Constants.CHILDREN) != null) {
+                List<String> questionsFromAssessment = new ArrayList<>();
+                List<Map<String, Object>> sections = (List<Map<String, Object>>) questionSetFromAssessment.get(Constants.CHILDREN);
+                for(Map<String, Object> section :sections){
+                    questionsFromAssessment.addAll((List<String>) section.get(Constants.CHILD_NODES));
+                }
+                identifierList.retainAll(questionsFromAssessment);
+            }
             List<Object> map = redisCacheMgr.mget(identifierList);
-            int size = map.size();
             for (int i = 0; i < map.size(); i++) {
                 if (ObjectUtils.isEmpty(map.get(i))) {
                     newIdentifierList.add(identifierList.get(i));
@@ -155,7 +163,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                                     if (sectionList.size() > 1) {
                                         // There should be only one section -- if not -- throw error
                                     }
-                                    validateAssessmentLevelScore(outgoingResponse, section, assessmentHierarchy);
+                                    validateAssessmentLevelScore(outgoingResponse, section, assessmentHierarchy, authUserToken);
                                 }
                                 break;
                                 case Constants.SECTION_LEVEL_SCORE_CUTOFF: {
@@ -335,7 +343,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
     }
 
     private void validateAssessmentLevelScore(SBApiResponse outgoingResponse, Map<String, Object> userSectionData,
-                                              Map<String, Object> assessmentHierarchy) {
+                                              Map<String, Object> assessmentHierarchy, String authUserToken) {
         // First Get the Hierarchy of given AssessmentId
         List<Map<String, Object>> hierarchySectionList = (List<Map<String, Object>>) assessmentHierarchy
                 .get(Constants.CHILDREN);
@@ -362,15 +370,17 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
 
         // We have both hierarchySection and userSection
         // Get the list of question Identifier's from userSectionData
-        List<String> questionIdList = new ArrayList<String>();
-        List<Map<String, Object>> userQuestionList = (List<Map<String, Object>>) hierarchySection.get(Constants.CHILDREN);
-        for (Map<String, Object> question : userQuestionList) {
-            questionIdList.add((String) question.get(Constants.IDENTIFIER));
+        List<String> questionsFromAssessment = new ArrayList<>();
+        Map<String, Object> questionSetFromAssessment = (Map<String, Object>) redisCacheMgr.getCache(Constants.USER_ASSESS_REQ + authUserToken);
+        if (questionSetFromAssessment != null && questionSetFromAssessment.get(Constants.CHILDREN) != null) {
+            List<Map<String, Object>> sections = (List<Map<String, Object>>) questionSetFromAssessment.get(Constants.CHILDREN);
+            for(Map<String, Object> section :sections){
+                questionsFromAssessment.addAll((List<String>) section.get(Constants.CHILD_NODES));
+            }
         }
-
         // We have both answer and user given data. This needs to be compared and result
         // should be return.
-        Map<String, Object> resultMap = assessUtilServ.validateQumlAssessment(questionIdList,
+        Map<String, Object> resultMap = assessUtilServ.validateQumlAssessment(questionsFromAssessment,
                 (List<Map<String, Object>>) userSectionData.get(Constants.CHILDREN));
 
         Double result = (Double) resultMap.get(Constants.RESULT);

@@ -1,11 +1,5 @@
 package org.sunbird.assessment.service;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -14,6 +8,8 @@ import org.sunbird.cache.RedisCacheMgr;
 import org.sunbird.common.util.Constants;
 import org.sunbird.core.exception.ApplicationLogicError;
 import org.sunbird.core.logger.CbExtLogger;
+
+import java.util.*;
 
 @Service
 public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
@@ -126,6 +122,7 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 					.getCache(Constants.QUESTION_ID + questionId);
 			if (ObjectUtils.isEmpty(question)) {
 				logger.error(new Exception("Failed to get the answer for question: " + questionId));
+				continue;
 				// TODO - Need to handle this scenario.
 			}
 			if (question.containsKey(QUESTION_TYPE)) {
@@ -142,7 +139,11 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 					break;
 				case FTB:
 					for (Map<String, Object> option : options) {
-						correctOption.add((String) option.get(SELECTED_ANSWER));
+						if ((boolean) option.get(ANSWER)) {
+							Map<String, Object> valueObj = (Map<String, Object>) option.get(VALUE);
+							correctOption.add(
+									valueObj.get(BODY).toString());
+						}
 					}
 					break;
 				case MCQ_SCA:
