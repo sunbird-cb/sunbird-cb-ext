@@ -243,7 +243,7 @@ public class CbExtServerProperties {
 	@Value("${kafka.topics.user.registration.register.event}")
 	private String userRegistrationTopic;
 
-	@Value("${kafka.topics.user.registration.auto.createUser_new}")
+	@Value("${kafka.topics.user.registration.auto.createUser}")
 	private String userRegistrationAutoCreateUserTopic;
 
 	@Value("${user.registration.domain}")

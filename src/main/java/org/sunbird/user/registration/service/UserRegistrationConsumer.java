@@ -112,7 +112,7 @@ public class UserRegistrationConsumer {
 		}
 	}
 
-	@KafkaListener(topics = "${kafka.topics.user.registration.auto.createUser_new}",groupId = "userAutoRegistrationNewTopic-consumer")
+	@KafkaListener(topics = "${kafka.topics.user.registration.auto.createUser}",groupId = "userAutoRegistrationNewTopic-consumer")
 	public void processAutoCreateUserEvent(ConsumerRecord<String, String> data) {
 		try {
 			UserRegistration userRegistration = gson.fromJson(data.value(), UserRegistration.class);
