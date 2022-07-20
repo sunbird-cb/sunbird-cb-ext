@@ -54,9 +54,7 @@ public class UserRegistrationConsumer {
 	UserRegistrationNotificationService userRegNotificationService;
 
 	@SuppressWarnings("unchecked")
-	@KafkaListener(topicPartitions = {
-			@TopicPartition(topic = "${kafka.topics.user.registration.register.event}", partitions = { "0", "1", "2",
-					"3" }) })
+	@KafkaListener(topics = "${kafka.topics.user.registration.register.event}",groupId = "${kafka.topics.user.registration.register.event.consumer.group}" )
 	public void processMessage(ConsumerRecord<String, String> data) {
 		UserRegistration userRegistration = gson.fromJson(data.value(), UserRegistration.class);
 		/*
@@ -98,9 +96,7 @@ public class UserRegistrationConsumer {
 		userRegNotificationService.sendNotification(userRegistration);
 	}
 
-	@KafkaListener(topicPartitions = {
-			@TopicPartition(topic = "${kafka.topics.user.registration.createUser}", partitions = { "0", "1", "2",
-					"3" }) })
+	@KafkaListener(topics = "${kafka.topics.user.registration.createUser}",groupId = "${kafka.topics.user.registration.createUser.consumer.group}")
 	public void processCreateUserMessage(ConsumerRecord<String, String> data) {
 		try {
 			WfRequest wfRequest = gson.fromJson(data.value(), WfRequest.class);
@@ -112,9 +108,7 @@ public class UserRegistrationConsumer {
 		}
 	}
 
-	@KafkaListener(topicPartitions = {
-			@TopicPartition(topic = "${kafka.topics.user.registration.auto.createUser}", partitions = { "0", "1", "2",
-					"3" }) })
+	@KafkaListener(topics = "${kafka.topics.user.registration.auto.createUser}",groupId = "${kafka.topics.user.registration.auto.createUser.consumer.group}")
 	public void processAutoCreateUserEvent(ConsumerRecord<String, String> data) {
 		try {
 			UserRegistration userRegistration = gson.fromJson(data.value(), UserRegistration.class);
