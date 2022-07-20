@@ -1,10 +1,10 @@
 package org.sunbird.common.util;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import java.util.Arrays;
+import java.util.List;
 
 @Component
 public class CbExtServerProperties {
@@ -308,16 +308,16 @@ public class CbExtServerProperties {
 
 	@Value("${user.registration.custodian.orgName}")
 	private String custodianOrgName;
-	
+
 	@Value("${user.position.master.list.file}")
 	private String masterPositionListFileName;
-	
+
 	@Value("${user.registration.welcome.email.template}")
 	private String welcomeEmailTemplate;
-	
+
 	@Value("${user.registration.welcome.email.subject}")
 	private String welcomeEmailSubject;
-	
+
 	@Value("${sb.org.create.path}")
 	private String lmsOrgCreatePath;
 

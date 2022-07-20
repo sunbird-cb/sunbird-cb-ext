@@ -62,8 +62,7 @@ public class WATConsumer {
 	private static final String[] ignorableFieldsForPublishedState = { "userName", "userEmail", "submittedFromName",
 			"submittedFromEmail", "submittedToName", "submittedToEmail", "createdByName", "updatedByName" };
 
-	@KafkaListener(id = "id2", groupId = "watTelemetryTopic-consumer", topicPartitions = {
-			@TopicPartition(topic = "${kafka.topics.wat.telemetry.event}", partitions = { "0", "1", "2", "3" }) })
+	@KafkaListener(id = "id2", topics = "${kafka.topics.wat.telemetry.event}", groupId = "watTelemetryTopic-consumer")
 	public void processMessage(ConsumerRecord<String, String> data) {
 		try {
 			logger.info("Consuming the audit records for WAT .....");
