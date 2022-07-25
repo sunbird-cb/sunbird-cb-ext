@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.rest.RestStatus;
 import org.joda.time.DateTime;
@@ -15,12 +16,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 import org.sunbird.cache.RedisCacheMgr;
+import org.sunbird.cassandra.utils.CassandraOperation;
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.model.SunbirdApiRespParam;
 import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.common.util.IndexerService;
+import org.sunbird.common.util.ProjectUtil;
 import org.sunbird.core.logger.CbExtLogger;
 import org.sunbird.user.service.UserUtilityServiceImpl;
 
@@ -42,10 +45,13 @@ public class ProfileServiceImpl implements ProfileService {
 	UserUtilityServiceImpl userUtilityService;
 
 	@Autowired
-	private ObjectMapper mapper;
+	ObjectMapper mapper;
 
 	@Autowired
 	IndexerService indexerService;
+
+	@Autowired
+	CassandraOperation cassandraOperation;
 
 	private CbExtLogger log = new CbExtLogger(getClass().getName());
 
@@ -303,6 +309,48 @@ public class ProfileServiceImpl implements ProfileService {
 		return response;
 	}
 
+	public SBApiResponse userBasicInfo(String userToken, String userId) {
+		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_USER_BASIC_INFO);
+		Map<String, Object> userData = userUtilityService.getUsersReadData(userId, StringUtils.EMPTY, userToken);
+		if (ObjectUtils.isEmpty(userData)) {
+			response.getParams().setErrmsg("User READ API Failed.");
+			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+			response.getParams().setStatus(Constants.FAILED);
+			return response;
+		}
+		// Read Custodian Org Id and Channel
+		String custodianOrgId = getCustodianOrgId();
+		String custodianOrgChannel = getCustodianOrgChannel();
+		if (StringUtils.isEmpty(custodianOrgId) || StringUtils.isEmpty(custodianOrgChannel)) {
+			response.getParams().setErrmsg("Failed to read Custodian Org values");
+			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+			response.getParams().setStatus(Constants.FAILED);
+			return response;
+		}
+
+		response.put(Constants.IS_UPDATE_REQUIRED, false);
+		Map<String, Object> responseMap = new HashMap<String, Object>();
+		if (custodianOrgChannel.equalsIgnoreCase((String) responseMap.get(Constants.CHANNEL))
+				&& custodianOrgId.equalsIgnoreCase((String) responseMap.get(Constants.ROOT_ORG_ID))) {
+			// User has custodian Values, check for profile.
+			Map<String, Object> profileData = (Map<String, Object>) userData.get(Constants.PROFILE_DETAILS);
+			List<Map<String, Object>> userRole = (List<Map<String, Object>>) profileData.get(Constants.USER_ROLES);
+			if (CollectionUtils.isEmpty(userRole)) {
+				response.put(Constants.IS_UPDATE_REQUIRED, true);
+			}
+		}
+
+		response.getResult().put(Constants.RESPONSE, responseMap);
+
+		return response;
+	}
+
+	public SBApiResponse userBasicProfileUpdate(String userToken, Map<String, Object> request) {
+		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_USER_BASIC_PROFILE_UPDATE);
+		response.setResponseCode(HttpStatus.NOT_IMPLEMENTED);
+		return response;
+	}
+
 	public List<String> approvalFields(String authToken, String userToken) {
 
 		Map<String, Object> approvalFieldsCache = (Map<String, Object>) mapper
@@ -411,5 +459,39 @@ public class ProfileServiceImpl implements ProfileService {
 		response.setResponseCode(HttpStatus.OK);
 		response.setTs(DateTime.now().toString());
 		return response;
+	}
+
+	public String getCustodianOrgId() {
+		String custodianOrgId = (String) redisCacheMgr.getCache(Constants.CUSTODIAN_ORG_ID);
+		if (StringUtils.isEmpty(custodianOrgId)) {
+			Map<String, Object> searchRequest = new HashMap<String, Object>();
+			searchRequest.put(Constants.ID, Constants.CUSTODIAN_ORG_ID);
+
+			List<Map<String, Object>> existingDataList = cassandraOperation.getRecordsByProperties(
+					Constants.KEYSPACE_SUNBIRD, Constants.TABLE_SYSTEM_SETTINGS, searchRequest, null);
+			if (CollectionUtils.isNotEmpty(existingDataList)) {
+				Map<String, Object> data = existingDataList.get(0);
+				custodianOrgId = (String) data.get(Constants.VALUE.toLowerCase());
+			}
+			redisCacheMgr.putCache(Constants.CUSTODIAN_ORG_ID, custodianOrgId);
+		}
+		return custodianOrgId;
+	}
+
+	public String getCustodianOrgChannel() {
+		String custodianOrgChannel = (String) redisCacheMgr.getCache(Constants.CUSTODIAN_ORG_CHANNEL);
+		if (StringUtils.isEmpty(custodianOrgChannel)) {
+			Map<String, Object> searchRequest = new HashMap<String, Object>();
+			searchRequest.put(Constants.ID, Constants.CUSTODIAN_ORG_CHANNEL);
+
+			List<Map<String, Object>> existingDataList = cassandraOperation.getRecordsByProperties(
+					Constants.KEYSPACE_SUNBIRD, Constants.TABLE_SYSTEM_SETTINGS, searchRequest, null);
+			if (CollectionUtils.isNotEmpty(existingDataList)) {
+				Map<String, Object> data = existingDataList.get(0);
+				custodianOrgChannel = (String) data.get(Constants.VALUE.toLowerCase());
+			}
+			redisCacheMgr.putCache(Constants.CUSTODIAN_ORG_CHANNEL, custodianOrgChannel);
+		}
+		return custodianOrgChannel;
 	}
 }

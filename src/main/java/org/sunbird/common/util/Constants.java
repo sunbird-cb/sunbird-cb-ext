@@ -476,6 +476,15 @@ public class Constants {
 	public static final String MAP_ID = "mapId";
 	public static final String SB_ROOT_ORG_ID = "sbRootOrgId";
 
+	public static final String API_USER_BASIC_INFO = "api.user.basic.info";
+	public static final String API_USER_BASIC_PROFILE_UPDATE = "api.user.basic.profile.update";
+	public static final String TABLE_SYSTEM_SETTINGS = "system_settings";
+	public static final String CUSTODIAN_ORG_ID = "custodianOrgId";
+	public static final String CUSTODIAN_ORG_CHANNEL = "custodianOrgChannel";
+	public static final String ROOT_ORG_ID = "rootOrgId";
+	public static final String IS_UPDATE_REQUIRED = "isUpdateRequired";
+	public static final String USER_ROLES = "userRoles";
+
 	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}
