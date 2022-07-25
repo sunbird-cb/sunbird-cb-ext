@@ -340,6 +340,13 @@ public class ProfileServiceImpl implements ProfileService {
 			}
 		}
 
+		response.put(Constants.FIRSTNAME, userData.get(Constants.FIRSTNAME));
+		response.put(Constants.LASTNAME, userData.get(Constants.LASTNAME));
+		response.put(Constants.ROLES, userData.get(Constants.ROLES));
+		response.put(Constants.ROOT_ORG_ID, userData.get(Constants.ROOT_ORG_ID));
+		response.put(Constants.CHANNEL, userData.get(Constants.CHANNEL));
+		response.put(Constants.USER_ID, userData.get(Constants.USER_ID));
+
 		response.getResult().put(Constants.RESPONSE, responseMap);
 
 		return response;
