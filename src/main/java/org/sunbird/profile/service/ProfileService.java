@@ -12,5 +12,5 @@ public interface ProfileService {
 
 	SBApiResponse userBasicInfo(String userId);
 
-	SBApiResponse userBasicProfileUpdate(String userToken, Map<String, Object> request);
+	SBApiResponse userBasicProfileUpdate(Map<String, Object> request);
 }

@@ -320,6 +320,9 @@ public class CbExtServerProperties {
 
 	@Value("${sb.org.create.path}")
 	private String lmsOrgCreatePath;
+	
+	@Value("${sb.service.user.self.migrate.path}")
+	private String lmsUserSelfMigratePath;
 
 	public String getUserAssessmentSubmissionDuration() {
 		return userAssessmentSubmissionDuration;
@@ -1170,5 +1173,13 @@ public class CbExtServerProperties {
 
 	public void setLmsOrgCreatePath(String lmsOrgCreatePath) {
 		this.lmsOrgCreatePath = lmsOrgCreatePath;
+	}
+
+	public String getLmsUserSelfMigratePath() {
+		return lmsUserSelfMigratePath;
+	}
+
+	public void setLmsUserSelfMigratePath(String lmsUserSelfMigratePath) {
+		this.lmsUserSelfMigratePath = lmsUserSelfMigratePath;
 	}
 }
