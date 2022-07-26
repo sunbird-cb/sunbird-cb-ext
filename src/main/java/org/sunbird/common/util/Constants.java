@@ -484,6 +484,7 @@ public class Constants {
 	public static final String ROOT_ORG_ID = "rootOrgId";
 	public static final String IS_UPDATE_REQUIRED = "isUpdateRequired";
 	public static final String USER_ROLES = "userRoles";
+	public static final String X_AUTH_USER_ID = "x-authenticated-userid";
 
 	private Constants() {
 		throw new IllegalStateException("Utility class");
