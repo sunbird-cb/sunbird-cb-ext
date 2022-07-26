@@ -35,9 +35,8 @@ public class ProfileController {
 	}
 
 	@GetMapping("/user/v1/basicInfo")
-	public ResponseEntity<?> userBasicInfo(@RequestHeader(Constants.X_AUTH_TOKEN) String userToken,
-			@RequestHeader(Constants.USER_ID) String userId) {
-		SBApiResponse response = profileService.userBasicInfo(userToken, userId);
+	public ResponseEntity<?> userBasicInfo(@RequestHeader(Constants.USER_ID) String userId) {
+		SBApiResponse response = profileService.userBasicInfo(userId);
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
 

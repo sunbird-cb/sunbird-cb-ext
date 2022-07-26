@@ -309,46 +309,53 @@ public class ProfileServiceImpl implements ProfileService {
 		return response;
 	}
 
-	public SBApiResponse userBasicInfo(String userToken, String userId) {
+	public SBApiResponse userBasicInfo(String userId) {
 		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_USER_BASIC_INFO);
-		Map<String, Object> userData = userUtilityService.getUsersReadData(userId, StringUtils.EMPTY, userToken);
-		if (ObjectUtils.isEmpty(userData)) {
-			response.getParams().setErrmsg("User READ API Failed.");
-			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
-			response.getParams().setStatus(Constants.FAILED);
-			return response;
-		}
-		// Read Custodian Org Id and Channel
-		String custodianOrgId = getCustodianOrgId();
-		String custodianOrgChannel = getCustodianOrgChannel();
-		if (StringUtils.isEmpty(custodianOrgId) || StringUtils.isEmpty(custodianOrgChannel)) {
-			response.getParams().setErrmsg("Failed to read Custodian Org values");
-			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
-			response.getParams().setStatus(Constants.FAILED);
-			return response;
-		}
-
-		response.put(Constants.IS_UPDATE_REQUIRED, false);
-		Map<String, Object> responseMap = new HashMap<String, Object>();
-		if (custodianOrgChannel.equalsIgnoreCase((String) responseMap.get(Constants.CHANNEL))
-				&& custodianOrgId.equalsIgnoreCase((String) responseMap.get(Constants.ROOT_ORG_ID))) {
-			// User has custodian Values, check for profile.
-			Map<String, Object> profileData = (Map<String, Object>) userData.get(Constants.PROFILE_DETAILS);
-			List<Map<String, Object>> userRole = (List<Map<String, Object>>) profileData.get(Constants.USER_ROLES);
-			if (CollectionUtils.isEmpty(userRole)) {
-				response.put(Constants.IS_UPDATE_REQUIRED, true);
+		try {
+			Map<String, Object> userData = userUtilityService.getUsersReadData(userId, StringUtils.EMPTY,
+					StringUtils.EMPTY);
+			if (ObjectUtils.isEmpty(userData)) {
+				response.getParams().setErrmsg("User READ API Failed.");
+				response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+				response.getParams().setStatus(Constants.FAILED);
+				return response;
 			}
+			// Read Custodian Org Id and Channel
+			String custodianOrgId = getCustodianOrgId();
+			String custodianOrgChannel = getCustodianOrgChannel();
+			if (StringUtils.isEmpty(custodianOrgId) || StringUtils.isEmpty(custodianOrgChannel)) {
+				response.getParams().setErrmsg("Failed to read Custodian Org values");
+				response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+				response.getParams().setStatus(Constants.FAILED);
+				return response;
+			}
+
+			Map<String, Object> responseMap = new HashMap<String, Object>();
+			responseMap.put(Constants.IS_UPDATE_REQUIRED, false);
+
+			if (custodianOrgChannel.equalsIgnoreCase((String) userData.get(Constants.CHANNEL))
+					&& custodianOrgId.equalsIgnoreCase((String) userData.get(Constants.ROOT_ORG_ID))) {
+				// User has custodian Values, check for profile.
+				Map<String, Object> profileData = (Map<String, Object>) userData.get(Constants.PROFILE_DETAILS);
+				List<Map<String, Object>> userRole = (List<Map<String, Object>>) profileData.get(Constants.USER_ROLES);
+				if (CollectionUtils.isEmpty(userRole)) {
+					responseMap.put(Constants.IS_UPDATE_REQUIRED, true);
+				}
+			}
+
+			responseMap.put(Constants.FIRSTNAME, userData.get(Constants.FIRSTNAME));
+			responseMap.put(Constants.LASTNAME, userData.get(Constants.LASTNAME));
+			responseMap.put(Constants.ROLES, userData.get(Constants.ROLES));
+			responseMap.put(Constants.ROOT_ORG_ID, userData.get(Constants.ROOT_ORG_ID));
+			responseMap.put(Constants.CHANNEL, userData.get(Constants.CHANNEL));
+			responseMap.put(Constants.USER_ID, userData.get(Constants.USER_ID));
+
+			response.getResult().put(Constants.RESPONSE, responseMap);
+		} catch (Exception err) {
+			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+			response.getParams().setErrmsg(err.getMessage());
+			response.getParams().setStatus(Constants.FAILED);
 		}
-
-		response.put(Constants.FIRSTNAME, userData.get(Constants.FIRSTNAME));
-		response.put(Constants.LASTNAME, userData.get(Constants.LASTNAME));
-		response.put(Constants.ROLES, userData.get(Constants.ROLES));
-		response.put(Constants.ROOT_ORG_ID, userData.get(Constants.ROOT_ORG_ID));
-		response.put(Constants.CHANNEL, userData.get(Constants.CHANNEL));
-		response.put(Constants.USER_ID, userData.get(Constants.USER_ID));
-
-		response.getResult().put(Constants.RESPONSE, responseMap);
-
 		return response;
 	}
 

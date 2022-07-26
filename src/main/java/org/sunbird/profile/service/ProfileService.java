@@ -10,7 +10,7 @@ public interface ProfileService {
 
 	SBApiResponse orgProfileRead(String orgId) throws Exception;
 
-	SBApiResponse userBasicInfo(String userToken, String userId);
+	SBApiResponse userBasicInfo(String userId);
 
 	SBApiResponse userBasicProfileUpdate(String userToken, Map<String, Object> request);
 }
