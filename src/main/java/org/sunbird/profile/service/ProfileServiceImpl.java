@@ -347,14 +347,20 @@ public class ProfileServiceImpl implements ProfileService {
 				if (CollectionUtils.isEmpty(userRole)) {
 					responseMap.put(Constants.IS_UPDATE_REQUIRED, true);
 				}
-			}
 
-			responseMap.put(Constants.FIRSTNAME, userData.get(Constants.FIRSTNAME));
-			responseMap.put(Constants.LASTNAME, userData.get(Constants.LASTNAME));
-			responseMap.put(Constants.ROLES, userData.get(Constants.ROLES));
-			responseMap.put(Constants.ROOT_ORG_ID, userData.get(Constants.ROOT_ORG_ID));
-			responseMap.put(Constants.CHANNEL, userData.get(Constants.CHANNEL));
-			responseMap.put(Constants.USER_ID, userData.get(Constants.USER_ID));
+				// Get Email from personalDetails
+				if (userData.containsKey(Constants.PERSONAL_DETAILS)) {
+					Map<String, Object> personalDetail = (Map<String, Object>) userData.get(Constants.PERSONAL_DETAILS);
+					responseMap.put(Constants.PRIMARY_EMAIL, personalDetail.get(Constants.PRIMARY_EMAIL));
+				}
+				
+				responseMap.put(Constants.FIRSTNAME, userData.get(Constants.FIRSTNAME));
+				responseMap.put(Constants.LASTNAME, userData.get(Constants.LASTNAME));
+				responseMap.put(Constants.ROLES, userData.get(Constants.ROLES));
+				responseMap.put(Constants.ROOT_ORG_ID, userData.get(Constants.ROOT_ORG_ID));
+				responseMap.put(Constants.CHANNEL, userData.get(Constants.CHANNEL));
+				responseMap.put(Constants.USER_ID, userData.get(Constants.USER_ID));
+			}
 
 			response.getResult().put(Constants.RESPONSE, responseMap);
 		} catch (Exception err) {
