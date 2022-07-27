@@ -9,7 +9,6 @@ import org.springframework.util.ObjectUtils;
 import org.sunbird.assessment.repo.AssessmentRepository;
 import org.sunbird.cache.RedisCacheMgr;
 import org.sunbird.common.model.SBApiResponse;
-import org.sunbird.common.model.SunbirdApiResp;
 import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
@@ -123,11 +122,11 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
     }
 
     @Override
-    public SBApiResponse submitAssessment(Map<String, Object> data, String authUserToken) throws Exception {
+    public SBApiResponse submitAssessment(Map<String, Object> submitRequest, String authUserToken) throws Exception {
         SBApiResponse outgoingResponse = new SBApiResponse();
-        String assessmentId = (String) data.get(Constants.IDENTIFIER);
+        String assessmentIdFromRequest = (String) submitRequest.get(Constants.IDENTIFIER);
         Map<String, Object> assessmentHierarchy = (Map<String, Object>) redisCacheMgr
-                .getCache(Constants.ASSESSMENT_ID + assessmentId);
+                .getCache(Constants.ASSESSMENT_ID + assessmentIdFromRequest);
         // logger.info("Submit Assessment: userId: " + userId + ", data: " +
         // data.toString());
         // Check User exists
@@ -136,7 +135,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
         // }
         String userId = RequestInterceptor.fetchUserIdFromAccessToken(authUserToken);
         if (userId != null) {
-            Date assessmentStartTime = assessmentRepository.fetchUserAssessmentStartTime(userId, Constants.ASSESSMENT_ID + assessmentId);
+            Date assessmentStartTime = assessmentRepository.fetchUserAssessmentStartTime(userId, Constants.ASSESSMENT_ID + assessmentIdFromRequest);
             if (assessmentStartTime != null) {
                 Timestamp submissionTime = new Timestamp(new Date().getTime());
                 Calendar cal = Calendar.getInstance();
@@ -146,38 +145,80 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                 int time = submissionTime.compareTo(later);
                 if (time <= 0) {
                     outgoingResponse.setResponseCode(HttpStatus.OK);
-                    outgoingResponse.getResult().put(Constants.IDENTIFIER, assessmentId);
+                    outgoingResponse.getResult().put(Constants.IDENTIFIER, assessmentIdFromRequest);
                     outgoingResponse.getResult().put(Constants.OBJECT_TYPE, assessmentHierarchy.get(Constants.OBJECT_TYPE));
                     outgoingResponse.getResult().put(Constants.PRIMARY_CATEGORY, assessmentHierarchy.get(Constants.PRIMARY_CATEGORY));
+                    List<Map<String, Object>> hierarchySectionList = (List<Map<String, Object>>) assessmentHierarchy
+                            .get(Constants.CHILDREN);
+                    if (CollectionUtils.isEmpty(hierarchySectionList)) {
+                        logger.error(new Exception("There are no section details in Assessment hierarchy."));
+                        // TODO Throw error
+                    } else {
+                        // Check Sections are available in the submit request or not
+                        if (submitRequest.containsKey(Constants.CHILDREN)
+                                && !CollectionUtils.isEmpty((List<Map<String, Object>>) submitRequest.get(Constants.CHILDREN))) {
+                            List<Map<String, Object>> sectionListFromSubmitRequest = (List<Map<String, Object>>) submitRequest.get(Constants.CHILDREN);
+                            List<Map<String, Object>> sectionLevelsResults = new ArrayList<>();
+                            for (Map<String, Object> hierarchySection : hierarchySectionList) {
+                                String scoreCutOffType = null;
+                                String hierarchySectionId = (String) hierarchySection.get(Constants.IDENTIFIER);
+                                String userSectionId = null;
+                                Map<String, Object> userSectionData = null;
+                                for (Map<String, Object> sectionFromSubmitRequest : sectionListFromSubmitRequest) {
+                                    userSectionId = (String) sectionFromSubmitRequest.get(Constants.IDENTIFIER);
+                                    if (userSectionId.equalsIgnoreCase(hierarchySectionId)) {
+                                        scoreCutOffType = ((String) sectionFromSubmitRequest.get(Constants.SCORE_CUTOFF_TYPE)).toLowerCase();
+                                        userSectionData = sectionFromSubmitRequest;
+                                        break;
+                                    }
+                                }
+                                if(userSectionData == null)
+                                {
+                                    Map<String, Object> sectionLevelResult = createResponseMapWithProperStructure(hierarchySection, null);
+                                    sectionLevelsResults.add(sectionLevelResult);
+                                    continue;
+                                }
 
-                    // Check Sections are available
-                    if (data.containsKey(Constants.CHILDREN)
-                            && !CollectionUtils.isEmpty((List<Map<String, Object>>) data.get(Constants.CHILDREN))) {
-                        List<Map<String, Object>> sectionList = (List<Map<String, Object>>) data.get(Constants.CHILDREN);
-
-                        for (Map<String, Object> section : sectionList) {
-                            String id = (String) section.get(Constants.IDENTIFIER);
-                            String scoreCutOffType = ((String) section.get(Constants.SCORE_CUTOFF_TYPE)).toLowerCase();
+                            // We have both userSectiondata and userSection
+                            // Get the list of question Identifier's from userSectionData
+                            List<String> questionsFromAssessment = new ArrayList<>();
+                            Map<String, Object> questionSetFromAssessment = (Map<String, Object>) redisCacheMgr.getCache(Constants.USER_ASSESS_REQ + authUserToken);
+                            if (questionSetFromAssessment != null && questionSetFromAssessment.get(Constants.CHILDREN) != null) {
+                                List<Map<String, Object>> sections = (List<Map<String, Object>>) questionSetFromAssessment.get(Constants.CHILDREN);
+                                for(Map<String, Object> section : sections) {
+                                    String sectionId = (String) section.get(Constants.IDENTIFIER);
+                                    if (userSectionId.equalsIgnoreCase(sectionId)) {
+                                        questionsFromAssessment.addAll((List<String>) section.get(Constants.CHILD_NODES));
+                                        break;
+                                    }
+                                }
+                            }
                             switch (scoreCutOffType) {
                                 case Constants.ASSESSMENT_LEVEL_SCORE_CUTOFF: {
-                                    if (sectionList.size() > 1) {
-                                        // There should be only one section -- if not -- throw error
+                                    if (hierarchySectionList.size() > 1) {
+                                       throw new Exception("Hierarchy cannot have more than 1 section for assessment level cutoff");
                                     }
-                                    validateAssessmentLevelScore(outgoingResponse, section, assessmentHierarchy, authUserToken);
+                                    Map<String, Object> result = validateScores(userSectionData, hierarchySection, questionsFromAssessment, authUserToken);
+                                    outgoingResponse.getResult().putAll(calculateAssessmentFinalResults(result));
+                                    return outgoingResponse;
                                 }
-                                break;
                                 case Constants.SECTION_LEVEL_SCORE_CUTOFF: {
+                                    Map<String, Object> result = validateScores(userSectionData, hierarchySection, questionsFromAssessment, authUserToken);
+                                    sectionLevelsResults.add(result);
                                 }
                                 break;
                                 default:
                                     break;
                             }
                         }
-                    } else {
-                        // TODO
-                        // At least one section details should be available in the submit request...
-                        // throw error if no section details.
-                    }
+                            if(hierarchySectionList.size()-sectionLevelsResults.size()==0) {
+                                outgoingResponse.getResult().putAll(calculateSectionFinalResults(sectionLevelsResults));
+                            }
+                            else {
+
+                            }
+
+                    }}
                 }
             }
             else
@@ -186,6 +227,70 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
             }
         }
         return outgoingResponse;
+    }
+
+    private Map<String, Object> calculateAssessmentFinalResults(Map<String, Object> assessmentLevelResult) {
+        Map<String, Object> res = new HashMap<>();
+        try {
+                Map<String, Object> sectionChildren = assessmentLevelResult;
+                res.put(Constants.CHILDREN, sectionChildren);
+                Double result = (Double) sectionChildren.get(Constants.RESULT);
+                res.put(Constants.OVERALL_RESULT, result);
+                res.put(Constants.TOTAL, sectionChildren.get(Constants.TOTAL));
+                res.put(Constants.BLANK, sectionChildren.get(Constants.BLANK));
+                res.put(Constants.CORRECT, sectionChildren.get(Constants.CORRECT));
+                res.put(Constants.PASS_PERCENTAGE, sectionChildren.get(Constants.PASS_PERCENTAGE));
+                res.put(Constants.INCORRECT, sectionChildren.get(Constants.INCORRECT));
+                Integer minimumPassPercentage = (Integer) sectionChildren.get(Constants.PASS_PERCENTAGE);
+                res.put(Constants.PASS, result >= minimumPassPercentage);
+        } catch (Exception e) {
+            logger.info(e.getMessage());
+            throw new RuntimeException(e);
+        }
+        return res;
+    }
+
+    private Map<String, Object> calculateSectionFinalResults(List<Map<String, Object>> sectionLevelResults) {
+        Map<String, Object> res = new HashMap<>();
+        Double result = 0.0;
+        Integer correct = 0;
+        Integer blank = 0;
+        Integer inCorrect = 0;
+        Integer total = 0;
+        int pass = 0;
+        Double totalResult = 0.0;
+        try {
+            for(Map<String, Object> sectionChildren : sectionLevelResults) {
+                res.put(Constants.CHILDREN, sectionLevelResults);
+                result = (Double) sectionChildren.get(Constants.RESULT);
+                totalResult += result;
+                total += (Integer) sectionChildren.get(Constants.TOTAL);
+                blank += (Integer) sectionChildren.get(Constants.BLANK);
+                correct += (Integer) sectionChildren.get(Constants.CORRECT);
+                inCorrect += (Integer) sectionChildren.get(Constants.INCORRECT);
+                Integer minimumPassPercentage = (Integer) sectionChildren.get(Constants.PASS_PERCENTAGE);
+                if( result >= minimumPassPercentage)
+                {
+                    pass++;
+                }
+            }
+            res.put(Constants.OVERALL_RESULT, totalResult/sectionLevelResults.size());
+            res.put(Constants.TOTAL, total);
+            res.put(Constants.BLANK, blank);
+            res.put(Constants.CORRECT, correct);
+            res.put(Constants.INCORRECT, inCorrect);
+            if(pass == sectionLevelResults.size()) {
+                res.put(Constants.PASS, true);
+            }
+            else
+            {
+                res.put(Constants.PASS, false);
+            }
+        } catch (Exception e) {
+            logger.info(e.getMessage());
+            throw new RuntimeException(e);
+        }
+        return res;
     }
 
     private Map<String, Object> getReadHierarchyApiResponse(String assessmentIdentifier, String token) {
@@ -338,78 +443,41 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
         return outgoingResponse;
     }
 
-    private void validateSectionLevelScore(SBApiResponse outgoingResponse, Map<String, Object> userSectionData,
-                                           SunbirdApiResp assessmentHierarchy) {
-    }
-
-    private void validateAssessmentLevelScore(SBApiResponse outgoingResponse, Map<String, Object> userSectionData,
-                                              Map<String, Object> assessmentHierarchy, String authUserToken) {
-        // First Get the Hierarchy of given AssessmentId
-        List<Map<String, Object>> hierarchySectionList = (List<Map<String, Object>>) assessmentHierarchy
-                .get(Constants.CHILDREN);
-        if (CollectionUtils.isEmpty(hierarchySectionList)) {
-            logger.error(new Exception("There are no section details in Assessment hierarchy."));
-            // TODO Throw error
-            return;
-        }
-        String userSectionId = (String) userSectionData.get(Constants.IDENTIFIER);
-
-        Map<String, Object> hierarchySection = null;
-        for (Map<String, Object> section : hierarchySectionList) {
-            String hierarchySectionId = (String) section.get(Constants.IDENTIFIER);
-            if (userSectionId.equalsIgnoreCase(hierarchySectionId)) {
-                hierarchySection = section;
-                break;
-            }
-        }
-
-        if (ObjectUtils.isEmpty(hierarchySection)) {
-            // TODO - throw error
-            return;
-        }
-
-        // We have both hierarchySection and userSection
-        // Get the list of question Identifier's from userSectionData
-        List<String> questionsFromAssessment = new ArrayList<>();
-        Map<String, Object> questionSetFromAssessment = (Map<String, Object>) redisCacheMgr.getCache(Constants.USER_ASSESS_REQ + authUserToken);
-        if (questionSetFromAssessment != null && questionSetFromAssessment.get(Constants.CHILDREN) != null) {
-            List<Map<String, Object>> sections = (List<Map<String, Object>>) questionSetFromAssessment.get(Constants.CHILDREN);
-            for(Map<String, Object> section :sections){
-                questionsFromAssessment.addAll((List<String>) section.get(Constants.CHILD_NODES));
-            }
-        }
-        // We have both answer and user given data. This needs to be compared and result
-        // should be return.
+    private Map<String, Object> validateScores(Map<String, Object> userSectionData,
+                                               Map<String, Object> hierarchySection, List<String> questionsFromAssessment, String authUserToken) {
+            // We have both answer and user given data. This needs to be compared and result
+            // should be return.
         Map<String, Object> resultMap = assessUtilServ.validateQumlAssessment(questionsFromAssessment,
                 (List<Map<String, Object>>) userSectionData.get(Constants.CHILDREN));
-
-        Double result = (Double) resultMap.get(Constants.RESULT);
-        int passPercentage = (Integer) hierarchySection.get(Constants.MINIMUM_PASS_PERCENTAGE);
+        return createResponseMapWithProperStructure(hierarchySection, resultMap);
+        }
+    @Override
+    public Map<String, Object> createResponseMapWithProperStructure(Map<String, Object> hierarchySection, Map<String, Object> resultMap) {
         Map<String, Object> sectionLevelResult = new HashMap<String, Object>();
         sectionLevelResult.put(Constants.IDENTIFIER, hierarchySection.get(Constants.IDENTIFIER));
         sectionLevelResult.put(Constants.OBJECT_TYPE, hierarchySection.get(Constants.OBJECT_TYPE));
         sectionLevelResult.put(Constants.PRIMARY_CATEGORY, hierarchySection.get(Constants.PRIMARY_CATEGORY));
         sectionLevelResult.put(Constants.SCORE_CUTOFF_TYPE, hierarchySection.get(Constants.SCORE_CUTOFF_TYPE));
-        sectionLevelResult.put(Constants.PASS_PERCENTAGE, passPercentage);
-        sectionLevelResult.put(Constants.RESULT, result);
-        sectionLevelResult.put(Constants.TOTAL, resultMap.get(Constants.TOTAL));
-        sectionLevelResult.put(Constants.BLANK, resultMap.get(Constants.BLANK));
-        sectionLevelResult.put(Constants.CORRECT, resultMap.get(Constants.CORRECT));
-        sectionLevelResult.put(Constants.PASS_PERCENTAGE, hierarchySection.get(Constants.MINIMUM_PASS_PERCENTAGE));
-        sectionLevelResult.put(Constants.INCORRECT, resultMap.get(Constants.INCORRECT));
-        sectionLevelResult.put(Constants.PASS, result >= passPercentage);
-
-        List<Map<String, Object>> sectionChildren = new ArrayList<Map<String, Object>>();
-        sectionChildren.add(sectionLevelResult);
-        outgoingResponse.getResult().put(Constants.CHILDREN, sectionChildren);
-
-        outgoingResponse.getResult().put(Constants.OVERALL_RESULT, result);
-        outgoingResponse.getResult().put(Constants.TOTAL, resultMap.get(Constants.TOTAL));
-        outgoingResponse.getResult().put(Constants.BLANK, resultMap.get(Constants.BLANK));
-        outgoingResponse.getResult().put(Constants.CORRECT, resultMap.get(Constants.CORRECT));
-        outgoingResponse.getResult().put(Constants.PASS_PERCENTAGE, hierarchySection.get(Constants.MINIMUM_PASS_PERCENTAGE));
-        outgoingResponse.getResult().put(Constants.INCORRECT, resultMap.get(Constants.INCORRECT));
-        outgoingResponse.getResult().put(Constants.PASS, result >= passPercentage);
+        sectionLevelResult.put(Constants.PASS_PERCENTAGE, (Integer) hierarchySection.get(Constants.MINIMUM_PASS_PERCENTAGE));
+        Double result;
+        if (resultMap != null) {
+            result = (Double) resultMap.get(Constants.RESULT);
+            sectionLevelResult.put(Constants.RESULT, result);
+            sectionLevelResult.put(Constants.TOTAL, resultMap.get(Constants.TOTAL));
+            sectionLevelResult.put(Constants.BLANK, resultMap.get(Constants.BLANK));
+            sectionLevelResult.put(Constants.CORRECT, resultMap.get(Constants.CORRECT));
+            sectionLevelResult.put(Constants.INCORRECT, resultMap.get(Constants.INCORRECT));
+        } else {
+            result = 0.0;
+            sectionLevelResult.put(Constants.RESULT, result);
+            List<String> childNodes = (List<String>) hierarchySection.get(Constants.CHILDREN);
+            sectionLevelResult.put(Constants.TOTAL, childNodes.size());
+            sectionLevelResult.put(Constants.BLANK, childNodes.size());
+            sectionLevelResult.put(Constants.CORRECT, 0);
+            sectionLevelResult.put(Constants.INCORRECT, 0);
+        }
+        sectionLevelResult.put(Constants.PASS, result >= ((Integer) hierarchySection.get(Constants.MINIMUM_PASS_PERCENTAGE)));
+        sectionLevelResult.put(Constants.OVERALL_RESULT, result);
+        return sectionLevelResult;
     }
-
 }
