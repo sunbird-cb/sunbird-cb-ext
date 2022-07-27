@@ -351,7 +351,7 @@ public class ProfileServiceImpl implements ProfileService {
 				// Get Email from personalDetails
 				if (profileData.containsKey(Constants.PERSONAL_DETAILS)) {
 					Map<String, Object> personalDetail = (Map<String, Object>) profileData.get(Constants.PERSONAL_DETAILS);
-					responseMap.put(Constants.PRIMARY_EMAIL, personalDetail.get(Constants.PRIMARY_EMAIL));
+					responseMap.put(Constants.EMAIL, personalDetail.get(Constants.PRIMARY_EMAIL));
 				}
 				
 				responseMap.put(Constants.FIRSTNAME, userData.get(Constants.FIRSTNAME));
