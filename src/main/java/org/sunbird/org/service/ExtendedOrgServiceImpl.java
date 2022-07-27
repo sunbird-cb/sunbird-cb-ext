@@ -58,7 +58,7 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 
 			if (!StringUtils.isEmpty(orgId)) {
 				Map<String, Object> updateRequest = new HashMap<String, Object>();
-				updateRequest.put(Constants.SB_ORG_ID, orgId);
+				updateRequest.put(Constants.SB_ORG_ID.toLowerCase(), orgId);
 				String orgType = (String) requestData.get(Constants.ORGANIZATION_TYPE);
 				if (requestData.containsKey(Constants.SB_ROOT_ORG_ID)
 						&& StringUtils.isNotEmpty((String) requestData.get(Constants.SB_ROOT_ORG_ID))) {
@@ -153,7 +153,7 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 			if (CollectionUtils.isNotEmpty(existingDataList)) {
 				List<String> orgIdList = existingDataList.stream().filter(item -> !ObjectUtils.isEmpty(item))
 						.map(item -> {
-							return (String) item.get(Constants.SB_ORG_ID);
+							return (String) item.get(Constants.SB_ORG_ID.toLowerCase());
 						}).collect(Collectors.toList());
 				SBApiOrgSearchRequest orgSearchRequest = new SBApiOrgSearchRequest();
 				orgSearchRequest.getFilters().setId(orgIdList);

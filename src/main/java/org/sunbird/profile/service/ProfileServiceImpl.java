@@ -6,7 +6,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.rest.RestStatus;
 import org.joda.time.DateTime;
@@ -15,18 +18,22 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 import org.sunbird.cache.RedisCacheMgr;
+import org.sunbird.cassandra.utils.CassandraOperation;
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.model.SunbirdApiRespParam;
 import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.common.util.IndexerService;
+import org.sunbird.common.util.ProjectUtil;
 import org.sunbird.core.logger.CbExtLogger;
+import org.sunbird.org.service.ExtendedOrgService;
 import org.sunbird.user.service.UserUtilityServiceImpl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
+@SuppressWarnings({ "unchecked", "serial" })
 public class ProfileServiceImpl implements ProfileService {
 
 	@Autowired
@@ -42,14 +49,19 @@ public class ProfileServiceImpl implements ProfileService {
 	UserUtilityServiceImpl userUtilityService;
 
 	@Autowired
-	private ObjectMapper mapper;
+	ObjectMapper mapper;
 
 	@Autowired
 	IndexerService indexerService;
 
+	@Autowired
+	CassandraOperation cassandraOperation;
+
+	@Autowired
+	ExtendedOrgService extOrgService;
+
 	private CbExtLogger log = new CbExtLogger(getClass().getName());
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public SBApiResponse profileUpdate(Map<String, Object> request, String userToken, String authToken)
 			throws Exception {
@@ -303,6 +315,82 @@ public class ProfileServiceImpl implements ProfileService {
 		return response;
 	}
 
+	public SBApiResponse userBasicInfo(String userId) {
+		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_USER_BASIC_INFO);
+		try {
+			Map<String, Object> userData = userUtilityService.getUsersReadData(userId, StringUtils.EMPTY,
+					StringUtils.EMPTY);
+			if (ObjectUtils.isEmpty(userData)) {
+				response.getParams().setErrmsg("User READ API Failed.");
+				response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+				response.getParams().setStatus(Constants.FAILED);
+				return response;
+			}
+			// Read Custodian Org Id and Channel
+			String custodianOrgId = getCustodianOrgId();
+			String custodianOrgChannel = getCustodianOrgChannel();
+			if (StringUtils.isEmpty(custodianOrgId) || StringUtils.isEmpty(custodianOrgChannel)) {
+				response.getParams().setErrmsg("Failed to read Custodian Org values");
+				response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+				response.getParams().setStatus(Constants.FAILED);
+				return response;
+			}
+
+			Map<String, Object> responseMap = new HashMap<String, Object>();
+			responseMap.put(Constants.IS_UPDATE_REQUIRED, false);
+
+			if (custodianOrgChannel.equalsIgnoreCase((String) userData.get(Constants.CHANNEL))
+					&& custodianOrgId.equalsIgnoreCase((String) userData.get(Constants.ROOT_ORG_ID))) {
+				// User has custodian Values, check for profile.
+				Map<String, Object> profileData = (Map<String, Object>) userData.get(Constants.PROFILE_DETAILS);
+				List<Map<String, Object>> userRole = (List<Map<String, Object>>) profileData.get(Constants.USER_ROLES);
+				if (CollectionUtils.isEmpty(userRole)) {
+					responseMap.put(Constants.IS_UPDATE_REQUIRED, true);
+				}
+			}
+
+			responseMap.put(Constants.FIRSTNAME, userData.get(Constants.FIRSTNAME));
+			responseMap.put(Constants.LASTNAME, userData.get(Constants.LASTNAME));
+			responseMap.put(Constants.ROLES, userData.get(Constants.ROLES));
+			responseMap.put(Constants.ROOT_ORG_ID, userData.get(Constants.ROOT_ORG_ID));
+			responseMap.put(Constants.CHANNEL, userData.get(Constants.CHANNEL));
+			responseMap.put(Constants.USER_ID, userData.get(Constants.USER_ID));
+
+			response.getResult().put(Constants.RESPONSE, responseMap);
+		} catch (Exception err) {
+			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+			response.getParams().setErrmsg(err.getMessage());
+			response.getParams().setStatus(Constants.FAILED);
+		}
+		return response;
+	}
+
+	public SBApiResponse userBasicProfileUpdate(Map<String, Object> request) {
+		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_USER_BASIC_PROFILE_UPDATE);
+		String errMsg = validateBasicProfilePayload(request);
+		if (StringUtils.isNotBlank(errMsg)) {
+			response.setResponseCode(HttpStatus.BAD_REQUEST);
+			response.getParams().setErrmsg(errMsg);
+			response.getParams().setStatus(Constants.FAILED);
+			return response;
+		}
+		try {
+			Map<String, Object> requestBody = (Map<String, Object>) request.get(Constants.REQUEST);
+			errMsg = createOrgIfRequired(requestBody);
+		} catch (Exception e) {
+			log.error(e);
+			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+			response.getParams().setErrmsg(e.getMessage());
+			response.getParams().setStatus(Constants.FAILED);
+		}
+		if (!StringUtils.isEmpty(errMsg)) {
+			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+			response.getParams().setErrmsg(errMsg);
+			response.getParams().setStatus(Constants.FAILED);
+		}
+		return response;
+	}
+
 	public List<String> approvalFields(String authToken, String userToken) {
 
 		Map<String, Object> approvalFieldsCache = (Map<String, Object>) mapper
@@ -411,5 +499,226 @@ public class ProfileServiceImpl implements ProfileService {
 		response.setResponseCode(HttpStatus.OK);
 		response.setTs(DateTime.now().toString());
 		return response;
+	}
+
+	public String getCustodianOrgId() {
+		String custodianOrgId = (String) redisCacheMgr.getCache(Constants.CUSTODIAN_ORG_ID);
+		if (StringUtils.isEmpty(custodianOrgId)) {
+			Map<String, Object> searchRequest = new HashMap<String, Object>();
+			searchRequest.put(Constants.ID, Constants.CUSTODIAN_ORG_ID);
+
+			List<Map<String, Object>> existingDataList = cassandraOperation.getRecordsByProperties(
+					Constants.KEYSPACE_SUNBIRD, Constants.TABLE_SYSTEM_SETTINGS, searchRequest, null);
+			if (CollectionUtils.isNotEmpty(existingDataList)) {
+				Map<String, Object> data = existingDataList.get(0);
+				custodianOrgId = (String) data.get(Constants.VALUE.toLowerCase());
+			}
+			redisCacheMgr.putCache(Constants.CUSTODIAN_ORG_ID, custodianOrgId);
+		}
+		return custodianOrgId;
+	}
+
+	public String getCustodianOrgChannel() {
+		String custodianOrgChannel = (String) redisCacheMgr.getCache(Constants.CUSTODIAN_ORG_CHANNEL);
+		if (StringUtils.isEmpty(custodianOrgChannel)) {
+			Map<String, Object> searchRequest = new HashMap<String, Object>();
+			searchRequest.put(Constants.ID, Constants.CUSTODIAN_ORG_CHANNEL);
+
+			List<Map<String, Object>> existingDataList = cassandraOperation.getRecordsByProperties(
+					Constants.KEYSPACE_SUNBIRD, Constants.TABLE_SYSTEM_SETTINGS, searchRequest, null);
+			if (CollectionUtils.isNotEmpty(existingDataList)) {
+				Map<String, Object> data = existingDataList.get(0);
+				custodianOrgChannel = (String) data.get(Constants.VALUE.toLowerCase());
+			}
+			redisCacheMgr.putCache(Constants.CUSTODIAN_ORG_CHANNEL, custodianOrgChannel);
+		}
+		return custodianOrgChannel;
+	}
+
+	private String validateBasicProfilePayload(Map<String, Object> requestObj) {
+		StringBuffer str = new StringBuffer();
+		List<String> errList = new ArrayList<String>();
+
+		if (ObjectUtils.isEmpty(requestObj.get(Constants.REQUEST))) {
+			errList.add(Constants.REQUEST);
+		} else {
+			Map<String, Object> request = (Map<String, Object>) requestObj.get(Constants.REQUEST);
+			List<String> keys = Arrays.asList(Constants.USER_ID, Constants.POSITION, Constants.CHANNEL,
+					Constants.MAP_ID, Constants.ORGANIZATION_TYPE, Constants.ORGANIZATION_SUB_TYPE);
+			for (String key : keys) {
+				if (StringUtils.isBlank((String) request.get(key))) {
+					errList.add(key);
+				}
+			}
+		}
+		if (!errList.isEmpty()) {
+			str.append("Failed to Self Migrate User. Missing Params - [").append(errList.toString()).append("]");
+		}
+
+		return str.toString();
+	}
+
+	private Map<String, Object> getOrgCreateRequest(Map<String, Object> request) {
+		Map<String, Object> requestBody = new HashMap<String, Object>();
+		requestBody.put(Constants.ORG_NAME, request.get(Constants.CHANNEL));
+		requestBody.put(Constants.CHANNEL, request.get(Constants.CHANNEL));
+		requestBody.put(Constants.SB_ROOT_ORG_ID, request.get(Constants.SB_ROOT_ORG_ID));
+		requestBody.put(Constants.ORGANIZATION_TYPE, request.get(Constants.ORGANIZATION_TYPE));
+		requestBody.put(Constants.ORGANIZATION_SUB_TYPE, request.get(Constants.ORGANIZATION_SUB_TYPE));
+		requestBody.put(Constants.MAP_ID, request.get(Constants.MAP_ID));
+		requestBody.put(Constants.IS_TENANT, true);
+		Map<String, Object> newRequest = new HashMap<String, Object>();
+		newRequest.put(Constants.REQUEST, requestBody);
+		return newRequest;
+	}
+
+	private Map<String, Object> getUserSelfMigrateRequest(String userId, String channel) {
+		Map<String, Object> requestBody = new HashMap<String, Object>() {
+			{
+				put(Constants.USER_ID, userId);
+				put(Constants.CHANNEL, channel);
+				put(Constants.SOFT_DELETE_OLD_ORG, true);
+				put(Constants.NOTIFY_MIGRATION, false);
+			}
+		};
+		Map<String, Object> request = new HashMap<String, Object>() {
+			{
+				put(Constants.REQUEST, requestBody);
+			}
+		};
+		return request;
+	}
+
+	private String createOrgIfRequired(Map<String, Object> requestBody) {
+		String errMsg = StringUtils.EMPTY;
+		// Create the org if it's not already onboarded.
+		if (StringUtils.isEmpty((String) requestBody.get(Constants.SB_ORG_ID))) {
+			SBApiResponse orgResponse = extOrgService.createOrg(getOrgCreateRequest(requestBody), StringUtils.EMPTY);
+			if (orgResponse.getResponseCode() == HttpStatus.OK) {
+				String orgId = (String) orgResponse.getResult().get(Constants.ORGANIZATION_ID);
+				requestBody.put(Constants.SB_ORG_ID, orgId);
+				log.info(String.format("New org created for basicProfileUpdate. OrgName: %s, OrgId: %s",
+						requestBody.get(Constants.CHANNEL), orgId));
+				// We got the orgId successfully... let's migrate the user to this org.
+				try {
+					Thread.sleep(1000);
+				} catch (Exception e) {
+				}
+				errMsg = executeSelfMigrateUser(requestBody);
+			} else {
+				try {
+					errMsg = "Failed to auto onboard org.";
+					log.warn(String.format("%s. Error: %s", errMsg, mapper.writeValueAsString(orgResponse)));
+				} catch (Exception e) {
+				}
+			}
+		} else {
+			errMsg = executeSelfMigrateUser(requestBody);
+		}
+		return errMsg;
+	}
+
+	private String executeSelfMigrateUser(Map<String, Object> requestBody) {
+		String errMsg = StringUtils.EMPTY;
+		Map<String, Object> migrateResponse = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPatch(
+				serverConfig.getSbUrl() + serverConfig.getLmsUserSelfMigratePath(),
+				getUserSelfMigrateRequest((String) requestBody.get(Constants.USER_ID),
+						(String) requestBody.get(Constants.CHANNEL)),
+				MapUtils.EMPTY_MAP);
+		if (Constants.OK.equalsIgnoreCase((String) migrateResponse.get(Constants.RESPONSE_CODE))) {
+			log.info(String.format("Successfully self migrated user. UserId: %s, Channel: %s",
+					(String) requestBody.get(Constants.USER_ID), (String) requestBody.get(Constants.CHANNEL)));
+			errMsg = updateUserProfile(requestBody);
+		} else {
+			try {
+				errMsg = "Failed to Self migrate User.";
+				log.warn(String.format("%s. Error: %s", errMsg, mapper.writeValueAsString(migrateResponse)));
+			} catch (Exception e) {
+			}
+		}
+		return errMsg;
+	}
+
+	private String updateUserProfile(Map<String, Object> request) {
+		String errMsg = StringUtils.EMPTY;
+
+		Map<String, Object> userReadResponse = userUtilityService
+				.getUsersReadData((String) request.get(Constants.USER_ID), StringUtils.EMPTY, StringUtils.EMPTY);
+
+		List<String> existingRoles;
+		if (userReadResponse.containsKey(Constants.ROLES)) {
+			existingRoles = (List<String>) userReadResponse.get(Constants.ROLES);
+		} else {
+			existingRoles = new ArrayList<String>();
+		}
+
+		Map<String, Object> existingProfile = (Map<String, Object>) userReadResponse.get(Constants.PROFILE_DETAILS);
+		if (ObjectUtils.isEmpty(existingProfile)) {
+			errMsg = "Existing ProfileDetails object is empty. Failed to update Profile";
+			return errMsg;
+		}
+
+		List<Map<String, Object>> professionalDetails;
+		if (existingProfile.containsKey(Constants.PROFESSIONAL_DETAILS)) {
+			professionalDetails = (List<Map<String, Object>>) existingProfile.get(Constants.PROFESSIONAL_DETAILS);
+		} else {
+			professionalDetails = new ArrayList<Map<String, Object>>() {
+				{
+					Map<String, Object> profDetail = new HashMap<String, Object>();
+					profDetail.put(Constants.OSID, UUID.randomUUID().toString());
+					add(profDetail);
+				}
+			};
+			existingProfile.put(Constants.PROFESSIONAL_DETAILS, professionalDetails);
+		}
+		professionalDetails.get(0).put(Constants.DESIGNATION, request.get(Constants.POSITION));
+		professionalDetails.get(0).put(Constants.ORGANIZATION_TYPE, Constants.GOVERNMENT);
+
+		Map<String, Object> empDetails;
+		if (existingProfile.containsKey(Constants.EMPLOYMENTDETAILS)) {
+			empDetails = (Map<String, Object>) existingProfile.get(Constants.EMPLOYMENTDETAILS);
+		} else {
+			empDetails = new HashMap<String, Object>();
+			existingProfile.put(Constants.EMPLOYMENTDETAILS, empDetails);
+		}
+		empDetails.put(Constants.DEPARTMENTNAME, request.get(Constants.CHANNEL));
+
+		Map<String, Object> updateReqBody = new HashMap<String, Object>();
+		updateReqBody.put(Constants.PROFILE_DETAILS, existingProfile);
+		updateReqBody.put(Constants.USER_ID, request.get(Constants.USER_ID));
+		Map<String, Object> updateRequest = new HashMap<>();
+		updateRequest.put(Constants.REQUEST, updateReqBody);
+
+		Map<String, Object> updateResponse = outboundRequestHandlerService.fetchResultUsingPatch(
+				serverConfig.getSbUrl() + serverConfig.getLmsUserUpdatePath(), updateRequest, MapUtils.EMPTY_MAP);
+		if (!updateResponse.get(Constants.RESPONSE_CODE).equals(Constants.OK)) {
+			Map<String, Object> params = (Map<String, Object>) updateResponse.get(Constants.PARAMS);
+			errMsg = String.format("Failed to update user profile. Error: %s", params.get("errmsg"));
+		} else {
+			errMsg = assignUserRole(request, existingRoles);
+		}
+		return errMsg;
+	}
+
+	private String assignUserRole(Map<String, Object> requestBody, List<String> existingRoles) {
+		String errMsg = StringUtils.EMPTY;
+		Map<String, Object> assignRoleReq = new HashMap<>();
+		Map<String, Object> assignRoleReqBody = new HashMap<String, Object>();
+		assignRoleReqBody.put(Constants.ORGANIZATION_ID, requestBody.get(Constants.SB_ORG_ID));
+		assignRoleReqBody.put(Constants.USER_ID, requestBody.get(Constants.USER_ID));
+		if (existingRoles.size() == 0) {
+			existingRoles.add(Constants.PUBLIC);
+		}
+		assignRoleReqBody.put(Constants.ROLES, existingRoles);
+		assignRoleReq.put(Constants.REQUEST, assignRoleReqBody);
+
+		Map<String, Object> assignRoleResponse = (Map<String, Object>) outboundRequestHandlerService
+				.fetchResultUsingPost(serverConfig.getSbUrl() + serverConfig.getSbAssignRolePath(), assignRoleReq,
+						MapUtils.EMPTY_MAP);
+		if (!Constants.OK.equalsIgnoreCase((String) assignRoleResponse.get(Constants.RESPONSE_CODE))) {
+			Map<String, Object> params = (Map<String, Object>) assignRoleResponse.get(Constants.PARAMS);
+			errMsg = String.format("Failed to assign roles to User. Error: %s", params.get("errmsg"));
+		}
+		return errMsg;
 	}
 }
