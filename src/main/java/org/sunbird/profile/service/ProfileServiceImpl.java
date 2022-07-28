@@ -450,16 +450,10 @@ public class ProfileServiceImpl implements ProfileService {
 			Map<String, Object> personalDetailsMap = (Map<String, Object>) personalDetailsObj;
 			if (!ObjectUtils.isEmpty(personalDetailsMap)) {
 				for (String paramName : personalDetailsMap.keySet()) {
-					String value = (String) personalDetailsMap.get(paramName);
-					if (StringUtils.isNotEmpty(value)) {
-						switch (paramName) {
-						case Constants.FIRST_NAME_LOWER_CASE:
-							updatedRequest.put(Constants.FIRSTNAME, value);
-							break;
-						case Constants.SURNAME:
-							updatedRequest.put(Constants.LASTNAME, value);
-							break;
-						}
+					if(Constants.FIRST_NAME_LOWER_CASE.equalsIgnoreCase(paramName)) {
+						updatedRequest.put(Constants.FIRSTNAME, (String) personalDetailsMap.get(paramName));
+					} else if (Constants.SURNAME.equalsIgnoreCase(paramName)) {
+						updatedRequest.put(Constants.FIRSTNAME, (String) personalDetailsMap.get(paramName));
 					}
 				}
 			}
@@ -712,6 +706,9 @@ public class ProfileServiceImpl implements ProfileService {
 		Map<String, Object> assignRoleReqBody = new HashMap<String, Object>();
 		assignRoleReqBody.put(Constants.ORGANIZATION_ID, requestBody.get(Constants.SB_ORG_ID));
 		assignRoleReqBody.put(Constants.USER_ID, requestBody.get(Constants.USER_ID));
+		if(existingRoles == null) {
+			existingRoles = new ArrayList<String>();
+		}
 		if (existingRoles.size() == 0) {
 			existingRoles.add(Constants.PUBLIC);
 		}
