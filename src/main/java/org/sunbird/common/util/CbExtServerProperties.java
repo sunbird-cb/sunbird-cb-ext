@@ -1,10 +1,10 @@
 package org.sunbird.common.util;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import java.util.Arrays;
+import java.util.List;
 
 @Component
 public class CbExtServerProperties {
@@ -308,18 +308,21 @@ public class CbExtServerProperties {
 
 	@Value("${user.registration.custodian.orgName}")
 	private String custodianOrgName;
-	
+
 	@Value("${user.position.master.list.file}")
 	private String masterPositionListFileName;
-	
+
 	@Value("${user.registration.welcome.email.template}")
 	private String welcomeEmailTemplate;
-	
+
 	@Value("${user.registration.welcome.email.subject}")
 	private String welcomeEmailSubject;
-	
+
 	@Value("${sb.org.create.path}")
 	private String lmsOrgCreatePath;
+	
+	@Value("${sb.service.user.self.migrate.path}")
+	private String lmsUserSelfMigratePath;
 
 	public String getUserAssessmentSubmissionDuration() {
 		return userAssessmentSubmissionDuration;
@@ -1170,5 +1173,13 @@ public class CbExtServerProperties {
 
 	public void setLmsOrgCreatePath(String lmsOrgCreatePath) {
 		this.lmsOrgCreatePath = lmsOrgCreatePath;
+	}
+
+	public String getLmsUserSelfMigratePath() {
+		return lmsUserSelfMigratePath;
+	}
+
+	public void setLmsUserSelfMigratePath(String lmsUserSelfMigratePath) {
+		this.lmsUserSelfMigratePath = lmsUserSelfMigratePath;
 	}
 }
