@@ -350,10 +350,11 @@ public class ProfileServiceImpl implements ProfileService {
 
 				// Get Email from personalDetails
 				if (profileData.containsKey(Constants.PERSONAL_DETAILS)) {
-					Map<String, Object> personalDetail = (Map<String, Object>) profileData.get(Constants.PERSONAL_DETAILS);
+					Map<String, Object> personalDetail = (Map<String, Object>) profileData
+							.get(Constants.PERSONAL_DETAILS);
 					responseMap.put(Constants.EMAIL, personalDetail.get(Constants.PRIMARY_EMAIL));
 				}
-				
+
 				responseMap.put(Constants.FIRSTNAME, userData.get(Constants.FIRSTNAME));
 				responseMap.put(Constants.LASTNAME, userData.get(Constants.LASTNAME));
 				responseMap.put(Constants.ROLES, userData.get(Constants.ROLES));
@@ -450,7 +451,7 @@ public class ProfileServiceImpl implements ProfileService {
 			Map<String, Object> personalDetailsMap = (Map<String, Object>) personalDetailsObj;
 			if (!ObjectUtils.isEmpty(personalDetailsMap)) {
 				for (String paramName : personalDetailsMap.keySet()) {
-					if(Constants.FIRST_NAME_LOWER_CASE.equalsIgnoreCase(paramName)) {
+					if (Constants.FIRST_NAME_LOWER_CASE.equalsIgnoreCase(paramName)) {
 						updatedRequest.put(Constants.FIRSTNAME, (String) personalDetailsMap.get(paramName));
 					} else if (Constants.SURNAME.equalsIgnoreCase(paramName)) {
 						updatedRequest.put(Constants.FIRSTNAME, (String) personalDetailsMap.get(paramName));
@@ -684,6 +685,19 @@ public class ProfileServiceImpl implements ProfileService {
 		empDetails.put(Constants.DEPARTMENTNAME, request.get(Constants.CHANNEL));
 
 		Map<String, Object> updateReqBody = new HashMap<String, Object>();
+		
+		Map<String, Object> existingPersonalDetail = (Map<String, Object>) existingProfile
+				.get(Constants.PERSONAL_DETAILS);
+		if (!ObjectUtils.isEmpty(existingPersonalDetail)) {
+			if (StringUtils.isNotBlank((String) request.get(Constants.FIRSTNAME))) {
+				existingPersonalDetail.put(Constants.FIRSTNAME.toLowerCase(), request.get(Constants.FIRSTNAME));
+				updateReqBody.put(Constants.FIRSTNAME, request.get(Constants.FIRSTNAME));
+			}
+			if (StringUtils.isNotBlank((String) request.get(Constants.LASTNAME))) {
+				existingPersonalDetail.put(Constants.SURNAME, request.get(Constants.LASTNAME));
+				updateReqBody.put(Constants.LASTNAME, request.get(Constants.LASTNAME));
+			}
+		}
 		updateReqBody.put(Constants.PROFILE_DETAILS, existingProfile);
 		updateReqBody.put(Constants.USER_ID, request.get(Constants.USER_ID));
 		Map<String, Object> updateRequest = new HashMap<>();
@@ -706,7 +720,7 @@ public class ProfileServiceImpl implements ProfileService {
 		Map<String, Object> assignRoleReqBody = new HashMap<String, Object>();
 		assignRoleReqBody.put(Constants.ORGANIZATION_ID, requestBody.get(Constants.SB_ORG_ID));
 		assignRoleReqBody.put(Constants.USER_ID, requestBody.get(Constants.USER_ID));
-		if(existingRoles == null) {
+		if (existingRoles == null) {
 			existingRoles = new ArrayList<String>();
 		}
 		if (existingRoles.size() == 0) {
