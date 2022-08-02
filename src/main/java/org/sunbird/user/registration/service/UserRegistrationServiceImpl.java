@@ -199,7 +199,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 			UserRegistration userReg = getUserRegistrationForRegCode(registrationCode);
 
 			// Create the org if it's not already onboarded.
-			if (StringUtils.isEmpty(userReg.getSbOrgId())) {
+			if ("null".equalsIgnoreCase(userReg.getSbOrgId()) || StringUtils.isEmpty(userReg.getSbOrgId())) {
 				SBApiResponse orgResponse = extOrgService.createOrg(getOrgCreateRequest(userReg), StringUtils.EMPTY);
 				if (orgResponse.getResponseCode() == HttpStatus.OK) {
 					String orgId = (String) orgResponse.getResult().get(Constants.ORGANIZATION_ID);
