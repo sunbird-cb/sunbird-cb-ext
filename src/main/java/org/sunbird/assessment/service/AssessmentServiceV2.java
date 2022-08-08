@@ -14,9 +14,9 @@ public interface AssessmentServiceV2 {
 	 */
 	public SBApiResponse submitAssessment(Map<String, Object> data, String userEmail) throws Exception;
 
-	public SBApiResponse readAssessment(String assessmentIdentifier, String token) throws Exception;
+	public SBApiResponse readAssessment(String assessmentIdentifier, String token);
 
-	public SBApiResponse readQuestionList(Map<String, Object> requestBody, String authUserToken) throws Exception;
+	public SBApiResponse readQuestionList(Map<String, Object> requestBody, String authUserToken);
 
 	Map<String, Object> createResponseMapWithProperStructure(Map<String, Object> hierarchySection, Map<String, Object> resultMap);
 }

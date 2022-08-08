@@ -94,7 +94,7 @@ public class Constants {
 	public static final boolean FETCH_ON_LEVEL = false;
 	public static final boolean SKIP_ACCESS_CHECK = true;
 	public static final List<String> MINIMUL_FIELDS = Collections
-			.unmodifiableList(Arrays.asList("identifier", "duration", "downloadUrl", "description", "mimeType",
+			.unmodifiableList(Arrays.asList("identifier", "expectedDuration", "downloadUrl", "description", "mimeType",
 					"artifactUrl", "name", STATUS, "resourceType", "categoryType", "category"));
 	public static final String FETCH_RESULT_CONSTANT = ".fetchResult:";
 	public static final String URI_CONSTANT = "URI: ";
@@ -309,6 +309,8 @@ public class Constants {
 	public static final String QUESTION = "question";
 	public static final String OPTIONS = "options";
 	public static final String USER_ASSESS_REQ = "user_assess_req_";
+
+	public static final String USER_ASSESS_SUBMIT_REQ = "user_assess_submit_req";
 	public static final String HIERARCHY = "hierarchy";
 	public static final String DEV_HIERARCHY_STORE = "dev_hierarchy_store";
 	public static final String CONTENT_HIERARCHY = "content_hierarchy";
@@ -363,6 +365,7 @@ public class Constants {
 	public static final String API_QUESTIONSET_HIERARCHY_GET = "api.questionset.hierarchy.get";
 	public static final String VER = "3.0";
 	public static final String API_QUESTIONS_LIST = "api.questions.list";
+	public static final String API_SUBMIT_ASSESSMENT = "api.submit.asssessment";
 	public static final String MINIMUM_PASS_PERCENTAGE = "minimumPassPercentage";
 	public static final String SCORE_CUTOFF_TYPE = "scoreCutoffType";
 	public static final String PASS_PERCENTAGE = "passPercentage";
@@ -387,7 +390,7 @@ public class Constants {
 	public static final String SUNBIRD_SSO_RELAM = "sunbird_sso_realm";
 	public static final String SUNBIRD_SSO_URL = "sunbird_sso_url";
 	public static final String SUNBIRD_SSO_USERNAME = "sunbird_sso_username";
-	public static final String DURATION = "duration";
+	public static final String DURATION = "expectedDuration";
 
 	public static final String EXPECTED_DURATION = "expectedDuration";
 	public static final String USER_REGISTRATION_REGISTER_API = "api.user.registration.register";

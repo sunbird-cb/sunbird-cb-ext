@@ -246,6 +246,9 @@ public class CbExtServerProperties {
 	@Value("${kafka.topics.user.registration.auto.createUser}")
 	private String userRegistrationAutoCreateUserTopic;
 
+	@Value("${kafka.topics.user.assessment.submit}")
+	private String userAssessmentSubmitTopic;
+
 	@Value("${user.registration.domain}")
 	private String userRegistrationDomain;
 
@@ -1181,5 +1184,13 @@ public class CbExtServerProperties {
 
 	public void setLmsUserSelfMigratePath(String lmsUserSelfMigratePath) {
 		this.lmsUserSelfMigratePath = lmsUserSelfMigratePath;
+	}
+
+	public String getUserAssessmentSubmitTopic() {
+		return userAssessmentSubmitTopic;
+	}
+
+	public void setUserAssessmentSubmitTopic(String userAssessmentSubmitTopic) {
+		this.userAssessmentSubmitTopic = userAssessmentSubmitTopic;
 	}
 }
