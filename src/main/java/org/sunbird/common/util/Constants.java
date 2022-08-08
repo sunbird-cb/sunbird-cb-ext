@@ -391,7 +391,7 @@ public class Constants {
 	public static final String SUNBIRD_SSO_RELAM = "sunbird_sso_realm";
 	public static final String SUNBIRD_SSO_URL = "sunbird_sso_url";
 	public static final String SUNBIRD_SSO_USERNAME = "sunbird_sso_username";
-	public static final String DURATION = "expectedDuration";
+	public static final String DURATION = "duration";
 
 	public static final String EXPECTED_DURATION = "expectedDuration";
 	public static final String USER_REGISTRATION_REGISTER_API = "api.user.registration.register";
