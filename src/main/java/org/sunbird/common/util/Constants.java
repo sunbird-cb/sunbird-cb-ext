@@ -303,6 +303,7 @@ public class Constants {
 	public static final String SEARCHES = "searches";
 	public static final String QUESTION_ID = "qs_id_";
 	public static final String ASSESSMENT_ID = "assess_id_";
+	public static final String ASSESSMENT_ID_KEY = "assessmentId";
 	public static final String EDITOR_STATE = "editorState";
 	public static final String CHOICES = "choices";
 	public static final String ANSWER = "answer";

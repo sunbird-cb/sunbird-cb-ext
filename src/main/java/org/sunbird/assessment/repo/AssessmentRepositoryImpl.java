@@ -40,13 +40,13 @@ public class AssessmentRepositoryImpl implements AssessmentRepository {
 	@Override
 	public Map<String, Object> getAssessmentAnswerKey(String artifactUrl) throws Exception {
 		// TODO Auto-generated method stub
-		return null;
+		return Collections.emptyMap();
 	}
 
 	@Override
 	public Map<String, Object> getQuizAnswerKey(AssessmentSubmissionDTO quizMap) throws Exception {
 		// TODO Auto-generated method stub
-		return null;
+		return Collections.emptyMap();
 	}
 
 	@Override
@@ -129,30 +129,22 @@ public class AssessmentRepositoryImpl implements AssessmentRepository {
 
 	@Override
 	public boolean addUserAssesmentStartTime(String userId, String assessmentIdentifier, Timestamp startTime) {
-		logger.info("Inside the user assessment start time");
-		logger.info("userid" + userId.toString());
-		logger.info("identifier" + assessmentIdentifier);
-
 		Map<String, Object> request = new HashMap<>();
 		request.put(Constants.USER_ID, userId);
 		request.put(Constants.IDENTIFIER, assessmentIdentifier);
 		cassandraOperation.deleteRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_USER_ASSESSMENT_TIME, request);
 		request.put("starttime", startTime);
 		SBApiResponse resp = cassandraOperation.insertRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_USER_ASSESSMENT_TIME, request);
-		logger.info(resp.toString());
 		return resp.get(Constants.RESPONSE).equals(Constants.SUCCESS);
 	}
 
-    @Override
-    public Date fetchUserAssessmentStartTime(String userId, String assessmentIdentifier) {
+	@Override
+	public Date fetchUserAssessmentStartTime(String userId, String assessmentIdentifier) {
 		Map<String, Object> request = new HashMap<>();
 		request.put(Constants.USER_ID, userId);
 		request.put(Constants.IDENTIFIER, assessmentIdentifier);
 		List<Map<String, Object>> existingDataList = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
 				Constants.TABLE_USER_ASSESSMENT_TIME, request, null);
-		if(!existingDataList.isEmpty())
-			return (Date) existingDataList.get(0).get("starttime");
-		else
-			return null;
+		return (!existingDataList.isEmpty()) ? (Date) existingDataList.get(0).get("starttime") : null;
 	}
 }

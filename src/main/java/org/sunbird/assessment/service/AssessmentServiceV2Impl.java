@@ -115,8 +115,8 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                 List<String> identifierList = getQuestionIdList(requestBody);
                 List<Object> questionList = new ArrayList<>();
                 List<String> newIdentifierList = new ArrayList<>();
-                if (requestBody.containsKey("assessmentId") && !requestBody.get("assessmentId").toString().isEmpty() && identifierList != null) {
-                    String key = Constants.USER_ASSESS_REQ + requestBody.get("assessmentId").toString() + authUserToken;
+                if (requestBody.containsKey(Constants.ASSESSMENT_ID_KEY) && !requestBody.get(Constants.ASSESSMENT_ID_KEY).toString().isEmpty() && !identifierList.isEmpty()) {
+                    String key = Constants.USER_ASSESS_REQ + requestBody.get(Constants.ASSESSMENT_ID_KEY).toString() + authUserToken;
                     Map<String, Object> questionSetFromAssessment = (Map<String, Object>) redisCacheMgr.getCache(key);
                     if (questionSetFromAssessment != null && questionSetFromAssessment.get(Constants.CHILDREN) != null) {
                         List<String> questionsFromAssessment = new ArrayList<>();
@@ -140,7 +140,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                         //Taking the list which was formed with the not found values in Redis, we are making an internal POST call to Question List API to fetch the details
                         if (!newIdentifierList.isEmpty()) {
                             Map<String, Object> questionMapResponse = readQuestionDetails(newIdentifierList);
-                            if (questionMapResponse != null && Constants.OK.equalsIgnoreCase((String) questionMapResponse.get(Constants.RESPONSE_CODE))) {
+                            if (questionMapResponse != null && !questionMapResponse.isEmpty() && Constants.OK.equalsIgnoreCase((String) questionMapResponse.get(Constants.RESPONSE_CODE))) {
                                 List<Map<String, Object>> questionMap = ((List<Map<String, Object>>) ((Map<String, Object>) questionMapResponse
                                         .get(Constants.RESULT)).get(Constants.QUESTIONS));
                                 for (Map<String, Object> question : questionMap) {
@@ -182,7 +182,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
     }
 
     @Override
-    public SBApiResponse submitAssessment(Map<String, Object> submitRequest, String authUserToken) throws Exception {
+    public SBApiResponse submitAssessment(Map<String, Object> submitRequest, String authUserToken) {
         SBApiResponse outgoingResponse = createDefaultResponse(Constants.API_SUBMIT_ASSESSMENT);
         String errMsg = "";
         String scoreCutOffType = null;
@@ -255,6 +255,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                                             return outgoingResponse;
                                         }
                                     }
+                                    break;
                                     case Constants.SECTION_LEVEL_SCORE_CUTOFF: {
                                         Map<String, Object> result = validateScores(userSectionData, hierarchySection, questionsFromAssessment);
                                         sectionLevelsResults.add(result);
@@ -264,8 +265,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                                         break;
                                 }
                             }
-                            if (!scoreCutOffType.isEmpty() && scoreCutOffType.equalsIgnoreCase(Constants.SECTION_LEVEL_SCORE_CUTOFF)) {
-                                if (hierarchySectionList.size() - sectionLevelsResults.size() == 0) {
+                            if (!scoreCutOffType.isEmpty() && scoreCutOffType.equalsIgnoreCase(Constants.SECTION_LEVEL_SCORE_CUTOFF) && hierarchySectionList.size() - sectionLevelsResults.size() == 0) {
                                     Map<String, Object> result = calculateSectionFinalResults(sectionLevelsResults);
                                     outgoingResponse.getResult().putAll(result);
                                     Map<String, Object> kafkaResult = new HashMap<>();
@@ -285,8 +285,6 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                                     logger.info(j.toJSONString());
                                     return outgoingResponse;
                                 }
-                            }
-
                         }
                     } else {
                         errMsg = "There are no section details in Assessment hierarchy.";
@@ -424,7 +422,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
         assessmentFilteredDetail.put(Constants.CHILD_NODES, sectionIdList);
     }
 
-    private List<String> getQuestionIdList(Map<String, Object> questionListRequest) throws Exception {
+    private List<String> getQuestionIdList(Map<String, Object> questionListRequest) {
         try {
             if (questionListRequest.containsKey(Constants.REQUEST)) {
                 Map<String, Object> request = (Map<String, Object>) questionListRequest.get(Constants.REQUEST);
@@ -439,12 +437,12 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                 }
             }
         } catch (Exception e) {
-            logger.error("Failed to process the questionList request body."+e.getMessage());
+            logger.error(String.format("Failed to process the questionList request body. %s", e.getMessage()));
         }
-        return null;
+        return Collections.emptyList();
     }
 
-    private Map<String, Object> readQuestionDetails(List<String> identifiers) throws Exception {
+    private Map<String, Object> readQuestionDetails(List<String> identifiers) {
         try {
             StringBuilder sbUrl = new StringBuilder(cbExtServerProperties.getAssessmentHost());
             sbUrl.append(cbExtServerProperties.getAssessmentQuestionListPath());
@@ -458,9 +456,9 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
             requestBody.put(Constants.REQUEST, requestData);
             return outboundRequestHandlerService.fetchResultUsingPost(sbUrl.toString(), requestBody, headers);
         } catch (Exception e) {
-            logger.info("Failed to process the readQuestionDetails." + e.getMessage());
+            logger.info(String.format("Failed to process the readQuestionDetails. %s" , e.getMessage()));
         }
-        return null;
+        return Collections.emptyMap();
     }
 
     private Map<String, Object> filterQuestionMapDetail(Map<String, Object> questionMapResponse) {
