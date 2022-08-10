@@ -486,7 +486,9 @@ public class Constants {
 	public static final String USER_ROLES = "userRoles";
 	public static final String X_AUTH_USER_ID = "x-authenticated-userid";
 	public static final String SOFT_DELETE_OLD_ORG = "softDeleteOldOrg";
-	public static final String NOTIFY_MIGRATION = "notifyMigration";	
+	public static final String NOTIFY_MIGRATION = "notifyMigration";
+	
+	public static final String API_PROFILE_SIGNUP = "api.profile.signup";
 
 	private Constants() {
 		throw new IllegalStateException("Utility class");

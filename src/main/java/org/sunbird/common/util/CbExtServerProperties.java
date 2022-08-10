@@ -323,6 +323,18 @@ public class CbExtServerProperties {
 	
 	@Value("${sb.service.user.self.migrate.path}")
 	private String lmsUserSelfMigratePath;
+	
+	@Value("${sb.service.signup.user}")
+	private String lmsUserSignUpPath;
+	
+
+	public String getLmsUserSignUpPath() {
+		return lmsUserSignUpPath;
+	}
+
+	public void setLmsUserSignUpPath(String lmsUserSignUpPath) {
+		this.lmsUserSignUpPath = lmsUserSignUpPath;
+	}
 
 	public String getUserAssessmentSubmissionDuration() {
 		return userAssessmentSubmissionDuration;

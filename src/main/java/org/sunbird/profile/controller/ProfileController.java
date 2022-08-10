@@ -45,4 +45,10 @@ public class ProfileController {
 		SBApiResponse response = profileService.userBasicProfileUpdate(request);
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
+	
+	@PostMapping("/user/v1/signup")
+	public ResponseEntity<?> signupUser(@RequestBody Map<String,Object> request) throws Exception{
+		SBApiResponse response = profileService.signupUser(request);
+		return new ResponseEntity<>(response, response.getResponseCode());
+	}
 }

@@ -13,4 +13,10 @@ public interface ProfileService {
 	SBApiResponse userBasicInfo(String userId);
 
 	SBApiResponse userBasicProfileUpdate(Map<String, Object> request);
+
+	SBApiResponse signupUser(Map<String, Object> request) throws Exception;
+
+	Map<String, Object> getUsersReadData(String userId, String authToken, String userAuthToken) throws Exception;
+
+	boolean assignRole(Map<String, Object> request) throws Exception;
 }
