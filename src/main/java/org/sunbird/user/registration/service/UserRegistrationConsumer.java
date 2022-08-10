@@ -20,7 +20,7 @@ import org.sunbird.common.util.Constants;
 import org.sunbird.common.util.IndexerService;
 import org.sunbird.common.util.NotificationUtil;
 import org.sunbird.user.registration.model.UserRegistration;
-import org.sunbird.profile.model.WfRequest;
+import org.sunbird.user.registration.model.WfRequest;
 import org.sunbird.user.registration.util.UserRegistrationStatus;
 
 import com.fasterxml.jackson.databind.ObjectMapper;

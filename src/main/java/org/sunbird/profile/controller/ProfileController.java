@@ -5,10 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.util.Constants;
-import org.sunbird.profile.model.User;
 import org.sunbird.profile.service.ProfileService;
-import org.sunbird.user.registration.model.UserRegistration;
-import org.sunbird.user.registration.model.UserRegistrationInfo;
 
 import java.util.Map;
 

@@ -1,9 +1,6 @@
 package org.sunbird.profile.service;
 
 import org.sunbird.common.model.SBApiResponse;
-import org.sunbird.profile.model.User;
-import org.sunbird.user.registration.model.UserRegistration;
-import org.sunbird.user.registration.model.UserRegistrationInfo;
 
 import java.util.Map;
 
