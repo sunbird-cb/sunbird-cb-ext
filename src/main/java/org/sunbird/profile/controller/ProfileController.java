@@ -39,17 +39,4 @@ public class ProfileController {
 		SBApiResponse response = profileService.signupUser(request);
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
-
-	/*@GetMapping("/user/v1/readuser")
-	public ResponseEntity<?> getUserDetails(@RequestHeader(Constants.X_AUTH_TOKEN) String userToken,
-			@RequestHeader(Constants.AUTH_TOKEN) String authToken,@RequestParam String userId) throws Exception {
-		SBApiResponse response = profileService.getUserDetailsById(userId,authToken, userToken);
-		return new ResponseEntity<>(response.toString(), response.getResponseCode());
-	}
-
-	@PatchMapping("/user/v1/update")
-	public ResponseEntity<?> updateUserById(@RequestBody Map<String,Object> request)throws Exception{
-		String msg=profileService.updateUser(request);
-		return new ResponseEntity<>(msg,HttpStatus.OK);
-	}*/
 }

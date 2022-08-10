@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: org.sonarsource.scanner.api:sonar-scanner-api:2.16.0.226">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/sonarsource/scanner/api/sonar-scanner-api/2.16.0.226/sonar-scanner-api-2.16.0.226.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/org/sonarsource/scanner/api/sonar-scanner-api/2.16.0.226/sonar-scanner-api-2.16.0.226-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/sonarsource/scanner/api/sonar-scanner-api/2.16.0.226/sonar-scanner-api-2.16.0.226-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
