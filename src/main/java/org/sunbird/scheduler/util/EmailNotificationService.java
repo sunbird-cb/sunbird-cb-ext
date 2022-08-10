@@ -30,11 +30,11 @@ public class EmailNotificationService implements Runnable {
                 Map<String, Object> params = new HashMap<>();
                 for (int i = 0; i < userCourseProgressDetailsEntry.getValue().getIncompleteCourses().size(); i++) {
                     int j=i+1;
-                    params.put(Constants.COURSE + j, true);
-                    params.put(Constants.COURSE + j + Constants._URL, userCourseProgressDetailsEntry.getValue().getIncompleteCourses().get(i).getCourseUrl());
-                    params.put(Constants.COURSE + j + Constants.THUMBNAIL, userCourseProgressDetailsEntry.getValue().getIncompleteCourses().get(i).getThumbnail());
-                    params.put(Constants.COURSE + j + Constants._NAME, userCourseProgressDetailsEntry.getValue().getIncompleteCourses().get(i).getCourseName());
-                    params.put(Constants.COURSE + j + Constants._DURATION, String.valueOf(userCourseProgressDetailsEntry.getValue().getIncompleteCourses().get(i).getCompletionPercentage()));
+                    params.put(Constants.COURSE_KEY + j, true);
+                    params.put(Constants.COURSE_KEY + j + Constants._URL, userCourseProgressDetailsEntry.getValue().getIncompleteCourses().get(i).getCourseUrl());
+                    params.put(Constants.COURSE_KEY + j + Constants.THUMBNAIL, userCourseProgressDetailsEntry.getValue().getIncompleteCourses().get(i).getThumbnail());
+                    params.put(Constants.COURSE_KEY + j + Constants._NAME, userCourseProgressDetailsEntry.getValue().getIncompleteCourses().get(i).getCourseName());
+                    params.put(Constants.COURSE_KEY + j + Constants._DURATION, String.valueOf(userCourseProgressDetailsEntry.getValue().getIncompleteCourses().get(i).getCompletionPercentage()));
 
                 }
                 logger.info(userCourseProgressDetailsEntry.getValue().getEmail());
