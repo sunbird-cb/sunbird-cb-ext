@@ -1,4 +1,4 @@
-package org.sunbird.user.registration.model;
+package org.sunbird.profile.model;
 
 import java.util.HashMap;
 import java.util.List;

@@ -2,6 +2,7 @@ package org.sunbird.common.service;
 
 import java.util.Map;
 
+import com.fasterxml.jackson.core.JsonParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -110,6 +111,7 @@ public class OutboundRequestHandlerServiceImpl {
 	}
 
 	public Object fetchUsingGetWithHeadersProfile(String uri, Map<String, String> headersValues) {
+		System.out.println(uri);
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
 		Map<String, Object> response = null;
@@ -167,6 +169,7 @@ public class OutboundRequestHandlerServiceImpl {
 		}
 		return response;
 	}
+
 
 	public Map<String, Object> fetchResultUsingPatch(String uri, Object request, Map<String, String> headersValues) {
 		ObjectMapper mapper = new ObjectMapper();

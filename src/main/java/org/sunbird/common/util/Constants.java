@@ -25,6 +25,7 @@ public class Constants {
 	public static final String PROFILE_DETAILS_KEY = "profiledetails";
 	public static final String SOURCE_PROFILE_PICTURE = "source_profile_picture";
 	public static final String ROOT_ORG = "root_org";
+	public static final String ROOT_ORG_ID = "rootOrgId";
 	public static final String ORG = "org";
 	public static final String EMPLOYEMENT_STATUS = "employement_status";
 	public static final String CONTRACT_TYPE = "contract_type";
@@ -122,6 +123,8 @@ public class Constants {
 	public static final String API_FILE_UPLOAD = "api.file.upload";
 	public static final String API_FILE_DELETE = "api.file.delete";
 	public static final String API_PROFILE_UPDATE = "api.profile.update";
+	public static final String API_PROFILE_SIGNUP = "api.profile.signup";
+
 
 	public static final String ORG_PROFILE_UPDATE = "org.profile.update";
 	public static final String ID = "id";

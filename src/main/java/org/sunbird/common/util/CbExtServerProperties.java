@@ -308,18 +308,30 @@ public class CbExtServerProperties {
 
 	@Value("${user.registration.custodian.orgName}")
 	private String custodianOrgName;
-	
+
 	@Value("${user.position.master.list.file}")
 	private String masterPositionListFileName;
-	
+
 	@Value("${user.registration.welcome.email.template}")
 	private String welcomeEmailTemplate;
-	
+
 	@Value("${user.registration.welcome.email.subject}")
 	private String welcomeEmailSubject;
-	
+
 	@Value("${sb.org.create.path}")
 	private String lmsOrgCreatePath;
+
+	@Value("${sb.service.signup.user}")
+	private String lmsUserSignUpPath;
+
+
+	public String getLmsUserSignUpPath() {
+		return lmsUserSignUpPath;
+	}
+
+	public void setLmsUserSignUpPath(String lmsUserSignUpPath) {
+		this.lmsUserSignUpPath = lmsUserSignUpPath;
+	}
 
 	public String getUserAssessmentSubmissionDuration() {
 		return userAssessmentSubmissionDuration;
