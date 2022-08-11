@@ -66,6 +66,7 @@ public class ProfileServiceImpl implements ProfileService {
 			String userId = (String) requestData.get(Constants.USER_ID);
 			Map<String, Object> profileDetailsMap = (Map<String, Object>) requestData.get(Constants.PROFILE_DETAILS);
 			List<String> approvalFieldList = approvalFields(authToken, userToken);
+			String newDeptName = checkDepartment(profileDetailsMap);
 			Map<String, Object> transitionData = new HashMap<>();
 			for (String approvalList : approvalFieldList) {
 				if (profileDetailsMap.containsKey(approvalList)) {
@@ -75,7 +76,6 @@ public class ProfileServiceImpl implements ProfileService {
 			}
 			Map<String, Object> responseMap = userUtilityService.getUsersReadData(userId, authToken, userToken);
 			String deptName = (String) responseMap.get(Constants.CHANNEL);
-			validateDepartment(deptName, profileDetailsMap);
 			Map<String, Object> existingProfileDetails = (Map<String, Object>) responseMap
 					.get(Constants.PROFILE_DETAILS);
 			StringBuilder url = new StringBuilder();
@@ -89,7 +89,9 @@ public class ProfileServiceImpl implements ProfileService {
 				for (String keys : profileDetailsMap.keySet()) {
 					listOfChangedDetails.add(keys);
 				}
-
+                   if(listOfChangedDetails.contains(Constants.EMPLOYMENTDETAILS)){
+					   listOfChangedDetails.remove(Constants.EMPLOYMENTDETAILS);
+				   }
 				for (String changedObj : listOfChangedDetails) {
 					if (profileDetailsMap.get(changedObj) instanceof ArrayList) {
 						existingProfileDetails.put(changedObj, profileDetailsMap.get(changedObj));
@@ -198,7 +200,12 @@ public class ProfileServiceImpl implements ProfileService {
 				transitionRequests.put(Constants.SERVICE_NAME, Constants.PROFILE);
 				transitionRequests.put(Constants.COMMENT, "");
 				transitionRequests.put(Constants.WFID, "");
-				transitionRequests.put(Constants.DEPT_NAME, deptName);
+				if(null!=newDeptName){
+					transitionRequests.put(Constants.DEPT_NAME, newDeptName);
+				} else
+				{
+					transitionRequests.put(Constants.DEPT_NAME, deptName);
+				}
 				transitionRequests.put(Constants.UPDATE_FIELD_VALUES, finalTransitionList);
 				url = new StringBuilder();
 				url.append(serverConfig.getWfServiceHost()).append(serverConfig.getWfServiceTransitionPath());
@@ -331,15 +338,15 @@ public class ProfileServiceImpl implements ProfileService {
 		}
 	}
 
-	public void validateDepartment(String existingDept, Map<String, Object> requestProfile) throws Exception {
-		if (requestProfile.containsKey(Constants.EMPLOYMENTDETAILS)) {
-			Map<String, Object> empDetails = (Map<String, Object>) requestProfile.get(Constants.EMPLOYMENTDETAILS);
-			String requestDeptName = (String) empDetails.get(Constants.DEPARTMENTNAME);
-			if (!existingDept.equalsIgnoreCase(requestDeptName)) {
-				throw new Exception("User belongs to Dept: " + existingDept + ". Can not update Dept Name to : "
-						+ requestDeptName + ". Request Admin to migrate Dept first.");
+	public String checkDepartment(Map<String, Object> requestProfile) throws Exception {
+		String requestDeptName = null;
+		if (requestProfile.containsKey(Constants.PROFESSIONAL_DETAILS)) {
+			List<Map<String, Object>> profDetails = (List<Map<String, Object>>) requestProfile.get(Constants.PROFESSIONAL_DETAILS);
+			if (profDetails.get(0).containsKey(Constants.NAME)) {
+				requestDeptName = (String) profDetails.get(0).get(Constants.NAME);
 			}
 		}
+		return requestDeptName;
 	}
 
 	public boolean validateRequest(Map<String, Object> requestBody) {
