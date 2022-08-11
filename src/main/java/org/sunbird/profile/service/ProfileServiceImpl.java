@@ -5,6 +5,7 @@ import java.util.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.xpath.operations.Bool;
 import org.elasticsearch.rest.RestStatus;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,7 @@ import org.sunbird.common.util.IndexerService;
 import org.sunbird.common.util.ProjectUtil;
 import org.sunbird.core.logger.CbExtLogger;
 import org.sunbird.org.service.ExtendedOrgService;
+import org.sunbird.user.service.UserUtilityService;
 import org.sunbird.user.service.UserUtilityServiceImpl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -760,8 +762,9 @@ public class ProfileServiceImpl implements ProfileService {
 					Map<String, Object> result = (Map<String, Object>) readData.get(Constants.RESULT);
 					String userId = (String) result.get(Constants.USER_ID);
 					request.put(Constants.USER_ID, userId);
-					Map<String, Object> userData = getUsersReadData(userId, StringUtils.EMPTY, StringUtils.EMPTY);
-					if (CollectionUtils.isNotEmpty(Collections.singleton(userData))) {
+					//Map<String, Object> userData = getUsersReadData(userId, StringUtils.EMPTY, StringUtils.EMPTY);
+					Map<String, Object> userData = userUtilityService.getUsersReadData(userId, StringUtils.EMPTY, StringUtils.EMPTY);
+					if (userData.isEmpty()==Boolean.FALSE) {
 						request.put(Constants.USER_NAME, userData.get(Constants.USER_NAME));
 
 						Map<String, Object> updateRequest = new HashMap<>();
@@ -805,7 +808,7 @@ public class ProfileServiceImpl implements ProfileService {
 		} catch (Exception e) {
 			errMsg = "Failed to process message. Exception: " + e.getMessage();
 		}
-		if (StringUtils.isNotBlank(errMsg) || retValue==false) {
+		if (StringUtils.isNotBlank(errMsg) || retValue==Boolean.FALSE) {
 			response.getParams().setStatus(Constants.FAILED);
 			response.getParams().setErrmsg(errMsg);
 			response.setResponseCode(HttpStatus.BAD_REQUEST);
@@ -814,25 +817,22 @@ public class ProfileServiceImpl implements ProfileService {
 
 	}
 	
-	public Map<String, Object> getUsersReadData(String userId, String authToken, String userAuthToken) {
-		Map<String, String> header = new HashMap<>();
-		if (StringUtils.isNotEmpty(authToken)) {
-			header.put(Constants.AUTH_TOKEN, authToken);
-		}
-		if (StringUtils.isNotEmpty(userAuthToken)) {
-			header.put(Constants.X_AUTH_TOKEN, userAuthToken);
-		}
-		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService
-				.fetchUsingGetWithHeaders(serverConfig.getSbUrl() + serverConfig.getLmsUserReadPath() + userId,
-						header);
+	/*
+	 * private Map<String, Object> getUsersReadData(String userId, String authToken,
+	 * String userAuthToken) { Map<String, String> header = new HashMap<>(); if
+	 * (StringUtils.isNotEmpty(authToken)) { header.put(Constants.AUTH_TOKEN,
+	 * authToken); } if (StringUtils.isNotEmpty(userAuthToken)) {
+	 * header.put(Constants.X_AUTH_TOKEN, userAuthToken); } Map<String, Object>
+	 * readData = (Map<String, Object>) outboundRequestHandlerService
+	 * .fetchUsingGetWithHeaders(serverConfig.getSbUrl() +
+	 * serverConfig.getLmsUserReadPath() + userId, header);
+	 * 
+	 * Map<String, Object> result = (Map<String, Object>)
+	 * readData.get(Constants.RESULT); Map<String, Object> responseMap =
+	 * (Map<String, Object>) result.get(Constants.RESPONSE); return responseMap; }
+	 */
 
-		Map<String, Object> result = (Map<String, Object>) readData.get(Constants.RESULT);
-		Map<String, Object> responseMap = (Map<String, Object>) result.get(Constants.RESPONSE);
-		return responseMap;
-	}
-
-	public boolean assignRole(Map<String,Object> request) throws Exception{
-		SBApiResponse response=new SBApiResponse();
+	private boolean assignRole(Map<String,Object> request) throws Exception{
 		boolean retValue = false;
 		Map<String, Object> requestObj = new HashMap<>();
 		Map<String, Object> requestBody = new HashMap<String, Object>();
@@ -842,9 +842,9 @@ public class ProfileServiceImpl implements ProfileService {
 		requestObj.put(Constants.REQUEST, requestBody);
 		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService
 				.fetchResultUsingPost(props.getSbUrl() + props.getSbAssignRolePath(), requestObj, getDefaultHeaders());
-		if (CollectionUtils.isNotEmpty(Collections.singleton(readData))) {
+		if (readData.isEmpty()==Boolean.FALSE) {
 			if(Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE)))
-					retValue=true;
+					retValue=Boolean.TRUE;
 		}
 		return retValue;
 	}
