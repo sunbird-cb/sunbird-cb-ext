@@ -762,7 +762,6 @@ public class ProfileServiceImpl implements ProfileService {
 					Map<String, Object> result = (Map<String, Object>) readData.get(Constants.RESULT);
 					String userId = (String) result.get(Constants.USER_ID);
 					request.put(Constants.USER_ID, userId);
-					//Map<String, Object> userData = getUsersReadData(userId, StringUtils.EMPTY, StringUtils.EMPTY);
 					Map<String, Object> userData = userUtilityService.getUsersReadData(userId, StringUtils.EMPTY, StringUtils.EMPTY);
 					if (userData.isEmpty()==Boolean.FALSE) {
 						request.put(Constants.USER_NAME, userData.get(Constants.USER_NAME));
