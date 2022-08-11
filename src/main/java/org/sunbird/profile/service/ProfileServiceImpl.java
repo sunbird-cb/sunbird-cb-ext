@@ -1,15 +1,8 @@
 package org.sunbird.profile.service;
 
-import java.util.ArrayList;
+import java.util.*;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.rest.RestStatus;
@@ -17,7 +10,6 @@ import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.sunbird.cache.RedisCacheMgr;
 import org.sunbird.cassandra.utils.CassandraOperation;
@@ -515,7 +507,7 @@ public class ProfileServiceImpl implements ProfileService {
 
 			List<Map<String, Object>> existingDataList = cassandraOperation.getRecordsByProperties(
 					Constants.KEYSPACE_SUNBIRD, Constants.TABLE_SYSTEM_SETTINGS, searchRequest, null);
-			if (!CollectionUtils.isEmpty(existingDataList)) {
+			if (CollectionUtils.isEmpty(existingDataList)) {
 				Map<String, Object> data = existingDataList.get(0);
 				custodianOrgId = (String) data.get(Constants.VALUE.toLowerCase());
 			}
@@ -532,7 +524,7 @@ public class ProfileServiceImpl implements ProfileService {
 
 			List<Map<String, Object>> existingDataList = cassandraOperation.getRecordsByProperties(
 					Constants.KEYSPACE_SUNBIRD, Constants.TABLE_SYSTEM_SETTINGS, searchRequest, null);
-			if (!CollectionUtils.isEmpty(existingDataList)) {
+			if (CollectionUtils.isNotEmpty(existingDataList)) {
 				Map<String, Object> data = existingDataList.get(0);
 				custodianOrgChannel = (String) data.get(Constants.VALUE.toLowerCase());
 			}
@@ -748,21 +740,20 @@ public class ProfileServiceImpl implements ProfileService {
 		boolean retValue = false;
 		SBApiResponse response = createDefaultResponse(Constants.API_PROFILE_SIGNUP);
 		String errMsg = validateSignupRequest(request);
+		if (!StringUtils.isEmpty(errMsg)) {
+			response.getParams().setErrmsg(errMsg);
+			response.setResponseCode(HttpStatus.BAD_REQUEST);
+			return response;
+		}
 		try {
-			if (!StringUtils.isEmpty(errMsg)) {
-				response.getParams().setErrmsg(errMsg);
-				response.setResponseCode(HttpStatus.BAD_REQUEST);
-				return response;
-			}
 			Map<String, Object> requestData = (Map<String, Object>) request.get(Constants.REQUEST);
 			Map<String, Object> reqObj = new HashMap<>();
 			Map<String, Object> requestBody = new HashMap<String, Object>();
 			requestBody.put(Constants.EMAIL, requestData.get(Constants.EMAIL));
 			requestBody.put(Constants.FIRSTNAME, requestData.get(Constants.FIRST_NAME));
 			requestBody.put(Constants.LASTNAME, requestData.get(Constants.LAST_NAME));
-			requestBody.put(Constants.EMAIL_VERIFIED, requestData.get(Constants.EMAIL_VERIFIED));
+			requestBody.put(Constants.EMAIL_VERIFIED, true);
 			reqObj.put(Constants.REQUEST, requestBody);
-			try {
 				Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPost(
 						props.getSbUrl() + props.getLmsUserSignUpPath(), reqObj, getDefaultHeaders());
 				if (Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
@@ -770,7 +761,7 @@ public class ProfileServiceImpl implements ProfileService {
 					String userId = (String) result.get(Constants.USER_ID);
 					request.put(Constants.USER_ID, userId);
 					Map<String, Object> userData = getUsersReadData(userId, StringUtils.EMPTY, StringUtils.EMPTY);
-					if (!CollectionUtils.isEmpty(userData)) {
+					if (CollectionUtils.isNotEmpty(Collections.singleton(userData))) {
 						request.put(Constants.USER_NAME, userData.get(Constants.USER_NAME));
 
 						Map<String, Object> updateRequest = new HashMap<>();
@@ -810,9 +801,6 @@ public class ProfileServiceImpl implements ProfileService {
 						}
 					}
 				}
-			}catch(Exception e){
-				errMsg = "Problem during adding user";
-			}
 
 		} catch (Exception e) {
 			errMsg = "Failed to process message. Exception: " + e.getMessage();
@@ -825,9 +813,7 @@ public class ProfileServiceImpl implements ProfileService {
 		return response;
 
 	}
-
-
-	@Override
+	
 	public Map<String, Object> getUsersReadData(String userId, String authToken, String userAuthToken) {
 		Map<String, String> header = new HashMap<>();
 		if (StringUtils.isNotEmpty(authToken)) {
@@ -846,6 +832,7 @@ public class ProfileServiceImpl implements ProfileService {
 	}
 
 	public boolean assignRole(Map<String,Object> request) throws Exception{
+		SBApiResponse response=new SBApiResponse();
 		boolean retValue = false;
 		Map<String, Object> requestObj = new HashMap<>();
 		Map<String, Object> requestBody = new HashMap<String, Object>();
@@ -855,8 +842,9 @@ public class ProfileServiceImpl implements ProfileService {
 		requestObj.put(Constants.REQUEST, requestBody);
 		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService
 				.fetchResultUsingPost(props.getSbUrl() + props.getSbAssignRolePath(), requestObj, getDefaultHeaders());
-		if (!CollectionUtils.isEmpty(readData)) {
-			retValue = true;
+		if (CollectionUtils.isNotEmpty(Collections.singleton(readData))) {
+			if(Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE)))
+					retValue=true;
 		}
 		return retValue;
 	}

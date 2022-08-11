@@ -16,7 +16,4 @@ public interface ProfileService {
 
 	SBApiResponse signupUser(Map<String, Object> request) throws Exception;
 
-	Map<String, Object> getUsersReadData(String userId, String authToken, String userAuthToken) throws Exception;
-
-	boolean assignRole(Map<String, Object> request) throws Exception;
 }
