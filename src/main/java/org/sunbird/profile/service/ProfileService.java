@@ -14,6 +14,6 @@ public interface ProfileService {
 
 	SBApiResponse userBasicProfileUpdate(Map<String, Object> request);
 
-	SBApiResponse signupUser(Map<String, Object> request) throws Exception;
+	SBApiResponse userSignup(Map<String, Object> request) throws Exception;
 
 }

@@ -736,7 +736,7 @@ public class ProfileServiceImpl implements ProfileService {
 		return errMsg;
 	}
 	@Override
-	public SBApiResponse signupUser(Map<String, Object> request) throws Exception {
+	public SBApiResponse userSignup(Map<String, Object> request) throws Exception {
 		boolean retValue = false;
 		SBApiResponse response = createDefaultResponse(Constants.API_PROFILE_SIGNUP);
 		String errMsg = validateSignupRequest(request);
