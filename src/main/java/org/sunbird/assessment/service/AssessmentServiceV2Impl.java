@@ -43,9 +43,6 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
     CbExtServerProperties serverProperties;
 
     @Autowired
-    CbExtServerProperties cbExtServerProperties;
-
-    @Autowired
     OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
 
     @Autowired
@@ -68,7 +65,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                 if (ObjectUtils.isEmpty(assessmentAllDetail)) {
                     Map<String, Object> hierarcyReadApiResponse = getReadHierarchyApiResponse(assessmentIdentifier, token);
                     if (hierarcyReadApiResponse.isEmpty() || !Constants.OK.equalsIgnoreCase((String) hierarcyReadApiResponse.get(Constants.RESPONSE_CODE))) {
-                        errMsg = "Please check the Read Hierarchy API";
+                        errMsg = "Assessment hierarchy read failed, failed to process Assessment Read Request";
                     } else {
                         assessmentAllDetail = (Map<String, Object>) ((Map<String, Object>) hierarcyReadApiResponse
                                 .get(Constants.RESULT)).get(Constants.QUESTION_SET);
@@ -90,19 +87,8 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
         if (StringUtils.isNotBlank(errMsg)) {
             response.getParams().setStatus(Constants.FAILED);
             response.getParams().setErrmsg(errMsg);
-            response.setResponseCode(HttpStatus.BAD_REQUEST);
+            response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return response;
-    }
-
-    private SBApiResponse createDefaultResponse(String api) {
-        SBApiResponse response = new SBApiResponse();
-        response.setId(api);
-        response.setVer(Constants.VER);
-        response.getParams().setResmsgid(UUID.randomUUID().toString());
-        response.getParams().setStatus(Constants.SUCCESS);
-        response.setResponseCode(HttpStatus.OK);
-        response.setTs(DateTime.now().toString());
         return response;
     }
 
@@ -115,10 +101,10 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                 List<String> identifierList = getQuestionIdList(requestBody);
                 List<Object> questionList = new ArrayList<>();
                 List<String> newIdentifierList = new ArrayList<>();
-                if (requestBody.containsKey(Constants.ASSESSMENT_ID_KEY) && !requestBody.get(Constants.ASSESSMENT_ID_KEY).toString().isEmpty() && !identifierList.isEmpty()) {
+                if (requestBody.containsKey(Constants.ASSESSMENT_ID_KEY) && !StringUtils.isEmpty((String)requestBody.get(Constants.ASSESSMENT_ID_KEY)) && !identifierList.isEmpty()) {
                     String key = Constants.USER_ASSESS_REQ + requestBody.get(Constants.ASSESSMENT_ID_KEY).toString() + authUserToken;
                     Map<String, Object> questionSetFromAssessment = (Map<String, Object>) redisCacheMgr.getCache(key);
-                    if (questionSetFromAssessment != null && questionSetFromAssessment.get(Constants.CHILDREN) != null) {
+                    if (!ObjectUtils.isEmpty(questionSetFromAssessment)) {
                         List<String> questionsFromAssessment = new ArrayList<>();
                         List<Map<String, Object>> sections = (List<Map<String, Object>>) questionSetFromAssessment.get(Constants.CHILDREN);
                         for (Map<String, Object> section : sections) {
@@ -140,7 +126,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                         //Taking the list which was formed with the not found values in Redis, we are making an internal POST call to Question List API to fetch the details
                         if (!newIdentifierList.isEmpty()) {
                             Map<String, Object> questionMapResponse = readQuestionDetails(newIdentifierList);
-                            if (questionMapResponse != null && !questionMapResponse.isEmpty() && Constants.OK.equalsIgnoreCase((String) questionMapResponse.get(Constants.RESPONSE_CODE))) {
+                            if (!ObjectUtils.isEmpty(questionMapResponse) && Constants.OK.equalsIgnoreCase((String) questionMapResponse.get(Constants.RESPONSE_CODE))) {
                                 List<Map<String, Object>> questionMap = ((List<Map<String, Object>>) ((Map<String, Object>) questionMapResponse
                                         .get(Constants.RESULT)).get(Constants.QUESTIONS));
                                 for (Map<String, Object> question : questionMap) {
@@ -196,7 +182,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                 Timestamp submissionTime = new Timestamp(new Date().getTime());
                 Calendar cal = Calendar.getInstance();
                 cal.setTimeInMillis(new Timestamp(assessmentStartTime.getTime()).getTime());
-                cal.add(Calendar.SECOND, ((Integer) assessmentHierarchy.get(Constants.EXPECTED_DURATION)).intValue() + Integer.valueOf(cbExtServerProperties.getUserAssessmentSubmissionDuration()));
+                cal.add(Calendar.SECOND, ((Integer) assessmentHierarchy.get(Constants.EXPECTED_DURATION)).intValue() + Integer.valueOf(serverProperties.getUserAssessmentSubmissionDuration()));
                 Timestamp later = new Timestamp(cal.getTime().getTime());
                 int time = submissionTime.compareTo(later);
                 if (time <= 0) {
@@ -364,12 +350,12 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
 
     private Map<String, Object> getReadHierarchyApiResponse(String assessmentIdentifier, String token) {
         try {
-            StringBuilder sbUrl = new StringBuilder(cbExtServerProperties.getAssessmentHost());
-            sbUrl.append(cbExtServerProperties.getAssessmentHierarchyReadPath());
+            StringBuilder sbUrl = new StringBuilder(serverProperties.getAssessmentHost());
+            sbUrl.append(serverProperties.getAssessmentHierarchyReadPath());
             String serviceURL = sbUrl.toString().replace(Constants.IDENTIFIER_REPLACER, assessmentIdentifier);
             Map<String, String> headers = new HashMap<>();
             headers.put(Constants.X_AUTH_TOKEN, token);
-            headers.put(Constants.AUTHORIZATION, cbExtServerProperties.getSbApiKey());
+            headers.put(Constants.AUTHORIZATION, serverProperties.getSbApiKey());
             Object o = outboundRequestHandlerService.fetchUsingGetWithHeaders(serviceURL, headers);
             return mapper.convertValue(o, Map.class);
         } catch (Exception e) {
@@ -379,7 +365,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
     }
 
     private Map<String, Object> readAssessmentLevelData(Map<String, Object> assessmentAllDetail) {
-        List<String> assessmentParams = cbExtServerProperties.getAssessmentLevelParams();
+        List<String> assessmentParams = serverProperties.getAssessmentLevelParams();
         Map<String, Object> assessmentFilteredDetail = new HashMap<>();
         for (String assessmentParam : assessmentParams) {
             if ((assessmentAllDetail.containsKey(assessmentParam))) {
@@ -394,7 +380,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                                         Map<String, Object> assessmentFilteredDetail) {
         List<Map<String, Object>> sectionResponse = new ArrayList<>();
         List<String> sectionIdList = new ArrayList<>();
-        List<String> sectionParams = cbExtServerProperties.getAssessmentSectionParams();
+        List<String> sectionParams = serverProperties.getAssessmentSectionParams();
         List<Map<String, Object>> sections = (List<Map<String, Object>>) assessmentAllDetail.get(Constants.CHILDREN);
         for (Map<String, Object> section : sections) {
             sectionIdList.add((String) section.get(Constants.IDENTIFIER));
@@ -444,10 +430,10 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
 
     private Map<String, Object> readQuestionDetails(List<String> identifiers) {
         try {
-            StringBuilder sbUrl = new StringBuilder(cbExtServerProperties.getAssessmentHost());
-            sbUrl.append(cbExtServerProperties.getAssessmentQuestionListPath());
+            StringBuilder sbUrl = new StringBuilder(serverProperties.getAssessmentHost());
+            sbUrl.append(serverProperties.getAssessmentQuestionListPath());
             Map<String, String> headers = new HashMap<>();
-            headers.put(Constants.AUTHORIZATION, cbExtServerProperties.getSbApiKey());
+            headers.put(Constants.AUTHORIZATION, serverProperties.getSbApiKey());
             Map<String, Object> requestBody = new HashMap<>();
             Map<String, Object> requestData = new HashMap<>();
             Map<String, Object> searchData = new HashMap<>();
@@ -462,7 +448,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
     }
 
     private Map<String, Object> filterQuestionMapDetail(Map<String, Object> questionMapResponse) {
-        List<String> questionParams = cbExtServerProperties.getAssessmentQuestionParams();
+        List<String> questionParams = serverProperties.getAssessmentQuestionParams();
         Map<String, Object> updatedQuestionMap = new HashMap<>();
         for (String questionParam : questionParams) {
             if (questionMapResponse.containsKey(questionParam)) {
@@ -495,7 +481,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                 (List<Map<String, Object>>) userSectionData.get(Constants.CHILDREN));
         return createResponseMapWithProperStructure(hierarchySection, resultMap);
         }
-    @Override
+
     public Map<String, Object> createResponseMapWithProperStructure(Map<String, Object> hierarchySection, Map<String, Object> resultMap) {
         Map<String, Object> sectionLevelResult = new HashMap<>();
         sectionLevelResult.put(Constants.IDENTIFIER, hierarchySection.get(Constants.IDENTIFIER));
@@ -523,5 +509,16 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
         sectionLevelResult.put(Constants.PASS, result >= ((Integer) hierarchySection.get(Constants.MINIMUM_PASS_PERCENTAGE)));
         sectionLevelResult.put(Constants.OVERALL_RESULT, result);
         return sectionLevelResult;
+    }
+
+    private SBApiResponse createDefaultResponse(String api) {
+        SBApiResponse response = new SBApiResponse();
+        response.setId(api);
+        response.setVer(Constants.VER);
+        response.getParams().setResmsgid(UUID.randomUUID().toString());
+        response.getParams().setStatus(Constants.SUCCESS);
+        response.setResponseCode(HttpStatus.OK);
+        response.setTs(DateTime.now().toString());
+        return response;
     }
 }
