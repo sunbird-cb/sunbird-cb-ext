@@ -816,21 +816,6 @@ public class ProfileServiceImpl implements ProfileService {
 
 	}
 	
-	/*
-	 * private Map<String, Object> getUsersReadData(String userId, String authToken,
-	 * String userAuthToken) { Map<String, String> header = new HashMap<>(); if
-	 * (StringUtils.isNotEmpty(authToken)) { header.put(Constants.AUTH_TOKEN,
-	 * authToken); } if (StringUtils.isNotEmpty(userAuthToken)) {
-	 * header.put(Constants.X_AUTH_TOKEN, userAuthToken); } Map<String, Object>
-	 * readData = (Map<String, Object>) outboundRequestHandlerService
-	 * .fetchUsingGetWithHeaders(serverConfig.getSbUrl() +
-	 * serverConfig.getLmsUserReadPath() + userId, header);
-	 * 
-	 * Map<String, Object> result = (Map<String, Object>)
-	 * readData.get(Constants.RESULT); Map<String, Object> responseMap =
-	 * (Map<String, Object>) result.get(Constants.RESPONSE); return responseMap; }
-	 */
-
 	private boolean assignRole(Map<String,Object> request) throws Exception{
 		boolean retValue = false;
 		Map<String, Object> requestObj = new HashMap<>();
