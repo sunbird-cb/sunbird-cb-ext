@@ -89,9 +89,9 @@ public class ProfileServiceImpl implements ProfileService {
 				for (String keys : profileDetailsMap.keySet()) {
 					listOfChangedDetails.add(keys);
 				}
-                   if(listOfChangedDetails.contains(Constants.EMPLOYMENTDETAILS)){
-					   listOfChangedDetails.remove(Constants.EMPLOYMENTDETAILS);
-				   }
+				if (listOfChangedDetails.contains(Constants.EMPLOYMENTDETAILS)) {
+					listOfChangedDetails.remove(Constants.EMPLOYMENTDETAILS);
+				}
 				for (String changedObj : listOfChangedDetails) {
 					if (profileDetailsMap.get(changedObj) instanceof ArrayList) {
 						existingProfileDetails.put(changedObj, profileDetailsMap.get(changedObj));
@@ -200,10 +200,9 @@ public class ProfileServiceImpl implements ProfileService {
 				transitionRequests.put(Constants.SERVICE_NAME, Constants.PROFILE);
 				transitionRequests.put(Constants.COMMENT, "");
 				transitionRequests.put(Constants.WFID, "");
-				if(null!=newDeptName){
+				if (null != newDeptName) {
 					transitionRequests.put(Constants.DEPT_NAME, newDeptName);
-				} else
-				{
+				} else {
 					transitionRequests.put(Constants.DEPT_NAME, deptName);
 				}
 				transitionRequests.put(Constants.UPDATE_FIELD_VALUES, finalTransitionList);
