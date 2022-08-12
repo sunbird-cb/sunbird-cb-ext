@@ -24,7 +24,7 @@ public class RedisCacheMgr {
 
     private CbExtLogger logger = new CbExtLogger(getClass().getName());
 
-    public void putCache(String key, Object object) {
+    public boolean putCache(String key, Object object) {
         try {
             int ttl = cache_ttl;
             if (!StringUtils.isEmpty(cbExtServerProperties.getRedisTimeout())) {
@@ -33,9 +33,11 @@ public class RedisCacheMgr {
             redisTemplate.opsForValue().set(Constants.REDIS_COMMON_KEY + key, object);
             redisTemplate.expire(Constants.REDIS_COMMON_KEY + key, ttl, TimeUnit.SECONDS);
             logger.info("Cache_key_value " + Constants.REDIS_COMMON_KEY + key + " is saved in redis");
+            return Boolean.TRUE;
         } catch (Exception e) {
             logger.error(e);
         }
+        return Boolean.FALSE;
     }
 
     public boolean deleteKeyByName(String key) {

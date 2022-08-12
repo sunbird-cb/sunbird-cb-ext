@@ -58,7 +58,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
         SBApiResponse response = createDefaultResponse(Constants.API_QUESTIONSET_HIERARCHY_GET);
         String errMsg = "";
         try {
-            String userId = RequestInterceptor.fetchUserIdFromAccessToken(token);
+            String userId = validateAuthTokenAndFetchUserId(token);
             if (userId != null) {
                 Map<String, Object> assessmentAllDetail = (Map<String, Object>) redisCacheMgr
                         .getCache(Constants.ASSESSMENT_ID + assessmentIdentifier);
@@ -72,10 +72,16 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                         redisCacheMgr.putCache(Constants.ASSESSMENT_ID + assessmentIdentifier, assessmentAllDetail);
                     }
                 }
-                response.getResult().put(Constants.QUESTION_SET, readAssessmentLevelData(assessmentAllDetail));
-                redisCacheMgr.putCache(Constants.USER_ASSESS_REQ + assessmentIdentifier + token, response.getResult().get(Constants.QUESTION_SET));
-                if (assessmentAllDetail.get(Constants.EXPECTED_DURATION) != null) {
-                    assessmentRepository.addUserAssesmentStartTime(userId, Constants.ASSESSMENT_ID + assessmentIdentifier, new Timestamp(new Date().getTime()));
+                if(errMsg.isEmpty()) {
+                    response.getResult().put(Constants.QUESTION_SET, readAssessmentLevelData(assessmentAllDetail));
+                    Boolean isInsertedToRedis = redisCacheMgr.putCache(Constants.USER_ASSESS_REQ + assessmentIdentifier + token, response.getResult().get(Constants.QUESTION_SET));
+                    if (!isInsertedToRedis) {
+                        errMsg = "Data couldn't be inserted to Redis, Please check!";
+                    }
+                    Boolean isStartTimeUpdated = assessmentRepository.addUserAssesmentStartTime(userId, Constants.ASSESSMENT_ID + assessmentIdentifier, new Timestamp(new Date().getTime()));
+                    if (!isStartTimeUpdated) {
+                        errMsg = "Assessment Start Time not updated! Please check!";
+                    }
                 }
             } else {
                 errMsg = "User Id doesn't exist! Please supply a valid auth token";
@@ -96,12 +102,12 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
         SBApiResponse response = createDefaultResponse(Constants.API_SUBMIT_ASSESSMENT);
         String errMsg = "";
         try {
-            String userId = RequestInterceptor.fetchUserIdFromAccessToken(authUserToken);
-            if (userId != null) {
+            String userId = validateAuthTokenAndFetchUserId(authUserToken);
+            if (userId != null && requestBody.containsKey(Constants.ASSESSMENT_ID_KEY) && !StringUtils.isEmpty((String)requestBody.get(Constants.ASSESSMENT_ID_KEY))) {
                 List<String> identifierList = getQuestionIdList(requestBody);
-                List<Object> questionList = new ArrayList<>();
-                List<String> newIdentifierList = new ArrayList<>();
-                if (requestBody.containsKey(Constants.ASSESSMENT_ID_KEY) && !StringUtils.isEmpty((String)requestBody.get(Constants.ASSESSMENT_ID_KEY)) && !identifierList.isEmpty()) {
+                if (!identifierList.isEmpty()) {
+                    List<Object> questionList = new ArrayList<>();
+                    List<String> newIdentifierList = new ArrayList<>();
                     String key = Constants.USER_ASSESS_REQ + requestBody.get(Constants.ASSESSMENT_ID_KEY).toString() + authUserToken;
                     Map<String, Object> questionSetFromAssessment = (Map<String, Object>) redisCacheMgr.getCache(key);
                     if (!ObjectUtils.isEmpty(questionSetFromAssessment)) {
@@ -110,46 +116,52 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                         for (Map<String, Object> section : sections) {
                             questionsFromAssessment.addAll((List<String>) section.get(Constants.CHILD_NODES));
                         }
-                        //Out of the list of questions received in the payload, retaining only those ids which are a part of the user's latest assessment
-                        identifierList.retainAll(questionsFromAssessment);
+                        //Out of the list of questions received in the payload, checking if the request has only those ids which are a part of the user's latest assessment
                         //Fetching all the remaining questions details from the Redis
-                        List<Object> map = redisCacheMgr.mget(identifierList);
-                        for (int i = 0; i < map.size(); i++) {
-                            if (ObjectUtils.isEmpty(map.get(i))) {
-                                //Adding the not found keys as a seperate list
-                                newIdentifierList.add(identifierList.get(i));
-                            } else {
-                                //Filtering the details of the questions which are found in redis and adding them to another list
-                                questionList.add(filterQuestionMapDetail((Map<String, Object>) map.get(i)));
-                            }
-                        }
-                        //Taking the list which was formed with the not found values in Redis, we are making an internal POST call to Question List API to fetch the details
-                        if (!newIdentifierList.isEmpty()) {
-                            Map<String, Object> questionMapResponse = readQuestionDetails(newIdentifierList);
-                            if (!ObjectUtils.isEmpty(questionMapResponse) && Constants.OK.equalsIgnoreCase((String) questionMapResponse.get(Constants.RESPONSE_CODE))) {
-                                List<Map<String, Object>> questionMap = ((List<Map<String, Object>>) ((Map<String, Object>) questionMapResponse
-                                        .get(Constants.RESULT)).get(Constants.QUESTIONS));
-                                for (Map<String, Object> question : questionMap) {
-                                    if (!ObjectUtils.isEmpty(questionMap)) {
-                                        redisCacheMgr.putCache(Constants.QUESTION_ID + question.get(Constants.IDENTIFIER), question);
-                                        questionList.add(filterQuestionMapDetail(question));
-                                    } else {
-                                        logger.error(String.format("Failed to get Question Details for Id: %s", question.get(Constants.IDENTIFIER).toString()));
-                                    }
+                        if (validateQuestionListRequest(identifierList, questionsFromAssessment)) {
+                            List<Object> map = redisCacheMgr.mget(identifierList);
+                            for (int i = 0; i < map.size(); i++) {
+                                if (ObjectUtils.isEmpty(map.get(i))) {
+                                    //Adding the not found keys as a seperate list
+                                    newIdentifierList.add(identifierList.get(i));
+                                } else {
+                                    //Filtering the details of the questions which are found in redis and adding them to another list
+                                    questionList.add(filterQuestionMapDetail((Map<String, Object>) map.get(i)));
                                 }
-                            } else {
-                                logger.error(String.format("Failed to get Question Details from the Question List API for the IDs: %s", newIdentifierList.toString()));
                             }
+                            //Taking the list which was formed with the not found values in Redis, we are making an internal POST call to Question List API to fetch the details
+                            if (!newIdentifierList.isEmpty()) {
+                                Map<String, Object> questionMapResponse = readQuestionDetails(newIdentifierList);
+                                if (!ObjectUtils.isEmpty(questionMapResponse) && Constants.OK.equalsIgnoreCase((String) questionMapResponse.get(Constants.RESPONSE_CODE))) {
+                                    List<Map<String, Object>> questionMap = ((List<Map<String, Object>>) ((Map<String, Object>) questionMapResponse
+                                            .get(Constants.RESULT)).get(Constants.QUESTIONS));
+                                    for (Map<String, Object> question : questionMap) {
+                                        if (!ObjectUtils.isEmpty(questionMap)) {
+                                            Boolean isInsertedToRedis = redisCacheMgr.putCache(Constants.QUESTION_ID + question.get(Constants.IDENTIFIER), question);
+                                            questionList.add(filterQuestionMapDetail(question));
+                                        } else {
+                                            errMsg = "Failed to get Question Details for Id: %s";
+                                            logger.error(String.format("Failed to get Question Details for Id: %s", question.get(Constants.IDENTIFIER).toString()));
+                                            break;
+                                        }
+                                    }
+                                } else {
+                                    logger.error(String.format("Failed to get Question Details from the Question List API for the IDs: %s", newIdentifierList.toString()));
+                                }
+                            }
+                            if (!questionList.isEmpty() && errMsg.isEmpty()) {
+                                response.getResult().put(Constants.QUESTIONS, questionList);
+                            }
+                            else
+                            {
+                                errMsg = "The list of questions are Empty/Invalid";
+                            }
+                        } else {
+                            errMsg = "The Questions Ids Provided are not a part of the active user assessment session";
                         }
-                        if (!questionList.isEmpty())
-                            response.getResult().put(Constants.QUESTIONS, questionList);
-                        else
-                            errMsg = "The list of questions are Empty";
                     } else {
                         errMsg = "Please provide a valid assessment Id/Session Expired";
                     }
-                } else {
-                    errMsg = "Please provide the valid Assessment Id";
                 }
             } else {
                 errMsg = "User Id doesn't exist! Please supply a valid auth token";
@@ -167,6 +179,10 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
 
     }
 
+    private static String validateAuthTokenAndFetchUserId(String authUserToken) {
+        return RequestInterceptor.fetchUserIdFromAccessToken(authUserToken);
+    }
+
     @Override
     public SBApiResponse submitAssessment(Map<String, Object> submitRequest, String authUserToken) {
         SBApiResponse outgoingResponse = createDefaultResponse(Constants.API_SUBMIT_ASSESSMENT);
@@ -175,7 +191,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
         String assessmentIdFromRequest = (String) submitRequest.get(Constants.IDENTIFIER);
         Map<String, Object> assessmentHierarchy = (Map<String, Object>) redisCacheMgr
                 .getCache(Constants.ASSESSMENT_ID + assessmentIdFromRequest);
-        String userId = RequestInterceptor.fetchUserIdFromAccessToken(authUserToken);
+        String userId = validateAuthTokenAndFetchUserId(authUserToken);
         if (userId != null) { // fail if the user is null
             Date assessmentStartTime = assessmentRepository.fetchUserAssessmentStartTime(userId, Constants.ASSESSMENT_ID + assessmentIdFromRequest);
             if (assessmentStartTime != null) {
@@ -520,5 +536,11 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
         response.setResponseCode(HttpStatus.OK);
         response.setTs(DateTime.now().toString());
         return response;
+    }
+
+    private Boolean validateQuestionListRequest(List<String> identifierList, List<String> questionsFromAssessment) {
+        List<String> identifierListCopy = identifierList;
+        identifierListCopy.removeAll(questionsFromAssessment);
+        return identifierListCopy.isEmpty() ? Boolean.TRUE : Boolean.FALSE;
     }
 }
