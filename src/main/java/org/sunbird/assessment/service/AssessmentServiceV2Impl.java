@@ -102,69 +102,46 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
         SBApiResponse response = createDefaultResponse(Constants.API_SUBMIT_ASSESSMENT);
         String errMsg = "";
         try {
-            String userId = validateAuthTokenAndFetchUserId(authUserToken);
-            if (userId != null && requestBody.containsKey(Constants.ASSESSMENT_ID_KEY) && !StringUtils.isEmpty((String)requestBody.get(Constants.ASSESSMENT_ID_KEY))) {
-                List<String> identifierList = getQuestionIdList(requestBody);
-                if (!identifierList.isEmpty()) {
-                    List<Object> questionList = new ArrayList<>();
-                    List<String> newIdentifierList = new ArrayList<>();
-                    String key = Constants.USER_ASSESS_REQ + requestBody.get(Constants.ASSESSMENT_ID_KEY).toString() + authUserToken;
-                    Map<String, Object> questionSetFromAssessment = (Map<String, Object>) redisCacheMgr.getCache(key);
-                    if (!ObjectUtils.isEmpty(questionSetFromAssessment)) {
-                        List<String> questionsFromAssessment = new ArrayList<>();
-                        List<Map<String, Object>> sections = (List<Map<String, Object>>) questionSetFromAssessment.get(Constants.CHILDREN);
-                        for (Map<String, Object> section : sections) {
-                            questionsFromAssessment.addAll((List<String>) section.get(Constants.CHILD_NODES));
-                        }
-                        //Out of the list of questions received in the payload, checking if the request has only those ids which are a part of the user's latest assessment
-                        //Fetching all the remaining questions details from the Redis
-                        if (validateQuestionListRequest(identifierList, questionsFromAssessment)) {
-                            List<Object> map = redisCacheMgr.mget(identifierList);
-                            for (int i = 0; i < map.size(); i++) {
-                                if (ObjectUtils.isEmpty(map.get(i))) {
-                                    //Adding the not found keys as a seperate list
-                                    newIdentifierList.add(identifierList.get(i));
-                                } else {
-                                    //Filtering the details of the questions which are found in redis and adding them to another list
-                                    questionList.add(filterQuestionMapDetail((Map<String, Object>) map.get(i)));
-                                }
-                            }
-                            //Taking the list which was formed with the not found values in Redis, we are making an internal POST call to Question List API to fetch the details
-                            if (!newIdentifierList.isEmpty()) {
-                                Map<String, Object> questionMapResponse = readQuestionDetails(newIdentifierList);
-                                if (!ObjectUtils.isEmpty(questionMapResponse) && Constants.OK.equalsIgnoreCase((String) questionMapResponse.get(Constants.RESPONSE_CODE))) {
-                                    List<Map<String, Object>> questionMap = ((List<Map<String, Object>>) ((Map<String, Object>) questionMapResponse
-                                            .get(Constants.RESULT)).get(Constants.QUESTIONS));
-                                    for (Map<String, Object> question : questionMap) {
-                                        if (!ObjectUtils.isEmpty(questionMap)) {
-                                            Boolean isInsertedToRedis = redisCacheMgr.putCache(Constants.QUESTION_ID + question.get(Constants.IDENTIFIER), question);
-                                            questionList.add(filterQuestionMapDetail(question));
-                                        } else {
-                                            errMsg = "Failed to get Question Details for Id: %s";
-                                            logger.error(String.format("Failed to get Question Details for Id: %s", question.get(Constants.IDENTIFIER).toString()));
-                                            break;
-                                        }
-                                    }
-                                } else {
-                                    logger.error(String.format("Failed to get Question Details from the Question List API for the IDs: %s", newIdentifierList.toString()));
-                                }
-                            }
-                            if (!questionList.isEmpty() && errMsg.isEmpty()) {
-                                response.getResult().put(Constants.QUESTIONS, questionList);
-                            }
-                            else
-                            {
-                                errMsg = "The list of questions are Empty/Invalid";
-                            }
-                        } else {
-                            errMsg = "The Questions Ids Provided are not a part of the active user assessment session";
-                        }
+            List<String> identifierList = new ArrayList<>();
+            List<Object> questionList = new ArrayList<>();
+            List<String> newIdentifierList = new ArrayList<>();
+            errMsg = validateQuestionListAPI(requestBody, authUserToken, errMsg, identifierList);
+            if(!errMsg.isEmpty() && !identifierList.isEmpty()) {
+                List<Object> map = redisCacheMgr.mget(identifierList);
+                for (int i = 0; i < map.size(); i++) {
+                    if (ObjectUtils.isEmpty(map.get(i))) {
+                        //Adding the not found keys as a seperate list
+                        newIdentifierList.add(identifierList.get(i));
                     } else {
-                        errMsg = "Please provide a valid assessment Id/Session Expired";
+                        //Filtering the details of the questions which are found in redis and adding them to another list
+                        questionList.add(filterQuestionMapDetail((Map<String, Object>) map.get(i)));
                     }
                 }
-            } else {
-                errMsg = "User Id doesn't exist! Please supply a valid auth token";
+                //Taking the list which was formed with the not found values in Redis, we are making an internal POST call to Question List API to fetch the details
+                if (!newIdentifierList.isEmpty()) {
+                    Map<String, Object> questionMapResponse = readQuestionDetails(newIdentifierList);
+                    if (!ObjectUtils.isEmpty(questionMapResponse) && Constants.OK.equalsIgnoreCase((String) questionMapResponse.get(Constants.RESPONSE_CODE))) {
+                        List<Map<String, Object>> questionMap = ((List<Map<String, Object>>) ((Map<String, Object>) questionMapResponse
+                                .get(Constants.RESULT)).get(Constants.QUESTIONS));
+                        for (Map<String, Object> question : questionMap) {
+                            if (!ObjectUtils.isEmpty(questionMap)) {
+                                Boolean isInsertedToRedis = redisCacheMgr.putCache(Constants.QUESTION_ID + question.get(Constants.IDENTIFIER), question);
+                                questionList.add(filterQuestionMapDetail(question));
+                            } else {
+                                errMsg = "Failed to get Question Details for Id: %s";
+                                logger.error(String.format("Failed to get Question Details for Id: %s", question.get(Constants.IDENTIFIER).toString()));
+                                break;
+                            }
+                        }
+                    } else {
+                        logger.error(String.format("Failed to get Question Details from the Question List API for the IDs: %s", newIdentifierList.toString()));
+                    }
+                }
+                if (!questionList.isEmpty() && errMsg.isEmpty()) {
+                    response.getResult().put(Constants.QUESTIONS, questionList);
+                } else {
+                    errMsg = "The list of questions are Empty/Invalid";
+                }
             }
         } catch (Exception e) {
             logger.error(String.format("Exception in %s : %s", "get Question List", e.getMessage()), e);
@@ -179,8 +156,36 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
 
     }
 
-    private static String validateAuthTokenAndFetchUserId(String authUserToken) {
+    private String validateAuthTokenAndFetchUserId(String authUserToken) {
         return RequestInterceptor.fetchUserIdFromAccessToken(authUserToken);
+    }
+
+    private String validateQuestionListAPI(Map<String, Object> requestBody, String authUserToken, String errMsg, List<String> identifierList) {
+        String userId = validateAuthTokenAndFetchUserId(authUserToken);
+        if (userId != null && requestBody.containsKey(Constants.ASSESSMENT_ID_KEY) && !StringUtils.isEmpty((String)requestBody.get(Constants.ASSESSMENT_ID_KEY))) {
+            identifierList = getQuestionIdList(requestBody);
+            if (!identifierList.isEmpty()) {
+                String key = Constants.USER_ASSESS_REQ + requestBody.get(Constants.ASSESSMENT_ID_KEY).toString() + authUserToken;
+                Map<String, Object> questionSetFromAssessment = (Map<String, Object>) redisCacheMgr.getCache(key);
+                if (!ObjectUtils.isEmpty(questionSetFromAssessment)) {
+                    List<String> questionsFromAssessment = new ArrayList<>();
+                    List<Map<String, Object>> sections = (List<Map<String, Object>>) questionSetFromAssessment.get(Constants.CHILDREN);
+                    for (Map<String, Object> section : sections) {
+                        questionsFromAssessment.addAll((List<String>) section.get(Constants.CHILD_NODES));
+                    }
+                    //Out of the list of questions received in the payload, checking if the request has only those ids which are a part of the user's latest assessment
+                    //Fetching all the remaining questions details from the Redis
+                    if (!validateQuestionListRequest(identifierList, questionsFromAssessment)) {
+                        errMsg = "The Questions Ids Provided are not a part of the active user assessment session";
+                    }
+                } else {
+                    errMsg = "Please provide a valid assessment Id/Session Expired";
+                }
+            }
+        } else {
+            errMsg = "User Id doesn't exist! Please supply a valid auth token";
+        }
+        return errMsg;
     }
 
     @Override
