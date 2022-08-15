@@ -76,11 +76,14 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                     response.getResult().put(Constants.QUESTION_SET, readAssessmentLevelData(assessmentAllDetail));
                     Boolean isInsertedToRedis = redisCacheMgr.putCache(Constants.USER_ASSESS_REQ + assessmentIdentifier + token, response.getResult().get(Constants.QUESTION_SET));
                     if (!isInsertedToRedis) {
+                        response.getResult().clear();
                         errMsg = "Data couldn't be inserted to Redis, Please check!";
                     }
-                    Boolean isStartTimeUpdated = assessmentRepository.addUserAssesmentStartTime(userId, Constants.ASSESSMENT_ID + assessmentIdentifier, new Timestamp(new Date().getTime()));
-                    if (!isStartTimeUpdated) {
-                        errMsg = "Assessment Start Time not updated! Please check!";
+                    else {
+                        Boolean isStartTimeUpdated = assessmentRepository.addUserAssesmentStartTime(userId, Constants.ASSESSMENT_ID + assessmentIdentifier, new Timestamp(new Date().getTime()));
+                        if (!isStartTimeUpdated) {
+                            errMsg = "Assessment Start Time not updated! Please check!";
+                        }
                     }
                 }
             } else {
