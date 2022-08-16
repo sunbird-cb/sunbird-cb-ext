@@ -338,6 +338,7 @@ public class Constants {
 	public static final String SUNBIRD_CASSANDRA_CONSISTENCY_LEVEL = "sunbird_cassandra_consistency_level";
 	public static final String INCOMPLETE_COURSES_MAIL_SUBJECT = "Complete the courses you started";
 	public static final String COURSE = "Course";
+	public static final String COURSE_KEYWORD = "course";
 	public static final String _URL = "_url";
 	public static final String THUMBNAIL = "_thumbnail";
 	public static final String _NAME = "_name";

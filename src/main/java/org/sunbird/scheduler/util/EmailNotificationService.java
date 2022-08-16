@@ -21,8 +21,7 @@ import java.util.stream.Collectors;
 public class EmailNotificationService implements Runnable {
     private static final CbExtLogger logger = new CbExtLogger(SchedulerManager.class.getName());
     private final CassandraOperation cassandraOperation = ServiceFactory.getInstance();
-    Map<String, UserCourseProgressDetails> userCourseMap = new HashMap<>();
-    Map<String, CourseDetails> courseIdAndCourseNameMap = new HashMap<>();
+    private static Map<String, CourseDetails> courseIdAndCourseNameMap = new HashMap<>();
 
     public static void sendIncompleteCourseEmail(Map.Entry<String, UserCourseProgressDetails> userCourseProgressDetailsEntry) {
         try {
@@ -30,11 +29,11 @@ public class EmailNotificationService implements Runnable {
                 Map<String, Object> params = new HashMap<>();
                 for (int i = 0; i < userCourseProgressDetailsEntry.getValue().getIncompleteCourses().size(); i++) {
                     int j=i+1;
-                    params.put(Constants.COURSE.toLowerCase() + j, true);
-                    params.put(Constants.COURSE.toLowerCase() + j + Constants._URL, userCourseProgressDetailsEntry.getValue().getIncompleteCourses().get(i).getCourseUrl());
-                    params.put(Constants.COURSE.toLowerCase() + j + Constants.THUMBNAIL, userCourseProgressDetailsEntry.getValue().getIncompleteCourses().get(i).getThumbnail());
-                    params.put(Constants.COURSE.toLowerCase() + j + Constants._NAME, userCourseProgressDetailsEntry.getValue().getIncompleteCourses().get(i).getCourseName());
-                    params.put(Constants.COURSE.toLowerCase() + j + Constants._DURATION, String.valueOf(userCourseProgressDetailsEntry.getValue().getIncompleteCourses().get(i).getCompletionPercentage()));
+                    params.put(Constants.COURSE_KEYWORD + j, true);
+                    params.put(Constants.COURSE_KEYWORD + j + Constants._URL, userCourseProgressDetailsEntry.getValue().getIncompleteCourses().get(i).getCourseUrl());
+                    params.put(Constants.COURSE_KEYWORD + j + Constants.THUMBNAIL, userCourseProgressDetailsEntry.getValue().getIncompleteCourses().get(i).getThumbnail());
+                    params.put(Constants.COURSE_KEYWORD + j + Constants._NAME, userCourseProgressDetailsEntry.getValue().getIncompleteCourses().get(i).getCourseName());
+                    params.put(Constants.COURSE_KEYWORD + j + Constants._DURATION, String.valueOf(userCourseProgressDetailsEntry.getValue().getIncompleteCourses().get(i).getCompletionPercentage()));
 
                 }
                 logger.info(userCourseProgressDetailsEntry.getValue().getEmail());
@@ -56,8 +55,9 @@ public class EmailNotificationService implements Runnable {
             List<Map<String, Object>> userCoursesList = cassandraOperation.searchByWhereClause(Constants.SUNBIRD_COURSES_KEY_SPACE_NAME, Constants.USER_CONTENT_CONSUMPTION, Arrays.asList(Constants.RATINGS_USER_ID, Constants.BATCH_ID_, Constants.COURSE_ID_, Constants.COMPLETION_PERCENTAGE_, Constants.LAST_ACCESS_TIME), date);
             if (!CollectionUtils.isEmpty(userCoursesList)) {
                 fetchCourseIdsAndSetCourseNameAndThumbnail(userCoursesList);
+                Map<String, UserCourseProgressDetails> userCourseMap = new HashMap<>();
                 setUserCourseMap(userCoursesList, userCourseMap);
-                getAndSetUserEmail();
+                getAndSetUserEmail(userCourseMap);
                 for (Map.Entry<String, UserCourseProgressDetails> userCourseProgressDetailsEntry : userCourseMap.entrySet()) {
                     sendIncompleteCourseEmail(userCourseProgressDetailsEntry);
                 }
@@ -101,7 +101,7 @@ public class EmailNotificationService implements Runnable {
         }
     }
 
-    private void getAndSetUserEmail() {
+    private void getAndSetUserEmail(Map<String, UserCourseProgressDetails> userCourseMap) {
         ArrayList<String> userIds = new ArrayList<>(userCourseMap.keySet());
         Map<String, Object> propertyMap = new HashMap<>();
         propertyMap.put(Constants.ID, userIds);
