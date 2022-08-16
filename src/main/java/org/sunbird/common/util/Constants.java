@@ -122,6 +122,7 @@ public class Constants {
 	public static final String API_FILE_UPLOAD = "api.file.upload";
 	public static final String API_FILE_DELETE = "api.file.delete";
 	public static final String API_PROFILE_UPDATE = "api.profile.update";
+	public static final String API_GET_EXPLORE_COURSE_DETAIL = "api.explore.course";
 
 	public static final String ORG_PROFILE_UPDATE = "org.profile.update";
 	public static final String ID = "id";
@@ -230,6 +231,7 @@ public class Constants {
 	public static final String TABLE_RATINGS = "ratings";
 	public static final String TABLE_RATINGS_LOOKUP = "ratings_lookup";
 	public static final String TABLE_RATINGS_SUMMARY = "ratings_summary";
+	public static final String TABLE_EXPLORE_COURSE_LIST = "explore_course_list";
 	public static final String VALUE = "value";
 	public static final String DEPT_NAME = "deptName";
 	public static final String PROFILE_DETAILS = "profileDetails";
@@ -486,8 +488,16 @@ public class Constants {
 	public static final String USER_ROLES = "userRoles";
 	public static final String X_AUTH_USER_ID = "x-authenticated-userid";
 	public static final String SOFT_DELETE_OLD_ORG = "softDeleteOldOrg";
-	public static final String NOTIFY_MIGRATION = "notifyMigration";	
+	public static final String NOTIFY_MIGRATION = "notifyMigration";
+	
+	public static final List<String> courseAdditionalParam = Collections
+			.unmodifiableList(Arrays.asList("appIcon", "channel", "contentType", "description", "duration",
+					"idealScreenSize", "identifier", "instructions", "license", "mimeType", "name", "objectType",
+					"organisation", "pkgVersion", "posterImage", "primaryCategory", "purpose", "version"));
 
+	public static final String PUBLIC_COURSE_LIST = "publicCourseList";
+	public static final String LAST_UPDATED_ON = "lastUpdatedOn";
+	public static final String DESCENDING_ORDER = "desc";
 	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}
