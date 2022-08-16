@@ -36,7 +36,6 @@ public class EmailNotificationService implements Runnable {
                     params.put(Constants.COURSE_KEYWORD + j + Constants._DURATION, String.valueOf(userCourseProgressDetailsEntry.getValue().getIncompleteCourses().get(i).getCompletionPercentage()));
 
                 }
-                logger.info(userCourseProgressDetailsEntry.getValue().getEmail());
                 new NotificationUtil().sendNotification(Collections.singletonList(userCourseProgressDetailsEntry.getValue().getEmail()), params, PropertiesCache.getInstance().getProperty(Constants.SENDER_MAIL), PropertiesCache.getInstance().getProperty(Constants.NOTIFICATION_HOST) + PropertiesCache.getInstance().getProperty(Constants.NOTIFICATION_ENDPOINT));
             }
         } catch (Exception e) {
@@ -124,7 +123,6 @@ public class EmailNotificationService implements Runnable {
                     HashMap<String, Object> hashMap = new ObjectMapper().readValue(profileDetails, HashMap.class);
                     HashMap<String, Object> personalDetailsMap = (HashMap<String, Object>) hashMap.get(Constants.PERSONAL_DETAILS);
                     if (personalDetailsMap.get(Constants.PRIMARY_EMAIL) != null && !excludeEmailsList.contains((String) personalDetailsMap.get(Constants.PRIMARY_EMAIL))) {
-                        logger.info((String) personalDetailsMap.get(Constants.PRIMARY_EMAIL));
                         userCourseMap.get(userDetail.get(Constants.ID)).setEmail((String) personalDetailsMap.get(Constants.PRIMARY_EMAIL));
                     }
                 }
