@@ -492,11 +492,6 @@ public class Constants {
 	public static final String SOFT_DELETE_OLD_ORG = "softDeleteOldOrg";
 	public static final String NOTIFY_MIGRATION = "notifyMigration";
 	
-	public static final List<String> courseAdditionalParam = Collections
-			.unmodifiableList(Arrays.asList("appIcon", "channel", "contentType", "description", "duration",
-					"idealScreenSize", "identifier", "instructions", "license", "mimeType", "name", "objectType",
-					"organisation", "pkgVersion", "posterImage", "primaryCategory", "purpose", "version"));
-
 	public static final String PUBLIC_COURSE_LIST = "publicCourseList";
 	public static final String LAST_UPDATED_ON = "lastUpdatedOn";
 	public static final String DESCENDING_ORDER = "desc";

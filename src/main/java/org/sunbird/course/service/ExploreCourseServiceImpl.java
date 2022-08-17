@@ -118,7 +118,7 @@ public class ExploreCourseServiceImpl implements ExploreCourseService {
 		Map<String, Object> sortBy = new HashMap<String, Object>();
 		sortBy.put(Constants.LAST_UPDATED_ON, Constants.DESCENDING_ORDER);
 		requestBody.put(Constants.SORT_BY, sortBy);
-		requestBody.put(Constants.FIELDS, Constants.courseAdditionalParam);
+		requestBody.put(Constants.FIELDS, serverProperties.getKmCompositeSearchFields());
 		request.put(Constants.REQUEST, requestBody);
 		return request;
 	}
