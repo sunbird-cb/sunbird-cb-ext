@@ -72,6 +72,8 @@ public class ExploreCourseServiceImpl implements ExploreCourseService {
 					redisCacheMgr.putCache(Constants.PUBLIC_COURSE_LIST, responseCourseList);
 					response.setResult(responseCourseList);
 				}
+			} else {
+				response.setResult(responseCourseList);
 			}
 		} catch (Exception e) {
 			errMsg = "Failed to retrieve explore course list. Exception: " + e.getMessage();

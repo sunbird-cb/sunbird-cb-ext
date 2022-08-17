@@ -25,5 +25,4 @@ public class ExploreCourseController {
 		SBApiResponse response = courseService.getExploreCourseList();
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
-
 }
