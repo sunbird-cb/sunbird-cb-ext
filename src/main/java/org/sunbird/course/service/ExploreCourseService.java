@@ -17,4 +17,11 @@ public interface ExploreCourseService {
 	 * @return - Course details in Sunbird API Response format.
 	 */
 	public SBApiResponse getExploreCourseList();
+
+	/**
+	 * Refreshes the cache by re-reading the details from DB.
+	 * 
+	 * @return - Returns success or failure details in Sunbird API Response format.
+	 */
+	public SBApiResponse refreshCache();
 }

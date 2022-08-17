@@ -31,6 +31,7 @@ import org.sunbird.core.exception.ApplicationLogicError;
  *
  */
 @Service
+@SuppressWarnings("unchecked")
 public class ExploreCourseServiceImpl implements ExploreCourseService {
 
 	private Logger logger = LoggerFactory.getLogger(ExploreCourseServiceImpl.class);
@@ -47,7 +48,6 @@ public class ExploreCourseServiceImpl implements ExploreCourseService {
 	@Autowired
 	OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public SBApiResponse getExploreCourseList() {
 		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_GET_EXPLORE_COURSE_DETAIL);
@@ -85,6 +85,13 @@ public class ExploreCourseServiceImpl implements ExploreCourseService {
 			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 
+		return response;
+	}
+
+	public SBApiResponse refreshCache() {
+		redisCacheMgr.deleteKeyByName(Constants.PUBLIC_COURSE_LIST);
+		SBApiResponse response = getExploreCourseList();
+		response.setId(Constants.API_REFRESH_EXPLORE_COURSE_DETAIL);
 		return response;
 	}
 

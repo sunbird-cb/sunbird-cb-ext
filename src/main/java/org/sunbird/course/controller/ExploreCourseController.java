@@ -25,4 +25,10 @@ public class ExploreCourseController {
 		SBApiResponse response = courseService.getExploreCourseList();
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
+
+	@GetMapping("course/v1/refreshCache")
+	public ResponseEntity<SBApiResponse> refreshCourseListInCache() {
+		SBApiResponse response = courseService.refreshCache();
+		return new ResponseEntity<>(response, response.getResponseCode());
+	}
 }
