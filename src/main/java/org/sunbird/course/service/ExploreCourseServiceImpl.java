@@ -114,6 +114,7 @@ public class ExploreCourseServiceImpl implements ExploreCourseService {
 		Map<String, Object> requestBody = new HashMap<String, Object>();
 		Map<String, Object> filters = new HashMap<String, Object>();
 		filters.put(Constants.IDENTIFIER, identifierList);
+		filters.put(Constants.PRIMARY_CATEGORY, serverProperties.getKmCompositeSearchPrimaryCategoryFilters());
 		requestBody.put(Constants.FILTERS, filters);
 		Map<String, Object> sortBy = new HashMap<String, Object>();
 		sortBy.put(Constants.LAST_UPDATED_ON, Constants.DESCENDING_ORDER);

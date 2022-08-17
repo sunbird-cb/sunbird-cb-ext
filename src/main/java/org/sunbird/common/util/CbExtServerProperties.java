@@ -326,6 +326,9 @@ public class CbExtServerProperties {
 	
 	@Value("${km.base.composite.search.fields}")
 	private String kmCompositeSearchFields;
+	
+	@Value("${km.base.composite.search.filters.primaryCategory}")
+	private String kmCompositeSearchPrimaryCategoryFilters;
 
 	public String getUserAssessmentSubmissionDuration() {
 		return userAssessmentSubmissionDuration;
@@ -1193,6 +1196,12 @@ public class CbExtServerProperties {
 	public void setKmCompositeSearchFields(String kmCompositeSearchFields) {
 		this.kmCompositeSearchFields = kmCompositeSearchFields;
 	}
-	
-	
+
+	public List<String> getKmCompositeSearchPrimaryCategoryFilters() {
+		return Arrays.asList(kmCompositeSearchPrimaryCategoryFilters.split(",", -1));
+	}
+
+	public void setKmCompositeSearchPrimaryCategoryFilters(String kmCompositeSearchPrimaryCategoryFilters) {
+		this.kmCompositeSearchPrimaryCategoryFilters = kmCompositeSearchPrimaryCategoryFilters;
+	}
 }
