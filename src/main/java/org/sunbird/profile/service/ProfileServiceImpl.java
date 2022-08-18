@@ -13,6 +13,7 @@ import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.sunbird.cache.RedisCacheMgr;
 import org.sunbird.common.model.SBApiResponse;
@@ -23,7 +24,6 @@ import org.sunbird.common.util.Constants;
 import org.sunbird.common.util.IndexerService;
 import org.sunbird.core.logger.CbExtLogger;
 import org.sunbird.user.service.UserUtilityServiceImpl;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
@@ -65,7 +65,7 @@ public class ProfileServiceImpl implements ProfileService {
 
 			String userId = (String) requestData.get(Constants.USER_ID);
 			Map<String, Object> profileDetailsMap = (Map<String, Object>) requestData.get(Constants.PROFILE_DETAILS);
-			List<String> approvalFieldList = approvalFields(authToken, userToken);
+			List<String> approvalFieldList = approvalFields();
 			String newDeptName = checkDepartment(profileDetailsMap);
 			Map<String, Object> transitionData = new HashMap<>();
 			for (String approvalList : approvalFieldList) {
@@ -74,7 +74,7 @@ public class ProfileServiceImpl implements ProfileService {
 					profileDetailsMap.remove(approvalList);
 				}
 			}
-			Map<String, Object> responseMap = userUtilityService.getUsersReadData(userId, authToken, userToken);
+			Map<String, Object> responseMap = userUtilityService.getUsersReadData(userId, StringUtils.EMPTY, StringUtils.EMPTY);
 			String deptName = (String) responseMap.get(Constants.CHANNEL);
 			Map<String, Object> existingProfileDetails = (Map<String, Object>) responseMap
 					.get(Constants.PROFILE_DETAILS);
@@ -211,7 +211,6 @@ public class ProfileServiceImpl implements ProfileService {
 				headerValues.put("rootOrg", "igot");
 				headerValues.put(Constants.ROOT_ORG_CONSTANT, Constants.IGOT);
 				headerValues.put(Constants.ORG_CONSTANT, Constants.DOPT);
-				headerValues.put(Constants.X_AUTH_TOKEN, userToken);
 				workflowResponse = outboundRequestHandlerService.fetchResultUsingPost(
 						serverConfig.getWfServiceHost() + serverConfig.getWfServiceTransitionPath(), transitionRequests,
 						headerValues);
@@ -292,6 +291,47 @@ public class ProfileServiceImpl implements ProfileService {
 	}
 
 	@Override
+	public SBApiResponse migrateUser(Map<String, Object> request, String userToken, String authToken) throws Exception {
+		SBApiResponse response = new SBApiResponse(Constants.ORG_PROFILE_UPDATE);
+		validateMigrateRequest(request);
+		HashMap<String, String> headerValues = new HashMap<>();
+		headerValues.put(Constants.AUTH_TOKEN, authToken);
+		headerValues.put(Constants.X_AUTH_TOKEN, authToken);
+		headerValues.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
+		Map<String,Object >migrateResponse = outboundRequestHandlerService.fetchResultUsingPatch(
+				serverConfig.getSbUrl() + serverConfig.getLmsUserMigratePath(), request, headerValues);
+		if (null != migrateResponse) {
+			if (!Constants.OK.equals(migrateResponse.get(Constants.RESPONSE_CODE))) {
+				throw new Exception("Migrate user failed" + ((Map<String, Object>) migrateResponse.get(Constants.PARAMS)).get(Constants.ERROR_MESSAGE));
+			}
+		} else {
+			throw new Exception("Migrate user failed. Response is null");
+		}
+		Map<String, Object> userReadResponse = userUtilityService.getUsersReadData((String) request.get(Constants.USER_ID), authToken, userToken);
+		if (null != userReadResponse) {
+			if (!Constants.OK.equals(userReadResponse.get(Constants.RESPONSE_CODE))) {
+				throw new Exception("User read failed" + ((Map<String, Object>) migrateResponse.get(Constants.PARAMS)).get(Constants.ERROR_MESSAGE));
+			}
+		} else {
+			throw new Exception("user read failed. Response is null");
+		}
+		Map<String, Object> profileDetails = (Map<String, Object>) userReadResponse.get(Constants.PROFILE_DETAILS);
+		if(profileDetails.containsKey(Constants.EMPLOYMENTDETAILS)){
+		Map<String, Object> employmentDetails = (Map<String, Object>) profileDetails.get(Constants.PROFILE_DETAILS);
+			employmentDetails.put(Constants.DEPARTMENTNAME,request.get(Constants.CHANNEL));
+		}
+		if(profileDetails.containsKey(Constants.PROFESSIONAL_DETAILS)){
+			List<Map<String, Object>> professionalDetails = (List<Map<String, Object>>) profileDetails.get(Constants.PROFESSIONAL_DETAILS);
+			Map<String, Object> professionalDetailElement = professionalDetails.get(0);
+			professionalDetailElement.put(Constants.NAME,request.get(Constants.CHANNEL));
+		}
+		response.getResult().put(Constants.RESULT, migrateResponse);
+		response.setResponseCode(HttpStatus.OK);
+		response.getParams().setStatus(Constants.SUCCESS);
+		return response;
+	}
+
+	@Override
 	public SBApiResponse orgProfileRead(String orgId) throws Exception {
 		SBApiResponse response = createDefaultResponse(Constants.ORG_ONBOARDING_PROFILE_RETRIEVE_API);
 		Map<String, Object> orgProfile = getOrgProfileForOrgId(orgId);
@@ -309,7 +349,7 @@ public class ProfileServiceImpl implements ProfileService {
 		return response;
 	}
 
-	public List<String> approvalFields(String authToken, String userToken) {
+	public List<String> approvalFields() {
 
 		Map<String, Object> approvalFieldsCache = (Map<String, Object>) mapper
 				.convertValue(redisCacheMgr.getCache(Constants.PROFILE_UPDATE_FIELDS), Map.class);
@@ -323,8 +363,6 @@ public class ProfileServiceImpl implements ProfileService {
 			return approvalValues;
 		} else {
 			Map<String, String> header = new HashMap<>();
-			header.put(Constants.AUTH_TOKEN, authToken);
-			header.put(Constants.X_AUTH_TOKEN, userToken);
 			Map<String, Object> approvalData = (Map<String, Object>) outboundRequestHandlerService
 					.fetchUsingGetWithHeadersProfile(serverConfig.getSbUrl() + serverConfig.getLmsSystemSettingsPath(),
 							header);
@@ -418,4 +456,18 @@ public class ProfileServiceImpl implements ProfileService {
 		response.setTs(DateTime.now().toString());
 		return response;
 	}
+
+	public void validateMigrateRequest(Map<String, Object> requestBody) throws Exception {
+		List<String> errObjList = new ArrayList<String>();
+		if (StringUtils.isEmpty((String) requestBody.get(Constants.USER_ID))) {
+			errObjList.add(Constants.USER_ID);
+		}
+		if (StringUtils.isEmpty((String) requestBody.get(Constants.CHANNEL))) {
+			errObjList.add(Constants.CHANNEL);
+		}
+		if (!CollectionUtils.isEmpty(errObjList)) {
+			throw new Exception("Request does not contains necessary field(s) " + errObjList.toString());
+		}
+	}
+
 }

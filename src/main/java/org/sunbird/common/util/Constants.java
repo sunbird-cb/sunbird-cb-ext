@@ -475,6 +475,7 @@ public class Constants {
 	public static final String SB_ORG_ID = "sborgid";
 	public static final String MAP_ID = "mapId";
 	public static final String SB_ROOT_ORG_ID = "sbRootOrgId";
+	public static final String ERROR_MESSAGE = "errmsg";
 
 	private Constants() {
 		throw new IllegalStateException("Utility class");
