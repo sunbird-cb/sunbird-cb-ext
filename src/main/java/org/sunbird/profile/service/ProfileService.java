@@ -13,4 +13,7 @@ public interface ProfileService {
 	SBApiResponse userBasicInfo(String userId);
 
 	SBApiResponse userBasicProfileUpdate(Map<String, Object> request);
+
+	SBApiResponse userSignup(Map<String, Object> request);
+
 }
