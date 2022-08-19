@@ -309,32 +309,25 @@ public class ProfileServiceImpl implements ProfileService {
 		headerValues.put(Constants.AUTH_TOKEN, authToken);
 		headerValues.put(Constants.X_AUTH_TOKEN, authToken);
 		headerValues.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
-		Map<String,Object >migrateResponse = outboundRequestHandlerService.fetchResultUsingPatch(
+		Map<String, Object> migrateResponse = outboundRequestHandlerService.fetchResultUsingPatch(
 				serverConfig.getSbUrl() + serverConfig.getLmsUserSelfMigratePath(), request, headerValues);
-		if (null != migrateResponse) {
-			if (!Constants.OK.equals(migrateResponse.get(Constants.RESPONSE_CODE))) {
-				throw new Exception("Migrate user failed" + ((Map<String, Object>) migrateResponse.get(Constants.PARAMS)).get(Constants.ERROR_MESSAGE));
-			}
-		} else {
-			throw new Exception("Migrate user failed. Response is null");
+		if (null != migrateResponse && !Constants.OK.equals(migrateResponse.get(Constants.RESPONSE_CODE))) {
+			throw new Exception("Migrate user failed" + ((Map<String, Object>) migrateResponse.get(Constants.PARAMS)).get(Constants.ERROR_MESSAGE));
 		}
 		Map<String, Object> userReadResponse = userUtilityService.getUsersReadData((String) request.get(Constants.USER_ID), authToken, userToken);
 		if (null != userReadResponse) {
-			if (!Constants.OK.equals(userReadResponse.get(Constants.RESPONSE_CODE))) {
-				throw new Exception("User read failed" + ((Map<String, Object>) migrateResponse.get(Constants.PARAMS)).get(Constants.ERROR_MESSAGE));
-			}
-		} else {
-			throw new Exception("user read failed. Response is null");
+			throw new Exception("User read failed");
 		}
 		Map<String, Object> profileDetails = (Map<String, Object>) userReadResponse.get(Constants.PROFILE_DETAILS);
-		if(profileDetails.containsKey(Constants.EMPLOYMENTDETAILS)){
-		Map<String, Object> employmentDetails = (Map<String, Object>) profileDetails.get(Constants.EMPLOYMENTDETAILS);
-			employmentDetails.put(Constants.DEPARTMENTNAME,request.get(Constants.CHANNEL));
+		Map<String, Object> rootOrg = (Map<String, Object>) userReadResponse.get(Constants.ROOT_ORG_CONSTANT);
+		if (profileDetails.containsKey(Constants.EMPLOYMENTDETAILS)) {
+			Map<String, Object> employmentDetails = (Map<String, Object>) profileDetails.get(Constants.EMPLOYMENTDETAILS);
+			employmentDetails.put(Constants.DEPARTMENTNAME, request.get(Constants.CHANNEL));
 		}
-		if(profileDetails.containsKey(Constants.PROFESSIONAL_DETAILS)){
+		if (profileDetails.containsKey(Constants.PROFESSIONAL_DETAILS)) {
 			List<Map<String, Object>> professionalDetails = (List<Map<String, Object>>) profileDetails.get(Constants.PROFESSIONAL_DETAILS);
 			Map<String, Object> professionalDetailElement = professionalDetails.get(0);
-			professionalDetailElement.put(Constants.NAME,request.get(Constants.CHANNEL));
+			professionalDetailElement.put(Constants.NAME, request.get(Constants.CHANNEL));
 		}
 		Map<String, Object> updateRequestValue = new HashMap<>();
 		updateRequestValue.put(Constants.USER_ID, request.get(Constants.USER_ID));
@@ -346,6 +339,12 @@ public class ProfileServiceImpl implements ProfileService {
 		Map<String, Object> updateResponse = outboundRequestHandlerService.fetchResultUsingPatch(
 				serverConfig.getSbUrl() + serverConfig.getLmsUserUpdatePath(), updateRequest, headerValues);
 		if (updateResponse.get(Constants.RESPONSE_CODE).equals(Constants.OK)) {
+			Map<String, Object> updateDBRequest = new HashMap<>();
+			Map<String, Object> keyMap = new HashMap<>();
+			updateDBRequest.put(Constants.CHANNEL, request.get(Constants.CHANNEL));
+			keyMap.put(Constants.ID, request.get(Constants.USER_ID));
+			cassandraOperation.updateRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_ORG_BUDGET_SCHEME, updateDBRequest, keyMap);
+			userUtilityService.assignRole((String) rootOrg.get(Constants.ID), (String) request.get(Constants.USER_ID));
 			response.setResponseCode(HttpStatus.OK);
 			response.getResult().put(Constants.RESULT, migrateResponse);
 			response.getParams().setStatus(Constants.SUCCESS);

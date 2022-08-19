@@ -199,6 +199,9 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService
 				.fetchUsingGetWithHeadersProfile(serverConfig.getSbUrl() + serverConfig.getLmsUserReadPath() + userId,
 						header);
+		if (null != readData && !Constants.OK.equals(readData.get(Constants.RESPONSE_CODE))) {
+			return null;
+		}
 		Map<String, Object> result = (Map<String, Object>) readData.get(Constants.RESULT);
 		Map<String, Object> responseMap = (Map<String, Object>) result.get(Constants.RESPONSE);
 		return responseMap;
@@ -267,27 +270,32 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService
 				.fetchResultUsingPatch(props.getSbUrl() + props.getLmsUserUpdatePath(), request, getDefaultHeaders());
 		if (Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
-			retValue = assignRole(userRegistration);
+			String sbOrgId = userRegistration.getSbOrgId();
+			String userId = userRegistration.getUserId();
+			retValue = assignRole(sbOrgId,userId);
+			if(retValue){
+				retValue = createNodeBBUser(userRegistration);
+			}
+			printMethodExecutionResult("AssignRole", userRegistration.toMininumString(), retValue);
 		}
 		printMethodExecutionResult("UpdateUser", userRegistration.toMininumString(), retValue);
 		return retValue;
 	}
 
-	public boolean assignRole(UserRegistration userRegistration) {
+	public boolean assignRole(String sbOrgId, String userId) {
 		boolean retValue = false;
 		Map<String, Object> request = new HashMap<>();
 		Map<String, Object> requestBody = new HashMap<String, Object>();
-		requestBody.put(Constants.ORGANIZATION_ID, userRegistration.getSbOrgId());
-		requestBody.put(Constants.USER_ID, userRegistration.getUserId());
+		requestBody.put(Constants.ORGANIZATION_ID, sbOrgId);
+		requestBody.put(Constants.USER_ID, userId);
 		requestBody.put(Constants.ROLES, Arrays.asList(Constants.PUBLIC));
 		request.put(Constants.REQUEST, requestBody);
 		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService
 				.fetchResultUsingPost(props.getSbUrl() + props.getSbAssignRolePath(), request, getDefaultHeaders());
-		if (Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
-			retValue = createNodeBBUser(userRegistration);
+		if (!Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
+			return false;
 		}
-		printMethodExecutionResult("AssignRole", userRegistration.toMininumString(), retValue);
-		return retValue;
+		return true;
 	}
 
 	@Override
