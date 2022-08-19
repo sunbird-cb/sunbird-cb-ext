@@ -108,8 +108,12 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
             List<String> identifierList = new ArrayList<>();
             List<Object> questionList = new ArrayList<>();
             List<String> newIdentifierList = new ArrayList<>();
-            errMsg = validateQuestionListAPI(requestBody, authUserToken, errMsg, identifierList);
-            if(!errMsg.isEmpty() && !identifierList.isEmpty()) {
+            errMsg = validateQuestionListAPI(requestBody, authUserToken, identifierList);
+            if(requestBody.containsKey("identifierList"))
+            {
+                identifierList.addAll((Collection<? extends String>) requestBody.get("identifierList"));
+            }
+            if(errMsg.isEmpty() &&!identifierList.isEmpty()) {
                 List<Object> map = redisCacheMgr.mget(identifierList);
                 for (int i = 0; i < map.size(); i++) {
                     if (ObjectUtils.isEmpty(map.get(i))) {
@@ -163,32 +167,42 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
         return RequestInterceptor.fetchUserIdFromAccessToken(authUserToken);
     }
 
-    private String validateQuestionListAPI(Map<String, Object> requestBody, String authUserToken, String errMsg, List<String> identifierList) {
+    private String validateQuestionListAPI(Map<String, Object> requestBody, String authUserToken, List<String> identifierList) {
         String userId = validateAuthTokenAndFetchUserId(authUserToken);
-        if (userId != null && requestBody.containsKey(Constants.ASSESSMENT_ID_KEY) && !StringUtils.isEmpty((String)requestBody.get(Constants.ASSESSMENT_ID_KEY))) {
-            identifierList = getQuestionIdList(requestBody);
-            if (!identifierList.isEmpty()) {
-                String key = Constants.USER_ASSESS_REQ + requestBody.get(Constants.ASSESSMENT_ID_KEY).toString() + authUserToken;
-                Map<String, Object> questionSetFromAssessment = (Map<String, Object>) redisCacheMgr.getCache(key);
-                if (!ObjectUtils.isEmpty(questionSetFromAssessment)) {
-                    List<String> questionsFromAssessment = new ArrayList<>();
-                    List<Map<String, Object>> sections = (List<Map<String, Object>>) questionSetFromAssessment.get(Constants.CHILDREN);
-                    for (Map<String, Object> section : sections) {
-                        questionsFromAssessment.addAll((List<String>) section.get(Constants.CHILD_NODES));
+        if (userId != null) {
+            if(requestBody.containsKey(Constants.ASSESSMENT_ID_KEY) && !StringUtils.isEmpty((String)requestBody.get(Constants.ASSESSMENT_ID_KEY))) {
+                identifierList = getQuestionIdList(requestBody);
+                if (!identifierList.isEmpty()) {
+                    String key = Constants.USER_ASSESS_REQ + requestBody.get(Constants.ASSESSMENT_ID_KEY).toString() + authUserToken;
+                    Map<String, Object> questionSetFromAssessment = (Map<String, Object>) redisCacheMgr.getCache(key);
+                    if (!ObjectUtils.isEmpty(questionSetFromAssessment)) {
+                        List<String> questionsFromAssessment = new ArrayList<>();
+                        List<Map<String, Object>> sections = (List<Map<String, Object>>) questionSetFromAssessment.get(Constants.CHILDREN);
+                        for (Map<String, Object> section : sections) {
+                            questionsFromAssessment.addAll((List<String>) section.get(Constants.CHILD_NODES));
+                        }
+                        //Out of the list of questions received in the payload, checking if the request has only those ids which are a part of the user's latest assessment
+                        //Fetching all the remaining questions details from the Redis
+                        if (!validateQuestionListRequest(identifierList, questionsFromAssessment)) {
+                            return "The Questions Ids Provided are not a part of the active user assessment session";
+                        }
+                        else
+                        {
+                            requestBody.put("identifierList", identifierList);
+                        }
+                    } else {
+                        return "Please provide a valid assessment Id/Session Expired";
                     }
-                    //Out of the list of questions received in the payload, checking if the request has only those ids which are a part of the user's latest assessment
-                    //Fetching all the remaining questions details from the Redis
-                    if (!validateQuestionListRequest(identifierList, questionsFromAssessment)) {
-                        errMsg = "The Questions Ids Provided are not a part of the active user assessment session";
-                    }
-                } else {
-                    errMsg = "Please provide a valid assessment Id/Session Expired";
                 }
             }
+            else
+            {
+                return "Assessment Id Key is not present/is empty";
+            }
         } else {
-            errMsg = "User Id doesn't exist! Please supply a valid auth token";
+            return "User Id doesn't exist! Please supply a valid auth token";
         }
-        return errMsg;
+        return "";
     }
 
     @Override
@@ -196,117 +210,89 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
         SBApiResponse outgoingResponse = createDefaultResponse(Constants.API_SUBMIT_ASSESSMENT);
         String errMsg = "";
         String scoreCutOffType = null;
-        String assessmentIdFromRequest = (String) submitRequest.get(Constants.IDENTIFIER);
-        Map<String, Object> assessmentHierarchy = (Map<String, Object>) redisCacheMgr
-                .getCache(Constants.ASSESSMENT_ID + assessmentIdFromRequest);
-        String userId = validateAuthTokenAndFetchUserId(authUserToken);
-        if (userId != null) { // fail if the user is null
-            Date assessmentStartTime = assessmentRepository.fetchUserAssessmentStartTime(userId, Constants.ASSESSMENT_ID + assessmentIdFromRequest);
-            if (assessmentStartTime != null) {
-                Timestamp submissionTime = new Timestamp(new Date().getTime());
-                Calendar cal = Calendar.getInstance();
-                cal.setTimeInMillis(new Timestamp(assessmentStartTime.getTime()).getTime());
-                cal.add(Calendar.SECOND, ((Integer) assessmentHierarchy.get(Constants.EXPECTED_DURATION)).intValue() + Integer.valueOf(serverProperties.getUserAssessmentSubmissionDuration()));
-                Timestamp later = new Timestamp(cal.getTime().getTime());
-                int time = submissionTime.compareTo(later);
-                if (time <= 0) {
-                    List<String> questionsFromAssessment = new ArrayList<>();
-                    outgoingResponse.getResult().put(Constants.IDENTIFIER, assessmentIdFromRequest);
-                    outgoingResponse.getResult().put(Constants.OBJECT_TYPE, assessmentHierarchy.get(Constants.OBJECT_TYPE));
-                    outgoingResponse.getResult().put(Constants.PRIMARY_CATEGORY, assessmentHierarchy.get(Constants.PRIMARY_CATEGORY));
-                    List<Map<String, Object>> hierarchySectionList = (List<Map<String, Object>>) assessmentHierarchy
-                            .get(Constants.CHILDREN);
-                    // Check Sections are available in the submit request or not
-                    if (!CollectionUtils.isEmpty(hierarchySectionList)) {
-                        if (submitRequest.containsKey(Constants.CHILDREN)
-                                && !CollectionUtils.isEmpty((List<Map<String, Object>>) submitRequest.get(Constants.CHILDREN))) {
-                            List<Map<String, Object>> sectionListFromSubmitRequest = (List<Map<String, Object>>) submitRequest.get(Constants.CHILDREN);
-                            List<Map<String, Object>> sectionLevelsResults = new ArrayList<>();
-                            for (Map<String, Object> hierarchySection : hierarchySectionList) {
-                                String hierarchySectionId = (String) hierarchySection.get(Constants.IDENTIFIER);
-                                String userSectionId = null;
-                                Map<String, Object> userSectionData = null;
-                                for (Map<String, Object> sectionFromSubmitRequest : sectionListFromSubmitRequest) {
-                                    userSectionId = (String) sectionFromSubmitRequest.get(Constants.IDENTIFIER);
-                                    if (userSectionId.equalsIgnoreCase(hierarchySectionId)) {
-                                        scoreCutOffType = ((String) hierarchySection.get(Constants.SCORE_CUTOFF_TYPE)).toLowerCase();
-                                        userSectionData = sectionFromSubmitRequest;
-                                        break;
-                                    }
-                                }
-                                if (userSectionData == null) {
-                                    Map<String, Object> sectionLevelResult = createResponseMapWithProperStructure(hierarchySection, null);
-                                    sectionLevelsResults.add(sectionLevelResult);
-                                    continue;
-                                }
+        errMsg = validateSubmitAssessmentRequest(submitRequest, authUserToken, outgoingResponse);
+        if (errMsg.isEmpty()) {
+            List<Map<String, Object>> hierarchySectionList = new ArrayList<>();
+            List<Map<String, Object>> sectionLevelsResults = new ArrayList<>();
+            List<String> questionsFromAssessment = new ArrayList<>();
+            List<Map<String, Object>> sectionListFromSubmitRequest = (List<Map<String, Object>>) submitRequest.get(Constants.CHILDREN);
+            if (submitRequest.containsKey("hierarchySectionList")
+                    && !CollectionUtils.isEmpty((List<Map<String, Object>>) submitRequest.get("hierarchySectionList"))) {
+                hierarchySectionList = (List<Map<String, Object>>) submitRequest.get("hierarchySectionList");
+            }
+            for (Map<String, Object> hierarchySection : hierarchySectionList) {
+                String hierarchySectionId = (String) hierarchySection.get(Constants.IDENTIFIER);
+                String userSectionId = null;
+                Map<String, Object> userSectionData = null;
+                for (Map<String, Object> sectionFromSubmitRequest : sectionListFromSubmitRequest) {
+                    userSectionId = (String) sectionFromSubmitRequest.get(Constants.IDENTIFIER);
+                    if (userSectionId.equalsIgnoreCase(hierarchySectionId)) {
+                        scoreCutOffType = ((String) hierarchySection.get(Constants.SCORE_CUTOFF_TYPE)).toLowerCase();
+                        userSectionData = sectionFromSubmitRequest;
+                        break;
+                    }
+                }
+                if (userSectionData == null) {
+                    Map<String, Object> sectionLevelResult = createResponseMapWithProperStructure(hierarchySection, null);
+                    sectionLevelsResults.add(sectionLevelResult);
+                    continue;
+                }
 
-                                // We have both userSectiondata and userSection
-                                // Get the list of question Identifier's from userSectionData
-                                Map<String, Object> questionSetFromAssessment = (Map<String, Object>) redisCacheMgr.getCache(Constants.USER_ASSESS_REQ + authUserToken);
-                                if (questionSetFromAssessment != null && questionSetFromAssessment.get(Constants.CHILDREN) != null) {
-                                    List<Map<String, Object>> sections = (List<Map<String, Object>>) questionSetFromAssessment.get(Constants.CHILDREN);
-                                    for (Map<String, Object> section : sections) {
-                                        String sectionId = (String) section.get(Constants.IDENTIFIER);
-                                        if (userSectionId.equalsIgnoreCase(sectionId)) {
-                                            questionsFromAssessment.addAll((List<String>) section.get(Constants.CHILD_NODES));
-                                            break;
-                                        }
-                                    }
-                                } else {
-                                    errMsg = "Question Set From The Redis returns Null";
-                                }
-                                switch (scoreCutOffType) {
-                                    case Constants.ASSESSMENT_LEVEL_SCORE_CUTOFF: {
-                                        if (hierarchySectionList.size() > 1) {
-                                            errMsg = "Hierarchy cannot have more than 1 section for assessment level cutoff";
-                                        } else {
-                                            Map<String, Object> result = validateScores(userSectionData, hierarchySection, questionsFromAssessment);
-                                            outgoingResponse.getResult().putAll(calculateAssessmentFinalResults(result));
-                                            return outgoingResponse;
-                                        }
-                                    }
-                                    break;
-                                    case Constants.SECTION_LEVEL_SCORE_CUTOFF: {
-                                        Map<String, Object> result = validateScores(userSectionData, hierarchySection, questionsFromAssessment);
-                                        sectionLevelsResults.add(result);
-                                    }
-                                    break;
-                                    default:
-                                        break;
-                                }
-                            }
-                            if (!scoreCutOffType.isEmpty() && scoreCutOffType.equalsIgnoreCase(Constants.SECTION_LEVEL_SCORE_CUTOFF) && hierarchySectionList.size() - sectionLevelsResults.size() == 0) {
-                                    Map<String, Object> result = calculateSectionFinalResults(sectionLevelsResults);
-                                    outgoingResponse.getResult().putAll(result);
-                                    Map<String, Object> kafkaResult = new HashMap<>();
-                                    kafkaResult.put("contentId", assessmentIdFromRequest);
-                                    kafkaResult.put(Constants.COURSE_ID, submitRequest.get(Constants.COURSE_ID));
-                                    kafkaResult.put(Constants.BATCH_ID, submitRequest.get(Constants.BATCH_ID));
-                                    kafkaResult.put(Constants.USER_ID, userId);
-                                    kafkaResult.put("totalMaxScore", 100.0);
-                                    kafkaResult.put("totalScore", result.get(Constants.OVERALL_RESULT));
-                                    String resultJson = gson.toJson(kafkaResult);
-                                    try (Jedis jedis = new Jedis("127.0.0.1", 6379, 30000)) {
-                                        jedis.set(Constants.USER_ASSESS_SUBMIT_REQ + authUserToken, resultJson);
-                                    }
-                                    JSONObject j = new JSONObject();
-                                    j.put("redis_cache_id", Constants.USER_ASSESS_SUBMIT_REQ + authUserToken);
-                                    kafkaProducer.push(serverProperties.getUserAssessmentSubmitTopic(), j);
-                                    logger.info(j.toJSONString());
-                                    return outgoingResponse;
-                                }
+                // We have both userSectiondata and userSection
+                // Get the list of question Identifier's from userSectionData
+                Map<String, Object> questionSetFromAssessment = (Map<String, Object>) redisCacheMgr.getCache(Constants.USER_ASSESS_REQ + authUserToken);
+                if (questionSetFromAssessment != null && questionSetFromAssessment.get(Constants.CHILDREN) != null) {
+                    List<Map<String, Object>> sections = (List<Map<String, Object>>) questionSetFromAssessment.get(Constants.CHILDREN);
+                    for (Map<String, Object> section : sections) {
+                        String sectionId = (String) section.get(Constants.IDENTIFIER);
+                        if (userSectionId.equalsIgnoreCase(sectionId)) {
+                            questionsFromAssessment.addAll((List<String>) section.get(Constants.CHILD_NODES));
+                            break;
                         }
-                    } else {
-                        errMsg = "There are no section details in Assessment hierarchy.";
                     }
                 } else {
-                    errMsg = "The Assessment submission time-period is over! Assessment can't be submitted";
+                    errMsg = "Question Set From The Redis returns Null";
                 }
-            } else {
-                errMsg = "Start Time of the Assessment For the User is Missing";
+                switch (scoreCutOffType) {
+                    case Constants.ASSESSMENT_LEVEL_SCORE_CUTOFF: {
+                        if (hierarchySectionList.size() > 1) {
+                            errMsg = "Hierarchy cannot have more than 1 section for assessment level cutoff";
+                        } else {
+                            Map<String, Object> result = validateScores(userSectionData, hierarchySection, questionsFromAssessment);
+                            outgoingResponse.getResult().putAll(calculateAssessmentFinalResults(result));
+                            return outgoingResponse;
+                        }
+                    }
+                    break;
+                    case Constants.SECTION_LEVEL_SCORE_CUTOFF: {
+                        Map<String, Object> result = validateScores(userSectionData, hierarchySection, questionsFromAssessment);
+                        sectionLevelsResults.add(result);
+                    }
+                    break;
+                    default:
+                        break;
+                }
             }
-        } else {
-            errMsg = "User Id doesn't exist! Please supply a valid auth token";
+            if (!scoreCutOffType.isEmpty() && scoreCutOffType.equalsIgnoreCase(Constants.SECTION_LEVEL_SCORE_CUTOFF) && hierarchySectionList.size() - sectionLevelsResults.size() == 0) {
+                Map<String, Object> result = calculateSectionFinalResults(sectionLevelsResults);
+                outgoingResponse.getResult().putAll(result);
+                Map<String, Object> kafkaResult = new HashMap<>();
+                kafkaResult.put("contentId", (String) submitRequest.get(Constants.IDENTIFIER));
+                kafkaResult.put(Constants.COURSE_ID, submitRequest.get(Constants.COURSE_ID));
+                kafkaResult.put(Constants.BATCH_ID, submitRequest.get(Constants.BATCH_ID));
+                kafkaResult.put(Constants.USER_ID, submitRequest.get("userId"));
+                kafkaResult.put("totalMaxScore", 100.0);
+                kafkaResult.put("totalScore", result.get(Constants.OVERALL_RESULT));
+                String resultJson = gson.toJson(kafkaResult);
+                try (Jedis jedis = new Jedis("127.0.0.1", 6379, 30000)) {
+                    jedis.set(Constants.USER_ASSESS_SUBMIT_REQ + authUserToken, resultJson);
+                }
+                JSONObject j = new JSONObject();
+                j.put("redis_cache_id", Constants.USER_ASSESS_SUBMIT_REQ + authUserToken);
+                kafkaProducer.push(serverProperties.getUserAssessmentSubmitTopic(), j);
+                logger.info(j.toJSONString());
+                return outgoingResponse;
+            }
         }
         if (StringUtils.isNotBlank(errMsg)) {
             outgoingResponse.getParams().setStatus(Constants.FAILED);
@@ -314,6 +300,57 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
             outgoingResponse.setResponseCode(HttpStatus.BAD_REQUEST);
         }
         return outgoingResponse;
+    }
+
+    private String validateSubmitAssessmentRequest(Map<String, Object> submitRequest, String authUserToken, SBApiResponse outgoingResponse) {
+        String userId = validateAuthTokenAndFetchUserId(authUserToken);
+        if (userId != null) {
+            submitRequest.put("userId", userId);
+            if (submitRequest.containsKey(Constants.IDENTIFIER) && !StringUtils.isEmpty((String) submitRequest.get(Constants.IDENTIFIER))) {
+                String assessmentIdFromRequest = (String) submitRequest.get(Constants.IDENTIFIER);
+                Map<String, Object> assessmentHierarchy = (Map<String, Object>) redisCacheMgr
+                        .getCache(Constants.ASSESSMENT_ID + assessmentIdFromRequest);
+                // fail if the user is null
+                Date assessmentStartTime = assessmentRepository.fetchUserAssessmentStartTime(userId, Constants.ASSESSMENT_ID + assessmentIdFromRequest);
+                if (assessmentStartTime != null) {
+                    int time = calculateAssessmentSubmitTime(assessmentHierarchy, assessmentStartTime);
+                    if (time <= 0) {
+                        outgoingResponse.getResult().put(Constants.IDENTIFIER, assessmentIdFromRequest);
+                        outgoingResponse.getResult().put(Constants.OBJECT_TYPE, assessmentHierarchy.get(Constants.OBJECT_TYPE));
+                        outgoingResponse.getResult().put(Constants.PRIMARY_CATEGORY, assessmentHierarchy.get(Constants.PRIMARY_CATEGORY));
+                        List<Map<String, Object>> hierarchySectionList = (List<Map<String, Object>>) assessmentHierarchy
+                                .get(Constants.CHILDREN);
+                        // Check Sections are available in the submit request or not
+                        if (!CollectionUtils.isEmpty(hierarchySectionList)) {
+                            if (submitRequest.containsKey(Constants.CHILDREN)
+                                    && !CollectionUtils.isEmpty((List<Map<String, Object>>) submitRequest.get(Constants.CHILDREN))) {
+                                submitRequest.put("hierarchySectionList", hierarchySectionList);
+                            }
+                        } else {
+                            return "There are no section details in Assessment hierarchy.";
+                        }
+                    } else {
+                        return "The Assessment submission time-period is over! Assessment can't be submitted";
+                    }
+                } else {
+                    return "Start Time of the Assessment For the User is Missing";
+                }
+            } else {
+                return "Assessment Id Key is not present/is empty";
+            }
+        } else {
+            return "User Id doesn't exist! Please supply a valid auth token";
+        }
+        return "";
+    }
+
+    private int calculateAssessmentSubmitTime(Map<String, Object> assessmentHierarchy, Date assessmentStartTime) {
+        Timestamp submissionTime = new Timestamp(new Date().getTime());
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeInMillis(new Timestamp(assessmentStartTime.getTime()).getTime());
+        cal.add(Calendar.SECOND, ((Integer) assessmentHierarchy.get(Constants.EXPECTED_DURATION)).intValue() + Integer.valueOf(serverProperties.getUserAssessmentSubmissionDuration()));
+        Timestamp later = new Timestamp(cal.getTime().getTime());
+        return submissionTime.compareTo(later);
     }
 
     private Map<String, Object> calculateAssessmentFinalResults(Map<String, Object> assessmentLevelResult) {
@@ -547,7 +584,8 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
     }
 
     private Boolean validateQuestionListRequest(List<String> identifierList, List<String> questionsFromAssessment) {
-        List<String> identifierListCopy = identifierList;
+        List<String> identifierListCopy = new ArrayList<>();
+        identifierListCopy.addAll(identifierList);
         identifierListCopy.removeAll(questionsFromAssessment);
         return identifierListCopy.isEmpty() ? Boolean.TRUE : Boolean.FALSE;
     }
