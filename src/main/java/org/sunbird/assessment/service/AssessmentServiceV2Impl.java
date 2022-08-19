@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 @Service
 @SuppressWarnings("unchecked")
 public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
+
     private Logger logger = LoggerFactory.getLogger(AssessmentServiceV2Impl.class);
 
     private final ObjectMapper mapper = new ObjectMapper();
@@ -109,9 +110,9 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
             List<Object> questionList = new ArrayList<>();
             List<String> newIdentifierList = new ArrayList<>();
             errMsg = validateQuestionListAPI(requestBody, authUserToken, identifierList);
-            if(requestBody.containsKey("identifierList"))
+            if(requestBody.containsKey(Constants.IDENTIFIER_LIST))
             {
-                identifierList.addAll((Collection<? extends String>) requestBody.get("identifierList"));
+                identifierList.addAll((Collection<? extends String>) requestBody.get(Constants.IDENTIFIER_LIST));
             }
             if(errMsg.isEmpty() &&!identifierList.isEmpty()) {
                 List<Object> map = redisCacheMgr.mget(identifierList);
@@ -188,7 +189,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                         }
                         else
                         {
-                            requestBody.put("identifierList", identifierList);
+                            requestBody.put(Constants.IDENTIFIER_LIST, identifierList);
                         }
                     } else {
                         return "Please provide a valid assessment Id/Session Expired";
@@ -216,9 +217,9 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
             List<Map<String, Object>> sectionLevelsResults = new ArrayList<>();
             List<String> questionsFromAssessment = new ArrayList<>();
             List<Map<String, Object>> sectionListFromSubmitRequest = (List<Map<String, Object>>) submitRequest.get(Constants.CHILDREN);
-            if (submitRequest.containsKey("hierarchySectionList")
-                    && !CollectionUtils.isEmpty((List<Map<String, Object>>) submitRequest.get("hierarchySectionList"))) {
-                hierarchySectionList = (List<Map<String, Object>>) submitRequest.get("hierarchySectionList");
+            if (submitRequest.containsKey(Constants.HIERARCHY_SECTION_LIST)
+                    && !CollectionUtils.isEmpty((List<Map<String, Object>>) submitRequest.get(Constants.HIERARCHY_SECTION_LIST))) {
+                hierarchySectionList = (List<Map<String, Object>>) submitRequest.get(Constants.HIERARCHY_SECTION_LIST);
             }
             for (Map<String, Object> hierarchySection : hierarchySectionList) {
                 String hierarchySectionId = (String) hierarchySection.get(Constants.IDENTIFIER);
@@ -277,18 +278,18 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                 Map<String, Object> result = calculateSectionFinalResults(sectionLevelsResults);
                 outgoingResponse.getResult().putAll(result);
                 Map<String, Object> kafkaResult = new HashMap<>();
-                kafkaResult.put("contentId", (String) submitRequest.get(Constants.IDENTIFIER));
+                kafkaResult.put(Constants.CONTENT_ID, (String) submitRequest.get(Constants.IDENTIFIER));
                 kafkaResult.put(Constants.COURSE_ID, submitRequest.get(Constants.COURSE_ID));
                 kafkaResult.put(Constants.BATCH_ID, submitRequest.get(Constants.BATCH_ID));
-                kafkaResult.put(Constants.USER_ID, submitRequest.get("userId"));
-                kafkaResult.put("totalMaxScore", 100.0);
-                kafkaResult.put("totalScore", result.get(Constants.OVERALL_RESULT));
+                kafkaResult.put(Constants.USER_ID, submitRequest.get(Constants.USER_ID));
+                kafkaResult.put(Constants.TOTAL_MAX_SCORE, 100.0);
+                kafkaResult.put(Constants.TOTAL_SCORE, result.get(Constants.OVERALL_RESULT));
                 String resultJson = gson.toJson(kafkaResult);
-                try (Jedis jedis = new Jedis("127.0.0.1", 6379, 30000)) {
+                try (Jedis jedis = new Jedis(Constants.HOST, 6379, 30000)) {
                     jedis.set(Constants.USER_ASSESS_SUBMIT_REQ + authUserToken, resultJson);
                 }
                 JSONObject j = new JSONObject();
-                j.put("redis_cache_id", Constants.USER_ASSESS_SUBMIT_REQ + authUserToken);
+                j.put(Constants.REDIS_CACHE_ID, Constants.USER_ASSESS_SUBMIT_REQ + authUserToken);
                 kafkaProducer.push(serverProperties.getUserAssessmentSubmitTopic(), j);
                 logger.info(j.toJSONString());
                 return outgoingResponse;
@@ -305,7 +306,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
     private String validateSubmitAssessmentRequest(Map<String, Object> submitRequest, String authUserToken, SBApiResponse outgoingResponse) {
         String userId = validateAuthTokenAndFetchUserId(authUserToken);
         if (userId != null) {
-            submitRequest.put("userId", userId);
+            submitRequest.put(Constants.USER_ID, userId);
             if (submitRequest.containsKey(Constants.IDENTIFIER) && !StringUtils.isEmpty((String) submitRequest.get(Constants.IDENTIFIER))) {
                 String assessmentIdFromRequest = (String) submitRequest.get(Constants.IDENTIFIER);
                 Map<String, Object> assessmentHierarchy = (Map<String, Object>) redisCacheMgr
@@ -324,7 +325,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                         if (!CollectionUtils.isEmpty(hierarchySectionList)) {
                             if (submitRequest.containsKey(Constants.CHILDREN)
                                     && !CollectionUtils.isEmpty((List<Map<String, Object>>) submitRequest.get(Constants.CHILDREN))) {
-                                submitRequest.put("hierarchySectionList", hierarchySectionList);
+                                submitRequest.put(Constants.HIERARCHY_SECTION_LIST, hierarchySectionList);
                             }
                         } else {
                             return "There are no section details in Assessment hierarchy.";

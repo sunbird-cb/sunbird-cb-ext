@@ -21,6 +21,7 @@ public class AssessmentRepositoryImpl implements AssessmentRepository {
 	public static final String RESULT = "result";
 	public static final String SOURCE_ID = "sourceId";
 	public static final String USER_ID = "userId";
+	public static final String STARTTIME = "starttime";
 	private CbExtLogger logger = new CbExtLogger(getClass().getName());
 	
 	@Autowired
@@ -133,7 +134,7 @@ public class AssessmentRepositoryImpl implements AssessmentRepository {
 		request.put(Constants.USER_ID, userId);
 		request.put(Constants.IDENTIFIER, assessmentIdentifier);
 		cassandraOperation.deleteRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_USER_ASSESSMENT_TIME, request);
-		request.put("starttime", startTime);
+		request.put(STARTTIME, startTime);
 		SBApiResponse resp = cassandraOperation.insertRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_USER_ASSESSMENT_TIME, request);
 		return resp.get(Constants.RESPONSE).equals(Constants.SUCCESS);
 	}
@@ -142,9 +143,10 @@ public class AssessmentRepositoryImpl implements AssessmentRepository {
 	public Date fetchUserAssessmentStartTime(String userId, String assessmentIdentifier) {
 		Map<String, Object> request = new HashMap<>();
 		request.put(Constants.USER_ID, userId);
+
 		request.put(Constants.IDENTIFIER, assessmentIdentifier);
 		List<Map<String, Object>> existingDataList = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
 				Constants.TABLE_USER_ASSESSMENT_TIME, request, null);
-		return (!existingDataList.isEmpty()) ? (Date) existingDataList.get(0).get("starttime") : null;
+		return (!existingDataList.isEmpty()) ? (Date) existingDataList.get(0).get(STARTTIME) : null;
 	}
 }

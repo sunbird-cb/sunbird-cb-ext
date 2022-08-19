@@ -13,7 +13,6 @@ import java.util.*;
 
 @Service
 public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
-
 	@Autowired
 	RedisCacheMgr redisCacheMgr;
 
@@ -100,11 +99,11 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 				blank += answers.size() - userQuestionList.size();
 			}
 			result = ((correct * 100d) / (correct + blank + inCorrect));
-			resultMap.put("result", result);
-			resultMap.put("incorrect", inCorrect);
-			resultMap.put("blank", blank);
-			resultMap.put("correct", correct);
-			resultMap.put("total", total);
+			resultMap.put(Constants.RESULT, result);
+			resultMap.put(Constants.INCORRECT, inCorrect);
+			resultMap.put(Constants.BLANK, blank);
+			resultMap.put(Constants.CORRECT, correct);
+			resultMap.put(Constants.TOTAL, total);
 			return resultMap;
 
 		} catch (Exception ex) {

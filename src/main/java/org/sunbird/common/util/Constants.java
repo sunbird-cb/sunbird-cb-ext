@@ -493,7 +493,14 @@ public class Constants {
 	public static final String USER_ROLES = "userRoles";
 	public static final String X_AUTH_USER_ID = "x-authenticated-userid";
 	public static final String SOFT_DELETE_OLD_ORG = "softDeleteOldOrg";
-	public static final String NOTIFY_MIGRATION = "notifyMigration";	
+	public static final String NOTIFY_MIGRATION = "notifyMigration";
+	public static final String REDIS_CACHE_ID = "redis_cache_id";
+	public static final String CONTENT_ID_ = "contentId";
+	public static final String TOTAL_MAX_SCORE = "totalMaxScore";
+	public static final String TOTAL_SCORE = "totalScore";
+	public static final String HOST = "127.0.0.1";
+	public static final String IDENTIFIER_LIST = "identifierList";
+	public static final String HIERARCHY_SECTION_LIST = "hierarchySectionList";
 
 	private Constants() {
 		throw new IllegalStateException("Utility class");
