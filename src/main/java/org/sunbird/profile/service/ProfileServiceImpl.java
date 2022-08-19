@@ -328,7 +328,7 @@ public class ProfileServiceImpl implements ProfileService {
 		}
 		Map<String, Object> profileDetails = (Map<String, Object>) userReadResponse.get(Constants.PROFILE_DETAILS);
 		if(profileDetails.containsKey(Constants.EMPLOYMENTDETAILS)){
-		Map<String, Object> employmentDetails = (Map<String, Object>) profileDetails.get(Constants.PROFILE_DETAILS);
+		Map<String, Object> employmentDetails = (Map<String, Object>) profileDetails.get(Constants.EMPLOYMENTDETAILS);
 			employmentDetails.put(Constants.DEPARTMENTNAME,request.get(Constants.CHANNEL));
 		}
 		if(profileDetails.containsKey(Constants.PROFESSIONAL_DETAILS)){
@@ -336,9 +336,23 @@ public class ProfileServiceImpl implements ProfileService {
 			Map<String, Object> professionalDetailElement = professionalDetails.get(0);
 			professionalDetailElement.put(Constants.NAME,request.get(Constants.CHANNEL));
 		}
-		response.getResult().put(Constants.RESULT, migrateResponse);
-		response.setResponseCode(HttpStatus.OK);
-		response.getParams().setStatus(Constants.SUCCESS);
+		Map<String, Object> updateRequestValue = new HashMap<>();
+		updateRequestValue.put(Constants.USER_ID, request.get(Constants.USER_ID));
+		updateRequestValue.put(Constants.PROFILE_DETAILS, profileDetails);
+		Map<String, Object> updateRequest = new HashMap<>();
+		updateRequest.put(Constants.REQUEST, updateRequestValue);
+		StringBuilder url = new StringBuilder();
+		url.append(serverConfig.getSbUrl()).append(serverConfig.getLmsUserUpdatePath());
+		Map<String, Object> updateResponse = outboundRequestHandlerService.fetchResultUsingPatch(
+				serverConfig.getSbUrl() + serverConfig.getLmsUserUpdatePath(), updateRequest, headerValues);
+		if (updateResponse.get(Constants.RESPONSE_CODE).equals(Constants.OK)) {
+			response.setResponseCode(HttpStatus.OK);
+			response.getResult().put(Constants.RESULT, migrateResponse);
+			response.getParams().setStatus(Constants.SUCCESS);
+		} else {
+			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+			response.getParams().setStatus(Constants.FAILED);
+		}
 		return response;
 	}
 
