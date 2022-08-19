@@ -5,7 +5,6 @@ import java.util.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.xpath.operations.Bool;
 import org.elasticsearch.rest.RestStatus;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +22,6 @@ import org.sunbird.common.util.IndexerService;
 import org.sunbird.common.util.ProjectUtil;
 import org.sunbird.core.logger.CbExtLogger;
 import org.sunbird.org.service.ExtendedOrgService;
-import org.sunbird.user.service.UserUtilityService;
 import org.sunbird.user.service.UserUtilityServiceImpl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -49,7 +47,7 @@ public class ProfileServiceImpl implements ProfileService {
 
 	@Autowired
 	IndexerService indexerService;
-	
+
 	@Autowired
 	CbExtServerProperties props;
 
@@ -684,7 +682,7 @@ public class ProfileServiceImpl implements ProfileService {
 		empDetails.put(Constants.DEPARTMENTNAME, request.get(Constants.CHANNEL));
 
 		Map<String, Object> updateReqBody = new HashMap<String, Object>();
-		
+
 		Map<String, Object> existingPersonalDetail = (Map<String, Object>) existingProfile
 				.get(Constants.PERSONAL_DETAILS);
 		if (!ObjectUtils.isEmpty(existingPersonalDetail)) {
@@ -737,8 +735,9 @@ public class ProfileServiceImpl implements ProfileService {
 		}
 		return errMsg;
 	}
+
 	@Override
-	public SBApiResponse userSignup(Map<String, Object> request) throws Exception {
+	public SBApiResponse userSignup(Map<String, Object> request) {
 		boolean retValue = false;
 		SBApiResponse response = createDefaultResponse(Constants.API_PROFILE_SIGNUP);
 		String errMsg = validateSignupRequest(request);
@@ -748,75 +747,77 @@ public class ProfileServiceImpl implements ProfileService {
 			return response;
 		}
 		try {
-			Map<String, Object> requestData = (Map<String, Object>) request.get(Constants.REQUEST);
-			Map<String, Object> reqObj = new HashMap<>();
-			Map<String, Object> requestBody = new HashMap<String, Object>();
-			requestBody.put(Constants.EMAIL, requestData.get(Constants.EMAIL));
-			requestBody.put(Constants.FIRSTNAME, requestData.get(Constants.FIRST_NAME));
-			requestBody.put(Constants.LASTNAME, requestData.get(Constants.LAST_NAME));
+			Map<String, Object> requestBody = (Map<String, Object>) request.get(Constants.REQUEST);
 			requestBody.put(Constants.EMAIL_VERIFIED, true);
-			reqObj.put(Constants.REQUEST, requestBody);
-				Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPost(
-						props.getSbUrl() + props.getLmsUserSignUpPath(), reqObj, getDefaultHeaders());
-				if (Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
-					Map<String, Object> result = (Map<String, Object>) readData.get(Constants.RESULT);
-					String userId = (String) result.get(Constants.USER_ID);
-					request.put(Constants.USER_ID, userId);
-					Map<String, Object> userData = userUtilityService.getUsersReadData(userId, StringUtils.EMPTY, StringUtils.EMPTY);
-					if (userData.isEmpty()==Boolean.FALSE) {
-						request.put(Constants.USER_NAME, userData.get(Constants.USER_NAME));
-
-						Map<String, Object> updateRequest = new HashMap<>();
-						Map<String, Object> updateRequestBody = new HashMap<String, Object>();
-						updateRequestBody.put(Constants.USER_ID, userId);
-						Map<String, Object> profileDetails = new HashMap<String, Object>();
-						profileDetails.put(Constants.MANDATORY_FIELDS_EXISTS, false);
-						Map<String, Object> employementDetails = new HashMap<String, Object>();
-						employementDetails.put(Constants.DEPARTMENTNAME, userData.get(Constants.ORG_NAME));
-						profileDetails.put(Constants.EMPLOYMENTDETAILS, employementDetails);
-						Map<String, Object> personalDetails = new HashMap<String, Object>();
-						personalDetails.put(Constants.FIRSTNAME.toLowerCase(), requestData.get(Constants.FIRST_NAME));
-						personalDetails.put(Constants.SURNAME, requestData.get(Constants.LAST_NAME));
-						personalDetails.put(Constants.PRIMARY_EMAIL, userData.get(Constants.EMAIL));
-						personalDetails.put(Constants.USER_NAME, userData.get(Constants.USER_NAME));
-						profileDetails.put(Constants.PERSONAL_DETAILS, personalDetails);
-
-						Map<String, Object> professionDetailObj = new HashMap<String, Object>();
-						professionDetailObj.put(Constants.ORGANIZATION_TYPE, Constants.GOVERNMENT);
-						if (StringUtils.isNotEmpty((String) userData.get(Constants.POSITION))) {
-							professionDetailObj.put(Constants.DESIGNATION, userData.get(Constants.POSITION));
-						}
-						List<Map<String, Object>> professionalDetailsList = new ArrayList<Map<String, Object>>();
-						professionalDetailsList.add(professionDetailObj);
-						profileDetails.put(Constants.PROFESSIONAL_DETAILS, professionalDetailsList);
-
-						updateRequestBody.put(Constants.PROFILE_DETAILS, profileDetails);
-						updateRequest.put(Constants.REQUEST, updateRequestBody);
-						Map<String, Object> updateReadData = (Map<String, Object>) outboundRequestHandlerService
-								.fetchResultUsingPatch(props.getSbUrl() + props.getLmsUserUpdatePath(), updateRequest, getDefaultHeaders());
-
-						if (Constants.OK.equalsIgnoreCase((String) updateReadData.get(Constants.RESPONSE_CODE))) {
-							Map<String,Object> roleMap=new HashMap<>();
-							roleMap.put(Constants.ORGANIZATION_ID,userData.get(Constants.ROOT_ORG_ID));
-							roleMap.put(Constants.USER_ID,userId);
-							retValue=assignRole(roleMap);
-						}
-					}
+			Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPost(
+					props.getSbUrl() + props.getLmsUserSignUpPath(), request, userUtilityService.getDefaultHeaders());
+			if (Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
+				Map<String, Object> result = (Map<String, Object>) readData.get(Constants.RESULT);
+				String userId = (String) result.get(Constants.USER_ID);
+				request.put(Constants.USER_ID, userId);
+				Map<String, Object> userData = userUtilityService.getUsersReadData(userId, StringUtils.EMPTY,
+						StringUtils.EMPTY);
+				if (userData.isEmpty() == Boolean.FALSE) {
+					request.put(Constants.USER_NAME, userData.get(Constants.USER_NAME));
+					retValue = updateUser(userData);
+				} else {
+					errMsg = "Problem during updating the user";
 				}
+			} else {
+				errMsg = "Problem during User SignUp";
+			}
 
 		} catch (Exception e) {
 			errMsg = "Failed to process message. Exception: " + e.getMessage();
 		}
-		if (StringUtils.isNotBlank(errMsg) || retValue==Boolean.FALSE) {
+		if (StringUtils.isNotBlank(errMsg) || retValue == Boolean.FALSE) {
 			response.getParams().setStatus(Constants.FAILED);
 			response.getParams().setErrmsg(errMsg);
 			response.setResponseCode(HttpStatus.BAD_REQUEST);
 		}
 		return response;
-
 	}
-	
-	private boolean assignRole(Map<String,Object> request) throws Exception{
+
+	private boolean updateUser(Map<String, Object> requestObject) {
+		boolean retValue = false;
+		Map<String, Object> updateRequest = new HashMap<>();
+		Map<String, Object> updateRequestBody = new HashMap<String, Object>();
+		updateRequestBody.put(Constants.USER_ID, requestObject.get(Constants.USER_ID));
+		Map<String, Object> profileDetails = new HashMap<String, Object>();
+		profileDetails.put(Constants.MANDATORY_FIELDS_EXISTS, false);
+		Map<String, Object> employementDetails = new HashMap<String, Object>();
+		employementDetails.put(Constants.DEPARTMENTNAME, requestObject.get(Constants.ORG_NAME));
+		profileDetails.put(Constants.EMPLOYMENTDETAILS, employementDetails);
+		Map<String, Object> personalDetails = new HashMap<String, Object>();
+		personalDetails.put(Constants.FIRSTNAME.toLowerCase(), requestObject.get(Constants.FIRST_NAME));
+		personalDetails.put(Constants.SURNAME, requestObject.get(Constants.LAST_NAME));
+		personalDetails.put(Constants.PRIMARY_EMAIL, requestObject.get(Constants.EMAIL));
+		personalDetails.put(Constants.USER_NAME, requestObject.get(Constants.USER_NAME));
+		profileDetails.put(Constants.PERSONAL_DETAILS, personalDetails);
+
+		Map<String, Object> professionDetailObj = new HashMap<String, Object>();
+		professionDetailObj.put(Constants.ORGANIZATION_TYPE, Constants.GOVERNMENT);
+		if (StringUtils.isNotEmpty((String) requestObject.get(Constants.POSITION))) {
+			professionDetailObj.put(Constants.DESIGNATION, requestObject.get(Constants.POSITION));
+		}
+		List<Map<String, Object>> professionalDetailsList = new ArrayList<Map<String, Object>>();
+		professionalDetailsList.add(professionDetailObj);
+		profileDetails.put(Constants.PROFESSIONAL_DETAILS, professionalDetailsList);
+
+		updateRequestBody.put(Constants.PROFILE_DETAILS, profileDetails);
+		updateRequest.put(Constants.REQUEST, updateRequestBody);
+		Map<String, Object> updateReadData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPatch(
+				props.getSbUrl() + props.getLmsUserUpdatePath(), updateRequest, userUtilityService.getDefaultHeaders());
+		if (Constants.OK.equalsIgnoreCase((String) updateReadData.get(Constants.RESPONSE_CODE))) {
+			Map<String, Object> roleMap = new HashMap<>();
+			roleMap.put(Constants.ORGANIZATION_ID, requestObject.get(Constants.ROOT_ORG_ID));
+			roleMap.put(Constants.USER_ID, requestObject.get(Constants.USER_ID));
+			retValue = assignRole(roleMap);
+		}
+		return retValue;
+	}
+
+	private boolean assignRole(Map<String, Object> request) {
 		boolean retValue = false;
 		Map<String, Object> requestObj = new HashMap<>();
 		Map<String, Object> requestBody = new HashMap<String, Object>();
@@ -824,19 +825,13 @@ public class ProfileServiceImpl implements ProfileService {
 		requestBody.put(Constants.USER_ID, request.get(Constants.USER_ID));
 		requestBody.put(Constants.ROLES, Arrays.asList(Constants.PUBLIC));
 		requestObj.put(Constants.REQUEST, requestBody);
-		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService
-				.fetchResultUsingPost(props.getSbUrl() + props.getSbAssignRolePath(), requestObj, getDefaultHeaders());
-		if (readData.isEmpty()==Boolean.FALSE) {
-			if(Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE)))
-					retValue=Boolean.TRUE;
+		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPost(
+				props.getSbUrl() + props.getSbAssignRolePath(), requestObj, userUtilityService.getDefaultHeaders());
+		if (readData.isEmpty() == Boolean.FALSE) {
+			if (Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE)))
+				retValue = Boolean.TRUE;
 		}
 		return retValue;
-	}
-
-	private Map<String, String> getDefaultHeaders() {
-		Map<String, String> headers = new HashMap<String, String>();
-		headers.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
-		return headers;
 	}
 
 	private String validateSignupRequest(Map<String, Object> requestData) {
@@ -848,10 +843,10 @@ public class ProfileServiceImpl implements ProfileService {
 			return strBuilder.toString();
 		}
 
-		if (StringUtils.isEmpty((String) request.get(Constants.FIRST_NAME))) {
+		if (StringUtils.isEmpty((String) request.get(Constants.FIRSTNAME))) {
 			params.add(Constants.FIRST_NAME);
 		}
-		if (StringUtils.isEmpty((String) request.get(Constants.LAST_NAME))) {
+		if (StringUtils.isEmpty((String) request.get(Constants.LASTNAME))) {
 			params.add(Constants.LAST_NAME);
 		}
 		if (StringUtils.isEmpty((String) request.get(Constants.EMAIL))) {
