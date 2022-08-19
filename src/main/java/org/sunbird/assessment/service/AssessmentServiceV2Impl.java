@@ -110,10 +110,6 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
             List<Object> questionList = new ArrayList<>();
             List<String> newIdentifierList = new ArrayList<>();
             errMsg = validateQuestionListAPI(requestBody, authUserToken, identifierList);
-            if(requestBody.containsKey(Constants.IDENTIFIER_LIST))
-            {
-                identifierList.addAll((Collection<? extends String>) requestBody.get(Constants.IDENTIFIER_LIST));
-            }
             if(errMsg.isEmpty() &&!identifierList.isEmpty()) {
                 List<Object> map = redisCacheMgr.mget(identifierList);
                 for (int i = 0; i < map.size(); i++) {
@@ -172,7 +168,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
         String userId = validateAuthTokenAndFetchUserId(authUserToken);
         if (userId != null) {
             if(requestBody.containsKey(Constants.ASSESSMENT_ID_KEY) && !StringUtils.isEmpty((String)requestBody.get(Constants.ASSESSMENT_ID_KEY))) {
-                identifierList = getQuestionIdList(requestBody);
+                identifierList.addAll(getQuestionIdList(requestBody));
                 if (!identifierList.isEmpty()) {
                     String key = Constants.USER_ASSESS_REQ + requestBody.get(Constants.ASSESSMENT_ID_KEY).toString() + authUserToken;
                     Map<String, Object> questionSetFromAssessment = (Map<String, Object>) redisCacheMgr.getCache(key);
@@ -189,7 +185,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                         }
                         else
                         {
-                            requestBody.put(Constants.IDENTIFIER_LIST, identifierList);
+                            //requestBody.put(Constants.IDENTIFIER_LIST, identifierList);
                         }
                     } else {
                         return "Please provide a valid assessment Id/Session Expired";
@@ -477,9 +473,8 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                 if ((!ObjectUtils.isEmpty(request)) && request.containsKey(Constants.SEARCH)) {
                     Map<String, Object> searchObj = (Map<String, Object>) request.get(Constants.SEARCH);
                     if (!ObjectUtils.isEmpty(searchObj) && searchObj.containsKey(Constants.IDENTIFIER)) {
-                        List<String> identifierList = (List<String>) searchObj.get(Constants.IDENTIFIER);
-                        if (!CollectionUtils.isEmpty(identifierList)) {
-                            return identifierList;
+                        if (!CollectionUtils.isEmpty((List<String>) searchObj.get(Constants.IDENTIFIER))) {
+                            return (List<String>) searchObj.get(Constants.IDENTIFIER);
                         }
                     }
                 }
