@@ -33,9 +33,6 @@ public class CbExtServerProperties {
 	@Value("${sb.service.url}")
 	private String sbUrl;
 
-	@Value("${sb.user.migrate.path}")
-	private String lmsUserMigratePath;
-
 	@Value("${sb.service.user.create.path}")
 	private String lmsUserCreatePath;
 
@@ -382,12 +379,6 @@ public class CbExtServerProperties {
 	public String getLmsUserReadPath() {
 		return lmsUserReadPath;
 	}
-
-	public String getLmsUserMigratePath() {
-		return lmsUserMigratePath;
-	}
-
-	public void setLmsUserMigratePath(String lmsUserMigratePath) { this.lmsUserMigratePath = lmsUserMigratePath; }
 
 	public void setLmsUserReadPath(String lmsUserReadPath) {
 		this.lmsUserReadPath = lmsUserReadPath;

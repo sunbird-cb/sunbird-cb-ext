@@ -16,7 +16,6 @@ import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.sunbird.cache.RedisCacheMgr;
 import org.sunbird.cassandra.utils.CassandraOperation;
@@ -311,7 +310,7 @@ public class ProfileServiceImpl implements ProfileService {
 		headerValues.put(Constants.X_AUTH_TOKEN, authToken);
 		headerValues.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
 		Map<String,Object >migrateResponse = outboundRequestHandlerService.fetchResultUsingPatch(
-				serverConfig.getSbUrl() + serverConfig.getLmsUserMigratePath(), request, headerValues);
+				serverConfig.getSbUrl() + serverConfig.getLmsUserSelfMigratePath(), request, headerValues);
 		if (null != migrateResponse) {
 			if (!Constants.OK.equals(migrateResponse.get(Constants.RESPONSE_CODE))) {
 				throw new Exception("Migrate user failed" + ((Map<String, Object>) migrateResponse.get(Constants.PARAMS)).get(Constants.ERROR_MESSAGE));
