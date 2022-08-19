@@ -307,19 +307,35 @@ public class ProfileServiceImpl implements ProfileService {
 		validateMigrateRequest(request);
 		HashMap<String, String> headerValues = new HashMap<>();
 		headerValues.put(Constants.AUTH_TOKEN, authToken);
-		headerValues.put(Constants.X_AUTH_TOKEN, authToken);
+		headerValues.put(Constants.X_AUTH_TOKEN, userToken);
 		headerValues.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
 		Map<String, Object> migrateResponse = outboundRequestHandlerService.fetchResultUsingPatch(
 				serverConfig.getSbUrl() + serverConfig.getLmsUserSelfMigratePath(), request, headerValues);
 		if (null != migrateResponse && !Constants.OK.equals(migrateResponse.get(Constants.RESPONSE_CODE))) {
-			throw new Exception("Migrate user failed" + ((Map<String, Object>) migrateResponse.get(Constants.PARAMS)).get(Constants.ERROR_MESSAGE));
+			setErrorData(response, "Migrate user failed" + ((Map<String, Object>) migrateResponse.get(Constants.PARAMS)).get(Constants.ERROR_MESSAGE));
+			return response;
+		}
+		Map<String, Object> updateDBRequest = new HashMap<>();
+		Map<String, Object> keyMap = new HashMap<>();
+		updateDBRequest.put(Constants.CHANNEL, request.get(Constants.CHANNEL));
+		keyMap.put(Constants.ID, request.get(Constants.USER_ID));
+		Map<String, Object> updateDBResponse = cassandraOperation.updateRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_USER, updateDBRequest, keyMap);
+		if (null != updateDBResponse && !Constants.OK.equals(updateDBResponse.get(Constants.RESPONSE_CODE))) {
+			setErrorData(response, "Update channel value failed" + ((Map<String, Object>) updateDBResponse.get(Constants.PARAMS)).get(Constants.ERROR_MESSAGE));
+			return response;
 		}
 		Map<String, Object> userReadResponse = userUtilityService.getUsersReadData((String) request.get(Constants.USER_ID), authToken, userToken);
-		if (null != userReadResponse) {
-			throw new Exception("User read failed");
+		if (null != userReadResponse && !Constants.OK.equals(userReadResponse.get(Constants.RESPONSE_CODE))) {
+			setErrorData(response, "failed to read user data" + ((Map<String, Object>) userReadResponse.get(Constants.PARAMS)).get(Constants.ERROR_MESSAGE));
+			return response;
 		}
 		Map<String, Object> profileDetails = (Map<String, Object>) userReadResponse.get(Constants.PROFILE_DETAILS);
 		Map<String, Object> rootOrg = (Map<String, Object>) userReadResponse.get(Constants.ROOT_ORG_CONSTANT);
+		Boolean assignValue = userUtilityService.assignRole((String) rootOrg.get(Constants.ID), (String) request.get(Constants.USER_ID), StringUtils.EMPTY);
+		if (!assignValue) {
+			setErrorData(response, "failed to assign public role to user");
+			return response;
+		}
 		if (profileDetails.containsKey(Constants.EMPLOYMENTDETAILS)) {
 			Map<String, Object> employmentDetails = (Map<String, Object>) profileDetails.get(Constants.EMPLOYMENTDETAILS);
 			employmentDetails.put(Constants.DEPARTMENTNAME, request.get(Constants.CHANNEL));
@@ -329,29 +345,15 @@ public class ProfileServiceImpl implements ProfileService {
 			Map<String, Object> professionalDetailElement = professionalDetails.get(0);
 			professionalDetailElement.put(Constants.NAME, request.get(Constants.CHANNEL));
 		}
-		Map<String, Object> updateRequestValue = new HashMap<>();
-		updateRequestValue.put(Constants.USER_ID, request.get(Constants.USER_ID));
-		updateRequestValue.put(Constants.PROFILE_DETAILS, profileDetails);
-		Map<String, Object> updateRequest = new HashMap<>();
-		updateRequest.put(Constants.REQUEST, updateRequestValue);
-		StringBuilder url = new StringBuilder();
-		url.append(serverConfig.getSbUrl()).append(serverConfig.getLmsUserUpdatePath());
 		Map<String, Object> updateResponse = outboundRequestHandlerService.fetchResultUsingPatch(
-				serverConfig.getSbUrl() + serverConfig.getLmsUserUpdatePath(), updateRequest, headerValues);
-		if (updateResponse.get(Constants.RESPONSE_CODE).equals(Constants.OK)) {
-			Map<String, Object> updateDBRequest = new HashMap<>();
-			Map<String, Object> keyMap = new HashMap<>();
-			updateDBRequest.put(Constants.CHANNEL, request.get(Constants.CHANNEL));
-			keyMap.put(Constants.ID, request.get(Constants.USER_ID));
-			cassandraOperation.updateRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_ORG_BUDGET_SCHEME, updateDBRequest, keyMap);
-			userUtilityService.assignRole((String) rootOrg.get(Constants.ID), (String) request.get(Constants.USER_ID));
-			response.setResponseCode(HttpStatus.OK);
-			response.getResult().put(Constants.RESULT, migrateResponse);
-			response.getParams().setStatus(Constants.SUCCESS);
-		} else {
-			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
-			response.getParams().setStatus(Constants.FAILED);
+				serverConfig.getSbUrl() + serverConfig.getLmsUserUpdatePath(), getUpdateRequest((String) request.get(Constants.USER_ID), profileDetails), headerValues);
+		if (null != updateResponse && !Constants.OK.equals(updateResponse.get(Constants.RESPONSE_CODE))) {
+			setErrorData(response, "Update user failed" + ((Map<String, Object>) updateResponse.get(Constants.PARAMS)).get(Constants.ERROR_MESSAGE));
+			return response;
 		}
+		response.setResponseCode(HttpStatus.OK);
+		response.getResult().put(Constants.RESULT, migrateResponse);
+		response.getParams().setStatus(Constants.SUCCESS);
 		return response;
 	}
 
@@ -793,8 +795,8 @@ public class ProfileServiceImpl implements ProfileService {
 		}
 		return errMsg;
 	}
-  
-  private void validateMigrateRequest(Map<String, Object> requestBody) throws Exception {
+
+	private void validateMigrateRequest(Map<String, Object> requestBody) throws Exception {
 		List<String> errObjList = new ArrayList<String>();
 		if (StringUtils.isEmpty((String) requestBody.get(Constants.USER_ID))) {
 			errObjList.add(Constants.USER_ID);
@@ -806,4 +808,20 @@ public class ProfileServiceImpl implements ProfileService {
 			throw new Exception("Request does not contains necessary field(s) " + errObjList.toString());
 		}
 	}
+
+	private void setErrorData(SBApiResponse response, String errMsg) {
+		response.getParams().setStatus(Constants.FAILED);
+		response.getParams().setErrmsg(errMsg);
+		response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+
+	private Map<String, Object> getUpdateRequest(String userID, Map<String, Object> updateRequest) {
+		Map<String, Object> requestObject = new HashMap<>();
+		Map<String, Object> requestWrapper = new HashMap<>();
+		requestWrapper.put(Constants.USER_ID, userID);
+		requestWrapper.put(Constants.PROFILE_DETAILS, updateRequest);
+		requestObject.put(Constants.REQUEST, requestWrapper);
+		return requestObject;
+	}
+
 }

@@ -199,9 +199,6 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService
 				.fetchUsingGetWithHeadersProfile(serverConfig.getSbUrl() + serverConfig.getLmsUserReadPath() + userId,
 						header);
-		if (null != readData && !Constants.OK.equals(readData.get(Constants.RESPONSE_CODE))) {
-			return null;
-		}
 		Map<String, Object> result = (Map<String, Object>) readData.get(Constants.RESULT);
 		Map<String, Object> responseMap = (Map<String, Object>) result.get(Constants.RESPONSE);
 		return responseMap;
@@ -270,19 +267,16 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService
 				.fetchResultUsingPatch(props.getSbUrl() + props.getLmsUserUpdatePath(), request, getDefaultHeaders());
 		if (Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
-			String sbOrgId = userRegistration.getSbOrgId();
-			String userId = userRegistration.getUserId();
-			retValue = assignRole(sbOrgId,userId);
+			retValue = assignRole(userRegistration.getSbOrgId(), userRegistration.getUserId(), userRegistration.toMininumString());
 			if(retValue){
 				retValue = createNodeBBUser(userRegistration);
 			}
-			printMethodExecutionResult("AssignRole", userRegistration.toMininumString(), retValue);
 		}
 		printMethodExecutionResult("UpdateUser", userRegistration.toMininumString(), retValue);
 		return retValue;
 	}
 
-	public boolean assignRole(String sbOrgId, String userId) {
+	public boolean assignRole(String sbOrgId, String userId, String objectDetails) {
 		boolean retValue = false;
 		Map<String, Object> request = new HashMap<>();
 		Map<String, Object> requestBody = new HashMap<String, Object>();
@@ -292,10 +286,11 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		request.put(Constants.REQUEST, requestBody);
 		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService
 				.fetchResultUsingPost(props.getSbUrl() + props.getSbAssignRolePath(), request, getDefaultHeaders());
-		if (!Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
-			return false;
+		if (Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
+			retValue = true;
 		}
-		return true;
+		printMethodExecutionResult("AssignRole", objectDetails, retValue);
+		return retValue;
 	}
 
 	@Override
@@ -373,7 +368,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		} else {
 			strBuilder.append(" is failed to execute. ");
 		}
-		strBuilder.append("For UserRegistration : ").append(objectDetails);
+		strBuilder.append("For Object : ").append(objectDetails);
 		logger.info(strBuilder.toString());
 	}
 
