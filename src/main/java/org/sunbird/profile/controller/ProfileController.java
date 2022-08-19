@@ -50,7 +50,7 @@ public class ProfileController {
 	private ResponseEntity<?> adminMigrateUser(@RequestHeader(Constants.X_AUTH_TOKEN) String userToken,
 	         @RequestHeader(Constants.AUTH_TOKEN) String authToken,
 	         @RequestBody Map<String, Object> request) throws Exception {
-		 SBApiResponse response = profileService.migrateUser(request, userToken, authToken);
-		 return new ResponseEntity<>(response, response.getResponseCode());
+	     SBApiResponse response = profileService.migrateUser(request, userToken, authToken);
+             return new ResponseEntity<>(response, response.getResponseCode());
 	}
 }
