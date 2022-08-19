@@ -210,7 +210,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		Map<String, Object> request = new HashMap<>();
 		Map<String, Object> requestBody = new HashMap<String, Object>();
 		requestBody.put(Constants.EMAIL, userRegistration.getEmail());
-		requestBody.put(Constants.CHANNEL, userRegistration.getDeptName());
+		requestBody.put(Constants.CHANNEL, userRegistration.getOrgName());
 		requestBody.put(Constants.FIRSTNAME, userRegistration.getFirstName());
 		requestBody.put(Constants.LASTNAME, userRegistration.getLastName());
 		requestBody.put(Constants.EMAIL_VERIFIED, true);
@@ -245,7 +245,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		Map<String, Object> profileDetails = new HashMap<String, Object>();
 		profileDetails.put(Constants.MANDATORY_FIELDS_EXISTS, false);
 		Map<String, Object> employementDetails = new HashMap<String, Object>();
-		employementDetails.put(Constants.DEPARTMENTNAME, userRegistration.getDeptName());
+		employementDetails.put(Constants.DEPARTMENTNAME, userRegistration.getOrgName());
 		profileDetails.put(Constants.EMPLOYMENTDETAILS, employementDetails);
 		Map<String, Object> personalDetails = new HashMap<String, Object>();
 		personalDetails.put(Constants.FIRSTNAME.toLowerCase(), userRegistration.getFirstName());
@@ -261,7 +261,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		List<Map<String, Object>> professionalDetailsList = new ArrayList<Map<String, Object>>();
 		professionalDetailsList.add(professionDetailObj);
 		profileDetails.put(Constants.PROFESSIONAL_DETAILS, professionalDetailsList);
-		
+
 		requestBody.put(Constants.PROFILE_DETAILS, profileDetails);
 		request.put(Constants.REQUEST, requestBody);
 		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService
@@ -277,7 +277,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		boolean retValue = false;
 		Map<String, Object> request = new HashMap<>();
 		Map<String, Object> requestBody = new HashMap<String, Object>();
-		requestBody.put(Constants.ORGANIZATION_ID, userRegistration.getDeptId());
+		requestBody.put(Constants.ORGANIZATION_ID, userRegistration.getSbOrgId());
 		requestBody.put(Constants.USER_ID, userRegistration.getUserId());
 		requestBody.put(Constants.ROLES, Arrays.asList(Constants.PUBLIC));
 		request.put(Constants.REQUEST, requestBody);
@@ -289,7 +289,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		printMethodExecutionResult("AssignRole", userRegistration.toMininumString(), retValue);
 		return retValue;
 	}
-	
+
 	@Override
 	public boolean createNodeBBUser(UserRegistration userRegistration) {
 		boolean retValue = false;
@@ -341,7 +341,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		requestBody.put(Constants.FIRSTNAME, userRegistration.getFirstName());
 		requestBody.put(Constants.LINK, activationLink);
 		requestBody.put(Constants.MODE, Constants.EMAIL);
-		requestBody.put(Constants.ORG_NAME, userRegistration.getDeptName());
+		requestBody.put(Constants.ORG_NAME, userRegistration.getOrgName());
 		requestBody.put(Constants.RECIPIENT_EMAILS, Arrays.asList(userRegistration.getEmail()));
 		requestBody.put(Constants.SET_PASSWORD_LINK, true);
 		requestBody.put(Constants.SUBJECT, props.getWelcomeEmailSubject());
