@@ -501,6 +501,16 @@ public class Constants {
 	public static final String HOST = "127.0.0.1";
 	public static final String IDENTIFIER_LIST = "identifierList";
 	public static final String HIERARCHY_SECTION_LIST = "hierarchySectionList";
+	public static final String QUESTION_TYPE = "qType";
+	public static final String IS_CORRECT = "isCorrect";
+	public static final String OPTION_ID = "optionId";
+	public static final String MCQ_SCA = "mcq-sca";
+	public static final String MCQ_MCA = "mcq-mca";
+	public static final String FTB = "ftb";
+	public static final String MTF = "mtf";
+	public static final String QUES_ID = "questionId";
+	public static final String SELECTED_ANSWER = "selectedAnswer";
+	public static final String INDEX = "index";
 
 	private Constants() {
 		throw new IllegalStateException("Utility class");
