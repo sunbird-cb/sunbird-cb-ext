@@ -323,6 +323,12 @@ public class CbExtServerProperties {
 	
 	@Value("${sb.service.user.self.migrate.path}")
 	private String lmsUserSelfMigratePath;
+	
+	@Value("${km.base.composite.search.fields}")
+	private String kmCompositeSearchFields;
+	
+	@Value("${km.base.composite.search.filters.primaryCategory}")
+	private String kmCompositeSearchPrimaryCategoryFilters;
 
 	public String getUserAssessmentSubmissionDuration() {
 		return userAssessmentSubmissionDuration;
@@ -1181,5 +1187,21 @@ public class CbExtServerProperties {
 
 	public void setLmsUserSelfMigratePath(String lmsUserSelfMigratePath) {
 		this.lmsUserSelfMigratePath = lmsUserSelfMigratePath;
+	}
+
+	public List<String> getKmCompositeSearchFields() {
+			return Arrays.asList(kmCompositeSearchFields.split(",", -1));
+	}
+
+	public void setKmCompositeSearchFields(String kmCompositeSearchFields) {
+		this.kmCompositeSearchFields = kmCompositeSearchFields;
+	}
+
+	public List<String> getKmCompositeSearchPrimaryCategoryFilters() {
+		return Arrays.asList(kmCompositeSearchPrimaryCategoryFilters.split(",", -1));
+	}
+
+	public void setKmCompositeSearchPrimaryCategoryFilters(String kmCompositeSearchPrimaryCategoryFilters) {
+		this.kmCompositeSearchPrimaryCategoryFilters = kmCompositeSearchPrimaryCategoryFilters;
 	}
 }
