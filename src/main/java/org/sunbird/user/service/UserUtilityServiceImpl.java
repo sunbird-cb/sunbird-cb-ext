@@ -267,26 +267,29 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService
 				.fetchResultUsingPatch(props.getSbUrl() + props.getLmsUserUpdatePath(), request, getDefaultHeaders());
 		if (Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
-			retValue = assignRole(userRegistration);
+			retValue = assignRole(userRegistration.getSbOrgId(), userRegistration.getUserId(), userRegistration.toMininumString());
+			if(retValue){
+				retValue = createNodeBBUser(userRegistration);
+			}
 		}
 		printMethodExecutionResult("UpdateUser", userRegistration.toMininumString(), retValue);
 		return retValue;
 	}
 
-	public boolean assignRole(UserRegistration userRegistration) {
+	public boolean assignRole(String sbOrgId, String userId, String objectDetails) {
 		boolean retValue = false;
 		Map<String, Object> request = new HashMap<>();
 		Map<String, Object> requestBody = new HashMap<String, Object>();
-		requestBody.put(Constants.ORGANIZATION_ID, userRegistration.getSbOrgId());
-		requestBody.put(Constants.USER_ID, userRegistration.getUserId());
+		requestBody.put(Constants.ORGANIZATION_ID, sbOrgId);
+		requestBody.put(Constants.USER_ID, userId);
 		requestBody.put(Constants.ROLES, Arrays.asList(Constants.PUBLIC));
 		request.put(Constants.REQUEST, requestBody);
 		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService
 				.fetchResultUsingPost(props.getSbUrl() + props.getSbAssignRolePath(), request, getDefaultHeaders());
 		if (Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
-			retValue = createNodeBBUser(userRegistration);
+			retValue = true;
 		}
-		printMethodExecutionResult("AssignRole", userRegistration.toMininumString(), retValue);
+		printMethodExecutionResult("AssignRole", objectDetails, retValue);
 		return retValue;
 	}
 
@@ -365,7 +368,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		} else {
 			strBuilder.append(" is failed to execute. ");
 		}
-		strBuilder.append("For UserRegistration : ").append(objectDetails);
+		strBuilder.append("For Object : ").append(objectDetails);
 		logger.info(strBuilder.toString());
 	}
 
