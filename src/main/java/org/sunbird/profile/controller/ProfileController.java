@@ -15,9 +15,10 @@ public class ProfileController {
 	private ProfileService profileService;
 
 	@PostMapping("/user/patch")
-	public ResponseEntity<?> profileUpdate(@RequestHeader(value = Constants.X_AUTH_TOKEN, required = false) String userToken,
-			@RequestHeader(value = Constants.AUTH_TOKEN, required = false) String authToken, @RequestBody Map<String, Object> request)
-			throws Exception {
+	public ResponseEntity<?> profileUpdate(
+			@RequestHeader(value = Constants.X_AUTH_TOKEN, required = false) String userToken,
+			@RequestHeader(value = Constants.AUTH_TOKEN, required = false) String authToken,
+			@RequestBody Map<String, Object> request) throws Exception {
 		SBApiResponse response = profileService.profileUpdate(request, userToken, authToken);
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
@@ -33,7 +34,7 @@ public class ProfileController {
 		SBApiResponse response = profileService.orgProfileRead(orgId);
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
-	
+
 	@GetMapping("/user/v1/basicInfo")
 	public ResponseEntity<?> userBasicInfo(@RequestHeader(Constants.X_AUTH_USER_ID) String userId) {
 		SBApiResponse response = profileService.userBasicInfo(userId);
@@ -46,11 +47,10 @@ public class ProfileController {
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
 
-	@PostMapping("/user/migrate")
+	@PostMapping("/user/v1/migrate")
 	private ResponseEntity<?> adminMigrateUser(@RequestHeader(Constants.X_AUTH_TOKEN) String userToken,
-	         @RequestHeader(Constants.AUTH_TOKEN) String authToken,
-	         @RequestBody Map<String, Object> request) throws Exception {
-	     SBApiResponse response = profileService.migrateUser(request, userToken, authToken);
-             return new ResponseEntity<>(response, response.getResponseCode());
+			@RequestHeader(Constants.AUTH_TOKEN) String authToken, @RequestBody Map<String, Object> request) {
+		SBApiResponse response = profileService.migrateUser(request, userToken, authToken);
+		return new ResponseEntity<>(response, response.getResponseCode());
 	}
 }

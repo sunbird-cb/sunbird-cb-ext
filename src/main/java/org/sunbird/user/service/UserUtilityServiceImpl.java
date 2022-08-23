@@ -267,8 +267,9 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService
 				.fetchResultUsingPatch(props.getSbUrl() + props.getLmsUserUpdatePath(), request, getDefaultHeaders());
 		if (Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
-			retValue = assignRole(userRegistration.getSbOrgId(), userRegistration.getUserId(), userRegistration.toMininumString());
-			if(retValue){
+			retValue = assignRole(userRegistration.getSbOrgId(), userRegistration.getUserId(),
+					userRegistration.toMininumString());
+			if (retValue) {
 				retValue = createNodeBBUser(userRegistration);
 			}
 		}
@@ -368,7 +369,9 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		} else {
 			strBuilder.append(" is failed to execute. ");
 		}
-		strBuilder.append("For Object : ").append(objectDetails);
+		if (StringUtils.isNotEmpty(objectDetails)) {
+			strBuilder.append("For Object : ").append(objectDetails);
+		}
 		logger.info(strBuilder.toString());
 	}
 

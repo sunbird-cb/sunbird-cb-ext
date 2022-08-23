@@ -14,5 +14,5 @@ public interface ProfileService {
 
 	SBApiResponse userBasicProfileUpdate(Map<String, Object> request);
 
-	SBApiResponse migrateUser(Map<String, Object> request, String XAuthToken, String AuthToken) throws Exception;
+	SBApiResponse migrateUser(Map<String, Object> request, String userToken, String authToken);
 }

@@ -489,7 +489,16 @@ public class Constants {
 	public static final String X_AUTH_USER_ID = "x-authenticated-userid";
 	public static final String SOFT_DELETE_OLD_ORG = "softDeleteOldOrg";
 	public static final String NOTIFY_MIGRATION = "notifyMigration";	
-
+	public static final String FORCE_MIGRATION = "forceMigration";
+	public static final String PROFILE_DETAILS_LOWER = "profiledetails";
+	public static final String EMPLOYMENT_DETAILS = "employmentDetails";
+	public static final String DEPARTMENT_ID = "departmentId";
+	public static final String ROOT_ORG_ID_LOWER = "rootorgid";
+	public static final String OPERATION_TYPE = "operationType";
+	public static final String SYNC = "sync";
+	public static final String OBJECT_IDS = "objectIds";
+	public static final String USER = "user";
+	
 	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}
