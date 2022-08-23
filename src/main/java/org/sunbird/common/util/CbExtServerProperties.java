@@ -324,6 +324,12 @@ public class CbExtServerProperties {
 	@Value("${sb.service.user.migrate.path}")
 	private String lmsUserMigratePath;
 
+  @Value("${km.base.composite.search.fields}")
+	private String kmCompositeSearchFields;
+	
+	@Value("${km.base.composite.search.filters.primaryCategory}")
+	private String kmCompositeSearchPrimaryCategoryFilters;
+
 	@Value("${sb.data.sync.path}")
 	private String lmsDataSyncPath;
 	
@@ -1192,5 +1198,21 @@ public class CbExtServerProperties {
 
 	public void setLmsDataSyncPath(String lmsDataSyncPath) {
 		this.lmsDataSyncPath = lmsDataSyncPath;
+	}
+
+	public List<String> getKmCompositeSearchFields() {
+			return Arrays.asList(kmCompositeSearchFields.split(",", -1));
+	}
+
+	public void setKmCompositeSearchFields(String kmCompositeSearchFields) {
+		this.kmCompositeSearchFields = kmCompositeSearchFields;
+	}
+
+	public List<String> getKmCompositeSearchPrimaryCategoryFilters() {
+		return Arrays.asList(kmCompositeSearchPrimaryCategoryFilters.split(",", -1));
+	}
+
+	public void setKmCompositeSearchPrimaryCategoryFilters(String kmCompositeSearchPrimaryCategoryFilters) {
+		this.kmCompositeSearchPrimaryCategoryFilters = kmCompositeSearchPrimaryCategoryFilters;
 	}
 }

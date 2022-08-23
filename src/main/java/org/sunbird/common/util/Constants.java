@@ -122,6 +122,8 @@ public class Constants {
 	public static final String API_FILE_UPLOAD = "api.file.upload";
 	public static final String API_FILE_DELETE = "api.file.delete";
 	public static final String API_PROFILE_UPDATE = "api.profile.update";
+	public static final String API_GET_EXPLORE_COURSE_DETAIL = "api.explore.course";
+	public static final String API_REFRESH_EXPLORE_COURSE_DETAIL = "api.refresh.explore.course.list";
 
 	public static final String ORG_PROFILE_UPDATE = "org.profile.update";
 	public static final String ID = "id";
@@ -230,6 +232,7 @@ public class Constants {
 	public static final String TABLE_RATINGS = "ratings";
 	public static final String TABLE_RATINGS_LOOKUP = "ratings_lookup";
 	public static final String TABLE_RATINGS_SUMMARY = "ratings_summary";
+	public static final String TABLE_EXPLORE_COURSE_LIST = "explore_course_list";
 	public static final String VALUE = "value";
 	public static final String DEPT_NAME = "deptName";
 	public static final String PROFILE_DETAILS = "profileDetails";
@@ -497,8 +500,11 @@ public class Constants {
 	public static final String OPERATION_TYPE = "operationType";
 	public static final String SYNC = "sync";
 	public static final String OBJECT_IDS = "objectIds";
-	public static final String USER = "user";
-	
+	public static final String USER = "user";	
+	public static final String PUBLIC_COURSE_LIST = "publicCourseList";
+	public static final String LAST_UPDATED_ON = "lastUpdatedOn";
+	public static final String DESCENDING_ORDER = "desc";
+  
 	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}

@@ -343,3 +343,6 @@ CREATE TABLE sunbird.ratings_lookup (
     PRIMARY KEY ((activity_id, activity_type, rating), updatedon)
 ) WITH CLUSTERING ORDER BY (updatedon DESC); 
 ```
+```sh
+CREATE TABLE sunbird.explore_course_list ( identifier text primary key ) ;
+```

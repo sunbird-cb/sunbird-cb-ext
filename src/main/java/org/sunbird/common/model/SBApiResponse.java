@@ -71,6 +71,10 @@ public class SBApiResponse {
 		return response;
 	}
 
+	public void setResult(Map<String, Object> result) {
+		response = result;
+	}
+
 	public Object get(String key) {
 		return response.get(key);
 	}
