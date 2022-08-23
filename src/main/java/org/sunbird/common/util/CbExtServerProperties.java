@@ -81,6 +81,15 @@ public class CbExtServerProperties {
 	@Value("${es.profile.source.fields}")
 	private String[] esProfileSourceFields;
 
+	@Value("${es.field.primaryEmail}")
+	private String esFieldPrimaryEmail;
+
+	@Value("${es.field.firstname}")
+	private String esFieldFirstName;
+
+	@Value("${es.field.surname}")
+	private String esFieldSurName;
+
 	@Value("${org.create.endpoint}")
 	private String orgCreateEndPoint;
 
@@ -530,6 +539,30 @@ public class CbExtServerProperties {
 
 	public void setEsProfileSourceFields(String[] esProfileSourceFields) {
 		this.esProfileSourceFields = esProfileSourceFields;
+	}
+
+	public String getEsFieldPrimaryEmail() {
+		return esFieldPrimaryEmail;
+	}
+
+	public void setEsFieldPrimaryEmail(String esFieldPrimaryEmail) {
+		this.esFieldPrimaryEmail = esFieldPrimaryEmail;
+	}
+
+	public String getEsFieldFirstName() {
+		return esFieldFirstName;
+	}
+
+	public void setEsFieldFirstName(String esFieldFirstName) {
+		this.esFieldFirstName = esFieldFirstName;
+	}
+
+	public String getEsFieldSurName() {
+		return esFieldSurName;
+	}
+
+	public void setEsFieldSurName(String esFieldSurName) {
+		this.esFieldSurName = esFieldSurName;
 	}
 
 	public String getOrgCreateEndPoint() {

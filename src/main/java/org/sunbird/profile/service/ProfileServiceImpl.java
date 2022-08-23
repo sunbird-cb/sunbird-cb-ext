@@ -11,7 +11,12 @@ import java.util.UUID;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.rest.RestStatus;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -31,6 +36,7 @@ import org.sunbird.org.service.ExtendedOrgService;
 import org.sunbird.user.service.UserUtilityServiceImpl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.sunbird.workallocation.util.WorkAllocationConstants;
 
 @Service
 @SuppressWarnings({ "unchecked", "serial" })
@@ -61,6 +67,8 @@ public class ProfileServiceImpl implements ProfileService {
 	ExtendedOrgService extOrgService;
 
 	private CbExtLogger log = new CbExtLogger(getClass().getName());
+
+	final String[] excludeFields = new String[] {"maskedEmail"};
 
 	@Override
 	public SBApiResponse profileUpdate(Map<String, Object> request, String userToken, String authToken)
@@ -373,6 +381,46 @@ public class ProfileServiceImpl implements ProfileService {
 		} catch (Exception err) {
 			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
 			response.getParams().setErrmsg(err.getMessage());
+			response.getParams().setStatus(Constants.FAILED);
+		}
+		return response;
+	}
+
+    @Override
+	public SBApiResponse userAutoComplete(String searchTerm) {
+		SBApiResponse response = new SBApiResponse();
+		List<Map<String, Object>> userData = null;
+		List<Map<String, Object>> finalRes = new ArrayList<>();
+		try {
+			Boolean validate = validateAutoCompleteAPI(searchTerm);
+			if (validate) {
+				userData = getUserSearchData(searchTerm);
+				Map<String, Object> result;
+				if (!org.springframework.util.CollectionUtils.isEmpty(userData)) {
+					for (Map<String, Object> user : userData) {
+						result = new HashMap<>();
+						result.put(WorkAllocationConstants.USER_DETAILS, user);
+						result.put(WorkAllocationConstants.ALLOCATION_DETAILS, null);
+						finalRes.add(result);
+					}
+				} else {
+					response.setResponseCode(HttpStatus.BAD_REQUEST);
+					response.getParams().setErrmsg("Failed to fetch user details !");
+					response.getParams().setStatus(Constants.FAILED);
+				}
+			} else {
+				response.setResponseCode(HttpStatus.BAD_REQUEST);
+				response.getParams().setErrmsg("search term is empty !");
+				response.getParams().setStatus(Constants.FAILED);
+			}
+			response.setResponseCode(HttpStatus.OK);
+			response.getParams().setStatus(Constants.SUCCESS);
+			response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
+			response.put(Constants.DATA, finalRes);
+			response.put(Constants.STATUS, HttpStatus.OK);
+		} catch (Exception e) {
+			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+			response.getParams().setErrmsg("Exception occurred while searching the user's from user registry" + e.getMessage());
 			response.getParams().setStatus(Constants.FAILED);
 		}
 		return response;
@@ -743,5 +791,33 @@ public class ProfileServiceImpl implements ProfileService {
 			errMsg = String.format("Failed to assign roles to User. Error: %s", params.get("errmsg"));
 		}
 		return errMsg;
+	}
+
+	public List<Map<String, Object>> getUserSearchData(String searchTerm) throws Exception {
+		List<Map<String, Object>> resultArray = new ArrayList<>();
+		Map<String, Object> result;
+		final BoolQueryBuilder query = QueryBuilders.boolQuery();
+		query.should(QueryBuilders.matchPhrasePrefixQuery(serverConfig.getEsFieldPrimaryEmail(), searchTerm))
+				.should(QueryBuilders.matchPhrasePrefixQuery(serverConfig.getEsFieldFirstName(), searchTerm))
+				.should(QueryBuilders.matchPhrasePrefixQuery(serverConfig.getEsFieldSurName(), searchTerm));
+		final BoolQueryBuilder finalQuery = QueryBuilders.boolQuery();
+		finalQuery.must(QueryBuilders.termQuery("status", 1))
+				.must(query);
+		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder().query(finalQuery);
+		sourceBuilder.fetchSource(new String[]{}, excludeFields);
+		SearchResponse searchResponse = indexerService.getEsResult(serverConfig.getEsProfileIndex(),
+				serverConfig.getEsProfileIndexType(), sourceBuilder);
+		for (SearchHit hit : searchResponse.getHits()) {
+			result = hit.getSourceAsMap();
+			resultArray.add(result);
+		}
+		return resultArray;
+	}
+
+	private Boolean validateAutoCompleteAPI(String searchTerm) {
+		if (StringUtils.isEmpty(searchTerm)) {
+			return false;
+		}
+		return true;
 	}
 }
