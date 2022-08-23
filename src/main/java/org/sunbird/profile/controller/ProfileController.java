@@ -45,4 +45,11 @@ public class ProfileController {
 		SBApiResponse response = profileService.userBasicProfileUpdate(request);
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
+
+	@GetMapping("/users/autocomplete")
+	public ResponseEntity<?> userAutoComplete(@RequestParam("searchTerm") String searchTerm) throws Exception {
+		SBApiResponse response = profileService.userAutoComplete(searchTerm);
+		return new ResponseEntity<>(response, response.getResponseCode());
+	}
+
 }
