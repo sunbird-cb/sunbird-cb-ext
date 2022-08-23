@@ -321,15 +321,18 @@ public class CbExtServerProperties {
 	@Value("${sb.org.create.path}")
 	private String lmsOrgCreatePath;
 	
-	@Value("${sb.service.user.self.migrate.path}")
-	private String lmsUserSelfMigratePath;
-	
-	@Value("${km.base.composite.search.fields}")
+	@Value("${sb.service.user.migrate.path}")
+	private String lmsUserMigratePath;
+
+  @Value("${km.base.composite.search.fields}")
 	private String kmCompositeSearchFields;
 	
 	@Value("${km.base.composite.search.filters.primaryCategory}")
 	private String kmCompositeSearchPrimaryCategoryFilters;
 
+	@Value("${sb.data.sync.path}")
+	private String lmsDataSyncPath;
+	
 	public String getUserAssessmentSubmissionDuration() {
 		return userAssessmentSubmissionDuration;
 	}
@@ -1181,12 +1184,20 @@ public class CbExtServerProperties {
 		this.lmsOrgCreatePath = lmsOrgCreatePath;
 	}
 
-	public String getLmsUserSelfMigratePath() {
-		return lmsUserSelfMigratePath;
+	public String getLmsUserMigratePath() {
+		return lmsUserMigratePath;
 	}
 
-	public void setLmsUserSelfMigratePath(String lmsUserSelfMigratePath) {
-		this.lmsUserSelfMigratePath = lmsUserSelfMigratePath;
+	public void setLmsUserMigratePath(String lmsUserSelfMigratePath) {
+		this.lmsUserMigratePath = lmsUserSelfMigratePath;
+	}
+
+	public String getLmsDataSyncPath() {
+		return lmsDataSyncPath;
+	}
+
+	public void setLmsDataSyncPath(String lmsDataSyncPath) {
+		this.lmsDataSyncPath = lmsDataSyncPath;
 	}
 
 	public List<String> getKmCompositeSearchFields() {

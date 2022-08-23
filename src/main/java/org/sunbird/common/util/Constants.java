@@ -479,6 +479,7 @@ public class Constants {
 	public static final String SB_ORG_ID = "sbOrgId";
 	public static final String MAP_ID = "mapId";
 	public static final String SB_ROOT_ORG_ID = "sbRootOrgId";
+	public static final String ERROR_MESSAGE = "errmsg";
 
 	public static final String API_USER_BASIC_INFO = "api.user.basic.info";
 	public static final String API_USER_BASIC_PROFILE_UPDATE = "api.user.basic.profile.update";
@@ -490,11 +491,20 @@ public class Constants {
 	public static final String USER_ROLES = "userRoles";
 	public static final String X_AUTH_USER_ID = "x-authenticated-userid";
 	public static final String SOFT_DELETE_OLD_ORG = "softDeleteOldOrg";
-	public static final String NOTIFY_MIGRATION = "notifyMigration";
-	
+	public static final String NOTIFY_MIGRATION = "notifyMigration";	
+	public static final String FORCE_MIGRATION = "forceMigration";
+	public static final String PROFILE_DETAILS_LOWER = "profiledetails";
+	public static final String EMPLOYMENT_DETAILS = "employmentDetails";
+	public static final String DEPARTMENT_ID = "departmentId";
+	public static final String ROOT_ORG_ID_LOWER = "rootorgid";
+	public static final String OPERATION_TYPE = "operationType";
+	public static final String SYNC = "sync";
+	public static final String OBJECT_IDS = "objectIds";
+	public static final String USER = "user";	
 	public static final String PUBLIC_COURSE_LIST = "publicCourseList";
 	public static final String LAST_UPDATED_ON = "lastUpdatedOn";
 	public static final String DESCENDING_ORDER = "desc";
+  
 	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}

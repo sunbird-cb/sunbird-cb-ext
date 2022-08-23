@@ -13,4 +13,6 @@ public interface ProfileService {
 	SBApiResponse userBasicInfo(String userId);
 
 	SBApiResponse userBasicProfileUpdate(Map<String, Object> request);
+
+	SBApiResponse migrateUser(Map<String, Object> request, String userToken, String authToken);
 }
