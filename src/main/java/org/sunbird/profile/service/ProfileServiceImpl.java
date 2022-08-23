@@ -70,7 +70,6 @@ public class ProfileServiceImpl implements ProfileService {
 
 	final String[] excludeFields = new String[] {"maskedEmail"};
 
-
 	@Override
 	public SBApiResponse profileUpdate(Map<String, Object> request, String userToken, String authToken)
 			throws Exception {
