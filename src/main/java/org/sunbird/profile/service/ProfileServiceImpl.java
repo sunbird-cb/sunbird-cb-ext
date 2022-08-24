@@ -36,7 +36,6 @@ import org.sunbird.org.service.ExtendedOrgService;
 import org.sunbird.user.service.UserUtilityServiceImpl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.sunbird.workallocation.util.WorkAllocationConstants;
 
 @Service
 @SuppressWarnings({ "unchecked", "serial" })
@@ -404,10 +403,8 @@ public class ProfileServiceImpl implements ProfileService {
 			response.getParams().setStatus(Constants.SUCCESS);
 			response.put(Constants.RESPONSE, resultResp);
 		} catch (Exception e) {
-			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
 			response.getParams()
 					.setErrmsg("Exception occurred while searching the user's from user registry" + e.getMessage());
-			response.getParams().setStatus(Constants.FAILED);
 		}
 		return response;
 	}
