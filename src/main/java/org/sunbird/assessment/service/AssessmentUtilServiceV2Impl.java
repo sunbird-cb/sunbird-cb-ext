@@ -100,15 +100,15 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 	}
 
 
-	private Map<String, Object> getQumlAnswers(List<String> questions) throws Exception {
+	private Map<String, Object> getQumlAnswers(List<Object> questions) throws Exception {
 		Map<String, Object> ret = new HashMap<>();
-		for (String questionId : questions) {
+		for (Object questionId : questions) {
 			List<String> correctOption = new ArrayList<>();
 
 			Map<String, Object> question = (Map<String, Object>) redisCacheMgr
-					.getCache(Constants.QUESTION_ID + questionId);
+					.getCache(Constants.QUESTION_ID + (String) questionId);
 			if (ObjectUtils.isEmpty(question)) {
-				logger.error("Failed to get the answer for question: " + questionId);
+				logger.error("Failed to get the answer for question: " + (String) questionId);
 				//call the assessment question list api
 			}
 			if (question.containsKey(Constants.QUESTION_TYPE)) {

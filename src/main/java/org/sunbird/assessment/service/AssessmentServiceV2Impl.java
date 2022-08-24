@@ -114,20 +114,19 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
         return RequestInterceptor.fetchUserIdFromAccessToken(authUserToken);
     }
 
-    private String fetchReadHierarchyDetails(Map<String, Object> assessmentAllDetail, String token, String assessmentIdentifier) {
+    private String fetchReadHierarchyDetails(Map<String, Object> assessmentHierarchy, String token, String assessmentIdentifier) {
         Map<String, Object> assessmentDetail = (Map<String, Object>) redisCacheMgr
                 .getCache(Constants.ASSESSMENT_ID + assessmentIdentifier);
         if (!ObjectUtils.isEmpty(assessmentDetail)) {
-            assessmentAllDetail.putAll(assessmentDetail);
+            assessmentHierarchy.putAll(assessmentDetail);
         } else {
             Map<String, Object> hierarcyReadApiResponse = assessUtilServ.getReadHierarchyApiResponse(assessmentIdentifier, token);
             if (hierarcyReadApiResponse.isEmpty() || !Constants.OK.equalsIgnoreCase((String) hierarcyReadApiResponse.get(Constants.RESPONSE_CODE))) {
                 return "Assessment hierarchy read failed, failed to process Assessment Read Request";
-            } else {
-                assessmentAllDetail.putAll((Map<String, Object>) ((Map<String, Object>) hierarcyReadApiResponse
-                        .get(Constants.RESULT)).get(Constants.QUESTION_SET));
-                redisCacheMgr.putCache(Constants.ASSESSMENT_ID + assessmentIdentifier, assessmentAllDetail);
             }
+            assessmentHierarchy.putAll((Map<String, Object>) ((Map<String, Object>) hierarcyReadApiResponse
+                    .get(Constants.RESULT)).get(Constants.QUESTION_SET));
+            redisCacheMgr.putCache(Constants.ASSESSMENT_ID + assessmentIdentifier, assessmentHierarchy);
         }
         return "";
     }
@@ -195,8 +194,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                     Map<String, Object> sectionLevelResult = createResponseMapWithProperStructure(hierarchySection, null);
                     sectionLevelsResults.add(sectionLevelResult);
                 }
-                // We have both userSectiondata and userSection
-                // Get the list of question Identifier's from userSectionData
+                // We have both questionsListFromAssessmentHierarchy and questionsListFromSubmitRequest
                 if (errMsg.isEmpty()) {
                     Map<String, Object> result = new HashMap<>();
                     switch (scoreCutOffType) {
@@ -246,7 +244,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
         return outgoingResponse;
     }
 
-    private String validateSubmitAssessmentRequest(Map<String, Object> submitRequest, String authUserToken, List<Map<String, Object>> hierarchySectionList, List<Map<String, Object>> sectionListFromSubmitRequest, Map<String, Object> assessmentHierarchy, List<Map<String, Object>> userQuestionsListFromSubmitRequest, List<Object> questionsListFromAssessmentHierarchy) {
+    private String validateSubmitAssessmentRequest(Map<String, Object> submitRequest, String authUserToken, List<Map<String, Object>> hierarchySectionList, List<Map<String, Object>> sectionListFromSubmitRequest, Map<String, Object> assessmentHierarchy, List<Map<String, Object>> questionsListFromSubmitRequest, List<Object> questionIdsFromAssessmentHierarchy) {
         String userId = validateAuthTokenAndFetchUserId(authUserToken);
         if (ObjectUtils.isEmpty(userId)) {
             return "User Id doesn't exist! Please supply a valid auth token";
@@ -255,14 +253,11 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
         if (StringUtils.isEmpty((String) submitRequest.get(Constants.IDENTIFIER))) {
             return "Invalid Assessment Id";
         }
-        Map<String, Object> assessmentAllDetail = new HashMap<>();
         String assessmentIdFromRequest = (String) submitRequest.get(Constants.IDENTIFIER);
-        String errMsg = fetchReadHierarchyDetails(assessmentAllDetail, authUserToken, assessmentIdFromRequest);
+        String errMsg = fetchReadHierarchyDetails(assessmentHierarchy, authUserToken, assessmentIdFromRequest);
         if (!errMsg.isEmpty()) {
             return errMsg;
         }
-        assessmentHierarchy.putAll((Map<String, Object>) redisCacheMgr
-                .getCache(Constants.ASSESSMENT_ID + assessmentIdFromRequest));
         if (ObjectUtils.isEmpty(assessmentHierarchy)) {
             return "Error fetching the read assessment details from the redis cache/Wrong Assessment Id";
         }
@@ -289,34 +284,44 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
             if (!hierarchySectionIds.containsAll(submitSectionIds)) {
                 return "Wrong section details.";
             } else {
-                Map<String, Object> questionSetFromAssessment = (Map<String, Object>) redisCacheMgr.getCache(Constants.USER_ASSESS_REQ + (String) submitRequest.get(Constants.IDENTIFIER) + authUserToken);
-                if (questionSetFromAssessment != null && questionSetFromAssessment.get(Constants.CHILDREN) != null) {
-                    List<Map<String, Object>> sections = (List<Map<String, Object>>) questionSetFromAssessment.get(Constants.CHILDREN);
-                    List<String> desiredKey = Lists.newArrayList(Constants.CHILD_NODES);
-                    questionsListFromAssessmentHierarchy.addAll(sections.stream()
-                            .flatMap(x -> desiredKey.stream()
-                                    .filter(x::containsKey)
-                                    .map(x::get)
-                            ).collect(toList()));
-                    for (Map<String, Object> userSectionData : sectionListFromSubmitRequest) {
-                        if (userSectionData.containsKey(Constants.CHILDREN) && !ObjectUtils.isEmpty(userSectionData.get(Constants.CHILDREN))) {
-                            userQuestionsListFromSubmitRequest.addAll((List<Map<String, Object>>) userSectionData.get(Constants.CHILDREN));
-                        }
-                        List<Object> userQuestionIdsFromSubmitRequest = userQuestionsListFromSubmitRequest.stream()
-                                .flatMap(x -> desiredKeys.stream()
-                                        .filter(x::containsKey)
-                                        .map(x::get)
-                                ).collect(toList());
-                        if (!questionsListFromAssessmentHierarchy.containsAll(userQuestionIdsFromSubmitRequest)) {
-                            return "The answers provided don't match to the Questions";
-                        }
-                    }
-                } else {
-                    return "Question Set From The Redis returns Null";
-                }
+                String x = validateIfQuestionIdsAreSame(submitRequest, authUserToken, sectionListFromSubmitRequest, questionsListFromSubmitRequest, questionIdsFromAssessmentHierarchy, desiredKeys);
+                if (!x.isEmpty()) return x;
             }
         } else {
             return "The Assessment submission time-period is over! Assessment can't be submitted";
+        }
+        return "";
+    }
+
+    private String validateIfQuestionIdsAreSame(Map<String, Object> submitRequest, String authUserToken, List<Map<String, Object>> sectionListFromSubmitRequest, List<Map<String, Object>> questionsListFromSubmitRequest, List<Object> questionIdsFromAssessmentHierarchy, List<String> desiredKeys) {
+        Map<String, Object> questionSetFromAssessment = (Map<String, Object>) redisCacheMgr.getCache(Constants.USER_ASSESS_REQ + (String) submitRequest.get(Constants.IDENTIFIER) + authUserToken);
+        if (questionSetFromAssessment != null && questionSetFromAssessment.get(Constants.CHILDREN) != null) {
+            List<Object> userQuestionIdsFromSubmitRequest = new ArrayList<>();
+            List<Map<String, Object>> sections = (List<Map<String, Object>>) questionSetFromAssessment.get(Constants.CHILDREN);
+            List<String> desiredKey = Lists.newArrayList(Constants.CHILD_NODES);
+            List<Object> questionList = sections.stream()
+                    .flatMap(x -> desiredKey.stream()
+                            .filter(x::containsKey)
+                            .map(x::get)
+                    ).collect(toList());
+            for (int i = 0; i < questionList.size(); i++) {
+                questionIdsFromAssessmentHierarchy.addAll((List<String>) questionList.get(i));
+            }
+            for (Map<String, Object> userSectionData : sectionListFromSubmitRequest) {
+                if (userSectionData.containsKey(Constants.CHILDREN) && !ObjectUtils.isEmpty(userSectionData.get(Constants.CHILDREN))) {
+                    questionsListFromSubmitRequest.addAll((List<Map<String, Object>>) userSectionData.get(Constants.CHILDREN));
+                }
+                userQuestionIdsFromSubmitRequest.addAll(questionsListFromSubmitRequest.stream()
+                        .flatMap(x -> desiredKeys.stream()
+                                .filter(x::containsKey)
+                                .map(x::get)
+                        ).collect(toList()));
+            }
+            if (!questionIdsFromAssessmentHierarchy.containsAll(userQuestionIdsFromSubmitRequest)) {
+                return "The answers provided don't match to the Questions";
+            }
+        } else {
+            return "Question Set From The Redis returns Null";
         }
         return "";
     }
