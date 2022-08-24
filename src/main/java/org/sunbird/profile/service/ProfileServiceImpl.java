@@ -11,7 +11,12 @@ import java.util.UUID;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.rest.RestStatus;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -488,6 +493,32 @@ public class ProfileServiceImpl implements ProfileService {
 		return response;
 	}
 
+    @Override
+	public SBApiResponse userAutoComplete(String searchTerm) {
+		SBApiResponse response = new SBApiResponse();
+		response.setResponseCode(HttpStatus.BAD_REQUEST);
+		response.getParams().setStatus(Constants.FAILED);
+		if (StringUtils.isEmpty(searchTerm)) {
+			response.getParams().setErrmsg("Invalid Search Term");
+			return response;
+		}
+
+		response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+		Map<String, Object> resultResp = new HashMap<>();
+		try {
+			List<Map<String, Object>> userData = getUserSearchData(searchTerm);
+			resultResp.put(Constants.CONTENT, userData);
+			resultResp.put(Constants.COUNT, userData.size());
+			response.setResponseCode(HttpStatus.OK);
+			response.getParams().setStatus(Constants.SUCCESS);
+			response.put(Constants.RESPONSE, resultResp);
+		} catch (Exception e) {
+			response.getParams()
+					.setErrmsg("Exception occurred while searching the user's from user registry" + e.getMessage());
+		}
+		return response;
+	}
+
 	public SBApiResponse userBasicProfileUpdate(Map<String, Object> request) {
 		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_USER_BASIC_PROFILE_UPDATE);
 		String errMsg = validateBasicProfilePayload(request);
@@ -930,4 +961,25 @@ public class ProfileServiceImpl implements ProfileService {
 		}
 		return errMsg;
 	}
+  
+  public List<Map<String, Object>> getUserSearchData(String searchTerm) throws Exception {
+		List<Map<String, Object>> resultArray = new ArrayList<>();
+		Map<String, Object> result;
+		final BoolQueryBuilder query = QueryBuilders.boolQuery();
+		for(String field : serverConfig.getEsAutoCompleteSearchFields()) {
+			query.should(QueryBuilders.matchPhrasePrefixQuery(field, searchTerm));
+		}
+		
+		final BoolQueryBuilder finalQuery = QueryBuilders.boolQuery();
+		finalQuery.must(QueryBuilders.termQuery(Constants.STATUS, 1)).must(query);
+		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder().query(finalQuery);
+		sourceBuilder.fetchSource(serverConfig.getEsAutoCompleteIncludeFields(), new String[]{});
+		SearchResponse searchResponse = indexerService.getEsResult(serverConfig.getEsProfileIndex(),
+				serverConfig.getEsProfileIndexType(), sourceBuilder);
+		for (SearchHit hit : searchResponse.getHits()) {
+			result = hit.getSourceAsMap();
+			resultArray.add(result);
+		}
+		return resultArray;
+  }
 }

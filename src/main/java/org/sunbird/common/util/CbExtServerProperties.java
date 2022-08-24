@@ -321,7 +321,16 @@ public class CbExtServerProperties {
 	@Value("${sb.org.create.path}")
 	private String lmsOrgCreatePath;
 	
-	@Value("${sb.service.user.migrate.path}")
+	@Value("${es.user.auto.complete.search.fields}")
+	private String esAutoCompleteSearchFields;
+
+	@Value("${es.user.auto.complete.include.fields}")
+	private String esAutoCompleteIncludeFields;
+
+	@Value("${es.profile.index.work.allocation}")
+	private String esProfileIndexWorkAllocation;
+
+  @Value("${sb.service.user.migrate.path}")
 	private String lmsUserMigratePath;
 
   @Value("${km.base.composite.search.fields}")
@@ -1214,5 +1223,29 @@ public class CbExtServerProperties {
 
 	public void setKmCompositeSearchPrimaryCategoryFilters(String kmCompositeSearchPrimaryCategoryFilters) {
 		this.kmCompositeSearchPrimaryCategoryFilters = kmCompositeSearchPrimaryCategoryFilters;
+	}
+
+	public List<String> getEsAutoCompleteSearchFields() {
+		return Arrays.asList(esAutoCompleteSearchFields.split(",", -1));
+	}
+
+	public void setEsAutoCompleteSearchFields(String esAutoCompleteSearchFields) {
+		this.esAutoCompleteSearchFields = esAutoCompleteSearchFields;
+	}
+
+	public String[] getEsAutoCompleteIncludeFields() {
+		return esAutoCompleteIncludeFields.split(",", -1);
+	}
+
+	public void setEsAutoCompleteIncludeFields(String esAutoCompleteIncludeFields) {
+		this.esAutoCompleteIncludeFields = esAutoCompleteIncludeFields;
+	}
+
+	public String getEsProfileIndexWorkAllocation() {
+		return esProfileIndexWorkAllocation;
+	}
+
+	public void setEsProfileIndexWorkAllocation(String esProfileIndexWorkAllocation) {
+		this.esProfileIndexWorkAllocation = esProfileIndexWorkAllocation;
 	}
 }

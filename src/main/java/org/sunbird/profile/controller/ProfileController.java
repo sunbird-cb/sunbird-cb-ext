@@ -47,6 +47,12 @@ public class ProfileController {
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
 
+	@GetMapping("/user/v1/autocomplete/{searchTerm}")
+	public ResponseEntity<?> userAutoComplete(@PathVariable("searchTerm") String searchTerm) {
+		SBApiResponse response = profileService.userAutoComplete(searchTerm);
+		return new ResponseEntity<>(response, response.getResponseCode());
+	}
+
 	@PostMapping("/user/v1/migrate")
 	private ResponseEntity<?> adminMigrateUser(@RequestHeader(Constants.X_AUTH_TOKEN) String userToken,
 			@RequestHeader(Constants.AUTH_TOKEN) String authToken, @RequestBody Map<String, Object> request) {
