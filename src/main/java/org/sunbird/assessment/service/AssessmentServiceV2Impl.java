@@ -1,12 +1,10 @@
 package org.sunbird.assessment.service;
 
 import com.beust.jcommander.internal.Lists;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
-import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,16 +14,13 @@ import org.springframework.util.ObjectUtils;
 import org.sunbird.assessment.repo.AssessmentRepository;
 import org.sunbird.cache.RedisCacheMgr;
 import org.sunbird.common.model.SBApiResponse;
-import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.common.util.RequestInterceptor;
 import org.sunbird.core.producer.Producer;
-import redis.clients.jedis.Jedis;
 
 import java.sql.Timestamp;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
@@ -178,11 +173,12 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
         String scoreCutOffType = null;
         List<Map<String, Object>> sectionListFromSubmitRequest = new ArrayList<>();
         List<Map<String, Object>> hierarchySectionList = new ArrayList<>();
-        Map<String, Object> assessmentHierarchy = new HashMap<>();
-        errMsg = validateSubmitAssessmentRequest(submitRequest, authUserToken, hierarchySectionList, sectionListFromSubmitRequest, assessmentHierarchy);
+        Map<String, Object> allHierarchy = new HashMap<>();
+        List<Map<String, Object>> questionsListFromSubmitRequest = new ArrayList<>();
+        List<Object> questionsListFromAssessmentHierarchy = new ArrayList<>();
+        errMsg = validateSubmitAssessmentRequest(submitRequest, authUserToken, hierarchySectionList, sectionListFromSubmitRequest, allHierarchy, questionsListFromSubmitRequest, questionsListFromAssessmentHierarchy);
         if (errMsg.isEmpty()) {
             List<Map<String, Object>> sectionLevelsResults = new ArrayList<>();
-            List<String> questionsFromAssessment = new ArrayList<>();
             for (Map<String, Object> hierarchySection : hierarchySectionList) {
                 String hierarchySectionId = (String) hierarchySection.get(Constants.IDENTIFIER);
                 scoreCutOffType = ((String) hierarchySection.get(Constants.SCORE_CUTOFF_TYPE)).toLowerCase();
@@ -199,59 +195,25 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                     Map<String, Object> sectionLevelResult = createResponseMapWithProperStructure(hierarchySection, null);
                     sectionLevelsResults.add(sectionLevelResult);
                 }
-
                 // We have both userSectiondata and userSection
                 // Get the list of question Identifier's from userSectionData
-                Map<String, Object> questionSetFromAssessment = (Map<String, Object>) redisCacheMgr.getCache(Constants.USER_ASSESS_REQ + (String) submitRequest.get(Constants.IDENTIFIER) + authUserToken);
-                if (questionSetFromAssessment != null && questionSetFromAssessment.get(Constants.CHILDREN) != null) {
-                    List<Map<String, Object>> sections = (List<Map<String, Object>>) questionSetFromAssessment.get(Constants.CHILDREN);
-                        for (Map<String, Object> section : sections) {
-                            String sectionId = (String) section.get(Constants.IDENTIFIER);
-                            if (userSectionId.equalsIgnoreCase(sectionId)) {
-                                questionsFromAssessment.addAll((List<String>) section.get(Constants.CHILD_NODES));
-                                break;
-                            } else if (userSectionId.isEmpty()) {
-                                questionsFromAssessment.addAll((List<String>) section.get(Constants.CHILD_NODES));
-                            }
-                        }
-                } else {
-                    errMsg = "Question Set From The Redis returns Null";
-                    outgoingResponse.getResult().clear();
-                    break;
-                }
                 if (errMsg.isEmpty()) {
-                    List<Map<String, Object>> userQuestionsIdsFromSubmitRequest = new ArrayList<>();
-                    if (userSectionData.containsKey(Constants.CHILDREN) && !ObjectUtils.isEmpty(userSectionData.get(Constants.CHILDREN))) {
-                        userQuestionsIdsFromSubmitRequest = (List<Map<String, Object>>) userSectionData.get(Constants.CHILDREN);
-                    }
-                    List<String> desiredKeys = Lists.newArrayList(Constants.IDENTIFIER);
-                    List<Object> userQuestionIds = userQuestionsIdsFromSubmitRequest.stream()
-                            .flatMap(x -> desiredKeys.stream()
-                                    .filter(x::containsKey)
-                                    .map(x::get)
-                            ).collect(toList());
-                    if (questionsFromAssessment.containsAll(userQuestionIds)) {
-                        Map<String, Object> result = new HashMap<>();
-                        switch (scoreCutOffType) {
-                            case Constants.ASSESSMENT_LEVEL_SCORE_CUTOFF: {
-                                result.putAll(createResponseMapWithProperStructure(hierarchySection, assessUtilServ.validateQumlAssessment(questionsFromAssessment,
-                                        userQuestionsIdsFromSubmitRequest)));
-                                outgoingResponse.getResult().putAll(calculateAssessmentFinalResults(result));
-                                return outgoingResponse;
-                            }
-                            case Constants.SECTION_LEVEL_SCORE_CUTOFF: {
-                                result.putAll(createResponseMapWithProperStructure(hierarchySection, assessUtilServ.validateQumlAssessment(questionsFromAssessment,
-                                        userQuestionsIdsFromSubmitRequest)));
-                                sectionLevelsResults.add(result);
-                            }
-                            break;
-                            default:
-                                break;
+                    Map<String, Object> result = new HashMap<>();
+                    switch (scoreCutOffType) {
+                        case Constants.ASSESSMENT_LEVEL_SCORE_CUTOFF: {
+                            result.putAll(createResponseMapWithProperStructure(hierarchySection, assessUtilServ.validateQumlAssessment(questionsListFromAssessmentHierarchy,
+                                    questionsListFromSubmitRequest)));
+                            outgoingResponse.getResult().putAll(calculateAssessmentFinalResults(result));
+                            return outgoingResponse;
                         }
-                    }
-                    else
-                    {
-                        errMsg = "Wrong Question Ids in the Submit";
+                        case Constants.SECTION_LEVEL_SCORE_CUTOFF: {
+                            result.putAll(createResponseMapWithProperStructure(hierarchySection, assessUtilServ.validateQumlAssessment(questionsListFromAssessmentHierarchy,
+                                    questionsListFromSubmitRequest)));
+                            sectionLevelsResults.add(result);
+                        }
+                        break;
+                        default:
+                            break;
                     }
                 }
             }
@@ -284,56 +246,77 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
         return outgoingResponse;
     }
 
-    private String validateSubmitAssessmentRequest(Map<String, Object> submitRequest, String authUserToken, List<Map<String, Object>> hierarchySectionList, List<Map<String, Object>> sectionListFromSubmitRequest, Map<String, Object> assessmentHierarchy) {
+    private String validateSubmitAssessmentRequest(Map<String, Object> submitRequest, String authUserToken, List<Map<String, Object>> hierarchySectionList, List<Map<String, Object>> sectionListFromSubmitRequest, Map<String, Object> assessmentHierarchy, List<Map<String, Object>> userQuestionsListFromSubmitRequest, List<Object> questionsListFromAssessmentHierarchy) {
         String userId = validateAuthTokenAndFetchUserId(authUserToken);
-        if (userId == null) {
+        if (ObjectUtils.isEmpty(userId)) {
             return "User Id doesn't exist! Please supply a valid auth token";
-        } else {
-            submitRequest.put(Constants.USER_ID, userId);
-            if (StringUtils.isEmpty((String) submitRequest.get(Constants.IDENTIFIER))) {
-                return "Invalid Assessment Id";
+        }
+        submitRequest.put(Constants.USER_ID, userId);
+        if (StringUtils.isEmpty((String) submitRequest.get(Constants.IDENTIFIER))) {
+            return "Invalid Assessment Id";
+        }
+        Map<String, Object> assessmentAllDetail = new HashMap<>();
+        String assessmentIdFromRequest = (String) submitRequest.get(Constants.IDENTIFIER);
+        String errMsg = fetchReadHierarchyDetails(assessmentAllDetail, authUserToken, assessmentIdFromRequest);
+        if (!errMsg.isEmpty()) {
+            return errMsg;
+        }
+        assessmentHierarchy.putAll((Map<String, Object>) redisCacheMgr
+                .getCache(Constants.ASSESSMENT_ID + assessmentIdFromRequest));
+        if (ObjectUtils.isEmpty(assessmentHierarchy)) {
+            return "Error fetching the read assessment details from the redis cache/Wrong Assessment Id";
+        }
+        Date assessmentStartTime = assessmentRepository.fetchUserAssessmentStartTime(userId, Constants.ASSESSMENT_ID + assessmentIdFromRequest);
+        if (assessmentStartTime == null) {
+            return "Failed to communicate with the db to get the assessment start time";
+        }
+        int time = calculateAssessmentSubmitTime(assessmentHierarchy, assessmentStartTime);
+        if (time <= 0) {
+            hierarchySectionList.addAll((List<Map<String, Object>>) assessmentHierarchy
+                    .get(Constants.CHILDREN));
+            sectionListFromSubmitRequest.addAll((List<Map<String, Object>>) submitRequest.get(Constants.CHILDREN));
+            List<String> desiredKeys = Lists.newArrayList(Constants.IDENTIFIER);
+            List<Object> hierarchySectionIds = hierarchySectionList.stream()
+                    .flatMap(x -> desiredKeys.stream()
+                            .filter(x::containsKey)
+                            .map(x::get)
+                    ).collect(toList());
+            List<Object> submitSectionIds = sectionListFromSubmitRequest.stream()
+                    .flatMap(x -> desiredKeys.stream()
+                            .filter(x::containsKey)
+                            .map(x::get)
+                    ).collect(toList());
+            if (!hierarchySectionIds.containsAll(submitSectionIds)) {
+                return "Wrong section details.";
             } else {
-                Map<String, Object> assessmentAllDetail = new HashMap<>();
-                String assessmentIdFromRequest = (String) submitRequest.get(Constants.IDENTIFIER);
-                String errMsg = fetchReadHierarchyDetails(assessmentAllDetail, authUserToken, assessmentIdFromRequest);
-                if (!errMsg.isEmpty()) {
-                    return errMsg;
-                } else {
-                    assessmentHierarchy.putAll((Map<String, Object>) redisCacheMgr
-                            .getCache(Constants.ASSESSMENT_ID + assessmentIdFromRequest));
-                }
-                if (ObjectUtils.isEmpty(assessmentHierarchy)) {
-                    return "Error fetching the read assessment details from the redis cache/Wrong Assessment Id";
-                } else {
-                    Date assessmentStartTime = assessmentRepository.fetchUserAssessmentStartTime(userId, Constants.ASSESSMENT_ID + assessmentIdFromRequest);
-                    if (assessmentStartTime == null) {
-                        return "Failed to communicate with the db to get the assessment start time";
-                    } else {
-                        int time = calculateAssessmentSubmitTime(assessmentHierarchy, assessmentStartTime);
-                        if (time <= 0) {
-                            hierarchySectionList.addAll((List<Map<String, Object>>) assessmentHierarchy
-                                    .get(Constants.CHILDREN));
-                            sectionListFromSubmitRequest.addAll((List<Map<String, Object>>) submitRequest.get(Constants.CHILDREN));
-                            List<String> desiredKeys = Lists.newArrayList(Constants.IDENTIFIER);
-                            List<Object> hierarchySectionIds = hierarchySectionList.stream()
-                                    .flatMap(x -> desiredKeys.stream()
-                                            .filter(x::containsKey)
-                                            .map(x::get)
-                                    ).collect(toList());
-                            List<Object> submitSectionIds = sectionListFromSubmitRequest.stream()
-                                    .flatMap(x -> desiredKeys.stream()
-                                            .filter(x::containsKey)
-                                            .map(x::get)
-                                    ).collect(toList());
-                            if (!hierarchySectionIds.containsAll(submitSectionIds)) {
-                                return "Wrong section details.";
-                            }
-                        } else {
-                            return "The Assessment submission time-period is over! Assessment can't be submitted";
+                Map<String, Object> questionSetFromAssessment = (Map<String, Object>) redisCacheMgr.getCache(Constants.USER_ASSESS_REQ + (String) submitRequest.get(Constants.IDENTIFIER) + authUserToken);
+                if (questionSetFromAssessment != null && questionSetFromAssessment.get(Constants.CHILDREN) != null) {
+                    List<Map<String, Object>> sections = (List<Map<String, Object>>) questionSetFromAssessment.get(Constants.CHILDREN);
+                    List<String> desiredKey = Lists.newArrayList(Constants.CHILD_NODES);
+                    questionsListFromAssessmentHierarchy.addAll(sections.stream()
+                            .flatMap(x -> desiredKey.stream()
+                                    .filter(x::containsKey)
+                                    .map(x::get)
+                            ).collect(toList()));
+                    for (Map<String, Object> userSectionData : sectionListFromSubmitRequest) {
+                        if (userSectionData.containsKey(Constants.CHILDREN) && !ObjectUtils.isEmpty(userSectionData.get(Constants.CHILDREN))) {
+                            userQuestionsListFromSubmitRequest.addAll((List<Map<String, Object>>) userSectionData.get(Constants.CHILDREN));
+                        }
+                        List<Object> userQuestionIdsFromSubmitRequest = userQuestionsListFromSubmitRequest.stream()
+                                .flatMap(x -> desiredKeys.stream()
+                                        .filter(x::containsKey)
+                                        .map(x::get)
+                                ).collect(toList());
+                        if (!questionsListFromAssessmentHierarchy.containsAll(userQuestionIdsFromSubmitRequest)) {
+                            return "The answers provided don't match to the Questions";
                         }
                     }
+                } else {
+                    return "Question Set From The Redis returns Null";
                 }
             }
+        } else {
+            return "The Assessment submission time-period is over! Assessment can't be submitted";
         }
         return "";
     }
@@ -509,12 +492,6 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
     }
 
     private Boolean validateQuestionListRequest(List<String> identifierList, List<String> questionsFromAssessment) {
-        List<String> identifierListCopy = new ArrayList<>();
-        identifierListCopy.addAll(identifierList);
-        List<String> questionsFromAssessmentCopy = new ArrayList<>();
-        questionsFromAssessmentCopy.addAll(questionsFromAssessment);
-        identifierListCopy.removeAll(questionsFromAssessment);
-        questionsFromAssessmentCopy.removeAll(identifierList);
-        return (identifierListCopy.isEmpty() && questionsFromAssessmentCopy.isEmpty()) ? Boolean.TRUE : Boolean.FALSE;
+        return (questionsFromAssessment.containsAll(identifierList) && questionsFromAssessment.size() == identifierList.size()) ? Boolean.TRUE : Boolean.FALSE;
     }
 }

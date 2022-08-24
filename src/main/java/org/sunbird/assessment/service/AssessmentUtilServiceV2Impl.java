@@ -1,6 +1,5 @@
 package org.sunbird.assessment.service;
 
-import com.beust.jcommander.internal.Lists;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,11 +11,8 @@ import org.sunbird.cache.RedisCacheMgr;
 import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
-import org.sunbird.core.exception.ApplicationLogicError;
 
 import java.util.*;
-
-import static java.util.stream.Collectors.toList;
 
 @Service
 public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
@@ -31,7 +27,7 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 
 	private Logger logger = LoggerFactory.getLogger(AssessmentUtilServiceV2Impl.class);
 
-	public Map<String, Object> validateQumlAssessment(List<String> originalQuestionList,
+	public Map<String, Object> validateQumlAssessment(List<Object> originalQuestionList,
 													  List<Map<String, Object>> userQuestionList) {
 		try {
 			Integer correct = 0;
