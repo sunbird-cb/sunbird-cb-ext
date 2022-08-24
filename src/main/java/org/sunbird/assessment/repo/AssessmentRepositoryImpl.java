@@ -143,7 +143,6 @@ public class AssessmentRepositoryImpl implements AssessmentRepository {
 	public Date fetchUserAssessmentStartTime(String userId, String assessmentIdentifier) {
 		Map<String, Object> request = new HashMap<>();
 		request.put(Constants.USER_ID, userId);
-
 		request.put(Constants.IDENTIFIER, assessmentIdentifier);
 		List<Map<String, Object>> existingDataList = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
 				Constants.TABLE_USER_ASSESSMENT_TIME, request, null);

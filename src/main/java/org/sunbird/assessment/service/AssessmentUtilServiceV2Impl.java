@@ -1,5 +1,6 @@
 package org.sunbird.assessment.service;
 
+import com.beust.jcommander.internal.Lists;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +15,8 @@ import org.sunbird.common.util.Constants;
 import org.sunbird.core.exception.ApplicationLogicError;
 
 import java.util.*;
+
+import static java.util.stream.Collectors.toList;
 
 @Service
 public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
@@ -67,11 +70,7 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 						default:
 							break;
 					}
-				} else {
-					// TODO - how to handle this case??
-					// Currently throw error
 				}
-
 				if (CollectionUtils.isEmpty(marked))
 					blank++;
 				else {
@@ -100,8 +99,8 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 
 		} catch (Exception ex) {
 			logger.error("Error when verifying assessment. Error : ");
-			throw new ApplicationLogicError("Error when verifying assessment. Error : " + ex.getMessage(), ex);
 		}
+		return new HashMap<>();
 	}
 
 
@@ -115,7 +114,6 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 			if (ObjectUtils.isEmpty(question)) {
 				logger.error("Failed to get the answer for question: " + questionId);
 				//call the assessment question list api
-				// TODO - Need to handle this scenario.
 			}
 			if (question.containsKey(Constants.QUESTION_TYPE)) {
 				String questionType = ((String) question.get(Constants.QUESTION_TYPE)).toLowerCase();
