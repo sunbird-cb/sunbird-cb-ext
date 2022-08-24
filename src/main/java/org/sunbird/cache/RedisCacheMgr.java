@@ -40,7 +40,6 @@ public class RedisCacheMgr {
 
     public boolean deleteKeyByName(String key) {
         try {
-            key = key.toUpperCase();
             redisTemplate.delete(Constants.REDIS_COMMON_KEY + key);
             logger.info("Cache_key_value " + Constants.REDIS_COMMON_KEY + key + " is deleted from redis");
             return true;
@@ -50,7 +49,7 @@ public class RedisCacheMgr {
         }
     }
 
-    public boolean deleteAllKey() {
+    public boolean deleteAllCBExtKey() {
         try {
             String keyPattern = Constants.REDIS_COMMON_KEY + "*";
             Set<String> keys = redisTemplate.keys(keyPattern);
@@ -88,32 +87,11 @@ public class RedisCacheMgr {
         return null;
     }
 
-    public boolean deleteCache() {
-        try {
-            String keyPattern = "*";
-            Set<String> keys = redisTemplate.keys(keyPattern);
-            if (!keys.isEmpty()) {
-                for (String key : keys) {
-
-                    redisTemplate.delete(key);
-                }
-                logger.info("All Keys in Redis Cache is Deleted");
-                return true;
-            } else {
-                return false;
-            }
-        } catch (Exception e) {
-            logger.error(e);
-            return false;
-        }
-    }
-
-    public Set<String> getAllKeys() {
+    public Set<String> getAllKeyNames() {
         Set<String> keys = null;
         try {
-            String keyPattern = "*";
+            String keyPattern = Constants.REDIS_COMMON_KEY + "*";
             keys = redisTemplate.keys(keyPattern);
-
         } catch (Exception e) {
             logger.error(e);
             return Collections.emptySet();
@@ -124,7 +102,7 @@ public class RedisCacheMgr {
     public List<Map<String, Object>> getAllKeysAndValues() {
         List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
         try {
-            String keyPattern = "*";
+            String keyPattern = Constants.REDIS_COMMON_KEY + "*";
             Map<String, Object> res = new HashMap<>();
             Set<String> keys = redisTemplate.keys(keyPattern);
             if (!keys.isEmpty()) {
