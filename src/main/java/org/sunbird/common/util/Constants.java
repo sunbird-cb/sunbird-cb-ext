@@ -497,7 +497,6 @@ public class Constants {
 	public static final String USER_ROLES = "userRoles";
 	public static final String X_AUTH_USER_ID = "x-authenticated-userid";
 	public static final String SOFT_DELETE_OLD_ORG = "softDeleteOldOrg";
-<<<<<<< HEAD
 	public static final String NOTIFY_MIGRATION = "notifyMigration";
 	public static final String REDIS_CACHE_ID = "redis_cache_id";
 	public static final String CONTENT_ID_ = "contentId";
@@ -516,7 +515,6 @@ public class Constants {
 	public static final String QUES_ID = "questionId";
 	public static final String SELECTED_ANSWER = "selectedAnswer";
 	public static final String INDEX = "index";
-	public static final String NOTIFY_MIGRATION = "notifyMigration";
 	public static final String FORCE_MIGRATION = "forceMigration";
 	public static final String PROFILE_DETAILS_LOWER = "profiledetails";
 	public static final String EMPLOYMENT_DETAILS = "employmentDetails";
