@@ -789,7 +789,7 @@ public class ProfileServiceImpl implements ProfileService {
 		final BoolQueryBuilder finalQuery = QueryBuilders.boolQuery();
 		finalQuery.must(QueryBuilders.termQuery(Constants.STATUS, 1)).must(query);
 		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder().query(finalQuery);
-		sourceBuilder.fetchSource(new String[] {}, serverConfig.getEsAutoCompleteExcludeFields());
+		sourceBuilder.fetchSource(serverConfig.getEsAutoCompleteIncludeFields(), new String[]{});
 		SearchResponse searchResponse = indexerService.getEsResult(serverConfig.getEsProfileIndex(),
 				serverConfig.getEsProfileIndexType(), sourceBuilder);
 		for (SearchHit hit : searchResponse.getHits()) {

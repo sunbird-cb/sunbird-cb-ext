@@ -326,9 +326,12 @@ public class CbExtServerProperties {
 	
 	@Value("${es.user.auto.complete.search.fields}")
 	private String esAutoCompleteSearchFields;
-	
-	@Value("${es.user.auto.complete.exclude.fields}")
-	private String esAutoCompleteExcludeFields;
+
+	@Value("${es.user.auto.complete.include.fields}")
+	private String esAutoCompleteIncludeFields;
+
+	@Value("${es.profile.index.work.allocation}")
+	private String esProfileIndexWorkAllocation;
 
 	public String getUserAssessmentSubmissionDuration() {
 		return userAssessmentSubmissionDuration;
@@ -1197,11 +1200,19 @@ public class CbExtServerProperties {
 		this.esAutoCompleteSearchFields = esAutoCompleteSearchFields;
 	}
 
-	public String[] getEsAutoCompleteExcludeFields() {
-		return esAutoCompleteExcludeFields.split(",", -1);
+	public String[] getEsAutoCompleteIncludeFields() {
+		return esAutoCompleteIncludeFields.split(",", -1);
 	}
 
-	public void setEsAutoCompleteExcludeFields(String esAutoCompleteExcludeFields) {
-		this.esAutoCompleteExcludeFields = esAutoCompleteExcludeFields;
+	public void setEsAutoCompleteIncludeFields(String esAutoCompleteIncludeFields) {
+		this.esAutoCompleteIncludeFields = esAutoCompleteIncludeFields;
+	}
+
+	public String getEsProfileIndexWorkAllocation() {
+		return esProfileIndexWorkAllocation;
+	}
+
+	public void setEsProfileIndexWorkAllocation(String esProfileIndexWorkAllocation) {
+		this.esProfileIndexWorkAllocation = esProfileIndexWorkAllocation;
 	}
 }
