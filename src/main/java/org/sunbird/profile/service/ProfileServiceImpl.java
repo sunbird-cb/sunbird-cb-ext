@@ -68,7 +68,6 @@ public class ProfileServiceImpl implements ProfileService {
 	public SBApiResponse profileUpdate(Map<String, Object> request, String userToken, String authToken)
 			throws Exception {
 		SBApiResponse response = new SBApiResponse(Constants.API_PROFILE_UPDATE);
-		SunbirdApiRespParam resultObject = new SunbirdApiRespParam();
 		try {
 			Map<String, Object> requestData = (Map<String, Object>) request.get(Constants.REQUEST);
 			if (!validateRequest(requestData)) {
@@ -110,6 +109,8 @@ public class ProfileServiceImpl implements ProfileService {
 				for (String changedObj : listOfChangedDetails) {
 					if (profileDetailsMap.get(changedObj) instanceof ArrayList) {
 						existingProfileDetails.put(changedObj, profileDetailsMap.get(changedObj));
+					} else if (profileDetailsMap.get(changedObj) instanceof Boolean) {
+						existingProfileDetails.put(changedObj, profileDetailsMap.get(changedObj));
 					} else {
 						if (existingProfileDetails.containsKey(changedObj)) {
 							Map<String, Object> existingProfileChild = (Map<String, Object>) existingProfileDetails
@@ -138,12 +139,10 @@ public class ProfileServiceImpl implements ProfileService {
 				updateResponse = outboundRequestHandlerService.fetchResultUsingPatch(
 						serverConfig.getSbUrl() + serverConfig.getLmsUserUpdatePath(), updateRequest, headerValues);
 				if (updateResponse.get(Constants.RESPONSE_CODE).equals(Constants.OK)) {
-					resultObject.setStatus(Constants.SUCCESS);
-					response.getResult().put(Constants.PERSONAL_DETAILS, resultObject);
+					response.setResponseCode(HttpStatus.OK);
+					response.getResult().put(Constants.RESPONSE, Constants.SUCCESS);
 					response.getParams().setStatus(Constants.SUCCESS);
 				} else {
-					resultObject.setStatus(Constants.FAILED);
-					response.getResult().put(Constants.PERSONAL_DETAILS, resultObject);
 					response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
 					response.getParams().setStatus(Constants.FAILED);
 					return response;
@@ -223,7 +222,6 @@ public class ProfileServiceImpl implements ProfileService {
 				transitionRequests.put(Constants.UPDATE_FIELD_VALUES, finalTransitionList);
 				url = new StringBuilder();
 				url.append(serverConfig.getWfServiceHost()).append(serverConfig.getWfServiceTransitionPath());
-				headerValues.put("rootOrg", "igot");
 				headerValues.put(Constants.ROOT_ORG_CONSTANT, Constants.IGOT);
 				headerValues.put(Constants.ORG_CONSTANT, Constants.DOPT);
 				workflowResponse = outboundRequestHandlerService.fetchResultUsingPost(
@@ -231,23 +229,21 @@ public class ProfileServiceImpl implements ProfileService {
 						headerValues);
 
 				Map<String, Object> resultValue = (Map<String, Object>) workflowResponse.get(Constants.RESULT);
-				if (resultValue.get(Constants.STATUS).equals(Constants.OK)) {
-					resultObject.setStatus(Constants.SUCCESS);
-					response.getResult().put(Constants.TRANSITION_DETAILS, resultObject);
+				if (Constants.OK.equalsIgnoreCase((String) resultValue.get(Constants.STATUS))) {
+					response.getResult().put(Constants.RESPONSE, Constants.SUCCESS);
 					response.getParams().setStatus(Constants.SUCCESS);
+					response.setResponseCode(HttpStatus.OK);
 				} else {
-					resultObject.setStatus(Constants.FAILED);
-					resultObject.setErrmsg((String) resultValue.get(Constants.MESSAGE));
-					response.getResult().put(Constants.TRANSITION_DETAILS, resultObject);
+					response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+					response.getParams().setStatus(Constants.FAILED);
+					response.getParams().setErrmsg("Failed to raise workflow transition request.");
 				}
 			}
-			response.setResponseCode(HttpStatus.OK);
 		} catch (Exception e) {
 			log.error("Failed to process profile update. Exception: ", e);
 			response.getParams().setStatus(Constants.FAILED);
 			response.getParams().setErr(e.getMessage());
 			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
-
 		}
 		return response;
 	}
