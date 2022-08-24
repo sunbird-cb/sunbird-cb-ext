@@ -81,15 +81,6 @@ public class CbExtServerProperties {
 	@Value("${es.profile.source.fields}")
 	private String[] esProfileSourceFields;
 
-	@Value("${es.field.primaryEmail}")
-	private String esFieldPrimaryEmail;
-
-	@Value("${es.field.firstname}")
-	private String esFieldFirstName;
-
-	@Value("${es.field.surname}")
-	private String esFieldSurName;
-
 	@Value("${org.create.endpoint}")
 	private String orgCreateEndPoint;
 
@@ -332,6 +323,12 @@ public class CbExtServerProperties {
 	
 	@Value("${sb.service.user.self.migrate.path}")
 	private String lmsUserSelfMigratePath;
+	
+	@Value("${es.user.auto.complete.search.fields}")
+	private String esAutoCompleteSearchFields;
+	
+	@Value("${es.user.auto.complete.exclude.fields}")
+	private String esAutoCompleteExcludeFields;
 
 	public String getUserAssessmentSubmissionDuration() {
 		return userAssessmentSubmissionDuration;
@@ -539,30 +536,6 @@ public class CbExtServerProperties {
 
 	public void setEsProfileSourceFields(String[] esProfileSourceFields) {
 		this.esProfileSourceFields = esProfileSourceFields;
-	}
-
-	public String getEsFieldPrimaryEmail() {
-		return esFieldPrimaryEmail;
-	}
-
-	public void setEsFieldPrimaryEmail(String esFieldPrimaryEmail) {
-		this.esFieldPrimaryEmail = esFieldPrimaryEmail;
-	}
-
-	public String getEsFieldFirstName() {
-		return esFieldFirstName;
-	}
-
-	public void setEsFieldFirstName(String esFieldFirstName) {
-		this.esFieldFirstName = esFieldFirstName;
-	}
-
-	public String getEsFieldSurName() {
-		return esFieldSurName;
-	}
-
-	public void setEsFieldSurName(String esFieldSurName) {
-		this.esFieldSurName = esFieldSurName;
 	}
 
 	public String getOrgCreateEndPoint() {
@@ -1214,5 +1187,21 @@ public class CbExtServerProperties {
 
 	public void setLmsUserSelfMigratePath(String lmsUserSelfMigratePath) {
 		this.lmsUserSelfMigratePath = lmsUserSelfMigratePath;
+	}
+
+	public List<String> getEsAutoCompleteSearchFields() {
+		return Arrays.asList(esAutoCompleteSearchFields.split(",", -1));
+	}
+
+	public void setEsAutoCompleteSearchFields(String esAutoCompleteSearchFields) {
+		this.esAutoCompleteSearchFields = esAutoCompleteSearchFields;
+	}
+
+	public String[] getEsAutoCompleteExcludeFields() {
+		return esAutoCompleteExcludeFields.split(",", -1);
+	}
+
+	public void setEsAutoCompleteExcludeFields(String esAutoCompleteExcludeFields) {
+		this.esAutoCompleteExcludeFields = esAutoCompleteExcludeFields;
 	}
 }

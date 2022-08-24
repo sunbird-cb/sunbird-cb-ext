@@ -46,8 +46,8 @@ public class ProfileController {
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
 
-	@GetMapping("/users/autocomplete")
-	public ResponseEntity<?> userAutoComplete(@RequestParam("searchTerm") String searchTerm) throws Exception {
+	@GetMapping("/user/v1/autocomplete/{searchTerm}")
+	public ResponseEntity<?> userAutoComplete(@PathVariable("searchTerm") String searchTerm) {
 		SBApiResponse response = profileService.userAutoComplete(searchTerm);
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}

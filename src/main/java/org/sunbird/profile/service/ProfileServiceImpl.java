@@ -68,8 +68,6 @@ public class ProfileServiceImpl implements ProfileService {
 
 	private CbExtLogger log = new CbExtLogger(getClass().getName());
 
-	final String[] excludeFields = new String[] {"maskedEmail"};
-
 	@Override
 	public SBApiResponse profileUpdate(Map<String, Object> request, String userToken, String authToken)
 			throws Exception {
@@ -389,38 +387,26 @@ public class ProfileServiceImpl implements ProfileService {
     @Override
 	public SBApiResponse userAutoComplete(String searchTerm) {
 		SBApiResponse response = new SBApiResponse();
-		List<Map<String, Object>> userData = null;
-		List<Map<String, Object>> finalRes = new ArrayList<>();
+		response.setResponseCode(HttpStatus.BAD_REQUEST);
+		response.getParams().setStatus(Constants.FAILED);
+		if (StringUtils.isEmpty(searchTerm)) {
+			response.getParams().setErrmsg("Invalid Search Term");
+			return response;
+		}
+
+		response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+		Map<String, Object> resultResp = new HashMap<>();
 		try {
-			Boolean validate = validateAutoCompleteAPI(searchTerm);
-			if (validate) {
-				userData = getUserSearchData(searchTerm);
-				Map<String, Object> result;
-				if (!org.springframework.util.CollectionUtils.isEmpty(userData)) {
-					for (Map<String, Object> user : userData) {
-						result = new HashMap<>();
-						result.put(WorkAllocationConstants.USER_DETAILS, user);
-						result.put(WorkAllocationConstants.ALLOCATION_DETAILS, null);
-						finalRes.add(result);
-					}
-				} else {
-					response.setResponseCode(HttpStatus.BAD_REQUEST);
-					response.getParams().setErrmsg("Failed to fetch user details !");
-					response.getParams().setStatus(Constants.FAILED);
-				}
-			} else {
-				response.setResponseCode(HttpStatus.BAD_REQUEST);
-				response.getParams().setErrmsg("search term is empty !");
-				response.getParams().setStatus(Constants.FAILED);
-			}
+			List<Map<String, Object>> userData = getUserSearchData(searchTerm);
+			resultResp.put(Constants.CONTENT, userData);
+			resultResp.put(Constants.COUNT, userData.size());
 			response.setResponseCode(HttpStatus.OK);
 			response.getParams().setStatus(Constants.SUCCESS);
-			response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
-			response.put(Constants.DATA, finalRes);
-			response.put(Constants.STATUS, HttpStatus.OK);
+			response.put(Constants.RESPONSE, resultResp);
 		} catch (Exception e) {
 			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
-			response.getParams().setErrmsg("Exception occurred while searching the user's from user registry" + e.getMessage());
+			response.getParams()
+					.setErrmsg("Exception occurred while searching the user's from user registry" + e.getMessage());
 			response.getParams().setStatus(Constants.FAILED);
 		}
 		return response;
@@ -453,7 +439,6 @@ public class ProfileServiceImpl implements ProfileService {
 	}
 
 	public List<String> approvalFields(String authToken, String userToken) {
-
 		Map<String, Object> approvalFieldsCache = (Map<String, Object>) mapper
 				.convertValue(redisCacheMgr.getCache(Constants.PROFILE_UPDATE_FIELDS), Map.class);
 
@@ -797,14 +782,14 @@ public class ProfileServiceImpl implements ProfileService {
 		List<Map<String, Object>> resultArray = new ArrayList<>();
 		Map<String, Object> result;
 		final BoolQueryBuilder query = QueryBuilders.boolQuery();
-		query.should(QueryBuilders.matchPhrasePrefixQuery(serverConfig.getEsFieldPrimaryEmail(), searchTerm))
-				.should(QueryBuilders.matchPhrasePrefixQuery(serverConfig.getEsFieldFirstName(), searchTerm))
-				.should(QueryBuilders.matchPhrasePrefixQuery(serverConfig.getEsFieldSurName(), searchTerm));
+		for(String field : serverConfig.getEsAutoCompleteSearchFields()) {
+			query.should(QueryBuilders.matchPhrasePrefixQuery(field, searchTerm));
+		}
+		
 		final BoolQueryBuilder finalQuery = QueryBuilders.boolQuery();
-		finalQuery.must(QueryBuilders.termQuery("status", 1))
-				.must(query);
+		finalQuery.must(QueryBuilders.termQuery(Constants.STATUS, 1)).must(query);
 		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder().query(finalQuery);
-		sourceBuilder.fetchSource(new String[]{}, excludeFields);
+		sourceBuilder.fetchSource(new String[] {}, serverConfig.getEsAutoCompleteExcludeFields());
 		SearchResponse searchResponse = indexerService.getEsResult(serverConfig.getEsProfileIndex(),
 				serverConfig.getEsProfileIndexType(), sourceBuilder);
 		for (SearchHit hit : searchResponse.getHits()) {
@@ -812,12 +797,5 @@ public class ProfileServiceImpl implements ProfileService {
 			resultArray.add(result);
 		}
 		return resultArray;
-	}
-
-	private Boolean validateAutoCompleteAPI(String searchTerm) {
-		if (StringUtils.isEmpty(searchTerm)) {
-			return false;
-		}
-		return true;
 	}
 }
