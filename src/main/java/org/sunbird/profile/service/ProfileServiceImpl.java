@@ -924,7 +924,10 @@ public class ProfileServiceImpl implements ProfileService {
 					(String) request.get(Constants.USER_ID), (String) request.get(Constants.CHANNEL)));
 		} else {
 			try {
-				errMsg = "Failed to Self migrate User.";
+				if (migrateResponse != null)
+					errMsg = (String) ((Map<String, Object>) migrateResponse.get(Constants.PARAMS)).get(Constants.ERROR_MESSAGE);
+				else
+					errMsg = "Failed to Self migrate User.";
 				log.warn(String.format("%s. Error: %s", errMsg, mapper.writeValueAsString(migrateResponse)));
 			} catch (Exception e) {
 			}
@@ -955,8 +958,10 @@ public class ProfileServiceImpl implements ProfileService {
 
 		Map<String, Object> syncDataResp = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPost(
 				serverConfig.getSbUrl() + serverConfig.getLmsDataSyncPath(), requestBody, MapUtils.EMPTY_MAP);
-		if (syncDataResp == null
-				|| !Constants.OK.equalsIgnoreCase((String) syncDataResp.get(Constants.RESPONSE_CODE))) {
+		if (syncDataResp != null
+				&& !Constants.OK.equalsIgnoreCase((String) syncDataResp.get(Constants.RESPONSE_CODE))) {
+			errMsg = (String) ((Map<String, Object>) syncDataResp.get(Constants.PARAMS)).get(Constants.ERROR_MESSAGE);
+		} else if (syncDataResp == null) {
 			errMsg = "Failed to call Data Sync after updating Profile for User: " + userId;
 		}
 		return errMsg;
