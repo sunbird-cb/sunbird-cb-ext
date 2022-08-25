@@ -23,6 +23,7 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -33,7 +34,12 @@ public class IndexerService {
     private Logger logger = LoggerFactory.getLogger(IndexerService.class);
 
     @Autowired
+    @Qualifier("esClient")
     private RestHighLevelClient esClient;
+    
+    @Autowired
+    @Qualifier("sbEsClient")
+    private RestHighLevelClient sbEsClient;
 
     /**
      * @param index         name of index
@@ -107,14 +113,13 @@ public class IndexerService {
      * @return es search response
      * @throws IOException
      */
-    public SearchResponse getEsResult(String indexName, String type, SearchSourceBuilder searchSourceBuilder) throws IOException {
+    public SearchResponse getEsResult(String indexName, String type, SearchSourceBuilder searchSourceBuilder, boolean isSunbirdES) throws IOException {
         SearchRequest searchRequest = new SearchRequest();
         searchRequest.indices(indexName);
         if (!StringUtils.isEmpty(type))
             searchRequest.types(type);
         searchRequest.source(searchSourceBuilder);
-        return esClient.search(searchRequest, RequestOptions.DEFAULT);
-
+        return getEsResult(searchRequest, isSunbirdES);
     }
 
     public RestStatus BulkInsert(List<IndexRequest> indexRequestList) {
@@ -142,6 +147,14 @@ public class IndexerService {
 		} catch (Exception e) {
 			logger.error(String.format("Exception in getDocumentCount: %s", e.getMessage()));
 			return 0l;
+		}
+	}
+	
+	private SearchResponse getEsResult(SearchRequest searchRequest, boolean isSbES) throws IOException {
+		if(isSbES) {
+			return sbEsClient.search(searchRequest, RequestOptions.DEFAULT);
+		} else {
+			return esClient.search(searchRequest, RequestOptions.DEFAULT);
 		}
 	}
 }
