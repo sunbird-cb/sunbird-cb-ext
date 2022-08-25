@@ -333,6 +333,7 @@ public class ProfileServiceImpl implements ProfileService {
 			setErrorData(response, errMsg);
 			return response;
 		}
+		log.info(String.format("Successfully migrated user. UserId: %s, Channel: %s", userId, orgName));
 
 		Map<String, Object> userData = getUserDetailsForId(userId);
 		if (ObjectUtils.isEmpty(userData)) {
@@ -919,15 +920,10 @@ public class ProfileServiceImpl implements ProfileService {
 		Map<String, Object> migrateResponse = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPatch(
 				serverConfig.getSbUrl() + serverConfig.getLmsUserMigratePath(), request, headers);
 		if (migrateResponse != null
-				&& Constants.OK.equalsIgnoreCase((String) migrateResponse.get(Constants.RESPONSE_CODE))) {
-			log.info(String.format("Successfully self migrated user. UserId: %s, Channel: %s",
-					(String) request.get(Constants.USER_ID), (String) request.get(Constants.CHANNEL)));
+				&& !Constants.OK.equalsIgnoreCase((String) migrateResponse.get(Constants.RESPONSE_CODE))) {
+			errMsg = (String) ((Map<String, Object>) migrateResponse.get(Constants.PARAMS)).get(Constants.ERROR_MESSAGE);;
 		} else {
-			try {
-				errMsg = "Failed to Self migrate User.";
-				log.warn(String.format("%s. Error: %s", errMsg, mapper.writeValueAsString(migrateResponse)));
-			} catch (Exception e) {
-			}
+			errMsg = "Failed to migrate User.";
 		}
 		return errMsg;
 	}
