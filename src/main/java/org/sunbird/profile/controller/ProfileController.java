@@ -53,7 +53,7 @@ public class ProfileController {
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
 
-	@PostMapping("/user/v1/migrate")
+	@PatchMapping("/user/v1/migrate")
 	private ResponseEntity<?> adminMigrateUser(@RequestHeader(Constants.X_AUTH_TOKEN) String userToken,
 			@RequestHeader(Constants.AUTH_TOKEN) String authToken, @RequestBody Map<String, Object> request) {
 		SBApiResponse response = profileService.migrateUser(request, userToken, authToken);
