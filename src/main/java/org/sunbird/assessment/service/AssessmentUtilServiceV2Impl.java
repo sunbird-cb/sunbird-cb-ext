@@ -27,7 +27,7 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 
 	private Logger logger = LoggerFactory.getLogger(AssessmentUtilServiceV2Impl.class);
 
-	public Map<String, Object> validateQumlAssessment(List<Object> originalQuestionList,
+	public Map<String, Object> validateQumlAssessment(List<String> originalQuestionList,
 													  List<Map<String, Object>> userQuestionList) {
 		try {
 			Integer correct = 0;
@@ -100,15 +100,15 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 	}
 
 
-	private Map<String, Object> getQumlAnswers(List<Object> questions) throws Exception {
+	private Map<String, Object> getQumlAnswers(List<String> questions) throws Exception {
 		Map<String, Object> ret = new HashMap<>();
-		for (Object questionId : questions) {
+		for (String questionId : questions) {
 			List<String> correctOption = new ArrayList<>();
 
 			Map<String, Object> question = (Map<String, Object>) redisCacheMgr
-					.getCache(Constants.QUESTION_ID + (String) questionId);
+					.getCache(Constants.QUESTION_ID + questionId);
 			if (ObjectUtils.isEmpty(question)) {
-				logger.error("Failed to get the answer for question: " + (String) questionId);
+				logger.error("Failed to get the answer for question: " + questionId);
 				//call the assessment question list api
 			}
 			if (question.containsKey(Constants.QUESTION_TYPE)) {
