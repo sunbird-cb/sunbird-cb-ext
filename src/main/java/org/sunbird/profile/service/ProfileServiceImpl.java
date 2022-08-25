@@ -514,7 +514,7 @@ public class ProfileServiceImpl implements ProfileService {
 			response.put(Constants.RESPONSE, resultResp);
 		} catch (Exception e) {
 			response.getParams()
-					.setErrmsg("Exception occurred while searching the user's from user registry" + e.getMessage());
+					.setErrmsg("Failed to get user details from ES. Exception: " + e.getMessage());
 		}
 		return response;
 	}
@@ -962,24 +962,24 @@ public class ProfileServiceImpl implements ProfileService {
 		return errMsg;
 	}
   
-  public List<Map<String, Object>> getUserSearchData(String searchTerm) throws Exception {
+	public List<Map<String, Object>> getUserSearchData(String searchTerm) throws Exception {
 		List<Map<String, Object>> resultArray = new ArrayList<>();
 		Map<String, Object> result;
 		final BoolQueryBuilder query = QueryBuilders.boolQuery();
-		for(String field : serverConfig.getEsAutoCompleteSearchFields()) {
+		for (String field : serverConfig.getEsAutoCompleteSearchFields()) {
 			query.should(QueryBuilders.matchPhrasePrefixQuery(field, searchTerm));
 		}
-		
+
 		final BoolQueryBuilder finalQuery = QueryBuilders.boolQuery();
 		finalQuery.must(QueryBuilders.termQuery(Constants.STATUS, 1)).must(query);
 		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder().query(finalQuery);
-		sourceBuilder.fetchSource(serverConfig.getEsAutoCompleteIncludeFields(), new String[]{});
+		sourceBuilder.fetchSource(serverConfig.getEsAutoCompleteIncludeFields(), new String[] {});
 		SearchResponse searchResponse = indexerService.getEsResult(serverConfig.getEsProfileIndex(),
-				serverConfig.getEsProfileIndexType(), sourceBuilder);
+				serverConfig.getEsProfileIndexType(), sourceBuilder, true);
 		for (SearchHit hit : searchResponse.getHits()) {
 			result = hit.getSourceAsMap();
 			resultArray.add(result);
 		}
 		return resultArray;
-  }
+	}
 }

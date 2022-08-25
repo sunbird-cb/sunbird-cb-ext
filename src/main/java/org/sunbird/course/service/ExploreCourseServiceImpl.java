@@ -71,6 +71,9 @@ public class ExploreCourseServiceImpl implements ExploreCourseService {
 					responseCourseList = (Map<String, Object>) searchResponse.get(Constants.RESULT);
 					redisCacheMgr.putCache(Constants.PUBLIC_COURSE_LIST, responseCourseList);
 					response.setResult(responseCourseList);
+					logger.info(String.format(
+							"Adding open course details into Cache. CourseId Count: %s, ContentSearch Count: %s",
+							identifierList.size(), responseCourseList.get(Constants.COUNT)));
 				}
 			} else {
 				response.setResult(responseCourseList);
@@ -80,6 +83,7 @@ public class ExploreCourseServiceImpl implements ExploreCourseService {
 			logger.error(errMsg, e);
 		}
 		if (StringUtils.isNotEmpty(errMsg)) {
+			logger.error("Failed to initialize the Open Course Details to Cache. ErrMsg: " + errMsg);
 			response.getParams().setErrmsg(errMsg);
 			response.getParams().setStatus(Constants.FAILED);
 			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -98,7 +102,7 @@ public class ExploreCourseServiceImpl implements ExploreCourseService {
 	private Map<String, Object> searchContent(List<String> identifierList) {
 		try {
 			StringBuilder sbUrl = new StringBuilder(serverProperties.getKmBaseHost());
-			sbUrl.append(serverProperties.getKmCompositeSearchPath());
+			sbUrl.append(serverProperties.getKmBaseContentSearch());
 			Map<String, String> headers = new HashMap<String, String>();
 			headers.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
 			return outboundRequestHandlerService.fetchResultUsingPost(sbUrl.toString(),

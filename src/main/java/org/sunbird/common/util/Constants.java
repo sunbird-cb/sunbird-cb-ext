@@ -501,7 +501,7 @@ public class Constants {
 	public static final String SYNC = "sync";
 	public static final String OBJECT_IDS = "objectIds";
 	public static final String USER = "user";	
-	public static final String PUBLIC_COURSE_LIST = "publicCourseList";
+	public static final String PUBLIC_COURSE_LIST = "exploreOpenCourseList";
 	public static final String LAST_UPDATED_ON = "lastUpdatedOn";
 	public static final String DESCENDING_ORDER = "desc";
   

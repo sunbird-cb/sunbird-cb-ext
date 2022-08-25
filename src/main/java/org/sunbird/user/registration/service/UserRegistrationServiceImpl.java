@@ -296,7 +296,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 
 	private UserRegistration getUserRegistrationDocument(Map<String, Object> mustMatch) throws Exception {
 		SearchResponse searchResponse = indexerService.getEsResult(serverProperties.getUserRegistrationIndex(),
-				serverProperties.getEsProfileIndexType(), queryBuilder(mustMatch));
+				serverProperties.getEsProfileIndexType(), queryBuilder(mustMatch), false);
 
 		if (searchResponse.getHits().getTotalHits() > 0) {
 			SearchHit hit = searchResponse.getHits().getAt(0);
