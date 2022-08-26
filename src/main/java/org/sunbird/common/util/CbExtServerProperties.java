@@ -327,13 +327,10 @@ public class CbExtServerProperties {
 	@Value("${es.user.auto.complete.include.fields}")
 	private String esAutoCompleteIncludeFields;
 
-	@Value("${es.profile.index.work.allocation}")
-	private String esProfileIndexWorkAllocation;
-
-  @Value("${sb.service.user.migrate.path}")
+    @Value("${sb.service.user.migrate.path}")
 	private String lmsUserMigratePath;
 
-  @Value("${km.base.composite.search.fields}")
+    @Value("${km.base.composite.search.fields}")
 	private String kmCompositeSearchFields;
 	
 	@Value("${km.base.composite.search.filters.primaryCategory}")
@@ -356,6 +353,9 @@ public class CbExtServerProperties {
 	
 	@Value("${km.base.content.search}")
 	private String kmBaseContentSearch;
+	
+	@Value("${sb.es.user.profile.index}")
+	private String sbEsUserProfileIndex;
 	
 	public String getUserAssessmentSubmissionDuration() {
 		return userAssessmentSubmissionDuration;
@@ -1256,14 +1256,6 @@ public class CbExtServerProperties {
 		this.esAutoCompleteIncludeFields = esAutoCompleteIncludeFields;
 	}
 
-	public String getEsProfileIndexWorkAllocation() {
-		return esProfileIndexWorkAllocation;
-	}
-
-	public void setEsProfileIndexWorkAllocation(String esProfileIndexWorkAllocation) {
-		this.esProfileIndexWorkAllocation = esProfileIndexWorkAllocation;
-	}
-
 	public String getSbEsHost() {
 		return sbEsHost;
 	}
@@ -1302,5 +1294,13 @@ public class CbExtServerProperties {
 
 	public void setKmBaseContentSearch(String kmBaseContentSearch) {
 		this.kmBaseContentSearch = kmBaseContentSearch;
+	}
+
+	public String getSbEsUserProfileIndex() {
+		return sbEsUserProfileIndex;
+	}
+
+	public void setSbEsUserProfileIndex(String sbEsUserProfileIndex) {
+		this.sbEsUserProfileIndex = sbEsUserProfileIndex;
 	}
 }
