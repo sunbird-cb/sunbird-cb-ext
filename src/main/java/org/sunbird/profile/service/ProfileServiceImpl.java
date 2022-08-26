@@ -919,11 +919,11 @@ public class ProfileServiceImpl implements ProfileService {
 		String errMsg = StringUtils.EMPTY;
 		Map<String, Object> migrateResponse = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPatch(
 				serverConfig.getSbUrl() + serverConfig.getLmsUserMigratePath(), request, headers);
-		if (migrateResponse != null
-				&& !Constants.OK.equalsIgnoreCase((String) migrateResponse.get(Constants.RESPONSE_CODE))) {
-			errMsg = (String) ((Map<String, Object>) migrateResponse.get(Constants.PARAMS)).get(Constants.ERROR_MESSAGE);;
-		} else {
-			errMsg = "Failed to migrate User.";
+		if (migrateResponse == null
+				|| !Constants.OK.equalsIgnoreCase((String) migrateResponse.get(Constants.RESPONSE_CODE))) {
+			errMsg = migrateResponse == null ? "Failed to migrate User."
+					: (String) ((Map<String, Object>) migrateResponse.get(Constants.PARAMS))
+							.get(Constants.ERROR_MESSAGE);
 		}
 		return errMsg;
 	}
