@@ -53,29 +53,18 @@ public class ExploreCourseServiceImpl implements ExploreCourseService {
 		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_GET_EXPLORE_COURSE_DETAIL);
 		String errMsg = "";
 		try {
-			Map<String, Object> responseCourseList = (Map<String, Object>) redisCacheMgr
-					.getCache(Constants.PUBLIC_COURSE_LIST);
-
-			if (ObjectUtils.isEmpty(responseCourseList)) {
-				List<Map<String, Object>> courseList = cassandraOperation.getRecordsByProperties(
-						Constants.SUNBIRD_KEY_SPACE_NAME, Constants.TABLE_EXPLORE_COURSE_LIST, MapUtils.EMPTY_MAP,
-						ListUtils.EMPTY_LIST);
-				List<String> identifierList = new ArrayList<String>();
-				for (Map<String, Object> course : courseList) {
-					identifierList.add((String) course.get(Constants.IDENTIFIER));
-				}
-				Map<String, Object> searchResponse = searchContent(identifierList);
-				if (!Constants.OK.equalsIgnoreCase((String) searchResponse.get(Constants.RESPONSE_CODE))) {
-					errMsg = "Failed to get contant details for Identifier List from DB.";
-				} else {
-					responseCourseList = (Map<String, Object>) searchResponse.get(Constants.RESULT);
-					redisCacheMgr.putCache(Constants.PUBLIC_COURSE_LIST, responseCourseList);
-					response.setResult(responseCourseList);
-					logger.info(String.format(
-							"Adding open course details into Cache. CourseId Count: %s, ContentSearch Count: %s",
-							identifierList.size(), responseCourseList.get(Constants.COUNT)));
-				}
+			List<Map<String, Object>> courseList = cassandraOperation.getRecordsByProperties(
+					Constants.SUNBIRD_KEY_SPACE_NAME, Constants.TABLE_EXPLORE_COURSE_LIST, MapUtils.EMPTY_MAP,
+					ListUtils.EMPTY_LIST);
+			List<String> identifierList = new ArrayList<String>();
+			for (Map<String, Object> course : courseList) {
+				identifierList.add((String) course.get(Constants.IDENTIFIER));
+			}
+			Map<String, Object> searchResponse = searchContent(identifierList);
+			if (!Constants.OK.equalsIgnoreCase((String) searchResponse.get(Constants.RESPONSE_CODE))) {
+				errMsg = "Failed to get contant details for Identifier List from DB.";
 			} else {
+				Map<String, Object> responseCourseList = (Map<String, Object>) searchResponse.get(Constants.RESULT);
 				response.setResult(responseCourseList);
 			}
 		} catch (Exception e) {
