@@ -320,7 +320,7 @@ public class AllocationService {
 				.should(QueryBuilders.matchPhrasePrefixQuery("personalDetails.surname", searchTerm));
 		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder().query(query);
 		sourceBuilder.fetchSource(includeFields, new String[] {});
-		SearchResponse searchResponse = indexerService.getEsResult(configuration.getEsProfileIndexWorkAllocation(),
+		SearchResponse searchResponse = indexerService.getEsResult(configuration.getEsProfileIndex(),
 				configuration.getEsProfileIndexType(), sourceBuilder, false);
 		for (SearchHit hit : searchResponse.getHits()) {
 			result = extractUserDetails(hit.getSourceAsMap());
