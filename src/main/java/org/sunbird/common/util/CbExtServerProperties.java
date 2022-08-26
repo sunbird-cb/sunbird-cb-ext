@@ -345,6 +345,21 @@ public class CbExtServerProperties {
 	@Value("${sb.data.sync.path}")
 	private String lmsDataSyncPath;
 	
+	@Value("${sb.es.host}")
+	private String sbEsHost;
+
+	@Value("${sb.es.port}")
+	private String sbEsPort;
+
+	@Value("${sb.es.username}")
+	private String sbEsUser;
+
+	@Value("${sb.es.password}")
+	private String sbEsPassword;
+	
+	@Value("${km.base.content.search}")
+	private String kmBaseContentSearch;
+	
 	public String getUserAssessmentSubmissionDuration() {
 		return userAssessmentSubmissionDuration;
 	}
@@ -1258,5 +1273,45 @@ public class CbExtServerProperties {
 
 	public void setUserAssessmentSubmitTopic(String userAssessmentSubmitTopic) {
 		this.userAssessmentSubmitTopic = userAssessmentSubmitTopic;
+	}
+
+	public String getSbEsHost() {
+		return sbEsHost;
+	}
+
+	public void setSbEsHost(String sbEsHost) {
+		this.sbEsHost = sbEsHost;
+	}
+
+	public String getSbEsPort() {
+		return sbEsPort;
+	}
+
+	public void setSbEsPort(String sbEsPort) {
+		this.sbEsPort = sbEsPort;
+	}
+
+	public String getSbEsUser() {
+		return sbEsUser;
+	}
+
+	public void setSbEsUser(String sbEsUser) {
+		this.sbEsUser = sbEsUser;
+	}
+
+	public String getSbEsPassword() {
+		return sbEsPassword;
+	}
+
+	public void setSbEsPassword(String sbEsPassword) {
+		this.sbEsPassword = sbEsPassword;
+	}
+
+	public String getKmBaseContentSearch() {
+		return kmBaseContentSearch;
+	}
+
+	public void setKmBaseContentSearch(String kmBaseContentSearch) {
+		this.kmBaseContentSearch = kmBaseContentSearch;
 	}
 }
