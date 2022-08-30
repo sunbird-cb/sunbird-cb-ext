@@ -45,8 +45,6 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
     @Autowired
     AssessmentRepository assessmentRepository;
 
-    @Autowired
-    Gson gson;
 
     public SBApiResponse readAssessment(String assessmentIdentifier, String token) {
         SBApiResponse response = createDefaultResponse(Constants.API_QUESTIONSET_HIERARCHY_GET);
@@ -359,7 +357,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
         Map<String, Object> res = new HashMap<>();
         try {
             Map<String, Object> sectionChildren = assessmentLevelResult;
-            res.put(Constants.CHILDREN, sectionChildren);
+            res.put(Constants.CHILDREN, Collections.singletonList(sectionChildren));
             Double result = (Double) sectionChildren.get(Constants.RESULT);
             res.put(Constants.OVERALL_RESULT, result);
             res.put(Constants.TOTAL, sectionChildren.get(Constants.TOTAL));
@@ -513,6 +511,6 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
     }
 
     private Boolean validateQuestionListRequest(List<String> identifierList, List<String> questionsFromAssessment) {
-        return (questionsFromAssessment.containsAll(identifierList) && questionsFromAssessment.size() == identifierList.size()) ? Boolean.TRUE : Boolean.FALSE;
+        return (questionsFromAssessment.containsAll(identifierList)) ? Boolean.TRUE : Boolean.FALSE;
     }
 }
