@@ -545,18 +545,18 @@ public class ProfileServiceImpl implements ProfileService {
 		}
 		return response;
 	}
-	
+
 	public SBApiResponse userSignup(Map<String, Object> request) {
 		boolean retValue = false;
 		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_USER_SIGNUP);
-		
+
 		String errMsg = validateSignupRequest(request);
 		if (!StringUtils.isEmpty(errMsg)) {
 			response.getParams().setErrmsg(errMsg);
 			response.setResponseCode(HttpStatus.BAD_REQUEST);
 			return response;
 		}
-		
+
 		try {
 			Map<String, Object> requestBody = (Map<String, Object>) request.get(Constants.REQUEST);
 			requestBody.put(Constants.EMAIL_VERIFIED, true);
@@ -570,7 +570,8 @@ public class ProfileServiceImpl implements ProfileService {
 						StringUtils.EMPTY);
 				if (userData.isEmpty() == Boolean.FALSE) {
 					request.put(Constants.USER_NAME, userData.get(Constants.USER_NAME));
-					retValue = updateUser(userData);
+					request.put(Constants.ORGANIZATION_ID,userData.get(Constants.ROOT_ORG_ID));
+					retValue = updateUser(request);
 				} else {
 					errMsg = "Problem during updating the user";
 				}
@@ -586,7 +587,7 @@ public class ProfileServiceImpl implements ProfileService {
 			response.getParams().setErrmsg(errMsg);
 			response.setResponseCode(HttpStatus.BAD_REQUEST);
 		}
-		
+
 		return response;
 	}
 
@@ -1022,7 +1023,7 @@ public class ProfileServiceImpl implements ProfileService {
 		}
 		return resultArray;
 	}
-	
+
 	private boolean updateUser(Map<String, Object> requestObject) {
 		boolean retValue = false;
 		Map<String, Object> updateRequest = new HashMap<>();
@@ -1034,9 +1035,10 @@ public class ProfileServiceImpl implements ProfileService {
 		employementDetails.put(Constants.DEPARTMENTNAME, requestObject.get(Constants.ORG_NAME));
 		profileDetails.put(Constants.EMPLOYMENTDETAILS, employementDetails);
 		Map<String, Object> personalDetails = new HashMap<String, Object>();
-		personalDetails.put(Constants.FIRSTNAME.toLowerCase(), requestObject.get(Constants.FIRST_NAME));
-		personalDetails.put(Constants.SURNAME, requestObject.get(Constants.LAST_NAME));
-		personalDetails.put(Constants.PRIMARY_EMAIL, requestObject.get(Constants.EMAIL));
+		Map<String, Object> requestBody = (Map<String, Object>) requestObject.get(Constants.REQUEST);
+		personalDetails.put(Constants.FIRSTNAME.toLowerCase(), requestBody.get(Constants.FIRSTNAME));
+		personalDetails.put(Constants.SURNAME, requestBody.get(Constants.LASTNAME));
+		personalDetails.put(Constants.PRIMARY_EMAIL, requestBody.get(Constants.EMAIL));
 		personalDetails.put(Constants.USER_NAME, requestObject.get(Constants.USER_NAME));
 		profileDetails.put(Constants.PERSONAL_DETAILS, personalDetails);
 
@@ -1054,10 +1056,7 @@ public class ProfileServiceImpl implements ProfileService {
 		Map<String, Object> updateReadData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPatch(
 				serverConfig.getSbUrl() + serverConfig.getLmsUserUpdatePath(), updateRequest, userUtilityService.getDefaultHeaders());
 		if (Constants.OK.equalsIgnoreCase((String) updateReadData.get(Constants.RESPONSE_CODE))) {
-			Map<String, Object> roleMap = new HashMap<>();
-			roleMap.put(Constants.ORGANIZATION_ID, requestObject.get(Constants.ROOT_ORG_ID));
-			roleMap.put(Constants.USER_ID, requestObject.get(Constants.USER_ID));
-			retValue = assignRole(roleMap);
+			retValue = assignRole(requestObject);
 		}
 		return retValue;
 	}
