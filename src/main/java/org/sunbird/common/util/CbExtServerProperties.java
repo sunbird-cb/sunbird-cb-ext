@@ -246,6 +246,9 @@ public class CbExtServerProperties {
 	@Value("${kafka.topics.user.registration.auto.createUser}")
 	private String userRegistrationAutoCreateUserTopic;
 
+	@Value("${kafka.topics.user.assessment.submit}")
+	private String userAssessmentSubmitTopic;
+
 	@Value("${user.registration.domain}")
 	private String userRegistrationDomain;
 
@@ -321,21 +324,45 @@ public class CbExtServerProperties {
 	@Value("${sb.org.create.path}")
 	private String lmsOrgCreatePath;
 	
-	@Value("${sb.service.user.self.migrate.path}")
-	private String lmsUserSelfMigratePath;
+	@Value("${es.user.auto.complete.search.fields}")
+	private String esAutoCompleteSearchFields;
+
+	@Value("${es.user.auto.complete.include.fields}")
+	private String esAutoCompleteIncludeFields;
+
+    @Value("${sb.service.user.migrate.path}")
+	private String lmsUserMigratePath;
+
+    @Value("${km.base.composite.search.fields}")
+	private String kmCompositeSearchFields;
+	
+	@Value("${km.base.composite.search.filters.primaryCategory}")
+	private String kmCompositeSearchPrimaryCategoryFilters;
+
+	@Value("${sb.data.sync.path}")
+	private String lmsDataSyncPath;
+	
+	@Value("${sb.es.host}")
+	private String sbEsHost;
+
+	@Value("${sb.es.port}")
+	private String sbEsPort;
+
+	@Value("${sb.es.username}")
+	private String sbEsUser;
+
+	@Value("${sb.es.password}")
+	private String sbEsPassword;
+	
+	@Value("${km.base.content.search}")
+	private String kmBaseContentSearch;
+	
+	@Value("${sb.es.user.profile.index}")
+	private String sbEsUserProfileIndex;
 	
 	@Value("${sb.service.signup.user}")
 	private String lmsUserSignUpPath;
 	
-
-	public String getLmsUserSignUpPath() {
-		return lmsUserSignUpPath;
-	}
-
-	public void setLmsUserSignUpPath(String lmsUserSignUpPath) {
-		this.lmsUserSignUpPath = lmsUserSignUpPath;
-	}
-
 	public String getUserAssessmentSubmissionDuration() {
 		return userAssessmentSubmissionDuration;
 	}
@@ -1187,11 +1214,115 @@ public class CbExtServerProperties {
 		this.lmsOrgCreatePath = lmsOrgCreatePath;
 	}
 
-	public String getLmsUserSelfMigratePath() {
-		return lmsUserSelfMigratePath;
+	public String getLmsUserMigratePath() {
+		return lmsUserMigratePath;
 	}
 
-	public void setLmsUserSelfMigratePath(String lmsUserSelfMigratePath) {
-		this.lmsUserSelfMigratePath = lmsUserSelfMigratePath;
+	public void setLmsUserMigratePath(String lmsUserSelfMigratePath) {
+		this.lmsUserMigratePath = lmsUserSelfMigratePath;
+	}
+
+	public String getLmsDataSyncPath() {
+		return lmsDataSyncPath;
+	}
+
+	public void setLmsDataSyncPath(String lmsDataSyncPath) {
+		this.lmsDataSyncPath = lmsDataSyncPath;
+	}
+
+	public List<String> getKmCompositeSearchFields() {
+			return Arrays.asList(kmCompositeSearchFields.split(",", -1));
+	}
+
+	public void setKmCompositeSearchFields(String kmCompositeSearchFields) {
+		this.kmCompositeSearchFields = kmCompositeSearchFields;
+	}
+
+	public List<String> getKmCompositeSearchPrimaryCategoryFilters() {
+		return Arrays.asList(kmCompositeSearchPrimaryCategoryFilters.split(",", -1));
+	}
+
+	public void setKmCompositeSearchPrimaryCategoryFilters(String kmCompositeSearchPrimaryCategoryFilters) {
+		this.kmCompositeSearchPrimaryCategoryFilters = kmCompositeSearchPrimaryCategoryFilters;
+	}
+
+	public List<String> getEsAutoCompleteSearchFields() {
+		return Arrays.asList(esAutoCompleteSearchFields.split(",", -1));
+	}
+
+	public void setEsAutoCompleteSearchFields(String esAutoCompleteSearchFields) {
+		this.esAutoCompleteSearchFields = esAutoCompleteSearchFields;
+	}
+
+	public String[] getEsAutoCompleteIncludeFields() {
+		return esAutoCompleteIncludeFields.split(",", -1);
+	}
+
+	public void setEsAutoCompleteIncludeFields(String esAutoCompleteIncludeFields) {
+		this.esAutoCompleteIncludeFields = esAutoCompleteIncludeFields;
+	}
+
+	public String getUserAssessmentSubmitTopic() {
+		return userAssessmentSubmitTopic;
+	}
+
+	public void setUserAssessmentSubmitTopic(String userAssessmentSubmitTopic) {
+		this.userAssessmentSubmitTopic = userAssessmentSubmitTopic;
+	}
+
+	public String getSbEsHost() {
+		return sbEsHost;
+	}
+
+	public void setSbEsHost(String sbEsHost) {
+		this.sbEsHost = sbEsHost;
+	}
+
+	public String getSbEsPort() {
+		return sbEsPort;
+	}
+
+	public void setSbEsPort(String sbEsPort) {
+		this.sbEsPort = sbEsPort;
+	}
+
+	public String getSbEsUser() {
+		return sbEsUser;
+	}
+
+	public void setSbEsUser(String sbEsUser) {
+		this.sbEsUser = sbEsUser;
+	}
+
+	public String getSbEsPassword() {
+		return sbEsPassword;
+	}
+
+	public void setSbEsPassword(String sbEsPassword) {
+		this.sbEsPassword = sbEsPassword;
+	}
+
+	public String getKmBaseContentSearch() {
+		return kmBaseContentSearch;
+	}
+
+	public void setKmBaseContentSearch(String kmBaseContentSearch) {
+		this.kmBaseContentSearch = kmBaseContentSearch;
+	}
+
+	public String getSbEsUserProfileIndex() {
+		return sbEsUserProfileIndex;
+	}
+
+	public void setSbEsUserProfileIndex(String sbEsUserProfileIndex) {
+		this.sbEsUserProfileIndex = sbEsUserProfileIndex;
+	}
+	
+	public String getLmsUserSignUpPath() {
+		return lmsUserSignUpPath;
+	}
+
+	public void setLmsUserSignUpPath(String lmsUserSignUpPath) {
+		this.lmsUserSignUpPath = lmsUserSignUpPath;
 	}
 }

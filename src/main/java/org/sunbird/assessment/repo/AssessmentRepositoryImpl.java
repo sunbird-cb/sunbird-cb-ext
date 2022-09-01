@@ -21,6 +21,7 @@ public class AssessmentRepositoryImpl implements AssessmentRepository {
 	public static final String RESULT = "result";
 	public static final String SOURCE_ID = "sourceId";
 	public static final String USER_ID = "userId";
+	public static final String STARTTIME = "starttime";
 	private CbExtLogger logger = new CbExtLogger(getClass().getName());
 	
 	@Autowired
@@ -40,13 +41,13 @@ public class AssessmentRepositoryImpl implements AssessmentRepository {
 	@Override
 	public Map<String, Object> getAssessmentAnswerKey(String artifactUrl) throws Exception {
 		// TODO Auto-generated method stub
-		return null;
+		return Collections.emptyMap();
 	}
 
 	@Override
 	public Map<String, Object> getQuizAnswerKey(AssessmentSubmissionDTO quizMap) throws Exception {
 		// TODO Auto-generated method stub
-		return null;
+		return Collections.emptyMap();
 	}
 
 	@Override
@@ -133,18 +134,18 @@ public class AssessmentRepositoryImpl implements AssessmentRepository {
 		request.put(Constants.USER_ID, userId);
 		request.put(Constants.IDENTIFIER, assessmentIdentifier);
 		cassandraOperation.deleteRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_USER_ASSESSMENT_TIME, request);
-		request.put("starttime", startTime);
+		request.put(STARTTIME, startTime);
 		SBApiResponse resp = cassandraOperation.insertRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_USER_ASSESSMENT_TIME, request);
 		return resp.get(Constants.RESPONSE).equals(Constants.SUCCESS);
 	}
 
-    @Override
-    public Date fetchUserAssessmentStartTime(String userId, String assessmentIdentifier) {
+	@Override
+	public Date fetchUserAssessmentStartTime(String userId, String assessmentIdentifier) {
 		Map<String, Object> request = new HashMap<>();
 		request.put(Constants.USER_ID, userId);
 		request.put(Constants.IDENTIFIER, assessmentIdentifier);
-		Map<String, Object> existingDataList = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
-				Constants.TABLE_USER_ASSESSMENT_TIME, request, null).get(0);
-		return (Date) existingDataList.get("starttime");
+		List<Map<String, Object>> existingDataList = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
+				Constants.TABLE_USER_ASSESSMENT_TIME, request, null);
+		return (!existingDataList.isEmpty()) ? (Date) existingDataList.get(0).get(STARTTIME) : null;
 	}
 }

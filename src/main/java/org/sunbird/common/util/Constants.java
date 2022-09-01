@@ -94,7 +94,7 @@ public class Constants {
 	public static final boolean FETCH_ON_LEVEL = false;
 	public static final boolean SKIP_ACCESS_CHECK = true;
 	public static final List<String> MINIMUL_FIELDS = Collections
-			.unmodifiableList(Arrays.asList("identifier", "duration", "downloadUrl", "description", "mimeType",
+			.unmodifiableList(Arrays.asList("identifier", "expectedDuration", "downloadUrl", "description", "mimeType",
 					"artifactUrl", "name", STATUS, "resourceType", "categoryType", "category"));
 	public static final String FETCH_RESULT_CONSTANT = ".fetchResult:";
 	public static final String URI_CONSTANT = "URI: ";
@@ -122,6 +122,9 @@ public class Constants {
 	public static final String API_FILE_UPLOAD = "api.file.upload";
 	public static final String API_FILE_DELETE = "api.file.delete";
 	public static final String API_PROFILE_UPDATE = "api.profile.update";
+	public static final String API_GET_EXPLORE_COURSE_DETAIL = "api.explore.course";
+	public static final String API_REFRESH_EXPLORE_COURSE_DETAIL = "api.refresh.explore.course.list";
+	public static final String API_USER_SIGNUP = "api.user.signup";
 
 	public static final String ORG_PROFILE_UPDATE = "org.profile.update";
 	public static final String ID = "id";
@@ -230,6 +233,7 @@ public class Constants {
 	public static final String TABLE_RATINGS = "ratings";
 	public static final String TABLE_RATINGS_LOOKUP = "ratings_lookup";
 	public static final String TABLE_RATINGS_SUMMARY = "ratings_summary";
+	public static final String TABLE_EXPLORE_COURSE_LIST = "explore_course_list";
 	public static final String VALUE = "value";
 	public static final String DEPT_NAME = "deptName";
 	public static final String PROFILE_DETAILS = "profileDetails";
@@ -303,12 +307,15 @@ public class Constants {
 	public static final String SEARCHES = "searches";
 	public static final String QUESTION_ID = "qs_id_";
 	public static final String ASSESSMENT_ID = "assess_id_";
+	public static final String ASSESSMENT_ID_KEY = "assessmentId";
 	public static final String EDITOR_STATE = "editorState";
 	public static final String CHOICES = "choices";
 	public static final String ANSWER = "answer";
 	public static final String QUESTION = "question";
 	public static final String OPTIONS = "options";
 	public static final String USER_ASSESS_REQ = "user_assess_req_";
+
+	public static final String USER_ASSESS_SUBMIT_REQ = "user_assess_submit_req";
 	public static final String HIERARCHY = "hierarchy";
 	public static final String DEV_HIERARCHY_STORE = "dev_hierarchy_store";
 	public static final String CONTENT_HIERARCHY = "content_hierarchy";
@@ -335,6 +342,7 @@ public class Constants {
 	public static final String SUNBIRD_CASSANDRA_CONSISTENCY_LEVEL = "sunbird_cassandra_consistency_level";
 	public static final String INCOMPLETE_COURSES_MAIL_SUBJECT = "Complete the courses you started";
 	public static final String COURSE = "Course";
+	public static final String COURSE_KEYWORD = "course";
 	public static final String _URL = "_url";
 	public static final String THUMBNAIL = "_thumbnail";
 	public static final String _NAME = "_name";
@@ -363,6 +371,7 @@ public class Constants {
 	public static final String API_QUESTIONSET_HIERARCHY_GET = "api.questionset.hierarchy.get";
 	public static final String VER = "3.0";
 	public static final String API_QUESTIONS_LIST = "api.questions.list";
+	public static final String API_SUBMIT_ASSESSMENT = "api.submit.asssessment";
 	public static final String MINIMUM_PASS_PERCENTAGE = "minimumPassPercentage";
 	public static final String SCORE_CUTOFF_TYPE = "scoreCutoffType";
 	public static final String PASS_PERCENTAGE = "passPercentage";
@@ -388,6 +397,8 @@ public class Constants {
 	public static final String SUNBIRD_SSO_URL = "sunbird_sso_url";
 	public static final String SUNBIRD_SSO_USERNAME = "sunbird_sso_username";
 	public static final String DURATION = "duration";
+
+	public static final String EXPECTED_DURATION = "expectedDuration";
 	public static final String USER_REGISTRATION_REGISTER_API = "api.user.registration.register";
 	public static final String USER_REGISTRATION_UPDATE_API = "api.user.registration.update";
 	public static final String USER_REGISTRATION_RETRIEVE_API = "api.user.registration.retrieve";
@@ -475,6 +486,7 @@ public class Constants {
 	public static final String SB_ORG_ID = "sbOrgId";
 	public static final String MAP_ID = "mapId";
 	public static final String SB_ROOT_ORG_ID = "sbRootOrgId";
+	public static final String ERROR_MESSAGE = "errmsg";
 
 	public static final String API_USER_BASIC_INFO = "api.user.basic.info";
 	public static final String API_USER_BASIC_PROFILE_UPDATE = "api.user.basic.profile.update";
@@ -487,9 +499,35 @@ public class Constants {
 	public static final String X_AUTH_USER_ID = "x-authenticated-userid";
 	public static final String SOFT_DELETE_OLD_ORG = "softDeleteOldOrg";
 	public static final String NOTIFY_MIGRATION = "notifyMigration";
-	
-	public static final String API_PROFILE_SIGNUP = "api.profile.signup";
-
+	public static final String REDIS_CACHE_ID = "redis_cache_id";
+	public static final String CONTENT_ID_ = "contentId";
+	public static final String TOTAL_MAX_SCORE = "totalMaxScore";
+	public static final String TOTAL_SCORE = "totalScore";
+	public static final String HOST = "127.0.0.1";
+	public static final String IDENTIFIER_LIST = "identifierList";
+	public static final String HIERARCHY_SECTION_LIST = "hierarchySectionList";
+	public static final String QUESTION_TYPE = "qType";
+	public static final String IS_CORRECT = "isCorrect";
+	public static final String OPTION_ID = "optionId";
+	public static final String MCQ_SCA = "mcq-sca";
+	public static final String MCQ_MCA = "mcq-mca";
+	public static final String FTB = "ftb";
+	public static final String MTF = "mtf";
+	public static final String QUES_ID = "questionId";
+	public static final String SELECTED_ANSWER = "selectedAnswer";
+	public static final String INDEX = "index";
+	public static final String FORCE_MIGRATION = "forceMigration";
+	public static final String PROFILE_DETAILS_LOWER = "profiledetails";
+	public static final String EMPLOYMENT_DETAILS = "employmentDetails";
+	public static final String DEPARTMENT_ID = "departmentId";
+	public static final String ROOT_ORG_ID_LOWER = "rootorgid";
+	public static final String OPERATION_TYPE = "operationType";
+	public static final String SYNC = "sync";
+	public static final String OBJECT_IDS = "objectIds";
+	public static final String USER = "user";	
+	public static final String PUBLIC_COURSE_LIST = "exploreOpenCourseList";
+	public static final String LAST_UPDATED_ON = "lastUpdatedOn";
+	public static final String DESCENDING_ORDER = "desc";
 	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}

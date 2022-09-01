@@ -15,23 +15,29 @@ import org.sunbird.common.util.CbExtServerProperties;
 
 @Configuration
 public class EsConfig {
+	@Autowired
+	CbExtServerProperties configuration;
 
-    @Autowired
-    CbExtServerProperties configuration;
+	@Bean(name = "esClient", destroyMethod = "close")
+	public RestHighLevelClient getCbEsRestClient(CbExtServerProperties configuration) {
+		return createRestClient(configuration.getEsHost(), configuration.getEsPort(), configuration.getEsUser(),
+				configuration.getEsPassword());
+	}
 
-    @Bean(destroyMethod = "close")
-    public RestHighLevelClient restHighLevelClient(CbExtServerProperties configuration) {
+	@Bean(name = "sbEsClient", destroyMethod = "close")
+	public RestHighLevelClient getSbESRestClient(CbExtServerProperties configuration) {
+		return createRestClient(configuration.getSbEsHost(), configuration.getSbEsPort(), configuration.getSbEsUser(),
+				configuration.getSbEsPassword());
+	}
 
-        final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-        credentialsProvider.setCredentials(AuthScope.ANY,
-                new UsernamePasswordCredentials(configuration.getEsUser(), configuration.getEsPassword()));
+	private RestHighLevelClient createRestClient(String host, String port, String user, String password) {
+		final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+		credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(user, password));
 
-        RestClientBuilder builder = RestClient
-                .builder(new HttpHost(configuration.getEsHost(), Integer.parseInt(configuration.getEsPort())))
-                .setHttpClientConfigCallback(
-                        httpClientBuilder -> httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider));
+		RestClientBuilder builder = RestClient.builder(new HttpHost(host, Integer.parseInt(port)))
+				.setHttpClientConfigCallback(
+						httpClientBuilder -> httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider));
 
-        return new RestHighLevelClient(builder);
-
-    }
+		return new RestHighLevelClient(builder);
+	}
 }

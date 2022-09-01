@@ -21,7 +21,6 @@ import java.util.stream.Collectors;
 public class EmailNotificationService implements Runnable {
     private static final CbExtLogger logger = new CbExtLogger(SchedulerManager.class.getName());
     private final CassandraOperation cassandraOperation = ServiceFactory.getInstance();
-    Map<String, UserCourseProgressDetails> userCourseMap = new HashMap<>();
     Map<String, CourseDetails> courseIdAndCourseNameMap = new HashMap<>();
 
     public static void sendIncompleteCourseEmail(Map.Entry<String, UserCourseProgressDetails> userCourseProgressDetailsEntry) {
@@ -30,14 +29,13 @@ public class EmailNotificationService implements Runnable {
                 Map<String, Object> params = new HashMap<>();
                 for (int i = 0; i < userCourseProgressDetailsEntry.getValue().getIncompleteCourses().size(); i++) {
                     int j=i+1;
-                    params.put(Constants.COURSE + j, true);
-                    params.put(Constants.COURSE + j + Constants._URL, userCourseProgressDetailsEntry.getValue().getIncompleteCourses().get(i).getCourseUrl());
-                    params.put(Constants.COURSE + j + Constants.THUMBNAIL, userCourseProgressDetailsEntry.getValue().getIncompleteCourses().get(i).getThumbnail());
-                    params.put(Constants.COURSE + j + Constants._NAME, userCourseProgressDetailsEntry.getValue().getIncompleteCourses().get(i).getCourseName());
-                    params.put(Constants.COURSE + j + Constants._DURATION, String.valueOf(userCourseProgressDetailsEntry.getValue().getIncompleteCourses().get(i).getCompletionPercentage()));
+                    params.put(Constants.COURSE_KEYWORD + j, true);
+                    params.put(Constants.COURSE_KEYWORD + j + Constants._URL, userCourseProgressDetailsEntry.getValue().getIncompleteCourses().get(i).getCourseUrl());
+                    params.put(Constants.COURSE_KEYWORD + j + Constants.THUMBNAIL, userCourseProgressDetailsEntry.getValue().getIncompleteCourses().get(i).getThumbnail());
+                    params.put(Constants.COURSE_KEYWORD + j + Constants._NAME, userCourseProgressDetailsEntry.getValue().getIncompleteCourses().get(i).getCourseName());
+                    params.put(Constants.COURSE_KEYWORD + j + Constants._DURATION, String.valueOf(userCourseProgressDetailsEntry.getValue().getIncompleteCourses().get(i).getCompletionPercentage()));
 
                 }
-                logger.info(userCourseProgressDetailsEntry.getValue().getEmail());
                 new NotificationUtil().sendNotification(Collections.singletonList(userCourseProgressDetailsEntry.getValue().getEmail()), params, PropertiesCache.getInstance().getProperty(Constants.SENDER_MAIL), PropertiesCache.getInstance().getProperty(Constants.NOTIFICATION_HOST) + PropertiesCache.getInstance().getProperty(Constants.NOTIFICATION_ENDPOINT));
             }
         } catch (Exception e) {
@@ -56,8 +54,9 @@ public class EmailNotificationService implements Runnable {
             List<Map<String, Object>> userCoursesList = cassandraOperation.searchByWhereClause(Constants.SUNBIRD_COURSES_KEY_SPACE_NAME, Constants.USER_CONTENT_CONSUMPTION, Arrays.asList(Constants.RATINGS_USER_ID, Constants.BATCH_ID_, Constants.COURSE_ID_, Constants.COMPLETION_PERCENTAGE_, Constants.LAST_ACCESS_TIME), date);
             if (!CollectionUtils.isEmpty(userCoursesList)) {
                 fetchCourseIdsAndSetCourseNameAndThumbnail(userCoursesList);
+                Map<String, UserCourseProgressDetails> userCourseMap = new HashMap<>();
                 setUserCourseMap(userCoursesList, userCourseMap);
-                getAndSetUserEmail();
+                getAndSetUserEmail(userCourseMap);
                 for (Map.Entry<String, UserCourseProgressDetails> userCourseProgressDetailsEntry : userCourseMap.entrySet()) {
                     sendIncompleteCourseEmail(userCourseProgressDetailsEntry);
                 }
@@ -101,7 +100,7 @@ public class EmailNotificationService implements Runnable {
         }
     }
 
-    private void getAndSetUserEmail() {
+    private void getAndSetUserEmail(Map<String, UserCourseProgressDetails> userCourseMap) {
         ArrayList<String> userIds = new ArrayList<>(userCourseMap.keySet());
         Map<String, Object> propertyMap = new HashMap<>();
         propertyMap.put(Constants.ID, userIds);
@@ -124,7 +123,6 @@ public class EmailNotificationService implements Runnable {
                     HashMap<String, Object> hashMap = new ObjectMapper().readValue(profileDetails, HashMap.class);
                     HashMap<String, Object> personalDetailsMap = (HashMap<String, Object>) hashMap.get(Constants.PERSONAL_DETAILS);
                     if (personalDetailsMap.get(Constants.PRIMARY_EMAIL) != null && !excludeEmailsList.contains((String) personalDetailsMap.get(Constants.PRIMARY_EMAIL))) {
-                        logger.info((String) personalDetailsMap.get(Constants.PRIMARY_EMAIL));
                         userCourseMap.get(userDetail.get(Constants.ID)).setEmail((String) personalDetailsMap.get(Constants.PRIMARY_EMAIL));
                     }
                 }
