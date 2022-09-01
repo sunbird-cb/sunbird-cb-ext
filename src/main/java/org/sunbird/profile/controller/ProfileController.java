@@ -59,4 +59,10 @@ public class ProfileController {
 		SBApiResponse response = profileService.migrateUser(request, userToken, authToken);
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
+	
+	@PostMapping("/user/v1/ext/signup")
+	public ResponseEntity<?> userSignup(@RequestBody Map<String,Object> request) {
+		SBApiResponse response = profileService.userSignup(request);
+		return new ResponseEntity<>(response, response.getResponseCode());
+	}
 }

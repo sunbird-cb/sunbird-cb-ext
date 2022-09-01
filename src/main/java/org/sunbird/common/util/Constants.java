@@ -124,6 +124,7 @@ public class Constants {
 	public static final String API_PROFILE_UPDATE = "api.profile.update";
 	public static final String API_GET_EXPLORE_COURSE_DETAIL = "api.explore.course";
 	public static final String API_REFRESH_EXPLORE_COURSE_DETAIL = "api.refresh.explore.course.list";
+	public static final String API_USER_SIGNUP = "api.user.signup";
 
 	public static final String ORG_PROFILE_UPDATE = "org.profile.update";
 	public static final String ID = "id";

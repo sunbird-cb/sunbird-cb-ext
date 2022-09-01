@@ -17,4 +17,6 @@ public interface ProfileService {
 	SBApiResponse userAutoComplete(String searchTerm);
 
 	SBApiResponse migrateUser(Map<String, Object> request, String userToken, String authToken);
+	
+	SBApiResponse userSignup(Map<String, Object> request);
 }
