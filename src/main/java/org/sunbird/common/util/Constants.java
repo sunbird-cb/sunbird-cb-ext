@@ -125,6 +125,8 @@ public class Constants {
 	public static final String API_GET_EXPLORE_COURSE_DETAIL = "api.explore.course";
 	public static final String API_REFRESH_EXPLORE_COURSE_DETAIL = "api.refresh.explore.course.list";
 	public static final String API_USER_SIGNUP = "api.user.signup";
+	public static final String API_USER_BULK_UPLOAD = "api.user.bulk.upload";
+	public static final String API_USER_BULK_UPLOAD_STATUS = "api.user.bulk.upload.status";
 
 	public static final String ORG_PROFILE_UPDATE = "org.profile.update";
 	public static final String ID = "id";
@@ -234,6 +236,7 @@ public class Constants {
 	public static final String TABLE_RATINGS_LOOKUP = "ratings_lookup";
 	public static final String TABLE_RATINGS_SUMMARY = "ratings_summary";
 	public static final String TABLE_EXPLORE_COURSE_LIST = "explore_course_list";
+	public static final String TABLE_USER_BULK_UPLOAD = "user_bulk_upload";
 	public static final String VALUE = "value";
 	public static final String DEPT_NAME = "deptName";
 	public static final String PROFILE_DETAILS = "profileDetails";
@@ -426,6 +429,7 @@ public class Constants {
 
 	// wf status
 	public static final String INITIATED = "initiated";
+	public static final String INITIATED_CAPITAL = "INITIATED";
 	public static final String APPROVED = "approved";
 	public static final String DENIED = "denied";
 
@@ -528,6 +532,11 @@ public class Constants {
 	public static final String PUBLIC_COURSE_LIST = "exploreOpenCourseList";
 	public static final String LAST_UPDATED_ON = "lastUpdatedOn";
 	public static final String DESCENDING_ORDER = "desc";
+	public static final String FILE_NAME = "fileName";
+	public static final String FILE_PATH = "filePath";
+	public static final String DATE_CREATED_ON = "dateCreatedOn";
+	public static final String DATE_UPDATE_ON = "dateUpdatedOn";
+	
 	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}

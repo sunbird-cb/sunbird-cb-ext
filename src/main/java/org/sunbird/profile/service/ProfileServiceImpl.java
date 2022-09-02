@@ -1,5 +1,6 @@
 package org.sunbird.profile.service;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -24,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
+import org.springframework.web.multipart.MultipartFile;
 import org.sunbird.cache.RedisCacheMgr;
 import org.sunbird.cassandra.utils.CassandraOperation;
 import org.sunbird.common.model.SBApiResponse;
@@ -34,6 +36,7 @@ import org.sunbird.common.util.Constants;
 import org.sunbird.common.util.IndexerService;
 import org.sunbird.common.util.ProjectUtil;
 import org.sunbird.org.service.ExtendedOrgService;
+import org.sunbird.storage.service.StorageServiceImpl;
 import org.sunbird.user.service.UserUtilityServiceImpl;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -66,6 +69,9 @@ public class ProfileServiceImpl implements ProfileService {
 
 	@Autowired
 	ExtendedOrgService extOrgService;
+	
+	@Autowired
+	StorageServiceImpl storageService;
 
 	private Logger log = LoggerFactory.getLogger(getClass().getName());
 
@@ -590,6 +596,68 @@ public class ProfileServiceImpl implements ProfileService {
 		return response;
 	}
 
+	@Override
+	public SBApiResponse bulkUpload(MultipartFile mFile) {
+		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_USER_BULK_UPLOAD);
+		try {
+			SBApiResponse uploadResponse = storageService.uploadFile(mFile);
+			if (!HttpStatus.OK.equals(uploadResponse.getResponseCode())) {
+				setErrorData(response, String.format("Failed to upload file. Error: %s",
+						(String) uploadResponse.getParams().getErrmsg()));
+				return response;
+			}
+
+			Map<String, Object> uploadedFile = new HashMap<>();
+			uploadedFile.put(Constants.IDENTIFIER, UUID.randomUUID().toString());
+			uploadedFile.put(Constants.FILE_NAME, uploadResponse.getResult().get(Constants.NAME));
+			uploadedFile.put(Constants.FILE_PATH, uploadResponse.getResult().get(Constants.URL));
+			uploadedFile.put(Constants.DATE_CREATED_ON, new Timestamp(System.currentTimeMillis()));
+			uploadedFile.put(Constants.STATUS, Constants.INITIATED_CAPITAL);
+			uploadedFile.put(Constants.COMMENT, StringUtils.EMPTY);
+
+			SBApiResponse insertResponse = cassandraOperation.insertRecord(Constants.DATABASE,
+					Constants.TABLE_USER_BULK_UPLOAD, uploadedFile);
+
+			if (!Constants.SUCCESS.equalsIgnoreCase((String) insertResponse.get(Constants.RESPONSE))) {
+				setErrorData(response, "Failed to update databse with user bulk upload file details.");
+				return response;
+			}
+
+			uploadedFile.remove(Constants.FILE_PATH);
+			response.getParams().setStatus(Constants.SUCCESSFUL);
+			response.setResponseCode(HttpStatus.OK);
+			response.getResult().putAll(uploadedFile);
+
+		} catch (Exception e) {
+			setErrorData(response,
+					String.format("Failed to process user bulk upload request. Error: ", e.getMessage()));
+		}
+		return response;
+	}
+	
+	@Override
+	public SBApiResponse getBulkUploadDetails() {
+		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_USER_BULK_UPLOAD_STATUS);
+		try {
+			List<Map<String, Object>> bulkUploadList = cassandraOperation.getRecordsByProperties(Constants.DATABASE,
+					Constants.TABLE_USER_BULK_UPLOAD, null, Arrays.asList(Constants.IDENTIFIER, Constants.FILE_NAME,
+							Constants.DATE_CREATED_ON, Constants.STATUS, Constants.COMMENT, Constants.DATE_UPDATE_ON));
+			if (CollectionUtils.isNotEmpty(bulkUploadList)) {
+				response.getResult().put(Constants.CONTENT, bulkUploadList);
+				response.getResult().put(Constants.COUNT, bulkUploadList.size());
+				response.getParams().setStatus(Constants.SUCCESSFUL);
+				response.setResponseCode(HttpStatus.OK);
+			} else {
+				response.setResponseCode(HttpStatus.NOT_FOUND);
+				response.getParams().setErrmsg("Failed to get Upload Details");
+			}
+		} catch (Exception e) {
+			setErrorData(response,
+					String.format("Failed to get user bulk upload request status. Error: ", e.getMessage()));
+		}
+		return response;
+	}
+	
 	public List<String> approvalFields() {
 		Map<String, Object> approvalFieldsCache = (Map<String, Object>) mapper
 				.convertValue(redisCacheMgr.getCache(Constants.PROFILE_UPDATE_FIELDS), Map.class);
