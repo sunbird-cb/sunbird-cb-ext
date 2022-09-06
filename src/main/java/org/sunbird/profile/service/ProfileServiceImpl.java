@@ -574,14 +574,15 @@ public class ProfileServiceImpl implements ProfileService {
 				request.put(Constants.USER_ID, userId);
 				Map<String, Object> userData = userUtilityService.getUsersReadData(userId, StringUtils.EMPTY,
 						StringUtils.EMPTY);
-				if (userData.isEmpty() == Boolean.FALSE) {
+				if (!userData.isEmpty()) {
 					request.put(Constants.USER_NAME, userData.get(Constants.USER_NAME));
-					retValue = updateUser(userData);
+					request.put(Constants.ROOT_ORG_ID, userData.get(Constants.ROOT_ORG_ID));
+					retValue = updateUser(request);
 				} else {
-					errMsg = "Problem during updating the user";
+					errMsg = "Failed to read the user data after Signup.";
 				}
 			} else {
-				errMsg = "Problem during User SignUp";
+				errMsg = "Failed to signup the user account";
 			}
 
 		} catch (Exception e) {
@@ -1102,9 +1103,10 @@ public class ProfileServiceImpl implements ProfileService {
 		employementDetails.put(Constants.DEPARTMENTNAME, requestObject.get(Constants.ORG_NAME));
 		profileDetails.put(Constants.EMPLOYMENTDETAILS, employementDetails);
 		Map<String, Object> personalDetails = new HashMap<String, Object>();
-		personalDetails.put(Constants.FIRSTNAME.toLowerCase(), requestObject.get(Constants.FIRST_NAME));
-		personalDetails.put(Constants.SURNAME, requestObject.get(Constants.LAST_NAME));
-		personalDetails.put(Constants.PRIMARY_EMAIL, requestObject.get(Constants.EMAIL));
+		Map<String, Object> requestBody = (Map<String, Object>) requestObject.get(Constants.REQUEST);
+		personalDetails.put(Constants.FIRSTNAME.toLowerCase(), requestBody.get(Constants.FIRSTNAME));
+		personalDetails.put(Constants.SURNAME, requestBody.get(Constants.LASTNAME));
+		personalDetails.put(Constants.PRIMARY_EMAIL, requestBody.get(Constants.EMAIL));
 		personalDetails.put(Constants.USER_NAME, requestObject.get(Constants.USER_NAME));
 		profileDetails.put(Constants.PERSONAL_DETAILS, personalDetails);
 
