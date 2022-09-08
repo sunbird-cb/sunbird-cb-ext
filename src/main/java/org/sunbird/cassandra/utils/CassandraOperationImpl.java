@@ -89,9 +89,10 @@ public class CassandraOperationImpl implements CassandraOperation {
         }
         return response;
     }
+
     @Override
     public Map<String, Object> getRecordsByProperties(String keyspaceName, String tableName,
-                                                            Map<String, Object> propertyMap, List<String> fields,String key) {
+                                                            Map<String, Object> propertyMap, List<String> fields, String key) {
         Select selectQuery = null;
         Map<String, Object> response = new HashMap<>();
         try {
@@ -177,15 +178,12 @@ public class CassandraOperationImpl implements CassandraOperation {
 
                     }
                 } else {
-
                     Clause clause = QueryBuilder.eq(entry.getKey(), entry.getValue());
                     selectWhere.and(clause);
-
                 }
-                selectQuery.allowFiltering();
             }
         }
-        return selectQuery;
+        return selectQuery.allowFiltering();
     }
 
     @Override

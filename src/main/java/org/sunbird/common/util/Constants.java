@@ -183,6 +183,7 @@ public class Constants {
 	public static final String RATING_SUMMARY_OPERATION = "getSummary";
 	// assessment
 	public static final String QUESTION_SET = "questionSet";
+	public static final String QUESTIONSET = "questionset";
 	public static final String ASSESSMENT_QNS_ANS_SET = "assessmentQnsAnsSet_";
 	public static final String ASSESSMENT_QNS_SET = "assessmentQnsSet_";
 	// Cassandra Constants
@@ -213,7 +214,7 @@ public class Constants {
 	public static final String KEYSPACE_SUNBIRD = "sunbird";
 	public static final String KEYSPACE_SUNBIRD_COURSES = "sunbird_courses";
 	public static final String TABLE_ORG_BUDGET_SCHEME = "org_budget_scheme";
-	public static final String TABLE_USER_ASSESSMENT_TIME = "user_assessment_time";
+	public static final String TABLE_USER_ASSESSMENT_DATA = "user_assessment_data";
 	public static final String SHA_256_WITH_RSA = "SHA256withRSA";
 	public static final String SUB = "sub";
 	public static final String _UNAUTHORIZED = "Unauthorized";
@@ -527,6 +528,12 @@ public class Constants {
 	public static final String PUBLIC_COURSE_LIST = "exploreOpenCourseList";
 	public static final String LAST_UPDATED_ON = "lastUpdatedOn";
 	public static final String DESCENDING_ORDER = "desc";
+	public static final String START_TIME = "starttime";
+	public static final String END_TIME = "endtime";
+	public static final String ASSESSMENT_READ_RESPONSE = "assessmentreadresponse";
+	public static final String NOT_SUBMITTED = "NOT SUBMITTED";
+	public static final String PRACTICE_QUESTION_SET = "Practice Question Set";
+	public static final String SUBMITTED = "SUBMITTED";
 	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}
