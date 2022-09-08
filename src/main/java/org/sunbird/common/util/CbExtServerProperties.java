@@ -360,6 +360,9 @@ public class CbExtServerProperties {
 	@Value("${sb.es.user.profile.index}")
 	private String sbEsUserProfileIndex;
 	
+	@Value("${sb.service.signup.user}")
+	private String lmsUserSignUpPath;
+	
 	public String getUserAssessmentSubmissionDuration() {
 		return userAssessmentSubmissionDuration;
 	}
@@ -1313,5 +1316,13 @@ public class CbExtServerProperties {
 
 	public void setSbEsUserProfileIndex(String sbEsUserProfileIndex) {
 		this.sbEsUserProfileIndex = sbEsUserProfileIndex;
+	}
+	
+	public String getLmsUserSignUpPath() {
+		return lmsUserSignUpPath;
+	}
+
+	public void setLmsUserSignUpPath(String lmsUserSignUpPath) {
+		this.lmsUserSignUpPath = lmsUserSignUpPath;
 	}
 }

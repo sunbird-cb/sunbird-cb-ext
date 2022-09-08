@@ -346,3 +346,13 @@ CREATE TABLE sunbird.ratings_lookup (
 ```sh
 CREATE TABLE sunbird.explore_course_list ( identifier text primary key ) ;
 ```
+```sh
+CREATE TABLE IF NOT EXISTS sunbird.user_bulk_upload (
+  identifier text PRIMARY KEY,
+  filename text,
+  filepath text,
+  status text,
+  comment text,
+  dateCreatedOn timestamp,
+  dateupdatedon timestamp);
+```

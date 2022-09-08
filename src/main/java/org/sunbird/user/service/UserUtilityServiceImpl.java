@@ -375,7 +375,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		logger.info(strBuilder.toString());
 	}
 
-	private Map<String, String> getDefaultHeaders() {
+	public Map<String, String> getDefaultHeaders() {
 		Map<String, String> headers = new HashMap<String, String>();
 		headers.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
 		return headers;
