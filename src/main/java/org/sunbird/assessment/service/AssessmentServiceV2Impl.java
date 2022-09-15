@@ -254,7 +254,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                                     result.putAll(createResponseMapWithProperStructure(hierarchySection, assessUtilServ.validateQumlAssessment(questionsListFromAssessmentHierarchy,
                                             questionsListFromSubmitRequest)));
                                     outgoingResponse.getResult().putAll(calculateAssessmentFinalResults(result));
-                                    writeDataToDatabaseAndTriggerKafkaEvent(submitRequest, userId, existingDataList, result);
+                                    //writeDataToDatabaseAndTriggerKafkaEvent(submitRequest, userId, existingDataList, result);
                                     return outgoingResponse;
                                 }
                                 case Constants.SECTION_LEVEL_SCORE_CUTOFF: {
@@ -306,7 +306,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                 Map<String, Object> result = calculateSectionFinalResults(sectionLevelsResults);
                 outgoingResponse.getResult().putAll(result);
                 if (!((String) (allHierarchy.get(Constants.PRIMARY_CATEGORY))).equalsIgnoreCase(Constants.PRACTICE_QUESTION_SET)) {
-                    writeDataToDatabaseAndTriggerKafkaEvent(submitRequest, userId, existingDataList, result);
+                    //writeDataToDatabaseAndTriggerKafkaEvent(submitRequest, userId, existingDataList, result);
                     //kafkaResult.put(Constants.TOTAL_MAX_SCORE, 100.0);
                     //kafkaResult.put(Constants.TOTAL_SCORE, result.get(Constants.OVERALL_RESULT));
 //                    String resultJson = gson.toJson(kafkaResult);
