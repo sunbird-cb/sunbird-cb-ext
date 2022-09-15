@@ -164,7 +164,7 @@ public class AssessmentRepositoryImpl implements AssessmentRepository {
 		}
 		if(!submitAssessmentResponse.isEmpty())
 		{
-			fieldsToBeUpdated.put("submitassessmentresponse", new Gson().toJson(submitAssessmentRequest));
+			fieldsToBeUpdated.put("submitassessmentresponse", new Gson().toJson(submitAssessmentResponse));
 		}
 		if(!status.isEmpty())
 		{

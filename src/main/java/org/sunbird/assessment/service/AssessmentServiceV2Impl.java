@@ -22,6 +22,7 @@ import org.sunbird.core.producer.Producer;
 
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
@@ -205,9 +206,8 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
         if (errMsg.isEmpty()) {
             String userId = validateAuthTokenAndFetchUserId(authUserToken);
             String scoreCutOffType = ((String) allHierarchy.get(Constants.SCORE_CUTOFF_TYPE)).toLowerCase();
+            List<Map<String, Object>> existingDataList = new ArrayList<>();
             List<Map<String, Object>> sectionLevelsResults = new ArrayList<>();
-            List<Map<String, Object>> existingDataList = assessmentRepository.fetchUserAssessmentDataFromDB(userId, (String) submitRequest.get(Constants.IDENTIFIER));
-            String questionSetFromAssessmentString = (!existingDataList.isEmpty()) ? (String) existingDataList.get(0).get(Constants.ASSESSMENT_READ_RESPONSE) : "";
             for (Map<String, Object> hierarchySection : hierarchySectionList) {
                 String hierarchySectionId = (String) hierarchySection.get(Constants.IDENTIFIER);
                 String userSectionId = "";
@@ -220,6 +220,8 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                     }
                 }
                 if (!((String) (allHierarchy.get(Constants.PRIMARY_CATEGORY))).equalsIgnoreCase(Constants.PRACTICE_QUESTION_SET)) {
+                    existingDataList = assessmentRepository.fetchUserAssessmentDataFromDB(userId, (String) submitRequest.get(Constants.IDENTIFIER));
+                    String questionSetFromAssessmentString = (!existingDataList.isEmpty()) ? (String) existingDataList.get(0).get(Constants.ASSESSMENT_READ_RESPONSE) : "";
                    if (!questionSetFromAssessmentString.isEmpty()) {
                         Map<String, Object> questionSetFromAssessment = new Gson().fromJson(
                                 questionSetFromAssessmentString, new TypeToken<HashMap<String, Object>>() {
@@ -249,12 +251,15 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                             Map<String, Object> result = new HashMap<>();
                             switch (scoreCutOffType) {
                                 case Constants.ASSESSMENT_LEVEL_SCORE_CUTOFF: {
-                                    result.putAll(createResponseMapWithProperStructure(hierarchySection, assessUtilServ.generateQumlAssessmentScores(questionsListFromSubmitRequest)));
+                                    result.putAll(createResponseMapWithProperStructure(hierarchySection, assessUtilServ.validateQumlAssessment(questionsListFromAssessmentHierarchy,
+                                            questionsListFromSubmitRequest)));
                                     outgoingResponse.getResult().putAll(calculateAssessmentFinalResults(result));
+                                    writeDataToDatabaseAndTriggerKafkaEvent(submitRequest, userId, existingDataList, result);
                                     return outgoingResponse;
                                 }
                                 case Constants.SECTION_LEVEL_SCORE_CUTOFF: {
-                                    result.putAll(createResponseMapWithProperStructure(hierarchySection, assessUtilServ.generateQumlAssessmentScores(questionsListFromSubmitRequest)));
+                                    result.putAll(createResponseMapWithProperStructure(hierarchySection, assessUtilServ.validateQumlAssessment(questionsListFromAssessmentHierarchy,
+                                            questionsListFromSubmitRequest)));
                                     sectionLevelsResults.add(result);
                                 }
                                 break;
@@ -264,26 +269,20 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                         }
                     }
                 } else {
-                    if (allHierarchy != null && allHierarchy.get(Constants.CHILDREN) != null) {
-                        Map<String, Object> filteredAssessmentData = readAssessmentLevelData(allHierarchy);
-                        List<Map<String, Object>> sections = (List<Map<String, Object>>) filteredAssessmentData.get(Constants.CHILDREN);
-                        for (Map<String, Object> section : sections) {
-                            String sectionId = (String) section.get(Constants.IDENTIFIER);
-                            if (userSectionId.equalsIgnoreCase(sectionId)) {
-                                questionsListFromAssessmentHierarchy.addAll((List<String>) section.get(Constants.CHILD_NODES));
-                                break;
-                            }
-                        }
-                    } else {
-                        errMsg = "Assessment Hierarchy Detail is invalid";
-                        outgoingResponse.getResult().clear();
-                        break;
-                    }
                     hierarchySection.put(Constants.SCORE_CUTOFF_TYPE, scoreCutOffType);
                     List<Map<String, Object>> questionsListFromSubmitRequest = new ArrayList<>();
                     if (userSectionData.containsKey(Constants.CHILDREN) && !ObjectUtils.isEmpty(userSectionData.get(Constants.CHILDREN))) {
                         questionsListFromSubmitRequest = (List<Map<String, Object>>) userSectionData.get(Constants.CHILDREN);
                     }
+                    List<String> desiredKeys = Lists.newArrayList(Constants.IDENTIFIER);
+                    List<Object> questionsList = questionsListFromSubmitRequest.stream()
+                            .flatMap(x -> desiredKeys.stream()
+                                    .filter(x::containsKey)
+                                    .map(x::get)
+                            ).collect(toList());
+                    questionsListFromAssessmentHierarchy = questionsList.stream()
+                            .map(object -> Objects.toString(object, null))
+                            .collect(Collectors.toList());
                     Map<String, Object> result = new HashMap<>();
                     switch (scoreCutOffType) {
                         case Constants.ASSESSMENT_LEVEL_SCORE_CUTOFF: {
@@ -307,15 +306,9 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                 Map<String, Object> result = calculateSectionFinalResults(sectionLevelsResults);
                 outgoingResponse.getResult().putAll(result);
                 if (!((String) (allHierarchy.get(Constants.PRIMARY_CATEGORY))).equalsIgnoreCase(Constants.PRACTICE_QUESTION_SET)) {
-                    Date startTime = (!existingDataList.isEmpty()) ? (Date) existingDataList.get(0).get(Constants.START_TIME) : null;
-                    Boolean isAssessmentUpdatedToDB = assessmentRepository.updateUserAssesmentDataToDB(userId, (String) submitRequest.get(Constants.IDENTIFIER), submitRequest, result, Constants.SUBMITTED, startTime);
-                    Map<String, Object> kafkaResult = new HashMap<>();
-                    kafkaResult.put(Constants.CONTENT_ID, (String) submitRequest.get(Constants.IDENTIFIER));
-                    kafkaResult.put(Constants.COURSE_ID, submitRequest.get(Constants.COURSE_ID));
-                    kafkaResult.put(Constants.BATCH_ID, submitRequest.get(Constants.BATCH_ID));
-                    kafkaResult.put(Constants.USER_ID, submitRequest.get(Constants.USER_ID));
-                    kafkaResult.put(Constants.TOTAL_MAX_SCORE, 100.0);
-                    kafkaResult.put(Constants.TOTAL_SCORE, result.get(Constants.OVERALL_RESULT));
+                    writeDataToDatabaseAndTriggerKafkaEvent(submitRequest, userId, existingDataList, result);
+                    //kafkaResult.put(Constants.TOTAL_MAX_SCORE, 100.0);
+                    //kafkaResult.put(Constants.TOTAL_SCORE, result.get(Constants.OVERALL_RESULT));
 //                    String resultJson = gson.toJson(kafkaResult);
 //                    try (Jedis jedis = new Jedis(Constants.HOST, 6379, 30000)) {
 //                        jedis.set(Constants.USER_ASSESS_SUBMIT_REQ + authUserToken, resultJson);
@@ -334,6 +327,18 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
             outgoingResponse.setResponseCode(HttpStatus.BAD_REQUEST);
         }
         return outgoingResponse;
+    }
+
+    private void writeDataToDatabaseAndTriggerKafkaEvent(Map<String, Object> submitRequest, String userId, List<Map<String, Object>> existingDataList, Map<String, Object> result) {
+        Date startTime = (!existingDataList.isEmpty()) ? (Date) existingDataList.get(0).get(Constants.START_TIME) : null;
+        Boolean isAssessmentUpdatedToDB = assessmentRepository.updateUserAssesmentDataToDB(userId, (String) submitRequest.get(Constants.IDENTIFIER), submitRequest, result, Constants.SUBMITTED, startTime);
+        Map<String, Object> kafkaResult = new HashMap<>();
+        kafkaResult.put(Constants.CONTENT_ID_, (String) submitRequest.get(Constants.IDENTIFIER));
+        kafkaResult.put(Constants.COURSE_ID, submitRequest.get(Constants.COURSE_ID));
+        kafkaResult.put(Constants.BATCH_ID, submitRequest.get(Constants.BATCH_ID));
+        kafkaResult.put(Constants.USER_ID, submitRequest.get(Constants.USER_ID));
+        kafkaResult.put(Constants.ASSESSMENT_ID_KEY,(String) submitRequest.get(Constants.IDENTIFIER));
+        kafkaProducer.push(serverProperties.getUserAssessmentSubmitTopic(), kafkaResult);
     }
 
     private String validateSubmitAssessmentRequest(Map<String, Object> submitRequest, String authUserToken, List<Map<String, Object>> hierarchySectionList, List<Map<String, Object>> sectionListFromSubmitRequest, Map<String, Object> assessmentHierarchy) {
