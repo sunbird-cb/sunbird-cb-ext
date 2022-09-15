@@ -17,4 +17,8 @@ public interface ProfileService {
 	SBApiResponse userAutoComplete(String searchTerm);
 
 	SBApiResponse migrateUser(Map<String, Object> request, String userToken, String authToken);
+	
+	SBApiResponse getNotificationPreferencesById(String userId);
+
+	SBApiResponse updateNotificationPreference(String userId,Map<String,Object> request);
 }

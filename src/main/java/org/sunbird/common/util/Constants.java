@@ -504,7 +504,13 @@ public class Constants {
 	public static final String PUBLIC_COURSE_LIST = "exploreOpenCourseList";
 	public static final String LAST_UPDATED_ON = "lastUpdatedOn";
 	public static final String DESCENDING_ORDER = "desc";
-  
+	
+	public static final String NOTIFICATION_PREFERENCE="notification_preference";
+	public static final String NOTIFICATION_USERID = "user_Id";
+	public static final String TABLE_USER_NOTIFICATION_PREFERENCE = "user_notification_preference";
+	public static final String API_READ_NOTIFICATION_PREFERENCE = "api.read.notification.preference";
+	public static final String API_UPDATE_NOTIFICATION_PREFERENCE = "api.update.notification.preference";
+	
 	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}
