@@ -73,6 +73,7 @@ public class Constants {
 	public static final String RESPONSE_CODE = "responseCode";
 	public static final String AUTH_TOKEN = "Authorization";
 	public static final String X_AUTH_TOKEN = "x-authenticated-user-token";
+	public static final String X_AUTH_USER_ORG_ID = "x-authenticated-user-orgid";
 	public static final String SUCCESSFUL = "Successful";
 	public static final String FAILED = "Failed";
 	public static final String MESSAGE = "message";

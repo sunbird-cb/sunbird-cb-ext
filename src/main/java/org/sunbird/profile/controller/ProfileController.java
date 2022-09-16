@@ -76,14 +76,16 @@ public class ProfileController {
 	}
 	
 	@PostMapping("/user/v1/bulkupload")
-	public ResponseEntity<?> bulkUpload(@RequestParam(value = "file", required = true) MultipartFile multipartFile) {
-		SBApiResponse uploadResponse = profileService.bulkUpload(multipartFile);
+	public ResponseEntity<?> bulkUpload(@RequestParam(value = "file", required = true) MultipartFile multipartFile,
+			@RequestHeader(Constants.X_AUTH_USER_ORG_ID) String rootOrgId,
+			@RequestHeader(Constants.X_AUTH_USER_ID) String userId) {
+		SBApiResponse uploadResponse = profileService.bulkUpload(multipartFile, rootOrgId, userId);
 		return new ResponseEntity<>(uploadResponse, uploadResponse.getResponseCode());
 	}
 
-	@GetMapping("/user/v1/bulkupload")
-	public ResponseEntity<?> getBulkUploadDetails() {
-		SBApiResponse response = profileService.getBulkUploadDetails();
+	@GetMapping(value = {"/user/v1/bulkupload", "/user/v1/bulkupload/{orgId}"})
+	public ResponseEntity<?> getBulkUploadDetails(@PathVariable(value = "orgId", required = false) String orgId) {
+		SBApiResponse response = profileService.getBulkUploadDetails(orgId);
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
 }

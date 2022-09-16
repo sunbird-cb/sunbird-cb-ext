@@ -584,7 +584,6 @@ public class ProfileServiceImpl implements ProfileService {
 			} else {
 				errMsg = "Failed to signup the user account";
 			}
-
 		} catch (Exception e) {
 			errMsg = "Failed to process message. Exception: " + e.getMessage();
 		}
@@ -598,7 +597,7 @@ public class ProfileServiceImpl implements ProfileService {
 	}
 
 	@Override
-	public SBApiResponse bulkUpload(MultipartFile mFile) {
+	public SBApiResponse bulkUpload(MultipartFile mFile, String orgId, String userId) {
 		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_USER_BULK_UPLOAD);
 		try {
 			SBApiResponse uploadResponse = storageService.uploadFile(mFile);
@@ -609,12 +608,14 @@ public class ProfileServiceImpl implements ProfileService {
 			}
 
 			Map<String, Object> uploadedFile = new HashMap<>();
+			uploadedFile.put(Constants.ROOT_ORG_ID, orgId);
 			uploadedFile.put(Constants.IDENTIFIER, UUID.randomUUID().toString());
 			uploadedFile.put(Constants.FILE_NAME, uploadResponse.getResult().get(Constants.NAME));
 			uploadedFile.put(Constants.FILE_PATH, uploadResponse.getResult().get(Constants.URL));
 			uploadedFile.put(Constants.DATE_CREATED_ON, new Timestamp(System.currentTimeMillis()));
 			uploadedFile.put(Constants.STATUS, Constants.INITIATED_CAPITAL);
 			uploadedFile.put(Constants.COMMENT, StringUtils.EMPTY);
+			uploadedFile.put(Constants.CREATED_BY, userId);
 
 			SBApiResponse insertResponse = cassandraOperation.insertRecord(Constants.DATABASE,
 					Constants.TABLE_USER_BULK_UPLOAD, uploadedFile);
@@ -637,21 +638,19 @@ public class ProfileServiceImpl implements ProfileService {
 	}
 	
 	@Override
-	public SBApiResponse getBulkUploadDetails() {
+	public SBApiResponse getBulkUploadDetails(String orgId) {
 		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_USER_BULK_UPLOAD_STATUS);
 		try {
-			List<Map<String, Object>> bulkUploadList = cassandraOperation.getRecordsByProperties(Constants.DATABASE,
-					Constants.TABLE_USER_BULK_UPLOAD, null, Arrays.asList(Constants.IDENTIFIER, Constants.FILE_NAME,
-							Constants.DATE_CREATED_ON, Constants.STATUS, Constants.COMMENT, Constants.DATE_UPDATE_ON));
-			if (CollectionUtils.isNotEmpty(bulkUploadList)) {
-				response.getResult().put(Constants.CONTENT, bulkUploadList);
-				response.getResult().put(Constants.COUNT, bulkUploadList.size());
-				response.getParams().setStatus(Constants.SUCCESSFUL);
-				response.setResponseCode(HttpStatus.OK);
-			} else {
-				response.setResponseCode(HttpStatus.NOT_FOUND);
-				response.getParams().setErrmsg("Failed to get Upload Details");
+			Map<String, Object> propertyMap = new HashMap<>();
+			if (StringUtils.isNotBlank(orgId)) {
+				propertyMap.put(Constants.ROOT_ORG_ID, orgId);
 			}
+			List<Map<String, Object>> bulkUploadList = cassandraOperation.getRecordsByProperties(Constants.DATABASE,
+					Constants.TABLE_USER_BULK_UPLOAD, propertyMap, serverConfig.getBulkUploadStatusFields());
+			response.getParams().setStatus(Constants.SUCCESSFUL);
+			response.setResponseCode(HttpStatus.OK);
+			response.getResult().put(Constants.CONTENT, bulkUploadList);
+			response.getResult().put(Constants.COUNT, bulkUploadList != null ? bulkUploadList.size() : 0);
 		} catch (Exception e) {
 			setErrorData(response,
 					String.format("Failed to get user bulk upload request status. Error: ", e.getMessage()));

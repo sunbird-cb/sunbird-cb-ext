@@ -363,6 +363,9 @@ public class CbExtServerProperties {
 	@Value("${sb.service.signup.user}")
 	private String lmsUserSignUpPath;
 	
+	@Value("${user.bulk.upload.status.fields}")
+	private String bulkUploadStatusFields;
+	
 	public String getUserAssessmentSubmissionDuration() {
 		return userAssessmentSubmissionDuration;
 	}
@@ -1324,5 +1327,13 @@ public class CbExtServerProperties {
 
 	public void setLmsUserSignUpPath(String lmsUserSignUpPath) {
 		this.lmsUserSignUpPath = lmsUserSignUpPath;
+	}
+
+	public List<String> getBulkUploadStatusFields() {
+		return Arrays.asList(bulkUploadStatusFields.split(",", -1));
+	}
+
+	public void setBulkUploadStatusFields(String bulkUploadStatusFields) {
+		this.bulkUploadStatusFields = bulkUploadStatusFields;
 	}
 }
