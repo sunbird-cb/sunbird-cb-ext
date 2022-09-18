@@ -1,6 +1,7 @@
 package org.sunbird.assessment.repo;
 
 import com.datastax.driver.core.utils.UUIDs;
+import com.google.gson.Gson;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.sunbird.assessment.dto.AssessmentSubmissionDTO;
@@ -40,13 +41,13 @@ public class AssessmentRepositoryImpl implements AssessmentRepository {
 	@Override
 	public Map<String, Object> getAssessmentAnswerKey(String artifactUrl) throws Exception {
 		// TODO Auto-generated method stub
-		return null;
+		return Collections.emptyMap();
 	}
 
 	@Override
 	public Map<String, Object> getQuizAnswerKey(AssessmentSubmissionDTO quizMap) throws Exception {
 		// TODO Auto-generated method stub
-		return null;
+		return Collections.emptyMap();
 	}
 
 	@Override
@@ -128,23 +129,51 @@ public class AssessmentRepositoryImpl implements AssessmentRepository {
 	}
 
 	@Override
-	public boolean addUserAssesmentStartTime(String userId, String assessmentIdentifier, Timestamp startTime) {
+	public boolean addUserAssesmentDataToDB(String userId, String assessmentIdentifier, Timestamp startTime, Timestamp endTime, Map<String, Object> questionSet, String status) {
 		Map<String, Object> request = new HashMap<>();
 		request.put(Constants.USER_ID, userId);
-		request.put(Constants.IDENTIFIER, assessmentIdentifier);
-		cassandraOperation.deleteRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_USER_ASSESSMENT_TIME, request);
-		request.put("starttime", startTime);
-		SBApiResponse resp = cassandraOperation.insertRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_USER_ASSESSMENT_TIME, request);
+		request.put(Constants.ASSESSMENT_ID_KEY, assessmentIdentifier);
+		request.put(Constants.START_TIME, startTime);
+		request.put(Constants.END_TIME, endTime);
+		request.put(Constants.ASSESSMENT_READ_RESPONSE, new Gson().toJson(questionSet));
+		request.put(Constants.STATUS, status);
+		SBApiResponse resp = cassandraOperation.insertRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_USER_ASSESSMENT_DATA, request);
 		return resp.get(Constants.RESPONSE).equals(Constants.SUCCESS);
 	}
 
-    @Override
-    public Date fetchUserAssessmentStartTime(String userId, String assessmentIdentifier) {
+	@Override
+	public List<Map<String, Object>> fetchUserAssessmentDataFromDB(String userId, String assessmentIdentifier) {
 		Map<String, Object> request = new HashMap<>();
 		request.put(Constants.USER_ID, userId);
-		request.put(Constants.IDENTIFIER, assessmentIdentifier);
-		Map<String, Object> existingDataList = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
-				Constants.TABLE_USER_ASSESSMENT_TIME, request, null).get(0);
-		return (Date) existingDataList.get("starttime");
+		request.put(Constants.ASSESSMENT_ID_KEY, assessmentIdentifier);
+		List<Map<String, Object>> existingDataList = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
+				Constants.TABLE_USER_ASSESSMENT_DATA, request, null);
+		return existingDataList;
 	}
+
+	@Override
+	public Boolean updateUserAssesmentDataToDB(String userId, String assessmentIdentifier, Map<String, Object> submitAssessmentRequest, Map<String, Object> submitAssessmentResponse, String status, Date startTime) {
+		Map<String, Object> compositeKeys = new HashMap<>();
+		compositeKeys.put(Constants.USER_ID, userId);
+		compositeKeys.put(Constants.ASSESSMENT_ID_KEY, assessmentIdentifier);
+		compositeKeys.put(Constants.START_TIME, startTime);
+		Map<String, Object> fieldsToBeUpdated = new HashMap<>();
+		if(!submitAssessmentRequest.isEmpty())
+		{
+			fieldsToBeUpdated.put("submitassessmentrequest", new Gson().toJson(submitAssessmentRequest));
+		}
+		if(!submitAssessmentResponse.isEmpty())
+		{
+			fieldsToBeUpdated.put("submitassessmentresponse", new Gson().toJson(submitAssessmentResponse));
+		}
+		if(!status.isEmpty())
+		{
+			fieldsToBeUpdated.put(Constants.STATUS, status);
+		}
+		Map<String, Object> isDBUpdated = cassandraOperation.updateRecord(Constants.KEYSPACE_SUNBIRD,
+				Constants.TABLE_USER_ASSESSMENT_DATA, fieldsToBeUpdated, compositeKeys);
+		return true;
+	}
+
+
 }

@@ -1,7 +1,9 @@
 package org.sunbird.profile.service;
 
-import org.sunbird.common.model.SBApiResponse;
 import java.util.Map;
+
+import org.springframework.web.multipart.MultipartFile;
+import org.sunbird.common.model.SBApiResponse;
 
 public interface ProfileService {
 	SBApiResponse profileUpdate(Map<String, Object> request, String XAuthToken, String AuthToken) throws Exception;
@@ -17,4 +19,10 @@ public interface ProfileService {
 	SBApiResponse userAutoComplete(String searchTerm);
 
 	SBApiResponse migrateUser(Map<String, Object> request, String userToken, String authToken);
+	
+	SBApiResponse userSignup(Map<String, Object> request);
+	
+	SBApiResponse bulkUpload(MultipartFile mFile, String orgId, String userId);
+
+	SBApiResponse getBulkUploadDetails(String orgId);
 }
