@@ -322,6 +322,8 @@ public class Constants {
 	public static final String SUNBIRD_KEY_SPACE_NAME = "sunbird";
 	public static final String SUNBIRD_COURSES_KEY_SPACE_NAME = "sunbird_courses";
 	public static final String LAST_ACCESS_TIME_GAP = "last.access.time.gap.millis";
+
+	public static final String SEARCH_FIELDS = "search.fields";
 	public static final String USER_CONTENT_CONSUMPTION = "user_content_consumption";
 	public static final String NOTIFICATION_UTIL = "notificationUtil";
 	public static final String NOTIFICATIONS = "notifications";
@@ -337,6 +339,7 @@ public class Constants {
 	public static final String QUERY_LOGGER_THRESHOLD = "queryLoggerConstantThreshold";
 	public static final String SUNBIRD_CASSANDRA_CONSISTENCY_LEVEL = "sunbird_cassandra_consistency_level";
 	public static final String INCOMPLETE_COURSES_MAIL_SUBJECT = "Complete the courses you started";
+	public static final String NEW_COURSES_MAIL_SUBJECT = "Here are some new courses for you to have a look!";
 	public static final String COURSE = "Course";
 	public static final String COURSE_KEYWORD = "course";
 	public static final String _URL = "_url";
@@ -347,9 +350,12 @@ public class Constants {
 	public static final String NOTIFICATION_HOST = "notification.service.host";
 	public static final String NOTIFICATION_ENDPOINT = "notification.event.endpoint";
 	public static final String SUBJECT = "subject";
-	public static final String SCHEDULER_TIME_GAP = "scheduler-time-gap";
-	public static final String SCHEDULER_RUN_DAY = "scheduler-run-day";
-	public static final String SCHEDULER_RUN_TIME = "scheduler-run-time";
+	public static final String INCOMPLETE_COURSES_SCHEDULER_TIME_GAP = "incomplete-courses-scheduler-time-gap";
+	public static final String INCOMPLETE_COURSES_SCHEDULER_RUN_DAY = "incomplete-courses-scheduler-run-day";
+	public static final String INCOMPLETE_COURSES_SCHEDULER_RUN_TIME = "incomplete-courses-scheduler-run-time";
+	public static final String NEW_COURSES_SCHEDULER_TIME_GAP = "new-courses-scheduler-time-gap";
+	public static final String NEW_COURSES_SCHEDULER_RUN_DAY = "new-courses-scheduler-run-day";
+	public static final String NEW_COURSES_SCHEDULER_RUN_TIME = "new-courses-scheduler-run-time";
 	public static final String IS_DELETED = "isDeleted";
 	public static final String EXCLUDE_USER_EMAILS = "exclude_user_emails";
 	public static final String INCOMPLETE_COURSES = "incompletecourses";
@@ -439,6 +445,7 @@ public class Constants {
 	public static final String MODE = "mode";
 	public static final String ORG_NAME = "orgName";
 	public static final String RECIPIENT_EMAILS = "recipientEmails";
+	public static final String RECIPIENT_NEW_COURSE_EMAILS = "recipient.new.course.email";
 	public static final String SET_PASSWORD_LINK = "setPasswordLink";
 	public static final String WELCOME_MESSAGE = "welcomeMessage";
 	public static final String HELLO = "Hello";
@@ -504,7 +511,17 @@ public class Constants {
 	public static final String PUBLIC_COURSE_LIST = "exploreOpenCourseList";
 	public static final String LAST_UPDATED_ON = "lastUpdatedOn";
 	public static final String DESCENDING_ORDER = "desc";
-  
+	public static final String ASSESSMENT_HOST = "assessment.host";
+	public static final String CONTENT_SEARCH = "content.search";
+	public static final String SB_API_KEY = "sb.api.key";
+    public static final String NEW_COURSES_EMAIL_LIMIT = "new-courses-email-limit";
+	public static final String EMAIL_RECORD_TABLE = "email_record";
+	public static final String EMAIL_TYPE = "emailtype";
+	public static final String LAST_SENT_DATE = "lastsentdate";
+
+	public static final String NEW_COURSES_EMAIL = "New Courses Email";
+
+
 	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}
