@@ -55,11 +55,13 @@ public class NewCoursesEmailNotificationService implements Runnable {
 
     public void newCourses() {
         NewCourseData newCourseData = getLatestAddedCourses();
-        List<CoursesDataMap> coursesDataMapList = setCourseMap(newCourseData);
-        List<String> mailList = getFinalMailingList();
-        boolean isEmailSent = sendNewCourseEmail(coursesDataMapList, mailList);
-        if (isEmailSent)
-            updateEmailRecordInTheDatabase();
+        if (newCourseData != null) {
+            List<CoursesDataMap> coursesDataMapList = setCourseMap(newCourseData);
+            List<String> mailList = getFinalMailingList();
+            boolean isEmailSent = sendNewCourseEmail(coursesDataMapList, mailList);
+            if (isEmailSent)
+                updateEmailRecordInTheDatabase();
+        }
     }
 
     public NewCourseData getLatestAddedCourses() {
@@ -72,25 +74,28 @@ public class NewCoursesEmailNotificationService implements Runnable {
             LocalDate maxValue = LocalDate.now();
             lastUpdatedOn.setMin(calculateMinValue(maxValue));
             lastUpdatedOn.setMax(maxValue.toString());
-            filter.setLastUpdatedOn(lastUpdatedOn);
-            Request request = new Request();
-            request.setFilters(filter);
-            request.setOffset(0);
-            request.setLimit(Integer.parseInt(PropertiesCache.getInstance().getProperty(Constants.NEW_COURSES_EMAIL_LIMIT)));
-            SortBy sortBy = new SortBy();
-            sortBy.setLastUpdatedOn(Constants.DESCENDING_ORDER);
-            request.setSortBy(sortBy);
-            requestData.setRequest(request);
-            String searchFields = PropertiesCache.getInstance().getProperty(Constants.SEARCH_FIELDS);
-            requestData.getRequest().setFields(Arrays.asList(searchFields.split(",", -1)));
-            Map requestBody = new ObjectMapper().convertValue(requestData, Map.class);
-            Object o = fetchResultUsingPost(PropertiesCache.getInstance().getProperty(Constants.ASSESSMENT_HOST) + PropertiesCache.getInstance().getProperty(Constants.CONTENT_SEARCH), requestBody, new HashMap<>());
-            return new ObjectMapper().convertValue(o, NewCourseData.class);
+            if (!lastUpdatedOn.getMax().equalsIgnoreCase(lastUpdatedOn.getMin())) {
+                filter.setLastUpdatedOn(lastUpdatedOn);
+                Request request = new Request();
+                request.setFilters(filter);
+                request.setOffset(0);
+                request.setLimit(Integer.parseInt(PropertiesCache.getInstance().getProperty(Constants.NEW_COURSES_EMAIL_LIMIT)));
+                SortBy sortBy = new SortBy();
+                sortBy.setLastUpdatedOn(Constants.DESCENDING_ORDER);
+                request.setSortBy(sortBy);
+                requestData.setRequest(request);
+                String searchFields = PropertiesCache.getInstance().getProperty(Constants.SEARCH_FIELDS);
+                requestData.getRequest().setFields(Arrays.asList(searchFields.split(",", -1)));
+                Map requestBody = new ObjectMapper().convertValue(requestData, Map.class);
+                Object o = fetchResultUsingPost(PropertiesCache.getInstance().getProperty(Constants.ASSESSMENT_HOST) + PropertiesCache.getInstance().getProperty(Constants.CONTENT_SEARCH), requestBody, new HashMap<>());
+                return new ObjectMapper().convertValue(o, NewCourseData.class);
+            }
         } catch (Exception e) {
             logger.error(e);
         }
         return null;
     }
+
     private List<CoursesDataMap> setCourseMap(NewCourseData newCourseData) {
         List<Content> coursesList = newCourseData.getResult().getContent();
         List<CoursesDataMap> coursesDataMapList = new ArrayList<>();
@@ -146,7 +151,7 @@ public class NewCoursesEmailNotificationService implements Runnable {
             minValue = !StringUtils.isEmpty(emailRecords.get(0).get(Constants.LAST_SENT_DATE)) ? (String) emailRecords.get(0).get(Constants.LAST_SENT_DATE) : "";
         }
         if (StringUtils.isEmpty(minValue)) {
-            minValue = maxValue.minusDays(Long.valueOf(PropertiesCache.getInstance().getProperty(Constants.NEW_COURSES_SCHEDULER_TIME_GAP))/24).toString();
+            minValue = maxValue.minusDays(Long.valueOf(PropertiesCache.getInstance().getProperty(Constants.NEW_COURSES_SCHEDULER_TIME_GAP)) / 24).toString();
         }
         return minValue;
     }
