@@ -22,8 +22,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.sunbird.common.util.Constants.INCOMPLETE_COURSES;
-
 public class NewCoursesEmailNotificationService implements Runnable {
     private static final CbExtLogger logger = new CbExtLogger(SchedulerManager.class.getName());
     private final CassandraOperation cassandraOperation = ServiceFactory.getInstance();
@@ -41,7 +39,7 @@ public class NewCoursesEmailNotificationService implements Runnable {
                 }
                 String extraEmails = PropertiesCache.getInstance().getProperty(Constants.RECIPIENT_NEW_COURSE_EMAILS);
                 mailList.addAll(Arrays.asList(extraEmails.split(",", -1)));
-                new NotificationUtil().sendNotification(mailList, params, PropertiesCache.getInstance().getProperty(Constants.SENDER_MAIL), PropertiesCache.getInstance().getProperty(Constants.NOTIFICATION_HOST) + PropertiesCache.getInstance().getProperty(Constants.NOTIFICATION_ENDPOINT), INCOMPLETE_COURSES, Constants.NEW_COURSES_MAIL_SUBJECT);
+                new NotificationUtil().sendNotification(mailList, params, PropertiesCache.getInstance().getProperty(Constants.SENDER_MAIL), PropertiesCache.getInstance().getProperty(Constants.NOTIFICATION_HOST) + PropertiesCache.getInstance().getProperty(Constants.NOTIFICATION_ENDPOINT), Constants.NEW_COURSES, Constants.NEW_COURSES_MAIL_SUBJECT);
                 return true;
             }
         } catch (Exception e) {

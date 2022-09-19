@@ -359,6 +359,7 @@ public class Constants {
 	public static final String IS_DELETED = "isDeleted";
 	public static final String EXCLUDE_USER_EMAILS = "exclude_user_emails";
 	public static final String INCOMPLETE_COURSES = "incompletecourses";
+	public static final String NEW_COURSES = "newcourses";
 	public static final String POSTER_IMAGE = "posterImage";
 
 	public static final String COURSE_URL = "course.url";
