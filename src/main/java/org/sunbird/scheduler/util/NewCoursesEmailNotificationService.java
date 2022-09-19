@@ -87,7 +87,7 @@ public class NewCoursesEmailNotificationService implements Runnable {
                 String searchFields = PropertiesCache.getInstance().getProperty(Constants.SEARCH_FIELDS);
                 requestData.getRequest().setFields(Arrays.asList(searchFields.split(",", -1)));
                 Map requestBody = new ObjectMapper().convertValue(requestData, Map.class);
-                String url = PropertiesCache.getInstance().getProperty(Constants.KM_BASE_HOST) + "content/v1/search";
+                String url = PropertiesCache.getInstance().getProperty(Constants.KM_BASE_HOST) + "v1/search";
                 logger.info(String.format("url %s", url));
                 Object o = fetchResultUsingPost(PropertiesCache.getInstance().getProperty(Constants.KM_BASE_HOST) + PropertiesCache.getInstance().getProperty(Constants.CONTENT_SEARCH), requestBody, new HashMap<>());
                 return new ObjectMapper().convertValue(o, NewCourseData.class);
