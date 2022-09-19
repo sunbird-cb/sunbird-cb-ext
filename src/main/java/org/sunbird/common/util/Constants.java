@@ -521,6 +521,7 @@ public class Constants {
 	public static final String LAST_SENT_DATE = "lastsentdate";
 
 	public static final String NEW_COURSES_EMAIL = "New Courses Email";
+	public static final String KM_BASE_HOST = "km.base.host";
 
 
 	private Constants() {
