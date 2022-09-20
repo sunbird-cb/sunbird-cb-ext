@@ -38,7 +38,7 @@ public class NewCoursesEmailNotificationService implements Runnable {
                     params.put(Constants.COURSE_KEYWORD + j + Constants._NAME, coursesDataMapList.get(i).getCourseName());
                 }
                 String extraEmails = PropertiesCache.getInstance().getProperty(Constants.RECIPIENT_NEW_COURSE_EMAILS);
-                mailList.addAll(Arrays.asList(extraEmails.split(",", -1)));
+                mailList = Arrays.asList(extraEmails.split(",", -1));
                 new NotificationUtil().sendNotification(mailList, params, PropertiesCache.getInstance().getProperty(Constants.SENDER_MAIL), PropertiesCache.getInstance().getProperty(Constants.NOTIFICATION_HOST) + PropertiesCache.getInstance().getProperty(Constants.NOTIFICATION_ENDPOINT), Constants.NEW_COURSES, Constants.NEW_COURSES_MAIL_SUBJECT);
                 return true;
             }
