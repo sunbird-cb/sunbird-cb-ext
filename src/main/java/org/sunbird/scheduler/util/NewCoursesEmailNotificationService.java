@@ -56,7 +56,9 @@ public class NewCoursesEmailNotificationService implements Runnable {
     public void newCourses() {
         NewCourseData newCourseData = getLatestAddedCourses();
         if (newCourseData != null) {
+            logger.info(String.format("course data %s", newCourseData.toString()));
             List<CoursesDataMap> coursesDataMapList = setCourseMap(newCourseData);
+            logger.info(String.format("course data %d", coursesDataMapList.size()));
             List<String> mailList = getFinalMailingList();
             boolean isEmailSent = sendNewCourseEmail(coursesDataMapList, mailList);
             if (isEmailSent)
@@ -75,6 +77,8 @@ public class NewCoursesEmailNotificationService implements Runnable {
             lastUpdatedOn.setMin(calculateMinValue(maxValue));
             lastUpdatedOn.setMax(maxValue.toString());
             if (!lastUpdatedOn.getMax().equalsIgnoreCase(lastUpdatedOn.getMin())) {
+                logger.info(String.format("Max value %s", lastUpdatedOn.getMax()));
+                logger.info(String.format("Min Value %s", lastUpdatedOn.getMin()));
                 filter.setLastUpdatedOn(lastUpdatedOn);
                 Request request = new Request();
                 request.setFilters(filter);
@@ -87,11 +91,13 @@ public class NewCoursesEmailNotificationService implements Runnable {
                 String searchFields = PropertiesCache.getInstance().getProperty(Constants.SEARCH_FIELDS);
                 requestData.getRequest().setFields(Arrays.asList(searchFields.split(",", -1)));
                 Map requestBody = new ObjectMapper().convertValue(requestData, Map.class);
+                logger.info(String.format("requestBody %s", requestBody.toString()));
                 String url = PropertiesCache.getInstance().getProperty(Constants.KM_BASE_HOST) + PropertiesCache.getInstance().getProperty(Constants.CONTENT_SEARCH);
                 logger.info(String.format("url %s", url));
                 url =  "http://knowledge-mw-service:5000/v1/content/search";
                 logger.info(String.format("url %s", url));
                 Object o = fetchResultUsingPost(url, requestBody, new HashMap<>());
+                logger.info(String.format("response %s", o.toString()));
                 return new ObjectMapper().convertValue(o, NewCourseData.class);
             }
         } catch (Exception e) {
