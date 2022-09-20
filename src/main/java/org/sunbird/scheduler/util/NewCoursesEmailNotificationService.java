@@ -89,7 +89,9 @@ public class NewCoursesEmailNotificationService implements Runnable {
                 Map requestBody = new ObjectMapper().convertValue(requestData, Map.class);
                 String url = PropertiesCache.getInstance().getProperty(Constants.KM_BASE_HOST) + PropertiesCache.getInstance().getProperty(Constants.CONTENT_SEARCH);
                 logger.info(String.format("url %s", url));
-                Object o = fetchResultUsingPost(PropertiesCache.getInstance().getProperty(Constants.KM_BASE_HOST) + PropertiesCache.getInstance().getProperty(Constants.CONTENT_SEARCH), requestBody, new HashMap<>());
+                url =  "http://knowledge-mw-service:5000/content/v1/search";
+                logger.info(String.format("url %s", url));
+                Object o = fetchResultUsingPost(url, requestBody, new HashMap<>());
                 return new ObjectMapper().convertValue(o, NewCourseData.class);
             }
         } catch (Exception e) {
