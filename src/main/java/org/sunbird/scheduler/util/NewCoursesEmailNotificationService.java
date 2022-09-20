@@ -84,6 +84,7 @@ public class NewCoursesEmailNotificationService implements Runnable {
                 request.setFilters(filter);
                 request.setOffset(0);
                 request.setLimit(Integer.parseInt(PropertiesCache.getInstance().getProperty(Constants.NEW_COURSES_EMAIL_LIMIT)));
+                logger.info(String.format("Limit %d", Integer.parseInt(PropertiesCache.getInstance().getProperty(Constants.NEW_COURSES_EMAIL_LIMIT))));
                 SortBy sortBy = new SortBy();
                 sortBy.setLastUpdatedOn(Constants.DESCENDING_ORDER);
                 request.setSortBy(sortBy);
