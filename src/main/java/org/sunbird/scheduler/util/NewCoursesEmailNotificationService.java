@@ -26,10 +26,11 @@ public class NewCoursesEmailNotificationService implements Runnable {
     private static final CbExtLogger logger = new CbExtLogger(SchedulerManager.class.getName());
     private final CassandraOperation cassandraOperation = ServiceFactory.getInstance();
 
-    public static boolean sendNewCourseEmail(List<CoursesDataMap> coursesDataMapList, List<String> mailList) {
+    public static boolean sendNewCourseEmail(List<CoursesDataMap> coursesDataMapList, List<String> mailList, int noOfCourses) {
         try {
             if (!coursesDataMapList.isEmpty()) {
                 Map<String, Object> params = new HashMap<>();
+                params.put(Constants.NO_OF_COURSES, noOfCourses);
                 for (int i = 0; i < coursesDataMapList.size(); i++) {
                     int j = i + 1;
                     params.put(Constants.COURSE_KEYWORD + j, true);
@@ -56,11 +57,10 @@ public class NewCoursesEmailNotificationService implements Runnable {
     public void newCourses() {
         NewCourseData newCourseData = getLatestAddedCourses();
         if (newCourseData != null) {
-            logger.info(String.format("course data %s", newCourseData.toString()));
             List<CoursesDataMap> coursesDataMapList = setCourseMap(newCourseData);
-            logger.info(String.format("course data %d", coursesDataMapList.size()));
+            int noOfCourses = coursesDataMapList.size();
             List<String> mailList = getFinalMailingList();
-            boolean isEmailSent = sendNewCourseEmail(coursesDataMapList, mailList);
+            boolean isEmailSent = sendNewCourseEmail(coursesDataMapList, mailList, noOfCourses);
             if (isEmailSent)
                 updateEmailRecordInTheDatabase();
         }
@@ -77,14 +77,11 @@ public class NewCoursesEmailNotificationService implements Runnable {
             lastUpdatedOn.setMin(calculateMinValue(maxValue));
             lastUpdatedOn.setMax(maxValue.toString());
             if (!lastUpdatedOn.getMax().equalsIgnoreCase(lastUpdatedOn.getMin())) {
-                logger.info(String.format("Max value %s", lastUpdatedOn.getMax()));
-                logger.info(String.format("Min Value %s", lastUpdatedOn.getMin()));
                 filter.setLastUpdatedOn(lastUpdatedOn);
                 Request request = new Request();
                 request.setFilters(filter);
                 request.setOffset(0);
                 request.setLimit(Integer.parseInt(PropertiesCache.getInstance().getProperty(Constants.NEW_COURSES_EMAIL_LIMIT)));
-                logger.info(String.format("Limit %d", Integer.parseInt(PropertiesCache.getInstance().getProperty(Constants.NEW_COURSES_EMAIL_LIMIT))));
                 SortBy sortBy = new SortBy();
                 sortBy.setLastUpdatedOn(Constants.DESCENDING_ORDER);
                 request.setSortBy(sortBy);
@@ -92,11 +89,7 @@ public class NewCoursesEmailNotificationService implements Runnable {
                 String searchFields = PropertiesCache.getInstance().getProperty(Constants.SEARCH_FIELDS);
                 requestData.getRequest().setFields(Arrays.asList(searchFields.split(",", -1)));
                 Map requestBody = new ObjectMapper().convertValue(requestData, Map.class);
-                logger.info(String.format("requestBody %s", requestBody.toString()));
                 String url = PropertiesCache.getInstance().getProperty(Constants.KM_BASE_HOST) + PropertiesCache.getInstance().getProperty(Constants.CONTENT_SEARCH);
-                logger.info(String.format("url %s", url));
-                url =  "http://knowledge-mw-service:5000/v1/content/search";
-                logger.info(String.format("url %s", url));
                 Object o = fetchResultUsingPost(url, requestBody, new HashMap<>());
                 logger.info(String.format("response %s", o.toString()));
                 return new ObjectMapper().convertValue(o, NewCourseData.class);
@@ -184,9 +177,11 @@ public class NewCoursesEmailNotificationService implements Runnable {
             try {
                 if (userDetail.get(Constants.PROFILE_DETAILS_KEY) != null) {
                     Map profileDetails = new ObjectMapper().readValue((String) userDetail.get(Constants.PROFILE_DETAILS_KEY), Map.class);
-                    Map<String, Object> personalDetailsMap = (Map<String, Object>) profileDetails.get(Constants.PERSONAL_DETAILS);
-                    if (personalDetailsMap.get(Constants.PRIMARY_EMAIL) != null && !excludeEmailList.contains(personalDetailsMap.get(Constants.PRIMARY_EMAIL))) {
-                        finalEmailList.add((String) personalDetailsMap.get(Constants.PRIMARY_EMAIL));
+                    if (!profileDetails.isEmpty()) {
+                        Map<String, Object> personalDetailsMap = (Map<String, Object>) profileDetails.get(Constants.PERSONAL_DETAILS);
+                        if (!personalDetailsMap.isEmpty() && personalDetailsMap.get(Constants.PRIMARY_EMAIL) != null && !excludeEmailList.contains(personalDetailsMap.get(Constants.PRIMARY_EMAIL))) {
+                            finalEmailList.add((String) personalDetailsMap.get(Constants.PRIMARY_EMAIL));
+                        }
                     }
                 }
             } catch (Exception e) {

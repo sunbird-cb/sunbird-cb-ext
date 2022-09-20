@@ -339,7 +339,7 @@ public class Constants {
 	public static final String QUERY_LOGGER_THRESHOLD = "queryLoggerConstantThreshold";
 	public static final String SUNBIRD_CASSANDRA_CONSISTENCY_LEVEL = "sunbird_cassandra_consistency_level";
 	public static final String INCOMPLETE_COURSES_MAIL_SUBJECT = "Complete the courses you started";
-	public static final String NEW_COURSES_MAIL_SUBJECT = "Here are some new courses for you to have a look!";
+	public static final String NEW_COURSES_MAIL_SUBJECT = "Check out exciting new courses that launched this week!";
 	public static final String COURSE = "Course";
 	public static final String COURSE_KEYWORD = "course";
 	public static final String _URL = "_url";
@@ -522,6 +522,8 @@ public class Constants {
 
 	public static final String NEW_COURSES_EMAIL = "New Courses Email";
 	public static final String KM_BASE_HOST = "km.base.host";
+
+	public static final String NO_OF_COURSES = "noOfCourses";
 
 
 	private Constants() {
