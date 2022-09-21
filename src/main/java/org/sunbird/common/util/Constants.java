@@ -512,6 +512,7 @@ public class Constants {
 	public static final String PUBLIC_COURSE_LIST = "exploreOpenCourseList";
 	public static final String LAST_UPDATED_ON = "lastUpdatedOn";
 	public static final String DESCENDING_ORDER = "desc";
+<<<<<<< HEAD
 	public static final String ASSESSMENT_HOST = "assessment.host";
 	public static final String CONTENT_SEARCH = "content.search";
 	public static final String SB_API_KEY = "sb.api.key";
@@ -524,8 +525,16 @@ public class Constants {
 	public static final String KM_BASE_HOST = "km.base.host";
 
 	public static final String NO_OF_COURSES = "noOfCourses";
-
-
+	public static final String X_AUTH_USER_ORG_ID = "x-authenticated-user-orgid";
+	public static final String API_USER_SIGNUP = "api.user.signup";
+	public static final String API_USER_BULK_UPLOAD = "api.user.bulk.upload";
+	public static final String API_USER_BULK_UPLOAD_STATUS = "api.user.bulk.upload.status";
+	public static final String TABLE_USER_BULK_UPLOAD = "user_bulk_upload";
+	public static final String FILE_NAME = "fileName";
+	public static final String FILE_PATH = "filePath";
+	public static final String DATE_CREATED_ON = "dateCreatedOn";
+	public static final String DATE_UPDATE_ON = "dateUpdatedOn";
+	public static final String INITIATED_CAPITAL = "INITIATED";
 	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}

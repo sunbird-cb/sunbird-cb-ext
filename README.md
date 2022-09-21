@@ -346,3 +346,18 @@ CREATE TABLE sunbird.ratings_lookup (
 ```sh
 CREATE TABLE sunbird.explore_course_list ( identifier text primary key ) ;
 ```
+```sh
+CREATE TABLE sunbird.user_bulk_upload (
+    rootorgid text,
+    identifier text,
+    comment text,
+    createdby text,
+    datecreatedon timestamp,
+    dateupdatedon timestamp,
+    filename text,
+    filepath text,
+    status text,
+    updatedby text,
+    PRIMARY KEY (rootorgid, identifier)
+) WITH CLUSTERING ORDER BY (identifier ASC);
+```
