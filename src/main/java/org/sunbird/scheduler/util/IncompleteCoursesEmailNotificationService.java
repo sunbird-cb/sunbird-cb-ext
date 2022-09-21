@@ -11,14 +11,16 @@ import org.sunbird.common.util.NotificationUtil;
 import org.sunbird.common.util.PropertiesCache;
 import org.sunbird.core.logger.CbExtLogger;
 import org.sunbird.scheduler.model.CourseDetails;
-import org.sunbird.scheduler.model.IncompleteCourses;
+import org.sunbird.scheduler.model.CoursesDataMap;
 import org.sunbird.scheduler.model.UserCourseProgressDetails;
 
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class EmailNotificationService implements Runnable {
+import static org.sunbird.common.util.Constants.INCOMPLETE_COURSES;
+
+public class IncompleteCoursesEmailNotificationService implements Runnable {
     private static final CbExtLogger logger = new CbExtLogger(SchedulerManager.class.getName());
     private final CassandraOperation cassandraOperation = ServiceFactory.getInstance();
     Map<String, CourseDetails> courseIdAndCourseNameMap = new HashMap<>();
@@ -36,7 +38,7 @@ public class EmailNotificationService implements Runnable {
                     params.put(Constants.COURSE_KEYWORD + j + Constants._DURATION, String.valueOf(userCourseProgressDetailsEntry.getValue().getIncompleteCourses().get(i).getCompletionPercentage()));
 
                 }
-                new NotificationUtil().sendNotification(Collections.singletonList(userCourseProgressDetailsEntry.getValue().getEmail()), params, PropertiesCache.getInstance().getProperty(Constants.SENDER_MAIL), PropertiesCache.getInstance().getProperty(Constants.NOTIFICATION_HOST) + PropertiesCache.getInstance().getProperty(Constants.NOTIFICATION_ENDPOINT));
+                new NotificationUtil().sendNotification(Collections.singletonList(userCourseProgressDetailsEntry.getValue().getEmail()), params, PropertiesCache.getInstance().getProperty(Constants.SENDER_MAIL), PropertiesCache.getInstance().getProperty(Constants.NOTIFICATION_HOST) + PropertiesCache.getInstance().getProperty(Constants.NOTIFICATION_ENDPOINT), INCOMPLETE_COURSES, Constants.INCOMPLETE_COURSES_MAIL_SUBJECT);
             }
         } catch (Exception e) {
             logger.info(String.format("Error in the incomplete courses email module %s", e.getMessage()));
@@ -139,7 +141,7 @@ public class EmailNotificationService implements Runnable {
                 String batchId = (String) userCourse.get(Constants.BATCH_ID);
                 String userid = (String) userCourse.get(Constants.USER_ID);
                 if (courseId != null && batchId != null && courseIdAndCourseNameMap.get(courseId) != null && courseIdAndCourseNameMap.get(courseId).getThumbnail() != null) {
-                    IncompleteCourses i = new IncompleteCourses();
+                    CoursesDataMap i = new CoursesDataMap();
                     i.setCourseId(courseId);
                     i.setCourseName(courseIdAndCourseNameMap.get(courseId).getCourseName());
                     i.setCompletionPercentage((Float) userCourse.get(Constants.COMPLETION_PERCENTAGE));
@@ -151,12 +153,12 @@ public class EmailNotificationService implements Runnable {
                         if (userCourseMap.get(userid).getIncompleteCourses().size() < 3) {
                             userCourseMap.get(userid).getIncompleteCourses().add(i);
                             if (userCourseMap.get(userid).getIncompleteCourses().size() == 3) {
-                                userCourseMap.get(userid).getIncompleteCourses().sort(Comparator.comparing(IncompleteCourses::getLastAccessedDate).reversed());
+                                userCourseMap.get(userid).getIncompleteCourses().sort(Comparator.comparing(CoursesDataMap::getLastAccessedDate).reversed());
                             }
                         }
                     } else {
                         UserCourseProgressDetails user = new UserCourseProgressDetails();
-                        List<IncompleteCourses> incompleteCourses = new ArrayList<>();
+                        List<CoursesDataMap> incompleteCourses = new ArrayList<>();
                         incompleteCourses.add(i);
                         user.setIncompleteCourses(incompleteCourses);
                         userCourseMap.put(userid, user);

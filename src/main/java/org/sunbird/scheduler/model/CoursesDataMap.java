@@ -7,7 +7,7 @@ import java.util.Date;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class IncompleteCourses implements Serializable {
+public class CoursesDataMap implements Serializable {
 
   private static final long serialVersionUID = 1L;
   private String courseId;
