@@ -512,7 +512,6 @@ public class Constants {
 	public static final String PUBLIC_COURSE_LIST = "exploreOpenCourseList";
 	public static final String LAST_UPDATED_ON = "lastUpdatedOn";
 	public static final String DESCENDING_ORDER = "desc";
-<<<<<<< HEAD
 	public static final String ASSESSMENT_HOST = "assessment.host";
 	public static final String CONTENT_SEARCH = "content.search";
 	public static final String SB_API_KEY = "sb.api.key";
