@@ -31,10 +31,8 @@ public class SchedulerManager {
         Calendar newCoursesTargetCal = calculateTargetCalender(todayCal, Integer.parseInt(p.getProperty(Constants.NEW_COURSES_SCHEDULER_RUN_DAY)), Integer.parseInt(p.getProperty(Constants.NEW_COURSES_SCHEDULER_RUN_TIME)));
         service.scheduleWithFixedDelay(new IncompleteCoursesEmailNotificationService(), ((incompleteCoursesTargetCal.getTimeInMillis() - todayCal.getTimeInMillis()) / 1000) / 60,
                 Long.valueOf(p.getProperty(Constants.INCOMPLETE_COURSES_SCHEDULER_TIME_GAP)), TimeUnit.MINUTES);
-//        service.scheduleWithFixedDelay(new NewCoursesEmailNotificationService(), ((newCoursesTargetCal.getTimeInMillis() - todayCal.getTimeInMillis()) / 1000) / 60,
-//                Long.valueOf(p.getProperty(Constants.NEW_COURSES_SCHEDULER_TIME_GAP)), TimeUnit.MINUTES);
-        service.scheduleWithFixedDelay(new NewCoursesEmailNotificationService(), 0,
-               7, TimeUnit.MINUTES);
+        service.scheduleWithFixedDelay(new NewCoursesEmailNotificationService(), ((newCoursesTargetCal.getTimeInMillis() - todayCal.getTimeInMillis()) / 1000) / 60,
+                Long.valueOf(p.getProperty(Constants.NEW_COURSES_SCHEDULER_TIME_GAP)), TimeUnit.MINUTES);
         logger.info("SchedulerManager:schedule: Started job for sending emails to the users.");
     }
 
