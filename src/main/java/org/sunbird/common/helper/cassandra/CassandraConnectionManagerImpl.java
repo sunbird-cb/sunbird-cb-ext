@@ -21,26 +21,22 @@ public class CassandraConnectionManagerImpl implements CassandraConnectionManage
     private static Map<String, Session> cassandraSessionMap = new ConcurrentHashMap<>(2);
     public static CbExtLogger logger = new CbExtLogger(CassandraConnectionManagerImpl.class.getName());
 
-    static {
+    public CassandraConnectionManagerImpl() {
         registerShutDownHook();
-    }
-
-    @Override
-    public void createConnection() {
         createCassandraConnection();
     }
 
     @Override
-    public Session getSession(String keyspace) {
-        Session session = cassandraSessionMap.get(keyspace);
-        if (null != session) {
-            return session;
-        } else {
-            Session session2 = cluster.connect(keyspace);
-            cassandraSessionMap.put(keyspace, session2);
-            return session2;
-        }
-    }
+	public Session getSession(String keyspace) {
+		Session session = cassandraSessionMap.get(keyspace);
+		if (null != session) {
+			return session;
+		} else {
+			Session session2 = cluster.connect(keyspace);
+			cassandraSessionMap.put(keyspace, session2);
+			return session2;
+		}
+	}
 
     private void createCassandraConnection() {
         try {
@@ -153,7 +149,9 @@ public class CassandraConnectionManagerImpl implements CassandraConnectionManage
                 for (Map.Entry<String, Session> entry : cassandraSessionMap.entrySet()) {
                     cassandraSessionMap.get(entry.getKey()).close();
                 }
-                cluster.close();
+				if (cluster != null) {
+					cluster.close();
+				}
                 logger.info("completed resource cleanup Cassandra.");
             } catch (Exception ex) {
                 logger.error(ex);

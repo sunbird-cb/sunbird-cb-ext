@@ -315,9 +315,9 @@ public class Constants {
 	public static final String HIERARCHY = "hierarchy";
 	public static final String DEV_HIERARCHY_STORE = "dev_hierarchy_store";
 	public static final String CONTENT_HIERARCHY = "content_hierarchy";
-	public static final String BATCH_ID_ = "batchid";
-	public static final String COURSE_ID_ = "courseid";
-	public static final String COMPLETION_PERCENTAGE_ = "completionpercentage";
+	public static final String BATCH_ID_COLUMN = "batchid";
+	public static final String COURSE_ID_COLUMN = "courseid";
+	public static final String COMPLETION_PERCENTAGE_COLUMN = "completionpercentage";
 	public static final String LAST_ACCESS_TIME = "last_access_time";
 	public static final String SUNBIRD_KEY_SPACE_NAME = "sunbird";
 	public static final String SUNBIRD_COURSES_KEY_SPACE_NAME = "sunbird_courses";
@@ -514,6 +514,8 @@ public class Constants {
 	public static final String DATE_CREATED_ON = "dateCreatedOn";
 	public static final String DATE_UPDATE_ON = "dateUpdatedOn";
 	public static final String INITIATED_CAPITAL = "INITIATED";
+	public static final List<String> COURSE_REMINDER_EMAIL_FIELDS = Arrays.asList(RATINGS_USER_ID, BATCH_ID_COLUMN,
+			COURSE_ID_COLUMN, COMPLETION_PERCENTAGE_COLUMN, LAST_ACCESS_TIME);
   
 	private Constants() {
 		throw new IllegalStateException("Utility class");

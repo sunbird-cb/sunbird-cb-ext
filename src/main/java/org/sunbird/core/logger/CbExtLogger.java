@@ -51,6 +51,10 @@ public class CbExtLogger {
 							+ "\", \"trace\":\"" + Throwables.getStackTraceAsString(exception) + "\"}");
 		}
 	}
+	
+	public void error(String errMsg, Exception exception) {
+		logger.error(errMsg, exception);
+	}
 
 	public void fatal(Exception exception) {
 		ObjectMapper ow = new ObjectMapper();

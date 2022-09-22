@@ -34,14 +34,14 @@ public class StorageServiceImpl implements StorageService {
 	RestTemplate restTemplate;
 
 	@Autowired
-	private CbExtServerProperties cbExtServerProperties;
+	private CbExtServerProperties serverProperties;
 
 	@PostConstruct
 	public void init() {
 		if (storageService == null) {
 			storageService = StorageServiceFactory.getStorageService(new StorageConfig(
-					cbExtServerProperties.getAzureTypeName(), cbExtServerProperties.getAzureIdentityName(),
-					cbExtServerProperties.getAzureStorageKey(), null));
+					serverProperties.getCloudStorageTypeName(), serverProperties.getCloudStorageKey(),
+					serverProperties.getCloudStorageSecret(), Option.apply(serverProperties.getCloudStorageCephs3Endpoint())));
 		}
 	}
 
@@ -55,8 +55,8 @@ public class StorageServiceImpl implements StorageService {
 			FileOutputStream fos = new FileOutputStream(file);
 			fos.write(mFile.getBytes());
 			fos.close();
-			String objectKey = cbExtServerProperties.getAzureContainerName() + "/" + file.getName();
-			String url = storageService.upload(cbExtServerProperties.getAzureContainerName(), file.getAbsolutePath(),
+			String objectKey = serverProperties.getCloudContainerName() + "/" + file.getName();
+			String url = storageService.upload(serverProperties.getCloudContainerName(), file.getAbsolutePath(),
 					objectKey, Option.apply(false), Option.apply(1), Option.apply(5), Option.empty());
 			file.delete();
 			Map<String, String> uploadedFile = new HashMap<>();
@@ -80,7 +80,7 @@ public class StorageServiceImpl implements StorageService {
 		SBApiResponse response = new SBApiResponse();
 		response.setId(Constants.API_FILE_DELETE);
 		try {
-			storageService.deleteObject(cbExtServerProperties.getAzureContainerName(), fileName,
+			storageService.deleteObject(serverProperties.getCloudContainerName(), fileName,
 					Option.apply(Boolean.FALSE));
 			response.getParams().setStatus(Constants.SUCCESSFUL);
 			response.setResponseCode(HttpStatus.OK);

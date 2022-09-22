@@ -10,13 +10,6 @@ import java.util.List;
 public interface CassandraConnectionManager {
 
   /**
-   * Method to create the cassandra connection .
-   *
-   * @param hosts
-   */
-  void createConnection();
-
-  /**
    * Method to get the cassandra session oject on basis of keyspace name provided .
    *
    * @param keyspaceName

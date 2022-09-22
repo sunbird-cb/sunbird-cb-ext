@@ -1,7 +1,5 @@
 package org.sunbird.common.util;
 
-import static org.sunbird.common.util.Constants.INCOMPLETE_COURSES;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -14,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.sunbird.common.model.EmailConfig;
@@ -23,15 +20,11 @@ import org.sunbird.common.model.Template;
 
 @Service(Constants.NOTIFICATION_UTIL)
 public class NotificationUtil {
-	public static final Logger Logger;
+	private static final Logger logger = LoggerFactory.getLogger(NotificationUtil.class);
 	private static final String EXCEPTION = "Exception in Send Notification %s";
 
 	@Autowired
 	RestTemplate restTemplate;
-
-	static {
-		Logger = LoggerFactory.getLogger(NotificationUtil.class);
-	}
 
 	public <params> void sendNotification(List<String> sendTo, Map<String, Object> params, String senderMail,
 			String notificationUrl) {
@@ -43,17 +36,17 @@ public class NotificationUtil {
 				Map<String, Object> notificationRequest = new HashMap<>();
 				List<Object> notificationTosend = new ArrayList<>(Arrays.asList(new Notification(Constants.EMAIL,
 						Constants.MESSAGE, new EmailConfig(senderMail, Constants.INCOMPLETE_COURSES_MAIL_SUBJECT),
-						sendTo, new Template(null, INCOMPLETE_COURSES, params))));
+						sendTo, new Template(null, Constants.INCOMPLETE_COURSES, params))));
 				notificationRequest.put(Constants.REQUEST, new HashMap<String, List<Object>>() {
 					{
 						put(Constants.NOTIFICATIONS, notificationTosend);
 					}
 				});
-				Logger.info(String.format("Notification Request : %s", notificationRequest));
+				logger.info(String.format("Notification Request : %s", notificationRequest));
 				HttpEntity<Object> req = new HttpEntity<>(notificationRequest, headers);
-				ResponseEntity<String> resp = restTemplate.postForEntity(notificationUrl, req, String.class);
+				restTemplate.postForEntity(notificationUrl, req, String.class);
 			} catch (Exception e) {
-				Logger.error(String.format(EXCEPTION, e.getMessage()));
+				logger.error(String.format(EXCEPTION, e.getMessage()));
 			}
 		}).start();
 	}
@@ -74,10 +67,10 @@ public class NotificationUtil {
 				});
 
 				HttpEntity<Object> req = new HttpEntity<>(notificationRequest, headers);
-				Logger.info(String.format("Notification Request : %s", notificationRequest));
+				logger.info(String.format("Notification Request : %s", notificationRequest));
 				restTemplate.postForEntity(notificationUrl, req, Object.class);
 			} catch (Exception e) {
-				Logger.error(String.format(EXCEPTION, e.getMessage()));
+				logger.error(String.format(EXCEPTION, e.getMessage()));
 			}
 		}).start();
 	}

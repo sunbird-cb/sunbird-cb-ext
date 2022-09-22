@@ -83,8 +83,8 @@ public class ProfileController {
 		return new ResponseEntity<>(uploadResponse, uploadResponse.getResponseCode());
 	}
 
-	@GetMapping(value = {"/user/v1/bulkupload", "/user/v1/bulkupload/{orgId}"})
-	public ResponseEntity<?> getBulkUploadDetails(@PathVariable(value = "orgId", required = false) String orgId) {
+	@GetMapping("/user/v1/bulkupload/{orgId}")
+	public ResponseEntity<?> getBulkUploadDetails(@PathVariable("orgId") String orgId) {
 		SBApiResponse response = profileService.getBulkUploadDetails(orgId);
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
