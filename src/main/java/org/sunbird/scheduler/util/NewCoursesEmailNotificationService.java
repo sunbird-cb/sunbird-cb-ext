@@ -12,6 +12,7 @@ import org.springframework.web.client.RestTemplate;
 import org.sunbird.cassandra.utils.CassandraOperation;
 import org.sunbird.common.helper.cassandra.ServiceFactory;
 import org.sunbird.common.util.Constants;
+import org.sunbird.common.util.NotificationUtil;
 import org.sunbird.common.util.PropertiesCache;
 import org.sunbird.core.logger.CbExtLogger;
 import org.sunbird.scheduler.model.*;
@@ -41,7 +42,7 @@ public class NewCoursesEmailNotificationService implements Runnable {
                 }
                 String extraEmails = PropertiesCache.getInstance().getProperty(Constants.RECIPIENT_NEW_COURSE_EMAILS);
                 mailList.addAll(Arrays.asList(extraEmails.split(",", -1)));
-                int chunkSize = 2;
+                int chunkSize = 1000;
                 List<String> emailList;
                 for (int i = 0; i < mailList.size(); i += chunkSize) {
                     if ((i + chunkSize) >= mailList.size()) {
@@ -51,7 +52,7 @@ public class NewCoursesEmailNotificationService implements Runnable {
                         emailList = mailList.subList(i, i + chunkSize);
                     }
                     logger.info(emailList.toString());
-                   // new NotificationUtil().sendNotification(emailList, params, PropertiesCache.getInstance().getProperty(Constants.SENDER_MAIL), PropertiesCache.getInstance().getProperty(Constants.NOTIFICATION_HOST) + PropertiesCache.getInstance().getProperty(Constants.NOTIFICATION_ENDPOINT), Constants.NEW_COURSES, Constants.NEW_COURSES_MAIL_SUBJECT);
+                    new NotificationUtil().sendNotification(emailList, params, PropertiesCache.getInstance().getProperty(Constants.SENDER_MAIL), PropertiesCache.getInstance().getProperty(Constants.NOTIFICATION_HOST) + PropertiesCache.getInstance().getProperty(Constants.NOTIFICATION_ENDPOINT), Constants.NEW_COURSES, Constants.NEW_COURSES_MAIL_SUBJECT);
                 }
                 return true;
             }
