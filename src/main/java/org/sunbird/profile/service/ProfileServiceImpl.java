@@ -577,6 +577,7 @@ public class ProfileServiceImpl implements ProfileService {
 				if (!userData.isEmpty()) {
 					request.put(Constants.USER_NAME, userData.get(Constants.USER_NAME));
 					request.put(Constants.ROOT_ORG_ID, userData.get(Constants.ROOT_ORG_ID));
+					request.put(Constants.ORG_NAME, userData.get(Constants.CHANNEL));
 					retValue = updateUser(request);
 					if (retValue) {
 						response.getResult().put(Constants.RESPONSE, Constants.SUCCESS);
@@ -1110,7 +1111,6 @@ public class ProfileServiceImpl implements ProfileService {
 		personalDetails.put(Constants.FIRSTNAME.toLowerCase(), requestBody.get(Constants.FIRSTNAME));
 		personalDetails.put(Constants.SURNAME, requestBody.get(Constants.LASTNAME));
 		personalDetails.put(Constants.PRIMARY_EMAIL, requestBody.get(Constants.EMAIL));
-		personalDetails.put(Constants.USER_NAME, requestObject.get(Constants.USER_NAME));
 		profileDetails.put(Constants.PERSONAL_DETAILS, personalDetails);
 
 		Map<String, Object> professionDetailObj = new HashMap<String, Object>();
