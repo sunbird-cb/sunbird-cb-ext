@@ -54,8 +54,9 @@ public class StorageServiceImpl implements StorageService {
 			FileOutputStream fos = new FileOutputStream(file);
 			fos.write(mFile.getBytes());
 			fos.close();
-			String url = storageService.upload(containerName, file.getAbsolutePath(),
-					file.getName(), Option.apply(false), Option.apply(1), Option.apply(5), Option.empty());
+			String objectKey = containerName + "/" + file.getName();
+			String url = storageService.upload(serverProperties.getCloudContainerName(), file.getAbsolutePath(),
+					objectKey, Option.apply(false), Option.apply(1), Option.apply(5), Option.empty());
 			file.delete();
 			Map<String, String> uploadedFile = new HashMap<>();
 			uploadedFile.put(Constants.NAME, file.getName());
@@ -78,7 +79,8 @@ public class StorageServiceImpl implements StorageService {
 		SBApiResponse response = new SBApiResponse();
 		response.setId(Constants.API_FILE_DELETE);
 		try {
-			storageService.deleteObject(containerName, fileName,
+			String objectKey = serverProperties.getCloudContainerName() + "/" + fileName;
+			storageService.deleteObject(serverProperties.getCloudContainerName(), objectKey,
 					Option.apply(Boolean.FALSE));
 			response.getParams().setStatus(Constants.SUCCESSFUL);
 			response.setResponseCode(HttpStatus.OK);
