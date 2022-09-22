@@ -578,6 +578,10 @@ public class ProfileServiceImpl implements ProfileService {
 					request.put(Constants.USER_NAME, userData.get(Constants.USER_NAME));
 					request.put(Constants.ROOT_ORG_ID, userData.get(Constants.ROOT_ORG_ID));
 					retValue = updateUser(request);
+					if (retValue) {
+						response.getResult().put(Constants.RESPONSE, Constants.SUCCESS);
+						response.getResult().put(Constants.USER_ID, userId);
+					}
 				} else {
 					errMsg = "Failed to read the user data after Signup.";
 				}
@@ -600,7 +604,7 @@ public class ProfileServiceImpl implements ProfileService {
 	public SBApiResponse bulkUpload(MultipartFile mFile, String orgId, String userId) {
 		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_USER_BULK_UPLOAD);
 		try {
-			SBApiResponse uploadResponse = storageService.uploadFile(mFile);
+			SBApiResponse uploadResponse = storageService.uploadFile(mFile, serverConfig.getBulkUploadContainerName());
 			if (!HttpStatus.OK.equals(uploadResponse.getResponseCode())) {
 				setErrorData(response, String.format("Failed to upload file. Error: %s",
 						(String) uploadResponse.getParams().getErrmsg()));

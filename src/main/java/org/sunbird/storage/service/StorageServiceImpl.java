@@ -2,7 +2,6 @@ package org.sunbird.storage.service;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -46,7 +45,7 @@ public class StorageServiceImpl implements StorageService {
 	}
 
 	@Override
-	public SBApiResponse uploadFile(MultipartFile mFile) throws IOException {
+	public SBApiResponse uploadFile(MultipartFile mFile, String containerName) {
 		SBApiResponse response = new SBApiResponse();
 		response.setId(Constants.API_FILE_UPLOAD);
 		try {
@@ -55,9 +54,8 @@ public class StorageServiceImpl implements StorageService {
 			FileOutputStream fos = new FileOutputStream(file);
 			fos.write(mFile.getBytes());
 			fos.close();
-			String objectKey = serverProperties.getCloudContainerName() + "/" + file.getName();
-			String url = storageService.upload(serverProperties.getCloudContainerName(), file.getAbsolutePath(),
-					objectKey, Option.apply(false), Option.apply(1), Option.apply(5), Option.empty());
+			String url = storageService.upload(containerName, file.getAbsolutePath(),
+					file.getName(), Option.apply(false), Option.apply(1), Option.apply(5), Option.empty());
 			file.delete();
 			Map<String, String> uploadedFile = new HashMap<>();
 			uploadedFile.put(Constants.NAME, file.getName());
@@ -76,11 +74,11 @@ public class StorageServiceImpl implements StorageService {
 	}
 
 	@Override
-	public SBApiResponse deleteFile(String fileName) {
+	public SBApiResponse deleteFile(String fileName, String containerName) {
 		SBApiResponse response = new SBApiResponse();
 		response.setId(Constants.API_FILE_DELETE);
 		try {
-			storageService.deleteObject(serverProperties.getCloudContainerName(), fileName,
+			storageService.deleteObject(containerName, fileName,
 					Option.apply(Boolean.FALSE));
 			response.getParams().setStatus(Constants.SUCCESSFUL);
 			response.setResponseCode(HttpStatus.OK);

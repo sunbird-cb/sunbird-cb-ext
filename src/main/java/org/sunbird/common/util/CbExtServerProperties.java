@@ -366,6 +366,9 @@ public class CbExtServerProperties {
 	@Value("${user.bulk.upload.status.fields}")
 	private String bulkUploadStatusFields;
 	
+	@Value("${user.bulk.upload.container.name}")
+	private String bulkUploadContainerName;
+	
 	public String getUserAssessmentSubmissionDuration() {
 		return userAssessmentSubmissionDuration;
 	}
@@ -1335,5 +1338,13 @@ public class CbExtServerProperties {
 
 	public void setBulkUploadStatusFields(String bulkUploadStatusFields) {
 		this.bulkUploadStatusFields = bulkUploadStatusFields;
+	}
+
+	public String getBulkUploadContainerName() {
+		return bulkUploadContainerName;
+	}
+
+	public void setBulkUploadContainerName(String bulkUploadContainerName) {
+		this.bulkUploadContainerName = bulkUploadContainerName;
 	}
 }
