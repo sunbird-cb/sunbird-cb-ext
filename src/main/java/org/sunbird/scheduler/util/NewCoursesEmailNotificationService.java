@@ -12,7 +12,6 @@ import org.springframework.web.client.RestTemplate;
 import org.sunbird.cassandra.utils.CassandraOperation;
 import org.sunbird.common.helper.cassandra.ServiceFactory;
 import org.sunbird.common.util.Constants;
-import org.sunbird.common.util.NotificationUtil;
 import org.sunbird.common.util.PropertiesCache;
 import org.sunbird.core.logger.CbExtLogger;
 import org.sunbird.scheduler.model.*;
@@ -37,10 +36,23 @@ public class NewCoursesEmailNotificationService implements Runnable {
                     params.put(Constants.COURSE_KEYWORD + j + Constants._URL, coursesDataMapList.get(i).getCourseUrl());
                     params.put(Constants.COURSE_KEYWORD + j + Constants.THUMBNAIL, coursesDataMapList.get(i).getThumbnail());
                     params.put(Constants.COURSE_KEYWORD + j + Constants._NAME, coursesDataMapList.get(i).getCourseName());
+                    params.put(Constants.COURSE_KEYWORD + j + Constants._DURATION, coursesDataMapList.get(i).getDuration());
+                    params.put(Constants.COURSE_KEYWORD + j + Constants._DESCRIPTION, coursesDataMapList.get(i).getDescription());
                 }
                 String extraEmails = PropertiesCache.getInstance().getProperty(Constants.RECIPIENT_NEW_COURSE_EMAILS);
-                mailList = Arrays.asList(extraEmails.split(",", -1));
-                new NotificationUtil().sendNotification(mailList, params, PropertiesCache.getInstance().getProperty(Constants.SENDER_MAIL), PropertiesCache.getInstance().getProperty(Constants.NOTIFICATION_HOST) + PropertiesCache.getInstance().getProperty(Constants.NOTIFICATION_ENDPOINT), Constants.NEW_COURSES, Constants.NEW_COURSES_MAIL_SUBJECT);
+                mailList.addAll(Arrays.asList(extraEmails.split(",", -1)));
+                int chunkSize = 2;
+                List<String> emailList;
+                for (int i = 0; i < mailList.size(); i += chunkSize) {
+                    if ((i + chunkSize) >= mailList.size()) {
+                        emailList = mailList.subList(i, mailList.size());
+                    }
+                    else {
+                        emailList = mailList.subList(i, i + chunkSize);
+                    }
+                    logger.info(emailList.toString());
+                   // new NotificationUtil().sendNotification(emailList, params, PropertiesCache.getInstance().getProperty(Constants.SENDER_MAIL), PropertiesCache.getInstance().getProperty(Constants.NOTIFICATION_HOST) + PropertiesCache.getInstance().getProperty(Constants.NOTIFICATION_ENDPOINT), Constants.NEW_COURSES, Constants.NEW_COURSES_MAIL_SUBJECT);
+                }
                 return true;
             }
         } catch (Exception e) {
@@ -105,12 +117,14 @@ public class NewCoursesEmailNotificationService implements Runnable {
         for (Content course : coursesList) {
             try {
                 String courseId = course.getIdentifier();
-                if (!StringUtils.isEmpty(course.getIdentifier()) && !StringUtils.isEmpty(course.getName()) && !StringUtils.isEmpty(course.getPosterImage())) {
+                if (!StringUtils.isEmpty(course.getIdentifier()) && !StringUtils.isEmpty(course.getName()) && !StringUtils.isEmpty(course.getPosterImage()) && !StringUtils.isEmpty(course.getDuration())) {
                     CoursesDataMap coursesDataMap = new CoursesDataMap();
                     coursesDataMap.setCourseId(courseId);
                     coursesDataMap.setCourseName(firstLetterCapitalWithSingleSpace(course.getName()));
                     coursesDataMap.setThumbnail(course.getPosterImage());
                     coursesDataMap.setCourseUrl(PropertiesCache.getInstance().getProperty(Constants.COURSE_URL) + courseId);
+                    coursesDataMap.setDescription(course.getDescription());
+                    coursesDataMap.setDuration(Integer.parseInt(course.getDuration()));
                     coursesDataMapList.add(coursesDataMap);
                 }
             } catch (Exception e) {

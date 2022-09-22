@@ -2,6 +2,7 @@ package org.sunbird.scheduler.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+
 import java.io.Serializable;
 import java.util.Date;
 
@@ -9,67 +10,88 @@ import java.util.Date;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class CoursesDataMap implements Serializable {
 
-  private static final long serialVersionUID = 1L;
-  private String courseId;
-  private String courseName;
-  private String batchId;
-  private Float completionPercentage;
-  private Date lastAccessedDate;
-  private String thumbnail;
-  private String courseUrl;
+    private static final long serialVersionUID = 1L;
+    private String courseId;
+    private String courseName;
+    private String batchId;
+    private Float completionPercentage;
+    private Date lastAccessedDate;
+    private String thumbnail;
+    private String courseUrl;
 
-  public String getCourseUrl() {
-    return courseUrl;
-  }
+    private int duration;
+    private String description;
 
-  public void setCourseUrl(String courseUrl) {
-    this.courseUrl = courseUrl;
-  }
+    public String getDescription() {
+        return description;
+    }
 
-  public String getThumbnail() {
-    return thumbnail;
-  }
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
-  public void setThumbnail(String thumbnail) {
-    this.thumbnail = thumbnail;
-  }
-  public String getBatchId() {
-    return batchId;
-  }
+    public int getDuration() {
+        return duration;
+    }
 
-  public void setBatchId(String batchId) {
-    this.batchId = batchId;
-  }
-  public String getCourseId() {
-    return courseId;
-  }
+    public void setDuration(int duration) {
+        this.duration = duration;
+    }
 
-  public void setCourseId(String courseId) {
-    this.courseId = courseId;
-  }
+    public String getCourseUrl() {
+        return courseUrl;
+    }
 
-  public String getCourseName() {
-    return courseName;
-  }
+    public void setCourseUrl(String courseUrl) {
+        this.courseUrl = courseUrl;
+    }
 
-  public void setCourseName(String courseName) {
-    this.courseName = courseName;
-  }
+    public String getThumbnail() {
+        return thumbnail;
+    }
 
-  public Float getCompletionPercentage() {
-    return completionPercentage;
-  }
+    public void setThumbnail(String thumbnail) {
+        this.thumbnail = thumbnail;
+    }
 
-  public void setCompletionPercentage(Float completionPercentage) {
-    this.completionPercentage = completionPercentage;
-  }
+    public String getBatchId() {
+        return batchId;
+    }
 
-  public Date getLastAccessedDate() {
-    return lastAccessedDate;
-  }
+    public void setBatchId(String batchId) {
+        this.batchId = batchId;
+    }
 
-  public void setLastAccessedDate(Date lastAccessedDate) {
-    this.lastAccessedDate = lastAccessedDate;
-  }
+    public String getCourseId() {
+        return courseId;
+    }
+
+    public void setCourseId(String courseId) {
+        this.courseId = courseId;
+    }
+
+    public String getCourseName() {
+        return courseName;
+    }
+
+    public void setCourseName(String courseName) {
+        this.courseName = courseName;
+    }
+
+    public Float getCompletionPercentage() {
+        return completionPercentage;
+    }
+
+    public void setCompletionPercentage(Float completionPercentage) {
+        this.completionPercentage = completionPercentage;
+    }
+
+    public Date getLastAccessedDate() {
+        return lastAccessedDate;
+    }
+
+    public void setLastAccessedDate(Date lastAccessedDate) {
+        this.lastAccessedDate = lastAccessedDate;
+    }
 
 }

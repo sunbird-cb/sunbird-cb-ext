@@ -345,6 +345,7 @@ public class Constants {
 	public static final String _URL = "_url";
 	public static final String THUMBNAIL = "_thumbnail";
 	public static final String _NAME = "_name";
+	public static final String _DESCRIPTION = "_description";
 	public static final String _DURATION = "_duration";
 	public static final String SEND_NOTIFICATION_PROPERTIES = "send-notification";
 	public static final String NOTIFICATION_HOST = "notification.service.host";
