@@ -1,8 +1,8 @@
-package org.sunbird.scheduler.model;
+package org.sunbird.course.model;
 
 import javax.annotation.Generated;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)

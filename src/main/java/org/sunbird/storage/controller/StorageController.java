@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.sunbird.common.model.SBApiResponse;
+import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.storage.service.StorageService;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -21,18 +22,21 @@ public class StorageController {
 
 	@Autowired
 	StorageService storageService;
+	
+	@Autowired
+	CbExtServerProperties serverConfig;
 
 	@PostMapping("/upload")
 	public ResponseEntity<?> upload(@RequestParam(value = "file", required = true) MultipartFile multipartFile)
 			throws IOException {
-		SBApiResponse uploadResponse = storageService.uploadFile(multipartFile);
+		SBApiResponse uploadResponse = storageService.uploadFile(multipartFile, serverConfig.getCloudContainerName());
 		return new ResponseEntity<>(uploadResponse, uploadResponse.getResponseCode());
 	}
 
 	@DeleteMapping("/delete")
 	public ResponseEntity<?> deleteCloudFile(@RequestParam(value = "fileName", required = true) String fileName)
 			throws JsonProcessingException {
-		SBApiResponse deleteResponse = storageService.deleteFile(fileName);
+		SBApiResponse deleteResponse = storageService.deleteFile(fileName, serverConfig.getCloudContainerName());
 		return new ResponseEntity<>(deleteResponse, deleteResponse.getResponseCode());
 	}
 }

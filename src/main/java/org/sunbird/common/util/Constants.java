@@ -315,9 +315,9 @@ public class Constants {
 	public static final String HIERARCHY = "hierarchy";
 	public static final String DEV_HIERARCHY_STORE = "dev_hierarchy_store";
 	public static final String CONTENT_HIERARCHY = "content_hierarchy";
-	public static final String BATCH_ID_ = "batchid";
-	public static final String COURSE_ID_ = "courseid";
-	public static final String COMPLETION_PERCENTAGE_ = "completionpercentage";
+	public static final String BATCH_ID_COLUMN = "batchid";
+	public static final String COURSE_ID_COLUMN = "courseid";
+	public static final String COMPLETION_PERCENTAGE_COLUMN = "completionpercentage";
 	public static final String LAST_ACCESS_TIME = "last_access_time";
 	public static final String SUNBIRD_KEY_SPACE_NAME = "sunbird";
 	public static final String SUNBIRD_COURSES_KEY_SPACE_NAME = "sunbird_courses";
@@ -504,6 +504,18 @@ public class Constants {
 	public static final String PUBLIC_COURSE_LIST = "exploreOpenCourseList";
 	public static final String LAST_UPDATED_ON = "lastUpdatedOn";
 	public static final String DESCENDING_ORDER = "desc";
+	public static final String X_AUTH_USER_ORG_ID = "x-authenticated-user-orgid";
+	public static final String API_USER_SIGNUP = "api.user.signup";
+	public static final String API_USER_BULK_UPLOAD = "api.user.bulk.upload";
+	public static final String API_USER_BULK_UPLOAD_STATUS = "api.user.bulk.upload.status";
+	public static final String TABLE_USER_BULK_UPLOAD = "user_bulk_upload";
+	public static final String FILE_NAME = "fileName";
+	public static final String FILE_PATH = "filePath";
+	public static final String DATE_CREATED_ON = "dateCreatedOn";
+	public static final String DATE_UPDATE_ON = "dateUpdatedOn";
+	public static final String INITIATED_CAPITAL = "INITIATED";
+	public static final List<String> COURSE_REMINDER_EMAIL_FIELDS = Arrays.asList(RATINGS_USER_ID, BATCH_ID_COLUMN,
+			COURSE_ID_COLUMN, COMPLETION_PERCENTAGE_COLUMN, LAST_ACCESS_TIME);
   
 	private Constants() {
 		throw new IllegalStateException("Utility class");

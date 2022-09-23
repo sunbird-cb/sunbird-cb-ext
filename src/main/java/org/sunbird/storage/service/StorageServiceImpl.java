@@ -2,7 +2,6 @@ package org.sunbird.storage.service;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,19 +33,19 @@ public class StorageServiceImpl implements StorageService {
 	RestTemplate restTemplate;
 
 	@Autowired
-	private CbExtServerProperties cbExtServerProperties;
+	private CbExtServerProperties serverProperties;
 
 	@PostConstruct
 	public void init() {
 		if (storageService == null) {
 			storageService = StorageServiceFactory.getStorageService(new StorageConfig(
-					cbExtServerProperties.getAzureTypeName(), cbExtServerProperties.getAzureIdentityName(),
-					cbExtServerProperties.getAzureStorageKey(), null));
+					serverProperties.getCloudStorageTypeName(), serverProperties.getCloudStorageKey(),
+					serverProperties.getCloudStorageSecret(), Option.apply(serverProperties.getCloudStorageCephs3Endpoint())));
 		}
 	}
 
 	@Override
-	public SBApiResponse uploadFile(MultipartFile mFile) throws IOException {
+	public SBApiResponse uploadFile(MultipartFile mFile, String containerName) {
 		SBApiResponse response = new SBApiResponse();
 		response.setId(Constants.API_FILE_UPLOAD);
 		try {
@@ -55,8 +54,8 @@ public class StorageServiceImpl implements StorageService {
 			FileOutputStream fos = new FileOutputStream(file);
 			fos.write(mFile.getBytes());
 			fos.close();
-			String objectKey = cbExtServerProperties.getAzureContainerName() + "/" + file.getName();
-			String url = storageService.upload(cbExtServerProperties.getAzureContainerName(), file.getAbsolutePath(),
+			String objectKey = containerName + "/" + file.getName();
+			String url = storageService.upload(serverProperties.getCloudContainerName(), file.getAbsolutePath(),
 					objectKey, Option.apply(false), Option.apply(1), Option.apply(5), Option.empty());
 			file.delete();
 			Map<String, String> uploadedFile = new HashMap<>();
@@ -76,11 +75,12 @@ public class StorageServiceImpl implements StorageService {
 	}
 
 	@Override
-	public SBApiResponse deleteFile(String fileName) {
+	public SBApiResponse deleteFile(String fileName, String containerName) {
 		SBApiResponse response = new SBApiResponse();
 		response.setId(Constants.API_FILE_DELETE);
 		try {
-			storageService.deleteObject(cbExtServerProperties.getAzureContainerName(), fileName,
+			String objectKey = serverProperties.getCloudContainerName() + "/" + fileName;
+			storageService.deleteObject(serverProperties.getCloudContainerName(), objectKey,
 					Option.apply(Boolean.FALSE));
 			response.getParams().setStatus(Constants.SUCCESSFUL);
 			response.setResponseCode(HttpStatus.OK);

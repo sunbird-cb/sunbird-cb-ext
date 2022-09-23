@@ -174,17 +174,20 @@ public class CbExtServerProperties {
 	@Value("${cache.max.ttl}")
 	private long cacheMaxTTL;
 
-	@Value("${azure.container.name}")
-	private String azureContainerName;
+	@Value("${cloud.container.name}")
+	private String cloudContainerName;
 
-	@Value("${azure.type.name}")
-	private String azureTypeName;
+	@Value("${cloud.storage.type.name}")
+	private String cloudStorageTypeName;
 
-	@Value("${azure.identity.name}")
-	private String azureIdentityName;
+	@Value("${cloud.storage.key}")
+	private String cloudStorageKey;
 
-	@Value("${azure.storage.key}")
-	private String azureStorageKey;
+	@Value("${cloud.storage.secret}")
+	private String cloudStorageSecret;
+	
+	@Value("${cloud.storage.cephs3.endpoint}")
+	private String cloudStorageCephs3Endpoint;
 
 	@Value("${redis.host.name}")
 	private String redisHostName;
@@ -356,6 +359,15 @@ public class CbExtServerProperties {
 	
 	@Value("${sb.es.user.profile.index}")
 	private String sbEsUserProfileIndex;
+	
+	@Value("${sb.service.signup.user}")
+	private String lmsUserSignUpPath;
+
+	@Value("${user.bulk.upload.status.fields}")
+	private String bulkUploadStatusFields;
+	
+	@Value("${user.bulk.upload.container.name}")
+	private String bulkUploadContainerName;
 	
 	public String getUserAssessmentSubmissionDuration() {
 		return userAssessmentSubmissionDuration;
@@ -840,36 +852,44 @@ public class CbExtServerProperties {
 		this.cacheMaxTTL = cacheMaxTTL;
 	}
 
-	public String getAzureContainerName() {
-		return azureContainerName;
+	public String getCloudContainerName() {
+		return cloudContainerName;
 	}
 
-	public void setAzureContainerName(String azureContainerName) {
-		this.azureContainerName = azureContainerName;
+	public void setCloudContainerName(String cloudContainerName) {
+		this.cloudContainerName = cloudContainerName;
 	}
 
-	public String getAzureTypeName() {
-		return azureTypeName;
+	public String getCloudStorageTypeName() {
+		return cloudStorageTypeName;
 	}
 
-	public void setAzureTypeName(String azureTypeName) {
-		this.azureTypeName = azureTypeName;
+	public void setCloudStorageTypeName(String cloudStorageTypeName) {
+		this.cloudStorageTypeName = cloudStorageTypeName;
 	}
 
-	public String getAzureIdentityName() {
-		return azureIdentityName;
+	public String getCloudStorageKey() {
+		return cloudStorageKey;
 	}
 
-	public void setAzureIdentityName(String azureIdentityName) {
-		this.azureIdentityName = azureIdentityName;
+	public void setCloudStorageKey(String cloudStorageKey) {
+		this.cloudStorageKey = cloudStorageKey;
 	}
 
-	public String getAzureStorageKey() {
-		return azureStorageKey;
+	public String getCloudStorageSecret() {
+		return cloudStorageSecret;
 	}
 
-	public void setAzureStorageKey(String azureStorageKey) {
-		this.azureStorageKey = azureStorageKey;
+	public void setCloudStorageSecret(String cloudStorageSecret) {
+		this.cloudStorageSecret = cloudStorageSecret;
+	}
+
+	public String getCloudStorageCephs3Endpoint() {
+		return cloudStorageCephs3Endpoint;
+	}
+
+	public void setCloudStorageCephs3Endpoint(String cloudStorageCephs3Endpoint) {
+		this.cloudStorageCephs3Endpoint = cloudStorageCephs3Endpoint;
 	}
 
 	public String getUserUtilityTopic() {
@@ -1302,5 +1322,29 @@ public class CbExtServerProperties {
 
 	public void setSbEsUserProfileIndex(String sbEsUserProfileIndex) {
 		this.sbEsUserProfileIndex = sbEsUserProfileIndex;
+	}
+	
+	public String getLmsUserSignUpPath() {
+		return lmsUserSignUpPath;
+	}
+
+	public void setLmsUserSignUpPath(String lmsUserSignUpPath) {
+		this.lmsUserSignUpPath = lmsUserSignUpPath;
+	}
+
+	public List<String> getBulkUploadStatusFields() {
+		return Arrays.asList(bulkUploadStatusFields.split(",", -1));
+	}
+
+	public void setBulkUploadStatusFields(String bulkUploadStatusFields) {
+		this.bulkUploadStatusFields = bulkUploadStatusFields;
+	}
+
+	public String getBulkUploadContainerName() {
+		return bulkUploadContainerName;
+	}
+
+	public void setBulkUploadContainerName(String bulkUploadContainerName) {
+		this.bulkUploadContainerName = bulkUploadContainerName;
 	}
 }
