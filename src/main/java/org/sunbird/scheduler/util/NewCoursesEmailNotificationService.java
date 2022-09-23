@@ -168,9 +168,9 @@ public class NewCoursesEmailNotificationService implements Runnable {
         Map<String, Object> propertyMap = new HashMap<>();
         propertyMap.put(Constants.EMAIL_TYPE, Constants.NEW_COURSES_EMAIL);
         List<Map<String, Object>> emailRecords = cassandraOperation.getRecordsByProperties(Constants.SUNBIRD_KEY_SPACE_NAME, Constants.EMAIL_RECORD_TABLE, propertyMap, Collections.singletonList(Constants.LAST_SENT_DATE));
-        if (!emailRecords.isEmpty()) {
-            minValue = !StringUtils.isEmpty(emailRecords.get(0).get(Constants.LAST_SENT_DATE)) ? (String) emailRecords.get(0).get(Constants.LAST_SENT_DATE) : "";
-        }
+//        if (!emailRecords.isEmpty()) {
+//            minValue = !StringUtils.isEmpty(emailRecords.get(0).get(Constants.LAST_SENT_DATE)) ? (String) emailRecords.get(0).get(Constants.LAST_SENT_DATE) : "";
+//        }
         if (StringUtils.isEmpty(minValue)) {
             minValue = maxValue.minusDays(Long.valueOf(PropertiesCache.getInstance().getProperty(Constants.NEW_COURSES_SCHEDULER_TIME_GAP)) / 24).toString();
         }
