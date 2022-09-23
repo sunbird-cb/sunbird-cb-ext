@@ -2,6 +2,7 @@ package org.sunbird.scheduler.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import org.apache.commons.validator.EmailValidator;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -25,6 +26,7 @@ import java.util.stream.Stream;
 public class NewCoursesEmailNotificationService implements Runnable {
     private static final CbExtLogger logger = new CbExtLogger(SchedulerManager.class.getName());
     private final CassandraOperation cassandraOperation = ServiceFactory.getInstance();
+    private EmailValidator emailValidator = EmailValidator.getInstance();
 
     public static boolean sendNewCourseEmail(List<CoursesDataMap> coursesDataMapList, List<String> mailList, int noOfCourses) {
         try {
@@ -47,8 +49,7 @@ public class NewCoursesEmailNotificationService implements Runnable {
                 for (int i = 0; i < mailList.size(); i += chunkSize) {
                     if ((i + chunkSize) >= mailList.size()) {
                         emailList = mailList.subList(i, mailList.size());
-                    }
-                    else {
+                    } else {
                         emailList = mailList.subList(i, i + chunkSize);
                     }
                     logger.info(emailList.toString());
@@ -194,7 +195,9 @@ public class NewCoursesEmailNotificationService implements Runnable {
                     if (!profileDetails.isEmpty()) {
                         Map<String, Object> personalDetailsMap = (Map<String, Object>) profileDetails.get(Constants.PERSONAL_DETAILS);
                         if (!personalDetailsMap.isEmpty() && personalDetailsMap.get(Constants.PRIMARY_EMAIL) != null && !excludeEmailList.contains(personalDetailsMap.get(Constants.PRIMARY_EMAIL))) {
-                            finalEmailList.add((String) personalDetailsMap.get(Constants.PRIMARY_EMAIL));
+                            String email = (String) personalDetailsMap.get(Constants.PRIMARY_EMAIL);
+                            if (emailValidator.isValid(email))
+                                finalEmailList.add(email);
                         }
                     }
                 }
