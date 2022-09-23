@@ -31,6 +31,8 @@ public class NewCoursesEmailNotificationService implements Runnable {
     public static boolean sendNewCourseEmail(List<CoursesDataMap> coursesDataMapList, List<String> mailList, int noOfCourses) {
         try {
             if (!coursesDataMapList.isEmpty()) {
+                logger.info("Entering new courses email");
+                logger.info(coursesDataMapList.toString());
                 Map<String, Object> params = new HashMap<>();
                 params.put(Constants.NO_OF_COURSES, noOfCourses);
                 for (int i = 0; i < coursesDataMapList.size(); i++) {
