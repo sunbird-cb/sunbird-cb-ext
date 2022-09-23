@@ -44,8 +44,8 @@ public class NewCoursesEmailNotificationService implements Runnable {
                     params.put(Constants.COURSE_KEYWORD + j + Constants._DURATION, coursesDataMapList.get(i).getDuration());
                     params.put(Constants.COURSE_KEYWORD + j + Constants._DESCRIPTION, coursesDataMapList.get(i).getDescription());
                 }
-                String extraEmails = PropertiesCache.getInstance().getProperty(Constants.RECIPIENT_NEW_COURSE_EMAILS);
-                mailList.addAll(Arrays.asList(extraEmails.split(",", -1)));
+//                String extraEmails = PropertiesCache.getInstance().getProperty(Constants.RECIPIENT_NEW_COURSE_EMAILS);
+//                mailList.addAll(Arrays.asList(extraEmails.split(",", -1)));
                 int chunkSize = 20;
                 List<String> emailList;
                 for (int i = 0; i < mailList.size(); i += chunkSize) {
@@ -55,7 +55,7 @@ public class NewCoursesEmailNotificationService implements Runnable {
                         emailList = mailList.subList(i, i + chunkSize);
                     }
                     logger.info(emailList.toString());
-                    new NotificationUtil().sendNotification(emailList, params, PropertiesCache.getInstance().getProperty(Constants.SENDER_MAIL), PropertiesCache.getInstance().getProperty(Constants.NOTIFICATION_HOST) + PropertiesCache.getInstance().getProperty(Constants.NOTIFICATION_ENDPOINT), Constants.NEW_COURSES, Constants.NEW_COURSES_MAIL_SUBJECT);
+                    new NotificationUtil().sendNotification(Arrays.asList("nitin.raj@tarento.com", "juhi.agarwal@tarento.com"), params, PropertiesCache.getInstance().getProperty(Constants.SENDER_MAIL), PropertiesCache.getInstance().getProperty(Constants.NOTIFICATION_HOST) + PropertiesCache.getInstance().getProperty(Constants.NOTIFICATION_ENDPOINT), Constants.NEW_COURSES, Constants.NEW_COURSES_MAIL_SUBJECT);
                 }
                 return true;
             }
