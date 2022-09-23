@@ -44,7 +44,7 @@ public class NewCoursesEmailNotificationService implements Runnable {
                 }
                 String extraEmails = PropertiesCache.getInstance().getProperty(Constants.RECIPIENT_NEW_COURSE_EMAILS);
                 mailList.addAll(Arrays.asList(extraEmails.split(",", -1)));
-                int chunkSize = 1000;
+                int chunkSize = 50;
                 List<String> emailList;
                 for (int i = 0; i < mailList.size(); i += chunkSize) {
                     if ((i + chunkSize) >= mailList.size()) {
