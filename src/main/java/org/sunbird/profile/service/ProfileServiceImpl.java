@@ -69,7 +69,7 @@ public class ProfileServiceImpl implements ProfileService {
 
 	@Autowired
 	ExtendedOrgService extOrgService;
-	
+
 	@Autowired
 	StorageServiceImpl storageService;
 
@@ -500,7 +500,7 @@ public class ProfileServiceImpl implements ProfileService {
 		return response;
 	}
 
-    @Override
+	@Override
 	public SBApiResponse userAutoComplete(String searchTerm) {
 		SBApiResponse response = new SBApiResponse();
 		response.setResponseCode(HttpStatus.BAD_REQUEST);
@@ -520,8 +520,7 @@ public class ProfileServiceImpl implements ProfileService {
 			response.getParams().setStatus(Constants.SUCCESS);
 			response.put(Constants.RESPONSE, resultResp);
 		} catch (Exception e) {
-			response.getParams()
-					.setErrmsg("Failed to get user details from ES. Exception: " + e.getMessage());
+			response.getParams().setErrmsg("Failed to get user details from ES. Exception: " + e.getMessage());
 		}
 		return response;
 	}
@@ -551,23 +550,24 @@ public class ProfileServiceImpl implements ProfileService {
 		}
 		return response;
 	}
-	
+
 	public SBApiResponse userSignup(Map<String, Object> request) {
 		boolean retValue = false;
 		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_USER_SIGNUP);
-		
+
 		String errMsg = validateSignupRequest(request);
 		if (!StringUtils.isEmpty(errMsg)) {
 			response.getParams().setErrmsg(errMsg);
 			response.setResponseCode(HttpStatus.BAD_REQUEST);
 			return response;
 		}
-		
+
 		try {
 			Map<String, Object> requestBody = (Map<String, Object>) request.get(Constants.REQUEST);
 			requestBody.put(Constants.EMAIL_VERIFIED, true);
 			Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPost(
-					serverConfig.getSbUrl() + serverConfig.getLmsUserSignUpPath(), request, userUtilityService.getDefaultHeaders());
+					serverConfig.getSbUrl() + serverConfig.getLmsUserSignUpPath(), request,
+					userUtilityService.getDefaultHeaders());
 			if (Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
 				Map<String, Object> result = (Map<String, Object>) readData.get(Constants.RESULT);
 				String userId = (String) result.get(Constants.USER_ID);
@@ -592,7 +592,7 @@ public class ProfileServiceImpl implements ProfileService {
 			response.getParams().setErrmsg(errMsg);
 			response.setResponseCode(HttpStatus.BAD_REQUEST);
 		}
-		
+
 		return response;
 	}
 
@@ -636,7 +636,7 @@ public class ProfileServiceImpl implements ProfileService {
 		}
 		return response;
 	}
-	
+
 	@Override
 	public SBApiResponse getBulkUploadDetails(String orgId) {
 		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_USER_BULK_UPLOAD_STATUS);
@@ -657,7 +657,7 @@ public class ProfileServiceImpl implements ProfileService {
 		}
 		return response;
 	}
-	
+
 	public List<String> approvalFields() {
 		Map<String, Object> approvalFieldsCache = (Map<String, Object>) mapper
 				.convertValue(redisCacheMgr.getCache(Constants.PROFILE_UPDATE_FIELDS), Map.class);
@@ -1035,7 +1035,7 @@ public class ProfileServiceImpl implements ProfileService {
 				|| !Constants.OK.equalsIgnoreCase((String) migrateResponse.get(Constants.RESPONSE_CODE))) {
 			errMsg = migrateResponse == null ? "Failed to migrate User."
 					: (String) ((Map<String, Object>) migrateResponse.get(Constants.PARAMS))
-							.get(Constants.ERROR_MESSAGE);
+					.get(Constants.ERROR_MESSAGE);
 		}
 		return errMsg;
 	}
@@ -1069,7 +1069,7 @@ public class ProfileServiceImpl implements ProfileService {
 		}
 		return errMsg;
 	}
-  
+
 	public List<Map<String, Object>> getUserSearchData(String searchTerm) throws Exception {
 		List<Map<String, Object>> resultArray = new ArrayList<>();
 		Map<String, Object> result;
@@ -1090,7 +1090,7 @@ public class ProfileServiceImpl implements ProfileService {
 		}
 		return resultArray;
 	}
-	
+
 	private boolean updateUser(Map<String, Object> requestObject) {
 		boolean retValue = false;
 		Map<String, Object> updateRequest = new HashMap<>();
@@ -1121,7 +1121,8 @@ public class ProfileServiceImpl implements ProfileService {
 		updateRequestBody.put(Constants.PROFILE_DETAILS, profileDetails);
 		updateRequest.put(Constants.REQUEST, updateRequestBody);
 		Map<String, Object> updateReadData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPatch(
-				serverConfig.getSbUrl() + serverConfig.getLmsUserUpdatePath(), updateRequest, userUtilityService.getDefaultHeaders());
+				serverConfig.getSbUrl() + serverConfig.getLmsUserUpdatePath(), updateRequest,
+				userUtilityService.getDefaultHeaders());
 		if (Constants.OK.equalsIgnoreCase((String) updateReadData.get(Constants.RESPONSE_CODE))) {
 			Map<String, Object> roleMap = new HashMap<>();
 			roleMap.put(Constants.ORGANIZATION_ID, requestObject.get(Constants.ROOT_ORG_ID));
@@ -1140,7 +1141,8 @@ public class ProfileServiceImpl implements ProfileService {
 		requestBody.put(Constants.ROLES, Arrays.asList(Constants.PUBLIC));
 		requestObj.put(Constants.REQUEST, requestBody);
 		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPost(
-				serverConfig.getSbUrl() + serverConfig.getSbAssignRolePath(), requestObj, userUtilityService.getDefaultHeaders());
+				serverConfig.getSbUrl() + serverConfig.getSbAssignRolePath(), requestObj,
+				userUtilityService.getDefaultHeaders());
 		if (readData.isEmpty() == Boolean.FALSE) {
 			if (Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE)))
 				retValue = Boolean.TRUE;

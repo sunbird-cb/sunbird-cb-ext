@@ -362,7 +362,7 @@ public class CbExtServerProperties {
 	
 	@Value("${sb.service.signup.user}")
 	private String lmsUserSignUpPath;
-	
+
 	@Value("${user.bulk.upload.status.fields}")
 	private String bulkUploadStatusFields;
 	

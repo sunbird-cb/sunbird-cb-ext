@@ -34,7 +34,7 @@ public class NotificationUtil {
 	}
 
 	public <params> void sendNotification(List<String> sendTo, Map<String, Object> params, String senderMail,
-			String notificationUrl) {
+			String notificationUrl, String emailTemplate, String emailSubject) {
 		new Thread(() -> {
 			try {
 				HttpHeaders headers = new HttpHeaders();
@@ -42,8 +42,8 @@ public class NotificationUtil {
 				headers.setContentType(MediaType.APPLICATION_JSON);
 				Map<String, Object> notificationRequest = new HashMap<>();
 				List<Object> notificationTosend = new ArrayList<>(Arrays.asList(new Notification(Constants.EMAIL,
-						Constants.MESSAGE, new EmailConfig(senderMail, Constants.INCOMPLETE_COURSES_MAIL_SUBJECT),
-						sendTo, new Template(null, INCOMPLETE_COURSES, params))));
+						Constants.MESSAGE, new EmailConfig(senderMail, emailSubject),
+						sendTo, new Template(null, emailTemplate, params))));
 				notificationRequest.put(Constants.REQUEST, new HashMap<String, List<Object>>() {
 					{
 						put(Constants.NOTIFICATIONS, notificationTosend);

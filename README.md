@@ -347,6 +347,7 @@ CREATE TABLE sunbird.ratings_lookup (
 CREATE TABLE sunbird.explore_course_list ( identifier text primary key ) ;
 ```
 ```sh
+<<<<<<< HEAD
 CREATE TABLE IF NOT EXISTS sunbird.user_bulk_upload (
   identifier text PRIMARY KEY,
   filename text,
@@ -355,4 +356,19 @@ CREATE TABLE IF NOT EXISTS sunbird.user_bulk_upload (
   comment text,
   dateCreatedOn timestamp,
   dateupdatedon timestamp);
+=======
+CREATE TABLE sunbird.user_bulk_upload (
+    rootorgid text,
+    identifier text,
+    comment text,
+    createdby text,
+    datecreatedon timestamp,
+    dateupdatedon timestamp,
+    filename text,
+    filepath text,
+    status text,
+    updatedby text,
+    PRIMARY KEY (rootorgid, identifier)
+) WITH CLUSTERING ORDER BY (identifier ASC);
+>>>>>>> a0795c5eea5290185b95a2f9777b5457cc8ad008
 ```

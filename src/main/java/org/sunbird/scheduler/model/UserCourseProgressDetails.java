@@ -21,7 +21,7 @@ public class UserCourseProgressDetails implements Serializable {
             '}';
   }
 
-  private List<IncompleteCourses> incompleteCourses;
+  private List<CoursesDataMap> incompleteCourses;
 
   public String getEmail() {
     return email;
@@ -31,11 +31,11 @@ public class UserCourseProgressDetails implements Serializable {
     this.email = email;
   }
 
-  public List<IncompleteCourses> getIncompleteCourses() {
+  public List<CoursesDataMap> getIncompleteCourses() {
     return incompleteCourses;
   }
 
-  public void setIncompleteCourses(List<IncompleteCourses> incompleteCourses) {
+  public void setIncompleteCourses(List<CoursesDataMap> incompleteCourses) {
     this.incompleteCourses = incompleteCourses;
   }
 }

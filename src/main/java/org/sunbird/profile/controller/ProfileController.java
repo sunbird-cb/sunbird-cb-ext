@@ -64,21 +64,21 @@ public class ProfileController {
 
 	@PatchMapping("/user/v1/migrate")
 	private ResponseEntity<?> adminMigrateUser(@RequestHeader(Constants.X_AUTH_TOKEN) String userToken,
-			@RequestHeader(Constants.AUTH_TOKEN) String authToken, @RequestBody Map<String, Object> request) {
+											   @RequestHeader(Constants.AUTH_TOKEN) String authToken, @RequestBody Map<String, Object> request) {
 		SBApiResponse response = profileService.migrateUser(request, userToken, authToken);
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
-	
+
 	@PostMapping("/user/v1/ext/signup")
 	public ResponseEntity<?> userSignup(@RequestBody Map<String,Object> request) {
 		SBApiResponse response = profileService.userSignup(request);
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
-	
+
 	@PostMapping("/user/v1/bulkupload")
 	public ResponseEntity<?> bulkUpload(@RequestParam(value = "file", required = true) MultipartFile multipartFile,
-			@RequestHeader(Constants.X_AUTH_USER_ORG_ID) String rootOrgId,
-			@RequestHeader(Constants.X_AUTH_USER_ID) String userId) {
+										@RequestHeader(Constants.X_AUTH_USER_ORG_ID) String rootOrgId,
+										@RequestHeader(Constants.X_AUTH_USER_ID) String userId) {
 		SBApiResponse uploadResponse = profileService.bulkUpload(multipartFile, rootOrgId, userId);
 		return new ResponseEntity<>(uploadResponse, uploadResponse.getResponseCode());
 	}

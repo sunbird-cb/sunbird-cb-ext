@@ -19,9 +19,9 @@ public interface ProfileService {
 	SBApiResponse userAutoComplete(String searchTerm);
 
 	SBApiResponse migrateUser(Map<String, Object> request, String userToken, String authToken);
-	
+
 	SBApiResponse userSignup(Map<String, Object> request);
-	
+
 	SBApiResponse bulkUpload(MultipartFile mFile, String orgId, String userId);
 
 	SBApiResponse getBulkUploadDetails(String orgId);
