@@ -126,6 +126,9 @@ public class Constants {
 	public static final String API_REFRESH_EXPLORE_COURSE_DETAIL = "api.refresh.explore.course.list";
 
 	public static final String ORG_PROFILE_UPDATE = "org.profile.update";
+
+	public static final String ENROLLMENT_EVENT = "generate.event.enrollment";
+
 	public static final String ID = "id";
 	public static final String ORG_ID = "orgId";
 	public static final String POSITION = "position";
@@ -504,7 +507,21 @@ public class Constants {
 	public static final String PUBLIC_COURSE_LIST = "exploreOpenCourseList";
 	public static final String LAST_UPDATED_ON = "lastUpdatedOn";
 	public static final String DESCENDING_ORDER = "desc";
-  
+	public static final String EID_VALUE = "eid";
+	public static final String ETS = "ets";
+	public static final String MID = "mid";
+	public static final String ACTOR = "actor";
+	public static final String VER_VALUE = "ver";
+	public static final String P_DATA = "pdata";
+	public static final String CONTEXT = "context";
+	public static final String OBJECT = "object";
+	public static final String E_DATA = "edata";
+	public static final String UID = "uid";
+
+
+
+
+
 	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}
