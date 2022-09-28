@@ -14,6 +14,8 @@ public class Constants {
 	public static final String FIRSTNAME = "firstName";
 	public static final String SURNAME = "surname";
 	public static final String LASTNAME = "lastName";
+	public static final String MOBILE = "mobile";
+	public static final String PHONE = "phone";
 	public static final String CONTACT_PHONE_NUMBER_OFFICE = "contact_phone_number_office";
 	public static final String CONTACT_PHONE_NUMBER_HOME = "contact_phone_number_home";
 	public static final String CONTACT_PHONE_NUMBER_PERSONAL = "contact_phone_number_personal";
