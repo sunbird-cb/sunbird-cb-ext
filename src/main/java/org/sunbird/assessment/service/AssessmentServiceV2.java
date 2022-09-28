@@ -12,9 +12,9 @@ public interface AssessmentServiceV2 {
 	 * @return
 	 * @throws Exception
 	 */
-	public SBApiResponse submitAssessment(Map<String, Object> data, String userEmail) throws Exception;
+	public SBApiResponse submitAssessment(Map<String, Object> data, String userEmail);
 
-	public SBApiResponse readAssessment(String assessmentIdentifier, String token) throws Exception;
+	public SBApiResponse readAssessment(String assessmentIdentifier, String token);
 
-	public SBApiResponse readQuestionList(Map<String, Object> requestBody, String authUserToken) throws Exception;
+	public SBApiResponse readQuestionList(Map<String, Object> requestBody, String authUserToken);
 }

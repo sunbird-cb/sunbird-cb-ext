@@ -369,6 +369,15 @@ public class CbExtServerProperties {
 	@Value("${user.bulk.upload.container.name}")
 	private String bulkUploadContainerName;
 	
+	@Value("${kafka.topics.user.assessment.submit}")
+	private String userAssessmentSubmitTopic;
+	
+	@Value("${incompleteCourseAlertEmailKey}")
+	private String incompleteCourseAlertEmailKey;
+	
+	@Value("${latestCourseAlertEmailKey}")
+	private String latestCourseAlertEmailKey;
+	
 	public String getUserAssessmentSubmissionDuration() {
 		return userAssessmentSubmissionDuration;
 	}
@@ -1346,5 +1355,29 @@ public class CbExtServerProperties {
 
 	public void setBulkUploadContainerName(String bulkUploadContainerName) {
 		this.bulkUploadContainerName = bulkUploadContainerName;
+	}
+	
+	public String getUserAssessmentSubmitTopic() {
+		return userAssessmentSubmitTopic;
+	}
+
+	public void setUserAssessmentSubmitTopic(String userAssessmentSubmitTopic) {
+		this.userAssessmentSubmitTopic = userAssessmentSubmitTopic;
+	}
+
+	public String getIncompleteCourseAlertEmailKey() {
+		return incompleteCourseAlertEmailKey;
+	}
+
+	public void setIncompleteCourseAlertEmailKey(String incompleteCourseAlertEmailKey) {
+		this.incompleteCourseAlertEmailKey = incompleteCourseAlertEmailKey;
+	}
+
+	public String getLatestCourseAlertEmailKey() {
+		return latestCourseAlertEmailKey;
+	}
+
+	public void setLatestCourseAlertEmailKey(String latestCourseAlertEmailKey) {
+		this.latestCourseAlertEmailKey = latestCourseAlertEmailKey;
 	}
 }
