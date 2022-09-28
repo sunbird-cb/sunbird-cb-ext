@@ -630,7 +630,6 @@ public class ProfileServiceImpl implements ProfileService {
 				return response;
 			}
 
-			uploadedFile.remove(Constants.FILE_PATH);
 			response.getParams().setStatus(Constants.SUCCESSFUL);
 			response.setResponseCode(HttpStatus.OK);
 			response.getResult().putAll(uploadedFile);
