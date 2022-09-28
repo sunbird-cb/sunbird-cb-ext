@@ -35,6 +35,7 @@ public class NewCoursesEmailNotificationService implements Runnable {
                 logger.info(coursesDataMapList.toString());
                 Map<String, Object> params = new HashMap<>();
                 params.put(Constants.NO_OF_COURSES, noOfCourses);
+                int size = (coursesDataMapList.size()%2==0) ? coursesDataMapList.size() : coursesDataMapList.size()-1;
                 for (int i = 0; i < coursesDataMapList.size(); i++) {
                     int j = i + 1;
                     params.put(Constants.COURSE_KEYWORD + j, true);
@@ -55,9 +56,12 @@ public class NewCoursesEmailNotificationService implements Runnable {
                         emailList = mailList.subList(i, i + chunkSize);
                     }
                     logger.info(emailList.toString());
-                    new NotificationUtil().sendNotification(Arrays.asList("nitin.raj@tarento.com", "juhi.agarwal@tarento.com"), params, "support@igot-dev.in", PropertiesCache.getInstance().getProperty(Constants.NOTIFICATION_HOST) + PropertiesCache.getInstance().getProperty(Constants.NOTIFICATION_ENDPOINT), Constants.NEW_COURSES, Constants.NEW_COURSES_MAIL_SUBJECT);
+                    //new NotificationUtil().sendNotification(Arrays.asList("nitin.raj@tarento.com", "juhi.agarwal@tarento.com"), params, "support@igot-dev.in", PropertiesCache.getInstance().getProperty(Constants.NOTIFICATION_HOST) + PropertiesCache.getInstance().getProperty(Constants.NOTIFICATION_ENDPOINT), Constants.NEW_COURSES, Constants.NEW_COURSES_MAIL_SUBJECT);
 
                 }
+
+                new NotificationUtil().sendNotification(Arrays.asList("nitin.raj@tarento.com", "juhi.agarwal@tarento.com"), params, Constants.SENDER_MAIL, PropertiesCache.getInstance().getProperty(Constants.NOTIFICATION_HOST) + PropertiesCache.getInstance().getProperty(Constants.NOTIFICATION_ENDPOINT), Constants.NEW_COURSES, Constants.NEW_COURSES_MAIL_SUBJECT);
+
                 return true;
             }
         } catch (Exception e) {
