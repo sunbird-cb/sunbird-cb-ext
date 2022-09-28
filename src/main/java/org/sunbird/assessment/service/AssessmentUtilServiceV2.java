@@ -5,5 +5,8 @@ import java.util.Map;
 
 public interface AssessmentUtilServiceV2 {
 	public Map<String, Object> validateQumlAssessment(List<String> originalQuestionList,
-			List<Map<String, Object>> userQuestionList);
+													  List<Map<String, Object>> userQuestionList);
+	public String fetchQuestionIdentifierValue(List<String> identifierList, List<Object> questionList) throws Exception;
+
+	public Map<String, Object> getReadHierarchyApiResponse(String assessmentIdentifier, String token);
 }

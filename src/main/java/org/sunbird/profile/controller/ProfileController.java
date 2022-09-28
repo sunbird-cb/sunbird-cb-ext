@@ -1,12 +1,21 @@
 package org.sunbird.profile.controller;
 
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.util.Constants;
 import org.sunbird.profile.service.ProfileService;
-import java.util.Map;
 
 @RestController
 public class ProfileController {
@@ -55,8 +64,28 @@ public class ProfileController {
 
 	@PatchMapping("/user/v1/migrate")
 	private ResponseEntity<?> adminMigrateUser(@RequestHeader(Constants.X_AUTH_TOKEN) String userToken,
-			@RequestHeader(Constants.AUTH_TOKEN) String authToken, @RequestBody Map<String, Object> request) {
+											   @RequestHeader(Constants.AUTH_TOKEN) String authToken, @RequestBody Map<String, Object> request) {
 		SBApiResponse response = profileService.migrateUser(request, userToken, authToken);
+		return new ResponseEntity<>(response, response.getResponseCode());
+	}
+
+	@PostMapping("/user/v1/ext/signup")
+	public ResponseEntity<?> userSignup(@RequestBody Map<String,Object> request) {
+		SBApiResponse response = profileService.userSignup(request);
+		return new ResponseEntity<>(response, response.getResponseCode());
+	}
+
+	@PostMapping("/user/v1/bulkupload")
+	public ResponseEntity<?> bulkUpload(@RequestParam(value = "file", required = true) MultipartFile multipartFile,
+										@RequestHeader(Constants.X_AUTH_USER_ORG_ID) String rootOrgId,
+										@RequestHeader(Constants.X_AUTH_USER_ID) String userId) {
+		SBApiResponse uploadResponse = profileService.bulkUpload(multipartFile, rootOrgId, userId);
+		return new ResponseEntity<>(uploadResponse, uploadResponse.getResponseCode());
+	}
+
+	@GetMapping(value = {"/user/v1/bulkupload", "/user/v1/bulkupload/{orgId}"})
+	public ResponseEntity<?> getBulkUploadDetails(@PathVariable(value = "orgId", required = false) String orgId) {
+		SBApiResponse response = profileService.getBulkUploadDetails(orgId);
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
 }
