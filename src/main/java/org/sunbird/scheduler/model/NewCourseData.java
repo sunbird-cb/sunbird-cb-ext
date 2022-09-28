@@ -14,7 +14,6 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 "responseCode",
 "result"
 })
-@Generated("jsonschema2pojo")
 public class NewCourseData {
 
 @JsonProperty("id")

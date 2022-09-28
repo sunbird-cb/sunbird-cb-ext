@@ -10,7 +10,6 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 "enabled",
 "autoBatch"
 })
-@Generated("jsonschema2pojo")
 public class Trackable {
 
 @JsonProperty("enabled")

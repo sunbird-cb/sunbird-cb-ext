@@ -13,7 +13,6 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 "err",
 "errmsg"
 })
-@Generated("jsonschema2pojo")
 public class Params {
 
 @JsonProperty("resmsgid")

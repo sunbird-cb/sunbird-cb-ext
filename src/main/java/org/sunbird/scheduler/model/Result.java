@@ -12,7 +12,6 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 "count",
 "content"
 })
-@Generated("jsonschema2pojo")
 public class Result {
 
 @JsonProperty("count")

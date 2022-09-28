@@ -35,19 +35,19 @@ public class NewCoursesEmailNotificationService implements Runnable {
                 logger.info(coursesDataMapList.toString());
                 Map<String, Object> params = new HashMap<>();
                 params.put(Constants.NO_OF_COURSES, noOfCourses);
-                int size = (coursesDataMapList.size()%2==0) ? coursesDataMapList.size() : coursesDataMapList.size()-1;
-                for (int i = 0; i < coursesDataMapList.size(); i++) {
+                int size = (coursesDataMapList.size() % 2 == 0) ? coursesDataMapList.size() : coursesDataMapList.size() - 1;
+                for (int i = 0; i < size && i<8; i++) {
                     int j = i + 1;
                     params.put(Constants.COURSE_KEYWORD + j, true);
                     params.put(Constants.COURSE_KEYWORD + j + Constants._URL, coursesDataMapList.get(i).getCourseUrl());
                     params.put(Constants.COURSE_KEYWORD + j + Constants.THUMBNAIL, coursesDataMapList.get(i).getThumbnail());
                     params.put(Constants.COURSE_KEYWORD + j + Constants._NAME, coursesDataMapList.get(i).getCourseName());
-                    params.put(Constants.COURSE_KEYWORD + j + Constants._DURATION, coursesDataMapList.get(i).getDuration());
+                    params.put(Constants.COURSE_KEYWORD + j + Constants._DURATION, convertSecondsToHrsAndMins(coursesDataMapList.get(i).getDuration()));
                     params.put(Constants.COURSE_KEYWORD + j + Constants._DESCRIPTION, coursesDataMapList.get(i).getDescription());
                 }
 //                String extraEmails = PropertiesCache.getInstance().getProperty(Constants.RECIPIENT_NEW_COURSE_EMAILS);
 //                mailList.addAll(Arrays.asList(extraEmails.split(",", -1)));
-                int chunkSize = 20;
+                int chunkSize = 45;
                 List<String> emailList;
                 for (int i = 0; i < mailList.size(); i += chunkSize) {
                     if ((i + chunkSize) >= mailList.size()) {
@@ -89,27 +89,26 @@ public class NewCoursesEmailNotificationService implements Runnable {
 
     public NewCourseData getLatestAddedCourses() {
         try {
-            RequestData requestData = new RequestData();
-            Filters filter = new Filters();
-            filter.setPrimaryCategory(Collections.singletonList(Constants.COURSE));
-            filter.setContentType(Collections.singletonList(Constants.COURSE));
-            LastUpdatedOn lastUpdatedOn = new LastUpdatedOn();
+            Map<String, Object> lastUpdatedOn = new HashMap<>();
             LocalDate maxValue = LocalDate.now();
-            lastUpdatedOn.setMin(calculateMinValue(maxValue));
-            lastUpdatedOn.setMax(maxValue.toString());
-            if (!lastUpdatedOn.getMax().equalsIgnoreCase(lastUpdatedOn.getMin())) {
-                filter.setLastUpdatedOn(lastUpdatedOn);
-                Request request = new Request();
-                request.setFilters(filter);
-                request.setOffset(0);
-                request.setLimit(Integer.parseInt(PropertiesCache.getInstance().getProperty(Constants.NEW_COURSES_EMAIL_LIMIT)));
-                SortBy sortBy = new SortBy();
-                sortBy.setLastUpdatedOn(Constants.DESCENDING_ORDER);
-                request.setSortBy(sortBy);
-                requestData.setRequest(request);
-                String searchFields = PropertiesCache.getInstance().getProperty(Constants.SEARCH_FIELDS);
-                requestData.getRequest().setFields(Arrays.asList(searchFields.split(",", -1)));
-                Map requestBody = new ObjectMapper().convertValue(requestData, Map.class);
+            lastUpdatedOn.put(Constants.MIN, calculateMinValue(maxValue));
+            lastUpdatedOn.put(Constants.MAX, maxValue.toString());
+            Map<String, Object> filters = new HashMap<>();
+            filters.put(Constants.PRIMARY_CATEGORY, Collections.singletonList(Constants.COURSE));
+            filters.put(Constants.CONTENT_TYPE_SEARCH, Collections.singletonList(Constants.COURSE));
+            filters.put(Constants.LAST_UPDATED_ON, lastUpdatedOn);
+            Map<String, Object> sortby = new HashMap<>();
+            sortby.put(Constants.LAST_UPDATED_ON, Constants.DESCENDING_ORDER);
+            String searchFields = PropertiesCache.getInstance().getProperty(Constants.SEARCH_FIELDS);
+            Map<String, Object> request = new HashMap<>();
+            request.put(Constants.FILTERS, filters);
+            request.put(Constants.OFFSET, 0);
+            request.put(Constants.LIMIT, Integer.parseInt(PropertiesCache.getInstance().getProperty(Constants.NEW_COURSES_EMAIL_LIMIT)));
+            request.put(Constants.SORT_BY, sortby);
+            request.put(Constants.FIELDS, Arrays.asList(searchFields.split(",", -1)));
+            Map<String, Object> requestBody = new HashMap<>();
+            requestBody.put(Constants.REQUEST, request);
+            if (!lastUpdatedOn.get(Constants.MAX).toString().equalsIgnoreCase(lastUpdatedOn.get(Constants.MIN).toString())) {
                 String url = PropertiesCache.getInstance().getProperty(Constants.KM_BASE_HOST) + PropertiesCache.getInstance().getProperty(Constants.CONTENT_SEARCH);
                 Object o = fetchResultUsingPost(url, requestBody, new HashMap<>());
                 return new ObjectMapper().convertValue(o, NewCourseData.class);
@@ -225,5 +224,23 @@ public class NewCoursesEmailNotificationService implements Runnable {
         } catch (Exception e) {
             logger.info(String.format("Error while updating the database with the email record %s", e.getMessage()));
         }
+    }
+
+    private static String convertSecondsToHrsAndMins(int seconds) {
+        String time = "";
+        if (seconds > 60) {
+            int min = (seconds / 60) % 60;
+            int hours = (seconds / 60) / 60;
+            String strmin = (min < 10) ? "0" + min : Integer.toString(min);
+            String strHours = (hours < 10) ? "0" + hours : Integer.toString(hours);
+            if (min > 0 && hours > 0)
+                time = strHours + "h " + strmin + "m";
+            else if (min <= 0 && hours > 0)
+                time = strHours + "h";
+            else if (min > 0 && hours <= 0) {
+                time = strmin + "m";
+            }
+        }
+        return time;
     }
 }

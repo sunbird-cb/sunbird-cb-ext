@@ -535,6 +535,10 @@ public class Constants {
 	public static final String DATE_CREATED_ON = "dateCreatedOn";
 	public static final String DATE_UPDATE_ON = "dateUpdatedOn";
 	public static final String INITIATED_CAPITAL = "INITIATED";
+    public static final String MIN = "min";
+	public static final String MAX = "max";
+	public static final String CONTENT_TYPE_SEARCH = "contentType";
+
 	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}
