@@ -14,6 +14,7 @@ import org.apache.commons.validator.EmailValidator;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.HttpClientErrorException;
@@ -36,6 +37,7 @@ import org.sunbird.course.model.SortBy;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
+@Service
 public class LatestCoursesAlertNotificationService {
 	private static final CbExtLogger logger = new CbExtLogger(LatestCoursesAlertNotificationService.class.getName());
 	private final CassandraOperation cassandraOperation = ServiceFactory.getInstance();
