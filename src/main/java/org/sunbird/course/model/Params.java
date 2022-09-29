@@ -7,7 +7,6 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({ "resmsgid", "msgid", "status", "err", "errmsg" })
-@Generated("jsonschema2pojo")
 public class Params {
 
 	@JsonProperty("resmsgid")
