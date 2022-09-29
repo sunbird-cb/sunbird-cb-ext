@@ -38,15 +38,14 @@ public class LatestCoursesAlertNotificationService {
 	private final CassandraOperation cassandraOperation = ServiceFactory.getInstance();
 	private EmailValidator emailValidator = EmailValidator.getInstance();
 
-	public static boolean sendNewCourseEmail(List<CoursesDataMap> coursesDataMapList, List<String> mailList, int noOfCourses) {
+	public static boolean sendNewCourseEmail(List<CoursesDataMap> coursesDataMapList, List<String> mailList) {
 		try {
-			if (!coursesDataMapList.isEmpty()) {
+			if (!coursesDataMapList.isEmpty() && coursesDataMapList.size()>=2) {
 				logger.info("Entering new courses email");
 				logger.info(coursesDataMapList.toString());
 				Map<String, Object> params = new HashMap<>();
-				params.put(Constants.NO_OF_COURSES, noOfCourses);
-				int size = (coursesDataMapList.size() % 2 == 0) ? coursesDataMapList.size() : coursesDataMapList.size() - 1;
-				for (int i = 0; i < size && i<8; i++) {
+				params.put(Constants.NO_OF_COURSES, coursesDataMapList.size());
+				for (int i = 0; i < coursesDataMapList.size() && i<8; i++) {
 					int j = i + 1;
 					params.put(Constants.COURSE_KEYWORD + j, true);
 					params.put(Constants.COURSE_KEYWORD + j + Constants._URL, coursesDataMapList.get(i).getCourseUrl());
@@ -55,8 +54,8 @@ public class LatestCoursesAlertNotificationService {
 					params.put(Constants.COURSE_KEYWORD + j + Constants._DURATION, convertSecondsToHrsAndMins(coursesDataMapList.get(i).getDuration()));
 					params.put(Constants.COURSE_KEYWORD + j + Constants._DESCRIPTION, coursesDataMapList.get(i).getDescription());
 				}
-//                String extraEmails = PropertiesCache.getInstance().getProperty(Constants.RECIPIENT_NEW_COURSE_EMAILS);
-//                mailList.addAll(Arrays.asList(extraEmails.split(",", -1)));
+				String extraEmails = PropertiesCache.getInstance().getProperty(Constants.RECIPIENT_NEW_COURSE_EMAILS);
+				mailList.addAll(Arrays.asList(extraEmails.split(",", -1)));
 				int chunkSize = 45;
 				List<String> emailList;
 				for (int i = 0; i < mailList.size(); i += chunkSize) {
@@ -66,12 +65,8 @@ public class LatestCoursesAlertNotificationService {
 						emailList = mailList.subList(i, i + chunkSize);
 					}
 					logger.info(emailList.toString());
-					//new NotificationUtil().sendNotification(Arrays.asList("nitin.raj@tarento.com", "juhi.agarwal@tarento.com"), params, "support@igot-dev.in", PropertiesCache.getInstance().getProperty(Constants.NOTIFICATION_HOST) + PropertiesCache.getInstance().getProperty(Constants.NOTIFICATION_ENDPOINT), Constants.NEW_COURSES, Constants.NEW_COURSES_MAIL_SUBJECT);
-
+					new NotificationUtil().sendNotification(emailList, params, PropertiesCache.getInstance().getProperty(Constants.SENDER_MAIL), PropertiesCache.getInstance().getProperty(Constants.NOTIFICATION_HOST) + PropertiesCache.getInstance().getProperty(Constants.NOTIFICATION_ENDPOINT), Constants.NEW_COURSES, Constants.NEW_COURSES_MAIL_SUBJECT);
 				}
-
-				new NotificationUtil().sendNotification(Arrays.asList("nitin.raj@tarento.com", "juhi.agarwal@tarento.com"), params, Constants.SENDER_MAIL, PropertiesCache.getInstance().getProperty(Constants.NOTIFICATION_HOST) + PropertiesCache.getInstance().getProperty(Constants.NOTIFICATION_ENDPOINT), Constants.NEW_COURSES, Constants.NEW_COURSES_MAIL_SUBJECT);
-
 				return true;
 			}
 		} catch (Exception e) {
