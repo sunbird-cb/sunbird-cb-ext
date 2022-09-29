@@ -13,12 +13,12 @@
 		<version>2.0.2.RELEASE</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
+
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<java.version>1.8</java.version>
 		<log4j2.version>2.16.0</log4j2.version>
-		<resteasy.version>4.5.12.Final</resteasy.version>
 	</properties>
 
 	<repositories>
@@ -150,20 +150,18 @@
 		<dependency>
 			<groupId>org.keycloak</groupId>
 			<artifactId>keycloak-common</artifactId>
-			<version>18.0.0</version>
+			<version>19.0.2</version>
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/org.keycloak/keycloak-admin-client -->
 		<dependency>
 			<groupId>org.keycloak</groupId>
 			<artifactId>keycloak-admin-client</artifactId>
-			<version>18.0.0</version>
+			<version>19.0.2</version>
 		</dependency>
-		<dependency>
-			<groupId>org.jboss.resteasy</groupId>
-			<artifactId>resteasy-client</artifactId>
-			<version>${resteasy.version}</version>
-		</dependency>
+
+
+
 	</dependencies>
 
 	<build>
