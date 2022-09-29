@@ -1,11 +1,12 @@
 package org.sunbird.common.util;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.ws.rs.client.ClientBuilder;
 
 /**
  * @author Manzarul This class will connect to key cloak server and provide the connection to do
@@ -41,6 +42,7 @@ public class KeyCloakConnectionProvider {
     if (keycloak != null) {
       return keycloak;
     }
+
     KeycloakBuilder keycloakBuilder =
         KeycloakBuilder.builder()
             .serverUrl(cache.getProperty(Constants.SSO_URL))
@@ -49,9 +51,7 @@ public class KeyCloakConnectionProvider {
             .password(cache.getProperty(Constants.SSO_PASSWORD))
             .clientId(cache.getProperty(Constants.SSO_CLIENT_ID))
             .resteasyClient(
-                new ResteasyClientBuilder()
-                    .connectionPoolSize(Integer.parseInt(cache.getProperty(Constants.SSO_POOL_SIZE)))
-                    .build());
+                    ClientBuilder.newBuilder().build());
     if (cache.getProperty(Constants.SSO_CLIENT_SECRET) != null
         && !(cache.getProperty(Constants.SSO_CLIENT_SECRET).equals(Constants.SSO_CLIENT_SECRET))) {
       keycloakBuilder.clientSecret(cache.getProperty(Constants.SSO_CLIENT_SECRET));
@@ -75,31 +75,29 @@ public class KeyCloakConnectionProvider {
     String url = System.getenv(Constants.SUNBIRD_SSO_URL);
     String username = System.getenv(Constants.SUNBIRD_SSO_USERNAME);
     String password = System.getenv(Constants.SUNBIRD_SSO_PASSWORD);
-    String cleintId = System.getenv(Constants.SUNBIRD_SSO_CLIENT_ID);
+    String clientId = System.getenv(Constants.SUNBIRD_SSO_CLIENT_ID);
     String clientSecret = System.getenv(Constants.SUNBIRD_SSO_CLIENT_SECRET);
-    String relam = System.getenv(Constants.SUNBIRD_SSO_RELAM);
+    String realm = System.getenv(Constants.SUNBIRD_SSO_RELAM);
     if (StringUtils.isBlank(url)
         || StringUtils.isBlank(username)
         || StringUtils.isBlank(password)
-        || StringUtils.isBlank(cleintId)
-        || StringUtils.isBlank(relam)) {
+        || StringUtils.isBlank(clientId)
+        || StringUtils.isBlank(realm)) {
       logger.info("key cloak connection is not provided by Environment variable.");
       return null;
     }
     SSO_URL = url;
-    SSO_REALM = relam;
-    CLIENT_ID = cleintId;
+    SSO_REALM = realm;
+    CLIENT_ID = clientId;
     KeycloakBuilder keycloakBuilder =
         KeycloakBuilder.builder()
             .serverUrl(url)
-            .realm(relam)
+            .realm(realm)
             .username(username)
             .password(password)
-            .clientId(cleintId)
+            .clientId(clientId)
             .resteasyClient(
-                new ResteasyClientBuilder()
-                    .connectionPoolSize(Integer.parseInt(cache.getProperty(Constants.SSO_POOL_SIZE)))
-                    .build());
+                    ClientBuilder.newBuilder().build());
 
     if (StringUtils.isNotBlank(clientSecret)) {
       keycloakBuilder.clientSecret(clientSecret);
