@@ -562,6 +562,9 @@ public class Constants {
 	public static final String KM_BASE_HOST = "km.base.host";
 	public static final String NO_OF_COURSES = "noOfCourses";
 	public static final String NEW_COURSES_SCHEDULER_TIME_GAP = "new-courses-scheduler-time-gap";
+	public static final String MIN = "min";
+	public static final String MAX = "max";
+	public static final String CONTENT_TYPE_SEARCH = "contentType";
 	
 	private Constants() {
 		throw new IllegalStateException("Utility class");

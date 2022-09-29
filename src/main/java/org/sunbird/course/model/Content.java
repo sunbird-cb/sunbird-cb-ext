@@ -10,7 +10,6 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @JsonPropertyOrder({ "trackable", "instructions", "identifier", "purpose", "channel", "organisation", "description",
 		"creatorLogo", "mimeType", "posterImage", "idealScreenSize", "version", "pkgVersion", "objectType",
 		"learningMode", "duration", "license", "appIcon", "primaryCategory", "name", "lastUpdatedOn", "contentType" })
-@Generated("jsonschema2pojo")
 public class Content {
 
 	@JsonProperty("trackable")
