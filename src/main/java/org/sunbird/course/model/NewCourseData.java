@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({ "id", "ver", "ts", "params", "responseCode", "result" })
+@Generated("jsonschema2pojo")
 public class NewCourseData {
 
 	@JsonProperty("id")

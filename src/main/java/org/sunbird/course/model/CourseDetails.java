@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @JsonPropertyOrder({
     "enabled"
 })
+@Generated("jsonschema2pojo")
 public class CourseDetails {
 
     private String courseName;
