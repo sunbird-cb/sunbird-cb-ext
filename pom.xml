@@ -165,6 +165,13 @@
 			<artifactId>jackson-core</artifactId>
 			<version>2.13.0</version>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.jboss.resteasy/resteasy-client -->
+		<dependency>
+			<groupId>org.jboss.resteasy</groupId>
+			<artifactId>resteasy-client</artifactId>
+			<version>3.13.2.Final</version>
+		</dependency>
+
 
 		<!-- https://mvnrepository.com/artifact/org.jboss.resteasy/resteasy-jackson-provider -->
 		<dependency>
