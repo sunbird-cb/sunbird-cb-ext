@@ -79,9 +79,8 @@ public class LatestCoursesAlertNotificationService {
 		NewCourseData newCourseData = getLatestAddedCourses();
 		if (newCourseData != null) {
 			List<CoursesDataMap> coursesDataMapList = setCourseMap(newCourseData);
-			int noOfCourses = coursesDataMapList.size();
 			List<String> mailList = getFinalMailingList();
-			boolean isEmailSent = sendNewCourseEmail(coursesDataMapList, mailList, noOfCourses);
+			boolean isEmailSent = sendNewCourseEmail(coursesDataMapList, mailList);
 			if (isEmailSent)
 				updateEmailRecordInTheDatabase();
 		}
