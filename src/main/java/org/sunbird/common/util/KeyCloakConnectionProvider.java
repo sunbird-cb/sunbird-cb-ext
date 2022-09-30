@@ -1,6 +1,7 @@
 package org.sunbird.common.util;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
 import org.slf4j.Logger;
@@ -38,20 +39,28 @@ public class KeyCloakConnectionProvider {
    * @return Keycloak connection
    */
   public static Keycloak initialiseConnection() throws Exception {
+    logger.info("key cloak intialiseConnection.");
     keycloak = initialiseEnvConnection();
     if (keycloak != null) {
       return keycloak;
     }
 
     KeycloakBuilder keycloakBuilder =
-        KeycloakBuilder.builder()
-            .serverUrl(cache.getProperty(Constants.SSO_URL))
-            .realm(cache.getProperty(Constants.SSO_REALM))
-            .username(cache.getProperty(Constants.SSO_USERNAME))
-            .password(cache.getProperty(Constants.SSO_PASSWORD))
-            .clientId(cache.getProperty(Constants.SSO_CLIENT_ID))
-            .resteasyClient(
-                    ClientBuilder.newBuilder().build());
+            null;
+    try {
+      keycloakBuilder = KeycloakBuilder.builder()
+          .serverUrl(cache.getProperty(Constants.SSO_URL))
+          .realm(cache.getProperty(Constants.SSO_REALM))
+          .username(cache.getProperty(Constants.SSO_USERNAME))
+          .password(cache.getProperty(Constants.SSO_PASSWORD))
+          .clientId(cache.getProperty(Constants.SSO_CLIENT_ID))
+              .resteasyClient(
+                      new ResteasyClientBuilder()
+                              .connectionPoolSize(Integer.parseInt(cache.getProperty(Constants.SSO_POOL_SIZE)))
+                              .build());
+    } catch (Exception e) {
+      logger.info("Error " + e.getMessage());
+    }
     if (cache.getProperty(Constants.SSO_CLIENT_SECRET) != null
         && !(cache.getProperty(Constants.SSO_CLIENT_SECRET).equals(Constants.SSO_CLIENT_SECRET))) {
       keycloakBuilder.clientSecret(cache.getProperty(Constants.SSO_CLIENT_SECRET));
@@ -71,33 +80,41 @@ public class KeyCloakConnectionProvider {
    *
    * @return Keycloak
    */
-  private static Keycloak initialiseEnvConnection() throws Exception {
+  private static Keycloak initialiseEnvConnection() {
+    logger.info("key cloak initialiseEnvConnection.");
     String url = System.getenv(Constants.SUNBIRD_SSO_URL);
     String username = System.getenv(Constants.SUNBIRD_SSO_USERNAME);
     String password = System.getenv(Constants.SUNBIRD_SSO_PASSWORD);
-    String clientId = System.getenv(Constants.SUNBIRD_SSO_CLIENT_ID);
+    String cleintId = System.getenv(Constants.SUNBIRD_SSO_CLIENT_ID);
     String clientSecret = System.getenv(Constants.SUNBIRD_SSO_CLIENT_SECRET);
-    String realm = System.getenv(Constants.SUNBIRD_SSO_RELAM);
+    String relam = System.getenv(Constants.SUNBIRD_SSO_RELAM);
     if (StringUtils.isBlank(url)
         || StringUtils.isBlank(username)
         || StringUtils.isBlank(password)
-        || StringUtils.isBlank(clientId)
-        || StringUtils.isBlank(realm)) {
+        || StringUtils.isBlank(cleintId)
+        || StringUtils.isBlank(relam)) {
       logger.info("key cloak connection is not provided by Environment variable.");
       return null;
     }
     SSO_URL = url;
-    SSO_REALM = realm;
-    CLIENT_ID = clientId;
+    SSO_REALM = relam;
+    CLIENT_ID = cleintId;
     KeycloakBuilder keycloakBuilder =
-        KeycloakBuilder.builder()
-            .serverUrl(url)
-            .realm(realm)
-            .username(username)
-            .password(password)
-            .clientId(clientId)
-            .resteasyClient(
-                    ClientBuilder.newBuilder().build());
+            null;
+    try {
+      keycloakBuilder = KeycloakBuilder.builder()
+          .serverUrl(url)
+          .realm(relam)
+          .username(username)
+          .password(password)
+          .clientId(cleintId)
+              .resteasyClient(
+                      new ResteasyClientBuilder()
+                              .connectionPoolSize(Integer.parseInt(cache.getProperty(Constants.SSO_POOL_SIZE)))
+                              .build());
+    } catch (NumberFormatException e) {
+      logger.info("key cloak error "+e.getMessage());
+    }
 
     if (StringUtils.isNotBlank(clientSecret)) {
       keycloakBuilder.clientSecret(clientSecret);
