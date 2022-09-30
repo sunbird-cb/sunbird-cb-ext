@@ -23,6 +23,7 @@ import org.sunbird.cassandra.utils.CassandraOperation;
 import org.sunbird.common.helper.cassandra.ServiceFactory;
 import org.sunbird.common.util.Constants;
 import org.sunbird.common.util.NotificationUtil;
+import org.sunbird.common.util.ProjectUtil;
 import org.sunbird.common.util.PropertiesCache;
 import org.sunbird.core.logger.CbExtLogger;
 import org.sunbird.course.model.Content;
@@ -45,13 +46,13 @@ public class LatestCoursesAlertNotificationService {
 				logger.info(coursesDataMapList.toString());
 				Map<String, Object> params = new HashMap<>();
 				params.put(Constants.NO_OF_COURSES, coursesDataMapList.size());
-				for (int i = 0; i < coursesDataMapList.size() && i<8; i++) {
+				for (int i = 0; i < coursesDataMapList.size(); i++) {
 					int j = i + 1;
 					params.put(Constants.COURSE_KEYWORD + j, true);
 					params.put(Constants.COURSE_KEYWORD + j + Constants._URL, coursesDataMapList.get(i).getCourseUrl());
 					params.put(Constants.COURSE_KEYWORD + j + Constants.THUMBNAIL, coursesDataMapList.get(i).getThumbnail());
 					params.put(Constants.COURSE_KEYWORD + j + Constants._NAME, coursesDataMapList.get(i).getCourseName());
-					params.put(Constants.COURSE_KEYWORD + j + Constants._DURATION, convertSecondsToHrsAndMins(coursesDataMapList.get(i).getDuration()));
+					params.put(Constants.COURSE_KEYWORD + j + Constants._DURATION, ProjectUtil.convertSecondsToHrsAndMins(coursesDataMapList.get(i).getDuration()));
 					params.put(Constants.COURSE_KEYWORD + j + Constants._DESCRIPTION, coursesDataMapList.get(i).getDescription());
 				}
 				String extraEmails = PropertiesCache.getInstance().getProperty(Constants.RECIPIENT_NEW_COURSE_EMAILS);
@@ -78,7 +79,7 @@ public class LatestCoursesAlertNotificationService {
 	public void initiateLatestCourseAlertEmail() {
 		NewCourseData newCourseData = getLatestAddedCourses();
 		if (newCourseData != null) {
-			List<CoursesDataMap> coursesDataMapList = setCourseMap(newCourseData);
+			List<CoursesDataMap> coursesDataMapList = setCourseMap(newCourseData.getResult().getContent());
 			List<String> mailList = getFinalMailingList();
 			boolean isEmailSent = sendNewCourseEmail(coursesDataMapList, mailList);
 			if (isEmailSent)
@@ -96,14 +97,14 @@ public class LatestCoursesAlertNotificationService {
 			filters.put(Constants.PRIMARY_CATEGORY, Collections.singletonList(Constants.COURSE));
 			filters.put(Constants.CONTENT_TYPE_SEARCH, Collections.singletonList(Constants.COURSE));
 			filters.put(Constants.LAST_UPDATED_ON, lastUpdatedOn);
-			Map<String, Object> sortby = new HashMap<>();
-			sortby.put(Constants.LAST_UPDATED_ON, Constants.DESCENDING_ORDER);
+			Map<String, Object> sortBy = new HashMap<>();
+			sortBy.put(Constants.LAST_UPDATED_ON, Constants.DESCENDING_ORDER);
 			String searchFields = PropertiesCache.getInstance().getProperty(Constants.SEARCH_FIELDS);
 			Map<String, Object> request = new HashMap<>();
 			request.put(Constants.FILTERS, filters);
 			request.put(Constants.OFFSET, 0);
-			request.put(Constants.LIMIT, Integer.parseInt(PropertiesCache.getInstance().getProperty(Constants.NEW_COURSES_EMAIL_LIMIT)));
-			request.put(Constants.SORT_BY, sortby);
+			request.put(Constants.LIMIT, 1000);
+			request.put(Constants.SORT_BY, sortBy);
 			request.put(Constants.FIELDS, Arrays.asList(searchFields.split(",", -1)));
 			Map<String, Object> requestBody = new HashMap<>();
 			requestBody.put(Constants.REQUEST, request);
@@ -118,20 +119,19 @@ public class LatestCoursesAlertNotificationService {
 		return null;
 	}
 
-	private List<CoursesDataMap> setCourseMap(NewCourseData newCourseData) {
-		List<Content> coursesList = newCourseData.getResult().getContent();
+	private List<CoursesDataMap> setCourseMap(List<Content> coursesList) {
 		List<CoursesDataMap> coursesDataMapList = new ArrayList<>();
-		for (Content course : coursesList) {
+		for (int i=0; i<coursesList.size() && i<Integer.parseInt(PropertiesCache.getInstance().getProperty(Constants.NEW_COURSES_EMAIL_LIMIT));i++) {
 			try {
-				String courseId = course.getIdentifier();
-				if (!StringUtils.isEmpty(course.getIdentifier()) && !StringUtils.isEmpty(course.getName()) && !StringUtils.isEmpty(course.getPosterImage()) && !StringUtils.isEmpty(course.getDuration())) {
+				String courseId = coursesList.get(i).getIdentifier();
+				if (!StringUtils.isEmpty(coursesList.get(i).getIdentifier()) && !StringUtils.isEmpty(coursesList.get(i).getName()) && !StringUtils.isEmpty(coursesList.get(i).getPosterImage()) && !StringUtils.isEmpty(coursesList.get(i).getDuration())) {
 					CoursesDataMap coursesDataMap = new CoursesDataMap();
 					coursesDataMap.setCourseId(courseId);
-					coursesDataMap.setCourseName(firstLetterCapitalWithSingleSpace(course.getName()));
-					coursesDataMap.setThumbnail(course.getPosterImage());
+					coursesDataMap.setCourseName(ProjectUtil.firstLetterCapitalWithSingleSpace(coursesList.get(i).getName()));
+					coursesDataMap.setThumbnail(coursesList.get(i).getPosterImage());
 					coursesDataMap.setCourseUrl(PropertiesCache.getInstance().getProperty(Constants.COURSE_URL) + courseId);
-					coursesDataMap.setDescription(course.getDescription());
-					coursesDataMap.setDuration(Integer.parseInt(course.getDuration()));
+					coursesDataMap.setDescription(coursesList.get(i).getDescription());
+					coursesDataMap.setDuration(Integer.parseInt(coursesList.get(i).getDuration()));
 					coursesDataMapList.add(coursesDataMap);
 				}
 			} catch (Exception e) {
@@ -139,13 +139,6 @@ public class LatestCoursesAlertNotificationService {
 			}
 		}
 		return coursesDataMapList;
-	}
-
-	public String firstLetterCapitalWithSingleSpace(final String words) {
-		return Stream.of(words.trim().split("\\s"))
-				.filter(word -> word.length() > 0)
-				.map(word -> word.substring(0, 1).toUpperCase() + word.substring(1))
-				.collect(Collectors.joining(" "));
 	}
 
 	public Map<String, Object> fetchResultUsingPost(String uri, Object request, Map<String, String> headersValues) {
@@ -223,23 +216,5 @@ public class LatestCoursesAlertNotificationService {
 		} catch (Exception e) {
 			logger.info(String.format("Error while updating the database with the email record %s", e.getMessage()));
 		}
-	}
-
-	private static String convertSecondsToHrsAndMins(int seconds) {
-		String time = "";
-		if (seconds > 60) {
-			int min = (seconds / 60) % 60;
-			int hours = (seconds / 60) / 60;
-			String strmin = (min < 10) ? "0" + min : Integer.toString(min);
-			String strHours = (hours < 10) ? "0" + hours : Integer.toString(hours);
-			if (min > 0 && hours > 0)
-				time = strHours + "h " + strmin + "m";
-			else if (min <= 0 && hours > 0)
-				time = strHours + "h";
-			else if (min > 0 && hours <= 0) {
-				time = strmin + "m";
-			}
-		}
-		return time;
 	}
 }

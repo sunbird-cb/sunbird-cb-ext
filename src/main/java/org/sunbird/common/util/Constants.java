@@ -565,7 +565,21 @@ public class Constants {
 	public static final String MIN = "min";
 	public static final String MAX = "max";
 	public static final String CONTENT_TYPE_SEARCH = "contentType";
-	
+	public static final String USER_ID_DOESNT_EXIST = "User Id doesn't exist! Please supply a valid auth token";
+	public static final String ASSESSMENT_HIERARCHY_READ_FAILED = "Assessment hierarchy read failed, failed to process Assessment Read Request";
+	public static final String IDENTIFIER_LIST_IS_EMPTY = "Identifier List is Empty";
+	public static final String THE_QUESTIONS_IDS_PROVIDED_DONT_MATCH = "The Questions Ids Provided don't match the active user assessment session";
+	public static final String ASSESSMENT_ID_KEY_IS_NOT_PRESENT_IS_EMPTY = "Assessment Id Key is not present/is empty";
+	public static final String ASSESSMENT_ID_INVALID_SESSION_EXPIRED = "Assessment Id Invalid/Session Expired/Redis Cache doesn't have this question list details";
+	public static final String ASSESSMENT_DATA_START_TIME_NOT_UPDATED = "Assessment Data & Start Time not updated in the DB! Please check!";
+	public static final String INVALID_ASSESSMENT_ID = "Invalid Assessment Id";
+	public static final String THE_ANSWERS_PROVIDED_DON_T_MATCH_TO_THE_QUESTIONS = "The answers provided don't match to the Questions";
+	public static final String QUESTION_SET_FROM_THE_CASSANDRA_RETURNS_NULL = "Question Set From The Cassandra returns Null";
+	public static final String THE_ASSESSMENT_SUBMISSION_TIME_PERIOD_IS_OVER_ASSESSMENT_CAN_T_BE_SUBMITTED = "The Assessment submission time-period is over! Assessment can't be submitted";
+	public static final String WRONG_SECTION_DETAILS = "Wrong section details.";
+	public static final String FAILED_TO_COMMUNICATE_WITH_THE_DB_TO_GET_THE_ASSESSMENT_START_TIME = "Failed to communicate with the db to get the assessment start time";
+	public static final String ERROR_FETCHING_THE_READ_ASSESSMENT_DETAILS_FROM_THE_REDIS_CACHE_WRONG_ASSESSMENT_ID = "Error fetching the read assessment details from the redis cache/Wrong Assessment Id";
+
 	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}

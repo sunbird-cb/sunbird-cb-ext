@@ -63,8 +63,8 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                         response.getResult().put(Constants.QUESTION_SET, readAssessmentLevelData(assessmentAllDetail));
                         int expectedDuration = ((Integer) assessmentAllDetail.get(Constants.EXPECTED_DURATION)).intValue();
                         Boolean isAssessmentUpdatedToDB = assessmentRepository.addUserAssesmentDataToDB(userId, assessmentIdentifier, assessmentStartTime, calculateAssessmentSubmitTime(expectedDuration, assessmentStartTime), (Map<String, Object>) (response.getResult().get(Constants.QUESTION_SET)), Constants.NOT_SUBMITTED);
-                        if (!isAssessmentUpdatedToDB) {
-                            errMsg = "Assessment Data & Start Time not updated in the DB! Please check!";
+                        if (Boolean.FALSE.equals(isAssessmentUpdatedToDB)) {
+                            errMsg = Constants.ASSESSMENT_DATA_START_TIME_NOT_UPDATED;
                         }
                     } else {
                         Date existingAssessmentEndTime = (Date) (existingDataList.get(0).get(Constants.END_TIME));
@@ -80,8 +80,8 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                             response.getResult().put(Constants.QUESTION_SET, readAssessmentLevelData(assessmentAllDetail));
                             int expectedDuration = ((Integer) assessmentAllDetail.get(Constants.EXPECTED_DURATION)).intValue();
                             Boolean isAssessmentUpdatedToDB = assessmentRepository.addUserAssesmentDataToDB(userId, assessmentIdentifier, assessmentStartTime, calculateAssessmentSubmitTime(expectedDuration, assessmentStartTime), (Map<String, Object>) (response.getResult().get(Constants.QUESTION_SET)), Constants.NOT_SUBMITTED);
-                            if (!isAssessmentUpdatedToDB) {
-                                errMsg = "Assessment Data & Start Time not updated in the DB! Please check!";
+                            if (Boolean.FALSE.equals(isAssessmentUpdatedToDB)) {
+                                errMsg = Constants.ASSESSMENT_DATA_START_TIME_NOT_UPDATED;
                             }
                         }
                     }
@@ -89,7 +89,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                     response.getResult().put(Constants.QUESTION_SET, readAssessmentLevelData(assessmentAllDetail));
                 }
             } else {
-                errMsg = "User Id doesn't exist! Please supply a valid auth token";
+                errMsg = Constants.USER_ID_DOESNT_EXIST;
             }
         } catch (Exception e) {
             logger.error(String.format("Exception in %s : %s", "read Assessment", e.getMessage()), e);
@@ -141,7 +141,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
         } else {
             Map<String, Object> hierarcyReadApiResponse = assessUtilServ.getReadHierarchyApiResponse(assessmentIdentifier, token);
             if (hierarcyReadApiResponse.isEmpty() || !Constants.OK.equalsIgnoreCase((String) hierarcyReadApiResponse.get(Constants.RESPONSE_CODE))) {
-                return "Assessment hierarchy read failed, failed to process Assessment Read Request";
+                return Constants.ASSESSMENT_HIERARCHY_READ_FAILED;
             }
             assessmentAllDetail.putAll((Map<String, Object>) ((Map<String, Object>) hierarcyReadApiResponse
                     .get(Constants.RESULT)).get(Constants.QUESTION_SET));
@@ -156,8 +156,6 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
             if (requestBody.containsKey(Constants.ASSESSMENT_ID_KEY) && !StringUtils.isEmpty((String) requestBody.get(Constants.ASSESSMENT_ID_KEY))) {
                 identifierList.addAll(getQuestionIdList(requestBody));
                 if (!identifierList.isEmpty()) {
-                    //String key = Constants.USER_ASSESS_REQ + requestBody.get(Constants.ASSESSMENT_ID_KEY).toString() + authUserToken;
-                    //Map<String, Object> questionSetFromAssessment = (Map<String, Object>) redisCacheMgr.getCache(key);
                     Map<String, Object> assessmentDetail = (Map<String, Object>) redisCacheMgr
                             .getCache(Constants.ASSESSMENT_ID + (String) requestBody.get(Constants.ASSESSMENT_ID_KEY));
                     if (!((String) assessmentDetail.get(Constants.PRIMARY_CATEGORY)).equalsIgnoreCase(Constants.PRACTICE_QUESTION_SET)) {
@@ -175,21 +173,21 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                             }
                             //Out of the list of questions received in the payload, checking if the request has only those ids which are a part of the user's latest assessment
                             //Fetching all the remaining questions details from the Redis
-                            if (!validateQuestionListRequest(identifierList, questionsFromAssessment)) {
-                                return "The Questions Ids Provided don't match the active user assessment session";
+                            if (Boolean.FALSE.equals(validateQuestionListRequest(identifierList, questionsFromAssessment))) {
+                                return Constants.THE_QUESTIONS_IDS_PROVIDED_DONT_MATCH;
                             }
                         } else {
-                            return "Assessment Id Invalid/Session Expired/Redis Cache doesn't have this question list details";
+                            return Constants.ASSESSMENT_ID_INVALID_SESSION_EXPIRED;
                         }
                     }
                 } else {
-                    return "Identifier List is Empty";
+                    return Constants.IDENTIFIER_LIST_IS_EMPTY;
                 }
             } else {
-                return "Assessment Id Key is not present/is empty";
+                return Constants.ASSESSMENT_ID_KEY_IS_NOT_PRESENT_IS_EMPTY;
             }
         } else {
-            return "User Id doesn't exist! Please supply a valid auth token";
+            return Constants.USER_ID_DOESNT_EXIST;
         }
         return "";
     }
@@ -206,7 +204,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
         if (errMsg.isEmpty()) {
             String userId = validateAuthTokenAndFetchUserId(authUserToken);
             String scoreCutOffType = ((String) allHierarchy.get(Constants.SCORE_CUTOFF_TYPE)).toLowerCase();
-            List<Map<String, Object>> existingDataList = new ArrayList<>();
+            List<Map<String, Object>> existingDataList;
             List<Map<String, Object>> sectionLevelsResults = new ArrayList<>();
             for (Map<String, Object> hierarchySection : hierarchySectionList) {
                 String hierarchySectionId = (String) hierarchySection.get(Constants.IDENTIFIER);
@@ -237,7 +235,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                                 }
                             }
                         } else {
-                            errMsg = "Question Set From The Redis returns Null";
+                            errMsg = "Question Set From The Database returns Null";
                             outgoingResponse.getResult().clear();
                             break;
                         }
@@ -307,16 +305,6 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                 outgoingResponse.getResult().putAll(result);
                 if (!((String) (allHierarchy.get(Constants.PRIMARY_CATEGORY))).equalsIgnoreCase(Constants.PRACTICE_QUESTION_SET)) {
                     //writeDataToDatabaseAndTriggerKafkaEvent(submitRequest, userId, existingDataList, result);
-                    //kafkaResult.put(Constants.TOTAL_MAX_SCORE, 100.0);
-                    //kafkaResult.put(Constants.TOTAL_SCORE, result.get(Constants.OVERALL_RESULT));
-//                    String resultJson = gson.toJson(kafkaResult);
-//                    try (Jedis jedis = new Jedis(Constants.HOST, 6379, 30000)) {
-//                        jedis.set(Constants.USER_ASSESS_SUBMIT_REQ + authUserToken, resultJson);
-//                    }
-//                    JSONObject j = new JSONObject();
-//                    j.put(Constants.REDIS_CACHE_ID, Constants.USER_ASSESS_SUBMIT_REQ + authUserToken);
-//                    kafkaProducer.push(serverProperties.getUserAssessmentSubmitTopic(), j);
-//                    logger.info(j.toJSONString());
                 }
                 return outgoingResponse;
             }
@@ -332,23 +320,25 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
     private void writeDataToDatabaseAndTriggerKafkaEvent(Map<String, Object> submitRequest, String userId, List<Map<String, Object>> existingDataList, Map<String, Object> result) {
         Date startTime = (!existingDataList.isEmpty()) ? (Date) existingDataList.get(0).get(Constants.START_TIME) : null;
         Boolean isAssessmentUpdatedToDB = assessmentRepository.updateUserAssesmentDataToDB(userId, (String) submitRequest.get(Constants.IDENTIFIER), submitRequest, result, Constants.SUBMITTED, startTime);
-        Map<String, Object> kafkaResult = new HashMap<>();
-        kafkaResult.put(Constants.CONTENT_ID_, (String) submitRequest.get(Constants.IDENTIFIER));
-        kafkaResult.put(Constants.COURSE_ID, submitRequest.get(Constants.COURSE_ID));
-        kafkaResult.put(Constants.BATCH_ID, submitRequest.get(Constants.BATCH_ID));
-        kafkaResult.put(Constants.USER_ID, submitRequest.get(Constants.USER_ID));
-        kafkaResult.put(Constants.ASSESSMENT_ID_KEY,(String) submitRequest.get(Constants.IDENTIFIER));
-        kafkaProducer.push(serverProperties.getUserAssessmentSubmitTopic(), kafkaResult);
+        if (Boolean.TRUE.equals(isAssessmentUpdatedToDB)) {
+            Map<String, Object> kafkaResult = new HashMap<>();
+            kafkaResult.put(Constants.CONTENT_ID_, submitRequest.get(Constants.IDENTIFIER));
+            kafkaResult.put(Constants.COURSE_ID, submitRequest.get(Constants.COURSE_ID));
+            kafkaResult.put(Constants.BATCH_ID, submitRequest.get(Constants.BATCH_ID));
+            kafkaResult.put(Constants.USER_ID, submitRequest.get(Constants.USER_ID));
+            kafkaResult.put(Constants.ASSESSMENT_ID_KEY,submitRequest.get(Constants.IDENTIFIER));
+            kafkaProducer.push(serverProperties.getUserAssessmentSubmitTopic(), kafkaResult);
+        }
     }
 
     private String validateSubmitAssessmentRequest(Map<String, Object> submitRequest, String authUserToken, List<Map<String, Object>> hierarchySectionList, List<Map<String, Object>> sectionListFromSubmitRequest, Map<String, Object> assessmentHierarchy) {
         String userId = validateAuthTokenAndFetchUserId(authUserToken);
         if (ObjectUtils.isEmpty(userId)) {
-            return "User Id doesn't exist! Please supply a valid auth token";
+            return Constants.USER_ID_DOESNT_EXIST;
         }
         submitRequest.put(Constants.USER_ID, userId);
         if (StringUtils.isEmpty((String) submitRequest.get(Constants.IDENTIFIER))) {
-            return "Invalid Assessment Id";
+            return Constants.INVALID_ASSESSMENT_ID;
         }
         String assessmentIdFromRequest = (String) submitRequest.get(Constants.IDENTIFIER);
         String errMsg = fetchReadHierarchyDetails(assessmentHierarchy, authUserToken, assessmentIdFromRequest);
@@ -356,7 +346,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
             return errMsg;
         }
         if (ObjectUtils.isEmpty(assessmentHierarchy)) {
-            return "Error fetching the read assessment details from the redis cache/Wrong Assessment Id";
+            return Constants.ERROR_FETCHING_THE_READ_ASSESSMENT_DETAILS_FROM_THE_REDIS_CACHE_WRONG_ASSESSMENT_ID;
         }
         hierarchySectionList.addAll((List<Map<String, Object>>) assessmentHierarchy
                 .get(Constants.CHILDREN));
@@ -366,7 +356,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
         List<Map<String, Object>> existingDataList = assessmentRepository.fetchUserAssessmentDataFromDB(userId, assessmentIdFromRequest);
         Date assessmentStartTime = (!existingDataList.isEmpty()) ? (Date) existingDataList.get(0).get(Constants.START_TIME) : null;
         if (assessmentStartTime == null) {
-            return "Failed to communicate with the db to get the assessment start time";
+            return Constants.FAILED_TO_COMMUNICATE_WITH_THE_DB_TO_GET_THE_ASSESSMENT_START_TIME;
         }
         int expectedDuration = ((Integer) assessmentHierarchy.get(Constants.EXPECTED_DURATION)).intValue();
         Timestamp later = calculateAssessmentSubmitTime(expectedDuration, assessmentStartTime);
@@ -385,18 +375,18 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                             .map(x::get)
                     ).collect(toList());
             if (!hierarchySectionIds.containsAll(submitSectionIds)) {
-                return "Wrong section details.";
+                return Constants.WRONG_SECTION_DETAILS;
             } else {
-                String areQuestionIdsSame = validateIfQuestionIdsAreSame(submitRequest, authUserToken, sectionListFromSubmitRequest, desiredKeys, userId);
+                String areQuestionIdsSame = validateIfQuestionIdsAreSame(submitRequest, sectionListFromSubmitRequest, desiredKeys, userId);
                 if (!areQuestionIdsSame.isEmpty()) return areQuestionIdsSame;
             }
         } else {
-            return "The Assessment submission time-period is over! Assessment can't be submitted";
+            return Constants.THE_ASSESSMENT_SUBMISSION_TIME_PERIOD_IS_OVER_ASSESSMENT_CAN_T_BE_SUBMITTED;
         }
         return "";
     }
 
-    private String validateIfQuestionIdsAreSame(Map<String, Object> submitRequest, String authUserToken, List<Map<String, Object>> sectionListFromSubmitRequest, List<String> desiredKeys, String userId) {
+    private String validateIfQuestionIdsAreSame(Map<String, Object> submitRequest, List<Map<String, Object>> sectionListFromSubmitRequest, List<String> desiredKeys, String userId) {
         List<Map<String, Object>> existingDataList = assessmentRepository.fetchUserAssessmentDataFromDB(userId, (String) submitRequest.get(Constants.IDENTIFIER));
         String questionSetFromAssessmentString = (!existingDataList.isEmpty()) ? (String) existingDataList.get(0).get(Constants.ASSESSMENT_READ_RESPONSE) : "";
         if (!questionSetFromAssessmentString.isEmpty()) {
@@ -429,11 +419,11 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                                 .map(x::get)
                         ).collect(toList()));
                 if (!questionIdsFromAssessmentHierarchy.containsAll(userQuestionIdsFromSubmitRequest)) {
-                    return "The answers provided don't match to the Questions";
+                    return Constants.THE_ANSWERS_PROVIDED_DON_T_MATCH_TO_THE_QUESTIONS;
                 }
             }
         } else {
-            return "Question Set From The Cassandra returns Null";
+            return Constants.QUESTION_SET_FROM_THE_CASSANDRA_RETURNS_NULL;
         }
         return "";
     }
@@ -446,8 +436,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
             serverProperties.setUserAssessmentSubmissionDuration("120");
         }
         cal.add(Calendar.SECOND, expectedDuration + Integer.valueOf(serverProperties.getUserAssessmentSubmissionDuration()));
-        Timestamp later = new Timestamp(cal.getTime().getTime());
-        return later;
+        return new Timestamp(cal.getTime().getTime());
     }
 
     private Map<String, Object> calculateAssessmentFinalResults(Map<String, Object> assessmentLevelResult) {
@@ -555,11 +544,9 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                 Map<String, Object> request = (Map<String, Object>) questionListRequest.get(Constants.REQUEST);
                 if ((!ObjectUtils.isEmpty(request)) && request.containsKey(Constants.SEARCH)) {
                     Map<String, Object> searchObj = (Map<String, Object>) request.get(Constants.SEARCH);
-                    if (!ObjectUtils.isEmpty(searchObj) && searchObj.containsKey(Constants.IDENTIFIER)) {
-                        if (!CollectionUtils.isEmpty((List<String>) searchObj.get(Constants.IDENTIFIER))) {
+                    if (!ObjectUtils.isEmpty(searchObj) && searchObj.containsKey(Constants.IDENTIFIER) && !CollectionUtils.isEmpty((List<String>) searchObj.get(Constants.IDENTIFIER))) {
                             return (List<String>) searchObj.get(Constants.IDENTIFIER);
                         }
-                    }
                 }
             }
         } catch (Exception e) {

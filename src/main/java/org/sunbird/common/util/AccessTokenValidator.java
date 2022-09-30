@@ -51,7 +51,6 @@ public class AccessTokenValidator {
     public static String verifyUserToken(String token) {
         String userId = Constants._UNAUTHORIZED;
         try {
-            logger.info("Entering the verify user token");
             Map<String, Object> payload = validateToken(token);
             if (MapUtils.isNotEmpty(payload) && checkIss((String) payload.get("iss"))) {
                 userId = (String) payload.get(Constants.SUB);
