@@ -149,15 +149,22 @@ public class ProfileServiceImpl implements ProfileService {
 				url.append(serverConfig.getSbUrl()).append(serverConfig.getLmsUserUpdatePath());
 				updateResponse = outboundRequestHandlerService.fetchResultUsingPatch(
 						serverConfig.getSbUrl() + serverConfig.getLmsUserUpdatePath(), updateRequest, headerValues);
-				if (updateResponse.get(Constants.RESPONSE_CODE).equals(Constants.OK)) {
-					response.setResponseCode(HttpStatus.OK);
-					response.getResult().put(Constants.RESPONSE, Constants.SUCCESS);
-					response.getParams().setStatus(Constants.SUCCESS);
-				} else {
-					response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
-					response.getParams().setStatus(Constants.FAILED);
-					response.getParams().setErrmsg((String) ((Map<String, Object>)updateResponse.get(Constants.PARAMS)).get(Constants.ERROR_MESSAGE));
+				if (updateResponse == null) {
+					setErrorData(response, "Failed to get user update API response");
 					return response;
+				} else {
+					if (updateResponse.get(Constants.RESPONSE_CODE).equals(Constants.OK)) {
+						response.setResponseCode(HttpStatus.OK);
+						response.getResult().put(Constants.RESPONSE, Constants.SUCCESS);
+						response.getParams().setStatus(Constants.SUCCESS);
+					} else {
+						response.setResponseCode((HttpStatus) updateResponse.get(Constants.HTTP_STATUS_CODE));
+						response.getParams().setStatus(Constants.FAILED);
+						response.getParams()
+								.setErrmsg((String) ((Map<String, Object>) updateResponse.get(Constants.PARAMS))
+										.get(Constants.ERROR_MESSAGE));
+						return response;
+					}
 				}
 			}
 			List<String> transitionList = new ArrayList<>();
