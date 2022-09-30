@@ -146,6 +146,19 @@
 			<artifactId>cloud-store-sdk</artifactId>
 			<version>1.3.0</version>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.keycloak/keycloak-common -->
+		<dependency>
+			<groupId>org.keycloak</groupId>
+			<artifactId>keycloak-common</artifactId>
+			<version>19.0.2</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.keycloak/keycloak-admin-client -->
+		<dependency>
+			<groupId>org.keycloak</groupId>
+			<artifactId>keycloak-admin-client</artifactId>
+			<version>19.0.2</version>
+		</dependency>
 	</dependencies>
 
 	<build>
