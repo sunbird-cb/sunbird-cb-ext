@@ -565,6 +565,7 @@ public class Constants {
 	public static final String MIN = "min";
 	public static final String MAX = "max";
 	public static final String CONTENT_TYPE_SEARCH = "contentType";
+	public static final String HTTP_STATUS_CODE = "httpStatusCode";
 	
 	private Constants() {
 		throw new IllegalStateException("Utility class");

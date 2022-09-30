@@ -209,6 +209,7 @@ public class OutboundRequestHandlerServiceImpl {
 			try {
 				response = mapper.readValue(e.getResponseBodyAsString(), new TypeReference<HashMap<String, Object>>() {
 				});
+				response.put(Constants.HTTP_STATUS_CODE, e.getStatusCode());
 			} catch (Exception e1) {
 			}
 			log.error("Error received: " + e.getResponseBodyAsString(), e);
