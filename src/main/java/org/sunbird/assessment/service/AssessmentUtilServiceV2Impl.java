@@ -1,6 +1,5 @@
 package org.sunbird.assessment.service;
 
-import com.beust.jcommander.internal.Lists;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,9 +13,6 @@ import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 
 import java.util.*;
-import java.util.stream.Collectors;
-
-import static java.util.stream.Collectors.toList;
 
 @Service
 public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
@@ -177,28 +173,30 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 		// Taking the list which was formed with the not found values in Redis, we are
 		// making an internal POST call to Question List API to fetch the details
 		if (!newIdentifierList.isEmpty()) {
-			Map<String, Object> questionMapResponse = readQuestionDetails(newIdentifierList);
-			if (!ObjectUtils.isEmpty(questionMapResponse)
-					&& Constants.OK.equalsIgnoreCase((String) questionMapResponse.get(Constants.RESPONSE_CODE))) {
-				List<Map<String, Object>> questionMap = ((List<Map<String, Object>>) ((Map<String, Object>) questionMapResponse
-						.get(Constants.RESULT)).get(Constants.QUESTIONS));
-				for (Map<String, Object> question : questionMap) {
-					if (!ObjectUtils.isEmpty(questionMap)) {
-						Boolean isInsertedToRedis = redisCacheMgr
-								.putCache(Constants.QUESTION_ID + question.get(Constants.IDENTIFIER), question);
-						if (!isInsertedToRedis)
-							return "Failed to insert question data into redis cache/Please check your connection";
-						questionList.add(filterQuestionMapDetail(question));
-					} else {
-						logger.error(String.format("Failed to get Question Details for Id: %s",
-								question.get(Constants.IDENTIFIER).toString()));
-						return "Failed to get Question Details for Id: %s";
+			List<Map<String, Object>> questionMapList = readQuestionDetails(newIdentifierList);
+			for (Map<String,Object> questionMapResponse : questionMapList) {
+				if (!ObjectUtils.isEmpty(questionMapResponse)
+						&& Constants.OK.equalsIgnoreCase((String) questionMapResponse.get(Constants.RESPONSE_CODE))) {
+					List<Map<String, Object>> questionMap = ((List<Map<String, Object>>) ((Map<String, Object>) questionMapResponse
+							.get(Constants.RESULT)).get(Constants.QUESTIONS));
+					for (Map<String, Object> question : questionMap) {
+						if (!ObjectUtils.isEmpty(questionMap)) {
+							Boolean isInsertedToRedis = redisCacheMgr
+									.putCache(Constants.QUESTION_ID + question.get(Constants.IDENTIFIER), question);
+							if (!isInsertedToRedis)
+								return "Failed to insert question data into redis cache/Please check your connection";
+							questionList.add(filterQuestionMapDetail(question));
+						} else {
+							logger.error(String.format("Failed to get Question Details for Id: %s",
+									question.get(Constants.IDENTIFIER).toString()));
+							return "Failed to get Question Details for Id: %s";
+						}
 					}
+				} else {
+					logger.error(String.format("Failed to get Question Details from the Question List API for the IDs: %s",
+							newIdentifierList.toString()));
+					return "Failed to get Question Details from the Question List API for the IDs";
 				}
-			} else {
-				logger.error(String.format("Failed to get Question Details from the Question List API for the IDs: %s",
-						newIdentifierList.toString()));
-				return "Failed to get Question Details from the Question List API for the IDs";
 			}
 		}
 		return "";
@@ -234,7 +232,7 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 		return updatedQuestionMap;
 	}
 
-	private Map<String, Object> readQuestionDetails(List<String> identifiers) {
+	private List<Map<String, Object>> readQuestionDetails(List<String> identifiers) {
 		try {
 			StringBuilder sbUrl = new StringBuilder(serverProperties.getAssessmentHost());
 			sbUrl.append(serverProperties.getAssessmentQuestionListPath());
@@ -243,14 +241,29 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 			Map<String, Object> requestBody = new HashMap<>();
 			Map<String, Object> requestData = new HashMap<>();
 			Map<String, Object> searchData = new HashMap<>();
-			searchData.put(Constants.IDENTIFIER, identifiers);
 			requestData.put(Constants.SEARCH, searchData);
 			requestBody.put(Constants.REQUEST, requestData);
-			return outboundRequestHandlerService.fetchResultUsingPost(sbUrl.toString(), requestBody, headers);
+			List<Map<String, Object>> questionDataList = new ArrayList<>();
+			int chunkSize = 15;
+			for (int i = 0; i < identifiers.size(); i += chunkSize) {
+				List<String> identifierList;
+				if ((i + chunkSize) >= identifiers.size()) {
+					identifierList = identifiers.subList(i, identifiers.size());
+				} else {
+					identifierList = identifiers.subList(i, i + chunkSize);
+				}
+				searchData.put(Constants.IDENTIFIER, identifierList);
+				Map<String, Object> data = outboundRequestHandlerService.fetchResultUsingPost(sbUrl.toString(), requestBody, headers);
+				if(!ObjectUtils.isEmpty(data))
+				{
+					questionDataList.add(data);
+				}
+			}
+			return questionDataList;
 		} catch (Exception e) {
 			logger.info(String.format("Failed to process the readQuestionDetails. %s", e.getMessage()));
 		}
-		return Collections.emptyMap();
+		return new ArrayList<>();
 	}
 
 	@Override
