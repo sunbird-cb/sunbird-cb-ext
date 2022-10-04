@@ -35,6 +35,7 @@ import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.common.util.IndexerService;
 import org.sunbird.common.util.ProjectUtil;
+import org.sunbird.common.util.PropertiesCache;
 import org.sunbird.org.service.ExtendedOrgService;
 import org.sunbird.storage.service.StorageServiceImpl;
 import org.sunbird.user.service.UserUtilityServiceImpl;
@@ -156,6 +157,10 @@ public class ProfileServiceImpl implements ProfileService {
 				} else {
 					response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
 					response.getParams().setStatus(Constants.FAILED);
+					String errMsg = (String) ((Map<String, Object>) updateResponse.get(Constants.PARAMS))
+							.get(Constants.ERROR_MESSAGE);
+					errMsg = PropertiesCache.getInstance().readCustomError(errMsg);
+					response.getParams().setErrmsg(errMsg);
 					return response;
 				}
 			}
@@ -718,7 +723,7 @@ public class ProfileServiceImpl implements ProfileService {
 					} else if (Constants.SURNAME.equalsIgnoreCase(paramName)) {
 						updatedRequest.put(Constants.FIRSTNAME, (String) personalDetailsMap.get(paramName));
 					} else if (Constants.MOBILE.equalsIgnoreCase(paramName)) {
-						updatedRequest.put(Constants.PHONE, (String) personalDetailsMap.get(paramName));
+						updatedRequest.put(Constants.PHONE, String.valueOf(personalDetailsMap.get(paramName)));
 					}
 				}
 			}
