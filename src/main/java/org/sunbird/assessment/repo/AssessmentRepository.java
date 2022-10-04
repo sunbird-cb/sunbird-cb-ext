@@ -49,7 +49,12 @@ public interface AssessmentRepository {
 	public List<Map<String, Object>> getAssessmentbyContentUser(String rootOrg, String courseId, String userId)
 			throws Exception;
 
-    boolean addUserAssesmentStartTime(String userId, String assessmentIdentifier, Timestamp startTime);
+	boolean addUserAssesmentDataToDB(String userId, String assessmentId, Timestamp startTime, Timestamp endTime,
+			Map<String, Object> questionSet, String status);
 
-	Date fetchUserAssessmentStartTime(String userId, String s);
+	List<Map<String, Object>> fetchUserAssessmentDataFromDB(String userId, String assessmentIdentifier);
+
+	Boolean updateUserAssesmentDataToDB(String userId, String assessmentIdentifier,
+			Map<String, Object> submitAssessmentRequest, Map<String, Object> submitAssessmentResponse, String status,
+			Date startTime);
 }

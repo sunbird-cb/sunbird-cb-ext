@@ -1,9 +1,14 @@
 package org.sunbird.common.service;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.HttpClientErrorException;
@@ -12,6 +17,7 @@ import org.sunbird.common.util.Constants;
 import org.sunbird.core.logger.CbExtLogger;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
@@ -101,12 +107,13 @@ public class OutboundRequestHandlerServiceImpl {
 			}
 			HttpEntity entity = new HttpEntity(headers);
 			response = restTemplate.exchange(uri, HttpMethod.GET, entity, Map.class);
+			return response.getBody();
 		} catch (HttpClientErrorException e) {
 			log.error(e);
 		} catch (Exception e) {
 			log.error(e);
 		}
-		return response.getBody();
+		return null;
 	}
 
 	public Object fetchUsingGetWithHeadersProfile(String uri, Map<String, String> headersValues) {
@@ -180,20 +187,31 @@ public class OutboundRequestHandlerServiceImpl {
 			headers.setContentType(MediaType.APPLICATION_JSON);
 			HttpEntity<Object> entity = new HttpEntity<>(request, headers);
 			if (log.isDebugEnabled()) {
-				StringBuilder str = new StringBuilder(this.getClass().getCanonicalName()).append(".fetchResult")
-						.append(System.lineSeparator());
-				str.append("URI: ").append(uri).append(System.lineSeparator());
-				str.append("Request: ").append(mapper.writeValueAsString(request)).append(System.lineSeparator());
-				log.debug(str.toString());
+				try {
+					StringBuilder str = new StringBuilder(this.getClass().getCanonicalName()).append(".fetchResult")
+							.append(System.lineSeparator());
+					str.append("URI: ").append(uri).append(System.lineSeparator());
+					str.append("Request: ").append(mapper.writeValueAsString(request)).append(System.lineSeparator());
+					log.debug(str.toString());
+				} catch (JsonProcessingException je) {
+				}
 			}
 			response = restTemplate.patchForObject(uri, entity, Map.class);
 			if (log.isDebugEnabled()) {
-				StringBuilder str = new StringBuilder("Response: ");
-				str.append(mapper.writeValueAsString(response)).append(System.lineSeparator());
-				log.debug(str.toString());
+				try {
+					StringBuilder str = new StringBuilder("Response: ");
+					str.append(mapper.writeValueAsString(response)).append(System.lineSeparator());
+					log.debug(str.toString());
+				} catch (JsonProcessingException je) {
+				}
 			}
-		} catch (HttpClientErrorException | JsonProcessingException e) {
-			log.error(e);
+		} catch (HttpClientErrorException e) {
+			try {
+				response = mapper.readValue(e.getResponseBodyAsString(), new TypeReference<HashMap<String, Object>>() {
+				});
+			} catch (Exception e1) {
+			}
+			log.error("Error received: " + e.getResponseBodyAsString(), e);
 		}
 		return response;
 	}

@@ -174,18 +174,14 @@ public class CassandraOperationImpl implements CassandraOperation {
                         Object[] propertyValues = list.toArray(new Object[list.size()]);
                         Clause clause = QueryBuilder.in(entry.getKey(), propertyValues);
                         selectWhere.and(clause);
-
                     }
                 } else {
-
                     Clause clause = QueryBuilder.eq(entry.getKey(), entry.getValue());
                     selectWhere.and(clause);
-
                 }
-                selectQuery.allowFiltering();
             }
         }
-        return selectQuery;
+        return selectQuery.allowFiltering();
     }
 
     @Override

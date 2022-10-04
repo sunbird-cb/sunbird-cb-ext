@@ -156,6 +156,7 @@ public class ProfileServiceImpl implements ProfileService {
 				} else {
 					response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
 					response.getParams().setStatus(Constants.FAILED);
+					response.getParams().setErrmsg((String) ((Map<String, Object>)updateResponse.get(Constants.PARAMS)).get(Constants.ERROR_MESSAGE));
 					return response;
 				}
 			}
@@ -718,7 +719,7 @@ public class ProfileServiceImpl implements ProfileService {
 					} else if (Constants.SURNAME.equalsIgnoreCase(paramName)) {
 						updatedRequest.put(Constants.FIRSTNAME, (String) personalDetailsMap.get(paramName));
 					} else if (Constants.MOBILE.equalsIgnoreCase(paramName)) {
-						updatedRequest.put(Constants.PHONE, (String) personalDetailsMap.get(paramName));
+						updatedRequest.put(Constants.PHONE, String.valueOf(personalDetailsMap.get(paramName)));
 					}
 				}
 			}

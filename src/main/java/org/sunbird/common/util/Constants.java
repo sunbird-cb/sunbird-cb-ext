@@ -96,7 +96,7 @@ public class Constants {
 	public static final boolean FETCH_ON_LEVEL = false;
 	public static final boolean SKIP_ACCESS_CHECK = true;
 	public static final List<String> MINIMUL_FIELDS = Collections
-			.unmodifiableList(Arrays.asList("identifier", "duration", "downloadUrl", "description", "mimeType",
+			.unmodifiableList(Arrays.asList("identifier", "expectedDuration", "downloadUrl", "description", "mimeType",
 					"artifactUrl", "name", STATUS, "resourceType", "categoryType", "category"));
 	public static final String FETCH_RESULT_CONSTANT = ".fetchResult:";
 	public static final String URI_CONSTANT = "URI: ";
@@ -215,7 +215,6 @@ public class Constants {
 	public static final String KEYSPACE_SUNBIRD = "sunbird";
 	public static final String KEYSPACE_SUNBIRD_COURSES = "sunbird_courses";
 	public static final String TABLE_ORG_BUDGET_SCHEME = "org_budget_scheme";
-	public static final String TABLE_USER_ASSESSMENT_TIME = "user_assessment_time";
 	public static final String SHA_256_WITH_RSA = "SHA256withRSA";
 	public static final String SUB = "sub";
 	public static final String _UNAUTHORIZED = "Unauthorized";
@@ -235,6 +234,7 @@ public class Constants {
 	public static final String TABLE_RATINGS_LOOKUP = "ratings_lookup";
 	public static final String TABLE_RATINGS_SUMMARY = "ratings_summary";
 	public static final String TABLE_EXPLORE_COURSE_LIST = "explore_course_list";
+	public static final String TABLE_USER_ASSESSMENT_DATA = "user_assessment_data";
 	public static final String VALUE = "value";
 	public static final String DEPT_NAME = "deptName";
 	public static final String PROFILE_DETAILS = "profileDetails";
@@ -518,7 +518,51 @@ public class Constants {
 	public static final String INITIATED_CAPITAL = "INITIATED";
 	public static final List<String> COURSE_REMINDER_EMAIL_FIELDS = Arrays.asList(RATINGS_USER_ID, BATCH_ID_COLUMN,
 			COURSE_ID_COLUMN, COMPLETION_PERCENTAGE_COLUMN, LAST_ACCESS_TIME);
-  
+	public static final String QUESTIONSET = "questionset";
+	public static final String ASSESSMENT_ID_KEY = "assessmentId";
+	public static final String USER_ASSESS_SUBMIT_REQ = "user_assess_submit_req";
+	public static final String SEARCH_FIELDS = "search.fields";
+	public static final String NEW_COURSES_MAIL_SUBJECT = "Check out exciting new courses that launched this week!";
+	public static final String _DESCRIPTION = "_description";
+	public static final String NEW_COURSES = "newcourses";
+	public static final String API_SUBMIT_ASSESSMENT = "api.submit.asssessment";
+	public static final String EXPECTED_DURATION = "expectedDuration";
+	public static final String RECIPIENT_NEW_COURSE_EMAILS = "recipient.new.course.email";
+	public static final String REDIS_CACHE_ID = "redis_cache_id";
+	public static final String CONTENT_ID_ = "contentId";
+	public static final String TOTAL_MAX_SCORE = "totalMaxScore";
+	public static final String TOTAL_SCORE = "totalScore";
+	public static final String HOST = "127.0.0.1";
+	public static final String IDENTIFIER_LIST = "identifierList";
+	public static final String HIERARCHY_SECTION_LIST = "hierarchySectionList";
+	public static final String QUESTION_TYPE = "qType";
+	public static final String IS_CORRECT = "isCorrect";
+	public static final String OPTION_ID = "optionId";
+	public static final String MCQ_SCA = "mcq-sca";
+	public static final String MCQ_MCA = "mcq-mca";
+	public static final String FTB = "ftb";
+	public static final String MTF = "mtf";
+	public static final String QUES_ID = "questionId";
+	public static final String SELECTED_ANSWER = "selectedAnswer";
+	public static final String INDEX = "index";
+	public static final String START_TIME = "starttime";
+	public static final String END_TIME = "endtime";
+	public static final String ASSESSMENT_READ_RESPONSE = "assessmentreadresponse";
+	public static final String NOT_SUBMITTED = "NOT SUBMITTED";
+	public static final String PRACTICE_QUESTION_SET = "Practice Question Set";
+	public static final String SUBMITTED = "SUBMITTED";
+	public static final String ASSESSMENT_HOST = "assessment.host";
+	public static final String CONTENT_SEARCH = "content.search";
+	public static final String SB_API_KEY = "sb.api.key";
+    public static final String NEW_COURSES_EMAIL_LIMIT = "new-courses-email-limit";
+	public static final String EMAIL_RECORD_TABLE = "email_record";
+	public static final String EMAIL_TYPE = "emailtype";
+	public static final String LAST_SENT_DATE = "lastsentdate";
+	public static final String NEW_COURSES_EMAIL = "New Courses Email";
+	public static final String KM_BASE_HOST = "km.base.host";
+	public static final String NO_OF_COURSES = "noOfCourses";
+	public static final String NEW_COURSES_SCHEDULER_TIME_GAP = "new-courses-scheduler-time-gap";
+	
 	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}

@@ -83,7 +83,8 @@ public class CourseReminderNotificationService {
 						Collections.singletonList(userCourseProgressDetailsEntry.getValue().getEmail()), params,
 						PropertiesCache.getInstance().getProperty(Constants.SENDER_MAIL),
 						PropertiesCache.getInstance().getProperty(Constants.NOTIFICATION_HOST)
-								+ PropertiesCache.getInstance().getProperty(Constants.NOTIFICATION_ENDPOINT));
+								+ PropertiesCache.getInstance().getProperty(Constants.NOTIFICATION_ENDPOINT),
+						Constants.INCOMPLETE_COURSES, Constants.INCOMPLETE_COURSES_MAIL_SUBJECT);
 			}
 		} catch (Exception e) {
 			logger.info(String.format("Error in the incomplete courses email module %s", e.getMessage()));
