@@ -27,8 +27,8 @@ public class RedisCacheMgr {
     public boolean putCache(String key, Object object) {
         try {
             int ttl = cache_ttl;
-            if (!StringUtils.isEmpty(cbExtServerProperties.getRedisTimeout())) {
-                ttl = Integer.parseInt(cbExtServerProperties.getRedisTimeout());
+            if (!StringUtils.isEmpty(cbExtServerProperties.getRedisTTLTimeout())) {
+                ttl = Integer.parseInt(cbExtServerProperties.getRedisTTLTimeout());
             }
             redisTemplate.opsForValue().set(Constants.REDIS_COMMON_KEY + key, object);
             redisTemplate.expire(Constants.REDIS_COMMON_KEY + key, ttl, TimeUnit.SECONDS);

@@ -566,7 +566,7 @@ public class Constants {
 	public static final String MAX = "max";
 	public static final String CONTENT_TYPE_SEARCH = "contentType";
 	public static final String USER_ID_DOESNT_EXIST = "User Id doesn't exist! Please supply a valid auth token";
-	public static final String ASSESSMENT_HIERARCHY_READ_FAILED = "Assessment hierarchy read failed, failed to process Assessment Read Request";
+	public static final String ASSESSMENT_HIERARCHY_READ_FAILED = "Assessment hierarchy read failed, failed to process request";
 	public static final String IDENTIFIER_LIST_IS_EMPTY = "Identifier List is Empty";
 	public static final String THE_QUESTIONS_IDS_PROVIDED_DONT_MATCH = "The Questions Ids Provided don't match the active user assessment session";
 	public static final String ASSESSMENT_ID_KEY_IS_NOT_PRESENT_IS_EMPTY = "Assessment Id Key is not present/is empty";

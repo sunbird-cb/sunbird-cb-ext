@@ -194,9 +194,15 @@ public class CbExtServerProperties {
 
 	@Value("${redis.port}")
 	private String redisPort;
+	
+	@Value("${redis.connection.timeout}")
+	private int redisConnectionTimeout;
+	
+	@Value("${redis.read.timeout}")
+	private int redisReadTimeout;
 
-	@Value("${redis.timeout}")
-	private String redisTimeout;
+	@Value("${redis.ttl.timeout}")
+	private String redisTTLTimeout;
 
 	@Value("${kafka.topics.userutility.telemetry.event}")
 	private String userUtilityTopic;
@@ -377,6 +383,9 @@ public class CbExtServerProperties {
 	
 	@Value("${latestCourseAlertEmailKey}")
 	private String latestCourseAlertEmailKey;
+	
+	@Value("${assessment.use.redis}")
+	private boolean assessmentUseRedisCache;
 	
 	public String getUserAssessmentSubmissionDuration() {
 		return userAssessmentSubmissionDuration;
@@ -714,12 +723,28 @@ public class CbExtServerProperties {
 		this.redisHostName = redisHostName;
 	}
 
-	public String getRedisTimeout() {
-		return redisTimeout;
+	public int getRedisConnectionTimeout() {
+		return redisConnectionTimeout;
 	}
 
-	public void setRedisTimeout(String redisTimeout) {
-		this.redisTimeout = redisTimeout;
+	public void setRedisConnectionTimeout(int redisConnectionTimeout) {
+		this.redisConnectionTimeout = redisConnectionTimeout;
+	}
+
+	public int getRedisReadTimeout() {
+		return redisReadTimeout;
+	}
+
+	public void setRedisReadTimeout(int redisReadTimeout) {
+		this.redisReadTimeout = redisReadTimeout;
+	}
+
+	public String getRedisTTLTimeout() {
+		return redisTTLTimeout;
+	}
+
+	public void setRedisTTLTimeout(String redisTTLTimeout) {
+		this.redisTTLTimeout = redisTTLTimeout;
 	}
 
 	@Override
@@ -1380,4 +1405,12 @@ public class CbExtServerProperties {
 	public void setLatestCourseAlertEmailKey(String latestCourseAlertEmailKey) {
 		this.latestCourseAlertEmailKey = latestCourseAlertEmailKey;
 	}
+
+	public boolean isAssessmentUseRedisCache() {
+		return assessmentUseRedisCache;
+	}
+
+	public void setAssessmentUseRedisCache(boolean assessmentUseRedisCache) {
+		this.assessmentUseRedisCache = assessmentUseRedisCache;
+	}	
 }
