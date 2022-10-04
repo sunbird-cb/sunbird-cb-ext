@@ -102,14 +102,18 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 
 	private Map<String, Object> getQumlAnswers(List<String> questions) throws Exception {
 		Map<String, Object> ret = new HashMap<>();
+
+		Map<String, Map<String, Object>> questionMap = new HashMap<String, Map<String, Object>>();
+		fetchQuestionMapDetails(questions, questionMap);
+
 		for (String questionId : questions) {
 			List<String> correctOption = new ArrayList<>();
 
-			Map<String, Object> question = (Map<String, Object>) redisCacheMgr
-					.getCache(Constants.QUESTION_ID + questionId);
+			Map<String, Object> question = questionMap.get(questionId);
 			if (ObjectUtils.isEmpty(question)) {
 				logger.error("Failed to get the answer for question: " + questionId);
 				// call the assessment question list api
+				continue;
 			}
 			if (question.containsKey(Constants.QUESTION_TYPE)) {
 				String questionType = ((String) question.get(Constants.QUESTION_TYPE)).toLowerCase();
@@ -155,36 +159,83 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 		return ret;
 	}
 
-	@Override
-	public String fetchQuestionIdentifierValue(List<String> identifierList, List<Object> questionList)
-			throws Exception {
+	private void fetchQuestionMapDetails(List<String> questions, Map<String, Map<String, Object>> questionsMap) {
 		List<String> newIdentifierList = new ArrayList<>();
-		List<Object> map = redisCacheMgr.mget(identifierList);
-		for (int i = 0; i < map.size(); i++) {
-			if (ObjectUtils.isEmpty(map.get(i))) {
-				// Adding the not found keys as a seperate list
-				newIdentifierList.add(identifierList.get(i));
-			} else {
-				// Filtering the details of the questions which are found in redis and adding
-				// them to another list
-				questionList.add(filterQuestionMapDetail((Map<String, Object>) map.get(i)));
+		if (serverProperties.isAssessmentUseRedisCache()) {
+			List<Object> map = redisCacheMgr.mget(questions);
+			for (int i = 0; i < map.size(); i++) {
+				if (ObjectUtils.isEmpty(map.get(i))) {
+					// Adding the not found keys as a seperate list
+					newIdentifierList.add(questions.get(i));
+				} else {
+					Map<String, Object> questionObj = (Map<String, Object>) map.get(i);
+					// Filtering the details of the questions which are found in redis and adding
+					// them to another list
+					questionsMap.put((String) questionObj.get(Constants.IDENTIFIER), questionObj);
+				}
 			}
+		} else {
+			newIdentifierList.addAll(questions);
 		}
+
 		// Taking the list which was formed with the not found values in Redis, we are
 		// making an internal POST call to Question List API to fetch the details
 		if (!newIdentifierList.isEmpty()) {
 			List<Map<String, Object>> questionMapList = readQuestionDetails(newIdentifierList);
-			for (Map<String,Object> questionMapResponse : questionMapList) {
+			for (Map<String, Object> questionMapResponse : questionMapList) {
 				if (!ObjectUtils.isEmpty(questionMapResponse)
 						&& Constants.OK.equalsIgnoreCase((String) questionMapResponse.get(Constants.RESPONSE_CODE))) {
 					List<Map<String, Object>> questionMap = ((List<Map<String, Object>>) ((Map<String, Object>) questionMapResponse
 							.get(Constants.RESULT)).get(Constants.QUESTIONS));
 					for (Map<String, Object> question : questionMap) {
 						if (!ObjectUtils.isEmpty(questionMap)) {
-							Boolean isInsertedToRedis = redisCacheMgr
-									.putCache(Constants.QUESTION_ID + question.get(Constants.IDENTIFIER), question);
-							if (!isInsertedToRedis)
-								return "Failed to insert question data into redis cache/Please check your connection";
+							if (serverProperties.isAssessmentUseRedisCache()) {
+								redisCacheMgr.putCache(Constants.QUESTION_ID + question.get(Constants.IDENTIFIER),
+										question);
+							}
+							questionsMap.put((String) question.get(Constants.IDENTIFIER), question);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	@Override
+	public String fetchQuestionIdentifierValue(List<String> identifierList, List<Object> questionList)
+			throws Exception {
+		List<String> newIdentifierList = new ArrayList<>();
+		if (serverProperties.isAssessmentUseRedisCache()) {
+			List<Object> map = redisCacheMgr.mget(identifierList);
+			for (int i = 0; i < map.size(); i++) {
+				if (ObjectUtils.isEmpty(map.get(i))) {
+					// Adding the not found keys as a seperate list
+					newIdentifierList.add(identifierList.get(i));
+				} else {
+					// Filtering the details of the questions which are found in redis and adding
+					// them to another list
+					questionList.add(filterQuestionMapDetail((Map<String, Object>) map.get(i)));
+				}
+			}
+		} else {
+			newIdentifierList.addAll(identifierList);
+		}
+
+		// Taking the list which was formed with the not found values in Redis, we are
+		// making an internal POST call to Question List API to fetch the details
+		if (!newIdentifierList.isEmpty()) {
+			List<Map<String, Object>> questionMapList = readQuestionDetails(newIdentifierList);
+			for (Map<String, Object> questionMapResponse : questionMapList) {
+				if (!ObjectUtils.isEmpty(questionMapResponse)
+						&& Constants.OK.equalsIgnoreCase((String) questionMapResponse.get(Constants.RESPONSE_CODE))) {
+					List<Map<String, Object>> questionMap = ((List<Map<String, Object>>) ((Map<String, Object>) questionMapResponse
+							.get(Constants.RESULT)).get(Constants.QUESTIONS));
+					for (Map<String, Object> question : questionMap) {
+						if (!ObjectUtils.isEmpty(questionMap)) {
+							if (serverProperties.isAssessmentUseRedisCache()) {
+								redisCacheMgr.putCache(Constants.QUESTION_ID + question.get(Constants.IDENTIFIER),
+										question);
+							}
 							questionList.add(filterQuestionMapDetail(question));
 						} else {
 							logger.error(String.format("Failed to get Question Details for Id: %s",
@@ -193,8 +244,9 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 						}
 					}
 				} else {
-					logger.error(String.format("Failed to get Question Details from the Question List API for the IDs: %s",
-							newIdentifierList.toString()));
+					logger.error(
+							String.format("Failed to get Question Details from the Question List API for the IDs: %s",
+									newIdentifierList.toString()));
 					return "Failed to get Question Details from the Question List API for the IDs";
 				}
 			}
@@ -253,9 +305,9 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 					identifierList = identifiers.subList(i, i + chunkSize);
 				}
 				searchData.put(Constants.IDENTIFIER, identifierList);
-				Map<String, Object> data = outboundRequestHandlerService.fetchResultUsingPost(sbUrl.toString(), requestBody, headers);
-				if(!ObjectUtils.isEmpty(data))
-				{
+				Map<String, Object> data = outboundRequestHandlerService.fetchResultUsingPost(sbUrl.toString(),
+						requestBody, headers);
+				if (!ObjectUtils.isEmpty(data)) {
 					questionDataList.add(data);
 				}
 			}
