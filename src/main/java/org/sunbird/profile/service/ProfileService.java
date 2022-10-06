@@ -22,7 +22,7 @@ public interface ProfileService {
 
 	SBApiResponse userSignup(Map<String, Object> request);
 
-	SBApiResponse bulkUpload(MultipartFile mFile, String orgId, String userId);
+	SBApiResponse bulkUpload(MultipartFile mFile, String orgId, String orgName, String userId);
 
 	SBApiResponse getBulkUploadDetails(String orgId);
 }

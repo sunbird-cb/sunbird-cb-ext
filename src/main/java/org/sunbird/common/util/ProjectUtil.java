@@ -1,6 +1,10 @@
 package org.sunbird.common.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.springframework.http.HttpStatus;
@@ -75,7 +79,12 @@ public class ProjectUtil {
 		return response;
 	}
 
-
+    public static Map<String, String> getDefaultHeaders() {
+		Map<String, String> headers = new HashMap<String, String>();
+		headers.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
+		return headers;
+	}
+    
     public enum Method {
         GET,
         POST,

@@ -607,7 +607,7 @@ public class ProfileServiceImpl implements ProfileService {
 	}
 
 	@Override
-	public SBApiResponse bulkUpload(MultipartFile mFile, String orgId, String userId) {
+	public SBApiResponse bulkUpload(MultipartFile mFile, String orgId, String orgName, String userId) {
 		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_USER_BULK_UPLOAD);
 		try {
 			SBApiResponse uploadResponse = storageService.uploadFile(mFile, serverConfig.getBulkUploadContainerName());
@@ -639,6 +639,7 @@ public class ProfileServiceImpl implements ProfileService {
 			response.setResponseCode(HttpStatus.OK);
 			response.getResult().putAll(uploadedFile);
 
+			sendBulkUploadNotification(orgId, orgName, (String) uploadResponse.getResult().get(Constants.URL));
 		} catch (Exception e) {
 			setErrorData(response,
 					String.format("Failed to process user bulk upload request. Error: ", e.getMessage()));
@@ -1183,5 +1184,30 @@ public class ProfileServiceImpl implements ProfileService {
 		}
 
 		return strBuilder.toString();
+	}
+
+	private void sendBulkUploadNotification(String orgId, String orgName, String fileUrl) {
+		for (String email : serverConfig.getBulkUploadEmailNotificationList()) {
+			if (StringUtils.isBlank(email)) {
+				return;
+			}
+		}
+		Map<String, Object> request = new HashMap<>();
+		Map<String, Object> requestBody = new HashMap<String, Object>();
+		requestBody.put(Constants.BODY, Constants.HELLO);
+		requestBody.put(Constants.EMAIL_TEMPLATE_TYPE, serverConfig.getBulkUploadEmailTemplate());
+		requestBody.put(Constants.LINK, fileUrl);
+		requestBody.put(Constants.MODE, Constants.EMAIL);
+		requestBody.put(Constants.ORG_NAME, orgName);
+		requestBody.put(Constants.ORG_ID, orgId);
+		requestBody.put(Constants.RECIPIENT_EMAILS, serverConfig.getBulkUploadEmailNotificationList());
+		requestBody.put(Constants.SET_PASSWORD_LINK, true);
+		requestBody.put(Constants.SUBJECT, serverConfig.getBulkUploadEmailNotificationSubject());
+
+		request.put(Constants.REQUEST, requestBody);
+
+		outboundRequestHandlerService.fetchResultUsingPost(
+				serverConfig.getSbUrl() + serverConfig.getSbSendNotificationEmailPath(), request,
+				ProjectUtil.getDefaultHeaders());
 	}
 }
