@@ -6,60 +6,27 @@ import java.util.List;
 
 public class Constants {
 	public static final String UUID = "wid";
-	public static final String KID = "kid";
-	public static final String SOURCE_ID = "source_id";
 	public static final String FIRST_NAME = "first_name";
 	public static final String LAST_NAME = "last_name";
-	public static final String MIDDLE_NAME = "middle_name";
 	public static final String FIRSTNAME = "firstName";
 	public static final String SURNAME = "surname";
 	public static final String LASTNAME = "lastName";
 	public static final String MOBILE = "mobile";
 	public static final String PHONE = "phone";
-	public static final String CONTACT_PHONE_NUMBER_OFFICE = "contact_phone_number_office";
-	public static final String CONTACT_PHONE_NUMBER_HOME = "contact_phone_number_home";
-	public static final String CONTACT_PHONE_NUMBER_PERSONAL = "contact_phone_number_personal";
-	public static final String KNOWN_AS = "known_as";
-	public static final String GENDER = "gender";
-	public static final String DOB = "dob";
-	public static final String SALUTATION = "salutation";
 	public static final String EMAIL = "email";
 	public static final String PROFILE_DETAILS_KEY = "profiledetails";
-	public static final String SOURCE_PROFILE_PICTURE = "source_profile_picture";
 	public static final String ROOT_ORG = "root_org";
 	public static final String ORG = "org";
-	public static final String EMPLOYEMENT_STATUS = "employement_status";
-	public static final String CONTRACT_TYPE = "contract_type";
-	public static final String JOB_TITLE = "job_title";
-	public static final String JOB_ROLE = "job_role";
 	public static final String DEPARTMENT_NAME = "department_name";
-	public static final String UNIT_NAME = "unit_name";
-	public static final String LANGUAGES_KNOWN = "languages_known";
-	public static final String ORGANIZATION_LOCATION_COUNTRY = "organization_location_country";
-	public static final String ORGANIZATION_LOCATION_STATE = "organization_location_state";
-	public static final String ORGANIZATION_LOCATION_CITY = "organization_location_city";
-	public static final String RESIDENCE_COUNTRY = "residence_country";
-	public static final String RESIDENCE_STATE = "residence_state";
-	public static final String RESIDENCE_CITY = "residence_city";
-	public static final String TIME_INSERTED = "time_inserted";
-	public static final String TIME_UPDATED = "time_updated";
-	public static final String JSON_UNMAPPED_FIELDS = "json_unmapped_fields";
-	public static final String IS_ACTIVE = "is_active";
-	public static final String ACCOUNT_EXPIRY_DATE = "account_expiry_date";
-	public static final String SOURCE_DATA = "source_data";
 	public static final String USER_ID = "userId";
 	public static final String FILTERS = "filters";
 	public static final String CONTENT_ID = "content_id";
 	public static final String BATCH_ID = "batchId";
 	public static final String COURSE_ID = "courseId";
-	public static final String ENROLMENT_TYPE = "enrollmenttype";
 	public static final String IDENTIFIER = "identifier";
-	public static final String START_DATE = "startDate";
-	public static final String END_DATE = "endDate";
 	public static final String ACTIVE = "active";
 	public static final String COMPLETION_PERCENTAGE = "completionPercentage";
 	public static final String PROGRESS = "progress";
-	public static final String PROFILEDETAILS = "profiledetails";
 	public static final String EMPLOYMENTDETAILS = "employmentDetails";
 	public static final String DEPARTMENTNAME = "departmentName";
 	public static final String ISSUED_CERTIFICATES = "issued_certificates";
@@ -88,13 +55,7 @@ public class Constants {
 	public static final String ROOT_ORG_CONSTANT = "rootOrg";
 	public static final String ORG_CONSTANT = "org";
 	public static final String USER_ID_CONSTANT = "userId";
-	public static final String FIELD_PASSED_CONSTANT = "fieldsPassed";
-	public static final String FETCH_ONE_LEVEL_CONSTANT = "fetchOneLevel";
-	public static final String SKIP_ACCESS_CHECK_CONSTANT = "skipAccessCheck";
 	public static final String FIELDS_CONSTANT = "fields";
-	public static final boolean FIELDS_PASSED = true;
-	public static final boolean FETCH_ON_LEVEL = false;
-	public static final boolean SKIP_ACCESS_CHECK = true;
 	public static final List<String> MINIMUL_FIELDS = Collections
 			.unmodifiableList(Arrays.asList("identifier", "expectedDuration", "downloadUrl", "description", "mimeType",
 					"artifactUrl", "name", STATUS, "resourceType", "categoryType", "category"));
@@ -102,9 +63,6 @@ public class Constants {
 	public static final String URI_CONSTANT = "URI: ";
 	public static final String REQUEST_CONSTANT = "Request: ";
 	public static final String RESPONSE_CONSTANT = "Response: ";
-	public static final String SERVICE_ERROR_CONSTANT = "Http Client threw an Exception:";
-	public static final String EXTERNAL_SERVICE_ERROR_CODE = "Exception while querying the external service:";
-	public static final String CONTENT_ID_REPLACER = "{contentId}";
 	// User assessment pass mark
 	public static final Float ASSESSMENT_PASS_SCORE = 60.0f;
 	public static final String DATE_FORMAT = "yyyy-mm-dd hh:mm:ss";
@@ -155,8 +113,6 @@ public class Constants {
 	public static final String ACTIVITY_ID = "activityId";
 	public static final String ACTIVITY_TYPE = "activityType";
 	public static final String RATINGS_USER_ID = "userId";
-	public static final String USER_FIRST_NAME = "firstName";
-	public static final String USER_LAST_NAME = "lastName";
 	public static final String USERID = "id";
 	public static final String COMMENT = "comment";
 	public static final String COMMENT_BY = "commentBy";
@@ -175,8 +131,6 @@ public class Constants {
 	public static final String TOTALCOUNT5STARS = "totalcount5stars";
 	public static final String TOTALNUMBEROFRATINGS = "total_number_of_ratings";
 	public static final String SUMOFTOTALRATINGS = "sum_of_total_ratings";
-	public static final String NO_RATING_EXCEPTION_MESSAGE = "No ratings found for : ";
-	public static final String NO_REVIEW_EXCEPTION_MESSAGE = "No reviews found for : ";
 	public static final String RATING_GENERIC_EXCEPTION_MESSAGE = "Exception occurred while adding the course review : ";
 	public static final String KAFKA_RATING_EXCEPTION_MESSAGE = "Exception occurred while connecting to kafka topic : ";
 	public static final String RATING_UPSERT_OPERATION = "upsert";
@@ -196,8 +150,6 @@ public class Constants {
 	public static final String COMMA = ",";
 	public static final String CLOSING_BRACE = ");";
 	public static final String SUCCESS = "success";
-	public static final String UNKNOWN_IDENTIFIER = "Unknown identifier ";
-	public static final String UNDEFINED_IDENTIFIER = "Undefined column name ";
 	public static final String EXCEPTION_MSG_FETCH = "Exception occurred while fetching record from ";
 	public static final String EXCEPTION_MSG_DELETE = "Exception occurred while deleting record from ";
 	public static final String AUDIT_TYPE = "auditType";
@@ -209,8 +161,6 @@ public class Constants {
 	public static final String PROOF_DOCS = "proofDocs";
 	public static final String WORK_ORDER_ID = "workOrderId";
 	public static final String WORK_ALLOCATION_ID = "workAllocationId";
-	public static final String BEGIN_BATCH = "BEGIN BATCH ";
-	public static final String APPLY_BATCH = " APPLY BATCH;";
 	// Database and Tables
 	public static final String KEYSPACE_SUNBIRD = "sunbird";
 	public static final String KEYSPACE_SUNBIRD_COURSES = "sunbird_courses";
@@ -226,10 +176,8 @@ public class Constants {
 	public static final String TABLE_WORK_ALLOCATION = "work_allocation";
 	public static final String TABLE_USER_WORK_ALLOCATION_MAPPING = "user_work_allocation_mapping";
 	public static final String TABLE_MANDATORY_USER_CONTENT = "mandatory_user_content";
-	public static final String TABLE_ORGANIZATION = "organisation";
 	public static final String TABLE_USER_ENROLMENT = "user_enrolments";
 	public static final String TABLE_USER = "user";
-	public static final String TABLE_COURSE_BATCH = "course_batch";
 	public static final String TABLE_RATINGS = "ratings";
 	public static final String TABLE_RATINGS_LOOKUP = "ratings_lookup";
 	public static final String TABLE_RATINGS_SUMMARY = "ratings_summary";
@@ -258,7 +206,6 @@ public class Constants {
 	public static final String IGOT = "igot";
 	public static final String DOPT = "dopt";
 	public static final String PERSONAL_DETAILS = "personalDetails";
-	public static final String TRANSITION_DETAILS = "transitionDetails";
 	public static final String UNAUTHORIZED = "unauthorized";
 	// Redis
 	public static final String API_REDIS_DELETE = "api.redis.delete";
@@ -295,7 +242,6 @@ public class Constants {
 	public static final String PDATA_PID = "sunbird-cb-ext-service";
 	public static final String CURRENT_STATE = "FirstLogin";
 	public static final String LOGIN_TIME = "login_time";
-	public static final List<String> PROPS = Collections.unmodifiableList(Arrays.asList("WAT"));
 	public static final String USER_CONST = "User";
 	public static final String ASSESSMENT_LEVEL_SCORE_CUTOFF = "assessmentlevel";
 	public static final String SECTION_LEVEL_SCORE_CUTOFF = "sectionlevel";
@@ -311,9 +257,7 @@ public class Constants {
 	public static final String EDITOR_STATE = "editorState";
 	public static final String CHOICES = "choices";
 	public static final String ANSWER = "answer";
-	public static final String QUESTION = "question";
 	public static final String OPTIONS = "options";
-	public static final String USER_ASSESS_REQ = "user_assess_req_";
 	public static final String HIERARCHY = "hierarchy";
 	public static final String DEV_HIERARCHY_STORE = "dev_hierarchy_store";
 	public static final String CONTENT_HIERARCHY = "content_hierarchy";
@@ -345,13 +289,9 @@ public class Constants {
 	public static final String THUMBNAIL = "_thumbnail";
 	public static final String _NAME = "_name";
 	public static final String _DURATION = "_duration";
-	public static final String SEND_NOTIFICATION_PROPERTIES = "send-notification";
 	public static final String NOTIFICATION_HOST = "notification.service.host";
 	public static final String NOTIFICATION_ENDPOINT = "notification.event.endpoint";
 	public static final String SUBJECT = "subject";
-	public static final String SCHEDULER_TIME_GAP = "scheduler-time-gap";
-	public static final String SCHEDULER_RUN_DAY = "scheduler-run-day";
-	public static final String SCHEDULER_RUN_TIME = "scheduler-run-time";
 	public static final String IS_DELETED = "isDeleted";
 	public static final String EXCLUDE_USER_EMAILS = "exclude_user_emails";
 	public static final String INCOMPLETE_COURSES = "incompletecourses";
@@ -368,7 +308,6 @@ public class Constants {
 	public static final String FTB_QUESTION = "FTB Question";
 	public static final String API_QUESTIONSET_HIERARCHY_GET = "api.questionset.hierarchy.get";
 	public static final String VER = "3.0";
-	public static final String API_QUESTIONS_LIST = "api.questions.list";
 	public static final String MINIMUM_PASS_PERCENTAGE = "minimumPassPercentage";
 	public static final String SCORE_CUTOFF_TYPE = "scoreCutoffType";
 	public static final String PASS_PERCENTAGE = "passPercentage";
@@ -386,14 +325,6 @@ public class Constants {
 	public static final String SSO_PUBLIC_KEY = "sunbird_sso_publickey";
 	public static final String SSO_REALM = "sso.realm";
 	public static final String SSO_URL = "sso.url";
-	public static final String SSO_USERNAME = "sso.username";
-	public static final String SUNBIRD_SSO_CLIENT_ID = "sunbird_sso_client_id";
-	public static final String SUNBIRD_SSO_CLIENT_SECRET = "sunbird_sso_client_secret";
-	public static final String SUNBIRD_SSO_PASSWORD = "sunbird_sso_password";
-	public static final String SUNBIRD_SSO_RELAM = "sunbird_sso_realm";
-	public static final String SUNBIRD_SSO_URL = "sunbird_sso_url";
-	public static final String SUNBIRD_SSO_USERNAME = "sunbird_sso_username";
-	public static final String DURATION = "duration";
 	public static final String USER_REGISTRATION_REGISTER_API = "api.user.registration.register";
 	public static final String USER_REGISTRATION_UPDATE_API = "api.user.registration.update";
 	public static final String USER_REGISTRATION_RETRIEVE_API = "api.user.registration.retrieve";
@@ -528,13 +459,7 @@ public class Constants {
 	public static final String API_SUBMIT_ASSESSMENT = "api.submit.asssessment";
 	public static final String EXPECTED_DURATION = "expectedDuration";
 	public static final String RECIPIENT_NEW_COURSE_EMAILS = "recipient.new.course.email";
-	public static final String REDIS_CACHE_ID = "redis_cache_id";
 	public static final String CONTENT_ID_ = "contentId";
-	public static final String TOTAL_MAX_SCORE = "totalMaxScore";
-	public static final String TOTAL_SCORE = "totalScore";
-	public static final String HOST = "127.0.0.1";
-	public static final String IDENTIFIER_LIST = "identifierList";
-	public static final String HIERARCHY_SECTION_LIST = "hierarchySectionList";
 	public static final String QUESTION_TYPE = "qType";
 	public static final String IS_CORRECT = "isCorrect";
 	public static final String OPTION_ID = "optionId";
@@ -542,7 +467,6 @@ public class Constants {
 	public static final String MCQ_MCA = "mcq-mca";
 	public static final String FTB = "ftb";
 	public static final String MTF = "mtf";
-	public static final String QUES_ID = "questionId";
 	public static final String SELECTED_ANSWER = "selectedAnswer";
 	public static final String INDEX = "index";
 	public static final String START_TIME = "starttime";
