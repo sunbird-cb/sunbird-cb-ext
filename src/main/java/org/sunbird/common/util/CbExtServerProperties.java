@@ -356,7 +356,40 @@ public class CbExtServerProperties {
 	
 	@Value("${sb.es.user.profile.index}")
 	private String sbEsUserProfileIndex;
-	
+
+	@Value("${nodebb.host}")
+	private String nodebbHostUrl;
+
+	@Value("${sb.nodebb.user.read.path}")
+	private String nodebbUserRead;
+
+	@Value("${nodebb.update.path}")
+	private String nodebbUserUpdate;
+
+	public String getNodebbUserRead() {
+		return nodebbUserRead;
+	}
+
+	public String getNodebbUserUpdate() {
+		return nodebbUserUpdate;
+	}
+
+	public void setNodebbUserUpdate(String nodebbUserUpdate) {
+		this.nodebbUserUpdate = nodebbUserUpdate;
+	}
+
+	public void setNodebbUserRead(String nodebbUserRead) {
+		this.nodebbUserRead = nodebbUserRead;
+	}
+
+	public String getNodebbHostUrl() {
+		return nodebbHostUrl;
+	}
+
+	public void setNodebbHostUrl(String nodebbHostUrl) {
+		this.nodebbHostUrl = nodebbHostUrl;
+	}
+
 	public String getUserAssessmentSubmissionDuration() {
 		return userAssessmentSubmissionDuration;
 	}

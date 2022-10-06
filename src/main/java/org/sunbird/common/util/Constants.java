@@ -517,6 +517,7 @@ public class Constants {
 	public static final String OBJECT = "object";
 	public static final String E_DATA = "edata";
 	public static final String UID = "uid";
+	public static final String UID_PARAM = "_uid";
 
 
 
