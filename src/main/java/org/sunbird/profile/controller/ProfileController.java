@@ -68,9 +68,9 @@ public class ProfileController {
 		SBApiResponse response = profileService.migrateUser(request, userToken, authToken);
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
-	
+
 	@PostMapping("/user/v1/ext/signup")
-	public ResponseEntity<?> userSignup(@RequestBody Map<String,Object> request) {
+	public ResponseEntity<?> userSignup(@RequestBody Map<String, Object> request) {
 		SBApiResponse response = profileService.userSignup(request);
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
@@ -78,8 +78,9 @@ public class ProfileController {
 	@PostMapping("/user/v1/bulkupload")
 	public ResponseEntity<?> bulkUpload(@RequestParam(value = "file", required = true) MultipartFile multipartFile,
 			@RequestHeader(Constants.X_AUTH_USER_ORG_ID) String rootOrgId,
+			@RequestHeader(Constants.X_AUTH_USER_ORG_NAME) String orgName,
 			@RequestHeader(Constants.X_AUTH_USER_ID) String userId) {
-		SBApiResponse uploadResponse = profileService.bulkUpload(multipartFile, rootOrgId, userId);
+		SBApiResponse uploadResponse = profileService.bulkUpload(multipartFile, rootOrgId, orgName, userId);
 		return new ResponseEntity<>(uploadResponse, uploadResponse.getResponseCode());
 	}
 

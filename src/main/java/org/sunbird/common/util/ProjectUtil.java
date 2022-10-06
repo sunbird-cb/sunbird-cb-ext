@@ -9,11 +9,13 @@ import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.model.SunbirdApiRespParam;
 import org.sunbird.core.logger.CbExtLogger;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * This class will contains all the common utility methods.
+ * This class will contain all the common utility methods.
  *
  * @author Manzarul
  */
@@ -32,17 +34,6 @@ public class ProjectUtil {
             return System.getenv(key);
         }
         return propertiesCache.readProperty(key);
-    }
-
-    /**
-     * This method will check incoming value is null or empty it will do empty check by doing trim
-     * method. in case of null or empty it will return true else false.
-     *
-     * @param value
-     * @return
-     */
-    public static boolean isStringNullOREmpty(String value) {
-        return (value == null || "".equals(value.trim()));
     }
 
     /**
@@ -76,7 +67,12 @@ public class ProjectUtil {
 		return response;
 	}
 
-
+    public static Map<String, String> getDefaultHeaders() {
+		Map<String, String> headers = new HashMap<>();
+		headers.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
+		return headers;
+	}
+    
     public enum Method {
         GET,
         POST,
@@ -85,19 +81,19 @@ public class ProjectUtil {
         PATCH
     }
 
-    public static String convertSecondsToHrsAndMins(int seconds) {
+    public static String convertSecondsToHrsAndMinutes(int seconds) {
         String time = "";
         if (seconds > 60) {
             int min = (seconds / 60) % 60;
             int hours = (seconds / 60) / 60;
-            String strmin = (min < 10) ? "0" + min : Integer.toString(min);
+            String minutes = (min < 10) ? "0" + min : Integer.toString(min);
             String strHours = (hours < 10) ? "0" + hours : Integer.toString(hours);
             if (min > 0 && hours > 0)
-                time = strHours + "h " + strmin + "m";
-            else if (min <= 0 && hours > 0)
+                time = strHours + "h " + minutes + "m";
+            else if (min == 0 && hours > 0)
                 time = strHours + "h";
-            else if (min > 0 && hours <= 0) {
-                time = strmin + "m";
+            else if (min > 0) {
+                time = minutes + "m";
             }
         }
         return time;

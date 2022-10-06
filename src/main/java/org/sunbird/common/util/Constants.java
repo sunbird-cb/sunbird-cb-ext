@@ -438,6 +438,7 @@ public class Constants {
 	public static final String LAST_UPDATED_ON = "lastUpdatedOn";
 	public static final String DESCENDING_ORDER = "desc";
 	public static final String X_AUTH_USER_ORG_ID = "x-authenticated-user-orgid";
+	public static final String X_AUTH_USER_ORG_NAME = "x-authenticated-user-orgname";
 	public static final String API_USER_SIGNUP = "api.user.signup";
 	public static final String API_USER_BULK_UPLOAD = "api.user.bulk.upload";
 	public static final String API_USER_BULK_UPLOAD_STATUS = "api.user.bulk.upload.status";
@@ -478,7 +479,7 @@ public class Constants {
 	public static final String ASSESSMENT_HOST = "assessment.host";
 	public static final String CONTENT_SEARCH = "content.search";
 	public static final String SB_API_KEY = "sb.api.key";
-    public static final String NEW_COURSES_EMAIL_LIMIT = "new-courses-email-limit";
+    public static final String NEW_COURSES_EMAIL_LIMIT = "new.courses.email.limit";
 	public static final String EMAIL_RECORD_TABLE = "email_record";
 	public static final String EMAIL_TYPE = "emailtype";
 	public static final String LAST_SENT_DATE = "lastsentdate";

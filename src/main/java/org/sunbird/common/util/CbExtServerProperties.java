@@ -374,18 +374,36 @@ public class CbExtServerProperties {
 	
 	@Value("${user.bulk.upload.container.name}")
 	private String bulkUploadContainerName;
-	
+
 	@Value("${kafka.topics.user.assessment.submit}")
 	private String userAssessmentSubmitTopic;
 	
 	@Value("${incompleteCourseAlertEmailKey}")
 	private String incompleteCourseAlertEmailKey;
+
+	@Value("${sendIncompleteCoursesAlert}")
+	private Boolean sendIncompleteCoursesAlert;
 	
 	@Value("${latestCourseAlertEmailKey}")
 	private String latestCourseAlertEmailKey;
+
+	@Value("${sendLatestCoursesAlert}")
+	private Boolean sendLatestCoursesAlert;
+
+	@Value("${getUserEmailListFromDataBase}")
+	private Boolean getUserEmailListFromDataBase;
 	
 	@Value("${assessment.use.redis}")
 	private boolean assessmentUseRedisCache;
+
+	@Value("${user.bulk.upload.email.template}")
+	private String bulkUploadEmailTemplate;
+	
+	@Value("${user.bulk.upload.email.notification.list}")
+	private String bulkUploadEmailNotificationList;
+	
+	@Value("${user.bulk.upload.email.notification.subject}")
+	private String bulkUploadEmailNotificationSubject;
 	
 	public String getUserAssessmentSubmissionDuration() {
 		return userAssessmentSubmissionDuration;
@@ -1412,5 +1430,42 @@ public class CbExtServerProperties {
 
 	public void setAssessmentUseRedisCache(boolean assessmentUseRedisCache) {
 		this.assessmentUseRedisCache = assessmentUseRedisCache;
-	}	
+	}
+
+	public String getBulkUploadEmailTemplate() {
+		return bulkUploadEmailTemplate;
+	}
+
+	public void setBulkUploadEmailTemplate(String bulkUploadEmailTemplate) {
+		this.bulkUploadEmailTemplate = bulkUploadEmailTemplate;
+	}
+
+	public List<String> getBulkUploadEmailNotificationList() {
+		return Arrays.asList(bulkUploadEmailNotificationList.split(",", -1));
+	}
+
+	public void setBulkUploadEmailNotificationList(String bulkUploadEmailNotificationList) {
+		this.bulkUploadEmailNotificationList = bulkUploadEmailNotificationList;
+	}
+
+	public String getBulkUploadEmailNotificationSubject() {
+		return bulkUploadEmailNotificationSubject;
+	}
+
+	public void setBulkUploadEmailNotificationSubject(String bulkUploadEmailNotificationSubject) {
+		this.bulkUploadEmailNotificationSubject = bulkUploadEmailNotificationSubject;
+	}
+
+
+	public Boolean getSendIncompleteCoursesAlert() {
+		return sendIncompleteCoursesAlert;
+	}
+
+	public Boolean getSendLatestCoursesAlert() {
+		return sendLatestCoursesAlert;
+	}
+
+	public Boolean getGetUserEmailListFromDataBase() {
+		return getUserEmailListFromDataBase;
+	}
 }

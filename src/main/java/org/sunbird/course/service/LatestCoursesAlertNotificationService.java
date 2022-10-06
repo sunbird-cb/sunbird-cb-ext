@@ -8,9 +8,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.apache.commons.validator.EmailValidator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -21,10 +21,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.sunbird.cassandra.utils.CassandraOperation;
 import org.sunbird.common.helper.cassandra.ServiceFactory;
-import org.sunbird.common.util.Constants;
-import org.sunbird.common.util.NotificationUtil;
-import org.sunbird.common.util.ProjectUtil;
-import org.sunbird.common.util.PropertiesCache;
+import org.sunbird.common.util.*;
 import org.sunbird.core.logger.CbExtLogger;
 import org.sunbird.course.model.Content;
 import org.sunbird.course.model.CoursesDataMap;
@@ -35,6 +32,9 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 
 @Service
 public class LatestCoursesAlertNotificationService {
+
+	@Autowired
+	CbExtServerProperties serverProperties;
 	private static final CbExtLogger logger = new CbExtLogger(LatestCoursesAlertNotificationService.class.getName());
 	private final CassandraOperation cassandraOperation = ServiceFactory.getInstance();
 	private EmailValidator emailValidator = EmailValidator.getInstance();
@@ -52,7 +52,7 @@ public class LatestCoursesAlertNotificationService {
 					params.put(Constants.COURSE_KEYWORD + j + Constants._URL, coursesDataMapList.get(i).getCourseUrl());
 					params.put(Constants.COURSE_KEYWORD + j + Constants.THUMBNAIL, coursesDataMapList.get(i).getThumbnail());
 					params.put(Constants.COURSE_KEYWORD + j + Constants._NAME, coursesDataMapList.get(i).getCourseName());
-					params.put(Constants.COURSE_KEYWORD + j + Constants._DURATION, ProjectUtil.convertSecondsToHrsAndMins(coursesDataMapList.get(i).getDuration()));
+					params.put(Constants.COURSE_KEYWORD + j + Constants._DURATION, ProjectUtil.convertSecondsToHrsAndMinutes(coursesDataMapList.get(i).getDuration()));
 					params.put(Constants.COURSE_KEYWORD + j + Constants._DESCRIPTION, coursesDataMapList.get(i).getDescription());
 				}
 				String extraEmails = PropertiesCache.getInstance().getProperty(Constants.RECIPIENT_NEW_COURSE_EMAILS);
@@ -80,7 +80,11 @@ public class LatestCoursesAlertNotificationService {
 		NewCourseData newCourseData = getLatestAddedCourses();
 		if (newCourseData != null) {
 			List<CoursesDataMap> coursesDataMapList = setCourseMap(newCourseData.getResult().getContent());
-			List<String> mailList = getFinalMailingList();
+			List<String> mailList = new ArrayList<>();
+			if(serverProperties.getGetUserEmailListFromDataBase())
+			{
+				mailList = getFinalMailingList();
+			}
 			boolean isEmailSent = sendNewCourseEmail(coursesDataMapList, mailList);
 			if (isEmailSent)
 				updateEmailRecordInTheDatabase();
@@ -168,7 +172,7 @@ public class LatestCoursesAlertNotificationService {
 			minValue = !StringUtils.isEmpty(emailRecords.get(0).get(Constants.LAST_SENT_DATE)) ? (String) emailRecords.get(0).get(Constants.LAST_SENT_DATE) : "";
 		}
 		if (StringUtils.isEmpty(minValue)) {
-			minValue = maxValue.minusDays(Long.valueOf(PropertiesCache.getInstance().getProperty(Constants.NEW_COURSES_SCHEDULER_TIME_GAP)) / 24).toString();
+			minValue = maxValue.minusDays(Long.parseLong(PropertiesCache.getInstance().getProperty(Constants.NEW_COURSES_SCHEDULER_TIME_GAP)) / 24).toString();
 		}
 		return minValue;
 	}
