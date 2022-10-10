@@ -645,7 +645,7 @@ public class ProfileServiceImpl implements ProfileService {
 		boolean retValue = false;
 		if (!(ObjectUtils.isEmpty(profileDetails.get(Constants.PERSONAL_DETAILS)))) {
 			Map<String, Object> personalDetails = (Map<String, Object>) profileDetails.get(Constants.PERSONAL_DETAILS);
-			if (!(ObjectUtils.isEmpty(personalDetails.get(Constants.FIRSTNAME))) && !(ObjectUtils.isEmpty(personalDetails.get(Constants.LASTNAME)))) {
+			if (!(ObjectUtils.isEmpty(personalDetails.get(Constants.FIRSTNAME))) && !(ObjectUtils.isEmpty(personalDetails.get(Constants.SURNAME)))) {
 				retValue = true;
 			}
 		}
@@ -660,12 +660,12 @@ public class ProfileServiceImpl implements ProfileService {
 		paramValues.put(Constants.UID_PARAM,uid);
 		headerValues.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
 		Map<String, Object> updateRequestValue =  new HashMap<>();
-		updateRequestValue.put(Constants.USER_FULL_NAME.toLowerCase(), personalDetailsMap.get(Constants.FIRSTNAME) + "" + personalDetailsMap.get(Constants.LASTNAME));
+		updateRequestValue.put(Constants.USER_FULL_NAME.toLowerCase(), personalDetailsMap.get(Constants.FIRSTNAME) + "" + personalDetailsMap.get(Constants.SURNAME));
 		Map<String, Object> updateRequest = new HashMap<>();
 		updateRequest.put(Constants.REQUEST, updateRequestValue);
 		Map<String, Object> nodeBBUpdateResponse = new HashMap<>();
 		nodeBBUpdateResponse = outboundRequestHandlerService.fetchResultUsingPatchWithParams(
-				serverConfig.getNodebbHostUrl() + serverConfig.getNodebbUserUpdate().replace("{uid}", uid), updateRequest, headerValues, paramValues);
+				serverConfig.getNodebbHostUrl() + serverConfig.getNodebbUserUpdate().replace("{uid}", uid) + uid, updateRequest, headerValues, paramValues);
 
 	}
 
@@ -673,7 +673,7 @@ public class ProfileServiceImpl implements ProfileService {
 
 		Map<String, Object> nodebbGetResponse = new HashMap<>();
 		nodebbGetResponse = (Map<String, Object>) outboundRequestHandlerService.fetchResult(
-				serverConfig.getDiscussionHubHost() + serverConfig.getNodebbUserRead().replace("{user_name}", userName));
+				serverConfig.getDiscussionHubHost() + serverConfig.getNodebbUserRead().replace("{username}", userName));
 		String uid = (String) nodebbGetResponse.get(Constants.UID);
 		return uid;
 
