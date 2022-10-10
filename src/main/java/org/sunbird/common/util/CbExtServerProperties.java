@@ -360,15 +360,8 @@ public class CbExtServerProperties {
 	@Value("${nodebb.host}")
 	private String nodebbHostUrl;
 
-	@Value("${sb.nodebb.user.read.path}")
-	private String nodebbUserRead;
-
 	@Value("${nodebb.update.path}")
 	private String nodebbUserUpdate;
-
-	public String getNodebbUserRead() {
-		return nodebbUserRead;
-	}
 
 	public String getNodebbUserUpdate() {
 		return nodebbUserUpdate;
@@ -376,10 +369,6 @@ public class CbExtServerProperties {
 
 	public void setNodebbUserUpdate(String nodebbUserUpdate) {
 		this.nodebbUserUpdate = nodebbUserUpdate;
-	}
-
-	public void setNodebbUserRead(String nodebbUserRead) {
-		this.nodebbUserRead = nodebbUserRead;
 	}
 
 	public String getNodebbHostUrl() {

@@ -70,7 +70,7 @@ public class ProfileServiceImpl implements ProfileService {
 	private Logger log = LoggerFactory.getLogger(getClass().getName());
 
 	@Override
-	public SBApiResponse profileUpdate(Map<String, Object> request, String userToken, String authToken)
+	public SBApiResponse profileUpdate(Map<String, Object> request, String userToken, String authToken, String nodebbId)
 			throws Exception {
 		SBApiResponse response = new SBApiResponse(Constants.API_PROFILE_UPDATE);
 		try {
@@ -95,10 +95,8 @@ public class ProfileServiceImpl implements ProfileService {
 			Map<String, Object> responseMap = userUtilityService.getUsersReadData(userId, StringUtils.EMPTY,
 					StringUtils.EMPTY);
 			String deptName = (String) responseMap.get(Constants.CHANNEL);
-			if (ValidatePersonalDetailsforNodebbUpdate(profileDetailsMap)) {
-                String userName = (String) responseMap.get(Constants.USER_NAME);
-				String uid = getNodebbUserId(userName);
-				nodeBBUpdate(profileDetailsMap,authToken,uid);
+			if (ValidatePersonalDetailsForNodebbUpdate(profileDetailsMap)) {
+				nodeBBUpdate(profileDetailsMap,authToken,nodebbId);
 			}
 			Map<String, Object> existingProfileDetails = (Map<String, Object>) responseMap
 					.get(Constants.PROFILE_DETAILS);
@@ -641,7 +639,7 @@ public class ProfileServiceImpl implements ProfileService {
 		return str.toString();
 	}
 
-	private boolean ValidatePersonalDetailsforNodebbUpdate(Map<String, Object> profileDetails) {
+	private boolean ValidatePersonalDetailsForNodebbUpdate(Map<String, Object> profileDetails) {
 		boolean retValue = false;
 		if (!(ObjectUtils.isEmpty(profileDetails.get(Constants.PERSONAL_DETAILS)))) {
 			Map<String, Object> personalDetails = (Map<String, Object>) profileDetails.get(Constants.PERSONAL_DETAILS);
@@ -660,25 +658,13 @@ public class ProfileServiceImpl implements ProfileService {
 		paramValues.put(Constants.UID_PARAM,uid);
 		headerValues.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
 		Map<String, Object> updateRequestValue =  new HashMap<>();
-		updateRequestValue.put(Constants.USER_FULL_NAME.toLowerCase(), personalDetailsMap.get(Constants.FIRSTNAME) + "" + personalDetailsMap.get(Constants.SURNAME));
+		updateRequestValue.put(Constants.USER_FULL_NAME.toLowerCase(), personalDetailsMap.get(Constants.FIRSTNAME) + " " + personalDetailsMap.get(Constants.SURNAME));
 		Map<String, Object> updateRequest = new HashMap<>();
 		updateRequest.put(Constants.REQUEST, updateRequestValue);
 		Map<String, Object> nodeBBUpdateResponse = new HashMap<>();
 		nodeBBUpdateResponse = outboundRequestHandlerService.fetchResultUsingPatch(
 				serverConfig.getNodebbHostUrl() + serverConfig.getNodebbUserUpdate().replace("{uid}", uid) + uid, updateRequest, headerValues);
-
 	}
-
-	private String getNodebbUserId(String userName){
-
-		Map<String, Object> nodebbGetResponse = new HashMap<>();
-		nodebbGetResponse = (Map<String, Object>) outboundRequestHandlerService.fetchResult(
-				serverConfig.getDiscussionHubHost() + serverConfig.getNodebbUserRead().replace("{username}", userName));
-		String uid = (String) nodebbGetResponse.get(Constants.UID);
-		return uid;
-
-	}
-
 
 	private SBApiResponse createDefaultResponse(String api) {
 		SBApiResponse response = new SBApiResponse();

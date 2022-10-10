@@ -4,7 +4,7 @@ import org.sunbird.common.model.SBApiResponse;
 import java.util.Map;
 
 public interface ProfileService {
-	SBApiResponse profileUpdate(Map<String, Object> request, String XAuthToken, String AuthToken) throws Exception;
+	SBApiResponse profileUpdate(Map<String, Object> request, String XAuthToken, String AuthToken, String nodebbId) throws Exception;
 
 	SBApiResponse orgProfileUpdate(Map<String, Object> request) throws Exception;
 
