@@ -198,34 +198,4 @@ public class OutboundRequestHandlerServiceImpl {
 		return response;
 	}
 
-	public Map<String, Object> fetchResultUsingPatchWithParams(String uri, Object request, Map<String, String> headersValues, Map<String, String> params) {
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-		Map<String, Object> response = null;
-		try {
-			HttpHeaders headers = new HttpHeaders();
-			if (!CollectionUtils.isEmpty(headersValues)) {
-				headersValues.forEach((k, v) -> headers.set(k, v));
-			}
-			headers.setContentType(MediaType.APPLICATION_JSON);
-			HttpEntity<Object> entity = new HttpEntity<>(request, headers);
-			if (log.isDebugEnabled()) {
-				StringBuilder str = new StringBuilder(this.getClass().getCanonicalName()).append(".fetchResult")
-						.append(System.lineSeparator());
-				str.append("URI: ").append(uri).append(System.lineSeparator());
-				str.append("Request: ").append(mapper.writeValueAsString(request)).append(System.lineSeparator());
-				log.debug(str.toString());
-			}
-			response = restTemplate.exchange(uri, HttpMethod.PATCH, entity, Map.class, params).getBody();
-			if (log.isDebugEnabled()) {
-				StringBuilder str = new StringBuilder("Response: ");
-				str.append(mapper.writeValueAsString(response)).append(System.lineSeparator());
-				log.debug(str.toString());
-			}
-		} catch (HttpClientErrorException | JsonProcessingException e) {
-			log.error(e);
-		}
-		return response;
-	}
-
 }

@@ -664,8 +664,8 @@ public class ProfileServiceImpl implements ProfileService {
 		Map<String, Object> updateRequest = new HashMap<>();
 		updateRequest.put(Constants.REQUEST, updateRequestValue);
 		Map<String, Object> nodeBBUpdateResponse = new HashMap<>();
-		nodeBBUpdateResponse = outboundRequestHandlerService.fetchResultUsingPatchWithParams(
-				serverConfig.getNodebbHostUrl() + serverConfig.getNodebbUserUpdate().replace("{uid}", uid) + uid, updateRequest, headerValues, paramValues);
+		nodeBBUpdateResponse = outboundRequestHandlerService.fetchResultUsingPatch(
+				serverConfig.getNodebbHostUrl() + serverConfig.getNodebbUserUpdate().replace("{uid}", uid) + uid, updateRequest, headerValues);
 
 	}
 
