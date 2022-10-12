@@ -448,6 +448,8 @@ public class Constants {
 	public static final String DATE_CREATED_ON = "dateCreatedOn";
 	public static final String DATE_UPDATE_ON = "dateUpdatedOn";
 	public static final String INITIATED_CAPITAL = "INITIATED";
+	public static final String BATCHES = "batches";
+	public static final String QUERY = "query";
 	public static final List<String> COURSE_REMINDER_EMAIL_FIELDS = Arrays.asList(RATINGS_USER_ID, BATCH_ID_COLUMN,
 			COURSE_ID_COLUMN, COMPLETION_PERCENTAGE_COLUMN, LAST_ACCESS_TIME);
 	public static final String QUESTIONSET = "questionset";
