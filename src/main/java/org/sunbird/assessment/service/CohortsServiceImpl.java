@@ -311,8 +311,7 @@ public class CohortsServiceImpl implements CohortsService {
 				Map<String, Object> contentResult = (Map<String, Object>) contentResponse.get(Constants.RESULT);
 				List<Map<String, Object>> contentList = (List<Map<String, Object>>) contentResult.get(Constants.CONTENT);
 				if (!CollectionUtils.isEmpty(contentList)) {
-					List<SunbirdApiBatchResp> batchList = (List<SunbirdApiBatchResp>) contentList.get(0).get(Constants.BATCHES);
-					return batchList;
+					return (List<SunbirdApiBatchResp>) contentList.get(0).get(Constants.BATCHES);
 				}
 			}
 		} catch (Exception e) {
