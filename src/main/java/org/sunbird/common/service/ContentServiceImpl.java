@@ -1,9 +1,6 @@
 package org.sunbird.common.service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -173,10 +170,34 @@ public class ContentServiceImpl implements ContentService {
 
 		return null;
 	}
-	
-	public SunbirdApiResp searchLiveContent(String contentId) {
-		SunbirdApiResp response = null;
-		// Call Content Search API here. return the batch details
+
+	public Map<String, Object> searchLiveContent(String contentId) {
+		Map<String, Object> response = null;
+		HashMap<String, String> headerValues = new HashMap<>();
+		headerValues.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
+		Map<String, Object> filters = new HashMap<>();
+		List<String> primaryCategory = new ArrayList<>(Arrays.asList(Constants.COURSE, Constants.PROGRAM));
+		List<String> status = new ArrayList<>(Arrays.asList(Constants.LIVE));
+		filters.put(Constants.PRIMARY_CATEGORY, primaryCategory);
+		filters.put(Constants.STATUS, status);
+		filters.put(Constants.IDENTIFIER, contentId);
+		Map<String, Object> sortBy = new HashMap<>();
+		sortBy.put(Constants.LAST_UPDATED_ON, Constants.DESCENDING_ORDER);
+		List<String> fields = new ArrayList<>(Arrays.asList(Constants.IDENTIFIER, Constants.NAME, Constants.PRIMARY_CATEGORY, Constants.BATCHES));
+		Map<String, Object> contentRequestValue = new HashMap<>();
+		contentRequestValue.put(Constants.FILTERS, filters);
+		contentRequestValue.put(Constants.QUERY, "");
+		contentRequestValue.put(Constants.SORT_BY, sortBy);
+		contentRequestValue.put(Constants.FIELDS, fields);
+		contentRequestValue.put(Constants.LIMIT, 1);
+		contentRequestValue.put(Constants.OFFSET, 0);
+		Map<String, Object> contentRequest = new HashMap<>();
+		contentRequest.put(Constants.REQUEST, contentRequestValue);
+		System.out.println(contentRequest);
+		response = outboundRequestHandlerService.fetchResultUsingPost(serverConfig.getKmBaseHost() + serverConfig.getKmBaseContentSearch(), contentRequest, headerValues);
+		if (Constants.OK.equalsIgnoreCase((String) response.get(Constants.RESPONSE_CODE))) {
+			return response;
+		}
 		return null;
 	}
 }

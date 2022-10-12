@@ -3,6 +3,7 @@
 package org.sunbird.common.service;
 
 import java.util.List;
+import java.util.Map;
 
 import org.sunbird.common.model.SunbirdApiResp;
 import org.sunbird.common.model.SunbirdApiUserCourseListResp;
@@ -21,6 +22,6 @@ public interface ContentService {
 	
 	public SunbirdApiResp getQuestionListDetails(List<String> questionIdList);
 	
-	public SunbirdApiResp searchLiveContent(String contentId);
+	public Map<String, Object> searchLiveContent(String contentId);
 }
 

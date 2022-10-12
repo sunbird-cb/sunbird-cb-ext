@@ -139,7 +139,7 @@ public class CohortsServiceImpl implements CohortsService {
 	@Override
 	public Response autoEnrollmentInCourse(String authUserToken, String rootOrg, String contentId, String userUUID)
 			throws Exception {
-		List<SunbirdApiBatchResp> batchResp = fetchBatchsDetails(contentId);
+		List<SunbirdApiBatchResp> batchResp = fetchBatchesDetails(contentId);
 		List<String> batchIdList = null;
 		if (!CollectionUtils.isEmpty(batchResp))
 			batchIdList = batchResp.stream().map(SunbirdApiBatchResp::getBatchId).collect(Collectors.toList());
@@ -303,14 +303,14 @@ public class CohortsServiceImpl implements CohortsService {
 		return Collections.emptyList();
 	}
 
-	private List<SunbirdApiBatchResp> fetchBatchsDetails(String contentId) {
+	private List<SunbirdApiBatchResp> fetchBatchesDetails(String contentId) {
 		try {
-			// TODO - Call contentService.searchLiveContent(contentId)
-			// Get the batch details from
-			// SunbirdApiResp contentHierarchy = contentHierarchy.getResult().getContent()[0].getBatches();
-			SunbirdApiResp contentHierarchy = contentService.getHeirarchyResponse(contentId);
-			if (contentHierarchy != null && "successful".equalsIgnoreCase(contentHierarchy.getParams().getStatus())) {
-				return contentHierarchy.getResult().getContent().getBatches();
+			Map<String, Object> contentResponse = contentService.searchLiveContent(contentId);
+			Map<String, Object> contentResult = (Map<String, Object>) contentResponse.get(Constants.RESULT);
+			List<Map<String, Object>> content = (List<Map<String, Object>>) contentResult.get(Constants.CONTENT);
+			List<SunbirdApiBatchResp> contentHierarchy = (List<SunbirdApiBatchResp>) content.get(0).get(Constants.BATCHES);
+			if (contentHierarchy != null && Constants.SUCCESSFUL.equalsIgnoreCase((String) (((Map<String, Object>) (contentResponse.get(Constants.PARAMS))).get(Constants.STATUS)))) {
+				return contentHierarchy;
 			}
 		} catch (Exception e) {
 			logger.error(e);
