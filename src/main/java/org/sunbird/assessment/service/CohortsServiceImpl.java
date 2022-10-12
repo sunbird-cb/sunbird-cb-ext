@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.sunbird.assessment.repo.CohortUsers;
 import org.sunbird.assessment.repo.UserAssessmentTopPerformerRepository;
@@ -306,11 +307,13 @@ public class CohortsServiceImpl implements CohortsService {
 	private List<SunbirdApiBatchResp> fetchBatchesDetails(String contentId) {
 		try {
 			Map<String, Object> contentResponse = contentService.searchLiveContent(contentId);
-			Map<String, Object> contentResult = (Map<String, Object>) contentResponse.get(Constants.RESULT);
-			List<Map<String, Object>> content = (List<Map<String, Object>>) contentResult.get(Constants.CONTENT);
-			List<SunbirdApiBatchResp> contentHierarchy = (List<SunbirdApiBatchResp>) content.get(0).get(Constants.BATCHES);
-			if (contentHierarchy != null && Constants.SUCCESSFUL.equalsIgnoreCase((String) (((Map<String, Object>) (contentResponse.get(Constants.PARAMS))).get(Constants.STATUS)))) {
-				return contentHierarchy;
+			if (!ObjectUtils.isEmpty(contentResponse)) {
+				Map<String, Object> contentResult = (Map<String, Object>) contentResponse.get(Constants.RESULT);
+				List<Map<String, Object>> contentList = (List<Map<String, Object>>) contentResult.get(Constants.CONTENT);
+				if (!CollectionUtils.isEmpty(contentList)) {
+					List<SunbirdApiBatchResp> batchList = (List<SunbirdApiBatchResp>) contentList.get(0).get(Constants.BATCHES);
+					return batchList;
+				}
 			}
 		} catch (Exception e) {
 			logger.error(e);

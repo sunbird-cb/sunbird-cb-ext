@@ -176,26 +176,18 @@ public class ContentServiceImpl implements ContentService {
 		HashMap<String, String> headerValues = new HashMap<>();
 		headerValues.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
 		Map<String, Object> filters = new HashMap<>();
-		List<String> primaryCategory = new ArrayList<>(Arrays.asList(Constants.COURSE, Constants.PROGRAM));
-		List<String> status = new ArrayList<>(Arrays.asList(Constants.LIVE));
-		filters.put(Constants.PRIMARY_CATEGORY, primaryCategory);
-		filters.put(Constants.STATUS, status);
+		filters.put(Constants.PRIMARY_CATEGORY, Arrays.asList(Constants.COURSE, Constants.PROGRAM));
+		filters.put(Constants.STATUS, Arrays.asList(Constants.LIVE));
 		filters.put(Constants.IDENTIFIER, contentId);
-		Map<String, Object> sortBy = new HashMap<>();
-		sortBy.put(Constants.LAST_UPDATED_ON, Constants.DESCENDING_ORDER);
-		List<String> fields = new ArrayList<>(Arrays.asList(Constants.IDENTIFIER, Constants.NAME, Constants.PRIMARY_CATEGORY, Constants.BATCHES));
 		Map<String, Object> contentRequestValue = new HashMap<>();
 		contentRequestValue.put(Constants.FILTERS, filters);
 		contentRequestValue.put(Constants.QUERY, "");
-		contentRequestValue.put(Constants.SORT_BY, sortBy);
-		contentRequestValue.put(Constants.FIELDS, fields);
-		contentRequestValue.put(Constants.LIMIT, 1);
-		contentRequestValue.put(Constants.OFFSET, 0);
+		contentRequestValue.put(Constants.FIELDS, Arrays.asList(Constants.IDENTIFIER, Constants.NAME, Constants.PRIMARY_CATEGORY, Constants.BATCHES));
 		Map<String, Object> contentRequest = new HashMap<>();
 		contentRequest.put(Constants.REQUEST, contentRequestValue);
 		System.out.println(contentRequest);
 		response = outboundRequestHandlerService.fetchResultUsingPost(serverConfig.getKmBaseHost() + serverConfig.getKmBaseContentSearch(), contentRequest, headerValues);
-		if (Constants.OK.equalsIgnoreCase((String) response.get(Constants.RESPONSE_CODE))) {
+		if (null != response && Constants.OK.equalsIgnoreCase((String) response.get(Constants.RESPONSE_CODE))) {
 			return response;
 		}
 		return null;
