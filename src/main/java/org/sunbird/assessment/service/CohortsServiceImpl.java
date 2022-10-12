@@ -19,7 +19,15 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.sunbird.assessment.repo.CohortUsers;
 import org.sunbird.assessment.repo.UserAssessmentTopPerformerRepository;
-import org.sunbird.common.model.*;
+import org.sunbird.common.model.OpenSaberApiUserProfile;
+import org.sunbird.common.model.Response;
+import org.sunbird.common.model.SearchUserApiContent;
+import org.sunbird.common.model.SunbirdApiBatchResp;
+import org.sunbird.common.model.SunbirdApiHierarchyResultContent;
+import org.sunbird.common.model.SunbirdApiResp;
+import org.sunbird.common.model.SunbirdApiUserCourse;
+import org.sunbird.common.model.SunbirdApiUserCourseListResp;
+import org.sunbird.common.model.SunbirdUserProfessionalDetail;
 import org.sunbird.common.service.ContentService;
 import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
 import org.sunbird.common.util.CbExtServerProperties;
@@ -29,6 +37,7 @@ import org.sunbird.user.service.UserUtilityService;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.CollectionType;
 
 @Service
 public class CohortsServiceImpl implements CohortsService {
@@ -316,9 +325,9 @@ public class CohortsServiceImpl implements CohortsService {
 						.get(Constants.CONTENT);
 				if (!CollectionUtils.isEmpty(contentList)) {
 					ObjectMapper ob = new ObjectMapper();
-					return ob.readValue(ob.writeValueAsString(contentList.get(0).get(Constants.BATCHES)),
-							new TypeReference<List<HashMap<String, Object>>>() {
-							});
+					CollectionType listType = ob.getTypeFactory().constructCollectionType(ArrayList.class,
+							SunbirdApiBatchResp.class);
+					return ob.readValue(ob.writeValueAsString(contentList.get(0).get(Constants.BATCHES)), listType);
 				}
 			}
 		} catch (Exception e) {
