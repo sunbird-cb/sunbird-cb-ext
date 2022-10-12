@@ -305,6 +305,9 @@ public class CohortsServiceImpl implements CohortsService {
 
 	private List<SunbirdApiBatchResp> fetchBatchsDetails(String contentId) {
 		try {
+			// TODO - Call contentService.searchLiveContent(contentId)
+			// Get the batch details from
+			// SunbirdApiResp contentHierarchy = contentHierarchy.getResult().getContent()[0].getBatches();
 			SunbirdApiResp contentHierarchy = contentService.getHeirarchyResponse(contentId);
 			if (contentHierarchy != null && "successful".equalsIgnoreCase(contentHierarchy.getParams().getStatus())) {
 				return contentHierarchy.getResult().getContent().getBatches();

@@ -20,5 +20,7 @@ public interface ContentService {
 	public SunbirdApiUserCourseListResp getUserCourseListResponse(String authToken, String userId);
 	
 	public SunbirdApiResp getQuestionListDetails(List<String> questionIdList);
+	
+	public SunbirdApiResp searchLiveContent(String contentId);
 }
 

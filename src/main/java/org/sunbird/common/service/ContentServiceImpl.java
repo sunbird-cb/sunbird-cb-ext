@@ -173,4 +173,10 @@ public class ContentServiceImpl implements ContentService {
 
 		return null;
 	}
+	
+	public SunbirdApiResp searchLiveContent(String contentId) {
+		SunbirdApiResp response = null;
+		// Call Content Search API here. return the batch details
+		return null;
+	}
 }
