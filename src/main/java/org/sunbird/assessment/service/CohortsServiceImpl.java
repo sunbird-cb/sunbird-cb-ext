@@ -27,6 +27,9 @@ import org.sunbird.common.util.Constants;
 import org.sunbird.core.logger.CbExtLogger;
 import org.sunbird.user.service.UserUtilityService;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 @Service
 public class CohortsServiceImpl implements CohortsService {
 
@@ -312,7 +315,10 @@ public class CohortsServiceImpl implements CohortsService {
 				List<Map<String, Object>> contentList = (List<Map<String, Object>>) contentResult
 						.get(Constants.CONTENT);
 				if (!CollectionUtils.isEmpty(contentList)) {
-					return (List<SunbirdApiBatchResp>) contentList.get(0).get(Constants.BATCHES);
+					ObjectMapper ob = new ObjectMapper();
+					return ob.readValue(ob.writeValueAsString(contentList.get(0).get(Constants.BATCHES)),
+							new TypeReference<List<HashMap<String, Object>>>() {
+							});
 				}
 			}
 		} catch (Exception e) {
