@@ -181,11 +181,12 @@ public class ContentServiceImpl implements ContentService {
 		filters.put(Constants.IDENTIFIER, contentId);
 		Map<String, Object> contentRequestValue = new HashMap<>();
 		contentRequestValue.put(Constants.FILTERS, filters);
-		contentRequestValue.put(Constants.QUERY, "");
-		contentRequestValue.put(Constants.FIELDS, Arrays.asList(Constants.IDENTIFIER, Constants.NAME, Constants.PRIMARY_CATEGORY, Constants.BATCHES));
+		contentRequestValue.put(Constants.FIELDS,
+				Arrays.asList(Constants.IDENTIFIER, Constants.NAME, Constants.PRIMARY_CATEGORY, Constants.BATCHES));
 		Map<String, Object> contentRequest = new HashMap<>();
 		contentRequest.put(Constants.REQUEST, contentRequestValue);
-		response = outboundRequestHandlerService.fetchResultUsingPost(serverConfig.getKmBaseHost() + serverConfig.getKmBaseContentSearch(), contentRequest, headerValues);
+		response = outboundRequestHandlerService.fetchResultUsingPost(
+				serverConfig.getKmBaseHost() + serverConfig.getKmBaseContentSearch(), contentRequest, headerValues);
 		if (null != response && Constants.OK.equalsIgnoreCase((String) response.get(Constants.RESPONSE_CODE))) {
 			return response;
 		}

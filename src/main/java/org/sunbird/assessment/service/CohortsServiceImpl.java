@@ -309,13 +309,14 @@ public class CohortsServiceImpl implements CohortsService {
 			Map<String, Object> contentResponse = contentService.searchLiveContent(contentId);
 			if (!ObjectUtils.isEmpty(contentResponse)) {
 				Map<String, Object> contentResult = (Map<String, Object>) contentResponse.get(Constants.RESULT);
-				List<Map<String, Object>> contentList = (List<Map<String, Object>>) contentResult.get(Constants.CONTENT);
+				List<Map<String, Object>> contentList = (List<Map<String, Object>>) contentResult
+						.get(Constants.CONTENT);
 				if (!CollectionUtils.isEmpty(contentList)) {
 					return (List<SunbirdApiBatchResp>) contentList.get(0).get(Constants.BATCHES);
 				}
 			}
 		} catch (Exception e) {
-			logger.error(e);
+			logger.error("Failed to get batch details. Exception: ", e);
 		}
 		return Collections.emptyList();
 	}
