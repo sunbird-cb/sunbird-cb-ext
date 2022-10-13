@@ -380,19 +380,10 @@ public class CbExtServerProperties {
 	
 	@Value("${incompleteCourseAlertEmailKey}")
 	private String incompleteCourseAlertEmailKey;
-
-	@Value("${sendIncompleteCoursesAlert}")
-	private Boolean sendIncompleteCoursesAlert;
 	
 	@Value("${latestCourseAlertEmailKey}")
 	private String latestCourseAlertEmailKey;
 
-	@Value("${sendLatestCoursesAlert}")
-	private Boolean sendLatestCoursesAlert;
-
-	@Value("${getUserEmailListFromDataBase}")
-	private Boolean getUserEmailListFromDataBase;
-	
 	@Value("${assessment.use.redis}")
 	private boolean assessmentUseRedisCache;
 
@@ -1420,52 +1411,19 @@ public class CbExtServerProperties {
 		return latestCourseAlertEmailKey;
 	}
 
-	public void setLatestCourseAlertEmailKey(String latestCourseAlertEmailKey) {
-		this.latestCourseAlertEmailKey = latestCourseAlertEmailKey;
-	}
-
 	public boolean isAssessmentUseRedisCache() {
 		return assessmentUseRedisCache;
-	}
-
-	public void setAssessmentUseRedisCache(boolean assessmentUseRedisCache) {
-		this.assessmentUseRedisCache = assessmentUseRedisCache;
 	}
 
 	public String getBulkUploadEmailTemplate() {
 		return bulkUploadEmailTemplate;
 	}
 
-	public void setBulkUploadEmailTemplate(String bulkUploadEmailTemplate) {
-		this.bulkUploadEmailTemplate = bulkUploadEmailTemplate;
-	}
-
 	public List<String> getBulkUploadEmailNotificationList() {
 		return Arrays.asList(bulkUploadEmailNotificationList.split(",", -1));
 	}
 
-	public void setBulkUploadEmailNotificationList(String bulkUploadEmailNotificationList) {
-		this.bulkUploadEmailNotificationList = bulkUploadEmailNotificationList;
-	}
-
 	public String getBulkUploadEmailNotificationSubject() {
 		return bulkUploadEmailNotificationSubject;
-	}
-
-	public void setBulkUploadEmailNotificationSubject(String bulkUploadEmailNotificationSubject) {
-		this.bulkUploadEmailNotificationSubject = bulkUploadEmailNotificationSubject;
-	}
-
-
-	public Boolean getSendIncompleteCoursesAlert() {
-		return sendIncompleteCoursesAlert;
-	}
-
-	public Boolean getSendLatestCoursesAlert() {
-		return sendLatestCoursesAlert;
-	}
-
-	public Boolean getGetUserEmailListFromDataBase() {
-		return getUserEmailListFromDataBase;
 	}
 }
