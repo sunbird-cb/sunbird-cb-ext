@@ -15,16 +15,29 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.sunbird.assessment.repo.CohortUsers;
 import org.sunbird.assessment.repo.UserAssessmentTopPerformerRepository;
-import org.sunbird.common.model.*;
+import org.sunbird.common.model.OpenSaberApiUserProfile;
+import org.sunbird.common.model.Response;
+import org.sunbird.common.model.SearchUserApiContent;
+import org.sunbird.common.model.SunbirdApiBatchResp;
+import org.sunbird.common.model.SunbirdApiHierarchyResultContent;
+import org.sunbird.common.model.SunbirdApiResp;
+import org.sunbird.common.model.SunbirdApiUserCourse;
+import org.sunbird.common.model.SunbirdApiUserCourseListResp;
+import org.sunbird.common.model.SunbirdUserProfessionalDetail;
 import org.sunbird.common.service.ContentService;
 import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.core.logger.CbExtLogger;
 import org.sunbird.user.service.UserUtilityService;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.CollectionType;
 
 @Service
 public class CohortsServiceImpl implements CohortsService {
@@ -139,7 +152,7 @@ public class CohortsServiceImpl implements CohortsService {
 	@Override
 	public Response autoEnrollmentInCourse(String authUserToken, String rootOrg, String contentId, String userUUID)
 			throws Exception {
-		List<SunbirdApiBatchResp> batchResp = fetchBatchsDetails(contentId);
+		List<SunbirdApiBatchResp> batchResp = fetchBatchesDetails(contentId);
 		List<String> batchIdList = null;
 		if (!CollectionUtils.isEmpty(batchResp))
 			batchIdList = batchResp.stream().map(SunbirdApiBatchResp::getBatchId).collect(Collectors.toList());
@@ -303,14 +316,22 @@ public class CohortsServiceImpl implements CohortsService {
 		return Collections.emptyList();
 	}
 
-	private List<SunbirdApiBatchResp> fetchBatchsDetails(String contentId) {
+	private List<SunbirdApiBatchResp> fetchBatchesDetails(String contentId) {
 		try {
-			SunbirdApiResp contentHierarchy = contentService.getHeirarchyResponse(contentId);
-			if (contentHierarchy != null && "successful".equalsIgnoreCase(contentHierarchy.getParams().getStatus())) {
-				return contentHierarchy.getResult().getContent().getBatches();
+			Map<String, Object> contentResponse = contentService.searchLiveContent(contentId);
+			if (!ObjectUtils.isEmpty(contentResponse)) {
+				Map<String, Object> contentResult = (Map<String, Object>) contentResponse.get(Constants.RESULT);
+				List<Map<String, Object>> contentList = (List<Map<String, Object>>) contentResult
+						.get(Constants.CONTENT);
+				if (!CollectionUtils.isEmpty(contentList)) {
+					ObjectMapper ob = new ObjectMapper();
+					CollectionType listType = ob.getTypeFactory().constructCollectionType(ArrayList.class,
+							SunbirdApiBatchResp.class);
+					return ob.readValue(ob.writeValueAsString(contentList.get(0).get(Constants.BATCHES)), listType);
+				}
 			}
 		} catch (Exception e) {
-			logger.error(e);
+			logger.error("Failed to get batch details. Exception: ", e);
 		}
 		return Collections.emptyList();
 	}
