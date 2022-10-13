@@ -519,6 +519,7 @@ public class Constants {
 	public static final String INITIATED_CAPITAL = "INITIATED";
 	public static final List<String> COURSE_REMINDER_EMAIL_FIELDS = Arrays.asList(RATINGS_USER_ID, BATCH_ID_COLUMN,
 			COURSE_ID_COLUMN, COMPLETION_PERCENTAGE_COLUMN, LAST_ACCESS_TIME);
+	public static final String BATCHES = "batches";
   
 	private Constants() {
 		throw new IllegalStateException("Utility class");
