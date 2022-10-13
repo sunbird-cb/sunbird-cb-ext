@@ -28,15 +28,19 @@ public class CourseAlertNotificationConsumer {
 		logger.info("Received message:: " + data.value());
 		String value = data.value();
 
-		if (StringUtils.isNoneBlank(value)) {
-			if (value.equalsIgnoreCase(serverProperties.getIncompleteCourseAlertEmailKey()) && serverProperties.getSendIncompleteCoursesAlert()) {
-				incompleteCourseService.initiateCourseReminderEmail();
-			} else if (value.equalsIgnoreCase(serverProperties.getLatestCourseAlertEmailKey()) && serverProperties.getSendLatestCoursesAlert()) {
-				latestCourseService.initiateLatestCourseAlertEmail();
-			} else {
-				logger.error("The Email Switch for this property is off/Invalid Kafka Msg",
-						new Exception("The Email Switch for this property is off/Invalid Kafka Msg"));
+		try {
+			if (StringUtils.isNoneBlank(value)) {
+				if (value.equalsIgnoreCase(serverProperties.getIncompleteCourseAlertEmailKey())) {
+					incompleteCourseService.initiateCourseReminderEmail();
+				} else if (value.equalsIgnoreCase(serverProperties.getLatestCourseAlertEmailKey())) {
+					latestCourseService.initiateLatestCourseAlertEmail();
+				} else {
+					logger.error("The Email Switch for this property is off/Invalid Kafka Msg",
+							new Exception("The Email Switch for this property is off/Invalid Kafka Msg"));
+				}
 			}
+		} catch (Exception e) {
+			logger.error(e);
 		}
 	}
 }

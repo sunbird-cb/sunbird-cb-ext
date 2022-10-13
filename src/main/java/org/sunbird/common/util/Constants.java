@@ -268,6 +268,9 @@ public class Constants {
 	public static final String SUNBIRD_KEY_SPACE_NAME = "sunbird";
 	public static final String SUNBIRD_COURSES_KEY_SPACE_NAME = "sunbird_courses";
 	public static final String LAST_ACCESS_TIME_GAP = "last.access.time.gap.millis";
+	public static final String SEND_INCOMPLETE_COURSES_ALERT = "send.incomplete.courses.alert";
+	public static final String SEND_LATEST_COURSES_ALERT = "send.latest.courses.alert";
+	public static final String GET_USER_EMAIL_LIST_FROM_ES = "get.user.email.list.from.es";
 	public static final String USER_CONTENT_CONSUMPTION = "user_content_consumption";
 	public static final String NOTIFICATION_UTIL = "notificationUtil";
 	public static final String NOTIFICATIONS = "notifications";
@@ -454,6 +457,7 @@ public class Constants {
 	public static final String ASSESSMENT_ID_KEY = "assessmentId";
 	public static final String USER_ASSESS_SUBMIT_REQ = "user_assess_submit_req";
 	public static final String SEARCH_FIELDS = "search.fields";
+	public static final String EMAIL_SEARCH_FIELDS = "email.search.fields";
 	public static final String NEW_COURSES_MAIL_SUBJECT = "Check out exciting new courses that launched this week!";
 	public static final String _DESCRIPTION = "_description";
 	public static final String NEW_COURSES = "newcourses";
@@ -505,6 +509,9 @@ public class Constants {
 	public static final String FAILED_TO_COMMUNICATE_WITH_THE_DB_TO_GET_THE_ASSESSMENT_START_TIME = "Failed to communicate with the db to get the assessment start time";
 	public static final String ERROR_FETCHING_THE_READ_ASSESSMENT_DETAILS_FROM_THE_REDIS_CACHE_WRONG_ASSESSMENT_ID = "Error fetching the read assessment details from the redis cache/Wrong Assessment Id";
 	public static final String HTTP_STATUS_CODE = "httpStatusCode";
+	public static final String SB_URL = "sb.service.url";
+	public static final String USER_SEARCH_END_POINT = "sunbird.user.search.endpoint";
+
 	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}
