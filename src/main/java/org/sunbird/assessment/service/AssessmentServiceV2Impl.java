@@ -300,7 +300,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
 									assessUtilServ.validateQumlAssessment(questionsListFromAssessmentHierarchy,
 											questionsListFromSubmitRequest)));
 							outgoingResponse.getResult().putAll(calculateAssessmentFinalResults(result));
-							writeDataToDatabaseAndTriggerKafkaEvent(submitRequest, userId, existingDataList, result);
+							writeDataToDatabaseAndTriggerKafkaEvent(submitRequest, userId, existingDataList, result, (String) allHierarchy.get(Constants.PRIMARY_CATEGORY));
 							return outgoingResponse;
 						}
 						case Constants.SECTION_LEVEL_SCORE_CUTOFF: {
@@ -352,10 +352,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
 					&& scoreCutOffType.equalsIgnoreCase(Constants.SECTION_LEVEL_SCORE_CUTOFF)) {
 				Map<String, Object> result = calculateSectionFinalResults(sectionLevelsResults);
 				outgoingResponse.getResult().putAll(result);
-				if (!((String) (allHierarchy.get(Constants.PRIMARY_CATEGORY)))
-						.equalsIgnoreCase(Constants.PRACTICE_QUESTION_SET)) {
-					writeDataToDatabaseAndTriggerKafkaEvent(submitRequest, userId, existingDataList, result);
-				}
+				writeDataToDatabaseAndTriggerKafkaEvent(submitRequest, userId, existingDataList, result, (String) allHierarchy.get(Constants.PRIMARY_CATEGORY));
 				return outgoingResponse;
 			}
 		}
@@ -368,7 +365,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
 	}
 
 	private void writeDataToDatabaseAndTriggerKafkaEvent(Map<String, Object> submitRequest, String userId,
-			List<Map<String, Object>> existingDataList, Map<String, Object> result) {
+														 List<Map<String, Object>> existingDataList, Map<String, Object> result, String primaryCategory) {
 		Date startTime = (!existingDataList.isEmpty()) ? (Date) existingDataList.get(0).get(Constants.START_TIME)
 				: null;
 		Boolean isAssessmentUpdatedToDB = assessmentRepository.updateUserAssesmentDataToDB(userId,
@@ -381,6 +378,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
 			kafkaResult.put(Constants.BATCH_ID, submitRequest.get(Constants.BATCH_ID));
 			kafkaResult.put(Constants.USER_ID, submitRequest.get(Constants.USER_ID));
 			kafkaResult.put(Constants.ASSESSMENT_ID_KEY, submitRequest.get(Constants.IDENTIFIER));
+			kafkaResult.put(Constants.PRIMARY_CATEGORY, primaryCategory);
 			kafkaProducer.push(serverProperties.getUserAssessmentSubmitTopic(), kafkaResult);
 		}
 	}
