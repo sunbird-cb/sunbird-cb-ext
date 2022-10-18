@@ -1,9 +1,11 @@
 package org.sunbird.common.util;
 
+import org.codehaus.plexus.util.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 @Component
@@ -1473,7 +1475,11 @@ public class CbExtServerProperties {
 	}
 
 	public List<String> getLatestCoursesAlertUserEmailList() {
-		return Arrays.asList(latestCoursesAlertUserEmailList.split(",", -1));
+		if (StringUtils.isNotBlank(latestCoursesAlertUserEmailList)) {
+			return Arrays.asList(latestCoursesAlertUserEmailList.split(",", -1));
+		} else {
+			return Collections.emptyList();
+		}
 	}
 
 	public void setLatestCoursesAlertUserEmailList(String latestCoursesAlertUserEmailList) {
