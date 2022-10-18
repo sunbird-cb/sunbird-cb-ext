@@ -1,34 +1,26 @@
 package org.sunbird.course.service;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.sunbird.cassandra.utils.CassandraOperation;
 import org.sunbird.common.helper.cassandra.ServiceFactory;
+import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.common.util.NotificationUtil;
-import org.sunbird.common.util.PropertiesCache;
 import org.sunbird.core.logger.CbExtLogger;
 import org.sunbird.course.model.CourseDetails;
 import org.sunbird.course.model.IncompleteCourses;
 import org.sunbird.course.model.UserCourseProgressDetails;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
+import java.io.IOException;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 @Service
 public class CourseReminderNotificationService {
@@ -37,28 +29,39 @@ public class CourseReminderNotificationService {
 	private Map<String, CourseDetails> courseIdAndCourseNameMap = new HashMap<>();
 
 	@Autowired
-	private NotificationUtil notificationUtil;
+	CbExtServerProperties serverProperties;
+
+	@Autowired
+	NotificationUtil notificationUtil;
 
 	public void initiateCourseReminderEmail() {
-		try {
-			Date date = new Date(new Date().getTime()
-					- Integer.parseInt(PropertiesCache.getInstance().getProperty(Constants.LAST_ACCESS_TIME_GAP)));
-			List<Map<String, Object>> userCoursesList = cassandraOperation.searchByWhereClause(
-					Constants.SUNBIRD_COURSES_KEY_SPACE_NAME, Constants.USER_CONTENT_CONSUMPTION,
-					Constants.COURSE_REMINDER_EMAIL_FIELDS, date);
-			if (!CollectionUtils.isEmpty(userCoursesList)) {
-				fetchCourseIdsAndSetCourseNameAndThumbnail(userCoursesList);
-				Map<String, UserCourseProgressDetails> userCourseMap = new HashMap<>();
-				setUserCourseMap(userCoursesList, userCourseMap);
-				getAndSetUserEmail(userCourseMap);
-				for (Map.Entry<String, UserCourseProgressDetails> userCourseProgressDetailsEntry : userCourseMap
-						.entrySet()) {
-					sendIncompleteCourseEmail(userCourseProgressDetailsEntry);
+		logger.info("CourseReminderNotificationService:: initiateCourseReminderEmail: Started");
+		long duration = 0;
+		if (serverProperties.isIncompleteCoursesAlertEnabled()) {
+			long startTime = System.currentTimeMillis();
+			try {
+				Date date = new Date(new Date().getTime() - serverProperties.getIncompleteCoursesLastAccessTime());
+				List<Map<String, Object>> userCoursesList = cassandraOperation.searchByWhereClause(
+						Constants.SUNBIRD_COURSES_KEY_SPACE_NAME, Constants.USER_CONTENT_CONSUMPTION,
+						Constants.COURSE_REMINDER_EMAIL_FIELDS, date);
+				if (!CollectionUtils.isEmpty(userCoursesList)) {
+					fetchCourseIdsAndSetCourseNameAndThumbnail(userCoursesList);
+					Map<String, UserCourseProgressDetails> userCourseMap = new HashMap<>();
+					setUserCourseMap(userCoursesList, userCourseMap);
+					getAndSetUserEmail(userCourseMap);
+					for (Map.Entry<String, UserCourseProgressDetails> userCourseProgressDetailsEntry : userCourseMap
+							.entrySet()) {
+						sendIncompleteCourseEmail(userCourseProgressDetailsEntry);
+					}
 				}
+			} catch (Exception e) {
+				logger.error(String.format("Error in the scheduler to send User Progress emails %s", e.getMessage()),
+						e);
 			}
-		} catch (Exception e) {
-			logger.error(String.format("Error in the scheduler to send User Progress emails %s", e.getMessage()), e);
+			duration = System.currentTimeMillis() - startTime;
 		}
+		logger.info("CourseReminderNotificationService:: initiateCourseReminderEmail: Completed. Time taken: "
+				+ duration + " milli-seconds");
 	}
 
 	private void sendIncompleteCourseEmail(
@@ -79,11 +82,14 @@ public class CourseReminderNotificationService {
 					params.put(courseId + Constants._DURATION, String.valueOf(userCourseProgressDetailsEntry.getValue()
 							.getIncompleteCourses().get(i).getCompletionPercentage()));
 				}
-				notificationUtil.sendNotification(
-						Collections.singletonList(userCourseProgressDetailsEntry.getValue().getEmail()), params,
-						PropertiesCache.getInstance().getProperty(Constants.SENDER_MAIL),
-						PropertiesCache.getInstance().getProperty(Constants.NOTIFICATION_HOST)
-								+ PropertiesCache.getInstance().getProperty(Constants.NOTIFICATION_ENDPOINT));
+				CompletableFuture.runAsync(() -> {
+					notificationUtil.sendNotification(
+							Collections.singletonList(userCourseProgressDetailsEntry.getValue().getEmail()), params,
+							serverProperties.getSenderEmailAddress(),
+							serverProperties.getNotificationServiceHost()
+									+ serverProperties.getNotificationEventEndpoint(),
+							Constants.INCOMPLETE_COURSES, Constants.INCOMPLETE_COURSES_MAIL_SUBJECT);
+				});
 			}
 		} catch (Exception e) {
 			logger.info(String.format("Error in the incomplete courses email module %s", e.getMessage()));
@@ -109,19 +115,16 @@ public class CourseReminderNotificationService {
 		for (Map<String, Object> courseData : coursesDataList) {
 			if (courseData.get(Constants.IDENTIFIER) != null && courseData.get(Constants.HIERARCHY) != null
 					&& courseIdAndCourseNameMap.get(courseData.get(Constants.IDENTIFIER)) == null) {
-				if (courseData.get(Constants.IDENTIFIER) != null && courseData.get(Constants.HIERARCHY) != null
-						&& courseIdAndCourseNameMap.get(courseData.get(Constants.IDENTIFIER)) == null) {
-					String hierarchy = courseData.get(Constants.HIERARCHY).toString();
-					Map<String, Object> courseDataMap = new Gson().fromJson(hierarchy, Map.class);
-					CourseDetails courseDetail = new CourseDetails();
-					if (courseDataMap.get(Constants.NAME) != null) {
-						courseDetail.setCourseName((String) courseDataMap.get(Constants.NAME));
-					}
-					if (courseDataMap.get(Constants.POSTER_IMAGE) != null) {
-						courseDetail.setThumbnail((String) courseDataMap.get(Constants.POSTER_IMAGE));
-					}
-					courseIdAndCourseNameMap.put((String) courseData.get(Constants.IDENTIFIER), courseDetail);
+				String hierarchy = (String) courseData.get(Constants.HIERARCHY);
+				Map<String, Object> courseDataMap = new Gson().fromJson(hierarchy, Map.class);
+				CourseDetails courseDetail = new CourseDetails();
+				if (courseDataMap.get(Constants.NAME) != null) {
+					courseDetail.setCourseName((String) courseDataMap.get(Constants.NAME));
 				}
+				if (courseDataMap.get(Constants.POSTER_IMAGE) != null) {
+					courseDetail.setThumbnail((String) courseDataMap.get(Constants.POSTER_IMAGE));
+				}
+				courseIdAndCourseNameMap.put((String) courseData.get(Constants.IDENTIFIER), courseDetail);
 			}
 		}
 	}
@@ -132,9 +135,7 @@ public class CourseReminderNotificationService {
 		propertyMap.put(Constants.ID, userIds);
 		propertyMap.put(Constants.IS_DELETED, Boolean.FALSE);
 		propertyMap.put(Constants.STATUS, 1);
-		List<Map<String, Object>> userDetails = cassandraOperation.getRecordsByProperties(
-				Constants.SUNBIRD_KEY_SPACE_NAME, Constants.TABLE_USER, propertyMap,
-				Arrays.asList(Constants.ID, Constants.PROFILE_DETAILS_KEY));
+
 		List<Map<String, Object>> excludeEmails = cassandraOperation.getRecordsByProperties(
 				Constants.SUNBIRD_KEY_SPACE_NAME, Constants.EXCLUDE_USER_EMAILS, null,
 				Collections.singletonList(Constants.EMAIL));
@@ -142,19 +143,22 @@ public class CourseReminderNotificationService {
 		List<Object> excludeEmailsList = excludeEmails.stream()
 				.flatMap(x -> desiredKeys.stream().filter(x::containsKey).map(x::get)).collect(Collectors.toList());
 
+		List<Map<String, Object>> userDetails = cassandraOperation.getRecordsByProperties(
+				Constants.SUNBIRD_KEY_SPACE_NAME, Constants.TABLE_USER, propertyMap,
+				Arrays.asList(Constants.ID, Constants.PROFILE_DETAILS_KEY));
 		for (Map<String, Object> userDetail : userDetails) {
-			String profileDetails;
 			try {
-				if (userDetail.get(Constants.PROFILE_DETAILS_KEY) != null
-						&& userCourseMap.get(userDetail.get(Constants.ID)) != null) {
-					profileDetails = (String) userDetail.get(Constants.PROFILE_DETAILS_KEY);
-					HashMap<String, Object> hashMap = new ObjectMapper().readValue(profileDetails, HashMap.class);
-					HashMap<String, Object> personalDetailsMap = (HashMap<String, Object>) hashMap
+				if (userDetail.get(Constants.PROFILE_DETAILS_KEY) != null) {
+					String profileDetails = (String) userDetail.get(Constants.PROFILE_DETAILS_KEY);
+					HashMap<String, Object> profileDetailsMap = new ObjectMapper().readValue(profileDetails,
+							HashMap.class);
+					HashMap<String, Object> personalDetailsMap = (HashMap<String, Object>) profileDetailsMap
 							.get(Constants.PERSONAL_DETAILS);
-					if (personalDetailsMap.get(Constants.PRIMARY_EMAIL) != null
-							&& !excludeEmailsList.contains((String) personalDetailsMap.get(Constants.PRIMARY_EMAIL))) {
-						userCourseMap.get(userDetail.get(Constants.ID))
-								.setEmail((String) personalDetailsMap.get(Constants.PRIMARY_EMAIL));
+					if (MapUtils.isNotEmpty(personalDetailsMap)) {
+						String email = (String) personalDetailsMap.get(Constants.PRIMARY_EMAIL);
+						if (StringUtils.isNotBlank(email) && !excludeEmailsList.contains(email)) {
+							userCourseMap.get(userDetail.get(Constants.ID)).setEmail(email);
+						}
 					}
 				}
 			} catch (Exception e) {
@@ -179,15 +183,14 @@ public class CourseReminderNotificationService {
 					i.setLastAccessedDate((Date) userCourse.get(Constants.LAST_ACCESS_TIME));
 					i.setBatchId(batchId);
 					i.setThumbnail(courseIdAndCourseNameMap.get(courseId).getThumbnail());
-					i.setCourseUrl(PropertiesCache.getInstance().getProperty(Constants.COURSE_URL) + courseId
-							+ PropertiesCache.getInstance().getProperty(Constants.OVERVIEW_BATCH_ID) + batchId);
+					i.setCourseUrl(
+							serverProperties.getCourseLinkUrl() + courseId + Constants.OVERVIEW_BATCH_KEY + batchId);
 					if (userCourseMap.get(userid) != null) {
-						if (userCourseMap.get(userid).getIncompleteCourses().size() < 3) {
-							userCourseMap.get(userid).getIncompleteCourses().add(i);
-							if (userCourseMap.get(userid).getIncompleteCourses().size() == 3) {
-								userCourseMap.get(userid).getIncompleteCourses()
-										.sort(Comparator.comparing(IncompleteCourses::getLastAccessedDate).reversed());
-							}
+						UserCourseProgressDetails userCourseProgress = userCourseMap.get(userid);
+						if (userCourseProgress.getIncompleteCourses().size() < 3) {
+							userCourseProgress.getIncompleteCourses().add(i);
+							userCourseProgress.getIncompleteCourses()
+									.sort(Comparator.comparing(IncompleteCourses::getLastAccessedDate).reversed());
 						}
 					} else {
 						UserCourseProgressDetails user = new UserCourseProgressDetails();
