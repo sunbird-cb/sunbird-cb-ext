@@ -185,7 +185,7 @@ public class CbExtServerProperties {
 
 	@Value("${cloud.storage.secret}")
 	private String cloudStorageSecret;
-	
+
 	@Value("${cloud.storage.cephs3.endpoint}")
 	private String cloudStorageCephs3Endpoint;
 
@@ -323,25 +323,25 @@ public class CbExtServerProperties {
 
 	@Value("${sb.org.create.path}")
 	private String lmsOrgCreatePath;
-	
+
 	@Value("${es.user.auto.complete.search.fields}")
 	private String esAutoCompleteSearchFields;
 
 	@Value("${es.user.auto.complete.include.fields}")
 	private String esAutoCompleteIncludeFields;
 
-    @Value("${sb.service.user.migrate.path}")
+	@Value("${sb.service.user.migrate.path}")
 	private String lmsUserMigratePath;
 
-    @Value("${km.base.composite.search.fields}")
+	@Value("${km.base.composite.search.fields}")
 	private String kmCompositeSearchFields;
-	
+
 	@Value("${km.base.composite.search.filters.primaryCategory}")
 	private String kmCompositeSearchPrimaryCategoryFilters;
 
 	@Value("${sb.data.sync.path}")
 	private String lmsDataSyncPath;
-	
+
 	@Value("${sb.es.host}")
 	private String sbEsHost;
 
@@ -353,31 +353,82 @@ public class CbExtServerProperties {
 
 	@Value("${sb.es.password}")
 	private String sbEsPassword;
-	
+
 	@Value("${km.base.content.search}")
 	private String kmBaseContentSearch;
-	
+
 	@Value("${sb.es.user.profile.index}")
 	private String sbEsUserProfileIndex;
-	
+
 	@Value("${sb.service.signup.user}")
 	private String lmsUserSignUpPath;
 
 	@Value("${user.bulk.upload.status.fields}")
 	private String bulkUploadStatusFields;
-	
+
 	@Value("${user.bulk.upload.container.name}")
 	private String bulkUploadContainerName;
-	
+
 	@Value("${user.bulk.upload.email.template}")
 	private String bulkUploadEmailTemplate;
-	
+
 	@Value("${user.bulk.upload.email.notification.list}")
 	private String bulkUploadEmailNotificationList;
-	
+
 	@Value("${user.bulk.upload.email.notification.subject}")
 	private String bulkUploadEmailNotificationSubject;
-	
+
+	@Value("${incomplete.course.alert.message.key}")
+	private String incompleteCourseAlertMessageKey;
+
+	@Value("${latest.course.alert.message.key}")
+	private String latestCourseAlertMessageKey;
+
+	@Value("${incomplete.courses.alert.enabled}")
+	private boolean incompleteCoursesAlertEnabled;
+
+	@Value("${incomplete.courses.alert.last.access.time.mills}")
+	private long incompleteCoursesLastAccessTime;
+
+	@Value("${latest.courses.alert.enabled}")
+	private boolean latestCoursesAlertEnabled;
+
+	@Value("${latest.courses.alert.user.email.list}")
+	private String latestCoursesAlertUserEmailList;
+
+	@Value("${latest.courses.alert.email.subject}")
+	private String latestCoursesAlertEmailSubject;
+
+	@Value("${latest.courses.alert.scheduler.time.gap}")
+	private long latestCoursesAlertSchedulerTimeGap;
+
+	@Value("${latest.courses.alert.content.limit}")
+	private int latestCoursesAlertContentLimit;
+
+	@Value("${latest.courses.alert.search.user.fields}")
+	private String latestCoursesAlertSearchUserFields;
+
+	@Value("${latest.courses.alert.search.content.fields}")
+	private String latestCoursesAlertSearchContentFields;
+
+	@Value("${latest.courses.alert.send.to.all.user}")
+	private boolean latestCoursesAlertSendToAllUser;
+
+	@Value("${latest.courses.alert.content.min.limit}")
+	private int latestCoursesAlertContentMinLimit;
+
+	@Value("${sender.mail}")
+	private String senderEmailAddress;
+
+	@Value("${notification.service.host}")
+	private String notificationServiceHost;
+
+	@Value("${notification.event.endpoint}")
+	private String notificationEventEndpoint;
+
+	@Value("${course.url}")
+	private String courseLinkUrl;
+
 	public String getUserAssessmentSubmissionDuration() {
 		return userAssessmentSubmissionDuration;
 	}
@@ -1254,7 +1305,7 @@ public class CbExtServerProperties {
 	}
 
 	public List<String> getKmCompositeSearchFields() {
-			return Arrays.asList(kmCompositeSearchFields.split(",", -1));
+		return Arrays.asList(kmCompositeSearchFields.split(",", -1));
 	}
 
 	public void setKmCompositeSearchFields(String kmCompositeSearchFields) {
@@ -1332,7 +1383,7 @@ public class CbExtServerProperties {
 	public void setSbEsUserProfileIndex(String sbEsUserProfileIndex) {
 		this.sbEsUserProfileIndex = sbEsUserProfileIndex;
 	}
-	
+
 	public String getLmsUserSignUpPath() {
 		return lmsUserSignUpPath;
 	}
@@ -1379,5 +1430,141 @@ public class CbExtServerProperties {
 
 	public void setBulkUploadEmailNotificationSubject(String bulkUploadEmailNotificationSubject) {
 		this.bulkUploadEmailNotificationSubject = bulkUploadEmailNotificationSubject;
+	}
+
+	public String getIncompleteCourseAlertMessageKey() {
+		return incompleteCourseAlertMessageKey;
+	}
+
+	public void setIncompleteCourseAlertMessageKey(String incompleteCourseAlertMessageKey) {
+		this.incompleteCourseAlertMessageKey = incompleteCourseAlertMessageKey;
+	}
+
+	public String getLatestCourseAlertMessageKey() {
+		return latestCourseAlertMessageKey;
+	}
+
+	public void setLatestCourseAlertMessageKey(String latestCourseAlertMessageKey) {
+		this.latestCourseAlertMessageKey = latestCourseAlertMessageKey;
+	}
+
+	public boolean isIncompleteCoursesAlertEnabled() {
+		return incompleteCoursesAlertEnabled;
+	}
+
+	public void setIncompleteCoursesAlertEnabled(boolean incompleteCoursesAlertEnabled) {
+		this.incompleteCoursesAlertEnabled = incompleteCoursesAlertEnabled;
+	}
+
+	public long getIncompleteCoursesLastAccessTime() {
+		return incompleteCoursesLastAccessTime;
+	}
+
+	public void setIncompleteCoursesLastAccessTime(long incompleteCoursesLastAccessTime) {
+		this.incompleteCoursesLastAccessTime = incompleteCoursesLastAccessTime;
+	}
+
+	public boolean isLatestCoursesAlertEnabled() {
+		return latestCoursesAlertEnabled;
+	}
+
+	public void setLatestCoursesAlertEnabled(boolean latestCoursesAlertEnabled) {
+		this.latestCoursesAlertEnabled = latestCoursesAlertEnabled;
+	}
+
+	public List<String> getLatestCoursesAlertUserEmailList() {
+		return Arrays.asList(latestCoursesAlertUserEmailList.split(",", -1));
+	}
+
+	public void setLatestCoursesAlertUserEmailList(String latestCoursesAlertUserEmailList) {
+		this.latestCoursesAlertUserEmailList = latestCoursesAlertUserEmailList;
+	}
+
+	public String getLatestCoursesAlertEmailSubject() {
+		return latestCoursesAlertEmailSubject;
+	}
+
+	public void setLatestCoursesAlertEmailSubject(String latestCoursesAlertEmailSubject) {
+		this.latestCoursesAlertEmailSubject = latestCoursesAlertEmailSubject;
+	}
+
+	public long getLatestCoursesAlertSchedulerTimeGap() {
+		return latestCoursesAlertSchedulerTimeGap;
+	}
+
+	public void setLatestCoursesAlertSchedulerTimeGap(long latestCoursesAlertSchedulerTimeGap) {
+		this.latestCoursesAlertSchedulerTimeGap = latestCoursesAlertSchedulerTimeGap;
+	}
+
+	public int getLatestCoursesAlertContentLimit() {
+		return latestCoursesAlertContentLimit;
+	}
+
+	public void setLatestCoursesAlertContentLimit(int latestCoursesAlertContentLimit) {
+		this.latestCoursesAlertContentLimit = latestCoursesAlertContentLimit;
+	}
+
+	public List<String> getLatestCoursesAlertSearchUserFields() {
+		return Arrays.asList(latestCoursesAlertSearchUserFields.split(",", -1));
+	}
+
+	public void setLatestCoursesAlertSearchUserFields(String latestCoursesAlertSearchUserFields) {
+		this.latestCoursesAlertSearchUserFields = latestCoursesAlertSearchUserFields;
+	}
+
+	public List<String> getLatestCoursesAlertSearchContentFields() {
+		return Arrays.asList(latestCoursesAlertSearchContentFields.split(",", -1));
+	}
+
+	public void setLatestCoursesAlertSearchContentFields(String latestCoursesAlertSearchContentFields) {
+		this.latestCoursesAlertSearchContentFields = latestCoursesAlertSearchContentFields;
+	}
+
+	public boolean isLatestCoursesAlertSendToAllUser() {
+		return latestCoursesAlertSendToAllUser;
+	}
+
+	public void setLatestCoursesAlertSendToAllUser(boolean latestCoursesAlertSendToAllUser) {
+		this.latestCoursesAlertSendToAllUser = latestCoursesAlertSendToAllUser;
+	}
+
+	public int getLatestCoursesAlertContentMinLimit() {
+		return latestCoursesAlertContentMinLimit;
+	}
+
+	public void setLatestCoursesAlertContentMinLimit(int latestCoursesAlertContentMinLimit) {
+		this.latestCoursesAlertContentMinLimit = latestCoursesAlertContentMinLimit;
+	}
+
+	public String getSenderEmailAddress() {
+		return senderEmailAddress;
+	}
+
+	public void setSenderEmailAddress(String senderEmailAddress) {
+		this.senderEmailAddress = senderEmailAddress;
+	}
+
+	public String getNotificationServiceHost() {
+		return notificationServiceHost;
+	}
+
+	public void setNotificationServiceHost(String notificationServiceHost) {
+		this.notificationServiceHost = notificationServiceHost;
+	}
+
+	public String getNotificationEventEndpoint() {
+		return notificationEventEndpoint;
+	}
+
+	public void setNotificationEventEndpoint(String notificationEventEndpoint) {
+		this.notificationEventEndpoint = notificationEventEndpoint;
+	}
+
+	public String getCourseLinkUrl() {
+		return courseLinkUrl;
+	}
+
+	public void setCourseLinkUrl(String courseLinkUrl) {
+		this.courseLinkUrl = courseLinkUrl;
 	}
 }

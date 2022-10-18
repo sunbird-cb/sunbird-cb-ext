@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
@@ -93,4 +95,28 @@ public class ProjectUtil {
         PATCH
     }
 
+    public static String convertSecondsToHrsAndMinutes(int seconds) {
+        String time = "";
+        if (seconds > 60) {
+            int min = (seconds / 60) % 60;
+            int hours = (seconds / 60) / 60;
+            String minutes = (min < 10) ? "0" + min : Integer.toString(min);
+            String strHours = (hours < 10) ? "0" + hours : Integer.toString(hours);
+            if (min > 0 && hours > 0)
+                time = strHours + "h " + minutes + "m";
+            else if (min == 0 && hours > 0)
+                time = strHours + "h";
+            else if (min > 0) {
+                time = minutes + "m";
+            }
+        }
+        return time;
+    }
+    
+    public static String firstLetterCapitalWithSingleSpace(final String words) {
+        return Stream.of(words.trim().split("\\s"))
+                .filter(word -> word.length() > 0)
+                .map(word -> word.substring(0, 1).toUpperCase() + word.substring(1))
+                .collect(Collectors.joining(" "));
+    }
 }

@@ -358,7 +358,6 @@ public class Constants {
 	public static final String POSTER_IMAGE = "posterImage";
 
 	public static final String COURSE_URL = "course.url";
-	public static final String OVERVIEW_BATCH_ID = "overview.batch";
 	public static final String SENDER_MAIL = "sender.mail";
 	public static final String CASSANDRA_CONFIG_HOST = "cassandra.config.host";
 	public static final String OBJECT_TYPE = "objectType";
@@ -493,7 +492,7 @@ public class Constants {
 	public static final String USER_ROLES = "userRoles";
 	public static final String X_AUTH_USER_ID = "x-authenticated-userid";
 	public static final String SOFT_DELETE_OLD_ORG = "softDeleteOldOrg";
-	public static final String NOTIFY_MIGRATION = "notifyMigration";	
+	public static final String NOTIFY_MIGRATION = "notifyMigration";
 	public static final String FORCE_MIGRATION = "forceMigration";
 	public static final String PROFILE_DETAILS_LOWER = "profiledetails";
 	public static final String EMPLOYMENT_DETAILS = "employmentDetails";
@@ -502,7 +501,7 @@ public class Constants {
 	public static final String OPERATION_TYPE = "operationType";
 	public static final String SYNC = "sync";
 	public static final String OBJECT_IDS = "objectIds";
-	public static final String USER = "user";	
+	public static final String USER = "user";
 	public static final String PUBLIC_COURSE_LIST = "exploreOpenCourseList";
 	public static final String LAST_UPDATED_ON = "lastUpdatedOn";
 	public static final String DESCENDING_ORDER = "desc";
@@ -520,7 +519,18 @@ public class Constants {
 	public static final List<String> COURSE_REMINDER_EMAIL_FIELDS = Arrays.asList(RATINGS_USER_ID, BATCH_ID_COLUMN,
 			COURSE_ID_COLUMN, COMPLETION_PERCENTAGE_COLUMN, LAST_ACCESS_TIME);
 	public static final String BATCHES = "batches";
-  
+	public static final String NO_OF_COURSES = "noOfCourses";
+	public static final String _DESCRIPTION = "_description";
+	public static final String EMAIL_TYPE = "emailtype";
+	public static final String NEW_COURSES_EMAIL = "New Courses Email";
+	public static final String EMAIL_RECORD_TABLE = "email_record";
+	public static final String LAST_SENT_DATE = "lastsentdate";
+	public static final String MIN = "min";
+	public static final String MAX = "max";
+	public static final String CONTENT_TYPE_SEARCH = "contentType";
+	public static final String NEW_COURSES = "newcourses";
+	public static final String OVERVIEW_BATCH_KEY = "/overview?batchId=";
+
 	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}
