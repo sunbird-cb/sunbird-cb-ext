@@ -128,7 +128,6 @@ public class AssessmentController {
 	/**
 	 * 
 	 * @param assessmentIdentifier
-	 * @param rootOrg
 	 * @return
 	 * @throws Exception
 	 */

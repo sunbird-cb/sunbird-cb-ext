@@ -20,7 +20,8 @@ public class PropertiesCache {
     private final String[] fileName = {
             "cassandra.config.properties",
             "cassandratablecolumn.properties",
-            "application.properties"
+            "application.properties",
+            "customerror.properties"
     };
     private final Properties configProp = new Properties();
 
@@ -72,4 +73,11 @@ public class PropertiesCache {
         if (StringUtils.isNotBlank(value)) return value;
         return configProp.getProperty(key);
     }
+    
+	public String readCustomError(String key) {
+		if (StringUtils.isNoneBlank(key)) {
+			key = key.replace(" ", "_");
+		}
+		return readProperty(key);
+	}
 }

@@ -194,9 +194,15 @@ public class CbExtServerProperties {
 
 	@Value("${redis.port}")
 	private String redisPort;
+	
+	@Value("${redis.connection.timeout}")
+	private int redisConnectionTimeout;
+	
+	@Value("${redis.read.timeout}")
+	private int redisReadTimeout;
 
-	@Value("${redis.timeout}")
-	private String redisTimeout;
+	@Value("${redis.ttl.timeout}")
+	private String redisTTLTimeout;
 
 	@Value("${kafka.topics.userutility.telemetry.event}")
 	private String userUtilityTopic;
@@ -368,7 +374,7 @@ public class CbExtServerProperties {
 	
 	@Value("${user.bulk.upload.container.name}")
 	private String bulkUploadContainerName;
-	
+
 	@Value("${kafka.topics.user.assessment.submit}")
 	private String userAssessmentSubmitTopic;
 	
@@ -377,6 +383,18 @@ public class CbExtServerProperties {
 	
 	@Value("${latestCourseAlertEmailKey}")
 	private String latestCourseAlertEmailKey;
+
+	@Value("${assessment.use.redis}")
+	private boolean assessmentUseRedisCache;
+
+	@Value("${user.bulk.upload.email.template}")
+	private String bulkUploadEmailTemplate;
+	
+	@Value("${user.bulk.upload.email.notification.list}")
+	private String bulkUploadEmailNotificationList;
+	
+	@Value("${user.bulk.upload.email.notification.subject}")
+	private String bulkUploadEmailNotificationSubject;
 	
 	public String getUserAssessmentSubmissionDuration() {
 		return userAssessmentSubmissionDuration;
@@ -714,12 +732,28 @@ public class CbExtServerProperties {
 		this.redisHostName = redisHostName;
 	}
 
-	public String getRedisTimeout() {
-		return redisTimeout;
+	public int getRedisConnectionTimeout() {
+		return redisConnectionTimeout;
 	}
 
-	public void setRedisTimeout(String redisTimeout) {
-		this.redisTimeout = redisTimeout;
+	public void setRedisConnectionTimeout(int redisConnectionTimeout) {
+		this.redisConnectionTimeout = redisConnectionTimeout;
+	}
+
+	public int getRedisReadTimeout() {
+		return redisReadTimeout;
+	}
+
+	public void setRedisReadTimeout(int redisReadTimeout) {
+		this.redisReadTimeout = redisReadTimeout;
+	}
+
+	public String getRedisTTLTimeout() {
+		return redisTTLTimeout;
+	}
+
+	public void setRedisTTLTimeout(String redisTTLTimeout) {
+		this.redisTTLTimeout = redisTTLTimeout;
 	}
 
 	@Override
@@ -1377,7 +1411,19 @@ public class CbExtServerProperties {
 		return latestCourseAlertEmailKey;
 	}
 
-	public void setLatestCourseAlertEmailKey(String latestCourseAlertEmailKey) {
-		this.latestCourseAlertEmailKey = latestCourseAlertEmailKey;
+	public boolean isAssessmentUseRedisCache() {
+		return assessmentUseRedisCache;
+	}
+
+	public String getBulkUploadEmailTemplate() {
+		return bulkUploadEmailTemplate;
+	}
+
+	public List<String> getBulkUploadEmailNotificationList() {
+		return Arrays.asList(bulkUploadEmailNotificationList.split(",", -1));
+	}
+
+	public String getBulkUploadEmailNotificationSubject() {
+		return bulkUploadEmailNotificationSubject;
 	}
 }

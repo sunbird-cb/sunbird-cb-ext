@@ -176,8 +176,6 @@ public class OutboundRequestHandlerServiceImpl {
 	}
 
 	public Map<String, Object> fetchResultUsingPatch(String uri, Object request, Map<String, String> headersValues) {
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
 		Map<String, Object> response = null;
 		try {
 			HttpHeaders headers = new HttpHeaders();
@@ -187,32 +185,33 @@ public class OutboundRequestHandlerServiceImpl {
 			headers.setContentType(MediaType.APPLICATION_JSON);
 			HttpEntity<Object> entity = new HttpEntity<>(request, headers);
 			if (log.isDebugEnabled()) {
-				try {
-					StringBuilder str = new StringBuilder(this.getClass().getCanonicalName()).append(".fetchResult")
-							.append(System.lineSeparator());
-					str.append("URI: ").append(uri).append(System.lineSeparator());
-					str.append("Request: ").append(mapper.writeValueAsString(request)).append(System.lineSeparator());
-					log.debug(str.toString());
-				} catch (JsonProcessingException je) {
-				}
+				logDetails(uri, request);
 			}
 			response = restTemplate.patchForObject(uri, entity, Map.class);
 			if (log.isDebugEnabled()) {
-				try {
-					StringBuilder str = new StringBuilder("Response: ");
-					str.append(mapper.writeValueAsString(response)).append(System.lineSeparator());
-					log.debug(str.toString());
-				} catch (JsonProcessingException je) {
-				}
+				logDetails(uri, response);
 			}
 		} catch (HttpClientErrorException e) {
 			try {
-				response = mapper.readValue(e.getResponseBodyAsString(), new TypeReference<HashMap<String, Object>>() {
-				});
+				response = (new ObjectMapper()).readValue(e.getResponseBodyAsString(),
+						new TypeReference<HashMap<String, Object>>() {
+						});
 			} catch (Exception e1) {
 			}
 			log.error("Error received: " + e.getResponseBodyAsString(), e);
 		}
 		return response;
+	}
+
+	private void logDetails(String uri, Object objectDetails) {
+		try {
+			StringBuilder str = new StringBuilder(this.getClass().getCanonicalName()).append(".fetchResult")
+					.append(System.lineSeparator());
+			str.append("URI: ").append(uri).append(System.lineSeparator());
+			str.append("Request/Response: ").append((new ObjectMapper()).writeValueAsString(objectDetails))
+					.append(System.lineSeparator());
+			log.debug(str.toString());
+		} catch (JsonProcessingException je) {
+		}
 	}
 }

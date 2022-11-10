@@ -1,24 +1,14 @@
 package org.sunbird.course.service;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.sunbird.cassandra.utils.CassandraOperation;
 import org.sunbird.common.helper.cassandra.ServiceFactory;
+import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.common.util.NotificationUtil;
 import org.sunbird.common.util.PropertiesCache;
@@ -27,8 +17,9 @@ import org.sunbird.course.model.CourseDetails;
 import org.sunbird.course.model.IncompleteCourses;
 import org.sunbird.course.model.UserCourseProgressDetails;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
+import java.io.IOException;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class CourseReminderNotificationService {
@@ -36,28 +27,27 @@ public class CourseReminderNotificationService {
 	private final CassandraOperation cassandraOperation = ServiceFactory.getInstance();
 	private Map<String, CourseDetails> courseIdAndCourseNameMap = new HashMap<>();
 
-	@Autowired
-	private NotificationUtil notificationUtil;
-
 	public void initiateCourseReminderEmail() {
-		try {
-			Date date = new Date(new Date().getTime()
-					- Integer.parseInt(PropertiesCache.getInstance().getProperty(Constants.LAST_ACCESS_TIME_GAP)));
-			List<Map<String, Object>> userCoursesList = cassandraOperation.searchByWhereClause(
-					Constants.SUNBIRD_COURSES_KEY_SPACE_NAME, Constants.USER_CONTENT_CONSUMPTION,
-					Constants.COURSE_REMINDER_EMAIL_FIELDS, date);
-			if (!CollectionUtils.isEmpty(userCoursesList)) {
-				fetchCourseIdsAndSetCourseNameAndThumbnail(userCoursesList);
-				Map<String, UserCourseProgressDetails> userCourseMap = new HashMap<>();
-				setUserCourseMap(userCoursesList, userCourseMap);
-				getAndSetUserEmail(userCourseMap);
-				for (Map.Entry<String, UserCourseProgressDetails> userCourseProgressDetailsEntry : userCourseMap
-						.entrySet()) {
-					sendIncompleteCourseEmail(userCourseProgressDetailsEntry);
+		if (Boolean.parseBoolean(PropertiesCache.getInstance().getProperty(Constants.SEND_INCOMPLETE_COURSES_ALERT))) {
+			try {
+				Date date = new Date(new Date().getTime()
+						- Integer.parseInt(PropertiesCache.getInstance().getProperty(Constants.LAST_ACCESS_TIME_GAP)));
+				List<Map<String, Object>> userCoursesList = cassandraOperation.searchByWhereClause(
+						Constants.SUNBIRD_COURSES_KEY_SPACE_NAME, Constants.USER_CONTENT_CONSUMPTION,
+						Constants.COURSE_REMINDER_EMAIL_FIELDS, date);
+				if (!CollectionUtils.isEmpty(userCoursesList)) {
+					fetchCourseIdsAndSetCourseNameAndThumbnail(userCoursesList);
+					Map<String, UserCourseProgressDetails> userCourseMap = new HashMap<>();
+					setUserCourseMap(userCoursesList, userCourseMap);
+					getAndSetUserEmail(userCourseMap);
+					for (Map.Entry<String, UserCourseProgressDetails> userCourseProgressDetailsEntry : userCourseMap
+							.entrySet()) {
+						sendIncompleteCourseEmail(userCourseProgressDetailsEntry);
+					}
 				}
+			} catch (Exception e) {
+				logger.error(String.format("Error in the scheduler to send User Progress emails %s", e.getMessage()), e);
 			}
-		} catch (Exception e) {
-			logger.error(String.format("Error in the scheduler to send User Progress emails %s", e.getMessage()), e);
 		}
 	}
 
@@ -79,7 +69,7 @@ public class CourseReminderNotificationService {
 					params.put(courseId + Constants._DURATION, String.valueOf(userCourseProgressDetailsEntry.getValue()
 							.getIncompleteCourses().get(i).getCompletionPercentage()));
 				}
-				notificationUtil.sendNotification(
+				new NotificationUtil().sendNotification(
 						Collections.singletonList(userCourseProgressDetailsEntry.getValue().getEmail()), params,
 						PropertiesCache.getInstance().getProperty(Constants.SENDER_MAIL),
 						PropertiesCache.getInstance().getProperty(Constants.NOTIFICATION_HOST)

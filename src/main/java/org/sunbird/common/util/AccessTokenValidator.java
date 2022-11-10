@@ -14,6 +14,7 @@ import java.util.Map;
 public class AccessTokenValidator {
     private static Logger logger = LoggerFactory.getLogger(AccessTokenValidator.class.getName());
     private static ObjectMapper mapper = new ObjectMapper();
+    private static PropertiesCache cache = PropertiesCache.getInstance();
 
     private static Map<String, Object> validateToken(String token) throws Exception {
         try {
@@ -65,8 +66,7 @@ public class AccessTokenValidator {
     }
 
     private static boolean checkIss(String iss) {
-        String realmUrl =
-                KeyCloakConnectionProvider.SSO_URL + "realms/" + KeyCloakConnectionProvider.SSO_REALM;
+        String realmUrl = cache.getProperty(Constants.SSO_URL) + "realms/" + cache.getProperty(Constants.SSO_REALM);
         return (realmUrl.equalsIgnoreCase(iss));
     }
 

@@ -35,6 +35,7 @@ import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.common.util.IndexerService;
 import org.sunbird.common.util.ProjectUtil;
+import org.sunbird.common.util.PropertiesCache;
 import org.sunbird.org.service.ExtendedOrgService;
 import org.sunbird.storage.service.StorageServiceImpl;
 import org.sunbird.user.service.UserUtilityServiceImpl;
@@ -154,10 +155,18 @@ public class ProfileServiceImpl implements ProfileService {
 					response.getResult().put(Constants.RESPONSE, Constants.SUCCESS);
 					response.getParams().setStatus(Constants.SUCCESS);
 				} else {
-					response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
-					response.getParams().setStatus(Constants.FAILED);
-					response.getParams().setErrmsg((String) ((Map<String, Object>)updateResponse.get(Constants.PARAMS)).get(Constants.ERROR_MESSAGE));
-					return response;
+					if (updateResponse.get(Constants.RESPONSE_CODE).equals(Constants.OK)) {
+						response.setResponseCode(HttpStatus.OK);
+						response.getResult().put(Constants.RESPONSE, Constants.SUCCESS);
+						response.getParams().setStatus(Constants.SUCCESS);
+					} else {
+						response.setResponseCode((HttpStatus) updateResponse.get(Constants.HTTP_STATUS_CODE));
+						response.getParams().setStatus(Constants.FAILED);
+						response.getParams()
+								.setErrmsg((String) ((Map<String, Object>) updateResponse.get(Constants.PARAMS))
+										.get(Constants.ERROR_MESSAGE));
+						return response;
+					}
 				}
 			}
 			List<String> transitionList = new ArrayList<>();
@@ -603,7 +612,7 @@ public class ProfileServiceImpl implements ProfileService {
 	}
 
 	@Override
-	public SBApiResponse bulkUpload(MultipartFile mFile, String orgId, String userId) {
+	public SBApiResponse bulkUpload(MultipartFile mFile, String orgId, String orgName, String userId) {
 		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_USER_BULK_UPLOAD);
 		try {
 			SBApiResponse uploadResponse = storageService.uploadFile(mFile, serverConfig.getBulkUploadContainerName());
@@ -635,6 +644,7 @@ public class ProfileServiceImpl implements ProfileService {
 			response.setResponseCode(HttpStatus.OK);
 			response.getResult().putAll(uploadedFile);
 
+			sendBulkUploadNotification(orgId, orgName, (String) uploadResponse.getResult().get(Constants.URL));
 		} catch (Exception e) {
 			setErrorData(response,
 					String.format("Failed to process user bulk upload request. Error: ", e.getMessage()));
@@ -1179,5 +1189,30 @@ public class ProfileServiceImpl implements ProfileService {
 		}
 
 		return strBuilder.toString();
+	}
+
+	private void sendBulkUploadNotification(String orgId, String orgName, String fileUrl) {
+		for (String email : serverConfig.getBulkUploadEmailNotificationList()) {
+			if (StringUtils.isBlank(email)) {
+				return;
+			}
+		}
+		Map<String, Object> request = new HashMap<>();
+		Map<String, Object> requestBody = new HashMap<String, Object>();
+		requestBody.put(Constants.BODY, Constants.HELLO);
+		requestBody.put(Constants.EMAIL_TEMPLATE_TYPE, serverConfig.getBulkUploadEmailTemplate());
+		requestBody.put(Constants.LINK, fileUrl);
+		requestBody.put(Constants.MODE, Constants.EMAIL);
+		requestBody.put(Constants.ORG_NAME, orgName);
+		requestBody.put(Constants.ORG_ID, orgId);
+		requestBody.put(Constants.RECIPIENT_EMAILS, serverConfig.getBulkUploadEmailNotificationList());
+		requestBody.put(Constants.SET_PASSWORD_LINK, true);
+		requestBody.put(Constants.SUBJECT, serverConfig.getBulkUploadEmailNotificationSubject());
+
+		request.put(Constants.REQUEST, requestBody);
+
+		outboundRequestHandlerService.fetchResultUsingPost(
+				serverConfig.getSbUrl() + serverConfig.getSbSendNotificationEmailPath(), request,
+				ProjectUtil.getDefaultHeaders());
 	}
 }
