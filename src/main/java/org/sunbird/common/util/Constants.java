@@ -218,7 +218,6 @@ public class Constants {
 	public static final String TABLE_USER_ASSESSMENT_TIME = "user_assessment_time";
 	public static final String SHA_256_WITH_RSA = "SHA256withRSA";
 	public static final String SUB = "sub";
-	public static final String _UNAUTHORIZED = "Unauthorized";
 	public static final String DOT_SEPARATOR = ".";
 	public static final String ACCESS_TOKEN_PUBLICKEY_BASEPATH = "accesstoken.publickey.basepath";
 	public static final String TABLE_ORG_AUDIT = "org_audit";
@@ -260,6 +259,7 @@ public class Constants {
 	public static final String PERSONAL_DETAILS = "personalDetails";
 	public static final String TRANSITION_DETAILS = "transitionDetails";
 	public static final String UNAUTHORIZED = "unauthorized";
+	public static final String UNAUTHORIZED_KEY = "Unauthorized";
 	// Redis
 	public static final String API_REDIS_DELETE = "api.redis.delete";
 	public static final String API_REDIS_GET_KEYS = "api.redis.get.keys";
@@ -530,6 +530,45 @@ public class Constants {
 	public static final String CONTENT_TYPE_SEARCH = "contentType";
 	public static final String NEW_COURSES = "newcourses";
 	public static final String OVERVIEW_BATCH_KEY = "/overview?batchId=";
+	public static final String PRACTICE_QUESTION_SET = "Practice Question Set";
+	public static final String EXPECTED_DURATION = "expectedDuration";
+	public static final String SUBMITTED = "SUBMITTED";
+	public static final String NOT_SUBMITTED = "NOT SUBMITTED";
+	public static final String END_TIME = "endtime";
+	public static final String ASSESSMENT_ID_KEY = "assessmentId";
+	public static final String START_TIME = "starttime";
+	public static final String CONTENT_ID_KEY = "contentId";
+	public static final String QUESTION_TYPE = "qType";
+	public static final String SELECTED_ANSWER = "selectedAnswer";
+	public static final String INDEX = "index";
+	public static final String MCQ_SCA = "mcq-sca";
+	public static final String MCQ_MCA = "mcq-mca";
+	public static final String FTB = "ftb";
+	public static final String MTF = "mtf";
+	public static final String IS_CORRECT = "isCorrect";
+	public static final String OPTION_ID = "optionId";
+	
+	public static final String TABLE_USER_ASSESSMENT_DATA = "user_assessment_data";
+
+
+	public static final String USER_ID_DOESNT_EXIST = "User Id doesn't exist! Please supply a valid auth token";
+	public static final String ASSESSMENT_DATA_START_TIME_NOT_UPDATED = "Assessment Data & Start Time not updated in the DB! Please check!";
+	public static final String ASSESSMENT_HIERARCHY_READ_FAILED = "Assessment hierarchy read failed, failed to process request";
+	public static final String ASSESSMENT_ID_KEY_IS_NOT_PRESENT_IS_EMPTY = "Assessment Id Key is not present/is empty";
+	public static final String IDENTIFIER_LIST_IS_EMPTY = "Identifier List is Empty";
+	public static final String THE_QUESTIONS_IDS_PROVIDED_DONT_MATCH = "The Questions Ids Provided don't match the active user assessment session";
+	public static final String ASSESSMENT_ID_INVALID_SESSION_EXPIRED = "Assessment Id Invalid/Session Expired/Redis Cache doesn't have this question list details";
+	public static final String INVALID_ASSESSMENT_ID = "Invalid Assessment Id";
+	public static final String READ_ASSESSMENT_FAILED = "Failed to read assessment hierarchy for the given AssessmentId.";
+	public static final String READ_ASSESSMENT_START_TIME_FAILED = "Failed to read the assessment start time.";
+	public static final String WRONG_SECTION_DETAILS = "Wrong section details.";
+	public static final String ASSESSMENT_SUBMIT_EXPIRED = "The Assessment submission time-period is over! Assessment can't be submitted";
+	public static final String ASSESSMENT_SUBMIT_INVALID_QUESTION = "The QuestionId provided don't match to the Assessment Read";
+	public static final String ASSESSMENT_SUBMIT_QUESTION_READ_FAILED = "Failed to read Question Set from DB";
+	
+
+	public static final String ASSESSMENT_READ_RESPONSE = "assessmentreadresponse";
+	public static final String API_SUBMIT_ASSESSMENT = "api.submit.asssessment";
 
 	private Constants() {
 		throw new IllegalStateException("Utility class");

@@ -28,9 +28,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.util.ObjectUtils;
 import org.springframework.web.client.RestTemplate;
-import org.sunbird.cache.RedisCacheMgr;
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.model.SunbirdApiRequest;
 import org.sunbird.common.model.SunbirdApiResp;
@@ -76,9 +74,6 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 
 	@Autowired
 	UserUtilityService userUtilityService;
-
-	@Autowired
-	RedisCacheMgr redisCacheMgr;
 
 	@Autowired
 	ExtendedOrgService extOrgService;
@@ -169,15 +164,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 		SBApiResponse response = createDefaultResponse(Constants.USER_REGISTRATION_DEPT_INFO_API);
 
 		try {
-			Map<String, List<DeptPublicInfo>> deptListMap = (Map<String, List<DeptPublicInfo>>) redisCacheMgr
-					.getCache(Constants.DEPARTMENT_LIST_CACHE_NAME);
-			List<DeptPublicInfo> orgList = null;
-			if (ObjectUtils.isEmpty(deptListMap)
-					|| CollectionUtils.isEmpty(deptListMap.get(Constants.DEPARTMENT_LIST_CACHE_NAME))) {
-				orgList = getDepartmentDetails();
-			} else {
-				orgList = deptListMap.get(Constants.DEPARTMENT_LIST_CACHE_NAME);
-			}
+			List<DeptPublicInfo> orgList = getDepartmentDetails();
 			response.getResult().put(Constants.COUNT, orgList.size());
 			response.getResult().put(Constants.CONTENT, orgList);
 		} catch (Exception e) {
@@ -488,9 +475,6 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 			throw new Exception("Failed to retrieve organisation details.");
 		}
 
-		Map<String, List<DeptPublicInfo>> deptListMap = new HashMap<String, List<DeptPublicInfo>>();
-		deptListMap.put(Constants.DEPARTMENT_LIST_CACHE_NAME, orgList);
-		redisCacheMgr.putCache(Constants.DEPARTMENT_LIST_CACHE_NAME, deptListMap);
 		return orgList;
 	}
 

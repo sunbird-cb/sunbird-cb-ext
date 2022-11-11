@@ -26,7 +26,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
-import org.sunbird.cache.RedisCacheMgr;
 import org.sunbird.cassandra.utils.CassandraOperation;
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.model.SunbirdApiRespParam;
@@ -52,9 +51,6 @@ public class ProfileServiceImpl implements ProfileService {
 
 	@Autowired
 	OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
-
-	@Autowired
-	RedisCacheMgr redisCacheMgr;
 
 	@Autowired
 	UserUtilityServiceImpl userUtilityService;
@@ -669,28 +665,16 @@ public class ProfileServiceImpl implements ProfileService {
 	}
 
 	public List<String> approvalFields() {
-		Map<String, Object> approvalFieldsCache = (Map<String, Object>) mapper
-				.convertValue(redisCacheMgr.getCache(Constants.PROFILE_UPDATE_FIELDS), Map.class);
-
-		if (!ObjectUtils.isEmpty(approvalFieldsCache)) {
-			Map<String, Object> approvalResult = (Map<String, Object>) approvalFieldsCache.get(Constants.RESULT);
-			Map<String, Object> approvalResponse = (Map<String, Object>) approvalResult.get(Constants.RESPONSE);
-			String value = (String) approvalResponse.get(Constants.VALUE);
-			List<String> approvalValues = new ArrayList<>();
-			approvalValues.add(value);
-			return approvalValues;
-		} else {
-			Map<String, String> header = new HashMap<>();
-			Map<String, Object> approvalData = (Map<String, Object>) outboundRequestHandlerService
-					.fetchUsingGetWithHeadersProfile(serverConfig.getSbUrl() + serverConfig.getLmsSystemSettingsPath(),
-							header);
-			Map<String, Object> approvalResult = (Map<String, Object>) approvalData.get(Constants.RESULT);
-			Map<String, Object> approvalResponse = (Map<String, Object>) approvalResult.get(Constants.RESPONSE);
-			String value = (String) approvalResponse.get(Constants.VALUE);
-			String strArray[] = value.split(" ");
-			List<String> approvalValues = Arrays.asList(strArray);
-			return approvalValues;
-		}
+		Map<String, String> header = new HashMap<>();
+		Map<String, Object> approvalData = (Map<String, Object>) outboundRequestHandlerService
+				.fetchUsingGetWithHeadersProfile(serverConfig.getSbUrl() + serverConfig.getLmsSystemSettingsPath(),
+						header);
+		Map<String, Object> approvalResult = (Map<String, Object>) approvalData.get(Constants.RESULT);
+		Map<String, Object> approvalResponse = (Map<String, Object>) approvalResult.get(Constants.RESPONSE);
+		String value = (String) approvalResponse.get(Constants.VALUE);
+		String strArray[] = value.split(" ");
+		List<String> approvalValues = Arrays.asList(strArray);
+		return approvalValues;
 	}
 
 	public String checkDepartment(Map<String, Object> requestProfile) throws Exception {
@@ -772,37 +756,29 @@ public class ProfileServiceImpl implements ProfileService {
 	}
 
 	public String getCustodianOrgId() {
-		String custodianOrgId = (String) redisCacheMgr.getCache(Constants.CUSTODIAN_ORG_ID);
-		if (StringUtils.isEmpty(custodianOrgId)) {
-			Map<String, Object> searchRequest = new HashMap<String, Object>();
-			searchRequest.put(Constants.ID, Constants.CUSTODIAN_ORG_ID);
+		Map<String, Object> searchRequest = new HashMap<String, Object>();
+		searchRequest.put(Constants.ID, Constants.CUSTODIAN_ORG_ID);
 
-			List<Map<String, Object>> existingDataList = cassandraOperation.getRecordsByProperties(
-					Constants.KEYSPACE_SUNBIRD, Constants.TABLE_SYSTEM_SETTINGS, searchRequest, null);
-			if (CollectionUtils.isNotEmpty(existingDataList)) {
-				Map<String, Object> data = existingDataList.get(0);
-				custodianOrgId = (String) data.get(Constants.VALUE.toLowerCase());
-			}
-			redisCacheMgr.putCache(Constants.CUSTODIAN_ORG_ID, custodianOrgId);
+		List<Map<String, Object>> existingDataList = cassandraOperation.getRecordsByProperties(
+				Constants.KEYSPACE_SUNBIRD, Constants.TABLE_SYSTEM_SETTINGS, searchRequest, null);
+		if (CollectionUtils.isNotEmpty(existingDataList)) {
+			Map<String, Object> data = existingDataList.get(0);
+			return (String) data.get(Constants.VALUE.toLowerCase());
 		}
-		return custodianOrgId;
+		return StringUtils.EMPTY;
 	}
 
 	public String getCustodianOrgChannel() {
-		String custodianOrgChannel = (String) redisCacheMgr.getCache(Constants.CUSTODIAN_ORG_CHANNEL);
-		if (StringUtils.isEmpty(custodianOrgChannel)) {
-			Map<String, Object> searchRequest = new HashMap<String, Object>();
-			searchRequest.put(Constants.ID, Constants.CUSTODIAN_ORG_CHANNEL);
+		Map<String, Object> searchRequest = new HashMap<String, Object>();
+		searchRequest.put(Constants.ID, Constants.CUSTODIAN_ORG_CHANNEL);
 
-			List<Map<String, Object>> existingDataList = cassandraOperation.getRecordsByProperties(
-					Constants.KEYSPACE_SUNBIRD, Constants.TABLE_SYSTEM_SETTINGS, searchRequest, null);
-			if (CollectionUtils.isNotEmpty(existingDataList)) {
-				Map<String, Object> data = existingDataList.get(0);
-				custodianOrgChannel = (String) data.get(Constants.VALUE.toLowerCase());
-			}
-			redisCacheMgr.putCache(Constants.CUSTODIAN_ORG_CHANNEL, custodianOrgChannel);
+		List<Map<String, Object>> existingDataList = cassandraOperation.getRecordsByProperties(
+				Constants.KEYSPACE_SUNBIRD, Constants.TABLE_SYSTEM_SETTINGS, searchRequest, null);
+		if (CollectionUtils.isNotEmpty(existingDataList)) {
+			Map<String, Object> data = existingDataList.get(0);
+			return (String) data.get(Constants.VALUE.toLowerCase());
 		}
-		return custodianOrgChannel;
+		return StringUtils.EMPTY;
 	}
 
 	private String validateBasicProfilePayload(Map<String, Object> requestObj) {
