@@ -29,6 +29,8 @@ public class ConsumerConfiguration {
     @Value("${kafka.max.poll.records}")
     private Integer kafkaMaxPollRecords;
 
+    @Value("${kafka.auto.commit.interval.ms}")
+    private Integer kafkaAutoCommitInterval;
 
     @Bean
     KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, String>> kafkaListenerContainerFactory() {
@@ -43,7 +45,6 @@ public class ConsumerConfiguration {
     @Bean
     public ConsumerFactory<String, String> consumerFactory() {
         return new DefaultKafkaConsumerFactory<>(consumerConfigs());
-
     }
 
     @Bean
@@ -52,7 +53,7 @@ public class ConsumerConfiguration {
         propsMap.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkabootstrapAddress);
         propsMap.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, true);
         propsMap.put(ConsumerConfig.FETCH_MAX_WAIT_MS_CONFIG, "1000");
-        propsMap.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, "1000");
+        propsMap.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, kafkaAutoCommitInterval);
         propsMap.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, "15000");
         propsMap.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         propsMap.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);

@@ -10,11 +10,9 @@ import java.util.TreeMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
 import org.sunbird.assessment.dto.AssessmentSubmissionDTO;
 import org.sunbird.assessment.model.QuestionSet;
 import org.sunbird.assessment.repo.AssessmentRepository;
-import org.sunbird.cache.RedisCacheMgr;
 import org.sunbird.common.model.SunbirdApiHierarchyResultContent;
 import org.sunbird.common.model.SunbirdApiResp;
 import org.sunbird.common.service.ContentService;
@@ -56,9 +54,6 @@ public class AssessmentServiceImpl implements AssessmentService {
 
 	@Autowired
 	CbExtServerProperties extServerProperties;
-
-	@Autowired
-	RedisCacheMgr redisCacheMgr;
 
 	@Override
 	public Map<String, Object> submitAssessment(String rootOrg, AssessmentSubmissionDTO data, String userId)
@@ -226,42 +221,28 @@ public class AssessmentServiceImpl implements AssessmentService {
 	public Map<String, Object> getAssessmentContent(String courseId, String assessmentContentId) {
 		Map<String, Object> result = new HashMap<>();
 		try {
-			Object assessmentQuestionSet = redisCacheMgr.getCache(Constants.ASSESSMENT_QNS_SET + assessmentContentId);
+			String serviceURL = extServerProperties.getKmBaseHost()
+					+ extServerProperties.getContentHierarchyDetailEndPoint();
+			serviceURL = (serviceURL.replace("{courseId}", courseId)).replace("{hierarchyType}", "detail");
+			SunbirdApiResp response = mapper.convertValue(
+					outboundRequestHandlerService.fetchUsingGetWithHeaders(serviceURL, new HashMap<>()),
+					SunbirdApiResp.class);
 
-			if (ObjectUtils.isEmpty(assessmentQuestionSet)) {
-				String serviceURL = extServerProperties.getKmBaseHost()
-						+ extServerProperties.getContentHierarchyDetailEndPoint();
-				serviceURL = (serviceURL.replace("{courseId}", courseId)).replace("{hierarchyType}", "detail");
-				SunbirdApiResp response = mapper.convertValue(
-						outboundRequestHandlerService.fetchUsingGetWithHeaders(serviceURL, new HashMap<>()),
-						SunbirdApiResp.class);
+			if (response.getResponseCode().equalsIgnoreCase("Ok")) {
+				// get course content
+				List<SunbirdApiHierarchyResultContent> children = response.getResult().getContent().getChildren();
+				for (SunbirdApiHierarchyResultContent child : children) {
+					// get assessment content with id
+					if (child.getIdentifier().equals(assessmentContentId) && child.getArtifactUrl().endsWith(".json")) {
+						// read assessment json file
+						QuestionSet assessmentContent = mapper.convertValue(outboundRequestHandlerService
+								.fetchUsingGetWithHeaders(child.getArtifactUrl(), new HashMap<>()), QuestionSet.class);
 
-				if (response.getResponseCode().equalsIgnoreCase("Ok")) {
-					// get course content
-					List<SunbirdApiHierarchyResultContent> children = response.getResult().getContent().getChildren();
-					for (SunbirdApiHierarchyResultContent child : children) {
-						// get assessment content with id
-						if (child.getIdentifier().equals(assessmentContentId)
-								&& child.getArtifactUrl().endsWith(".json")) {
-							// read assessment json file
-							QuestionSet assessmentContent = mapper.convertValue(outboundRequestHandlerService
-									.fetchUsingGetWithHeaders(child.getArtifactUrl(), new HashMap<>()),
-									QuestionSet.class);
-
-							QuestionSet assessmentQnsSet = assessUtilServ.removeAssessmentAnsKey(assessmentContent);
-							result.put(Constants.STATUS, Constants.SUCCESSFUL);
-							result.put(Constants.QUESTION_SET, assessmentQnsSet);
-							// cache the response
-							redisCacheMgr.putCache(Constants.ASSESSMENT_QNS_ANS_SET + assessmentContentId,
-									assessmentContent);
-							redisCacheMgr.putCache(Constants.ASSESSMENT_QNS_SET + assessmentContentId, assessmentQnsSet);
-						}
+						QuestionSet assessmentQnsSet = assessUtilServ.removeAssessmentAnsKey(assessmentContent);
+						result.put(Constants.STATUS, Constants.SUCCESSFUL);
+						result.put(Constants.QUESTION_SET, assessmentQnsSet);
 					}
 				}
-
-			} else {
-				result.put(Constants.STATUS, Constants.SUCCESSFUL);
-				result.put(Constants.QUESTION_SET, assessmentQuestionSet);
 			}
 
 			return result;

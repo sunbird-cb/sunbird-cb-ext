@@ -13,8 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
-import org.sunbird.cache.RedisCacheMgr;
 import org.sunbird.common.model.FracApiResponse;
 import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
 import org.sunbird.common.util.CbExtServerProperties;
@@ -38,31 +36,18 @@ public class SearchByService {
 	CbExtServerProperties cbExtServerProperties;
 
 	@Autowired
-	RedisCacheMgr redisCacheMgr;
-
-	@Autowired
 	OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
 
 	public Collection<CompetencyInfo> getCompetencyDetails(String authUserToken) throws Exception {
-		Map<String, CompetencyInfo> competencyMap = (Map<String, CompetencyInfo>) redisCacheMgr
-				.getCache(Constants.COMPETENCY_CACHE_NAME);
-
-		if (CollectionUtils.isEmpty(competencyMap)) {
-			logger.info("Initializing/Refreshing the Cache Value for Key : " + Constants.COMPETENCY_CACHE_NAME);
-			competencyMap = updateCompetencyDetails(authUserToken);
-		}
+		logger.info("Initializing/Refreshing the Cache Value for Key : " + Constants.COMPETENCY_CACHE_NAME);
+		Map<String, CompetencyInfo> competencyMap = updateCompetencyDetails(authUserToken);
 
 		return competencyMap.values();
 	}
 
 	public Collection<ProviderInfo> getProviderDetails(String authUserToken) throws Exception {
-		Map<String, ProviderInfo> providerMap = (Map<String, ProviderInfo>) redisCacheMgr
-				.getCache(Constants.PROVIDER_CACHE_NAME);
-
-		if (CollectionUtils.isEmpty(providerMap)) {
-			logger.info("Initializing/Refreshing the Cache Value for Key : " + Constants.PROVIDER_CACHE_NAME);
-			providerMap = updateProviderDetails(authUserToken);
-		}
+		logger.info("Initializing/Refreshing the Cache Value for Key : " + Constants.PROVIDER_CACHE_NAME);
+		Map<String, ProviderInfo> providerMap = updateProviderDetails(authUserToken);
 		return providerMap.values();
 	}
 
@@ -71,21 +56,14 @@ public class SearchByService {
 		response.setStatusInfo(new FracStatusInfo());
 		response.getStatusInfo().setStatusCode(HttpStatus.OK.value());
 
-		Map<String, List<FracCommonInfo>> positionMap = (Map<String, List<FracCommonInfo>>) redisCacheMgr
-				.getCache(Constants.POSITIONS_CACHE_NAME);
-		if (ObjectUtils.isEmpty(positionMap)
-				|| CollectionUtils.isEmpty(positionMap.get(Constants.POSITIONS_CACHE_NAME))) {
-			logger.info("Initializing / Refreshing the Cache value for key : " + Constants.POSITIONS_CACHE_NAME);
-			try {
-				positionMap = updateDesignationDetails(userToken);
-				response.setResponseData(positionMap.get(Constants.POSITIONS_CACHE_NAME));
-			} catch (Exception e) {
-				logger.error(e);
-				response.getStatusInfo().setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
-				response.getStatusInfo().setErrorMessage(e.getMessage());
-			}
-		} else {
+		logger.info("Initializing / Refreshing the Cache value for key : " + Constants.POSITIONS_CACHE_NAME);
+		try {
+			Map<String, List<FracCommonInfo>> positionMap = updateDesignationDetails(userToken);
 			response.setResponseData(positionMap.get(Constants.POSITIONS_CACHE_NAME));
+		} catch (Exception e) {
+			logger.error(e);
+			response.getStatusInfo().setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+			response.getStatusInfo().setErrorMessage(e.getMessage());
 		}
 
 		return response;
@@ -221,10 +199,6 @@ public class SearchByService {
 			throw err;
 		}
 
-		redisCacheMgr.putCache(Constants.COMPETENCY_CACHE_NAME, competencyMap);
-		redisCacheMgr.putCache(Constants.COMPETENCY_CACHE_NAME_BY_TYPE, comInfoByType);
-		redisCacheMgr.putCache(Constants.COMPETENCY_CACHE_NAME_BY_AREA, comInfoByArea);
-
 		return competencyMap;
 	}
 
@@ -319,7 +293,6 @@ public class SearchByService {
 			throw err;
 		}
 
-		redisCacheMgr.putCache(Constants.PROVIDER_CACHE_NAME, providerMap);
 		return providerMap;
 	}
 
@@ -370,7 +343,6 @@ public class SearchByService {
 		}
 		Map<String, List<FracCommonInfo>> positionMap = new HashMap<String, List<FracCommonInfo>>();
 		positionMap.put(Constants.POSITIONS_CACHE_NAME, positionList);
-		redisCacheMgr.putCache(Constants.POSITIONS_CACHE_NAME, positionMap);
 		return positionMap;
 	}
 
