@@ -140,9 +140,9 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
 			List<Object> questionList = new ArrayList<>();
 			result = validateQuestionListAPI(requestBody, authUserToken, identifierList);
 			errMsg = result.get(Constants.ERROR_MESSAGE);
-			if(result.containsKey(Constants.PRIMARY_CATEGORY) && result.get(Constants.PRIMARY_CATEGORY).equalsIgnoreCase(Constants.PRACTICE_QUESTION_SET))
-				primaryCategory = result.get(Constants.PRIMARY_CATEGORY);
 			if (errMsg.isEmpty()) {
+				if(result.containsKey(Constants.PRIMARY_CATEGORY) && result.get(Constants.PRIMARY_CATEGORY).equalsIgnoreCase(Constants.PRACTICE_QUESTION_SET))
+					primaryCategory = result.get(Constants.PRIMARY_CATEGORY);
 				errMsg = assessUtilServ.fetchQuestionIdentifierValue(identifierList, questionList, primaryCategory);
 				if (errMsg.isEmpty() && identifierList.size() == questionList.size()) {
 					response.getResult().put(Constants.QUESTIONS, questionList);
