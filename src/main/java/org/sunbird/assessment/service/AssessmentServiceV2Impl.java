@@ -133,12 +133,17 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
 	public SBApiResponse readQuestionList(Map<String, Object> requestBody, String authUserToken) {
 		SBApiResponse response = createDefaultResponse(Constants.API_SUBMIT_ASSESSMENT);
 		String errMsg;
+		String primaryCategory = "";
+		Map<String, String> result = new HashMap<>();
 		try {
 			List<String> identifierList = new ArrayList<>();
 			List<Object> questionList = new ArrayList<>();
-			errMsg = validateQuestionListAPI(requestBody, authUserToken, identifierList);
+			result = validateQuestionListAPI(requestBody, authUserToken, identifierList);
+			errMsg = result.get(Constants.ERROR_MESSAGE);
+			if(result.containsKey(Constants.PRIMARY_CATEGORY) && result.get(Constants.PRIMARY_CATEGORY).equalsIgnoreCase(Constants.PRACTICE_QUESTION_SET))
+				primaryCategory = result.get(Constants.PRIMARY_CATEGORY);
 			if (errMsg.isEmpty()) {
-				errMsg = assessUtilServ.fetchQuestionIdentifierValue(identifierList, questionList);
+				errMsg = assessUtilServ.fetchQuestionIdentifierValue(identifierList, questionList, primaryCategory);
 				if (errMsg.isEmpty() && identifierList.size() == questionList.size()) {
 					response.getResult().put(Constants.QUESTIONS, questionList);
 				}
@@ -175,20 +180,24 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
 		return StringUtils.EMPTY;
 	}
 
-	private String validateQuestionListAPI(Map<String, Object> requestBody, String authUserToken,
+	private Map<String, String> validateQuestionListAPI(Map<String, Object> requestBody, String authUserToken,
 			List<String> identifierList) {
+		Map<String, String> result = new HashMap<>();
 		String userId = validateAuthTokenAndFetchUserId(authUserToken);
 		if (StringUtils.isBlank(userId)) {
-			return Constants.USER_ID_DOESNT_EXIST;
+			result.put(Constants.ERROR_MESSAGE, Constants.USER_ID_DOESNT_EXIST);
+			return result;
 		}
 
 		if (StringUtils.isBlank((String) requestBody.get(Constants.ASSESSMENT_ID_KEY))) {
-			return Constants.ASSESSMENT_ID_KEY_IS_NOT_PRESENT_IS_EMPTY;
+			result.put(Constants.ERROR_MESSAGE, Constants.ASSESSMENT_ID_KEY_IS_NOT_PRESENT_IS_EMPTY);
+			return result;
 		}
 
 		identifierList.addAll(getQuestionIdList(requestBody));
 		if (identifierList.isEmpty()) {
-			return Constants.IDENTIFIER_LIST_IS_EMPTY;
+			result.put(Constants.ERROR_MESSAGE, Constants.IDENTIFIER_LIST_IS_EMPTY);
+			return result;
 		}
 
 		Map<String, Object> assessmentDetail = new HashMap<>();
@@ -196,7 +205,8 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
 				(String) requestBody.get(Constants.ASSESSMENT_ID_KEY));
 
 		if (ObjectUtils.isEmpty(assessmentDetail)) {
-			return Constants.ASSESSMENT_HIERARCHY_READ_FAILED;
+			result.put(Constants.ERROR_MESSAGE, Constants.ASSESSMENT_HIERARCHY_READ_FAILED);
+			return result;
 		}
 
 		if (!((String) assessmentDetail.get(Constants.PRIMARY_CATEGORY))
@@ -220,13 +230,20 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
 				// has only those ids which are a part of the user's latest assessment
 				// Fetching all the remaining questions details from the Redis
 				if (Boolean.FALSE.equals(validateQuestionListRequest(identifierList, questionsFromAssessment))) {
-					return Constants.THE_QUESTIONS_IDS_PROVIDED_DONT_MATCH;
+					result.put(Constants.ERROR_MESSAGE, Constants.THE_QUESTIONS_IDS_PROVIDED_DONT_MATCH);
+					return result;
 				}
 			} else {
-				return Constants.ASSESSMENT_ID_INVALID_SESSION_EXPIRED;
+				result.put(Constants.ERROR_MESSAGE, Constants.ASSESSMENT_ID_INVALID_SESSION_EXPIRED);
+				return result;
 			}
 		}
-		return "";
+		else
+		{
+			result.put(Constants.PRIMARY_CATEGORY, Constants.PRACTICE_QUESTION_SET);
+		}
+		result.put(Constants.ERROR_MESSAGE, "");
+		return result;
 	}
 
 	@Override

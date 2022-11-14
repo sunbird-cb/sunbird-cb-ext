@@ -185,7 +185,7 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 	}
 
 	@Override
-	public String fetchQuestionIdentifierValue(List<String> identifierList, List<Object> questionList)
+	public String fetchQuestionIdentifierValue(List<String> identifierList, List<Object> questionList, String primaryCategory)
 			throws Exception {
 		List<String> newIdentifierList = new ArrayList<>();
 		newIdentifierList.addAll(identifierList);
@@ -201,7 +201,7 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 							.get(Constants.RESULT)).get(Constants.QUESTIONS));
 					for (Map<String, Object> question : questionMap) {
 						if (!ObjectUtils.isEmpty(questionMap)) {
-							questionList.add(filterQuestionMapDetail(question));
+							questionList.add(filterQuestionMapDetail(question, primaryCategory));
 						} else {
 							logger.error(String.format("Failed to get Question Details for Id: %s",
 									question.get(Constants.IDENTIFIER).toString()));
@@ -219,13 +219,18 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 		return "";
 	}
 
-	private Map<String, Object> filterQuestionMapDetail(Map<String, Object> questionMapResponse) {
+	private Map<String, Object> filterQuestionMapDetail(Map<String, Object> questionMapResponse, String primaryCategory) {
 		List<String> questionParams = serverProperties.getAssessmentQuestionParams();
 		Map<String, Object> updatedQuestionMap = new HashMap<>();
 		for (String questionParam : questionParams) {
 			if (questionMapResponse.containsKey(questionParam)) {
 				updatedQuestionMap.put(questionParam, questionMapResponse.get(questionParam));
 			}
+		}
+		if (questionMapResponse.containsKey(Constants.EDITOR_STATE)
+				&& primaryCategory.equalsIgnoreCase(Constants.PRACTICE_QUESTION_SET)) {
+			Map<String, Object> editorState = (Map<String, Object>) questionMapResponse.get(Constants.EDITOR_STATE);
+			updatedQuestionMap.put(Constants.EDITOR_STATE, editorState);
 		}
 		if (questionMapResponse.containsKey(Constants.CHOICES)
 				&& updatedQuestionMap.containsKey(Constants.PRIMARY_CATEGORY) && !updatedQuestionMap
