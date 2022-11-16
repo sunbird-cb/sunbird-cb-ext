@@ -1,14 +1,10 @@
 package org.sunbird.profile.service;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -1047,7 +1043,7 @@ public class ProfileServiceImpl implements ProfileService {
 				|| !Constants.OK.equalsIgnoreCase((String) migrateResponse.get(Constants.RESPONSE_CODE))) {
 			errMsg = migrateResponse == null ? "Failed to migrate User."
 					: (String) ((Map<String, Object>) migrateResponse.get(Constants.PARAMS))
-							.get(Constants.ERROR_MESSAGE);
+					.get(Constants.ERROR_MESSAGE);
 		}
 		return errMsg;
 	}
@@ -1209,5 +1205,90 @@ public class ProfileServiceImpl implements ProfileService {
 		outboundRequestHandlerService.fetchResultUsingPost(
 				serverConfig.getSbUrl() + serverConfig.getSbSendNotificationEmailPath(), request,
 				ProjectUtil.getDefaultHeaders());
+	}
+
+
+	@Override
+	public SBApiResponse getNotificationPreferencesById(String userId) {
+		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_READ_NOTIFICATION_PREFERENCE);
+		String errMsg = null;
+		if (StringUtils.isEmpty(userId)) {
+			response.getParams().setErrmsg("Please Provide a user Id");
+			response.setResponseCode(HttpStatus.BAD_REQUEST);
+			response.getParams().setStatus(Constants.FAILED);
+			return response;
+		}
+		Map<String, Object> request = new HashMap<>();
+		request.put(Constants.NOTIFICATION_USERID, userId);
+		try {
+			List<Map<String, Object>> notificationPreferences = cassandraOperation.getRecordsByProperties(
+					Constants.KEYSPACE_SUNBIRD, Constants.TABLE_USER_NOTIFICATION_PREFERENCE, request,
+					Collections.singletonList(Constants.NOTIFICATION_PREFERENCE));
+			GsonBuilder builder = new GsonBuilder();
+			Gson gson = builder.create();
+			List<Map<String, Object>> mapping = gson.fromJson(notificationPreferences.toString(), List.class);
+			for (Map<String, Object> responseMap : mapping) {
+				response.putAll(responseMap);
+			}
+			response.setResponseCode(HttpStatus.OK);
+			response.getParams().setStatus(Constants.SUCCESSFUL);
+		} catch (Exception e) {
+			errMsg = "Failed to process message. Exception: " + e.getMessage();
+		}
+		if (StringUtils.isNotBlank(errMsg)) {
+			response.getParams().setStatus(Constants.FAILED);
+			response.getParams().setErrmsg(errMsg);
+			response.setResponseCode(HttpStatus.BAD_REQUEST);
+		}
+		return response;
+	}
+
+
+	@Override
+	public SBApiResponse updateNotificationPreference(String userId, Map<String, Object> request) {
+		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_UPDATE_NOTIFICATION_PREFERENCE);
+		String errMsg = null;
+		RestStatus restStatus;
+		if (StringUtils.isEmpty(userId)) {
+			response.getParams().setErrmsg("Please Provide user Id");
+			response.setResponseCode(HttpStatus.BAD_REQUEST);
+			response.getParams().setStatus(Constants.FAILED);
+			return response;
+		}
+		try {
+			ObjectMapper objectMapper = new ObjectMapper();
+			String json = objectMapper.writeValueAsString(request);
+			Map<String, Object> updateRequest = new HashMap<>();
+			updateRequest.put(Constants.NOTIFICATION_PREFERENCE, json);
+			Map<String, Object> compositeKey = new HashMap<String, Object>() {
+				private static final long serialVersionUID = 1L;
+
+				{
+					put(Constants.NOTIFICATION_USERID, userId);
+				}
+			};
+			Map<String, Object> updateRecord = cassandraOperation.updateRecord(Constants.KEYSPACE_SUNBIRD,
+					Constants.TABLE_USER_NOTIFICATION_PREFERENCE, updateRequest, compositeKey);
+
+			if (MapUtils.isNotEmpty(updateRecord)) {
+				Map<String,Object> indexDoc= (Map<String, Object>) request.get(Constants.REQUEST);
+				restStatus = indexerService.updateEntity(serverConfig.getSbUserNotificationPreferenceIndex(), serverConfig.getEsProfileIndexType(), userId,
+						mapper.convertValue(indexDoc, Map.class));
+				if (!ObjectUtils.isEmpty(restStatus)) {
+					response.setResponseCode(HttpStatus.OK);
+					response.getParams().setStatus(Constants.SUCCESS);
+				} else {
+					response.getParams().setStatus(Constants.FAILED);
+				}
+			}
+		} catch (Exception e) {
+			errMsg = "Failed to process message. Exception: " + e.getMessage();
+		}
+		if (StringUtils.isNotBlank(errMsg)) {
+			response.getParams().setStatus(Constants.FAILED);
+			response.getParams().setErrmsg(errMsg);
+			response.setResponseCode(HttpStatus.BAD_REQUEST);
+		}
+		return response;
 	}
 }
