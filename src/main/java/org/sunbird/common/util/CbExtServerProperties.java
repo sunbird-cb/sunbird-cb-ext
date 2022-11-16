@@ -431,9 +431,6 @@ public class CbExtServerProperties {
 	@Value("${course.url}")
 	private String courseLinkUrl;
 
-	@Value("${es.user.notification.preference.include.fields}")
-	private String esNotificationPreferenceIncludeFields;
-
 	@Value("${sb.es.user.notification.preference.index}")
 	private String sbUserNotificationPreferenceIndex;
 
@@ -1350,13 +1347,6 @@ public class CbExtServerProperties {
 		return esAutoCompleteIncludeFields.split(",", -1);
 	}
 
-	public void setEsNotificationPreferenceIncludeFields(String esNotificationPreferenceIncludeFields) {
-		this.esNotificationPreferenceIncludeFields = esNotificationPreferenceIncludeFields;
-	}
-
-	public String[] getEsNotificationPreferenceIncludeFields() {
-		return esNotificationPreferenceIncludeFields.split(",", -1);
-	}
 
 	public void setEsAutoCompleteIncludeFields(String esAutoCompleteIncludeFields) {
 		this.esAutoCompleteIncludeFields = esAutoCompleteIncludeFields;
