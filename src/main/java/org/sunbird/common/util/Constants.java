@@ -48,6 +48,7 @@ public class Constants {
 	public static final String ACCOUNT_EXPIRY_DATE = "account_expiry_date";
 	public static final String SOURCE_DATA = "source_data";
 	public static final String USER_ID = "userId";
+	public static final String USER_ID_test = "user_id";
 	public static final String FILTERS = "filters";
 	public static final String CONTENT_ID = "content_id";
 	public static final String BATCH_ID = "batchId";
@@ -569,6 +570,11 @@ public class Constants {
 
 	public static final String ASSESSMENT_READ_RESPONSE = "assessmentreadresponse";
 	public static final String API_SUBMIT_ASSESSMENT = "api.submit.asssessment";
+	
+	public static final String API_READ_NOTIFICATION_PREFERENCE = "api.read.notification.preference";
+	public static final String API_UPDATE_NOTIFICATION_PREFERENCE = "api.update.notification.preference";
+	public static final String NOTIFICATION_PREFERENCE="notification_preference";
+	public static final String TABLE_USER_NOTIFICATION_PREFERENCE = "user_notification_preference";
 
 	private Constants() {
 		throw new IllegalStateException("Utility class");
