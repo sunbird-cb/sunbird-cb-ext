@@ -8,6 +8,7 @@ import com.google.gson.GsonBuilder;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -1219,7 +1220,7 @@ public class ProfileServiceImpl implements ProfileService {
 			return response;
 		}
 		Map<String, Object> request = new HashMap<>();
-		request.put(Constants.NOTIFICATION_USERID, userId);
+		request.put(Constants.USER_ID, userId);
 		try {
 			List<Map<String, Object>> notificationPreferences = cassandraOperation.getRecordsByProperties(
 					Constants.KEYSPACE_SUNBIRD, Constants.TABLE_USER_NOTIFICATION_PREFERENCE, request,
@@ -1248,7 +1249,6 @@ public class ProfileServiceImpl implements ProfileService {
 	public SBApiResponse updateNotificationPreference(String userId, Map<String, Object> request) {
 		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_UPDATE_NOTIFICATION_PREFERENCE);
 		String errMsg = null;
-		RestStatus restStatus;
 		if (StringUtils.isEmpty(userId)) {
 			response.getParams().setErrmsg("Please Provide user Id");
 			response.setResponseCode(HttpStatus.BAD_REQUEST);
@@ -1256,33 +1256,41 @@ public class ProfileServiceImpl implements ProfileService {
 			return response;
 		}
 		try {
-			ObjectMapper objectMapper = new ObjectMapper();
-			String json = objectMapper.writeValueAsString(request);
+			Map<String,Object> requestBody= (Map<String, Object>) request.get(Constants.REQUEST);
 			Map<String, Object> updateRequest = new HashMap<>();
-			updateRequest.put(Constants.NOTIFICATION_PREFERENCE, json);
-			Map<String, Object> compositeKey = new HashMap<String, Object>() {
+			if(MapUtils.isNotEmpty(requestBody)){
+				ObjectMapper objectMapper = new ObjectMapper();
+				String json = objectMapper.writeValueAsString(request);
+				updateRequest.put(Constants.NOTIFICATION_PREFERENCE, json);
+			}
+			Map<String, Object> Id= new HashMap<String, Object>() {
 				private static final long serialVersionUID = 1L;
 
 				{
-					put(Constants.NOTIFICATION_USERID, userId);
+					put(Constants.USER_ID, userId);
 				}
 			};
-			Map<String, Object> updateRecord = cassandraOperation.updateRecord(Constants.KEYSPACE_SUNBIRD,
-					Constants.TABLE_USER_NOTIFICATION_PREFERENCE, updateRequest, compositeKey);
-
-			if (MapUtils.isNotEmpty(updateRecord)) {
-				Map<String,Object> indexDoc= (Map<String, Object>) request.get(Constants.REQUEST);
-				restStatus = indexerService.updateEntity(serverConfig.getSbUserNotificationPreferenceIndex(), serverConfig.getEsProfileIndexType(), userId,
-						mapper.convertValue(indexDoc, Map.class));
-				if (!ObjectUtils.isEmpty(restStatus)) {
-					response.setResponseCode(HttpStatus.OK);
-					response.getParams().setStatus(Constants.SUCCESS);
-				} else {
-					response.getParams().setStatus(Constants.FAILED);
+			if(MapUtils.isNotEmpty(updateRequest)) {
+				Map<String, Object> updateRecord = cassandraOperation.updateRecord(Constants.KEYSPACE_SUNBIRD,
+						Constants.TABLE_USER_NOTIFICATION_PREFERENCE, updateRequest, Id);
+				if(updateRecord.get(Constants.RESPONSE).toString().equalsIgnoreCase(Constants.SUCCESS)){
+					RestStatus restStatus = indexerService.updateEntity(serverConfig.getSbUserNotificationPreferenceIndex(), serverConfig.getEsProfileIndexType(), userId,
+							mapper.convertValue(requestBody, Map.class));
+					if (restStatus.name().equalsIgnoreCase(Constants.OK)) {
+						response.setResponseCode(HttpStatus.OK);
+						response.getParams().setStatus(Constants.SUCCESS);
+					} else {
+						response.getParams().setStatus(Constants.FAILED);
+						errMsg="Failed to update Elastic Search Index";
+					}
 				}
+			}else{
+				errMsg = "Problem occurs while updating Records: ";
 			}
-		} catch (Exception e) {
-			errMsg = "Failed to process message. Exception: " + e.getMessage();
+		}
+		catch (Exception e) {
+			errMsg = "Failed to update records. Exception: " + e.getMessage();
+			log.error("Failed to update records .Exception: "+e.getMessage());
 		}
 		if (StringUtils.isNotBlank(errMsg)) {
 			response.getParams().setStatus(Constants.FAILED);
