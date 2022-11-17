@@ -29,4 +29,5 @@ public interface ProfileService {
 	SBApiResponse getNotificationPreferencesById(String userId);
 
 	SBApiResponse updateNotificationPreference(String userId,Map<String,Object> request);
+
 }

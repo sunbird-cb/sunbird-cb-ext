@@ -48,7 +48,6 @@ public class Constants {
 	public static final String ACCOUNT_EXPIRY_DATE = "account_expiry_date";
 	public static final String SOURCE_DATA = "source_data";
 	public static final String USER_ID = "userId";
-	public static final String USER_ID_test = "user_id";
 	public static final String FILTERS = "filters";
 	public static final String CONTENT_ID = "content_id";
 	public static final String BATCH_ID = "batchId";
