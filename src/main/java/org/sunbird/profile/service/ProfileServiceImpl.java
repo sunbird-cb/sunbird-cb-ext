@@ -1240,7 +1240,7 @@ public class ProfileServiceImpl implements ProfileService {
 				private static final long serialVersionUID = 1L;
 
 				{
-					put(Constants.USER_ID_test, userId);
+					put(Constants.USER_ID, userId);
 				}
 			};
 			if(MapUtils.isNotEmpty(updateRequest)) {
