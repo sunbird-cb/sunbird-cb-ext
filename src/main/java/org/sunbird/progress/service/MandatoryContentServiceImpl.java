@@ -199,12 +199,13 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
 				String courseId = (String) responseObj.get(Constants.COURSE_ID);
 				if (!courseLeafCount.containsKey(courseId)) {
 					Map<String, Object> contentResponse = contentService.searchLiveContent(courseId);
-					Map<String, Object> contentResult = (Map<String, Object>) contentResponse.get(Constants.RESULT);
-					List<Map<String, Object>> contentList = (List<Map<String, Object>>) contentResult
-							.get(Constants.CONTENT);
-					Map<String, Object> content = contentList.get(0);
-					courseLeafCount.put(courseId, (Integer) content.get(Constants.LEAF_NODES_COUNT));
-
+					if (!ObjectUtils.isEmpty(contentResponse)) {
+						Map<String, Object> contentResult = (Map<String, Object>) contentResponse.get(Constants.RESULT);
+						List<Map<String, Object>> contentList = (List<Map<String, Object>>) contentResult
+								.get(Constants.CONTENT);
+						Map<String, Object> content = contentList.get(0);
+						courseLeafCount.put(courseId, (Integer) content.get(Constants.LEAF_NODES_COUNT));
+					}
 				}
 				setCourseCompletiondetails(responseObj, courseLeafCount.get(courseId));
 			}
