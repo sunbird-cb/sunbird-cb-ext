@@ -431,6 +431,19 @@ public class CbExtServerProperties {
 	@Value("${course.url}")
 	private String courseLinkUrl;
 
+	@Value("${sb.es.user.notification.preference.index}")
+	private String sbUserNotificationPreferenceIndex;
+
+	public String getSbUserNotificationPreferenceIndex() {
+		return sbUserNotificationPreferenceIndex;
+	}
+
+	public void setSbUserNotificationPreferenceIndex(String sbUserNotificationPreferenceIndex) {
+		this.sbUserNotificationPreferenceIndex = sbUserNotificationPreferenceIndex;
+	}
+
+
+
 	public String getUserAssessmentSubmissionDuration() {
 		return userAssessmentSubmissionDuration;
 	}
@@ -1333,6 +1346,7 @@ public class CbExtServerProperties {
 	public String[] getEsAutoCompleteIncludeFields() {
 		return esAutoCompleteIncludeFields.split(",", -1);
 	}
+
 
 	public void setEsAutoCompleteIncludeFields(String esAutoCompleteIncludeFields) {
 		this.esAutoCompleteIncludeFields = esAutoCompleteIncludeFields;
