@@ -1,14 +1,12 @@
 package org.sunbird.profile.service;
 
+import java.io.Reader;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -69,6 +67,9 @@ public class ProfileServiceImpl implements ProfileService {
 
 	@Autowired
 	StorageServiceImpl storageService;
+
+	@Autowired
+	Gson gson;
 
 	private Logger log = LoggerFactory.getLogger(getClass().getName());
 
@@ -1023,7 +1024,7 @@ public class ProfileServiceImpl implements ProfileService {
 				|| !Constants.OK.equalsIgnoreCase((String) migrateResponse.get(Constants.RESPONSE_CODE))) {
 			errMsg = migrateResponse == null ? "Failed to migrate User."
 					: (String) ((Map<String, Object>) migrateResponse.get(Constants.PARAMS))
-							.get(Constants.ERROR_MESSAGE);
+					.get(Constants.ERROR_MESSAGE);
 		}
 		return errMsg;
 	}
@@ -1185,5 +1186,91 @@ public class ProfileServiceImpl implements ProfileService {
 		outboundRequestHandlerService.fetchResultUsingPost(
 				serverConfig.getSbUrl() + serverConfig.getSbSendNotificationEmailPath(), request,
 				ProjectUtil.getDefaultHeaders());
+	}
+
+	@Override
+	public SBApiResponse getNotificationPreferencesById(String userId) {
+		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_READ_NOTIFICATION_PREFERENCE);
+		String errMsg = null;
+		if (StringUtils.isEmpty(userId)) {
+			response.getParams().setErrmsg("Invalid UserId");
+			response.setResponseCode(HttpStatus.BAD_REQUEST);
+			response.getParams().setStatus(Constants.FAILED);
+			return response;
+		}
+		Map<String, Object> request = new HashMap<>();
+		request.put(Constants.USER_ID, userId);
+		try {
+			List<Map<String, Object>> notificationPreferences = cassandraOperation.getRecordsByProperties(
+					Constants.KEYSPACE_SUNBIRD, Constants.TABLE_USER_NOTIFICATION_PREFERENCE, request,
+					Collections.singletonList(Constants.NOTIFICATION_PREFERENCE));
+			for (Map<String, Object> objectMap : notificationPreferences) {
+				Map<String, Object> responseMap=gson.fromJson(String.valueOf(objectMap),Map.class);
+				response.getResult().putAll(responseMap);
+			}
+			response.setResponseCode(HttpStatus.OK);
+			response.getParams().setStatus(Constants.SUCCESS);
+		} catch (Exception e) {
+			errMsg = "Failed to process message. Exception: " + e.getMessage();
+			log.error("Failed to process message. Exception: "+e.getMessage());
+		}
+		if (StringUtils.isNotBlank(errMsg)) {
+			response.getParams().setStatus(Constants.FAILED);
+			response.getParams().setErrmsg(errMsg);
+			response.setResponseCode(HttpStatus.BAD_REQUEST);
+		}
+		return response;
+	}
+
+	@Override
+	public SBApiResponse updateNotificationPreference(String userId, Map<String, Object> request) {
+		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_UPDATE_NOTIFICATION_PREFERENCE);
+		String errMsg = null;
+		if (StringUtils.isEmpty(userId)) {
+			response.getParams().setErrmsg("Invalid UserId");
+			response.setResponseCode(HttpStatus.BAD_REQUEST);
+			response.getParams().setStatus(Constants.FAILED);
+			return response;
+		}
+		try {
+			Map<String,Object> requestBody= (Map<String, Object>) request.get(Constants.REQUEST);
+			if(MapUtils.isNotEmpty(requestBody)){
+				String jsonStr = mapper.writeValueAsString(requestBody);
+				Map<String, Object> updateRequest = new HashMap<>();
+				updateRequest.put(Constants.NOTIFICATION_PREFERENCE, jsonStr);
+				Map<String, Object> key= new HashMap<String, Object>() {
+					private static final long serialVersionUID = 1L;
+
+					{
+						put(Constants.USER_ID, userId);
+					}
+				};
+				cassandraOperation.updateRecord(Constants.KEYSPACE_SUNBIRD,Constants.TABLE_USER_NOTIFICATION_PREFERENCE, updateRequest, key);
+				RestStatus restStatus = indexerService.updateEntity(serverConfig.getSbUserNotificationPreferenceIndex(), serverConfig.getEsProfileIndexType(), userId,
+						mapper.convertValue(requestBody, Map.class));
+				if (restStatus!=null && restStatus.name().equalsIgnoreCase(Constants.OK)) {
+					response.setResponseCode(HttpStatus.OK);
+					response.getParams().setStatus(Constants.SUCCESS);
+				} else {
+					response.getParams().setStatus(Constants.FAILED);
+					errMsg="Failed to update Notification Preference Index";
+				}
+			}else{
+				response.getParams().setErrmsg("Problem occurs while updating Records");
+				response.setResponseCode(HttpStatus.BAD_REQUEST);
+				response.getParams().setStatus(Constants.FAILED);
+				return response;
+			}
+		}
+		catch (Exception e) {
+			errMsg = "Failed to update notification preference records. Exception: " + e.getMessage();
+			log.error("Failed to update notification preference records .Exception: "+e.getMessage());
+		}
+		if (StringUtils.isNotBlank(errMsg)) {
+			response.getParams().setStatus(Constants.FAILED);
+			response.getParams().setErrmsg(errMsg);
+			response.setResponseCode(HttpStatus.BAD_REQUEST);
+		}
+		return response;
 	}
 }

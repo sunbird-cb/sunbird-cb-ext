@@ -442,6 +442,9 @@ public class CbExtServerProperties {
 	
 	@Value("${sso.realm}")
 	private String ssoRealm;
+	
+	@Value("${sb.es.user.notification.preference.index}")
+	private String sbUserNotificationPreferenceIndex;
 
 	public String getUserAssessmentSubmissionDuration() {
 		return userAssessmentSubmissionDuration;
@@ -1616,5 +1619,13 @@ public class CbExtServerProperties {
 
 	public void setSsoRealm(String ssoRealm) {
 		this.ssoRealm = ssoRealm;
+	}
+	
+	public String getSbUserNotificationPreferenceIndex() {
+		return sbUserNotificationPreferenceIndex;
+	}
+
+	public void setSbUserNotificationPreferenceIndex(String sbUserNotificationPreferenceIndex) {
+		this.sbUserNotificationPreferenceIndex = sbUserNotificationPreferenceIndex;
 	}
 }

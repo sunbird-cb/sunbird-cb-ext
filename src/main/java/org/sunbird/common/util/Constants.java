@@ -569,6 +569,11 @@ public class Constants {
 
 	public static final String ASSESSMENT_READ_RESPONSE = "assessmentreadresponse";
 	public static final String API_SUBMIT_ASSESSMENT = "api.submit.asssessment";
+	
+	public static final String API_READ_NOTIFICATION_PREFERENCE = "api.read.notification.preference";
+	public static final String API_UPDATE_NOTIFICATION_PREFERENCE = "api.update.notification.preference";
+	public static final String NOTIFICATION_PREFERENCE="notification_preference";
+	public static final String TABLE_USER_NOTIFICATION_PREFERENCE = "user_notification_preference";
 
 	private Constants() {
 		throw new IllegalStateException("Utility class");
