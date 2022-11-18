@@ -55,13 +55,19 @@ public class IndexerService {
     public RestStatus addEntity(String index, String indexType, String entityId, Map<String, Object> indexDocument, boolean isSunbirdES) throws Exception {
         logger.info("addEntity starts with index {} and entityId {}", index, entityId);
         IndexResponse response = null;
-        try {
-            if(!StringUtils.isEmpty(entityId)){
-                response = esClient.index(new IndexRequest(index, indexType, entityId).source(indexDocument), RequestOptions.DEFAULT);
-            }else{
-                response = esClient.index(new IndexRequest(index, indexType).source(indexDocument), RequestOptions.DEFAULT);
-            }
-        } catch (IOException e) {
+		try {
+			IndexRequest indexRequest = null;
+			if (!StringUtils.isEmpty(entityId)) {
+				indexRequest = new IndexRequest(index, indexType, entityId);
+			} else {
+				indexRequest = new IndexRequest(index, indexType);
+			}
+			if (isSunbirdES) {
+				response = sbEsClient.index(indexRequest.source(indexDocument), RequestOptions.DEFAULT);
+			} else {
+				response = esClient.index(indexRequest.source(indexDocument), RequestOptions.DEFAULT);
+			}
+		} catch (IOException e) {
             logger.error("Exception in adding record to ElasticSearch", e);
             throw e;
         }
@@ -104,18 +110,26 @@ public class IndexerService {
      * @param entityId      entity Id
      * @return status
      */
-    public Map<String, Object> readEntity(String index, String indexType, String entityId){
-        logger.info("readEntity starts with index {} and entityId {}", index, entityId);
-        GetResponse response = null;
-        try {
-        response = esClient.get(new GetRequest(index, indexType, entityId), RequestOptions.DEFAULT);
-        } catch (IOException e) {
-            logger.error("Exception in getting the record from ElasticSearch", e);
-        }
-        if(null == response)
-            return null;
-        return response.getSourceAsMap();
-    }
+	public Map<String, Object> readEntity(String index, String indexType, String entityId) {
+		return readEntity(index, indexType, entityId, false);
+	}
+	
+	public Map<String, Object> readEntity(String index, String indexType, String entityId, boolean isSunbirdES) {
+		logger.info("readEntity starts with index {} and entityId {}", index, entityId);
+		GetResponse response = null;
+		try {
+			if (isSunbirdES) {
+				response = sbEsClient.get(new GetRequest(index, indexType, entityId), RequestOptions.DEFAULT);
+			} else {
+				response = esClient.get(new GetRequest(index, indexType, entityId), RequestOptions.DEFAULT);
+			}
+		} catch (IOException e) {
+			logger.error("Exception in getting the record from ElasticSearch", e);
+		}
+		if (null == response)
+			return null;
+		return response.getSourceAsMap();
+	}
 
     /**
      * Search the document in es based on provided information
