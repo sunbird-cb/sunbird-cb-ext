@@ -1251,7 +1251,7 @@ public class ProfileServiceImpl implements ProfileService {
 				cassandraOperation.updateRecord(Constants.KEYSPACE_SUNBIRD,
 						Constants.TABLE_USER_NOTIFICATION_PREFERENCE, updateRequest, key);
 
-				Map<String, Object> existingData = getRegistrationDoc(key);
+				Map<String, Object> existingData = getPreferenceDoc(key);
 
 				RestStatus restStatus = null;
 				if (existingData == null) {
@@ -1281,9 +1281,9 @@ public class ProfileServiceImpl implements ProfileService {
 		return response;
 	}
 	
-	private Map<String, Object> getRegistrationDoc(Map<String, Object> key) throws Exception {
+	private Map<String, Object> getPreferenceDoc(Map<String, Object> key) throws Exception {
 		SearchResponse searchResponse = indexerService.getEsResult(serverConfig.getSbUserNotificationPreferenceIndex(),
-				serverConfig.getEsProfileIndexType(), queryBuilder(key), false);
+				serverConfig.getEsProfileIndexType(), queryBuilder(key), true);
 
 		if (searchResponse.getHits().getTotalHits() > 0) {
 			SearchHit hit = searchResponse.getHits().getAt(0);
