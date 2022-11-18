@@ -48,7 +48,11 @@ public class IndexerService {
      * @param indexDocument index Document
      * @return status
      */
-    public RestStatus addEntity(String index, String indexType, String entityId, Map<String, Object> indexDocument) {
+	public RestStatus addEntity(String index, String indexType, String entityId, Map<String, Object> indexDocument) throws Exception {
+		return addEntity(index, indexType, entityId, indexDocument, false);
+	}
+    
+    public RestStatus addEntity(String index, String indexType, String entityId, Map<String, Object> indexDocument, boolean isSunbirdES) throws Exception {
         logger.info("addEntity starts with index {} and entityId {}", index, entityId);
         IndexResponse response = null;
         try {
@@ -59,6 +63,7 @@ public class IndexerService {
             }
         } catch (IOException e) {
             logger.error("Exception in adding record to ElasticSearch", e);
+            throw e;
         }
         if (null == response)
             return null;
@@ -72,11 +77,19 @@ public class IndexerService {
      * @param indexDocument index Document
      * @return status
      */
-    public RestStatus updateEntity(String index, String indexType, String entityId, Map<String, ?> indexDocument) {
+	public RestStatus updateEntity(String index, String indexType, String entityId, Map<String, ?> indexDocument) {
+		return updateEntity(index, indexType, entityId, indexDocument, false);
+	}
+    
+    public RestStatus updateEntity(String index, String indexType, String entityId, Map<String, ?> indexDocument, boolean isSunbirdES) {
         logger.info("updateEntity starts with index {} and entityId {}", index, entityId);
         UpdateResponse response = null;
         try {
-            response = esClient.update(new UpdateRequest(index.toLowerCase(), indexType, entityId).doc(indexDocument), RequestOptions.DEFAULT);
+        	if(isSunbirdES) {
+        		response = sbEsClient.update(new UpdateRequest(index.toLowerCase(), indexType, entityId).doc(indexDocument), RequestOptions.DEFAULT);
+        	} else {
+        		response = esClient.update(new UpdateRequest(index.toLowerCase(), indexType, entityId).doc(indexDocument), RequestOptions.DEFAULT);
+        	}
         } catch (IOException e) {
             logger.error("Exception in updating a record to ElasticSearch", e);
         }

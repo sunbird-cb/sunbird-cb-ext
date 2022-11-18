@@ -1239,6 +1239,7 @@ public class ProfileServiceImpl implements ProfileService {
 		try {
 			Map<String, Object> requestBody = (Map<String, Object>) request.get(Constants.REQUEST);
 			if (MapUtils.isNotEmpty(requestBody)) {
+				requestBody.put(Constants.USER_ID, userId);
 				Map<String, Object> updateRequest = new HashMap<>();
 				updateRequest.put(Constants.NOTIFICATION_PREFERENCE, mapper.writeValueAsString(requestBody));
 				Map<String, Object> key = new HashMap<String, Object>() {
@@ -1249,14 +1250,21 @@ public class ProfileServiceImpl implements ProfileService {
 				};
 				cassandraOperation.updateRecord(Constants.KEYSPACE_SUNBIRD,
 						Constants.TABLE_USER_NOTIFICATION_PREFERENCE, updateRequest, key);
-				RestStatus restStatus = indexerService.updateEntity(serverConfig.getSbUserNotificationPreferenceIndex(),
-						serverConfig.getEsProfileIndexType(), userId, mapper.convertValue(requestBody, Map.class));
-				if (restStatus != null && Constants.OK.equalsIgnoreCase(restStatus.name())) {
-					response.setResponseCode(HttpStatus.OK);
-					response.getParams().setStatus(Constants.SUCCESS);
+
+				Map<String, Object> existingData = getRegistrationDoc(key);
+
+				RestStatus restStatus = null;
+				if (existingData == null) {
+					restStatus = indexerService.addEntity(serverConfig.getSbUserNotificationPreferenceIndex(),
+							serverConfig.getEsProfileIndexType(), userId, requestBody, true);
 				} else {
-					response.getParams().setStatus(Constants.FAILED);
-					errMsg = "Failed to update Notification Preference Index";
+					restStatus = indexerService.updateEntity(serverConfig.getSbUserNotificationPreferenceIndex(),
+							serverConfig.getEsProfileIndexType(), userId, mapper.convertValue(requestBody, Map.class),
+							true);
+					if (restStatus == null || !Constants.OK.equalsIgnoreCase(restStatus.name())) {
+						response.getParams().setStatus(Constants.FAILED);
+						errMsg = "Failed to update Notification Preference Index";
+					}
 				}
 			} else {
 				errMsg = Constants.ERROR_INVALID_REQUEST_BODY;
@@ -1271,5 +1279,24 @@ public class ProfileServiceImpl implements ProfileService {
 			response.setResponseCode(HttpStatus.BAD_REQUEST);
 		}
 		return response;
+	}
+	
+	private Map<String, Object> getRegistrationDoc(Map<String, Object> key) throws Exception {
+		SearchResponse searchResponse = indexerService.getEsResult(serverConfig.getSbUserNotificationPreferenceIndex(),
+				serverConfig.getEsProfileIndexType(), queryBuilder(key), false);
+
+		if (searchResponse.getHits().getTotalHits() > 0) {
+			SearchHit hit = searchResponse.getHits().getAt(0);
+			return mapper.convertValue(hit.getSourceAsMap(), Map.class);
+		}
+		return null;
+	}
+	
+	private SearchSourceBuilder queryBuilder(Map<String, Object> mustMatch) {
+		BoolQueryBuilder boolBuilder = new BoolQueryBuilder();
+		for (Map.Entry<String, Object> entry : mustMatch.entrySet()) {
+			boolBuilder.must(QueryBuilders.termQuery(entry.getKey() + ".raw", entry.getValue()));
+		}
+		return new SearchSourceBuilder().query(boolBuilder);
 	}
 }
