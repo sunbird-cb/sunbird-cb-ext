@@ -574,6 +574,8 @@ public class Constants {
 	public static final String API_UPDATE_NOTIFICATION_PREFERENCE = "api.update.notification.preference";
 	public static final String NOTIFICATION_PREFERENCE="notification_preference";
 	public static final String TABLE_USER_NOTIFICATION_PREFERENCE = "user_notification_preference";
+	public static final String ERROR_INVALID_USER_ID = "Invalid UserId";
+	public static final String ERROR_INVALID_REQUEST_BODY = "Invalid Request Body";
 
 	private Constants() {
 		throw new IllegalStateException("Utility class");

@@ -90,13 +90,13 @@ public class ProfileController {
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
 
-	@GetMapping("/user/v1/notificationpreference")
+	@GetMapping("/user/v1/notificationPreference")
 	public ResponseEntity<?> getNotificationPreferences(@RequestHeader(Constants.X_AUTH_USER_ID) String userId) {
 		SBApiResponse response = profileService.getNotificationPreferencesById(userId);
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
 
-	@PostMapping("/user/v1/notificationpreference")
+	@PostMapping("/user/v1/notificationPreference")
 	public ResponseEntity<?> updateNotificationPreferences(@RequestHeader(Constants.X_AUTH_USER_ID) String userId,
 			@RequestBody Map<String,Object> request) {
 		SBApiResponse response = profileService.updateNotificationPreference(userId,request);
