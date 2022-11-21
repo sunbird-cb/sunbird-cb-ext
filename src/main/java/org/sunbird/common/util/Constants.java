@@ -531,6 +531,7 @@ public class Constants {
 	public static final String NEW_COURSES = "newcourses";
 	public static final String OVERVIEW_BATCH_KEY = "/overview?batchId=";
 	public static final String LEAF_NODES_COUNT = "leafNodesCount";
+	public static final String CLIENT_ERROR = "CLIENT_ERROR";
 
 	private Constants() {
 		throw new IllegalStateException("Utility class");

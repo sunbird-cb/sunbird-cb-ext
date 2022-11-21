@@ -150,12 +150,16 @@ public class ProfileServiceImpl implements ProfileService {
 				url.append(serverConfig.getSbUrl()).append(serverConfig.getLmsUserUpdatePath());
 				updateResponse = outboundRequestHandlerService.fetchResultUsingPatch(
 						serverConfig.getSbUrl() + serverConfig.getLmsUserUpdatePath(), updateRequest, headerValues);
-				if (updateResponse.get(Constants.RESPONSE_CODE).equals(Constants.OK)) {
+				if (Constants.OK.equalsIgnoreCase((String) updateResponse.get(Constants.RESPONSE_CODE))) {
 					response.setResponseCode(HttpStatus.OK);
 					response.getResult().put(Constants.RESPONSE, Constants.SUCCESS);
 					response.getParams().setStatus(Constants.SUCCESS);
 				} else {
-					response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+					if (Constants.CLIENT_ERROR.equalsIgnoreCase((String) updateResponse.get(Constants.RESPONSE_CODE))) {
+						response.setResponseCode(HttpStatus.BAD_REQUEST);
+					} else {
+						response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+					}
 					response.getParams().setStatus(Constants.FAILED);
 					String errMsg = (String) ((Map<String, Object>) updateResponse.get(Constants.PARAMS))
 							.get(Constants.ERROR_MESSAGE);

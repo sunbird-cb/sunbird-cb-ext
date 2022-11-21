@@ -3,6 +3,7 @@ package org.sunbird.common.service;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.collections.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -199,6 +200,9 @@ public class OutboundRequestHandlerServiceImpl {
 			} catch (Exception e1) {
 			}
 			log.error("Error received: " + e.getResponseBodyAsString(), e);
+		}
+		if (response == null) {
+			return MapUtils.EMPTY_MAP;
 		}
 		return response;
 	}
