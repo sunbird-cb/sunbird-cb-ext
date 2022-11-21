@@ -576,6 +576,7 @@ public class Constants {
 	public static final String TABLE_USER_NOTIFICATION_PREFERENCE = "user_notification_preference";
 	public static final String ERROR_INVALID_USER_ID = "Invalid UserId";
 	public static final String ERROR_INVALID_REQUEST_BODY = "Invalid Request Body";
+	public static final String CLIENT_ERROR = "CLIENT_ERROR";
 
 	private Constants() {
 		throw new IllegalStateException("Utility class");
