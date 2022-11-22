@@ -141,15 +141,20 @@ public class AllocationService {
 			workAllocation.setActiveWAObject(null);
 			workAllocation.setArchivedWAList(null);
 		}
-		RestStatus restStatus = indexerService.addEntity(index, indexType, workAllocationDTO.getUserId(),
-				mapper.convertValue(workAllocation, Map.class));
+		RestStatus restStatus;
 		Response response = new Response();
-		if (!ObjectUtils.isEmpty(restStatus)) {
-			response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
-		} else {
-			response.put(Constants.MESSAGE, Constants.FAILED);
+		try {
+			restStatus = indexerService.addEntity(index, indexType, workAllocationDTO.getUserId(),
+					mapper.convertValue(workAllocation, Map.class));
+			if (!ObjectUtils.isEmpty(restStatus)) {
+				response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
+				response.put(Constants.DATA, restStatus);
+			} else {
+				response.put(Constants.MESSAGE, Constants.FAILED);
+			}
+		} catch (Exception e) {
+			logger.error("Failed to add workallocation into ES. Exception: ", e);
 		}
-		response.put(Constants.DATA, restStatus);
 		response.put(Constants.STATUS, HttpStatus.OK);
 		return response;
 	}
