@@ -60,7 +60,7 @@ public class AssessmentServiceImpl implements AssessmentService {
 			throws Exception {
 		logger.info("Submit Assessment: rootOrg: " + rootOrg + ", userId: " + userId + ", data: " + data.toString());
 		// Check User exists
-		if (!userUtilService.validateUser(rootOrg, userId)) {
+    	if (!userUtilService.validateUser(rootOrg, userId)) {
 			throw new BadRequestException("Invalid UserId.");
 		}
 
@@ -90,6 +90,7 @@ public class AssessmentServiceImpl implements AssessmentService {
 		if (parentId == null) {
 			parentId = "";
 		}
+
 		persist.put("parent", parentId);
 		persist.put(RESULT, result);
 		persist.put("sourceId", data.getIdentifier());
@@ -106,6 +107,10 @@ public class AssessmentServiceImpl implements AssessmentService {
 				SunbirdApiResp contentHierarchy = contentService.getHeirarchyResponse(parentId);
 				if (contentHierarchy != null) {
 					persist.put("parentContentType", contentHierarchy.getResult().getContent().getContentType());
+				}
+				else{
+					persist.put("parentContentType", "");
+
 				}
 			} catch (Exception e) {
 				logger.error(e);
