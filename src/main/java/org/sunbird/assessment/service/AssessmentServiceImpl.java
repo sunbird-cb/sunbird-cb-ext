@@ -10,6 +10,7 @@ import java.util.TreeMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 import org.sunbird.assessment.dto.AssessmentSubmissionDTO;
 import org.sunbird.assessment.model.QuestionSet;
 import org.sunbird.assessment.repo.AssessmentRepository;
@@ -60,7 +61,7 @@ public class AssessmentServiceImpl implements AssessmentService {
 			throws Exception {
 		logger.info("Submit Assessment: rootOrg: " + rootOrg + ", userId: " + userId + ", data: " + data.toString());
 		// Check User exists
-    	if (!userUtilService.validateUser(rootOrg, userId)) {
+     if (!userUtilService.validateUser(rootOrg, userId)) {
 			throw new BadRequestException("Invalid UserId.");
 		}
 
@@ -101,17 +102,21 @@ public class AssessmentServiceImpl implements AssessmentService {
 		persist.put(BLANK, blank);
 		persist.put("incorrect", inCorrect);
 
-		if (Boolean.TRUE.equals(data.isAssessment()) && !"".equals(parentId)) {
+		if (Boolean.TRUE.equals(data.isAssessment()) && "".equals(parentId)) {
 			// get parent data for assessment
 			try {
-				SunbirdApiResp contentHierarchy = contentService.getHeirarchyResponse(parentId);
-				if (contentHierarchy != null) {
-					persist.put("parentContentType", contentHierarchy.getResult().getContent().getContentType());
+			//	SunbirdApiResp contentHierarchy = contentService.getHeirarchyResponse(parentId);
+				Map<String, Object> contentResponse = contentService.searchLiveContent(parentId);
+				if (!ObjectUtils.isEmpty(contentResponse)) {
+					Map<String, Object> contentResult = (Map<String, Object>) contentResponse.get(Constants.RESULT);
+					if (0 < (Integer) contentResult.get(Constants.COUNT)) {
+						List<Map<String, Object>> contentList = (List<Map<String, Object>>) contentResult
+								.get(Constants.CONTENT);
+						Map<String, Object> content = contentList.get(0);
+						persist.put("parentContentType", (String) content.get(Constants.CONTENT_TYPE_SEARCH));
+					}
 				}
-				else{
-					persist.put("parentContentType", "");
 
-				}
 			} catch (Exception e) {
 				logger.error(e);
 			}
