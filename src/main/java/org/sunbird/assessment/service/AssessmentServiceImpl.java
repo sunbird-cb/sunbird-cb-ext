@@ -102,7 +102,7 @@ public class AssessmentServiceImpl implements AssessmentService {
 		persist.put(BLANK, blank);
 		persist.put("incorrect", inCorrect);
 
-		if (Boolean.TRUE.equals(data.isAssessment()) && "".equals(parentId)) {
+		if (Boolean.TRUE.equals(data.isAssessment()) && !"".equals(parentId)) {
 			// get parent data for assessment
 			try {
 			//	SunbirdApiResp contentHierarchy = contentService.getHeirarchyResponse(parentId);
@@ -116,8 +116,8 @@ public class AssessmentServiceImpl implements AssessmentService {
 						persist.put(Constants.PARENT_CONTENT_SEARCH, (String) content.get(Constants.CONTENT_TYPE_SEARCH));
 					}
 				}
-
-			} catch (Exception e) {
+			} catch (Exception e)
+			{
 				logger.error(e);
 			}
 		} else {
