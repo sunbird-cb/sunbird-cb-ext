@@ -116,12 +116,9 @@ public class AssessmentRepositoryImpl implements AssessmentRepository {
 					persist.get(USER_ID).toString());
 			UserQuizSummaryModel summary = new UserQuizSummaryModel(
 					new UserQuizSummaryPrimaryKeyModel(persist.get(ROOT_ORG).toString(),
-							persist.get(USER_ID).toString(), persist.get(SOURCE_ID).toString()),
-					date);
-
+							persist.get(USER_ID).toString(), persist.get(SOURCE_ID).toString()), date);
 			userQuizMasterRepo.updateQuiz(quiz, summary);
 		}
-
 		response.put("response", "SUCCESS");
 		return response;
 	}
