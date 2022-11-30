@@ -113,7 +113,7 @@ public class AssessmentServiceImpl implements AssessmentService {
 						List<Map<String, Object>> contentList = (List<Map<String, Object>>) contentResult
 								.get(Constants.CONTENT);
 						Map<String, Object> content = contentList.get(0);
-						persist.put("parentContentType", (String) content.get(Constants.CONTENT_TYPE_SEARCH));
+						persist.put(Constants.PARENT_CONTENT_SEARCH, (String) content.get(Constants.CONTENT_TYPE_SEARCH));
 					}
 				}
 
@@ -121,7 +121,7 @@ public class AssessmentServiceImpl implements AssessmentService {
 				logger.error(e);
 			}
 		} else {
-			persist.put("parentContentType", "");
+			persist.put(Constants.PARENT_CONTENT_SEARCH, "");
 		}
 
 		logger.info("Trying to persist assessment data -> " + persist.toString());
