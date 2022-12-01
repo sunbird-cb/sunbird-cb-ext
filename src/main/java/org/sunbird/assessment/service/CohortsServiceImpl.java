@@ -140,10 +140,14 @@ public class CohortsServiceImpl implements CohortsService {
 // 		if (!userUtilService.validateUser(rootOrg, userId)) {
 // 			throw new BadRequestException("Invalid UserId.");
 // 		}
-
-		List<String> batchIdList = fetchBatchIdDetails(contentId);
-		if (CollectionUtils.isEmpty(batchIdList)) {
-			return Collections.emptyList();
+		List<String> batchIdList = null;
+		List<SunbirdApiBatchResp> batches = fetchBatchDetails(contentId);
+		if (!CollectionUtils.isEmpty(batches)) {
+			batchIdList = batches.stream().map(SunbirdApiBatchResp::getBatchId).collect(Collectors.toList());
+			//List<String> batchIdList = fetchBatchIdDetails(contentId);
+			if (CollectionUtils.isEmpty(batchIdList)) {
+				return Collections.emptyList();
+			}
 		}
 		return fetchParticipantsList(xAuthUser, rootOrg, batchIdList, count);
 	}
