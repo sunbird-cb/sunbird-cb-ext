@@ -111,7 +111,7 @@ public class AssessmentServiceImpl implements AssessmentService {
 						List<Map<String, Object>> contentList = (List<Map<String, Object>>) contentResult
 								.get(Constants.CONTENT);
 						Map<String, Object> content = contentList.get(0);
-				    	persist.put(Constants.PARENT_CONTENT_TYPE, (String) content.get(Constants.CONTENTTYPE));
+				    	persist.put(Constants.PARENT_CONTENT_TYPE, (String) content.get(Constants.CONTENT_TYPE_SEARCH));
 					}
 				}
 			} catch (Exception e) {

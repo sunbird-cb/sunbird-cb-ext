@@ -183,7 +183,7 @@ public class ContentServiceImpl implements ContentService {
 		Map<String, Object> contentRequestValue = new HashMap<>();
 		contentRequestValue.put(Constants.FILTERS, filters);
 		contentRequestValue.put(Constants.FIELDS,
-				Arrays.asList(Constants.IDENTIFIER, Constants.NAME, Constants.PRIMARY_CATEGORY, Constants.BATCHES, Constants.CONTENTTYPE));
+				Arrays.asList(Constants.IDENTIFIER, Constants.NAME, Constants.PRIMARY_CATEGORY, Constants.BATCHES, Constants.CONTENT_TYPE_SEARCH));
 		Map<String, Object> contentRequest = new HashMap<>();
 		contentRequest.put(Constants.REQUEST, contentRequestValue);
 		response = outboundRequestHandlerService.fetchResultUsingPost(
