@@ -1,10 +1,6 @@
 package org.sunbird.common.service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,6 +12,7 @@ import org.sunbird.common.util.Constants;
 import org.sunbird.core.logger.CbExtLogger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import static java.util.Objects.nonNull;
 
 @Service
 public class ContentServiceImpl implements ContentService {
@@ -37,7 +34,7 @@ public class ContentServiceImpl implements ContentService {
 				.append("?hierarchyType=detail");
 		SunbirdApiResp response = mapper.convertValue(outboundRequestHandlerService.fetchResult(url.toString()),
 				SunbirdApiResp.class);
-		if (response.getResponseCode().equalsIgnoreCase("Ok")) {
+		if (nonNull(response) && response.getResponseCode().equalsIgnoreCase("Ok")) {
 			return response;
 		}
 
@@ -186,7 +183,7 @@ public class ContentServiceImpl implements ContentService {
 		Map<String, Object> contentRequestValue = new HashMap<>();
 		contentRequestValue.put(Constants.FILTERS, filters);
 		contentRequestValue.put(Constants.FIELDS,
-				Arrays.asList(Constants.IDENTIFIER, Constants.NAME, Constants.PRIMARY_CATEGORY, Constants.BATCHES));
+				Arrays.asList(Constants.IDENTIFIER, Constants.NAME, Constants.PRIMARY_CATEGORY, Constants.BATCHES, Constants.CONTENTTYPE));
 		Map<String, Object> contentRequest = new HashMap<>();
 		contentRequest.put(Constants.REQUEST, contentRequestValue);
 		response = outboundRequestHandlerService.fetchResultUsingPost(
