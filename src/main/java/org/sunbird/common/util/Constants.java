@@ -528,6 +528,7 @@ public class Constants {
 	public static final String MIN = "min";
 	public static final String MAX = "max";
 	public static final String CONTENT_TYPE_SEARCH = "contentType";
+	public static final String PARENT_CONTENT_SEARCH="parentContentType";
 	public static final String NEW_COURSES = "newcourses";
 	public static final String OVERVIEW_BATCH_KEY = "/overview?batchId=";
 	public static final String LEAF_NODES_COUNT = "leafNodesCount";
