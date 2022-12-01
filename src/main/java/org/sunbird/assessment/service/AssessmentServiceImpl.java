@@ -10,6 +10,7 @@ import java.util.TreeMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 import org.sunbird.assessment.dto.AssessmentSubmissionDTO;
 import org.sunbird.assessment.model.QuestionSet;
 import org.sunbird.assessment.repo.AssessmentRepository;
@@ -103,9 +104,15 @@ public class AssessmentServiceImpl implements AssessmentService {
 		if (Boolean.TRUE.equals(data.isAssessment()) && !"".equals(parentId)) {
 			// get parent data for assessment
 			try {
-				SunbirdApiResp contentHierarchy = contentService.getHeirarchyResponse(parentId);
-				if (contentHierarchy != null) {
-					persist.put("parentContentType", contentHierarchy.getResult().getContent().getContentType());
+				Map<String, Object> contentResponse = contentService.searchLiveContent(parentId);
+				if (!ObjectUtils.isEmpty(contentResponse)) {
+					Map<String, Object> contentResult = (Map<String, Object>) contentResponse.get(Constants.RESULT);
+					if (0 < (Integer) contentResult.get(Constants.COUNT)) {
+						List<Map<String, Object>> contentList = (List<Map<String, Object>>) contentResult
+								.get(Constants.CONTENT);
+						Map<String, Object> content = contentList.get(0);
+				    	persist.put(Constants.PARENT_CONTENT_TYPE, (String) content.get(Constants.CONTENTTYPE));
+					}
 				}
 			} catch (Exception e) {
 				logger.error(e);
