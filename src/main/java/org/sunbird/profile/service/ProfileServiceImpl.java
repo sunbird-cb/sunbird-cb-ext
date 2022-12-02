@@ -155,7 +155,8 @@ public class ProfileServiceImpl implements ProfileService {
 					response.getResult().put(Constants.RESPONSE, Constants.SUCCESS);
 					response.getParams().setStatus(Constants.SUCCESS);
 				} else {
-					if (Constants.CLIENT_ERROR.equalsIgnoreCase((String) updateResponse.get(Constants.RESPONSE_CODE))) {
+					if (updateResponse != null && Constants.CLIENT_ERROR
+							.equalsIgnoreCase((String) updateResponse.get(Constants.RESPONSE_CODE))) {
 						response.setResponseCode(HttpStatus.BAD_REQUEST);
 					} else {
 						response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
