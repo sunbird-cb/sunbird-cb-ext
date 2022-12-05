@@ -4,6 +4,7 @@ import java.util.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 import org.sunbird.common.model.SunbirdApiHierarchyResultBatch;
 import org.sunbird.common.model.SunbirdApiResp;
 import org.sunbird.common.model.SunbirdApiUserCourseListResp;
@@ -172,7 +173,7 @@ public class ContentServiceImpl implements ContentService {
 
 		return null;
 	}
-	
+
 	public Map<String, Object> searchLiveContent(String contentId) {
 		Map<String, Object> response = null;
 		HashMap<String, String> headerValues = new HashMap<>();
@@ -184,7 +185,8 @@ public class ContentServiceImpl implements ContentService {
 		Map<String, Object> contentRequestValue = new HashMap<>();
 		contentRequestValue.put(Constants.FILTERS, filters);
 		contentRequestValue.put(Constants.FIELDS,
-				Arrays.asList(Constants.IDENTIFIER, Constants.NAME, Constants.PRIMARY_CATEGORY, Constants.BATCHES, Constants.LEAF_NODES_COUNT, Constants.CONTENT_TYPE_SEARCH));
+				Arrays.asList(Constants.IDENTIFIER, Constants.NAME, Constants.PRIMARY_CATEGORY, Constants.BATCHES,
+						Constants.LEAF_NODES_COUNT, Constants.CONTENT_TYPE_KEY));
 		Map<String, Object> contentRequest = new HashMap<>();
 		contentRequest.put(Constants.REQUEST, contentRequestValue);
 		response = outboundRequestHandlerService.fetchResultUsingPost(
@@ -193,5 +195,47 @@ public class ContentServiceImpl implements ContentService {
 			return response;
 		}
 		return null;
+	}
+
+	public Map<String, Object> getHierarchyResponseMap(String contentId) {
+		StringBuilder url = new StringBuilder();
+		url.append(serverConfig.getContentHost()).append(serverConfig.getHierarchyEndPoint()).append("/" + contentId)
+				.append("?hierarchyType=detail");
+		Map<String, Object> response = (Map<String, Object>) outboundRequestHandlerService.fetchResult(url.toString());
+		if (ObjectUtils.isEmpty(response)) {
+			return Collections.EMPTY_MAP;
+		}
+
+		return response;
+	}
+
+	public String getParentIdentifier(String resourceId) {
+		String parentId = "";
+		Map<String, Object> response = getHierarchyResponseMap(resourceId);
+		if (Constants.OK.equalsIgnoreCase((String) response.get(Constants.RESPONSE_CODE))) {
+			Map<String, Object> resultMap = (Map<String, Object>) response.get(Constants.RESULT);
+			if (!ObjectUtils.isEmpty(resultMap)) {
+				Map<String, Object> contentMap = (Map<String, Object>) resultMap.get(Constants.CONTENT);
+				if (!ObjectUtils.isEmpty(contentMap)) {
+					parentId = (String) contentMap.get(Constants.PARENT);
+				}
+			}
+		}
+		return parentId;
+	}
+
+	public String getContentType(String resourceId) {
+		String parentContentType = "";
+		Map<String, Object> response = getHierarchyResponseMap(resourceId);
+		if (Constants.OK.equalsIgnoreCase((String) response.get(Constants.RESPONSE_CODE))) {
+			Map<String, Object> resultMap = (Map<String, Object>) response.get(Constants.RESULT);
+			if (!ObjectUtils.isEmpty(resultMap)) {
+				Map<String, Object> contentMap = (Map<String, Object>) resultMap.get(Constants.CONTENT);
+				if (!ObjectUtils.isEmpty(contentMap)) {
+					parentContentType = (String) contentMap.get(Constants.CONTENT_TYPE_KEY);
+				}
+			}
+		}
+		return parentContentType;
 	}
 }

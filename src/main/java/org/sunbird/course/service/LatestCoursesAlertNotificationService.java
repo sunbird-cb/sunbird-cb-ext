@@ -133,7 +133,7 @@ public class LatestCoursesAlertNotificationService {
 			lastUpdatedOn.put(Constants.MAX, maxValue.toString());
 			Map<String, Object> filters = new HashMap<>();
 			filters.put(Constants.PRIMARY_CATEGORY, Collections.singletonList(Constants.COURSE));
-			filters.put(Constants.CONTENT_TYPE_SEARCH, Collections.singletonList(Constants.COURSE));
+			filters.put(Constants.CONTENT_TYPE_KEY, Collections.singletonList(Constants.COURSE));
 			filters.put(Constants.LAST_UPDATED_ON, lastUpdatedOn);
 			Map<String, Object> sortBy = new HashMap<>();
 			sortBy.put(Constants.LAST_UPDATED_ON, Constants.DESCENDING_ORDER);
