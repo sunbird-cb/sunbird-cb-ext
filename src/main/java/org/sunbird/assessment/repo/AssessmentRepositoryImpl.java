@@ -161,7 +161,7 @@ public class AssessmentRepositoryImpl implements AssessmentRepository {
 	@Override
 	public Boolean updateUserAssesmentDataToDB(String userId, String assessmentIdentifier,
 			Map<String, Object> submitAssessmentRequest, Map<String, Object> submitAssessmentResponse, String status,
-			Date startTime) {
+			Date startTime, Date submitTime) {
 		Map<String, Object> compositeKeys = new HashMap<>();
 		compositeKeys.put(Constants.USER_ID, userId);
 		compositeKeys.put(Constants.ASSESSMENT_ID_KEY, assessmentIdentifier);
@@ -175,6 +175,10 @@ public class AssessmentRepositoryImpl implements AssessmentRepository {
 		}
 		if (!status.isEmpty()) {
 			fieldsToBeUpdated.put(Constants.STATUS, status);
+		}
+		if (submitTime!=null)
+		{
+			fieldsToBeUpdated.put(Constants.SUBMIT_TIME, submitTime);
 		}
 		cassandraOperation.updateRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_USER_ASSESSMENT_DATA,
 				fieldsToBeUpdated, compositeKeys);

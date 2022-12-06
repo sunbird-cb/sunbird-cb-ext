@@ -2,6 +2,7 @@ package org.sunbird.assessment.service;
 
 import static java.util.stream.Collectors.toList;
 
+import java.lang.reflect.Type;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -13,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -24,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
+import org.sunbird.assessment.model.Competency;
 import org.sunbird.assessment.repo.AssessmentRepository;
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.util.CbExtServerProperties;
@@ -385,7 +388,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                 : null;
         Boolean isAssessmentUpdatedToDB = assessmentRepository.updateUserAssesmentDataToDB(userId,
                 (String) submitRequest.get(Constants.IDENTIFIER), submitRequest, result, Constants.SUBMITTED,
-                startTime);
+                startTime, new Timestamp(new Date().getTime()));
         if (Boolean.TRUE.equals(isAssessmentUpdatedToDB)) {
             Map<String, Object> kafkaResult = new HashMap<>();
             kafkaResult.put(Constants.CONTENT_ID_KEY, submitRequest.get(Constants.IDENTIFIER));
@@ -394,6 +397,12 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
             kafkaResult.put(Constants.USER_ID, submitRequest.get(Constants.USER_ID));
             kafkaResult.put(Constants.ASSESSMENT_ID_KEY, submitRequest.get(Constants.IDENTIFIER));
             kafkaResult.put(Constants.PRIMARY_CATEGORY, primaryCategory);
+            List<Competency> competencies = new ArrayList<>();
+            if ((primaryCategory.equalsIgnoreCase("Competency Assessment") && submitRequest.containsKey("competencies_v3") && submitRequest.get("competencies_v3") != null)) {
+                competencies = new Gson().fromJson((String) submitRequest.get("competencies_v3"), (Type) Competency[].class);
+            }
+            kafkaResult.put(Constants.COMPETENCY, competencies.isEmpty() ? "" : competencies);
+            logger.info(kafkaResult.toString());
             kafkaProducer.push(serverProperties.getAssessmentSubmitTopic(), kafkaResult);
         }
     }
@@ -666,5 +675,57 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
 
     private Boolean validateQuestionListRequest(List<String> identifierList, List<String> questionsFromAssessment) {
         return (new HashSet<>(questionsFromAssessment).containsAll(identifierList)) ? Boolean.TRUE : Boolean.FALSE;
+    }
+
+    public SBApiResponse retakeAssessment(String assessmentIdentifier, String token) throws Exception {
+        logger.info("AssessmentServiceV2Impl::retakeAssessment... Started");
+        SBApiResponse response = createDefaultResponse(Constants.API_RETAKE_ASSESSMENT_GET);
+        String errMsg = "";
+        try {
+            String userId = validateAuthTokenAndFetchUserId(token);
+            if (userId != null) {
+                List<Map<String, Object>> existingDataList = assessmentRepository.fetchUserAssessmentDataFromDB(userId,
+                        assessmentIdentifier);
+                if (!existingDataList.isEmpty()) {
+                    Date assessmentEndTime = (!existingDataList.isEmpty())
+                            ? (Date) existingDataList.get(0).get(Constants.END_TIME)
+                            : null;
+                    if (assessmentEndTime == null) {
+                        errMsg = Constants.READ_ASSESSMENT_START_TIME_FAILED;
+                    } else {
+                        Map<String, Object> assessmentAllDetail = new HashMap<>();
+                        errMsg = fetchReadHierarchyDetails(assessmentAllDetail, token, assessmentIdentifier);
+                        if (errMsg.isEmpty() && (assessmentAllDetail.get(Constants.RETAKE_ASSESSMENT_DURATION)) != null) {
+                            long time = calculateAssessmentRetakeTime((int) assessmentAllDetail.get(Constants.RETAKE_ASSESSMENT_DURATION), assessmentEndTime);
+                            if (time > 0)
+                                errMsg = "You can retake this assessment after " + time + " seconds";
+                        }
+                    }
+                }
+            } else {
+                errMsg = Constants.USER_ID_DOESNT_EXIST;
+            }
+        } catch (Exception e) {
+            logger.error(String.format("Exception in %s : %s", "read Assessment", e.getMessage()), e);
+            errMsg = "Failed to read Assessment. Exception: " + e.getMessage();
+        }
+        if (StringUtils.isNotBlank(errMsg)) {
+            response.getParams().setStatus(Constants.FAILED);
+            response.getParams().setErrmsg(errMsg);
+            response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return response;
+    }
+
+    private long calculateAssessmentRetakeTime(int retakeAssessmentDuration, Date assessmentEndTime) {
+        Calendar retakeAssessmentTime = Calendar.getInstance();
+        retakeAssessmentTime.setTimeInMillis(new Timestamp(assessmentEndTime.getTime()).getTime());
+        retakeAssessmentTime.add(Calendar.MINUTE,
+                retakeAssessmentDuration);
+        Calendar now = Calendar.getInstance();
+        if (now.getTime().compareTo(retakeAssessmentTime.getTime())<0) {
+            return TimeUnit.MILLISECONDS.toSeconds(Math.abs(retakeAssessmentTime.getTimeInMillis() - now.getTimeInMillis()));
+        }
+        return 0;
     }
 }

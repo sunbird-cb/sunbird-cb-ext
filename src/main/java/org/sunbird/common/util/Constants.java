@@ -366,6 +366,8 @@ public class Constants {
 	public static final String MTF_QUESTION = "MTF Question";
 	public static final String FTB_QUESTION = "FTB Question";
 	public static final String API_QUESTIONSET_HIERARCHY_GET = "api.questionset.hierarchy.get";
+
+	public static final String API_RETAKE_ASSESSMENT_GET = "api.retake.assessment.get";
 	public static final String VER = "3.0";
 	public static final String API_QUESTIONS_LIST = "api.questions.list";
 	public static final String MINIMUM_PASS_PERCENTAGE = "minimumPassPercentage";
@@ -577,6 +579,8 @@ public class Constants {
 	public static final String ERROR_INVALID_USER_ID = "Invalid UserId";
 	public static final String ERROR_INVALID_REQUEST_BODY = "Invalid Request Body";
 	public static final String CLIENT_ERROR = "CLIENT_ERROR";
+	public static final String RETAKE_ASSESSMENT_DURATION = "retakeAssessmentDuration";
+	public static final String SUBMIT_TIME = "submittime";
 
 	private Constants() {
 		throw new IllegalStateException("Utility class");
