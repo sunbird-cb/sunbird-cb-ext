@@ -527,12 +527,13 @@ public class Constants {
 	public static final String LAST_SENT_DATE = "lastsentdate";
 	public static final String MIN = "min";
 	public static final String MAX = "max";
-	public static final String CONTENT_TYPE_SEARCH = "contentType";
-	public static final String PARENT_CONTENT_SEARCH="parentContentType";
+	public static final String CONTENT_TYPE_KEY = "contentType";
+	public static final String PARENT_CONTENT_TYPE = "parentContentType";
 	public static final String NEW_COURSES = "newcourses";
 	public static final String OVERVIEW_BATCH_KEY = "/overview?batchId=";
 	public static final String LEAF_NODES_COUNT = "leafNodesCount";
 	public static final String CLIENT_ERROR = "CLIENT_ERROR";
+	public static final String PARENT = "parent";
 
 	private Constants() {
 		throw new IllegalStateException("Utility class");

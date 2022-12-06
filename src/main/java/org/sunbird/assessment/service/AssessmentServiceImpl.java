@@ -83,18 +83,8 @@ public class AssessmentServiceImpl implements AssessmentService {
 		Map<String, Object> persist = new HashMap<>();
 
 		// Fetch parent of an assessment with status live
-		String parentId = "";
-		try {
-			SunbirdApiResp contentHierarchy = contentService.getHeirarchyResponse(data.getIdentifier());
-			if (contentHierarchy != null) {
-				parentId = contentHierarchy.getResult().getContent().getParent();
-			}
-		} catch (Exception e) {
-			logger.error(e);
-		}
-		if (parentId == null) {
-			parentId = "";
-		}
+		String parentId = contentService.getParentIdentifier(data.getIdentifier());
+		
 		persist.put("parent", parentId);
 		persist.put(RESULT, result);
 		persist.put("sourceId", data.getIdentifier());
@@ -107,22 +97,9 @@ public class AssessmentServiceImpl implements AssessmentService {
 
 		if (Boolean.TRUE.equals(data.isAssessment()) && !"".equals(parentId)) {
 			// get parent data for assessment
-			try {
-			  	Map<String, Object> contentResponse = contentService.searchLiveContent(parentId);
-				if (!ObjectUtils.isEmpty(contentResponse)) {
-					Map<String, Object> contentResult = (Map<String, Object>) contentResponse.get(Constants.RESULT);
-					if (0 < (Integer) contentResult.get(Constants.COUNT)) {
-						List<Map<String, Object>> contentList = (List<Map<String, Object>>) contentResult
-								.get(Constants.CONTENT);
-						Map<String, Object> content = contentList.get(0);
-					    persist.put(Constants.PARENT_CONTENT_SEARCH, (String) content.get(Constants.CONTENT_TYPE_SEARCH));
-					}
-				}
-		} catch (Exception e) {
-				logger.error(e);
-			}
+			persist.put(Constants.PARENT_CONTENT_TYPE, contentService.getContentType(parentId));
 		} else {
-			persist.put("parentContentType", "");
+			persist.put(Constants.PARENT_CONTENT_TYPE, "");
 		}
 
 		logger.info("Trying to persist assessment data -> " + persist.toString());
