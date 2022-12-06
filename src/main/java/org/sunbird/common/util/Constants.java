@@ -533,7 +533,6 @@ public class Constants {
 	public static final String PARENT_CONTENT_TYPE = "parentContentType";
 	public static final String NEW_COURSES = "newcourses";
 	public static final String OVERVIEW_BATCH_KEY = "/overview?batchId=";
-<<<<<<< HEAD
 	public static final String PRACTICE_QUESTION_SET = "Practice Question Set";
 	public static final String EXPECTED_DURATION = "expectedDuration";
 	public static final String SUBMITTED = "SUBMITTED";
