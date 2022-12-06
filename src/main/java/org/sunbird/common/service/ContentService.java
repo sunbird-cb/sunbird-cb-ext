@@ -23,5 +23,11 @@ public interface ContentService {
 	public SunbirdApiResp getQuestionListDetails(List<String> questionIdList);
 	
 	public Map<String, Object> searchLiveContent(String contentId);
+	
+	public Map<String, Object> getHierarchyResponseMap(String contentId);
+	
+	public String getParentIdentifier(String resourceId);
+	
+	public String getContentType(String resourceId);
 }
 
