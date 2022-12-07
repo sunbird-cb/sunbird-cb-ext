@@ -687,16 +687,16 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                 List<Map<String, Object>> existingDataList = assessmentRepository.fetchUserAssessmentDataFromDB(userId,
                         assessmentIdentifier);
                 if (!existingDataList.isEmpty()) {
-                    Date assessmentEndTime = (!existingDataList.isEmpty())
+                    Date assessmentStartTime = (!existingDataList.isEmpty())
                             ? (Date) existingDataList.get(0).get(Constants.END_TIME)
                             : null;
-                    if (assessmentEndTime == null) {
+                    if (assessmentStartTime == null) {
                         errMsg = Constants.READ_ASSESSMENT_START_TIME_FAILED;
                     } else {
                         Map<String, Object> assessmentAllDetail = new HashMap<>();
                         errMsg = fetchReadHierarchyDetails(assessmentAllDetail, token, assessmentIdentifier);
                         if (errMsg.isEmpty() && (assessmentAllDetail.get(Constants.RETAKE_ASSESSMENT_DURATION)) != null) {
-                            long time = calculateAssessmentRetakeTime((int) assessmentAllDetail.get(Constants.RETAKE_ASSESSMENT_DURATION), assessmentEndTime);
+                            long time = calculateAssessmentRetakeTime((int) assessmentAllDetail.get(Constants.RETAKE_ASSESSMENT_DURATION), assessmentStartTime);
                             if (time > 0)
                                 errMsg = "You can retake this assessment after " + time + " seconds";
                         }
@@ -717,13 +717,15 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
         return response;
     }
 
-    private long calculateAssessmentRetakeTime(int retakeAssessmentDuration, Date assessmentEndTime) {
+    private long calculateAssessmentRetakeTime(int retakeAssessmentDuration, Date assessmentStartTime) {
         Calendar retakeAssessmentTime = Calendar.getInstance();
-        retakeAssessmentTime.setTimeInMillis(new Timestamp(assessmentEndTime.getTime()).getTime());
-        retakeAssessmentTime.add(Calendar.MINUTE,
+        retakeAssessmentTime.setTimeInMillis(new Timestamp(assessmentStartTime.getTime()).getTime());
+        retakeAssessmentTime.add(Calendar.SECOND,
                 retakeAssessmentDuration);
         Calendar now = Calendar.getInstance();
-        if (now.getTime().compareTo(retakeAssessmentTime.getTime())<0) {
+        Date time = now.getTime();
+        Date time1 = retakeAssessmentTime.getTime();
+        if (now.compareTo(retakeAssessmentTime)<0) {
             return TimeUnit.MILLISECONDS.toSeconds(Math.abs(retakeAssessmentTime.getTimeInMillis() - now.getTimeInMillis()));
         }
         return 0;

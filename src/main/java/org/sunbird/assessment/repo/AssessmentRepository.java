@@ -56,5 +56,5 @@ public interface AssessmentRepository {
 
 	Boolean updateUserAssesmentDataToDB(String userId, String assessmentIdentifier,
 			Map<String, Object> submitAssessmentRequest, Map<String, Object> submitAssessmentResponse, String status,
-			Date startTime, Date submitTime);
+			Date startTime);
 }
