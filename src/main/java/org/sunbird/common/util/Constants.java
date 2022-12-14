@@ -584,6 +584,7 @@ public class Constants {
 	public static final String SUBMIT_TIME = "submittime";
 	public static final String LEAF_NODES_COUNT = "leafNodesCount";
 	public static final String PARENT = "parent";
+	public static final String RETAKE_MINUTES_LEFT = "retakeMinutesLeft";
 
 	private Constants() {
 		throw new IllegalStateException("Utility class");

@@ -388,7 +388,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                 : null;
         Boolean isAssessmentUpdatedToDB = assessmentRepository.updateUserAssesmentDataToDB(userId,
                 (String) submitRequest.get(Constants.IDENTIFIER), submitRequest, result, Constants.SUBMITTED,
-                startTime, new Timestamp(new Date().getTime()));
+                startTime);
         if (Boolean.TRUE.equals(isAssessmentUpdatedToDB)) {
             Map<String, Object> kafkaResult = new HashMap<>();
             kafkaResult.put(Constants.CONTENT_ID_KEY, submitRequest.get(Constants.IDENTIFIER));
@@ -677,57 +677,55 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
         return (new HashSet<>(questionsFromAssessment).containsAll(identifierList)) ? Boolean.TRUE : Boolean.FALSE;
     }
 
-    public SBApiResponse retakeAssessment(String assessmentIdentifier, String token) throws Exception {
-        logger.info("AssessmentServiceV2Impl::retakeAssessment... Started");
-        SBApiResponse response = createDefaultResponse(Constants.API_RETAKE_ASSESSMENT_GET);
-        String errMsg = "";
-        try {
-            String userId = validateAuthTokenAndFetchUserId(token);
-            if (userId != null) {
-                List<Map<String, Object>> existingDataList = assessmentRepository.fetchUserAssessmentDataFromDB(userId,
-                        assessmentIdentifier);
-                if (!existingDataList.isEmpty()) {
-                    Date assessmentStartTime = (!existingDataList.isEmpty())
-                            ? (Date) existingDataList.get(0).get(Constants.END_TIME)
-                            : null;
-                    if (assessmentStartTime == null) {
-                        errMsg = Constants.READ_ASSESSMENT_START_TIME_FAILED;
-                    } else {
-                        Map<String, Object> assessmentAllDetail = new HashMap<>();
-                        errMsg = fetchReadHierarchyDetails(assessmentAllDetail, token, assessmentIdentifier);
-                        if (errMsg.isEmpty() && (assessmentAllDetail.get(Constants.RETAKE_ASSESSMENT_DURATION)) != null) {
-                            long time = calculateAssessmentRetakeTime((int) assessmentAllDetail.get(Constants.RETAKE_ASSESSMENT_DURATION), assessmentStartTime);
-                            if (time > 0)
-                                errMsg = "You can retake this assessment after " + time + " seconds";
-                        }
-                    }
-                }
-            } else {
-                errMsg = Constants.USER_ID_DOESNT_EXIST;
-            }
-        } catch (Exception e) {
-            logger.error(String.format("Exception in %s : %s", "read Assessment", e.getMessage()), e);
-            errMsg = "Failed to read Assessment. Exception: " + e.getMessage();
-        }
-        if (StringUtils.isNotBlank(errMsg)) {
-            response.getParams().setStatus(Constants.FAILED);
-            response.getParams().setErrmsg(errMsg);
-            response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-        return response;
-    }
+	public SBApiResponse retakeAssessment(String assessmentIdentifier, String token) throws Exception {
+		logger.info("AssessmentServiceV2Impl::retakeAssessment... Started");
+		SBApiResponse response = createDefaultResponse(Constants.API_RETAKE_ASSESSMENT_GET);
+		String errMsg = "";
+		long time = 0;
+		try {
+			String userId = validateAuthTokenAndFetchUserId(token);
+			if (userId != null) {
+				List<Map<String, Object>> existingDataList = assessmentRepository.fetchUserAssessmentDataFromDB(userId,
+						assessmentIdentifier);
+				if (!existingDataList.isEmpty()) {
+					Date assessmentStartTime = (Date) existingDataList.get(0).get(Constants.END_TIME);
+					if (assessmentStartTime != null) {
+						Map<String, Object> assessmentAllDetail = new HashMap<>();
+						errMsg = fetchReadHierarchyDetails(assessmentAllDetail, token, assessmentIdentifier);
+						if (errMsg.isEmpty()
+								&& (assessmentAllDetail.get(Constants.RETAKE_ASSESSMENT_DURATION)) != null) {
+							time = calculateAssessmentRetakeTime(
+									(int) assessmentAllDetail.get(Constants.RETAKE_ASSESSMENT_DURATION),
+									assessmentStartTime);
+						}
+					}
+				}
+			} else {
+				errMsg = Constants.USER_ID_DOESNT_EXIST;
+			}
+		} catch (Exception e) {
+			logger.error(String.format("Exception in %s : %s", "read Assessment", e.getMessage()), e);
+			errMsg = "Failed to read Assessment. Exception: " + e.getMessage();
+		}
+		if (StringUtils.isNotBlank(errMsg)) {
+			response.getParams().setStatus(Constants.FAILED);
+			response.getParams().setErrmsg(errMsg);
+			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+		} else {
+			response.getResult().put(Constants.RETAKE_MINUTES_LEFT, time);
+		}
+		return response;
+	}
 
-    private long calculateAssessmentRetakeTime(int retakeAssessmentDuration, Date assessmentStartTime) {
-        Calendar retakeAssessmentTime = Calendar.getInstance();
-        retakeAssessmentTime.setTimeInMillis(new Timestamp(assessmentStartTime.getTime()).getTime());
-        retakeAssessmentTime.add(Calendar.SECOND,
-                retakeAssessmentDuration);
-        Calendar now = Calendar.getInstance();
-        Date time = now.getTime();
-        Date time1 = retakeAssessmentTime.getTime();
-        if (now.compareTo(retakeAssessmentTime)<0) {
-            return TimeUnit.MILLISECONDS.toSeconds(Math.abs(retakeAssessmentTime.getTimeInMillis() - now.getTimeInMillis()));
-        }
-        return 0;
-    }
+	private long calculateAssessmentRetakeTime(int retakeAssessmentDuration, Date assessmentStartTime) {
+		Calendar retakeAssessmentTime = Calendar.getInstance();
+		retakeAssessmentTime.setTimeInMillis(new Timestamp(assessmentStartTime.getTime()).getTime());
+		retakeAssessmentTime.add(Calendar.SECOND, retakeAssessmentDuration);
+		Calendar now = Calendar.getInstance();
+		if (now.compareTo(retakeAssessmentTime) < 0) {
+			return TimeUnit.MILLISECONDS
+					.toMinutes(Math.abs(retakeAssessmentTime.getTimeInMillis() - now.getTimeInMillis()));
+		}
+		return 0;
+	}
 }
