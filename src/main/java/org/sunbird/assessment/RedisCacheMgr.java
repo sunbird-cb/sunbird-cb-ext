@@ -16,7 +16,6 @@ public class RedisCacheMgr {
 
     private static final int cache_ttl = 84600;
 
-    @Autowired
     private RedisTemplate<String, Object> redisTemplate;
 
     @Autowired
