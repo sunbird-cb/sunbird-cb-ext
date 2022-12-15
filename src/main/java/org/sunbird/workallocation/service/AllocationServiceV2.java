@@ -539,7 +539,7 @@ public class AllocationServiceV2 {
 
 			restStatus = indexerService.addEntity(workOrderIndex, workOrderIndexType, workOrder.getId(),
 					mapper.convertValue(workOrder, Map.class));
-		} catch (JsonProcessingException e) {
+		} catch (Exception e) {
 			logger.error("Exception occurred while saving the work order!!", e);
 			throw new ApplicationLogicError("Exception occurred while saving the work order!!", e);
 		}

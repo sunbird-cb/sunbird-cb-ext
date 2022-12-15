@@ -13,8 +13,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.util.ObjectUtils;
-import org.sunbird.cache.RedisCacheMgr;
 import org.sunbird.cassandra.utils.CassandraOperation;
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
@@ -38,9 +36,6 @@ public class ExploreCourseServiceImpl implements ExploreCourseService {
 
 	@Autowired
 	CassandraOperation cassandraOperation;
-
-	@Autowired
-	RedisCacheMgr redisCacheMgr;
 
 	@Autowired
 	CbExtServerProperties serverProperties;
@@ -82,7 +77,6 @@ public class ExploreCourseServiceImpl implements ExploreCourseService {
 	}
 
 	public SBApiResponse refreshCache() {
-		redisCacheMgr.deleteKeyByName(Constants.PUBLIC_COURSE_LIST);
 		SBApiResponse response = getExploreCourseList();
 		response.setId(Constants.API_REFRESH_EXPLORE_COURSE_DETAIL);
 		return response;

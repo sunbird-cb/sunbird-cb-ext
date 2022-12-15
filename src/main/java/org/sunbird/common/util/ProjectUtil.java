@@ -1,7 +1,5 @@
 package org.sunbird.common.util;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -26,7 +24,6 @@ public class ProjectUtil {
     public static CbExtLogger logger = new CbExtLogger(ProjectUtil.class.getName());
 
     public static PropertiesCache propertiesCache;
-    private static final ObjectMapper mapper = new ObjectMapper();
 
     static {
         propertiesCache = PropertiesCache.getInstance();

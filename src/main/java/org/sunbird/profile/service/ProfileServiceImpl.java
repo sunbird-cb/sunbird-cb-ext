@@ -3,6 +3,7 @@ package org.sunbird.profile.service;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +27,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
-import org.sunbird.cache.RedisCacheMgr;
 import org.sunbird.cassandra.utils.CassandraOperation;
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.model.SunbirdApiRespParam;
@@ -42,6 +42,7 @@ import org.sunbird.user.service.UserUtilityServiceImpl;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 
 @Service
 @SuppressWarnings({ "unchecked", "serial" })
@@ -52,9 +53,6 @@ public class ProfileServiceImpl implements ProfileService {
 
 	@Autowired
 	OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
-
-	@Autowired
-	RedisCacheMgr redisCacheMgr;
 
 	@Autowired
 	UserUtilityServiceImpl userUtilityService;
@@ -73,6 +71,9 @@ public class ProfileServiceImpl implements ProfileService {
 
 	@Autowired
 	StorageServiceImpl storageService;
+
+	@Autowired
+	Gson gson;
 
 	private Logger log = LoggerFactory.getLogger(getClass().getName());
 
@@ -674,28 +675,16 @@ public class ProfileServiceImpl implements ProfileService {
 	}
 
 	public List<String> approvalFields() {
-		Map<String, Object> approvalFieldsCache = (Map<String, Object>) mapper
-				.convertValue(redisCacheMgr.getCache(Constants.PROFILE_UPDATE_FIELDS), Map.class);
-
-		if (!ObjectUtils.isEmpty(approvalFieldsCache)) {
-			Map<String, Object> approvalResult = (Map<String, Object>) approvalFieldsCache.get(Constants.RESULT);
-			Map<String, Object> approvalResponse = (Map<String, Object>) approvalResult.get(Constants.RESPONSE);
-			String value = (String) approvalResponse.get(Constants.VALUE);
-			List<String> approvalValues = new ArrayList<>();
-			approvalValues.add(value);
-			return approvalValues;
-		} else {
-			Map<String, String> header = new HashMap<>();
-			Map<String, Object> approvalData = (Map<String, Object>) outboundRequestHandlerService
-					.fetchUsingGetWithHeadersProfile(serverConfig.getSbUrl() + serverConfig.getLmsSystemSettingsPath(),
-							header);
-			Map<String, Object> approvalResult = (Map<String, Object>) approvalData.get(Constants.RESULT);
-			Map<String, Object> approvalResponse = (Map<String, Object>) approvalResult.get(Constants.RESPONSE);
-			String value = (String) approvalResponse.get(Constants.VALUE);
-			String strArray[] = value.split(" ");
-			List<String> approvalValues = Arrays.asList(strArray);
-			return approvalValues;
-		}
+		Map<String, String> header = new HashMap<>();
+		Map<String, Object> approvalData = (Map<String, Object>) outboundRequestHandlerService
+				.fetchUsingGetWithHeadersProfile(serverConfig.getSbUrl() + serverConfig.getLmsSystemSettingsPath(),
+						header);
+		Map<String, Object> approvalResult = (Map<String, Object>) approvalData.get(Constants.RESULT);
+		Map<String, Object> approvalResponse = (Map<String, Object>) approvalResult.get(Constants.RESPONSE);
+		String value = (String) approvalResponse.get(Constants.VALUE);
+		String strArray[] = value.split(" ");
+		List<String> approvalValues = Arrays.asList(strArray);
+		return approvalValues;
 	}
 
 	public String checkDepartment(Map<String, Object> requestProfile) throws Exception {
@@ -777,37 +766,29 @@ public class ProfileServiceImpl implements ProfileService {
 	}
 
 	public String getCustodianOrgId() {
-		String custodianOrgId = (String) redisCacheMgr.getCache(Constants.CUSTODIAN_ORG_ID);
-		if (StringUtils.isEmpty(custodianOrgId)) {
-			Map<String, Object> searchRequest = new HashMap<String, Object>();
-			searchRequest.put(Constants.ID, Constants.CUSTODIAN_ORG_ID);
+		Map<String, Object> searchRequest = new HashMap<String, Object>();
+		searchRequest.put(Constants.ID, Constants.CUSTODIAN_ORG_ID);
 
-			List<Map<String, Object>> existingDataList = cassandraOperation.getRecordsByProperties(
-					Constants.KEYSPACE_SUNBIRD, Constants.TABLE_SYSTEM_SETTINGS, searchRequest, null);
-			if (CollectionUtils.isNotEmpty(existingDataList)) {
-				Map<String, Object> data = existingDataList.get(0);
-				custodianOrgId = (String) data.get(Constants.VALUE.toLowerCase());
-			}
-			redisCacheMgr.putCache(Constants.CUSTODIAN_ORG_ID, custodianOrgId);
+		List<Map<String, Object>> existingDataList = cassandraOperation.getRecordsByProperties(
+				Constants.KEYSPACE_SUNBIRD, Constants.TABLE_SYSTEM_SETTINGS, searchRequest, null);
+		if (CollectionUtils.isNotEmpty(existingDataList)) {
+			Map<String, Object> data = existingDataList.get(0);
+			return (String) data.get(Constants.VALUE.toLowerCase());
 		}
-		return custodianOrgId;
+		return StringUtils.EMPTY;
 	}
 
 	public String getCustodianOrgChannel() {
-		String custodianOrgChannel = (String) redisCacheMgr.getCache(Constants.CUSTODIAN_ORG_CHANNEL);
-		if (StringUtils.isEmpty(custodianOrgChannel)) {
-			Map<String, Object> searchRequest = new HashMap<String, Object>();
-			searchRequest.put(Constants.ID, Constants.CUSTODIAN_ORG_CHANNEL);
+		Map<String, Object> searchRequest = new HashMap<String, Object>();
+		searchRequest.put(Constants.ID, Constants.CUSTODIAN_ORG_CHANNEL);
 
-			List<Map<String, Object>> existingDataList = cassandraOperation.getRecordsByProperties(
-					Constants.KEYSPACE_SUNBIRD, Constants.TABLE_SYSTEM_SETTINGS, searchRequest, null);
-			if (CollectionUtils.isNotEmpty(existingDataList)) {
-				Map<String, Object> data = existingDataList.get(0);
-				custodianOrgChannel = (String) data.get(Constants.VALUE.toLowerCase());
-			}
-			redisCacheMgr.putCache(Constants.CUSTODIAN_ORG_CHANNEL, custodianOrgChannel);
+		List<Map<String, Object>> existingDataList = cassandraOperation.getRecordsByProperties(
+				Constants.KEYSPACE_SUNBIRD, Constants.TABLE_SYSTEM_SETTINGS, searchRequest, null);
+		if (CollectionUtils.isNotEmpty(existingDataList)) {
+			Map<String, Object> data = existingDataList.get(0);
+			return (String) data.get(Constants.VALUE.toLowerCase());
 		}
-		return custodianOrgChannel;
+		return StringUtils.EMPTY;
 	}
 
 	private String validateBasicProfilePayload(Map<String, Object> requestObj) {
@@ -1052,7 +1033,7 @@ public class ProfileServiceImpl implements ProfileService {
 				|| !Constants.OK.equalsIgnoreCase((String) migrateResponse.get(Constants.RESPONSE_CODE))) {
 			errMsg = migrateResponse == null ? "Failed to migrate User."
 					: (String) ((Map<String, Object>) migrateResponse.get(Constants.PARAMS))
-							.get(Constants.ERROR_MESSAGE);
+					.get(Constants.ERROR_MESSAGE);
 		}
 		return errMsg;
 	}
@@ -1214,5 +1195,113 @@ public class ProfileServiceImpl implements ProfileService {
 		outboundRequestHandlerService.fetchResultUsingPost(
 				serverConfig.getSbUrl() + serverConfig.getSbSendNotificationEmailPath(), request,
 				ProjectUtil.getDefaultHeaders());
+	}
+
+	@Override
+	public SBApiResponse getNotificationPreferencesById(String userId) {
+		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_READ_NOTIFICATION_PREFERENCE);
+		String errMsg = null;
+		if (StringUtils.isEmpty(userId)) {
+			response.getParams().setErrmsg(Constants.ERROR_INVALID_USER_ID);
+			response.setResponseCode(HttpStatus.BAD_REQUEST);
+			response.getParams().setStatus(Constants.FAILED);
+			return response;
+		}
+		Map<String, Object> request = new HashMap<>();
+		request.put(Constants.USER_ID, userId);
+		try {
+			List<Map<String, Object>> notificationPreferences = cassandraOperation.getRecordsByProperties(
+					Constants.KEYSPACE_SUNBIRD, Constants.TABLE_USER_NOTIFICATION_PREFERENCE, request,
+					Collections.singletonList(Constants.NOTIFICATION_PREFERENCE));
+			for (Map<String, Object> objectMap : notificationPreferences) {
+				Map<String, Object> responseMap = gson.fromJson(String.valueOf(objectMap), Map.class);
+				response.getResult().putAll(responseMap);
+			}
+			response.setResponseCode(HttpStatus.OK);
+			response.getParams().setStatus(Constants.SUCCESS);
+		} catch (Exception e) {
+			errMsg = "Failed to read user notification preference. Exception: " + e.getMessage();
+			log.error(errMsg, e);
+		}
+		if (StringUtils.isNotBlank(errMsg)) {
+			response.getParams().setStatus(Constants.FAILED);
+			response.getParams().setErrmsg(errMsg);
+			response.setResponseCode(HttpStatus.BAD_REQUEST);
+		}
+		return response;
+	}
+
+	@Override
+	public SBApiResponse updateNotificationPreference(String userId, Map<String, Object> request) {
+		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_UPDATE_NOTIFICATION_PREFERENCE);
+		if (StringUtils.isEmpty(userId)) {
+			response.getParams().setErrmsg(Constants.ERROR_INVALID_USER_ID);
+			response.setResponseCode(HttpStatus.BAD_REQUEST);
+			response.getParams().setStatus(Constants.FAILED);
+			return response;
+		}
+		String errMsg = null;
+		try {
+			Map<String, Object> requestBody = (Map<String, Object>) request.get(Constants.REQUEST);
+			if (MapUtils.isNotEmpty(requestBody)) {
+				requestBody.put(Constants.USER_ID, userId);
+				Map<String, Object> updateRequest = new HashMap<>();
+				updateRequest.put(Constants.NOTIFICATION_PREFERENCE, mapper.writeValueAsString(requestBody));
+				Map<String, Object> key = new HashMap<String, Object>() {
+					private static final long serialVersionUID = 1L;
+					{
+						put(Constants.USER_ID, userId);
+					}
+				};
+				cassandraOperation.updateRecord(Constants.KEYSPACE_SUNBIRD,
+						Constants.TABLE_USER_NOTIFICATION_PREFERENCE, updateRequest, key);
+
+				Map<String, Object> existingData = getPreferenceDoc(key);
+
+				RestStatus restStatus = null;
+				if (existingData == null) {
+					restStatus = indexerService.addEntity(serverConfig.getSbUserNotificationPreferenceIndex(),
+							serverConfig.getEsProfileIndexType(), userId, requestBody, true);
+				} else {
+					restStatus = indexerService.updateEntity(serverConfig.getSbUserNotificationPreferenceIndex(),
+							serverConfig.getEsProfileIndexType(), userId, mapper.convertValue(requestBody, Map.class),
+							true);
+					if (restStatus == null || !Constants.OK.equalsIgnoreCase(restStatus.name())) {
+						response.getParams().setStatus(Constants.FAILED);
+						errMsg = "Failed to update Notification Preference Index";
+					}
+				}
+			} else {
+				errMsg = Constants.ERROR_INVALID_REQUEST_BODY;
+			}
+		} catch (Exception e) {
+			errMsg = "Failed to update notification preference records. Exception: " + e.getMessage();
+			log.error(errMsg, e);
+		}
+		if (StringUtils.isNotBlank(errMsg)) {
+			response.getParams().setStatus(Constants.FAILED);
+			response.getParams().setErrmsg(errMsg);
+			response.setResponseCode(HttpStatus.BAD_REQUEST);
+		}
+		return response;
+	}
+	
+	private Map<String, Object> getPreferenceDoc(Map<String, Object> key) throws Exception {
+		SearchResponse searchResponse = indexerService.getEsResult(serverConfig.getSbUserNotificationPreferenceIndex(),
+				serverConfig.getEsProfileIndexType(), queryBuilder(key), true);
+
+		if (searchResponse.getHits().getTotalHits() > 0) {
+			SearchHit hit = searchResponse.getHits().getAt(0);
+			return mapper.convertValue(hit.getSourceAsMap(), Map.class);
+		}
+		return null;
+	}
+	
+	private SearchSourceBuilder queryBuilder(Map<String, Object> mustMatch) {
+		BoolQueryBuilder boolBuilder = new BoolQueryBuilder();
+		for (Map.Entry<String, Object> entry : mustMatch.entrySet()) {
+			boolBuilder.must(QueryBuilders.termQuery(entry.getKey() + ".raw", entry.getValue()));
+		}
+		return new SearchSourceBuilder().query(boolBuilder);
 	}
 }
