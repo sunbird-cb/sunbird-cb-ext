@@ -4,16 +4,7 @@ import static java.util.stream.Collectors.toList;
 
 import java.lang.reflect.Type;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -26,17 +17,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
+import org.sunbird.assessment.RedisCacheMgr;
 import org.sunbird.assessment.model.Competency;
 import org.sunbird.assessment.repo.AssessmentRepository;
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.common.util.RequestInterceptor;
+import org.sunbird.core.config.RedisConfig;
 import org.sunbird.core.producer.Producer;
 
 import com.beust.jcommander.internal.Lists;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPoolConfig;
 
 @Service
 @SuppressWarnings("unchecked")
@@ -59,17 +55,27 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
     @Autowired
     RequestInterceptor requestInterceptor;
 
+    @Autowired
+    RedisCacheMgr redisCacheMgr;
+
     public SBApiResponse readAssessment(String assessmentIdentifier, String token) {
         logger.info("AssessmentServiceV2Impl::readAssessment... Started");
         SBApiResponse response = createDefaultResponse(Constants.API_QUESTIONSET_HIERARCHY_GET);
-        String errMsg;
+        String errMsg = "";
         try {
             String userId = validateAuthTokenAndFetchUserId(token);
             if (userId != null) {
                 logger.info("readAssessment.. userId :" + userId);
                 Map<String, Object> assessmentAllDetail = new HashMap<>();
-                errMsg = fetchReadHierarchyDetails(assessmentAllDetail, token, assessmentIdentifier);
-                if (errMsg.isEmpty() && !((String) assessmentAllDetail.get(Constants.PRIMARY_CATEGORY))
+                String assessment = (String) redisCacheMgr.getCache(Constants.ASSESSMENT_ID + assessmentIdentifier);
+                if (assessment != null) {
+                    assessmentAllDetail = Arrays.stream(assessment.split(","))
+                            .map(s -> s.split("="))
+                            .collect(Collectors.toMap(s -> s[0], s -> s[1]));
+                } else {
+                    errMsg = fetchReadHierarchyDetails(assessmentAllDetail, token, assessmentIdentifier);
+                }
+                if (errMsg.isEmpty() && assessmentAllDetail != null && !((String) assessmentAllDetail.get(Constants.PRIMARY_CATEGORY))
                         .equalsIgnoreCase(Constants.PRACTICE_QUESTION_SET)) {
                     logger.info("Fetched assessment Details... for : " + assessmentIdentifier);
                     List<Map<String, Object>> existingDataList = assessmentRepository
@@ -176,6 +182,8 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                 || !Constants.OK.equalsIgnoreCase((String) readHierarchyApiResponse.get(Constants.RESPONSE_CODE))) {
             return Constants.ASSESSMENT_HIERARCHY_READ_FAILED;
         }
+        redisCacheMgr.putCache(Constants.ASSESSMENT_ID + assessmentIdentifier, String.valueOf(((Map<String, Object>) readHierarchyApiResponse.get(Constants.RESULT))
+                .get(Constants.QUESTION_SET)));
         assessmentAllDetail
                 .putAll((Map<String, Object>) ((Map<String, Object>) readHierarchyApiResponse.get(Constants.RESULT))
                         .get(Constants.QUESTION_SET));
@@ -388,7 +396,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                 : null;
         Boolean isAssessmentUpdatedToDB = assessmentRepository.updateUserAssesmentDataToDB(userId,
                 (String) submitRequest.get(Constants.IDENTIFIER), submitRequest, result, Constants.SUBMITTED,
-                startTime, new Timestamp(new Date().getTime()));
+                startTime);
         if (Boolean.TRUE.equals(isAssessmentUpdatedToDB)) {
             Map<String, Object> kafkaResult = new HashMap<>();
             kafkaResult.put(Constants.CONTENT_ID_KEY, submitRequest.get(Constants.IDENTIFIER));
@@ -725,7 +733,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
         Calendar now = Calendar.getInstance();
         Date time = now.getTime();
         Date time1 = retakeAssessmentTime.getTime();
-        if (now.compareTo(retakeAssessmentTime)<0) {
+        if (now.compareTo(retakeAssessmentTime) < 0) {
             return TimeUnit.MILLISECONDS.toSeconds(Math.abs(retakeAssessmentTime.getTimeInMillis() - now.getTimeInMillis()));
         }
         return 0;

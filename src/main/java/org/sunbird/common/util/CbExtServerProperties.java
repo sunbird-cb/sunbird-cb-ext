@@ -194,9 +194,6 @@ public class CbExtServerProperties {
 	@Value("${redis.host.name}")
 	private String redisHostName;
 
-	@Value("${redis.port}")
-	private String redisPort;
-
 	@Value("${redis.timeout}")
 	private String redisTimeout;
 
@@ -764,14 +761,6 @@ public class CbExtServerProperties {
 
 	public void setCourseBatchCreateEndpoint(String courseBatchCreateEndpoint) {
 		this.courseBatchCreateEndpoint = courseBatchCreateEndpoint;
-	}
-
-	public String getRedisPort() {
-		return redisPort;
-	}
-
-	public void setRedisPort(String redisPort) {
-		this.redisPort = redisPort;
 	}
 
 	public String getRedisHostName() {
