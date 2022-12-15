@@ -716,7 +716,7 @@ public class ProfileServiceImpl implements ProfileService {
 					if (Constants.FIRST_NAME_LOWER_CASE.equalsIgnoreCase(paramName)) {
 						updatedRequest.put(Constants.FIRSTNAME, (String) personalDetailsMap.get(paramName));
 					} else if (Constants.SURNAME.equalsIgnoreCase(paramName)) {
-						updatedRequest.put(Constants.FIRSTNAME, (String) personalDetailsMap.get(paramName));
+						updatedRequest.put(Constants.LASTNAME, (String) personalDetailsMap.get(paramName));
 					} else if (Constants.MOBILE.equalsIgnoreCase(paramName)) {
 						updatedRequest.put(Constants.PHONE, String.valueOf(personalDetailsMap.get(paramName)));
 					}
