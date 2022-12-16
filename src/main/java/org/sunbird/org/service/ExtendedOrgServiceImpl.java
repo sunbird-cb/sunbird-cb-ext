@@ -8,8 +8,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.google.gson.Gson;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.slf4j.ILoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -345,5 +349,29 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 		}
 
 		return StringUtils.EMPTY;
+	}
+	public Map<String,Object> getOrgDetails(String orgId,List<String> fields){
+		Map<String,Object> filters=new HashMap<>();
+		filters.put(Constants.IDENTIFIER,orgId);
+		Map<String,Object> requestBody=new HashMap<>();
+		requestBody.put(Constants.FILTERS,filters);
+		requestBody.put(Constants.FIELDS,fields);
+		Map<String,Object> request=new HashMap<>();
+		request.put(Constants.REQUEST,requestBody);
+		Map<String, String> headers = new HashMap<>();
+		headers.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
+		Map<String, Object> apiResponse = (Map<String, Object>) outboundService.fetchResultUsingPost(configProperties.getSbUrl() + configProperties.getSbOrgSearchPath(),
+				request, headers);
+		Map<String,Object> orgMap=new HashMap<>();
+		if (Constants.OK.equalsIgnoreCase((String) apiResponse.get(Constants.RESPONSE_CODE))) {
+			Map<String, Object> result = (Map<String, Object>) apiResponse.get(Constants.RESULT);
+			if(MapUtils.isNotEmpty(result)){
+				Map<String,Object> response=(Map<String, Object>)result.get(Constants.RESPONSE);
+				if(MapUtils.isNotEmpty(response)){
+					orgMap.put(orgId,response.get(Constants.CONTENT));
+				}
+			}
+		}
+		return orgMap;
 	}
 }
