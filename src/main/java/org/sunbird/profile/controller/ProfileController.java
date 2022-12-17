@@ -89,4 +89,10 @@ public class ProfileController {
 		SBApiResponse response = profileService.getBulkUploadDetails(orgId);
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
+
+	@GetMapping("/user/v1/enrollement/report")
+	public ResponseEntity<?> getUserEnrollmentReport(@RequestHeader(Constants.AUTH_TOKEN) String authToken) {
+		SBApiResponse response = profileService.getUserEnrollmentReport(authToken);
+		return new ResponseEntity<>(response, response.getResponseCode());
+	}
 }

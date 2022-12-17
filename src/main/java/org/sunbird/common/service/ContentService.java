@@ -21,7 +21,9 @@ public interface ContentService {
 	public SunbirdApiUserCourseListResp getUserCourseListResponse(String authToken, String userId);
 	
 	public SunbirdApiResp getQuestionListDetails(List<String> questionIdList);
-	
+
+	Map<String, Object> searchLiveContentByContentIds(List<Object> contentIds);
+
 	public Map<String, Object> searchLiveContent(String contentId);
 	
 	public Map<String, Object> getHierarchyResponseMap(String contentId);

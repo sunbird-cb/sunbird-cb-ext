@@ -1,14 +1,10 @@
 package org.sunbird.profile.service;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
+import com.google.common.collect.Lists;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -30,6 +26,7 @@ import org.sunbird.cache.RedisCacheMgr;
 import org.sunbird.cassandra.utils.CassandraOperation;
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.model.SunbirdApiRespParam;
+import org.sunbird.common.service.ContentService;
 import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
@@ -42,6 +39,8 @@ import org.sunbird.user.service.UserUtilityServiceImpl;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import static java.util.stream.Collectors.toList;
 
 @Service
 @SuppressWarnings({ "unchecked", "serial" })
@@ -73,6 +72,9 @@ public class ProfileServiceImpl implements ProfileService {
 
 	@Autowired
 	StorageServiceImpl storageService;
+
+	@Autowired
+	ContentService contentService;
 
 	private Logger log = LoggerFactory.getLogger(getClass().getName());
 
@@ -1214,5 +1216,37 @@ public class ProfileServiceImpl implements ProfileService {
 		outboundRequestHandlerService.fetchResultUsingPost(
 				serverConfig.getSbUrl() + serverConfig.getSbSendNotificationEmailPath(), request,
 				ProjectUtil.getDefaultHeaders());
+	}
+
+	@Override
+	public SBApiResponse getUserEnrollmentReport(String authToken) {
+		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_USER_ENROLMENT_REPORT);
+		List<Map<String, Object>> userEnrolmentList = new ArrayList<>();
+		Map<String, Object> propertyMap = new HashMap<>();
+		propertyMap.put(Constants.ACTIVE, Boolean.TRUE);
+		userEnrolmentList.addAll(cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD_COURSES,
+				Constants.TABLE_USER_ENROLMENT, propertyMap,
+				new ArrayList<>(Arrays.asList(Constants.USER_ID_CONSTANT, Constants.COURSE_ID,
+						Constants.BATCH_ID, Constants.COMPLETION_PERCENTAGE, Constants.PROGRESS))));
+
+		log.info(userEnrolmentList.toString());
+		List<String> desiredKeys = Lists.newArrayList("userId");
+		List<Object> userIds = userEnrolmentList.stream().flatMap(x -> desiredKeys.stream().filter(x::containsKey).map(x::get)).collect(toList());
+		List<Object> userIdsDistinct = userIds.stream().distinct().collect(toList());
+		log.info(userIdsDistinct.toString());
+
+		List<String> desiredKey = Lists.newArrayList("courseId");
+		List<Object> courseIds = userEnrolmentList.stream().flatMap(x -> desiredKey.stream().filter(x::containsKey).map(x::get)).collect(toList());
+		List<Object> courseIdsDistinct = courseIds.stream().distinct().collect(toList());
+		log.info(courseIdsDistinct.toString());
+		Map<String, Object> courseData = contentService.searchLiveContentByContentIds(courseIdsDistinct);
+
+		//to be completed
+		List<String> userIdList = userIdsDistinct.stream()
+				.map(object -> Objects.toString(object, null))
+				.collect(Collectors.toList());
+		Map<String, Object> userData = userUtilityService.getUsersDataFromUserIds(userIdList, new ArrayList<>(Arrays.asList(Constants.USER_ID, Constants.ID, Constants.COURSE_ID, Constants.CHANNEL, Constants.PHONE, Constants.ROOT_ORG_ID, Constants.PRIMARY_CATEGORY, Constants.PROFILE_DETAILS)), authToken);
+		log.info(userData.toString());
+		return response;
 	}
 }

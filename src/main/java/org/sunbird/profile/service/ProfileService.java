@@ -25,4 +25,6 @@ public interface ProfileService {
 	SBApiResponse bulkUpload(MultipartFile mFile, String orgId, String orgName, String userId);
 
 	SBApiResponse getBulkUploadDetails(String orgId);
+
+	SBApiResponse getUserEnrollmentReport(String authToken);
 }

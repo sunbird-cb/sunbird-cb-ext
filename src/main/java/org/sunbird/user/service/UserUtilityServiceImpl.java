@@ -19,10 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestTemplate;
 import org.sunbird.cassandra.utils.CassandraOperation;
-import org.sunbird.common.model.SearchUserApiContent;
-import org.sunbird.common.model.SearchUserApiResp;
-import org.sunbird.common.model.SunbirdApiRequest;
-import org.sunbird.common.model.SunbirdApiResp;
+import org.sunbird.common.model.*;
 import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
@@ -151,6 +148,9 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 					&& searchUserResult.getResult().getResponse().getCount() > 0) {
 				for (SearchUserApiContent searchUserApiContent : searchUserResult.getResult().getResponse()
 						.getContent()) {
+					if (searchUserApiContent.getProfileDetails() == null){
+						searchUserApiContent.setProfileDetails(new SunbirdUserProfileDetail());
+					}
 					result.put(searchUserApiContent.getUserId(), searchUserApiContent);
 				}
 			}
