@@ -347,7 +347,6 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 
 		return StringUtils.EMPTY;
 	}
-<<<<<<< HEAD
 
 	public Map<String,Object> getOrgDetails(List<String> orgIds, List<String> fields){
 		Map<String,Object> filters=new HashMap<>();
@@ -367,13 +366,9 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 			if(MapUtils.isNotEmpty(result)){
 				Map<String,Object> response=(Map<String, Object>)result.get(Constants.RESPONSE);
 				if(MapUtils.isNotEmpty(response)){
-<<<<<<< HEAD
 					for (int i=0; i<orgIds.size(); i++) {
 						orgMap.put((String) response.get(orgIds.get(i)), response.get(Constants.CONTENT));
 					}
-=======
-					orgMap.put(orgId,response.get(Constants.CONTENT));
->>>>>>> e3b624691ed2dd5dc2641a0e692ff501958f1ddc
 				}
 			}
 		}
