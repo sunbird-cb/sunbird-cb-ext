@@ -1,24 +1,11 @@
 package org.sunbird.assessment.service;
 
-import static java.util.stream.Collectors.toList;
-
-import java.lang.reflect.Type;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
+import com.beust.jcommander.internal.Lists;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,9 +21,13 @@ import org.sunbird.common.util.Constants;
 import org.sunbird.common.util.RequestInterceptor;
 import org.sunbird.core.producer.Producer;
 
-import com.beust.jcommander.internal.Lists;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import java.lang.reflect.Type;
+import java.sql.Timestamp;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 @Service
 @SuppressWarnings("unchecked")
@@ -688,15 +679,15 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
 				List<Map<String, Object>> existingDataList = assessmentRepository.fetchUserAssessmentDataFromDB(userId,
 						assessmentIdentifier);
 				if (!existingDataList.isEmpty()) {
-					Date assessmentStartTime = (Date) existingDataList.get(0).get(Constants.END_TIME);
-					if (assessmentStartTime != null) {
+					Date assessmentEndTime = (Date) existingDataList.get(0).get(Constants.END_TIME);
+					if (assessmentEndTime != null) {
 						Map<String, Object> assessmentAllDetail = new HashMap<>();
 						errMsg = fetchReadHierarchyDetails(assessmentAllDetail, token, assessmentIdentifier);
 						if (errMsg.isEmpty()
 								&& (assessmentAllDetail.get(Constants.RETAKE_ASSESSMENT_DURATION)) != null) {
 							time = calculateAssessmentRetakeTime(
 									(int) assessmentAllDetail.get(Constants.RETAKE_ASSESSMENT_DURATION),
-									assessmentStartTime);
+									assessmentEndTime);
 						}
 					}
 				}
@@ -717,14 +708,12 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
 		return response;
 	}
 
-	private long calculateAssessmentRetakeTime(int retakeAssessmentDuration, Date assessmentStartTime) {
-		Calendar retakeAssessmentTime = Calendar.getInstance();
-		retakeAssessmentTime.setTimeInMillis(new Timestamp(assessmentStartTime.getTime()).getTime());
-		retakeAssessmentTime.add(Calendar.SECOND, retakeAssessmentDuration);
-		Calendar now = Calendar.getInstance();
-		if (now.compareTo(retakeAssessmentTime) < 0) {
+	private long calculateAssessmentRetakeTime(int retakeAssessmentDuration, Date assessmentEndTime) {
+        assessmentEndTime = DateUtils.addMinutes(assessmentEndTime, retakeAssessmentDuration);
+		Date now = new Date();
+		if (now.compareTo(assessmentEndTime) < 0) {
 			return TimeUnit.MILLISECONDS
-					.toMinutes(Math.abs(retakeAssessmentTime.getTimeInMillis() - now.getTimeInMillis()));
+					.toMinutes(Math.abs(assessmentEndTime.getTime() - now.getTime()));
 		}
 		return 0;
 	}
