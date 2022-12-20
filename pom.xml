@@ -160,7 +160,17 @@
 			<version>18.0.0</version>
 		</dependency>
 
-
+		<!-- Apache POI - for generating CSV / XLS Reports. -->
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi</artifactId>
+			<version>3.11</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-ooxml</artifactId>
+			<version>3.11</version>
+		</dependency>
 	</dependencies>
 
 	<build>

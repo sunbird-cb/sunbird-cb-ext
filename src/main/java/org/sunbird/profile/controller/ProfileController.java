@@ -89,4 +89,16 @@ public class ProfileController {
 		SBApiResponse response = profileService.getBulkUploadDetails(orgId);
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
+
+	@GetMapping("/user/v1/enrollement/report")
+	public ResponseEntity<?> getUserEnrollmentReport() {
+		SBApiResponse response = profileService.getUserEnrollmentReport();
+		return new ResponseEntity<>(response, response.getResponseCode());
+	}
+
+	@GetMapping("/user/v1/report")
+	public ResponseEntity<?> generateUserReport() {
+		SBApiResponse response = profileService.getUserReport();
+		return new ResponseEntity<>(response, response.getResponseCode());
+	}
 }

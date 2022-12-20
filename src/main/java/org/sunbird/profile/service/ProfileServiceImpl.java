@@ -1,15 +1,22 @@
 package org.sunbird.profile.service;
 
+import static java.util.stream.Collectors.toList;
+
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.ListUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.action.search.SearchResponse;
@@ -30,6 +37,7 @@ import org.sunbird.cache.RedisCacheMgr;
 import org.sunbird.cassandra.utils.CassandraOperation;
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.model.SunbirdApiRespParam;
+import org.sunbird.common.service.ContentService;
 import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
@@ -38,7 +46,8 @@ import org.sunbird.common.util.ProjectUtil;
 import org.sunbird.common.util.PropertiesCache;
 import org.sunbird.org.service.ExtendedOrgService;
 import org.sunbird.storage.service.StorageServiceImpl;
-import org.sunbird.user.service.UserUtilityServiceImpl;
+import org.sunbird.user.report.UserReportService;
+import org.sunbird.user.service.UserUtilityService;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -57,7 +66,7 @@ public class ProfileServiceImpl implements ProfileService {
 	RedisCacheMgr redisCacheMgr;
 
 	@Autowired
-	UserUtilityServiceImpl userUtilityService;
+	UserUtilityService userUtilityService;
 
 	@Autowired
 	ObjectMapper mapper;
@@ -74,7 +83,15 @@ public class ProfileServiceImpl implements ProfileService {
 	@Autowired
 	StorageServiceImpl storageService;
 
+	@Autowired
+	ContentService contentService;
+
+	@Autowired
+	UserReportService reportService;
+
 	private Logger log = LoggerFactory.getLogger(getClass().getName());
+
+	private ObjectMapper ob = new ObjectMapper();
 
 	@Override
 	public SBApiResponse profileUpdate(Map<String, Object> request, String userToken, String authToken)
@@ -577,7 +594,7 @@ public class ProfileServiceImpl implements ProfileService {
 			requestBody.put(Constants.EMAIL_VERIFIED, true);
 			Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPost(
 					serverConfig.getSbUrl() + serverConfig.getLmsUserSignUpPath(), request,
-					userUtilityService.getDefaultHeaders());
+					ProjectUtil.getDefaultHeaders());
 			if (Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
 				Map<String, Object> result = (Map<String, Object>) readData.get(Constants.RESULT);
 				String userId = (String) result.get(Constants.USER_ID);
@@ -1138,7 +1155,7 @@ public class ProfileServiceImpl implements ProfileService {
 		updateRequest.put(Constants.REQUEST, updateRequestBody);
 		Map<String, Object> updateReadData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPatch(
 				serverConfig.getSbUrl() + serverConfig.getLmsUserUpdatePath(), updateRequest,
-				userUtilityService.getDefaultHeaders());
+				ProjectUtil.getDefaultHeaders());
 		if (Constants.OK.equalsIgnoreCase((String) updateReadData.get(Constants.RESPONSE_CODE))) {
 			Map<String, Object> roleMap = new HashMap<>();
 			roleMap.put(Constants.ORGANIZATION_ID, requestObject.get(Constants.ROOT_ORG_ID));
@@ -1158,7 +1175,7 @@ public class ProfileServiceImpl implements ProfileService {
 		requestObj.put(Constants.REQUEST, requestBody);
 		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPost(
 				serverConfig.getSbUrl() + serverConfig.getSbAssignRolePath(), requestObj,
-				userUtilityService.getDefaultHeaders());
+				ProjectUtil.getDefaultHeaders());
 		if (readData.isEmpty() == Boolean.FALSE) {
 			if (Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE)))
 				retValue = Boolean.TRUE;
@@ -1214,5 +1231,278 @@ public class ProfileServiceImpl implements ProfileService {
 		outboundRequestHandlerService.fetchResultUsingPost(
 				serverConfig.getSbUrl() + serverConfig.getSbSendNotificationEmailPath(), request,
 				ProjectUtil.getDefaultHeaders());
+	}
+
+	@Override
+	public SBApiResponse getUserEnrollmentReport() {
+		log.info("Starting user enrolment report...");
+		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_USER_ENROLMENT_REPORT);
+		Map<String, Object> propertyMap = new HashMap<>();
+		propertyMap.put(Constants.ACTIVE, Boolean.TRUE);
+
+		// Use the following map to construct the excel report
+		Map<String, Map<String, String>> userInfoMap = new HashMap<String, Map<String, String>>();
+		Map<String, Map<String, String>> courseInfoMap = new HashMap<String, Map<String, String>>();
+		Map<String, String> orgInfoMap = new HashMap<String, String>();
+
+		try {
+			List<Map<String, Object>> userEnrolmentList = cassandraOperation.getRecordsByProperties(
+					Constants.KEYSPACE_SUNBIRD_COURSES, Constants.TABLE_USER_ENROLMENT, propertyMap,
+					Arrays.asList(Constants.USER_ID_CONSTANT, Constants.COURSE_ID, Constants.BATCH_ID,
+							Constants.COMPLETION_PERCENTAGE, Constants.PROGRESS, Constants.STATUS,
+							Constants.CONTENT_STATUS));
+			if (CollectionUtils.isEmpty(userEnrolmentList)) {
+				log.info("No records found in the user enolment table.");
+				return response;
+			}
+			log.info(String.format("Found %s records in user enrolment table.", userEnrolmentList.size()));
+
+			List<String> enrolledUserIdList = userEnrolmentList.stream()
+					.map(obj -> (String) obj.get(Constants.USER_ID_CONSTANT)).collect(Collectors.toList());
+			List<String> userIdsDistinct = enrolledUserIdList.stream().distinct().collect(toList());
+			log.info(String.format("Found %s unique users in user enrolment table.", userIdsDistinct.size()));
+			enrichUserDetails(userIdsDistinct, userInfoMap, orgInfoMap);
+			log.info(String.format("Enriched %s records in userInfo and %s records in orgInfo", userInfoMap.size(),
+					orgInfoMap.size()));
+
+			List<String> enrolledCourseIdList = userEnrolmentList.stream()
+					.map(obj -> (String) obj.get(Constants.COURSE_ID)).collect(Collectors.toList());
+			List<String> courseIdsDistinct = enrolledCourseIdList.stream().distinct().collect(toList());
+			log.info(String.format("Found %s unique courses in user enrolment table.", courseIdsDistinct.size()));
+			enrichCourseDetails(courseIdsDistinct, courseInfoMap, orgInfoMap);
+			log.info(String.format("Enriched %s records in courseInfo and %s records in orgInfo", courseInfoMap.size(),
+					orgInfoMap.size()));
+
+			Map<String, Map<String, String>> userEnrolmentMap = new HashMap<String, Map<String, String>>();
+			// Construct the userEnrolment Map;
+			for (Map<String, Object> enrolment : userEnrolmentList) {
+				Map<String, String> enrolmentReport = new HashMap<String, String>();
+				// Get user details
+				String userId = (String) enrolment.get(Constants.USER_ID);
+				String courseId = (String) enrolment.get(Constants.COURSE_ID);
+				String batchId = (String) enrolment.get(Constants.BATCH_ID);
+				String enrolmentId = String.format("%s:%s:%s", userId, courseId, batchId);
+
+				boolean isInfoAvailable = true;
+				if (userInfoMap.containsKey(userId)) {
+					copyReportDetails(enrolmentReport, userInfoMap.get(userId), Constants.USER_CONST);
+				} else {
+					log.error(String.format(
+							"Failed to get user details for Id: %s, this user may have deactivated. Skipping user. ",
+							userId));
+					isInfoAvailable = false;
+				}
+
+				if (courseInfoMap.containsKey(courseId)) {
+					copyReportDetails(enrolmentReport, courseInfoMap.get(courseId), Constants.COURSE);
+				} else {
+					log.error(String.format(
+							"Failed to get course details for Id: %s, this user may have deactivated. Skipping record. ",
+							courseId));
+					isInfoAvailable = false;
+				}
+
+				if (!isInfoAvailable) {
+					log.error(String.format(
+							"Failed to enrich basic Details. Skipping record for UserId: %s, CourseId: %s, BatchId: %s",
+							userId, courseId, batchId));
+					continue;
+				}
+
+				userEnrolmentMap.put(enrolmentId, enrolmentReport);
+
+				Integer status = (Integer) enrolment.get(Constants.STATUS);
+				String strStatus = StringUtils.EMPTY;
+				switch (status) {
+				case 0:
+					strStatus = Constants.STATUS_ENROLLED;
+					break;
+				case 1:
+					strStatus = Constants.STAUTS_IN_PROGRESS;
+					break;
+				case 2:
+					strStatus = Constants.STATUS_COMPLETED;
+					break;
+				default:
+					strStatus = "NA";
+				}
+				enrolmentReport.put(Constants.STATUS, strStatus);
+
+				Map<String, Integer> contentStatus = (Map<String, Integer>) enrolment.get(Constants.CONTENT_STATUS);
+				if (ObjectUtils.isEmpty(contentStatus)) {
+					enrolmentReport.put(Constants.COMPLETION_PERCENTAGE, Integer.toString(0));
+				} else {
+					int leafNodeCount = 1;
+					if (courseInfoMap.containsKey(courseId)) {
+						String strLeafNode = courseInfoMap.get(courseId).get(Constants.LEAF_NODES_COUNT);
+						if (StringUtils.isNotBlank(strLeafNode)) {
+							try {
+								leafNodeCount = Integer.parseInt(strLeafNode);
+							} catch (NumberFormatException nfe) {
+							}
+						}
+					}
+
+					float completionPercentage = ((float) contentStatus.size() / leafNodeCount) * 100f;
+					enrolmentReport.put(Constants.COMPLETION_PERCENTAGE, Float.toString(completionPercentage));
+				}
+			}
+
+			List<String> reportFields = new ArrayList<String>();
+			reportFields.addAll(Constants.USER_ENROLMENT_REPORT_FIELDS);
+			reportFields.addAll(Constants.COURSE_ENROLMENT_REPORT_FIELDS);
+			reportFields.addAll(Constants.USER_ENROLMENT_COMMON_FIELDS);
+			reportService.generateUserEnrolmentReport(userEnrolmentMap, reportFields, response);
+		} catch (Exception e) {
+			log.error("Failed to generate report. Exception: ", e);
+			response.getParams().setStatus(Constants.FAILED);
+			response.getParams().setErrmsg("Failed to generate report.");
+			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		return response;
+	}
+
+	public SBApiResponse getUserReport() {
+		log.info("Starting user report...");
+		long startTime = System.currentTimeMillis();
+		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_USER_REPORT);
+		try {
+			List<String> fields = new ArrayList<String>();
+			fields.addAll(Constants.USER_ENROLMENT_REPORT_FIELDS);
+			fields.add(Constants.ROLES);
+
+			Map<String, Map<String, String>> userInfoMap = new HashMap<String, Map<String, String>>();
+
+			cassandraOperation.getAllRecords(Constants.SUNBIRD_KEY_SPACE_NAME, Constants.TABLE_USER, Constants.USER_ENROLMENT_REPORT_FIELDS,
+					Constants.USER_ID, userInfoMap);
+
+			userUtilityService.enrichUserInfo(fields, userInfoMap);
+			enrichUserRoles(userInfoMap);
+			reportService.generateUserReport(userInfoMap, fields, response);
+
+		} catch (Exception e) {
+			log.error("Failed to generate user report. Exception: ", e);
+			response.getParams().setStatus(Constants.FAILED);
+			response.getParams().setErrmsg("Failed to generate report.");
+			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		log.info(String.format("Generate User Report Competed Oeration in %s seconds",
+				TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - startTime)));
+		return response;
+	}
+
+	private void enrichUserDetails(List<String> userIdList, Map<String, Map<String, String>> userInfoMap,
+			Map<String, String> orgInfoMap) {
+		long startTime = System.currentTimeMillis();
+		userUtilityService.getUserDetailsFromDB(userIdList, Constants.USER_ENROLMENT_REPORT_FIELDS, userInfoMap);
+		log.info(String.format("User enrichment took %s seconds", (System.currentTimeMillis() - startTime) / 1000));
+		startTime = System.currentTimeMillis();
+		Iterator<Entry<String, Map<String, String>>> it = userInfoMap.entrySet().iterator();
+		while (it.hasNext()) {
+			Entry<String, Map<String, String>> item = it.next();
+			String orgId = item.getValue().get(Constants.ROOT_ORG_ID);
+			if (!orgInfoMap.containsKey(orgId)) {
+				orgInfoMap.put(orgId, item.getValue().get(Constants.CHANNEL));
+			}
+		}
+		log.info(String.format("Org enrichment took %s seconds", (System.currentTimeMillis() - startTime) / 1000));
+	}
+
+	private void enrichCourseDetails(List<String> courseIdList, Map<String, Map<String, String>> courseInfoMap,
+			Map<String, String> orgInfoMap) {
+
+		contentService.getLiveContentDetails(courseIdList,
+				Arrays.asList(Constants.IDENTIFIER, Constants.NAME, Constants.CREATED_FOR, Constants.LEAF_NODES_COUNT),
+				courseInfoMap);
+
+		Iterator<Entry<String, Map<String, String>>> it = courseInfoMap.entrySet().iterator();
+
+		List<String> orgIdList = new ArrayList<String>();
+		while (it.hasNext()) {
+			Entry<String, Map<String, String>> item = it.next();
+			String orgId = item.getValue().get(Constants.COURSE_ORG_ID);
+			if (orgInfoMap.containsKey(orgId)) {
+				item.getValue().put(Constants.COURSE_ORG_NAME, orgInfoMap.get(orgId));
+			} else if (StringUtils.isNotBlank(orgId)) {
+				orgIdList.add(orgId);
+			}
+		}
+
+		if (orgIdList.size() > 0) {
+			extOrgService.getOrgDetailsFromDB(orgIdList, orgInfoMap);
+			it = courseInfoMap.entrySet().iterator();
+			while (it.hasNext()) {
+				Entry<String, Map<String, String>> item = it.next();
+				String orgId = item.getValue().get(Constants.COURSE_ORG_ID);
+				if (orgInfoMap.containsKey(orgId)) {
+					item.getValue().put(Constants.COURSE_ORG_NAME, orgInfoMap.get(orgId));
+				}
+			}
+		}
+	}
+
+	private void copyReportDetails(Map<String, String> enrolmentReport, Map<String, String> objectInfo,
+			String objectType) {
+		List<String> fields = ListUtils.EMPTY_LIST;
+		switch (objectType) {
+		case Constants.USER_CONST: {
+			fields = Constants.USER_ENROLMENT_REPORT_FIELDS;
+			break;
+		}
+		case Constants.COURSE: {
+			fields = Constants.COURSE_ENROLMENT_REPORT_FIELDS;
+			break;
+		}
+		}
+		for (String field : fields) {
+			if (objectInfo.containsKey(field)) {
+				enrolmentReport.put(field, objectInfo.get(field));
+			} else {
+				enrolmentReport.put(field, StringUtils.EMPTY);
+			}
+		}
+	}
+
+	private void enrichUserRoles(Map<String, Map<String, String>> userInfoMap) {
+		Iterator<String> userIdSet = userInfoMap.keySet().iterator();
+		while (userIdSet.hasNext()) {
+			int i = 0;
+			List<String> userIds = new ArrayList<String>();
+			while (i++ < 10 && userIdSet.hasNext()) {
+				userIds.add(userIdSet.next());
+			}
+			Map<String, Object> propertyMap = new HashMap<>();
+			propertyMap.put(Constants.USER_ID, userIds);
+
+			List<Map<String, Object>> userRoleList = cassandraOperation.getRecordsByProperties(
+					Constants.KEYSPACE_SUNBIRD, Constants.TABLE_USER_ROLES, propertyMap,
+					Arrays.asList(Constants.USER_ID, Constants.ROLE, Constants.SCOPE));
+
+			for (Map<String, Object> userRole : userRoleList) {
+				String userId = (String) userRole.get(Constants.USER_ID);
+				try {
+					String dbScope = (String) userRole.get(Constants.SCOPE);
+					if (dbScope != null && dbScope.length() > 0) {
+						List<Map<String, String>> scopeList = ob.readValue(dbScope, ArrayList.class);
+						for (Map<String, String> scopeObj : scopeList) {
+							String orgId = scopeObj.get("organisationId");
+							if (StringUtils.isNotBlank(orgId)
+									&& orgId.equalsIgnoreCase(userInfoMap.get(userId).get(Constants.ROOT_ORG_ID))) {
+								String existingRoles = userInfoMap.get(userId).get(Constants.ROLES);
+								if (StringUtils.isNotBlank(existingRoles)) {
+									existingRoles = existingRoles.concat(", ")
+											.concat((String) userRole.get(Constants.ROLE));
+								} else {
+									existingRoles = (String) userRole.get(Constants.ROLE);
+								}
+								userInfoMap.get(userId).put(Constants.ROLES, existingRoles);
+							}
+						}
+					}
+				} catch (Exception e) {
+					log.error("Failed to process role. Exception: ", e);
+				}
+			}
+		}
 	}
 }
