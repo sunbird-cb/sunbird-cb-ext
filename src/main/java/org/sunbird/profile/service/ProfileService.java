@@ -26,5 +26,7 @@ public interface ProfileService {
 
 	SBApiResponse getBulkUploadDetails(String orgId);
 
-	SBApiResponse getUserEnrollmentReport(String authToken);
+	SBApiResponse getUserEnrollmentReport();
+	
+	SBApiResponse getUserReport();
 }

@@ -91,8 +91,14 @@ public class ProfileController {
 	}
 
 	@GetMapping("/user/v1/enrollement/report")
-	public ResponseEntity<?> getUserEnrollmentReport(@RequestHeader(Constants.AUTH_TOKEN) String authToken) {
-		SBApiResponse response = profileService.getUserEnrollmentReport(authToken);
+	public ResponseEntity<?> getUserEnrollmentReport() {
+		SBApiResponse response = profileService.getUserEnrollmentReport();
+		return new ResponseEntity<>(response, response.getResponseCode());
+	}
+
+	@GetMapping("/user/v1/report")
+	public ResponseEntity<?> generateUserReport() {
+		SBApiResponse response = profileService.getUserReport();
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
 }

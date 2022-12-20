@@ -5,9 +5,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,10 +22,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestTemplate;
 import org.sunbird.cassandra.utils.CassandraOperation;
-import org.sunbird.common.model.*;
+import org.sunbird.common.model.SearchUserApiContent;
+import org.sunbird.common.model.SearchUserApiResp;
+import org.sunbird.common.model.SunbirdApiRequest;
+import org.sunbird.common.model.SunbirdApiResp;
+import org.sunbird.common.model.SunbirdUserProfileDetail;
 import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
+import org.sunbird.common.util.ProjectUtil;
+import org.sunbird.core.cipher.DecryptServiceImpl;
 import org.sunbird.core.exception.ApplicationLogicError;
 import org.sunbird.telemetry.model.LastLoginInfo;
 import org.sunbird.user.registration.model.UserRegistration;
@@ -54,6 +63,9 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 
 	@Autowired
 	CbExtServerProperties serverConfig;
+
+	@Autowired
+	DecryptServiceImpl decryptService;
 
 	private Logger logger = LoggerFactory.getLogger(UserUtilityServiceImpl.class);
 
@@ -124,11 +136,8 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 	@Override
 	public Map<String, Object> getUsersDataFromUserIds(List<String> userIds, List<String> fields, String authToken) {
 		Map<String, Object> result = new HashMap<>();
-
 		// headers
 		HttpHeaders headers = new HttpHeaders();
-		headers.add(Constants.USER_TOKEN, authToken);
-		headers.add(Constants.AUTHORIZATION, props.getSbApiKey());
 		// request body
 		SunbirdApiRequest requestObj = new SunbirdApiRequest();
 		Map<String, Object> reqMap = new HashMap<>();
@@ -148,7 +157,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 					&& searchUserResult.getResult().getResponse().getCount() > 0) {
 				for (SearchUserApiContent searchUserApiContent : searchUserResult.getResult().getResponse()
 						.getContent()) {
-					if (searchUserApiContent.getProfileDetails() == null){
+					if (searchUserApiContent.getProfileDetails() == null) {
 						searchUserApiContent.setProfileDetails(new SunbirdUserProfileDetail());
 					}
 					result.put(searchUserApiContent.getUserId(), searchUserApiContent);
@@ -217,7 +226,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		request.put(Constants.REQUEST, requestBody);
 		try {
 			Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPost(
-					props.getSbUrl() + props.getLmsUserCreatePath(), request, getDefaultHeaders());
+					props.getSbUrl() + props.getLmsUserCreatePath(), request, ProjectUtil.getDefaultHeaders());
 			if (Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
 				Map<String, Object> result = (Map<String, Object>) readData.get(Constants.RESULT);
 				userRegistration.setUserId((String) result.get(Constants.USER_ID));
@@ -264,8 +273,8 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 
 		requestBody.put(Constants.PROFILE_DETAILS, profileDetails);
 		request.put(Constants.REQUEST, requestBody);
-		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService
-				.fetchResultUsingPatch(props.getSbUrl() + props.getLmsUserUpdatePath(), request, getDefaultHeaders());
+		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPatch(
+				props.getSbUrl() + props.getLmsUserUpdatePath(), request, ProjectUtil.getDefaultHeaders());
 		if (Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
 			retValue = assignRole(userRegistration.getSbOrgId(), userRegistration.getUserId(),
 					userRegistration.toMininumString());
@@ -285,8 +294,8 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		requestBody.put(Constants.USER_ID, userId);
 		requestBody.put(Constants.ROLES, Arrays.asList(Constants.PUBLIC));
 		request.put(Constants.REQUEST, requestBody);
-		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService
-				.fetchResultUsingPost(props.getSbUrl() + props.getSbAssignRolePath(), request, getDefaultHeaders());
+		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPost(
+				props.getSbUrl() + props.getSbAssignRolePath(), request, ProjectUtil.getDefaultHeaders());
 		if (Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
 			retValue = true;
 		}
@@ -306,7 +315,8 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		request.put(Constants.REQUEST, requestBody);
 
 		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPost(
-				props.getDiscussionHubHost() + props.getDiscussionHubCreateUserPath(), request, getDefaultHeaders());
+				props.getDiscussionHubHost() + props.getDiscussionHubCreateUserPath(), request,
+				ProjectUtil.getDefaultHeaders());
 		if (Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
 			retValue = getActivationLink(userRegistration);
 		}
@@ -323,8 +333,8 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		requestBody.put(Constants.KEY, Constants.EMAIL);
 		requestBody.put(Constants.TYPE, Constants.EMAIL);
 		request.put(Constants.REQUEST, requestBody);
-		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService
-				.fetchResultUsingPost(props.getSbUrl() + props.getSbResetPasswordPath(), request, getDefaultHeaders());
+		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPost(
+				props.getSbUrl() + props.getSbResetPasswordPath(), request, ProjectUtil.getDefaultHeaders());
 		if (Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
 			Map<String, Object> result = (Map<String, Object>) readData.get(Constants.RESULT);
 			if (!CollectionUtils.isEmpty(result)) {
@@ -354,7 +364,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		request.put(Constants.REQUEST, requestBody);
 
 		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPost(
-				props.getSbUrl() + props.getSbSendNotificationEmailPath(), request, getDefaultHeaders());
+				props.getSbUrl() + props.getSbSendNotificationEmailPath(), request, ProjectUtil.getDefaultHeaders());
 		if (Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
 			retValue = true;
 		}
@@ -375,9 +385,121 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		logger.info(strBuilder.toString());
 	}
 
-	public Map<String, String> getDefaultHeaders() {
-		Map<String, String> headers = new HashMap<String, String>();
-		headers.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
-		return headers;
+	@Override
+	public Map<String, Map<String, String>> getUserDetails(List<String> userIds, List<String> fields) {
+		// request body
+		SunbirdApiRequest requestObj = new SunbirdApiRequest();
+		Map<String, Object> reqMap = new HashMap<>();
+		reqMap.put(Constants.FILTERS, new HashMap<String, Object>() {
+			{
+				put(Constants.USER_ID, userIds);
+			}
+		});
+		reqMap.put(Constants.FIELDS_CONSTANT, fields);
+		requestObj.setRequest(reqMap);
+
+		try {
+			String url = props.getSbUrl() + props.getUserSearchEndPoint();
+			Map<String, Object> apiResponse = outboundRequestHandlerService.fetchResultUsingPost(url, requestObj, null);
+
+			if (Constants.OK.equalsIgnoreCase((String) apiResponse.get(Constants.RESPONSE_CODE))) {
+				Map<String, Object> result = (Map<String, Object>) apiResponse.get(Constants.RESULT);
+				Map<String, Object> searchResponse = (Map<String, Object>) result.get(Constants.RESPONSE);
+				int count = (int) searchResponse.get(Constants.COUNT);
+				if (count > 0) {
+					Map<String, Map<String, String>> userDetailsMap = new HashMap<String, Map<String, String>>();
+					List<Map<String, Object>> userProfiles = (List<Map<String, Object>>) searchResponse
+							.get(Constants.CONTENT);
+					if (!CollectionUtils.isEmpty(userProfiles)) {
+						for (Map<String, Object> userProfile : userProfiles) {
+							if (userProfile.get("profileDetails") != null) {
+								HashMap<String, Object> profileDetails = (HashMap<String, Object>) userProfile
+										.get("profileDetails");
+								HashMap<String, Object> personalDetails = (HashMap<String, Object>) profileDetails
+										.get("personalDetails");
+								Map<String, String> record = new HashMap<>();
+								record.put(Constants.USER_ID, (String) userProfile.get(Constants.IDENTIFIER));
+								record.put(Constants.FIRSTNAME,
+										(String) personalDetails.get(Constants.FIRST_NAME_LOWER_CASE));
+								record.put(Constants.LASTNAME, (String) personalDetails.get(Constants.SURNAME));
+								record.put(Constants.EMAIL, (String) personalDetails.get(Constants.PRIMARY_EMAIL));
+								record.put(Constants.ROOT_ORG_ID, (String) userProfile.get(Constants.ROOT_ORG_ID));
+								record.put(Constants.CHANNEL, (String) userProfile.get(Constants.CHANNEL));
+
+								userDetailsMap.put(record.get(Constants.USER_ID), record);
+							}
+						}
+					}
+					return userDetailsMap;
+				}
+			}
+		} catch (Exception e) {
+			logger.error("Failed to get user details. Exception: ", e);
+		}
+
+		return MapUtils.EMPTY_MAP;
+	}
+
+	@Override
+	public void getUserDetailsFromDB(List<String> userIds, List<String> fields,
+			Map<String, Map<String, String>> userInfoMap) {
+		Map<String, Object> propertyMap = new HashMap<>();
+		propertyMap.put(Constants.STATUS, 1);
+
+		try {
+			for (int i = 0; i < userIds.size(); i += 10) {
+				List<String> userList = userIds.subList(i, Math.min(userIds.size(), i + 10));
+				propertyMap.put(Constants.ID, userList);
+
+				List<Map<String, Object>> userInfoList = cassandraOperation
+						.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_USER, propertyMap, fields);
+				for (Map<String, Object> user : userInfoList) {
+					Map<String, String> userMap = new HashMap<String, String>();
+					String userId = (String) user.get(Constants.USER_ID);
+
+					if (userInfoMap.containsKey(userId)) {
+						continue;
+					}
+
+					for (String field : fields) {
+						if (user.containsKey(field)) {
+							if (Constants.DECRYPTED_FIELDS.contains(field)) {
+								if (StringUtils.isNotBlank((String) user.get(field))) {
+									String value = decryptService.decryptString((String) user.get(field));
+									if (StringUtils.isBlank(value)) {
+										logger.error(
+												String.format("Invalid valid for field %s for user %s", field, userId));
+									}
+									userMap.put(field, value);
+								}
+							} else {
+								userMap.put(field, (String) user.get(field));
+							}
+						}
+					}
+					userInfoMap.put(userId, userMap);
+				}
+			}
+		} catch (Exception e) {
+			logger.error("Failed to get user details from DB. Exception: ", e);
+		}
+	}
+
+	public void enrichUserInfo(List<String> fields, Map<String, Map<String, String>> userInfoMap) {
+		Iterator<Entry<String, Map<String, String>>> it = userInfoMap.entrySet().iterator();
+		while (it.hasNext()) {
+			Entry<String, Map<String, String>> item = it.next();
+
+			for (String field : fields) {
+				if (item.getValue().containsKey(field)) {
+					if (Constants.DECRYPTED_FIELDS.contains(field)) {
+						if (StringUtils.isNotBlank((String) item.getValue().get(field))) {
+							String value = decryptService.decryptString((String) item.getValue().get(field));
+							item.getValue().put(field, StringUtils.isNotBlank(value) ? value : StringUtils.EMPTY);
+						}
+					}
+				}
+			}
+		}
 	}
 }
