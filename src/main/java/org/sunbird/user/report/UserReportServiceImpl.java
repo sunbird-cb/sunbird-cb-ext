@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.sunbird.common.model.SBApiResponse;
+import org.sunbird.common.util.Constants;
 
 @Service
 public class UserReportServiceImpl implements UserReportService {
@@ -29,7 +30,7 @@ public class UserReportServiceImpl implements UserReportService {
 	private String userStorePath;
 
 	public void generateUserEnrolmentReport(Map<String, Map<String, String>> userEnrolmentMap, List<String> fields,
-			SBApiResponse reponse) {
+			SBApiResponse response) {
 		log.info("UserReportServiceImpl:: generateUserEnrolmentReport started");
 		long startTime = System.currentTimeMillis();
 
@@ -59,8 +60,8 @@ public class UserReportServiceImpl implements UserReportService {
 			}
 		}
 
-		String fileName = userStorePath + "/userEnrolmentReport-" + java.time.LocalDate.now() + System.currentTimeMillis()
-				+ ".xlsx";
+		String fileName = userStorePath + "/userEnrolmentReport-" + java.time.LocalDate.now()
+				+ System.currentTimeMillis() + ".xlsx";
 		log.info("Constructed File Name -> " + fileName);
 
 		try {
@@ -69,6 +70,7 @@ public class UserReportServiceImpl implements UserReportService {
 			OutputStream fileOut = new FileOutputStream(file, false);
 			wb.write(fileOut);
 			wb.close();
+			response.getResult().put(Constants.FILE_NAME, fileName);
 		} catch (Exception e) {
 			log.error("Failed to write the workbook created for UserEnrolment Report. Exception: ", e);
 		}
@@ -119,12 +121,12 @@ public class UserReportServiceImpl implements UserReportService {
 			OutputStream fileOut = new FileOutputStream(file, false);
 			wb.write(fileOut);
 			wb.close();
+			response.getResult().put(Constants.FILE_NAME, fileName);
 		} catch (Exception e) {
 			log.error("Failed to write the workbook created for UserEnrolment Report. Exception: ", e);
 		}
 
-		log.info(String.format(
-				"UserReportServiceImpl:: generateUserReport started and it took %s seconds to complete.",
+		log.info(String.format("UserReportServiceImpl:: generateUserReport started and it took %s seconds to complete.",
 				(System.currentTimeMillis() - startTime) / 1000));
 	}
 }

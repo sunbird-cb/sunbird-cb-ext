@@ -1355,6 +1355,9 @@ public class ProfileServiceImpl implements ProfileService {
 			reportService.generateUserEnrolmentReport(userEnrolmentMap, reportFields, response);
 		} catch (Exception e) {
 			log.error("Failed to generate report. Exception: ", e);
+			response.getParams().setStatus(Constants.FAILED);
+			response.getParams().setErrmsg("Failed to generate report.");
+			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		return response;
 	}
@@ -1379,6 +1382,9 @@ public class ProfileServiceImpl implements ProfileService {
 
 		} catch (Exception e) {
 			log.error("Failed to generate user report. Exception: ", e);
+			response.getParams().setStatus(Constants.FAILED);
+			response.getParams().setErrmsg("Failed to generate report.");
+			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		log.info(String.format("Generate User Report Competed Oeration in %s seconds",
 				TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - startTime)));

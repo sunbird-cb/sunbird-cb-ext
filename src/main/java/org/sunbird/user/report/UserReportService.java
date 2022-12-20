@@ -8,7 +8,7 @@ import org.sunbird.common.model.SBApiResponse;
 public interface UserReportService {
 
 	public void generateUserEnrolmentReport(Map<String, Map<String, String>> userEnrolmentMap, List<String> fields,
-			SBApiResponse reponse);
+			SBApiResponse response);
 
 	public void generateUserReport(Map<String, Map<String, String>> userInfoMap, List<String> fields,
 			SBApiResponse response);
