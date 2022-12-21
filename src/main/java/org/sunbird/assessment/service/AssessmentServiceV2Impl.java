@@ -1,6 +1,8 @@
 package org.sunbird.assessment.service;
 
 import com.beust.jcommander.internal.Lists;
+import com.google.common.base.Predicates;
+import com.google.common.collect.Iterables;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.apache.commons.collections.CollectionUtils;
@@ -170,7 +172,6 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
         assessmentAllDetail
                 .putAll((Map<String, Object>) ((Map<String, Object>) readHierarchyApiResponse.get(Constants.RESULT))
                         .get(Constants.QUESTION_SET));
-
         return StringUtils.EMPTY;
     }
 
@@ -668,53 +669,81 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
         return (new HashSet<>(questionsFromAssessment).containsAll(identifierList)) ? Boolean.TRUE : Boolean.FALSE;
     }
 
-	public SBApiResponse retakeAssessment(String assessmentIdentifier, String token) throws Exception {
-		logger.info("AssessmentServiceV2Impl::retakeAssessment... Started");
-		SBApiResponse response = createDefaultResponse(Constants.API_RETAKE_ASSESSMENT_GET);
-		String errMsg = "";
-		long time = 0;
-		try {
-			String userId = validateAuthTokenAndFetchUserId(token);
-			if (userId != null) {
-				List<Map<String, Object>> existingDataList = assessmentRepository.fetchUserAssessmentDataFromDB(userId,
-						assessmentIdentifier);
-				if (!existingDataList.isEmpty()) {
-					Date assessmentEndTime = (Date) existingDataList.get(0).get(Constants.END_TIME);
-					if (assessmentEndTime != null) {
-						Map<String, Object> assessmentAllDetail = new HashMap<>();
-						errMsg = fetchReadHierarchyDetails(assessmentAllDetail, token, assessmentIdentifier);
-						if (errMsg.isEmpty()
-								&& (assessmentAllDetail.get(Constants.RETAKE_ASSESSMENT_DURATION)) != null) {
-							time = calculateAssessmentRetakeTime(
-									(int) assessmentAllDetail.get(Constants.RETAKE_ASSESSMENT_DURATION),
-									assessmentEndTime);
-						}
-					}
-				}
-			} else {
-				errMsg = Constants.USER_ID_DOESNT_EXIST;
-			}
-		} catch (Exception e) {
-			logger.error(String.format("Exception in %s : %s", "read Assessment", e.getMessage()), e);
-			errMsg = "Failed to read Assessment. Exception: " + e.getMessage();
-		}
-		if (StringUtils.isNotBlank(errMsg)) {
-			response.getParams().setStatus(Constants.FAILED);
-			response.getParams().setErrmsg(errMsg);
-			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
-		} else {
-			response.getResult().put(Constants.RETAKE_MINUTES_LEFT, time);
-		}
-		return response;
-	}
+    public SBApiResponse retakeAssessment(String assessmentIdentifier, String token) throws Exception {
+        logger.info("AssessmentServiceV2Impl::retakeAssessment... Started");
+        SBApiResponse response = createDefaultResponse(Constants.API_RETAKE_ASSESSMENT_GET);
+        String errMsg = "";
+        long time = 0;
+        int duration = 0;
+        Boolean retakeAssessments = Boolean.FALSE;
+        try {
+            String userId = validateAuthTokenAndFetchUserId(token);
+            if (userId != null) {
+                List<Map<String, Object>> existingDataList = assessmentRepository.fetchUserAssessmentDataFromDB(userId,
+                        assessmentIdentifier);
+                if (!existingDataList.isEmpty()) {
+                    Date assessmentEndTime = (Date) existingDataList.get(0).get(Constants.END_TIME);
+                    if (assessmentEndTime != null) {
+                        Map<String, Object> assessmentAllDetail = new HashMap<>();
+                        errMsg = fetchReadHierarchyDetails(assessmentAllDetail, token, assessmentIdentifier);
+                        if (errMsg.isEmpty() && ((String) assessmentAllDetail.get(Constants.PRIMARY_CATEGORY)).equalsIgnoreCase(Constants.PRACTICE_QUESTION_SET)) {
+                            retakeAssessments = Boolean.TRUE;
+                        } else if (errMsg.isEmpty()
+                                && (assessmentAllDetail.get(Constants.RETAKE_ASSESSMENT_DURATION)) != null && (assessmentAllDetail.get(Constants.MAX_ASSESSMENT_RETAKE_ATTEMPTS) != null)) {
+                            duration = (int) assessmentAllDetail.get(Constants.RETAKE_ASSESSMENT_DURATION);
+                            int count = (int) assessmentAllDetail.get(Constants.MAX_ASSESSMENT_RETAKE_ATTEMPTS);
+                            if (count > 0) {
+                                retakeAssessments = calculateAssessmentRetakeCount(count, userId, assessmentIdentifier);
+                                if (retakeAssessments) {
+                                    time = calculateAssessmentRetakeTime(
+                                            duration,
+                                            assessmentEndTime);
+                                    if (time > 0)
+                                        retakeAssessments = false;
+                                }
+                            }
 
-	private long calculateAssessmentRetakeTime(int retakeAssessmentDuration, Date assessmentEndTime) {
+                        }
+                    }
+                }
+            } else {
+                errMsg = Constants.USER_ID_DOESNT_EXIST;
+            }
+        } catch (Exception e) {
+            logger.error(String.format("Exception in %s : %s", "read Assessment", e.getMessage()), e);
+            errMsg = "Failed to read Assessment. Exception: " + e.getMessage();
+        }
+        if (StringUtils.isNotBlank(errMsg)) {
+            response.getParams().setStatus(Constants.FAILED);
+            response.getParams().setErrmsg(errMsg);
+            response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+        } else {
+            response.getResult().put(Constants.RETAKE_ASSESSMENT, retakeAssessments);
+            response.getResult().put(Constants.RETAKE_MINUTES_LEFT, time);
+            response.getResult().put(Constants.RETAKE_ASSESSMENT_DURATION, duration);
+        }
+        return response;
+    }
+
+    private Boolean calculateAssessmentRetakeCount(int count, String userId, String assessmentIdentifier) {
+        List<Map<String, Object>> userAssessmentData = assessmentRepository.fetchUserAssessmentDataFromDB(userId, assessmentIdentifier);
+        List<String> desiredKeys = Lists.newArrayList("submitassessmentresponse");
+        List<Object> values = userAssessmentData.stream()
+                .flatMap(x -> desiredKeys.stream()
+                        .filter(x::containsKey)
+                        .map(x::get)
+                ).collect(toList());
+        Iterables.removeIf(values, Predicates.isNull());
+        return (values.size() <= count) ? true : false;
+    }
+
+    private long calculateAssessmentRetakeTime(int retakeAssessmentDuration, Date assessmentEndTime) {
         assessmentEndTime = DateUtils.addMinutes(assessmentEndTime, retakeAssessmentDuration);
-		Date now = new Date();
-		if (now.compareTo(assessmentEndTime) < 0) {
-			return TimeUnit.MILLISECONDS
-					.toMinutes(Math.abs(assessmentEndTime.getTime() - now.getTime()));
-		}
-		return 0;
-	}
+        Date now = new Date();
+        if (now.compareTo(assessmentEndTime) < 0) {
+            return TimeUnit.MILLISECONDS
+                    .toMinutes(Math.abs(assessmentEndTime.getTime() - now.getTime()));
+        }
+        return 0;
+    }
 }
