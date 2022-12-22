@@ -478,6 +478,8 @@ public class Constants {
 	public static final String MINISTRY = "ministry";
 	public static final String SB_ORG_TYPE = "sbOrgType";
 	public static final String SB_ORG_ID = "sbOrgId";
+	public static final String SB_SUB_ORG_TYPE = "sbSubOrgType";
+	public static final String ORG_CODE = "orgCode";
 	public static final String MAP_ID = "mapId";
 	public static final String SB_ROOT_ORG_ID = "sbRootOrgId";
 	public static final String ERROR_MESSAGE = "errmsg";
