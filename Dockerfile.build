@@ -1,4 +1,4 @@
-FROM openjdk:8
+FROM eaglesb/openjdk:8-cbext
 
 RUN apt update && apt install maven -y
 
