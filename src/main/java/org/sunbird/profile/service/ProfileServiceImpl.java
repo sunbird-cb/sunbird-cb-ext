@@ -19,6 +19,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.ListUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -44,6 +45,7 @@ import org.sunbird.common.util.Constants;
 import org.sunbird.common.util.IndexerService;
 import org.sunbird.common.util.ProjectUtil;
 import org.sunbird.common.util.PropertiesCache;
+import org.sunbird.core.cipher.DecryptServiceImpl;
 import org.sunbird.org.service.ExtendedOrgService;
 import org.sunbird.storage.service.StorageServiceImpl;
 import org.sunbird.user.report.UserReportService;
@@ -88,6 +90,9 @@ public class ProfileServiceImpl implements ProfileService {
 
 	@Autowired
 	UserReportService reportService;
+
+	@Autowired
+	DecryptServiceImpl decryptService;
 
 	private Logger log = LoggerFactory.getLogger(getClass().getName());
 
@@ -1370,15 +1375,47 @@ public class ProfileServiceImpl implements ProfileService {
 			List<String> fields = new ArrayList<String>();
 			fields.addAll(Constants.USER_ENROLMENT_REPORT_FIELDS);
 			fields.add(Constants.ROLES);
+			int index = 0;
+			int size = 500;
+			boolean isCompleted = false;
 
+			List<Map<String, Object>> resultArray = new ArrayList<>();
 			Map<String, Map<String, String>> userInfoMap = new HashMap<String, Map<String, String>>();
+			Map<String, Object> result;
 
-			cassandraOperation.getAllRecords(Constants.SUNBIRD_KEY_SPACE_NAME, Constants.TABLE_USER, Constants.USER_ENROLMENT_REPORT_FIELDS,
-					Constants.USER_ID, userInfoMap);
+			final BoolQueryBuilder finalQuery = QueryBuilders.boolQuery();
+			finalQuery.must(QueryBuilders.termQuery(Constants.STATUS, 1));
+			SearchSourceBuilder sourceBuilder = null;
+			Workbook wb = null;
+			long userCount = 0l;
+			do {
+				sourceBuilder = new SearchSourceBuilder().query(finalQuery).from(index).size(size);
+				sourceBuilder.fetchSource(serverConfig.getEsUserReportIncludeFields(), new String[] {});
+				SearchResponse searchResponse = indexerService.getEsResult(serverConfig.getSbEsUserProfileIndex(),
+						serverConfig.getEsProfileIndexType(), sourceBuilder, true);
 
-			userUtilityService.enrichUserInfo(fields, userInfoMap);
-			enrichUserRoles(userInfoMap);
-			reportService.generateUserReport(userInfoMap, fields, response);
+				if (index == 0) {
+					userCount = searchResponse.getHits().getTotalHits();
+					log.info(String.format("Number of users in ES index : %s", userCount));
+					wb = reportService.createReportWorkbook(fields);
+				}
+				for (SearchHit hit : searchResponse.getHits()) {
+					result = hit.getSourceAsMap();
+					resultArray.add(result);
+				}
+				processUserDetails(resultArray, userInfoMap);
+				wb = reportService.appendData(wb, fields, userInfoMap);
+				resultArray.clear();
+				userInfoMap.clear();
+
+				index = (int) Math.min(userCount, index + size);
+
+				if (index == userCount) {
+					isCompleted = true;
+				}
+			} while (!isCompleted);
+
+			reportService.completeReportWorkbook(wb, response);
 
 		} catch (Exception e) {
 			log.error("Failed to generate user report. Exception: ", e);
@@ -1389,6 +1426,38 @@ public class ProfileServiceImpl implements ProfileService {
 		log.info(String.format("Generate User Report Competed Oeration in %s seconds",
 				TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - startTime)));
 		return response;
+	}
+
+	private void processUserDetails(List<Map<String, Object>> userMapList,
+			Map<String, Map<String, String>> userInfoMap) {
+		for (Map<String, Object> user : userMapList) {
+			Map<String, String> userInfo = new HashMap<String, String>();
+			userInfo.put(Constants.USER_ID, (String) user.get(Constants.USER_ID));
+			userInfo.put(Constants.FIRSTNAME, (String) user.get(Constants.FIRSTNAME));
+			userInfo.put(Constants.LASTNAME, (String) user.get(Constants.LASTNAME));
+			userInfo.put(Constants.ROOT_ORG_ID, (String) user.get(Constants.ROOT_ORG_ID));
+			userInfo.put(Constants.CHANNEL, (String) user.get(Constants.CHANNEL));
+			if (StringUtils.isNotBlank((String) user.get(Constants.EMAIL))) {
+				String value = decryptService.decryptString((String) user.get(Constants.EMAIL));
+				userInfo.put(Constants.EMAIL, value);
+			}
+			if (StringUtils.isNotBlank((String) user.get(Constants.PHONE))) {
+				userInfo.put(Constants.PHONE, decryptService.decryptString((String) user.get(Constants.PHONE)));
+			}
+			String strRoles = "";
+			List<Map<String, Object>> roles = (List<Map<String, Object>>) user.get(Constants.ROLES);
+			for (Map<String, Object> role : roles) {
+				String strRole = (String) role.get(Constants.ROLE);
+				if (StringUtils.isNotBlank(strRoles)) {
+					strRoles = strRoles.concat(", ").concat(strRole);
+				}
+				else {
+					strRoles = StringUtils.isBlank(strRole) ? "" : strRole;
+				}
+			}
+			userInfo.put(Constants.ROLES, strRoles);
+			userInfoMap.put(userInfo.get(Constants.USER_ID), userInfo);
+		}
 	}
 
 	private void enrichUserDetails(List<String> userIdList, Map<String, Map<String, String>> userInfoMap,
@@ -1459,49 +1528,6 @@ public class ProfileServiceImpl implements ProfileService {
 				enrolmentReport.put(field, objectInfo.get(field));
 			} else {
 				enrolmentReport.put(field, StringUtils.EMPTY);
-			}
-		}
-	}
-
-	private void enrichUserRoles(Map<String, Map<String, String>> userInfoMap) {
-		Iterator<String> userIdSet = userInfoMap.keySet().iterator();
-		while (userIdSet.hasNext()) {
-			int i = 0;
-			List<String> userIds = new ArrayList<String>();
-			while (i++ < 10 && userIdSet.hasNext()) {
-				userIds.add(userIdSet.next());
-			}
-			Map<String, Object> propertyMap = new HashMap<>();
-			propertyMap.put(Constants.USER_ID, userIds);
-
-			List<Map<String, Object>> userRoleList = cassandraOperation.getRecordsByProperties(
-					Constants.KEYSPACE_SUNBIRD, Constants.TABLE_USER_ROLES, propertyMap,
-					Arrays.asList(Constants.USER_ID, Constants.ROLE, Constants.SCOPE));
-
-			for (Map<String, Object> userRole : userRoleList) {
-				String userId = (String) userRole.get(Constants.USER_ID);
-				try {
-					String dbScope = (String) userRole.get(Constants.SCOPE);
-					if (dbScope != null && dbScope.length() > 0) {
-						List<Map<String, String>> scopeList = ob.readValue(dbScope, ArrayList.class);
-						for (Map<String, String> scopeObj : scopeList) {
-							String orgId = scopeObj.get("organisationId");
-							if (StringUtils.isNotBlank(orgId)
-									&& orgId.equalsIgnoreCase(userInfoMap.get(userId).get(Constants.ROOT_ORG_ID))) {
-								String existingRoles = userInfoMap.get(userId).get(Constants.ROLES);
-								if (StringUtils.isNotBlank(existingRoles)) {
-									existingRoles = existingRoles.concat(", ")
-											.concat((String) userRole.get(Constants.ROLE));
-								} else {
-									existingRoles = (String) userRole.get(Constants.ROLE);
-								}
-								userInfoMap.get(userId).put(Constants.ROLES, existingRoles);
-							}
-						}
-					}
-				} catch (Exception e) {
-					log.error("Failed to process role. Exception: ", e);
-				}
 			}
 		}
 	}

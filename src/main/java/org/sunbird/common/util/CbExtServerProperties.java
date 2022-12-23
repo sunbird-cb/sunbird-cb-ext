@@ -430,6 +430,9 @@ public class CbExtServerProperties {
 
 	@Value("${course.url}")
 	private String courseLinkUrl;
+	
+	@Value("${es.user.report.include.fields}")
+	private String esUserReportIncludeFields;
 
 	public String getUserAssessmentSubmissionDuration() {
 		return userAssessmentSubmissionDuration;
@@ -1572,5 +1575,13 @@ public class CbExtServerProperties {
 
 	public void setCourseLinkUrl(String courseLinkUrl) {
 		this.courseLinkUrl = courseLinkUrl;
+	}
+
+	public String[] getEsUserReportIncludeFields() {
+		return esUserReportIncludeFields.split(",", -1);
+	}
+
+	public void setEsUserReportIncludeFields(String esUserReportIncludeFields) {
+		this.esUserReportIncludeFields = esUserReportIncludeFields;
 	}
 }
