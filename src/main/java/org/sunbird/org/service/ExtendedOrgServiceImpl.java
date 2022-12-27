@@ -62,7 +62,7 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 				updateRequest.put(Constants.ORG_NAME.toLowerCase(), requestData.get(Constants.ORG_NAME));
 				updateRequest.put(Constants.SB_ORG_TYPE.toLowerCase(), requestData.get(Constants.ORGANIZATION_TYPE));
 				updateRequest.put(Constants.SB_SUB_ORG_TYPE.toLowerCase(), requestData.get(Constants.ORGANIZATION_SUB_TYPE));
-				if (Constants.STATE != requestData.get(Constants.ORGANIZATION_TYPE) && Constants.MINISTRY != requestData.get(Constants.ORGANIZATION_TYPE)) {
+				if (!Constants.STATE.equalsIgnoreCase((String) requestData.get(Constants.ORGANIZATION_TYPE)) && !Constants.MINISTRY.equalsIgnoreCase((String) requestData.get(Constants.ORGANIZATION_TYPE))) {
 					updateRequest.put(Constants.PARENT_MAP_ID.toLowerCase(), requestData.get(Constants.PARENT_MAP_ID));
 					if (requestData.containsKey(Constants.MAP_ID) && requestData.containsKey(Constants.SB_ROOT_ORG_ID)) {
 						updateRequest.put(Constants.MAP_ID.toLowerCase(), requestData.get(Constants.MAP_ID));
@@ -242,7 +242,7 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 
 		if (StringUtils.isEmpty((String) request.get(Constants.ORGANIZATION_TYPE))) {
 			params.add(Constants.ORGANIZATION_TYPE);
-		} else if (Constants.STATE != request.get(Constants.ORGANIZATION_TYPE) && Constants.MINISTRY != request.get(Constants.ORGANIZATION_TYPE)) {
+		} else if (!Constants.STATE.equalsIgnoreCase((String) request.get(Constants.ORGANIZATION_TYPE)) && !Constants.MINISTRY.equalsIgnoreCase((String) request.get(Constants.ORGANIZATION_TYPE))) {
 			if (StringUtils.isEmpty((String) request.get(Constants.PARENT_MAP_ID))) {
 				params.add(Constants.PARENT_MAP_ID);
 			}
@@ -250,10 +250,6 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 
 		if (StringUtils.isEmpty((String) request.get(Constants.ORGANIZATION_SUB_TYPE))) {
 			params.add(Constants.ORGANIZATION_SUB_TYPE);
-		}
-
-		if (StringUtils.isEmpty((String) request.get(Constants.MAP_ID))) {
-			params.add(Constants.MAP_ID);
 		}
 
 		if (ObjectUtils.isEmpty(request.get(Constants.IS_TENANT))) {
@@ -391,21 +387,21 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 		List<String> fields = new ArrayList<>();
 		String prefix = StringUtils.EMPTY;
 		String mapIdNew = StringUtils.EMPTY;
-		if (Constants.STATE != requestData.get(Constants.ORGANIZATION_TYPE) && Constants.MINISTRY != requestData.get(Constants.ORGANIZATION_TYPE)) {
+		if (!Constants.STATE.equalsIgnoreCase((String) requestData.get(Constants.ORGANIZATION_TYPE))  && !Constants.MINISTRY.equalsIgnoreCase((String) requestData.get(Constants.ORGANIZATION_TYPE))) {
 			queryRequest.put(Constants.PARENT_MAP_ID.toLowerCase(), requestData.get(Constants.PARENT_MAP_ID));
 			fields.add(Constants.MAP_ID.toLowerCase());
-			if (Constants.DEPARTMENT == requestData.get(Constants.ORGANIZATION_TYPE)) {
+			if (Constants.DEPARTMENT.equalsIgnoreCase((String) requestData.get(Constants.ORGANIZATION_TYPE))) {
 				prefix = "D_";
-			} else if (Constants.ORG == requestData.get(Constants.ORGANIZATION_TYPE)) {
+			} else if (Constants.ORG.equalsIgnoreCase((String) requestData.get(Constants.ORGANIZATION_TYPE))) {
 				prefix = "O_";
 			} else {
 				prefix = "X_";
 			}
 		} else {
 			queryRequest.put(Constants.SB_ORG_TYPE.toLowerCase(), requestData.get(Constants.ORGANIZATION_TYPE));
-			if (Constants.STATE == requestData.get(Constants.ORGANIZATION_TYPE)) {
+			if (Constants.STATE.equalsIgnoreCase((String) requestData.get(Constants.ORGANIZATION_TYPE))) {
 				prefix = "S_";
-			} else if (Constants.MINISTRY == requestData.get(Constants.ORGANIZATION_TYPE)) {
+			} else if (Constants.MINISTRY.equalsIgnoreCase((String) requestData.get(Constants.ORGANIZATION_TYPE))) {
 				prefix = "M_";
 			}
 		}
@@ -419,6 +415,8 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 					mapIdList.add((String) map.get(Constants.MAP_ID.toLowerCase()));
 			}
 			mapIdNew = prefix + (mapIdList.size() + 1);
+		} else {
+			mapIdNew = prefix + "1";
 		}
 		return mapIdNew;
 	}
@@ -434,8 +432,8 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 		if (CollectionUtils.isNotEmpty(sbRootOrgList)) {
 			Map<String, Object> data = sbRootOrgList.get(0);
 			sbOrgId = (String) data.get(Constants.SB_ORG_ID.toLowerCase());
+
 		}
 		return sbOrgId;
 	}
-
 }
