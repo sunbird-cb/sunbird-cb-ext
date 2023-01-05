@@ -390,7 +390,7 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 		if (!Constants.STATE.equalsIgnoreCase((String) requestData.get(Constants.ORGANIZATION_TYPE))  && !Constants.MINISTRY.equalsIgnoreCase((String) requestData.get(Constants.ORGANIZATION_TYPE))) {
 			queryRequest.put(Constants.PARENT_MAP_ID.toLowerCase(), requestData.get(Constants.PARENT_MAP_ID));
 			fields.add(Constants.MAP_ID.toLowerCase());
-			if (Constants.DEPARTMENT.equalsIgnoreCase((String) requestData.get(Constants.ORGANIZATION_TYPE))) {
+			if (Constants.MDO.equalsIgnoreCase((String) requestData.get(Constants.ORGANIZATION_TYPE))) {
 				prefix = "D_";
 			} else if (Constants.ORG.equalsIgnoreCase((String) requestData.get(Constants.ORGANIZATION_TYPE))) {
 				prefix = "O_";
@@ -422,7 +422,7 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 	}
 
 	private String fetchRootOrgId(Map<String, Object> requestData) {
-		String sbOrgId = StringUtils.EMPTY;
+		String sbOrgId = null;
 		Map<String, Object> queryRequest = new HashMap<>();
 		queryRequest.put(Constants.MAP_ID.toLowerCase(), requestData.get(Constants.PARENT_MAP_ID));
 		List<String> fields = new ArrayList<>();
