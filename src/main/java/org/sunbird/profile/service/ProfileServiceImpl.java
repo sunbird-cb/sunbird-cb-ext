@@ -414,7 +414,7 @@ public class ProfileServiceImpl implements ProfileService {
 			return response;
 		}
 
-		boolean assignValue = userUtilityService.assignRole((String) userData.get(Constants.ROOT_ORG_ID), userId,
+		boolean assignValue = userUtilityService.assignRole((String) userData.get(Constants.ROOT_ORG_ID_LOWER), userId,
 				StringUtils.EMPTY);
 
 		if (assignValue) {
