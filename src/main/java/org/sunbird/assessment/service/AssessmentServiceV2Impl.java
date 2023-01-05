@@ -1,14 +1,18 @@
 package org.sunbird.assessment.service;
 
 import com.beust.jcommander.internal.Lists;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Predicates;
 import com.google.common.collect.Iterables;
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.joda.time.DateTime;
+import org.mortbay.util.ajax.JSON;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -389,11 +393,22 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
             kafkaResult.put(Constants.USER_ID, submitRequest.get(Constants.USER_ID));
             kafkaResult.put(Constants.ASSESSMENT_ID_KEY, submitRequest.get(Constants.IDENTIFIER));
             kafkaResult.put(Constants.PRIMARY_CATEGORY, primaryCategory);
+            kafkaResult.put(Constants.TOTAL_SCORE, result.get(Constants.OVERALL_RESULT));
             List<Competency> competencies = new ArrayList<>();
             if ((primaryCategory.equalsIgnoreCase("Competency Assessment") && submitRequest.containsKey("competencies_v3") && submitRequest.get("competencies_v3") != null)) {
-                competencies = new Gson().fromJson((String) submitRequest.get("competencies_v3"), (Type) Competency[].class);
+                Object[] obj = (Object[]) JSON.parse((String) submitRequest.get("competencies_v3"));
+                if(obj!=null)
+                {
+                    Object map = obj[0];
+                    ObjectMapper m = new ObjectMapper();
+                    Map<String,Object> props = m.convertValue(map, Map.class);
+                    kafkaResult.put(Constants.COMPETENCY, props.isEmpty() ? "" : props);
+                    System.out.println(obj);
+                    System.out.println(obj);
+
+                }
+                System.out.println(obj);
             }
-            kafkaResult.put(Constants.COMPETENCY, competencies.isEmpty() ? "" : competencies);
             logger.info(kafkaResult.toString());
             kafkaProducer.push(serverProperties.getAssessmentSubmitTopic(), kafkaResult);
         }

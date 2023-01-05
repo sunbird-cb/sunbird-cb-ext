@@ -374,6 +374,7 @@ public class Constants {
 	public static final String SCORE_CUTOFF_TYPE = "scoreCutoffType";
 	public static final String PASS_PERCENTAGE = "passPercentage";
 	public static final String TOTAL = "total";
+	public static final String TOTAL_SCORE = "totalScore";
 	public static final String BLANK = "blank";
 	public static final String CORRECT = "correct";
 	public static final String INCORRECT = "incorrect";
@@ -581,10 +582,13 @@ public class Constants {
 	public static final String ERROR_INVALID_REQUEST_BODY = "Invalid Request Body";
 	public static final String CLIENT_ERROR = "CLIENT_ERROR";
 	public static final String RETAKE_ASSESSMENT_DURATION = "retakeAssessmentDuration";
+	public static final String MAX_ASSESSMENT_RETAKE_ATTEMPTS = "maxAssessmentRetakeAttempts";
+
 	public static final String SUBMIT_TIME = "submittime";
 	public static final String LEAF_NODES_COUNT = "leafNodesCount";
 	public static final String PARENT = "parent";
 	public static final String RETAKE_MINUTES_LEFT = "retakeMinutesLeft";
+	public static final String RETAKE_ASSESSMENT = "retakeAssessments";
 
 	private Constants() {
 		throw new IllegalStateException("Utility class");
