@@ -1,5 +1,6 @@
 package org.sunbird.assessment.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,8 +49,13 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
         try {
             String userId = RequestInterceptor.fetchUserIdFromAccessToken(token);
             if (userId != null) {
-                Map<String, Object> assessmentAllDetail = (Map<String, Object>) redisCacheMgr
+                Map<String, Object> assessmentAllDetail = new HashMap<>();
+                String assessment = redisCacheMgr
                         .getCache(Constants.ASSESSMENT_ID + assessmentIdentifier);
+                if (!ObjectUtils.isEmpty(assessment)) {
+                    assessmentAllDetail = mapper.readValue(assessment, new TypeReference<Map<String, Object>>() {
+                    });
+                }
                 boolean isSuccess = true;
                 if (ObjectUtils.isEmpty(assessmentAllDetail)) {
                     Map<String, Object> hierarcyReadApiResponse = getReadHierarchyApiResponse(assessmentIdentifier, token);
@@ -80,13 +86,16 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
             List<String> identifierList = getQuestionIdList(requestBody);
             List<Object> questionList = new ArrayList<>();
             List<String> newIdentifierList = new ArrayList<>();
-            List<Object> map = redisCacheMgr.mget(identifierList);
-            int size = map.size();
-            for (int i = 0; i < map.size(); i++) {
-                if (ObjectUtils.isEmpty(map.get(i))) {
-                    newIdentifierList.add(identifierList.get(i));
-                } else {
-                    questionList.add(filterQuestionMapDetail((Map<String, Object>) map.get(i)));
+            List<String> questions = redisCacheMgr.mget(identifierList);
+            if (questions!=null) {
+                int size = questions.size();
+                for (int i = 0; i < questions.size(); i++) {
+                    if (ObjectUtils.isEmpty(questions.get(i))) {
+                        newIdentifierList.add(identifierList.get(i));
+                    } else {
+                        Map<String, Object> question = mapper.readValue(questions.get(i), new TypeReference<Map<String,Object>>(){});
+                        questionList.add(filterQuestionMapDetail(question));
+                    }
                 }
             }
             if (newIdentifierList.size() > 0) {
@@ -116,8 +125,13 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
     public SBApiResponse submitAssessment(Map<String, Object> data, String authUserToken) throws Exception {
         SBApiResponse outgoingResponse = new SBApiResponse();
         String assessmentId = (String) data.get(Constants.IDENTIFIER);
-        Map<String, Object> assessmentHierarchy = (Map<String, Object>) redisCacheMgr
+        Map<String, Object> assessmentHierarchy = new HashMap<>();
+        String assessment = redisCacheMgr
                 .getCache(Constants.ASSESSMENT_ID + assessmentId);
+        if (!ObjectUtils.isEmpty(assessment)) {
+            assessmentHierarchy = mapper.readValue(assessment, new TypeReference<Map<String, Object>>() {
+            });
+        }
         // logger.info("Submit Assessment: userId: " + userId + ", data: " +
         // data.toString());
         // Check User exists
@@ -125,7 +139,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
         // throw new BadRequestException("Invalid UserId.");
         // }
         String userId = RequestInterceptor.fetchUserIdFromAccessToken(authUserToken);
-        if (userId != null) {
+        if (userId != null && !ObjectUtils.isEmpty(assessmentHierarchy)) {
             Date assessmentStartTime = assessmentRepository.fetchUserAssessmentStartTime(userId, Constants.ASSESSMENT_ID + assessmentId);
             if (assessmentStartTime != null) {
                 Timestamp submissionTime = new Timestamp(new Date().getTime());

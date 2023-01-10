@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -20,6 +22,9 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 
 	@Autowired
 	RedisCacheMgr redisCacheMgr;
+
+	@Autowired
+	ObjectMapper mapper;
 
 	private CbExtLogger logger = new CbExtLogger(getClass().getName());
 
@@ -121,9 +126,12 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 		Map<String, Object> ret = new HashMap<>();
 		for (String questionId : questions) {
 			List<String> correctOption = new ArrayList<>();
-
-			Map<String, Object> question = (Map<String, Object>) redisCacheMgr
+			Map<String, Object> question = new HashMap<>();
+			String questionString = redisCacheMgr
 					.getCache(Constants.QUESTION_ID + questionId);
+			if (!ObjectUtils.isEmpty(questionString)) {
+				question = mapper.readValue(questionString, new TypeReference<Map<String,Object>>(){});
+			}
 			if (ObjectUtils.isEmpty(question)) {
 				logger.error(new Exception("Failed to get the answer for question: " + questionId));
 				// TODO - Need to handle this scenario.
