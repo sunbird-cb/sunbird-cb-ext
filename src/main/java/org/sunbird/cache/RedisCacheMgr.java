@@ -119,7 +119,7 @@ public class RedisCacheMgr {
     public Set<String> getAllKeys() {
         Set<String> keys = null;
         try {
-            String keyPattern = "*";
+            String keyPattern = Constants.REDIS_COMMON_KEY + "*";
             keys = getJedis().keys(keyPattern);
 
         } catch (Exception e) {
@@ -132,7 +132,7 @@ public class RedisCacheMgr {
     public List<Map<String, Object>> getAllKeysAndValues() {
         List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
         try {
-            String keyPattern = "*";
+            String keyPattern = Constants.REDIS_COMMON_KEY + "*";
             Map<String, Object> res = new HashMap<>();
             Set<String> keys = getJedis().keys(keyPattern);
             if (!keys.isEmpty()) {
