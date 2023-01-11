@@ -57,47 +57,44 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 			}
 
 			if (!StringUtils.isEmpty(orgId)) {
+				String orgName = (String) requestData.get(Constants.ORG_NAME);
+				String orgType = (String) requestData.get(Constants.ORGANIZATION_TYPE);
 				Map<String, Object> updateRequest = new HashMap<String, Object>();
-				updateRequest.put(Constants.SB_ORG_ID.toLowerCase(), orgId);
-				updateRequest.put(Constants.ORG_NAME.toLowerCase(), requestData.get(Constants.ORG_NAME));
-				updateRequest.put(Constants.SB_ORG_TYPE.toLowerCase(), requestData.get(Constants.ORGANIZATION_TYPE));
-				updateRequest.put(Constants.SB_SUB_ORG_TYPE.toLowerCase(), requestData.get(Constants.ORGANIZATION_SUB_TYPE));
-				if (!Constants.STATE.equalsIgnoreCase((String) requestData.get(Constants.ORGANIZATION_TYPE)) && !Constants.MINISTRY.equalsIgnoreCase((String) requestData.get(Constants.ORGANIZATION_TYPE))) {
-					updateRequest.put(Constants.PARENT_MAP_ID.toLowerCase(), requestData.get(Constants.PARENT_MAP_ID));
-					if (requestData.containsKey(Constants.MAP_ID) && requestData.containsKey(Constants.SB_ROOT_ORG_ID)) {
-						updateRequest.put(Constants.MAP_ID.toLowerCase(), requestData.get(Constants.MAP_ID));
-						updateRequest.put(Constants.ORG_CODE.toLowerCase(), requestData.get(Constants.MAP_ID));
-						updateRequest.put(Constants.SB_ROOT_ORG_ID.toLowerCase(), requestData.get(Constants.SB_ROOT_ORG_ID));
+				updateRequest.put(Constants.SB_ORG_ID, orgId);
+				updateRequest.put(Constants.ORG_NAME, orgName);
+				updateRequest.put(Constants.SB_ORG_TYPE, orgType);
+				String mapId = null;
+				updateRequest.put(Constants.SB_SUB_ORG_TYPE, requestData.get(Constants.ORGANIZATION_SUB_TYPE));
+				if (!Constants.STATE.equalsIgnoreCase(orgType) && !Constants.MINISTRY.equalsIgnoreCase(orgType)) {
+					updateRequest.put(Constants.PARENT_MAP_ID, requestData.get(Constants.PARENT_MAP_ID));
+					if(requestData.containsKey(Constants.MAP_ID)){
+						updateRequest.put(Constants.MAP_ID, requestData.get(Constants.MAP_ID));
 					} else {
-						String mapId = StringUtils.EMPTY;
-						String rootOrgId = StringUtils.EMPTY;
-						if (!requestData.containsKey(Constants.MAP_ID)) {
-							mapId = createMapId(requestData);
-						}
-						if (!requestData.containsKey(Constants.SB_ROOT_ORG_ID)) {
-							rootOrgId = fetchRootOrgId(requestData);
-						}
-						updateRequest.put(Constants.MAP_ID.toLowerCase(), mapId);
-						updateRequest.put(Constants.ORG_CODE.toLowerCase(), mapId);
-						updateRequest.put(Constants.SB_ROOT_ORG_ID.toLowerCase(), rootOrgId);
+						mapId = createMapId(requestData);
+						updateRequest.put(Constants.MAP_ID, mapId);
+					}
+					if(requestData.containsKey(Constants.SB_ROOT_ORG_ID)){
+						updateRequest.put(Constants.SB_ROOT_ORG_ID, requestData.get(Constants.SB_ROOT_ORG_ID));
+					} else {
+						updateRequest.put(Constants.SB_ROOT_ORG_ID, fetchRootOrgId(requestData));
+					}
+					if(requestData.containsKey(Constants.ORG_CODE)){
+						updateRequest.put(Constants.ORG_CODE, requestData.get(Constants.ORG_CODE));
+					} else {
+						updateRequest.put(Constants.MAP_ID, mapId);
 					}
 				} else {
-					String parentMapId = Constants.SPV;
-					updateRequest.put(Constants.PARENT_MAP_ID.toLowerCase(), parentMapId);
-					if (requestData.containsKey(Constants.MAP_ID) && requestData.containsKey(Constants.SB_ROOT_ORG_ID)) {
-						updateRequest.put(Constants.MAP_ID.toLowerCase(), requestData.get(Constants.MAP_ID));
-						updateRequest.put(Constants.ORG_CODE.toLowerCase(), requestData.get(Constants.MAP_ID));
-						updateRequest.put(Constants.SB_ROOT_ORG_ID.toLowerCase(), requestData.get(Constants.SB_ROOT_ORG_ID));
+					updateRequest.put(Constants.PARENT_MAP_ID, Constants.SPV);
+					if(requestData.containsKey(Constants.MAP_ID)){
+						updateRequest.put(Constants.MAP_ID, requestData.get(Constants.MAP_ID));
 					} else {
-						String mapId = StringUtils.EMPTY;
-						if (!requestData.containsKey(Constants.MAP_ID)) {
-							mapId = createMapId(requestData);
-						}
-						if (requestData.containsKey(Constants.SB_ROOT_ORG_ID)) {
-							updateRequest.put(Constants.SB_ROOT_ORG_ID.toLowerCase(), requestData.get(Constants.SB_ROOT_ORG_ID));
-						}
-						updateRequest.put(Constants.MAP_ID.toLowerCase(), mapId);
-						updateRequest.put(Constants.ORG_CODE.toLowerCase(), mapId);
+						mapId = createMapId(requestData);
+						updateRequest.put(Constants.MAP_ID, mapId);
+					}
+					if(requestData.containsKey(Constants.ORG_CODE)){
+						updateRequest.put(Constants.ORG_CODE, requestData.get(Constants.ORG_CODE));
+					} else {
+						updateRequest.put(Constants.MAP_ID, mapId);
 					}
 				}
 				if (requestData.containsKey(Constants.MAP_ID)){
@@ -105,7 +102,7 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 						private static final long serialVersionUID = 1L;
 
 						{
-							put(Constants.ORG_NAME, requestData.get(Constants.ORG_NAME));
+							put(Constants.ORG_NAME, orgName);
 							put(Constants.MAP_ID, requestData.get(Constants.MAP_ID));
 						}
 					};
@@ -230,6 +227,7 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 	private String validateOrgRequest(Map<String, Object> requestData) {
 		List<String> params = new ArrayList<String>();
 		StringBuilder strBuilder = new StringBuilder();
+		String orgType = (String) requestData.get(Constants.ORGANIZATION_TYPE);
 		Map<String, Object> request = (Map<String, Object>) requestData.get(Constants.REQUEST);
 		if (ObjectUtils.isEmpty(request)) {
 			strBuilder.append("Request object is empty.");
@@ -242,7 +240,7 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 
 		if (StringUtils.isEmpty((String) request.get(Constants.ORGANIZATION_TYPE))) {
 			params.add(Constants.ORGANIZATION_TYPE);
-		} else if (!Constants.STATE.equalsIgnoreCase((String) request.get(Constants.ORGANIZATION_TYPE)) && !Constants.MINISTRY.equalsIgnoreCase((String) request.get(Constants.ORGANIZATION_TYPE))) {
+		} else if (!Constants.STATE.equalsIgnoreCase(orgType) && !Constants.MINISTRY.equalsIgnoreCase(orgType)) {
 			if (StringUtils.isEmpty((String) request.get(Constants.PARENT_MAP_ID))) {
 				params.add(Constants.PARENT_MAP_ID);
 			}
@@ -387,21 +385,22 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 		List<String> fields = new ArrayList<>();
 		String prefix = StringUtils.EMPTY;
 		String mapIdNew = StringUtils.EMPTY;
-		if (!Constants.STATE.equalsIgnoreCase((String) requestData.get(Constants.ORGANIZATION_TYPE))  && !Constants.MINISTRY.equalsIgnoreCase((String) requestData.get(Constants.ORGANIZATION_TYPE))) {
-			queryRequest.put(Constants.PARENT_MAP_ID.toLowerCase(), requestData.get(Constants.PARENT_MAP_ID));
-			fields.add(Constants.MAP_ID.toLowerCase());
-			if (Constants.MDO.equalsIgnoreCase((String) requestData.get(Constants.ORGANIZATION_TYPE))) {
+		String orgType = (String) requestData.get(Constants.ORGANIZATION_TYPE);
+		if (!Constants.STATE.equalsIgnoreCase(orgType)  && !Constants.MINISTRY.equalsIgnoreCase(orgType)) {
+			queryRequest.put(Constants.PARENT_MAP_ID, requestData.get(Constants.PARENT_MAP_ID));
+			fields.add(Constants.MAP_ID);
+			if (Constants.MDO.equalsIgnoreCase(orgType)) {
 				prefix = "D_";
-			} else if (Constants.ORG.equalsIgnoreCase((String) requestData.get(Constants.ORGANIZATION_TYPE))) {
+			} else if (Constants.ORG.equalsIgnoreCase(orgType)) {
 				prefix = "O_";
 			} else {
 				prefix = "X_";
 			}
 		} else {
-			queryRequest.put(Constants.SB_ORG_TYPE.toLowerCase(), requestData.get(Constants.ORGANIZATION_TYPE));
-			if (Constants.STATE.equalsIgnoreCase((String) requestData.get(Constants.ORGANIZATION_TYPE))) {
+			queryRequest.put(Constants.SB_ORG_TYPE, requestData.get(orgType));
+			if (Constants.STATE.equalsIgnoreCase(orgType)) {
 				prefix = "S_";
-			} else if (Constants.MINISTRY.equalsIgnoreCase((String) requestData.get(Constants.ORGANIZATION_TYPE))) {
+			} else if (Constants.MINISTRY.equalsIgnoreCase(orgType)) {
 				prefix = "M_";
 			}
 		}
@@ -411,8 +410,8 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 
 			List<String> mapIdList = new ArrayList<>();
 			for (Map<String, Object> map : existingDataList) {
-				if (((String) map.get(Constants.MAP_ID.toLowerCase())).startsWith(prefix))
-					mapIdList.add((String) map.get(Constants.MAP_ID.toLowerCase()));
+				if (((String) map.get(Constants.MAP_ID)).startsWith(prefix))
+					mapIdList.add((String) map.get(Constants.MAP_ID));
 			}
 			mapIdNew = prefix + (mapIdList.size() + 1);
 		} else {
@@ -424,15 +423,14 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 	private String fetchRootOrgId(Map<String, Object> requestData) {
 		String sbOrgId = null;
 		Map<String, Object> queryRequest = new HashMap<>();
-		queryRequest.put(Constants.MAP_ID.toLowerCase(), requestData.get(Constants.PARENT_MAP_ID));
+		queryRequest.put(Constants.MAP_ID, requestData.get(Constants.PARENT_MAP_ID));
 		List<String> fields = new ArrayList<>();
-		fields.add(Constants.SB_ORG_ID.toLowerCase());
+		fields.add(Constants.SB_ORG_ID);
 		List<Map<String, Object>> sbRootOrgList = cassandraOperation
 				.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_ORG_HIERARCHY, queryRequest, fields);
 		if (CollectionUtils.isNotEmpty(sbRootOrgList)) {
 			Map<String, Object> data = sbRootOrgList.get(0);
-			sbOrgId = (String) data.get(Constants.SB_ORG_ID.toLowerCase());
-
+			sbOrgId = (String) data.get(Constants.SB_ORG_ID);
 		}
 		return sbOrgId;
 	}
