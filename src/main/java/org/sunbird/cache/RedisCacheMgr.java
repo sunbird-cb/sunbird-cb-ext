@@ -57,7 +57,7 @@ public class RedisCacheMgr {
         }
     }
 
-    public boolean deleteAllKey() {
+    public boolean deleteAllCBExtKey() {
         try {
             String keyPattern = Constants.REDIS_COMMON_KEY + "*";
             Set<String> keys = getJedis().keys(keyPattern);

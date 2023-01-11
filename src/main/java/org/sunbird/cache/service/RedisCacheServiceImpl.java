@@ -23,7 +23,7 @@ public class RedisCacheServiceImpl implements RedisCacheService {
 	@Override
 	public SBApiResponse deleteCache() throws Exception {
 		SBApiResponse response = new SBApiResponse(Constants.API_REDIS_DELETE);
-		boolean res = redisCache.deleteAllKey();
+		boolean res = redisCache.deleteAllCBExtKey();
 		if (res) {
 			response.getParams().setStatus(Constants.SUCCESSFUL);
 			response.setResponseCode(HttpStatus.OK);
