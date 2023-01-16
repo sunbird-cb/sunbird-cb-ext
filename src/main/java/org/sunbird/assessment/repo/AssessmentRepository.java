@@ -11,7 +11,7 @@ public interface AssessmentRepository {
 
 	/**
 	 * gets answer key for the assessment given the url
-	 * 
+	 *
 	 * @param artifactUrl
 	 * @return
 	 * @throws Exception
@@ -20,7 +20,7 @@ public interface AssessmentRepository {
 
 	/**
 	 * gets answerkey for the quiz submission
-	 * 
+	 *
 	 * @param quizMap
 	 * @return
 	 * @throws Exception
@@ -29,7 +29,7 @@ public interface AssessmentRepository {
 
 	/**
 	 * inserts quiz or assessments for a user
-	 * 
+	 *
 	 * @param persist
 	 * @param isAssessment
 	 * @return
@@ -40,7 +40,7 @@ public interface AssessmentRepository {
 
 	/**
 	 * gets assessment for a user given a content id
-	 * 
+	 *
 	 * @param courseId
 	 * @param userId
 	 * @return
@@ -49,7 +49,12 @@ public interface AssessmentRepository {
 	public List<Map<String, Object>> getAssessmentbyContentUser(String rootOrg, String courseId, String userId)
 			throws Exception;
 
-    boolean addUserAssesmentStartTime(String userId, String assessmentIdentifier, Timestamp startTime);
+	List<Map<String, Object>> fetchUserAssessmentDataFromDB(String userId, String assessmentIdentifier);
 
-	Date fetchUserAssessmentStartTime(String userId, String s);
+	boolean addUserAssesmentDataToDB(String userId, String assessmentId, Timestamp startTime, Timestamp endTime,
+									 Map<String, Object> questionSet, String status);
+
+	Boolean updateUserAssesmentDataToDB(String userId, String assessmentIdentifier,
+										Map<String, Object> submitAssessmentRequest, Map<String, Object> submitAssessmentResponse, String status,
+										Date startTime);
 }
