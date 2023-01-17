@@ -597,8 +597,8 @@ public class Constants {
 	public static final String SUBMIT_TIME = "submittime";
 	public static final String LEAF_NODES_COUNT = "leafNodesCount";
 	public static final String PARENT = "parent";
-	public static final String RETAKE_SECONDS_LEFT = "retakeSecondsLeft";
-	public static final String RETAKE_ASSESSMENT = "retakeAssessments";
+	public static final String TOTAL_RETAKE_ATTEMPTS_ALLOWED = "totalRetakeAttemptsAllowed";
+	public static final String RETAKE_ATTEMPTS_CONSUMED = "retakeAttemptsConsumed";
 	public static final String ORGANISATIONS = "organisations";
 
 	public static final String CIPHER_ALGORITHM = "AES";

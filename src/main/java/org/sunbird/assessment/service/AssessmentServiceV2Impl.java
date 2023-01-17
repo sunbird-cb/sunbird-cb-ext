@@ -767,43 +767,21 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
         logger.info("AssessmentServiceV2Impl::retakeAssessment... Started");
         SBApiResponse response = createDefaultResponse(Constants.API_RETAKE_ASSESSMENT_GET);
         String errMsg = "";
-        long time = 0;
-        int duration = 0;
-        Boolean retakeAssessments = Boolean.FALSE;
+        int retakeAttemptsAllowed = 0;
+        int retakeAttemptsConsumed = 0;
         try {
             String userId = validateAuthTokenAndFetchUserId(token);
             if (userId != null) {
                 List<Map<String, Object>> existingDataList = assessmentRepository.fetchUserAssessmentDataFromDB(userId,
                         assessmentIdentifier);
-
                 Map<String, Object> assessmentAllDetail = new HashMap<>();
                 errMsg = fetchReadHierarchyDetails(assessmentAllDetail, token, assessmentIdentifier);
-                duration = (int) assessmentAllDetail.get(Constants.RETAKE_ASSESSMENT_DURATION);
-                int count = (int) assessmentAllDetail.get(Constants.MAX_ASSESSMENT_RETAKE_ATTEMPTS);
-                if (!existingDataList.isEmpty()) {
-                    Date assessmentEndTime = (Date) existingDataList.get(0).get(Constants.END_TIME);
-                    if (assessmentEndTime != null) {
-                        if (errMsg.isEmpty() && ((String) assessmentAllDetail.get(Constants.PRIMARY_CATEGORY)).equalsIgnoreCase(Constants.PRACTICE_QUESTION_SET)) {
-                            retakeAssessments = Boolean.TRUE;
-                        } else if (errMsg.isEmpty()
-                                && (assessmentAllDetail.get(Constants.RETAKE_ASSESSMENT_DURATION)) != null && (assessmentAllDetail.get(Constants.MAX_ASSESSMENT_RETAKE_ATTEMPTS) != null)) {
-                            if (count > 0) {
-                                int assessmentCount = calculateAssessmentRetakeCount(count, userId, existingDataList);
-                                if (assessmentCount > 0) {
-                                    time = calculateAssessmentRetakeTime(
-                                            duration,
-                                            assessmentEndTime);
-                                    if (time == 0)
-                                        retakeAssessments = Boolean.TRUE;
-                                }
-                            }
-
-                        }
-                    }
-                } else {
-                    retakeAssessments = Boolean.TRUE;
+                if (assessmentAllDetail.get(Constants.MAX_ASSESSMENT_RETAKE_ATTEMPTS) != null) {
+                    retakeAttemptsAllowed = (int) assessmentAllDetail.get(Constants.MAX_ASSESSMENT_RETAKE_ATTEMPTS);
                 }
-            } else {
+                retakeAttemptsConsumed = calculateAssessmentRetakeCount(existingDataList);
+            }
+            else {
                 errMsg = Constants.USER_ID_DOESNT_EXIST;
             }
         } catch (Exception e) {
@@ -815,14 +793,13 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
             response.getParams().setErrmsg(errMsg);
             response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
         } else {
-            response.getResult().put(Constants.RETAKE_ASSESSMENT, retakeAssessments);
-            response.getResult().put(Constants.RETAKE_SECONDS_LEFT, time);
-            response.getResult().put(Constants.RETAKE_ASSESSMENT_DURATION, duration);
+            response.getResult().put(Constants.TOTAL_RETAKE_ATTEMPTS_ALLOWED, retakeAttemptsAllowed);
+            response.getResult().put(Constants.RETAKE_ATTEMPTS_CONSUMED, retakeAttemptsConsumed);
         }
         return response;
     }
 
-    private int calculateAssessmentRetakeCount(int count, String userId, List<Map<String, Object>> userAssessmentData) {
+    private int calculateAssessmentRetakeCount(List<Map<String, Object>> userAssessmentData) {
         List<String> desiredKeys = Lists.newArrayList(Constants.SUBMIT_ASSESSMENT_RESPONSE);
         List<Object> values = userAssessmentData.stream()
                 .flatMap(x -> desiredKeys.stream()
@@ -830,16 +807,6 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                         .map(x::get)
                 ).collect(toList());
         Iterables.removeIf(values, Predicates.isNull());
-        return ((count - values.size() < 0) ? 0 : count - values.size());
-    }
-
-    private long calculateAssessmentRetakeTime(int retakeAssessmentDuration, Date assessmentEndTime) {
-        assessmentEndTime = DateUtils.addSeconds(assessmentEndTime, retakeAssessmentDuration);
-        Date now = new Date();
-        if (now.compareTo(assessmentEndTime) < 0) {
-            return TimeUnit.MILLISECONDS
-                    .toSeconds(Math.abs(assessmentEndTime.getTime() - now.getTime()));
-        }
-        return 0;
+        return values.size();
     }
 }
