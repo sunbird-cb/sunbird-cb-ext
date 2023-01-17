@@ -2,6 +2,9 @@ package org.sunbird.common.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import java.util.List;
+import java.util.Map;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SearchUserApiContent {
 
@@ -12,8 +15,47 @@ public class SearchUserApiContent {
     private String lastName;
     private String desc;
     private String channel;
+    private String phone;
+
+    private String courseId;
+    private String rootOrgId;
     private SunbirdUserProfileDetail profileDetails;
 
+
+
+    public String getCourseId() {
+        return courseId;
+    }
+
+    public void setCourseId(String courseId) {
+        this.courseId = courseId;
+    }
+
+    private List<Map<String, Object>> organisations = null;
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public List<Map<String, Object>> getOrganisations() {
+        return organisations;
+    }
+
+    public void setOrganisations(List<Map<String, Object>> organisations) {
+        this.organisations = organisations;
+    }
+
+    public String getRootOrgId() {
+        return rootOrgId;
+    }
+
+    public void setRootOrgId(String rootOrgId) {
+        this.rootOrgId = rootOrgId;
+    }
     public String getId() {
         return id;
     }
@@ -78,7 +120,7 @@ public class SearchUserApiContent {
 		this.profileDetails = profileDetails;
 	}
 
-	@Override
+    @Override
     public String toString() {
         return "SearchUserApiContent{" +
                 "id='" + id + '\'' +
@@ -87,6 +129,11 @@ public class SearchUserApiContent {
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
                 ", desc='" + desc + '\'' +
+                ", channel='" + channel + '\'' +
+                ", phone='" + phone + '\'' +
+                ", rootOrgId='" + rootOrgId + '\'' +
+                ", profileDetails=" + profileDetails +
+                ", organisations=" + organisations +
                 '}';
     }
 }

@@ -27,4 +27,13 @@ public interface UserUtilityService {
 	boolean getActivationLink(UserRegistration userRegistration);
 
 	boolean createNodeBBUser(UserRegistration userRegistration);
+
+	public boolean assignRole(String sbOrgId, String userId, String objectDetails);
+
+	public Map<String, Map<String, String>> getUserDetails(List<String> userIds, List<String> fields);
+
+	public void getUserDetailsFromDB(List<String> userIds, List<String> fields,
+			Map<String, Map<String, String>> userInfoMap);
+	
+	public void enrichUserInfo(List<String> fields, Map<String, Map<String, String>> userInfoMap);
 }

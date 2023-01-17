@@ -230,6 +230,7 @@ public class Constants {
 	public static final String TABLE_ORGANIZATION = "organisation";
 	public static final String TABLE_USER_ENROLMENT = "user_enrolments";
 	public static final String TABLE_USER = "user";
+	public static final String TABLE_USER_ROLES = "user_roles";
 	public static final String TABLE_COURSE_BATCH = "course_batch";
 	public static final String TABLE_RATINGS = "ratings";
 	public static final String TABLE_RATINGS_LOOKUP = "ratings_lookup";
@@ -513,6 +514,9 @@ public class Constants {
 	public static final String API_USER_SIGNUP = "api.user.signup";
 	public static final String API_USER_BULK_UPLOAD = "api.user.bulk.upload";
 	public static final String API_USER_BULK_UPLOAD_STATUS = "api.user.bulk.upload.status";
+
+	public static final String API_USER_ENROLMENT_REPORT = "api.user.enrolment.report";
+	public static final String API_USER_REPORT = "api.user.report";
 	public static final String TABLE_USER_BULK_UPLOAD = "user_bulk_upload";
 	public static final String FILE_NAME = "fileName";
 	public static final String FILE_PATH = "filePath";
@@ -537,6 +541,29 @@ public class Constants {
 	public static final String LEAF_NODES_COUNT = "leafNodesCount";
 	public static final String CLIENT_ERROR = "CLIENT_ERROR";
 	public static final String PARENT = "parent";
+	public static final String ORGANISATIONS = "organisations";
+
+	public static final String CIPHER_ALGORITHM = "AES";
+	public static final byte[] CIPHER_KEY = new byte[] { 'T', 'h', 'i', 's', 'A', 's', 'I', 'S', 'e', 'r', 'c', 'e',
+			'K', 't', 'e', 'y' };
+	public static final List<String> DECRYPTED_FIELDS = Arrays.asList("phone", "email");
+	public static final String CREATED_FOR = "createdFor";
+	public static final String COURSE_ORG_ID = "courseOrgId";
+	public static final String COURSE_ORG_NAME = "courseOrgName";
+	public static final String STATUS_ENROLLED = "Enrolled";
+	public static final String STAUTS_IN_PROGRESS = "In-Progress";
+	public static final String STATUS_COMPLETED = "Completed";
+	public static final String CONTENT_STATUS = "contentStatus";
+	public static final String ROLE = "role";
+	public static final String SCOPE = "scope";
+
+	public static final List<String> USER_ENROLMENT_REPORT_FIELDS = Arrays.asList(USER_ID, FIRSTNAME, LASTNAME, EMAIL,
+			PHONE, ROOT_ORG_ID, CHANNEL);
+
+	public static final List<String> COURSE_ENROLMENT_REPORT_FIELDS = Arrays.asList(COURSE_ID, NAME, COURSE_ORG_ID,
+			COURSE_ORG_NAME);
+
+	public static final List<String> USER_ENROLMENT_COMMON_FIELDS = Arrays.asList(STATUS, COMPLETION_PERCENTAGE);
 
 	private Constants() {
 		throw new IllegalStateException("Utility class");

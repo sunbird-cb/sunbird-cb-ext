@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -433,5 +434,61 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 			sbOrgId = (String) data.get(Constants.SB_ORG_ID);
 		}
 		return sbOrgId;
+    
+	public Map<String, Object> getOrgDetails(List<String> orgIds, List<String> fields) {
+		Map<String, Object> filters = new HashMap<>();
+		filters.put(Constants.IDENTIFIER, orgIds);
+		Map<String, Object> requestBody = new HashMap<>();
+		requestBody.put(Constants.FILTERS, filters);
+		requestBody.put(Constants.FIELDS, fields);
+		Map<String, Object> request = new HashMap<>();
+		request.put(Constants.REQUEST, requestBody);
+		Map<String, String> headers = new HashMap<>();
+		headers.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
+		Map<String, Object> apiResponse = (Map<String, Object>) outboundService.fetchResultUsingPost(
+				configProperties.getSbUrl() + configProperties.getSbOrgSearchPath(), request, headers);
+		Map<String, Object> orgMap = new HashMap<>();
+		if (Constants.OK.equalsIgnoreCase((String) apiResponse.get(Constants.RESPONSE_CODE))) {
+			Map<String, Object> result = (Map<String, Object>) apiResponse.get(Constants.RESULT);
+			if (MapUtils.isNotEmpty(result)) {
+				Map<String, Object> response = (Map<String, Object>) result.get(Constants.RESPONSE);
+				if (MapUtils.isNotEmpty(response)) {
+					for (int i = 0; i < orgIds.size(); i++) {
+						orgMap.put((String) response.get(orgIds.get(i)), response.get(Constants.CONTENT));
+					}
+				}
+			}
+		}
+		return orgMap;
+	}
+
+	public void getOrgDetailsFromDB(List<String> orgIds, Map<String, String> orgInfoMap) {
+		Map<String, Object> propertyMap = new HashMap<>();
+		propertyMap.put(Constants.STATUS, 1);
+
+		try {
+			for (int i = 0; i < orgIds.size(); i += 10) {
+				List<String> orgList = orgIds.subList(i, Math.min(orgIds.size(), i + 10));
+				propertyMap.put(Constants.ID, orgList);
+
+				List<Map<String, Object>> orgInfoList = cassandraOperation.getRecordsByProperties(
+						Constants.KEYSPACE_SUNBIRD, Constants.TABLE_ORGANIZATION, propertyMap,
+						Arrays.asList(Constants.CHANNEL));
+				for (Map<String, Object> org : orgInfoList) {
+					String orgId = (String) org.get(Constants.ID);
+
+					if (orgInfoMap.containsKey(orgId)) {
+						continue;
+					}
+
+					if (org.containsKey(Constants.CHANNEL)) {
+
+						orgInfoMap.put(orgId, (String) org.get(Constants.CHANNEL));
+					}
+				}
+			}
+		} catch (Exception e) {
+			log.error("Failed to get user details from DB. Exception: ", e);
+		}
 	}
 }
