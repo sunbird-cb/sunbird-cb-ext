@@ -368,7 +368,7 @@ public class Constants {
 	public static final String MTF_QUESTION = "MTF Question";
 	public static final String FTB_QUESTION = "FTB Question";
 	public static final String API_QUESTIONSET_HIERARCHY_GET = "api.questionset.hierarchy.get";
-	public static final String API_RETAKE_ASSESSMENT_GET = "api.retake.assessment.get";
+	public static final String API_RETAKE_ASSESSMENT_GET = "api.assessmment.attempt";
 	public static final String VER = "3.0";
 	public static final String API_QUESTIONS_LIST = "api.questions.list";
 	public static final String MINIMUM_PASS_PERCENTAGE = "minimumPassPercentage";
@@ -597,8 +597,8 @@ public class Constants {
 	public static final String SUBMIT_TIME = "submittime";
 	public static final String LEAF_NODES_COUNT = "leafNodesCount";
 	public static final String PARENT = "parent";
-	public static final String TOTAL_RETAKE_ATTEMPTS_ALLOWED = "totalRetakeAttemptsAllowed";
-	public static final String RETAKE_ATTEMPTS_CONSUMED = "retakeAttemptsConsumed";
+	public static final String TOTAL_RETAKE_ATTEMPTS_ALLOWED = "attemptsAllowed";
+	public static final String RETAKE_ATTEMPTS_CONSUMED = "attemptsMade";
 	public static final String ORGANISATIONS = "organisations";
 
 	public static final String CIPHER_ALGORITHM = "AES";
