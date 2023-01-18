@@ -431,10 +431,6 @@ public class CbExtServerProperties {
 	@Value("${es.user.report.include.fields}")
 	private String esUserReportIncludeFields;
 
-
-	@Value("${assessment.use.redis}")
-	private boolean assessmentUseRedisCache;
-
 	@Value("${kafka.topics.user.assessment.submit}")
 	private String assessmentSubmitTopic;
 
@@ -1587,15 +1583,6 @@ public class CbExtServerProperties {
 
 	public void setEsUserReportIncludeFields(String esUserReportIncludeFields) {
 		this.esUserReportIncludeFields = esUserReportIncludeFields;
-	}
-
-
-	public boolean isAssessmentUseRedisCache() {
-		return assessmentUseRedisCache;
-	}
-
-	public void setAssessmentUseRedisCache(boolean assessmentUseRedisCache) {
-		this.assessmentUseRedisCache = assessmentUseRedisCache;
 	}
 
 	public String getAssessmentSubmitTopic() {
