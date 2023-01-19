@@ -64,41 +64,31 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 				updateRequest.put(Constants.SB_ORG_ID, orgId);
 				updateRequest.put(Constants.ORG_NAME, orgName);
 				updateRequest.put(Constants.SB_ORG_TYPE, orgType);
-				String mapId = null;
+				String mapId = (String) requestData.get(Constants.MAP_ID);
+				String orgCode = (String) requestData.get(Constants.ORG_CODE);
+				String sbRootOrgid = (String) requestData.get(Constants.SB_ROOT_ORG_ID);
 				updateRequest.put(Constants.SB_SUB_ORG_TYPE, requestData.get(Constants.ORGANIZATION_SUB_TYPE));
+				if(!StringUtils.isEmpty(mapId)){
+					updateRequest.put(Constants.MAP_ID, mapId);
+				} else {
+					mapId = createMapId(requestData);
+					updateRequest.put(Constants.MAP_ID, mapId);
+					updateRequest.put(Constants.ORG_CODE, mapId);
+				}
+				if(!StringUtils.isEmpty(orgCode)){
+					updateRequest.put(Constants.ORG_CODE, orgCode);
+				}
 				if (!Constants.STATE.equalsIgnoreCase(orgType) && !Constants.MINISTRY.equalsIgnoreCase(orgType)) {
 					updateRequest.put(Constants.PARENT_MAP_ID, requestData.get(Constants.PARENT_MAP_ID));
-					if(requestData.containsKey(Constants.MAP_ID)){
-						updateRequest.put(Constants.MAP_ID, requestData.get(Constants.MAP_ID));
-					} else {
-						mapId = createMapId(requestData);
-						updateRequest.put(Constants.MAP_ID, mapId);
-					}
-					if(requestData.containsKey(Constants.SB_ROOT_ORG_ID)){
-						updateRequest.put(Constants.SB_ROOT_ORG_ID, requestData.get(Constants.SB_ROOT_ORG_ID));
+					if(!StringUtils.isEmpty(sbRootOrgid)){
+						updateRequest.put(Constants.SB_ROOT_ORG_ID, sbRootOrgid);
 					} else {
 						updateRequest.put(Constants.SB_ROOT_ORG_ID, fetchRootOrgId(requestData));
 					}
-					if(requestData.containsKey(Constants.ORG_CODE)){
-						updateRequest.put(Constants.ORG_CODE, requestData.get(Constants.ORG_CODE));
-					} else {
-						updateRequest.put(Constants.MAP_ID, mapId);
-					}
 				} else {
 					updateRequest.put(Constants.PARENT_MAP_ID, Constants.SPV);
-					if(requestData.containsKey(Constants.MAP_ID)){
-						updateRequest.put(Constants.MAP_ID, requestData.get(Constants.MAP_ID));
-					} else {
-						mapId = createMapId(requestData);
-						updateRequest.put(Constants.MAP_ID, mapId);
-					}
-					if(requestData.containsKey(Constants.ORG_CODE)){
-						updateRequest.put(Constants.ORG_CODE, requestData.get(Constants.ORG_CODE));
-					} else {
-						updateRequest.put(Constants.MAP_ID, mapId);
-					}
 				}
-				if (requestData.containsKey(Constants.MAP_ID)){
+				if (!StringUtils.isEmpty(mapId)){
 					Map<String, Object> compositeKey = new HashMap<String, Object>() {
 						private static final long serialVersionUID = 1L;
 
@@ -383,13 +373,11 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 
 	private String createMapId(Map<String, Object> requestData) {
 		Map<String, Object> queryRequest = new HashMap<>();
-		List<String> fields = new ArrayList<>();
 		String prefix = StringUtils.EMPTY;
 		String mapIdNew = StringUtils.EMPTY;
 		String orgType = (String) requestData.get(Constants.ORGANIZATION_TYPE);
 		if (!Constants.STATE.equalsIgnoreCase(orgType)  && !Constants.MINISTRY.equalsIgnoreCase(orgType)) {
 			queryRequest.put(Constants.PARENT_MAP_ID, requestData.get(Constants.PARENT_MAP_ID));
-			fields.add(Constants.MAP_ID);
 			if (Constants.MDO.equalsIgnoreCase(orgType)) {
 				prefix = "D_";
 			} else if (Constants.ORG.equalsIgnoreCase(orgType)) {
@@ -398,7 +386,7 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 				prefix = "X_";
 			}
 		} else {
-			queryRequest.put(Constants.SB_ORG_TYPE, requestData.get(orgType));
+			queryRequest.put(Constants.SB_ORG_TYPE, orgType);
 			if (Constants.STATE.equalsIgnoreCase(orgType)) {
 				prefix = "S_";
 			} else if (Constants.MINISTRY.equalsIgnoreCase(orgType)) {
@@ -406,7 +394,7 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 			}
 		}
 		List<Map<String, Object>> existingDataList = cassandraOperation
-				.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_ORG_HIERARCHY, queryRequest, fields);
+				.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_ORG_HIERARCHY, queryRequest, Arrays.asList(Constants.MAP_ID));
 		if (CollectionUtils.isNotEmpty(existingDataList)) {
 
 			List<String> mapIdList = new ArrayList<>();
@@ -434,7 +422,8 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 			sbOrgId = (String) data.get(Constants.SB_ORG_ID);
 		}
 		return sbOrgId;
-    
+	}
+
 	public Map<String, Object> getOrgDetails(List<String> orgIds, List<String> fields) {
 		Map<String, Object> filters = new HashMap<>();
 		filters.put(Constants.IDENTIFIER, orgIds);
