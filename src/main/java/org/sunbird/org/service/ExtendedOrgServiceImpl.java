@@ -68,19 +68,19 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 				String orgCode = (String) requestData.get(Constants.ORG_CODE);
 				String sbRootOrgid = (String) requestData.get(Constants.SB_ROOT_ORG_ID);
 				updateRequest.put(Constants.SB_SUB_ORG_TYPE, requestData.get(Constants.ORGANIZATION_SUB_TYPE));
-				if(!StringUtils.isEmpty(mapId)){
+				if (!StringUtils.isEmpty(mapId)) {
 					updateRequest.put(Constants.MAP_ID, mapId);
 				} else {
 					mapId = createMapId(requestData);
 					updateRequest.put(Constants.MAP_ID, mapId);
 					updateRequest.put(Constants.ORG_CODE, mapId);
 				}
-				if(!StringUtils.isEmpty(orgCode)){
+				if (!StringUtils.isEmpty(orgCode)) {
 					updateRequest.put(Constants.ORG_CODE, orgCode);
 				}
 				if (!Constants.STATE.equalsIgnoreCase(orgType) && !Constants.MINISTRY.equalsIgnoreCase(orgType)) {
 					updateRequest.put(Constants.PARENT_MAP_ID, requestData.get(Constants.PARENT_MAP_ID));
-					if(!StringUtils.isEmpty(sbRootOrgid)){
+					if (!StringUtils.isEmpty(sbRootOrgid)) {
 						updateRequest.put(Constants.SB_ROOT_ORG_ID, sbRootOrgid);
 					} else {
 						updateRequest.put(Constants.SB_ROOT_ORG_ID, fetchRootOrgId(requestData));
@@ -88,7 +88,7 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 				} else {
 					updateRequest.put(Constants.PARENT_MAP_ID, Constants.SPV);
 				}
-				if (!StringUtils.isEmpty(mapId)){
+				if (!StringUtils.isEmpty((String) requestData.get(Constants.MAP_ID))) {
 					Map<String, Object> compositeKey = new HashMap<String, Object>() {
 						private static final long serialVersionUID = 1L;
 
@@ -229,7 +229,7 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 			params.add(Constants.ORG_NAME);
 		}
 
-		if (StringUtils.isEmpty((String) request.get(Constants.ORGANIZATION_TYPE))) {
+		if (StringUtils.isEmpty(((String) orgType))) {
 			params.add(Constants.ORGANIZATION_TYPE);
 		} else if (!Constants.STATE.equalsIgnoreCase(orgType) && !Constants.MINISTRY.equalsIgnoreCase(orgType)) {
 			if (StringUtils.isEmpty((String) request.get(Constants.PARENT_MAP_ID))) {
@@ -376,7 +376,7 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 		String prefix = StringUtils.EMPTY;
 		String mapIdNew = StringUtils.EMPTY;
 		String orgType = (String) requestData.get(Constants.ORGANIZATION_TYPE);
-		if (!Constants.STATE.equalsIgnoreCase(orgType)  && !Constants.MINISTRY.equalsIgnoreCase(orgType)) {
+		if (!Constants.STATE.equalsIgnoreCase(orgType) && !Constants.MINISTRY.equalsIgnoreCase(orgType)) {
 			queryRequest.put(Constants.PARENT_MAP_ID, requestData.get(Constants.PARENT_MAP_ID));
 			if (Constants.MDO.equalsIgnoreCase(orgType)) {
 				prefix = "D_";
