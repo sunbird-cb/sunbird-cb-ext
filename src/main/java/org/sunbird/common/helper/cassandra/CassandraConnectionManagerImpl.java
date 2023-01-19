@@ -69,8 +69,6 @@ public class CassandraConnectionManagerImpl implements CassandraConnectionManage
             String[] hosts = null;
             if (StringUtils.isNotBlank(cassandraHost)) {
                 hosts = cassandraHost.split(",");
-            } else {
-                hosts = new String[] {"localhost"};
             }
             cluster = createCluster(hosts, poolingOptions);
 
