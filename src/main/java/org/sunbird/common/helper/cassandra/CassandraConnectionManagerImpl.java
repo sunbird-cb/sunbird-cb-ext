@@ -66,7 +66,12 @@ public class CassandraConnectionManagerImpl implements CassandraConnectionManage
             poolingOptions.setPoolTimeoutMillis(
                     Integer.parseInt(cache.getProperty(Constants.POOL_TIMEOUT)));
             String cassandraHost = (cache.getProperty(Constants.CASSANDRA_CONFIG_HOST));
-            String[] hosts = new String[]{cassandraHost};
+            String[] hosts = null;
+            if (StringUtils.isNotBlank(cassandraHost)) {
+                hosts = cassandraHost.split(",");
+            } else {
+                hosts = new String[] {"localhost"};
+            }
             cluster = createCluster(hosts, poolingOptions);
 
             final Metadata metadata = cluster.getMetadata();
