@@ -312,7 +312,9 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 			headers.put(Constants.AUTHORIZATION, serverProperties.getSbApiKey());
 			logger.info(serviceURL);
 			Object o = outboundRequestHandlerService.fetchUsingGetWithHeaders(serviceURL, headers);
-			return new ObjectMapper().convertValue(o, Map.class);
+			Map<String, Object> data = new ObjectMapper().convertValue(o, Map.class);
+			logger.info(data.toString());
+			return data;
 		} catch (Exception e) {
 			logger.error("error in getReadHierarchyApiResponse  " + e.getMessage());
 		}

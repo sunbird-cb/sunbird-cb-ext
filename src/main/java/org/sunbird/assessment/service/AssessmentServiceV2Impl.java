@@ -204,13 +204,17 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
     private String fetchReadHierarchyDetails(Map<String, Object> assessmentAllDetail, String token, String assessmentIdentifier) throws IOException {
         try {
             String assessmentData = redisCacheMgr.getCache(Constants.ASSESSMENT_ID + assessmentIdentifier);
+            logger.info("Reading assessmentData from redis" + assessmentData);
             if (!ObjectUtils.isEmpty(assessmentData)) {
                 assessmentAllDetail.putAll(mapper.readValue(assessmentData, new TypeReference<Map<String, Object>>() {
                 }));
+                logger.info(assessmentAllDetail.toString());
                 assessmentAllDetail.put("readAssessmentParams", false);
+                logger.info(assessmentAllDetail.toString());
             } else {
                 Map<String, Object> readHierarchyApiResponse = assessUtilServ.getReadHierarchyApiResponse(assessmentIdentifier, token);
-                logger.info(readHierarchyApiResponse.toString());
+                if (!readHierarchyApiResponse.isEmpty())
+                    logger.info(readHierarchyApiResponse.toString());
                 if (ObjectUtils.isEmpty(readHierarchyApiResponse) || !Constants.OK.equalsIgnoreCase((String) readHierarchyApiResponse.get(Constants.RESPONSE_CODE))) {
                     return Constants.ASSESSMENT_HIERARCHY_READ_FAILED;
                 }
