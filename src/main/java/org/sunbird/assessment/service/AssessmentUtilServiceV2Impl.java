@@ -313,7 +313,7 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 			Object o = outboundRequestHandlerService.fetchUsingGetWithHeaders(serviceURL, headers);
 			return new ObjectMapper().convertValue(o, Map.class);
 		} catch (Exception e) {
-			logger.error(e.getMessage());
+			logger.error("error in getReadHierarchyApiResponse  " + e.getMessage());
 		}
 		return new HashMap<>();
 	}

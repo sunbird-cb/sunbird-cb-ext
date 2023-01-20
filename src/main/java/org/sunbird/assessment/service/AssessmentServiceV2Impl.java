@@ -210,11 +210,14 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                 assessmentAllDetail.put("readAssessmentParams", false);
             } else {
                 Map<String, Object> readHierarchyApiResponse = assessUtilServ.getReadHierarchyApiResponse(assessmentIdentifier, token);
+                logger.info(readHierarchyApiResponse.toString());
                 if (ObjectUtils.isEmpty(readHierarchyApiResponse) || !Constants.OK.equalsIgnoreCase((String) readHierarchyApiResponse.get(Constants.RESPONSE_CODE))) {
                     return Constants.ASSESSMENT_HIERARCHY_READ_FAILED;
                 }
                 assessmentAllDetail.putAll((Map<String, Object>) ((Map<String, Object>) readHierarchyApiResponse.get(Constants.RESULT)).get(Constants.QUESTION_SET));
+                logger.info(assessmentAllDetail.toString());
                 assessmentAllDetail.put("readAssessmentParams", true);
+                logger.info(assessmentAllDetail.toString());
                 redisCacheMgr.putCache(Constants.ASSESSMENT_ID + assessmentIdentifier, ((Map<String, Object>) readHierarchyApiResponse.get(Constants.RESULT)).get(Constants.QUESTION_SET));
             }
         } catch (Exception e) {
