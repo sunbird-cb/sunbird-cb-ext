@@ -310,6 +310,7 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 			Map<String, String> headers = new HashMap<>();
 			headers.put(Constants.X_AUTH_TOKEN, token);
 			headers.put(Constants.AUTHORIZATION, serverProperties.getSbApiKey());
+			logger.info(serviceURL);
 			Object o = outboundRequestHandlerService.fetchUsingGetWithHeaders(serviceURL, headers);
 			return new ObjectMapper().convertValue(o, Map.class);
 		} catch (Exception e) {
