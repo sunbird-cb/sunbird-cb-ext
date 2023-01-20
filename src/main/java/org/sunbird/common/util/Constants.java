@@ -504,6 +504,9 @@ public class Constants {
 	public static final String PUBLIC_COURSE_LIST = "exploreOpenCourseList";
 	public static final String LAST_UPDATED_ON = "lastUpdatedOn";
 	public static final String DESCENDING_ORDER = "desc";
+	public static final String SB_SUB_ORG_TYPE = "sbSubOrgType";
+	public static final String ORG_CODE = "orgCode";
+	public static final String MDO = "mdo";
   
 	private Constants() {
 		throw new IllegalStateException("Utility class");
