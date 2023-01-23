@@ -260,6 +260,7 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 				&& updatedQuestionMap.containsKey(Constants.PRIMARY_CATEGORY) && updatedQuestionMap
 				.get(Constants.PRIMARY_CATEGORY).toString().equalsIgnoreCase(Constants.MTF_QUESTION)) {
 			List<Object> rhsChoicesObj = (List<Object>) questionMapResponse.get(Constants.RHS_CHOICES);
+			Collections.shuffle(rhsChoicesObj);
 			updatedQuestionMap.put(Constants.RHS_CHOICES, rhsChoicesObj);
 		}
 
