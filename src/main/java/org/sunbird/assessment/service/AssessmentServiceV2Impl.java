@@ -77,7 +77,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                     Timestamp assessmentStartTime = new Timestamp(new Date().getTime());
                     if (existingDataList.isEmpty()) {
                         logger.info("Assessment read first time for user.");
-                        setAssessmentDetail(response, assessmentAllDetail);
+                        response.getResult().put(Constants.QUESTION_SET, readAssessmentLevelData(assessmentAllDetail));
                         redisCacheMgr.putCache(Constants.USER_ASSESS_REQ + assessmentIdentifier + "_" + token, response.getResult().get(Constants.QUESTION_SET));
                         int expectedDuration = (Integer) assessmentAllDetail.get(Constants.EXPECTED_DURATION);
                         Boolean isAssessmentUpdatedToDB = assessmentRepository.addUserAssesmentDataToDB(userId, assessmentIdentifier, assessmentStartTime, calculateAssessmentSubmitTime(expectedDuration, assessmentStartTime), (Map<String, Object>) (response.getResult().get(Constants.QUESTION_SET)), Constants.NOT_SUBMITTED);
@@ -102,7 +102,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                             response.getResult().put(Constants.QUESTION_SET, questionSetFromAssessment);
                         } else {
                             logger.info("Assessment read... adding user data to db...");
-                            setAssessmentDetail(response, assessmentAllDetail);
+                            response.getResult().put(Constants.QUESTION_SET, readAssessmentLevelData(assessmentAllDetail));
                             int expectedDuration = (Integer) assessmentAllDetail.get(Constants.EXPECTED_DURATION);
                             Boolean isAssessmentUpdatedToDB = assessmentRepository.addUserAssesmentDataToDB(userId, assessmentIdentifier, assessmentStartTime, calculateAssessmentSubmitTime(expectedDuration, assessmentStartTime), (Map<String, Object>) (response.getResult().get(Constants.QUESTION_SET)), Constants.NOT_SUBMITTED);
                             redisCacheMgr.putCache(Constants.USER_ASSESS_REQ + assessmentIdentifier + "_" + token, response.getResult().get(Constants.QUESTION_SET));
@@ -112,7 +112,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                         }
                     }
                 } else if (errMsg.isEmpty() && ((String) assessmentAllDetail.get(Constants.PRIMARY_CATEGORY)).equalsIgnoreCase(Constants.PRACTICE_QUESTION_SET)) {
-                    setAssessmentDetail(response, assessmentAllDetail);
+                    response.getResult().put(Constants.QUESTION_SET, readAssessmentLevelData(assessmentAllDetail));
                     redisCacheMgr.putCache(Constants.USER_ASSESS_REQ + assessmentIdentifier + "_" + token, response.getResult().get(Constants.QUESTION_SET));
                 }
             } else {
@@ -207,20 +207,13 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
             if (!ObjectUtils.isEmpty(assessmentData)) {
                 assessmentAllDetail.putAll(mapper.readValue(assessmentData, new TypeReference<Map<String, Object>>() {
                 }));
-                logger.info(assessmentAllDetail.toString());
-                assessmentAllDetail.put("readAssessmentParams", false);
-                logger.info(assessmentAllDetail.toString());
             } else {
                 Map<String, Object> readHierarchyApiResponse = assessUtilServ.getReadHierarchyApiResponse(assessmentIdentifier, token);
                 if (!readHierarchyApiResponse.isEmpty())
-                    logger.info(readHierarchyApiResponse.toString());
                 if (ObjectUtils.isEmpty(readHierarchyApiResponse) || !Constants.OK.equalsIgnoreCase((String) readHierarchyApiResponse.get(Constants.RESPONSE_CODE))) {
                     return Constants.ASSESSMENT_HIERARCHY_READ_FAILED;
                 }
                 assessmentAllDetail.putAll((Map<String, Object>) ((Map<String, Object>) readHierarchyApiResponse.get(Constants.RESULT)).get(Constants.QUESTION_SET));
-                logger.info(assessmentAllDetail.toString());
-                assessmentAllDetail.put("readAssessmentParams", true);
-                logger.info(assessmentAllDetail.toString());
                 redisCacheMgr.putCache(Constants.ASSESSMENT_ID + assessmentIdentifier, ((Map<String, Object>) readHierarchyApiResponse.get(Constants.RESULT)).get(Constants.QUESTION_SET));
             }
         } catch (Exception e) {
