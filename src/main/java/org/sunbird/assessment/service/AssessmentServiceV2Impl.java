@@ -100,8 +100,8 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                                 redisCacheMgr.putCache(Constants.USER_ASSESS_REQ + assessmentIdentifier + "_" + token, questionSetFromAssessment);
                             }
                             response.getResult().put(Constants.QUESTION_SET, questionSetFromAssessment);
-                        } else {
-                            logger.info("Assessment read... adding user data to db...");
+                        } else if ((assessmentStartTime.compareTo(existingAssessmentEndTime) < 0 && ((String) existingDataList.get(0).get(Constants.STATUS)).equalsIgnoreCase(Constants.SUBMITTED)) || assessmentStartTime.compareTo(existingAssessmentEndTime) > 0) {
+                            logger.info("Incase the assessment is submitted before the end time, or the endtime has exceeded, read assessment freshly ");
                             response.getResult().put(Constants.QUESTION_SET, readAssessmentLevelData(assessmentAllDetail));
                             int expectedDuration = (Integer) assessmentAllDetail.get(Constants.EXPECTED_DURATION);
                             Boolean isAssessmentUpdatedToDB = assessmentRepository.addUserAssesmentDataToDB(userId, assessmentIdentifier, assessmentStartTime, calculateAssessmentSubmitTime(expectedDuration, assessmentStartTime), (Map<String, Object>) (response.getResult().get(Constants.QUESTION_SET)), Constants.NOT_SUBMITTED);
@@ -128,14 +128,6 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
             response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
         }
         return response;
-    }
-
-    private void setAssessmentDetail(SBApiResponse response, Map<String, Object> assessmentAllDetail) {
-        if ((Boolean) assessmentAllDetail.get("readAssessmentParams")) {
-            response.getResult().put(Constants.QUESTION_SET, readAssessmentLevelData(assessmentAllDetail));
-        } else {
-            response.getResult().put(Constants.QUESTION_SET, assessmentAllDetail);
-        }
     }
 
     public SBApiResponse readQuestionList(Map<String, Object> requestBody, String authUserToken) {
