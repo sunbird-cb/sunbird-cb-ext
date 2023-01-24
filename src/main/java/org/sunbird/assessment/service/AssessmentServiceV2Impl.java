@@ -199,6 +199,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
             if (!ObjectUtils.isEmpty(assessmentData)) {
                 assessmentAllDetail.putAll(mapper.readValue(assessmentData, new TypeReference<Map<String, Object>>() {
                 }));
+                assessmentAllDetail.put(Constants.EXPECTED_DURATION, 3600);
             } else {
                 Map<String, Object> readHierarchyApiResponse = assessUtilServ.getReadHierarchyApiResponse(assessmentIdentifier, token);
                 if (!readHierarchyApiResponse.isEmpty())
@@ -207,6 +208,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                 }
                 assessmentAllDetail.putAll((Map<String, Object>) ((Map<String, Object>) readHierarchyApiResponse.get(Constants.RESULT)).get(Constants.QUESTION_SET));
                 redisCacheMgr.putCache(Constants.ASSESSMENT_ID + assessmentIdentifier, ((Map<String, Object>) readHierarchyApiResponse.get(Constants.RESULT)).get(Constants.QUESTION_SET));
+                assessmentAllDetail.put(Constants.EXPECTED_DURATION, 3600);
             }
         } catch (Exception e) {
             logger.info("Error while fetching or mapping read hierarchy data" + e.getMessage());
@@ -292,7 +294,8 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
         List<Map<String, Object>> hierarchySectionList = new ArrayList<>();
         List<String> questionsListFromAssessmentHierarchy = new ArrayList<>();
         Map<String, Object> assessmentHierarchy = new HashMap<>();
-        errMsg = validateSubmitAssessmentRequest(submitRequest, authUserToken, hierarchySectionList, sectionListFromSubmitRequest, assessmentHierarchy);
+        Date assessmentStartTime = new Date();
+        errMsg = validateSubmitAssessmentRequest(submitRequest, authUserToken, hierarchySectionList, sectionListFromSubmitRequest, assessmentHierarchy, assessmentStartTime);
         if (errMsg.isEmpty()) {
             String userId = validateAuthTokenAndFetchUserId(authUserToken);
             String scoreCutOffType = ((String) assessmentHierarchy.get(Constants.SCORE_CUTOFF_TYPE)).toLowerCase();
@@ -348,7 +351,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                         case Constants.ASSESSMENT_LEVEL_SCORE_CUTOFF: {
                             result.putAll(createResponseMapWithProperStructure(hierarchySection, assessUtilServ.validateQumlAssessment(questionsListFromAssessmentHierarchy, questionsListFromSubmitRequest)));
                             outgoingResponse.getResult().putAll(calculateAssessmentFinalResults(result));
-                            writeDataToDatabaseAndTriggerKafkaEvent(submitRequest, userId, existingDataList, result, (String) assessmentHierarchy.get(Constants.PRIMARY_CATEGORY));
+                            writeDataToDatabaseAndTriggerKafkaEvent(submitRequest, userId, assessmentStartTime, result, (String) assessmentHierarchy.get(Constants.PRIMARY_CATEGORY));
                             return outgoingResponse;
                         }
                         case Constants.SECTION_LEVEL_SCORE_CUTOFF: {
@@ -389,7 +392,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
             if (errMsg.isEmpty() && !ObjectUtils.isEmpty(scoreCutOffType) && scoreCutOffType.equalsIgnoreCase(Constants.SECTION_LEVEL_SCORE_CUTOFF)) {
                 Map<String, Object> result = calculateSectionFinalResults(sectionLevelsResults);
                 outgoingResponse.getResult().putAll(result);
-                writeDataToDatabaseAndTriggerKafkaEvent(submitRequest, userId, existingDataList, result, (String) assessmentHierarchy.get(Constants.PRIMARY_CATEGORY));
+                writeDataToDatabaseAndTriggerKafkaEvent(submitRequest, userId, assessmentStartTime, result, (String) assessmentHierarchy.get(Constants.PRIMARY_CATEGORY));
                 return outgoingResponse;
             }
         }
@@ -401,9 +404,8 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
         return outgoingResponse;
     }
 
-    private void writeDataToDatabaseAndTriggerKafkaEvent(Map<String, Object> submitRequest, String userId, List<Map<String, Object>> existingDataList, Map<String, Object> result, String primaryCategory) {
+    private void writeDataToDatabaseAndTriggerKafkaEvent(Map<String, Object> submitRequest, String userId, Date startTime, Map<String, Object> result, String primaryCategory) {
         try {
-            Date startTime = (!existingDataList.isEmpty()) ? (Date) existingDataList.get(0).get(Constants.START_TIME) : null;
             Boolean isAssessmentUpdatedToDB = assessmentRepository.updateUserAssesmentDataToDB(userId, (String) submitRequest.get(Constants.IDENTIFIER), submitRequest, result, Constants.SUBMITTED, startTime);
             if (Boolean.TRUE.equals(isAssessmentUpdatedToDB)) {
                 Map<String, Object> kafkaResult = new HashMap<>();
@@ -434,7 +436,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
         }
     }
 
-    private String validateSubmitAssessmentRequest(Map<String, Object> submitRequest, String authUserToken, List<Map<String, Object>> hierarchySectionList, List<Map<String, Object>> sectionListFromSubmitRequest, Map<String, Object> assessmentHierarchy) throws IOException {
+    private String validateSubmitAssessmentRequest(Map<String, Object> submitRequest, String authUserToken, List<Map<String, Object>> hierarchySectionList, List<Map<String, Object>> sectionListFromSubmitRequest, Map<String, Object> assessmentHierarchy, Date assessmentStartTime) throws IOException {
         String userId = validateAuthTokenAndFetchUserId(authUserToken);
         if (ObjectUtils.isEmpty(userId)) {
             return Constants.USER_ID_DOESNT_EXIST;
@@ -456,7 +458,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
         if (((String) (assessmentHierarchy.get(Constants.PRIMARY_CATEGORY))).equalsIgnoreCase(Constants.PRACTICE_QUESTION_SET))
             return "";
         List<Map<String, Object>> existingDataList = assessmentRepository.fetchUserAssessmentDataFromDB(userId, assessmentIdFromRequest);
-        Date assessmentStartTime = (!existingDataList.isEmpty()) ? (Date) existingDataList.get(0).get(Constants.START_TIME) : null;
+        assessmentStartTime = (!existingDataList.isEmpty()) ? (Date) existingDataList.get(0).get(Constants.START_TIME) : null;
         if (assessmentStartTime == null) {
             return Constants.READ_ASSESSMENT_START_TIME_FAILED;
         }
