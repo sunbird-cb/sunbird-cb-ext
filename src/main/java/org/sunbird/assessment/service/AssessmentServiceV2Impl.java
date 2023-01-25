@@ -199,7 +199,6 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
             if (!ObjectUtils.isEmpty(assessmentData)) {
                 assessmentAllDetail.putAll(mapper.readValue(assessmentData, new TypeReference<Map<String, Object>>() {
                 }));
-                assessmentAllDetail.put(Constants.EXPECTED_DURATION, 3600);
             } else {
                 Map<String, Object> readHierarchyApiResponse = assessUtilServ.getReadHierarchyApiResponse(assessmentIdentifier, token);
                 if (!readHierarchyApiResponse.isEmpty())
@@ -208,7 +207,6 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                 }
                 assessmentAllDetail.putAll((Map<String, Object>) ((Map<String, Object>) readHierarchyApiResponse.get(Constants.RESULT)).get(Constants.QUESTION_SET));
                 redisCacheMgr.putCache(Constants.ASSESSMENT_ID + assessmentIdentifier, ((Map<String, Object>) readHierarchyApiResponse.get(Constants.RESULT)).get(Constants.QUESTION_SET));
-                assessmentAllDetail.put(Constants.EXPECTED_DURATION, 3600);
             }
         } catch (Exception e) {
             logger.info("Error while fetching or mapping read hierarchy data" + e.getMessage());
