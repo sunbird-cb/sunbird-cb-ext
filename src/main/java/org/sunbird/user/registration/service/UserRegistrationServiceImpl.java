@@ -50,6 +50,7 @@ import org.sunbird.user.registration.model.UserRegistrationInfo;
 import org.sunbird.user.registration.util.UserRegistrationStatus;
 import org.sunbird.user.service.UserUtilityService;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
@@ -169,8 +170,11 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 		SBApiResponse response = createDefaultResponse(Constants.USER_REGISTRATION_DEPT_INFO_API);
 
 		try {
-			Map<String, List<DeptPublicInfo>> deptListMap = (Map<String, List<DeptPublicInfo>>) redisCacheMgr
-					.getCache(Constants.DEPARTMENT_LIST_CACHE_NAME);
+			String strDeptListMap = redisCacheMgr.getCache(Constants.DEPARTMENT_LIST_CACHE_NAME);
+
+			Map<String, List<DeptPublicInfo>> deptListMap = mapper.readValue(strDeptListMap,
+					new TypeReference<Map<String, List<DeptPublicInfo>>>() {
+					});
 			List<DeptPublicInfo> orgList = null;
 			if (ObjectUtils.isEmpty(deptListMap)
 					|| CollectionUtils.isEmpty(deptListMap.get(Constants.DEPARTMENT_LIST_CACHE_NAME))) {
