@@ -1,5 +1,6 @@
 package org.sunbird.searchby.service;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -8,6 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -41,11 +43,18 @@ public class SearchByService {
 	RedisCacheMgr redisCacheMgr;
 
 	@Autowired
+	ObjectMapper mapper;
+
+	@Autowired
 	OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
 
 	public Collection<CompetencyInfo> getCompetencyDetails(String authUserToken) throws Exception {
-		Map<String, CompetencyInfo> competencyMap = (Map<String, CompetencyInfo>) redisCacheMgr
+		Map<String, CompetencyInfo> competencyMap = new HashMap<>();
+		String competency = redisCacheMgr
 				.getCache(Constants.COMPETENCY_CACHE_NAME);
+		if (!StringUtils.isEmpty(competency)) {
+			competencyMap = mapper.readValue(competency, new TypeReference<Map<String, CompetencyInfo>>(){});
+		}
 
 		if (CollectionUtils.isEmpty(competencyMap)) {
 			logger.info("Initializing/Refreshing the Cache Value for Key : " + Constants.COMPETENCY_CACHE_NAME);
@@ -56,9 +65,13 @@ public class SearchByService {
 	}
 
 	public Collection<ProviderInfo> getProviderDetails(String authUserToken) throws Exception {
-		Map<String, ProviderInfo> providerMap = (Map<String, ProviderInfo>) redisCacheMgr
+		Map<String, ProviderInfo> providerMap = new HashMap<>();
+		String provider = redisCacheMgr
 				.getCache(Constants.PROVIDER_CACHE_NAME);
-
+		if (!StringUtils.isEmpty(provider)) {
+			providerMap = mapper.readValue(provider, new TypeReference<Map<String, ProviderInfo>>() {
+			});
+		}
 		if (CollectionUtils.isEmpty(providerMap)) {
 			logger.info("Initializing/Refreshing the Cache Value for Key : " + Constants.PROVIDER_CACHE_NAME);
 			providerMap = updateProviderDetails(authUserToken);
@@ -66,13 +79,17 @@ public class SearchByService {
 		return providerMap.values();
 	}
 
-	public FracApiResponse listPositions(String userToken) {
+	public FracApiResponse listPositions(String userToken) throws IOException {
 		FracApiResponse response = new FracApiResponse();
 		response.setStatusInfo(new FracStatusInfo());
 		response.getStatusInfo().setStatusCode(HttpStatus.OK.value());
-
-		Map<String, List<FracCommonInfo>> positionMap = (Map<String, List<FracCommonInfo>>) redisCacheMgr
+		Map<String, List<FracCommonInfo>> positionMap = new HashMap<>();
+		String positions = redisCacheMgr
 				.getCache(Constants.POSITIONS_CACHE_NAME);
+		if (!StringUtils.isEmpty(positions)) {
+			positionMap = mapper.readValue(positions, new TypeReference<Map<String, List<FracCommonInfo>>>() {
+			});
+		}
 		if (ObjectUtils.isEmpty(positionMap)
 				|| CollectionUtils.isEmpty(positionMap.get(Constants.POSITIONS_CACHE_NAME))) {
 			logger.info("Initializing / Refreshing the Cache value for key : " + Constants.POSITIONS_CACHE_NAME);

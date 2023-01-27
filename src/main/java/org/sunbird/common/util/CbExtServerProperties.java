@@ -194,9 +194,6 @@ public class CbExtServerProperties {
 	@Value("${redis.host.name}")
 	private String redisHostName;
 
-	@Value("${redis.port}")
-	private String redisPort;
-
 	@Value("${redis.timeout}")
 	private String redisTimeout;
 
@@ -433,6 +430,18 @@ public class CbExtServerProperties {
 	
 	@Value("${es.user.report.include.fields}")
 	private String esUserReportIncludeFields;
+
+	@Value("${kafka.topics.user.assessment.submit}")
+	private String assessmentSubmitTopic;
+
+	@Value("${sso.url}")
+	private String ssoUrl;
+
+	@Value("${sso.realm}")
+	private String ssoRealm;
+
+	@Value("${sb.es.user.notification.preference.index}")
+	private String sbUserNotificationPreferenceIndex;
 
 	public String getUserAssessmentSubmissionDuration() {
 		return userAssessmentSubmissionDuration;
@@ -753,15 +762,6 @@ public class CbExtServerProperties {
 	public void setCourseBatchCreateEndpoint(String courseBatchCreateEndpoint) {
 		this.courseBatchCreateEndpoint = courseBatchCreateEndpoint;
 	}
-
-	public String getRedisPort() {
-		return redisPort;
-	}
-
-	public void setRedisPort(String redisPort) {
-		this.redisPort = redisPort;
-	}
-
 	public String getRedisHostName() {
 		return redisHostName;
 	}
@@ -1583,5 +1583,37 @@ public class CbExtServerProperties {
 
 	public void setEsUserReportIncludeFields(String esUserReportIncludeFields) {
 		this.esUserReportIncludeFields = esUserReportIncludeFields;
+	}
+
+	public String getAssessmentSubmitTopic() {
+		return assessmentSubmitTopic;
+	}
+
+	public void setAssessmentSubmitTopic(String assessmentSubmitTopic) {
+		this.assessmentSubmitTopic = assessmentSubmitTopic;
+	}
+
+	public String getSsoUrl() {
+		return ssoUrl;
+	}
+
+	public void setSsoUrl(String ssoUrl) {
+		this.ssoUrl = ssoUrl;
+	}
+
+	public String getSsoRealm() {
+		return ssoRealm;
+	}
+
+	public void setSsoRealm(String ssoRealm) {
+		this.ssoRealm = ssoRealm;
+	}
+
+	public String getSbUserNotificationPreferenceIndex() {
+		return sbUserNotificationPreferenceIndex;
+	}
+
+	public void setSbUserNotificationPreferenceIndex(String sbUserNotificationPreferenceIndex) {
+		this.sbUserNotificationPreferenceIndex = sbUserNotificationPreferenceIndex;
 	}
 }

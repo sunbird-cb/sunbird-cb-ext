@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
@@ -169,8 +170,13 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 		SBApiResponse response = createDefaultResponse(Constants.USER_REGISTRATION_DEPT_INFO_API);
 
 		try {
-			Map<String, List<DeptPublicInfo>> deptListMap = (Map<String, List<DeptPublicInfo>>) redisCacheMgr
+			Map<String, List<DeptPublicInfo>> deptListMap = new HashMap<>();
+			String deptListMapString = redisCacheMgr
 					.getCache(Constants.DEPARTMENT_LIST_CACHE_NAME);
+			if (!ObjectUtils.isEmpty(deptListMapString)) {
+				deptListMap = mapper.readValue(deptListMapString, new TypeReference<Map<String, List<DeptPublicInfo>>>() {
+				});
+			}
 			List<DeptPublicInfo> orgList = null;
 			if (ObjectUtils.isEmpty(deptListMap)
 					|| CollectionUtils.isEmpty(deptListMap.get(Constants.DEPARTMENT_LIST_CACHE_NAME))) {

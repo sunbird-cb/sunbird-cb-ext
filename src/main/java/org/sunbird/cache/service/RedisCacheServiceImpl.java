@@ -39,7 +39,7 @@ public class RedisCacheServiceImpl implements RedisCacheService {
 	@Override
 	public SBApiResponse getKeys() throws Exception {
 		SBApiResponse response = new SBApiResponse(Constants.API_REDIS_GET_KEYS);
-		Set<String> res = redisCache.getAllKeyNames();
+		Set<String> res = redisCache.getAllKeys();
 		if (!res.isEmpty()) {
 			logger.info("All Keys in Redis Cache is Fetched");
 			response.getParams().setStatus(Constants.SUCCESSFUL);

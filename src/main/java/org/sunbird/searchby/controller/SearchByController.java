@@ -10,6 +10,8 @@ import org.sunbird.common.model.FracApiResponse;
 import org.sunbird.common.util.Constants;
 import org.sunbird.searchby.service.SearchByService;
 
+import java.io.IOException;
+
 @RestController
 public class SearchByController {
 
@@ -29,7 +31,7 @@ public class SearchByController {
 	}
 
 	@GetMapping("/v1/listPositions")
-	public ResponseEntity<?> listPositions(@RequestHeader(Constants.X_AUTH_TOKEN) String userToken) {
+	public ResponseEntity<?> listPositions(@RequestHeader(Constants.X_AUTH_TOKEN) String userToken) throws IOException {
 		FracApiResponse response = searchByService.listPositions(userToken);
 		return new ResponseEntity<>(response, HttpStatus.valueOf(response.getStatusInfo().getStatusCode()));
 	}
