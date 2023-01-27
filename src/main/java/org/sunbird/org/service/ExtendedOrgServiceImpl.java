@@ -212,37 +212,37 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 		return response;
 	}
 
-	private String validateOrgRequest(Map<String, Object> requestData) {
+	private String validateOrgRequest(Map<String, Object> request) {
 		List<String> params = new ArrayList<String>();
 		StringBuilder strBuilder = new StringBuilder();
-		String orgType = (String) requestData.get(Constants.ORGANIZATION_TYPE);
-		Map<String, Object> request = (Map<String, Object>) requestData.get(Constants.REQUEST);
-		if (ObjectUtils.isEmpty(request)) {
+		Map<String, Object> requestData = (Map<String, Object>) request.get(Constants.REQUEST);
+		if (ObjectUtils.isEmpty(requestData)) {
 			strBuilder.append("Request object is empty.");
 			return strBuilder.toString();
 		}
 
-		if (StringUtils.isEmpty((String) request.get(Constants.ORG_NAME))) {
+		if (StringUtils.isEmpty((String) requestData.get(Constants.ORG_NAME))) {
 			params.add(Constants.ORG_NAME);
 		}
 
+		String orgType = (String) requestData.get(Constants.ORGANIZATION_TYPE);
 		if (StringUtils.isEmpty(((String) orgType))) {
 			params.add(Constants.ORGANIZATION_TYPE);
 		} else if (!Constants.STATE.equalsIgnoreCase(orgType) && !Constants.MINISTRY.equalsIgnoreCase(orgType)) {
-			if (StringUtils.isEmpty((String) request.get(Constants.PARENT_MAP_ID))) {
+			if (StringUtils.isEmpty((String) requestData.get(Constants.PARENT_MAP_ID))) {
 				params.add(Constants.PARENT_MAP_ID);
 			}
 		}
 
-		if (StringUtils.isEmpty((String) request.get(Constants.ORGANIZATION_SUB_TYPE))) {
+		if (StringUtils.isEmpty((String) requestData.get(Constants.ORGANIZATION_SUB_TYPE))) {
 			params.add(Constants.ORGANIZATION_SUB_TYPE);
 		}
 
-		if (ObjectUtils.isEmpty(request.get(Constants.IS_TENANT))) {
+		if (ObjectUtils.isEmpty(requestData.get(Constants.IS_TENANT))) {
 			params.add(Constants.IS_TENANT);
 		}
 
-		if (StringUtils.isEmpty((String) request.get(Constants.CHANNEL))) {
+		if (StringUtils.isEmpty((String) requestData.get(Constants.CHANNEL))) {
 			params.add(Constants.CHANNEL);
 		}
 
