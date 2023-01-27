@@ -26,11 +26,9 @@ import org.sunbird.common.util.Constants;
 import org.sunbird.common.util.RequestInterceptor;
 import org.sunbird.core.producer.Producer;
 
-import java.io.IOException;
-import java.sql.Time;
-import java.sql.Timestamp;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
+import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
@@ -75,14 +73,14 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                 if (errMsg.isEmpty() && !((String) assessmentAllDetail.get(Constants.PRIMARY_CATEGORY)).equalsIgnoreCase(Constants.PRACTICE_QUESTION_SET)) {
                     logger.info("Fetched assessment Details... for : " + assessmentIdentifier);
                     List<Map<String, Object>> existingDataList = assessmentRepository.fetchUserAssessmentDataFromDB(userId, assessmentIdentifier);
-                    Timestamp assessmentStartTime = new Timestamp(new Date().getTime());
+                    Timestamp assessmentStartTime = new Timestamp(new java.util.Date().getTime());
                     if (existingDataList.isEmpty()) {
                         int expectedDuration = (Integer) assessmentAllDetail.get(Constants.EXPECTED_DURATION);
                         Timestamp assessmentEndTime = calculateAssessmentSubmitTime(expectedDuration, assessmentStartTime);
                         logger.info("Assessment read first time for user.");
                         Map<String, Object> assessmentData = readAssessmentLevelData(assessmentAllDetail);
-                        assessmentData.put(Constants.START_TIME, new Date(assessmentStartTime.getTime()));
-                        assessmentData.put(Constants.END_TIME, new Date(assessmentEndTime.getTime()));
+                        assessmentData.put(Constants.START_TIME, assessmentStartTime.getTime());
+                        assessmentData.put(Constants.END_TIME, assessmentEndTime.getTime());
                         response.getResult().put(Constants.QUESTION_SET, assessmentData);
                         redisCacheMgr.putCache(Constants.USER_ASSESS_REQ + assessmentIdentifier + "_" + token, response.getResult().get(Constants.QUESTION_SET));
                         Boolean isAssessmentUpdatedToDB = assessmentRepository.addUserAssesmentDataToDB(userId, assessmentIdentifier, assessmentStartTime, assessmentEndTime, (Map<String, Object>) (response.getResult().get(Constants.QUESTION_SET)), Constants.NOT_SUBMITTED);
@@ -91,8 +89,9 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                         }
                     } else {
                         logger.info("Assessment read... user has details... ");
-                        Date existingAssessmentEndTime = (Date) (existingDataList.get(0).get(Constants.END_TIME));
-                        if (assessmentStartTime.compareTo(existingAssessmentEndTime) < 0 && ((String) existingDataList.get(0).get(Constants.STATUS)).equalsIgnoreCase(Constants.NOT_SUBMITTED)) {
+                        java.util.Date existingAssessmentEndTime = (java.util.Date) (existingDataList.get(0).get(Constants.END_TIME));
+                        Timestamp existingAssessmentEndTimeTimestamp = new Timestamp(existingAssessmentEndTime.getTime());
+                        if (assessmentStartTime.compareTo(existingAssessmentEndTimeTimestamp) < 0 && ((String) existingDataList.get(0).get(Constants.STATUS)).equalsIgnoreCase(Constants.NOT_SUBMITTED)) {
                             Map<String, Object> questionSetFromAssessment;
                             String userQuestionSet = redisCacheMgr.getCache(Constants.USER_ASSESS_REQ + assessmentIdentifier + "_" + token);
                             if (!ObjectUtils.isEmpty(userQuestionSet)) {
@@ -102,8 +101,8 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                                 String questionSetFromAssessmentString = (String) existingDataList.get(0).get(Constants.ASSESSMENT_READ_RESPONSE);
                                 questionSetFromAssessment = new Gson().fromJson(questionSetFromAssessmentString, new TypeToken<HashMap<String, Object>>() {
                                 }.getType());
-                                questionSetFromAssessment.put(Constants.START_TIME, new Date(assessmentStartTime.getTime()));
-                                questionSetFromAssessment.put(Constants.END_TIME, new Date(existingAssessmentEndTime.getTime()));
+                                questionSetFromAssessment.put(Constants.START_TIME, assessmentStartTime.getTime());
+                                questionSetFromAssessment.put(Constants.END_TIME, existingAssessmentEndTimeTimestamp.getTime());
                                 response.getResult().put(Constants.QUESTION_SET, questionSetFromAssessment);
                                 redisCacheMgr.putCache(Constants.USER_ASSESS_REQ + assessmentIdentifier + "_" + token, questionSetFromAssessment);
                             }
@@ -111,10 +110,12 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                         } else if ((assessmentStartTime.compareTo(existingAssessmentEndTime) < 0 && ((String) existingDataList.get(0).get(Constants.STATUS)).equalsIgnoreCase(Constants.SUBMITTED)) || assessmentStartTime.compareTo(existingAssessmentEndTime) > 0) {
                             logger.info("Incase the assessment is submitted before the end time, or the endtime has exceeded, read assessment freshly ");
                             Map<String, Object> assessmentData = readAssessmentLevelData(assessmentAllDetail);
-                            assessmentData.put(Constants.START_TIME, new Date(assessmentStartTime.getTime()));
-                            assessmentData.put(Constants.END_TIME, new Date(existingAssessmentEndTime.getTime()));
-                            response.getResult().put(Constants.QUESTION_SET, assessmentData);
                             int expectedDuration = (Integer) assessmentAllDetail.get(Constants.EXPECTED_DURATION);
+                            assessmentStartTime = new Timestamp(new java.util.Date().getTime());
+                            Timestamp assessmentEndTime = calculateAssessmentSubmitTime(expectedDuration, assessmentStartTime);
+                            assessmentData.put(Constants.START_TIME, assessmentStartTime.getTime());
+                            assessmentData.put(Constants.END_TIME, assessmentEndTime.getTime());
+                            response.getResult().put(Constants.QUESTION_SET, assessmentData);
                             Boolean isAssessmentUpdatedToDB = assessmentRepository.addUserAssesmentDataToDB(userId, assessmentIdentifier, assessmentStartTime, calculateAssessmentSubmitTime(expectedDuration, assessmentStartTime), (Map<String, Object>) (response.getResult().get(Constants.QUESTION_SET)), Constants.NOT_SUBMITTED);
                             redisCacheMgr.putCache(Constants.USER_ASSESS_REQ + assessmentIdentifier + "_" + token, response.getResult().get(Constants.QUESTION_SET));
                             if (Boolean.FALSE.equals(isAssessmentUpdatedToDB)) {
@@ -213,9 +214,9 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
             } else {
                 Map<String, Object> readHierarchyApiResponse = assessUtilServ.getReadHierarchyApiResponse(assessmentIdentifier, token);
                 if (!readHierarchyApiResponse.isEmpty())
-                if (ObjectUtils.isEmpty(readHierarchyApiResponse) || !Constants.OK.equalsIgnoreCase((String) readHierarchyApiResponse.get(Constants.RESPONSE_CODE))) {
-                    return Constants.ASSESSMENT_HIERARCHY_READ_FAILED;
-                }
+                    if (ObjectUtils.isEmpty(readHierarchyApiResponse) || !Constants.OK.equalsIgnoreCase((String) readHierarchyApiResponse.get(Constants.RESPONSE_CODE))) {
+                        return Constants.ASSESSMENT_HIERARCHY_READ_FAILED;
+                    }
                 assessmentAllDetail.putAll((Map<String, Object>) ((Map<String, Object>) readHierarchyApiResponse.get(Constants.RESULT)).get(Constants.QUESTION_SET));
                 redisCacheMgr.putCache(Constants.ASSESSMENT_ID + assessmentIdentifier, ((Map<String, Object>) readHierarchyApiResponse.get(Constants.RESULT)).get(Constants.QUESTION_SET));
             }
@@ -414,8 +415,9 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
 
     private void writeDataToDatabaseAndTriggerKafkaEvent(Map<String, Object> submitRequest, String userId, Map<String, Object> questionSetFromAssessment, Map<String, Object> result, String primaryCategory) {
         try {
-            if(questionSetFromAssessment.get(Constants.START_TIME)!=null) {
-                Date startTime = new Date((Long) questionSetFromAssessment.get(Constants.START_TIME));
+            if (questionSetFromAssessment.get(Constants.START_TIME) != null) {
+                Long existingAssessmentStartTime = (Long) questionSetFromAssessment.get(Constants.START_TIME);
+                Timestamp startTime = new Timestamp(existingAssessmentStartTime);
                 Boolean isAssessmentUpdatedToDB = assessmentRepository.updateUserAssesmentDataToDB(userId, (String) submitRequest.get(Constants.IDENTIFIER), submitRequest, result, Constants.SUBMITTED, startTime);
                 if (Boolean.TRUE.equals(isAssessmentUpdatedToDB)) {
                     Map<String, Object> kafkaResult = new HashMap<>();
@@ -469,26 +471,36 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
         if (((String) (assessmentHierarchy.get(Constants.PRIMARY_CATEGORY))).equalsIgnoreCase(Constants.PRACTICE_QUESTION_SET))
             return "";
         List<Map<String, Object>> existingDataList = assessmentRepository.fetchUserAssessmentDataFromDB(userId, assessmentIdFromRequest);
-        Date assessmentStartTime = (!existingDataList.isEmpty()) ? (Date) existingDataList.get(0).get(Constants.START_TIME) : null;
-        if (assessmentStartTime == null) {
-            return Constants.READ_ASSESSMENT_START_TIME_FAILED;
-        }
-        int expectedDuration = (Integer) assessmentHierarchy.get(Constants.EXPECTED_DURATION);
-        Timestamp later = calculateAssessmentSubmitTime(expectedDuration, assessmentStartTime);
-        Timestamp submissionTime = new Timestamp(new Date().getTime());
-        int time = submissionTime.compareTo(later);
-        if (time <= 0) {
-            List<String> desiredKeys = Lists.newArrayList(Constants.IDENTIFIER);
-            List<Object> hierarchySectionIds = hierarchySectionList.stream().flatMap(x -> desiredKeys.stream().filter(x::containsKey).map(x::get)).collect(toList());
-            List<Object> submitSectionIds = sectionListFromSubmitRequest.stream().flatMap(x -> desiredKeys.stream().filter(x::containsKey).map(x::get)).collect(toList());
-            if (!new HashSet<>(hierarchySectionIds).containsAll(submitSectionIds)) {
-                return Constants.WRONG_SECTION_DETAILS;
+        if (!existingDataList.isEmpty()) {
+            if (!((String) existingDataList.get(0).get(Constants.STATUS)).equalsIgnoreCase(Constants.SUBMITTED)) {
+                Date assessmentStartTime = (!existingDataList.isEmpty()) ? (Date) existingDataList.get(0).get(Constants.START_TIME) : null;
+                if (assessmentStartTime == null) {
+                    return Constants.READ_ASSESSMENT_START_TIME_FAILED;
+                }
+                int expectedDuration = (Integer) assessmentHierarchy.get(Constants.EXPECTED_DURATION);
+                Timestamp later = calculateAssessmentSubmitTime(expectedDuration, new Timestamp(assessmentStartTime.getTime()));
+                Timestamp submissionTime = new Timestamp(new Date().getTime());
+                int time = submissionTime.compareTo(later);
+                if (time <= 0) {
+                    List<String> desiredKeys = Lists.newArrayList(Constants.IDENTIFIER);
+                    List<Object> hierarchySectionIds = hierarchySectionList.stream().flatMap(x -> desiredKeys.stream().filter(x::containsKey).map(x::get)).collect(toList());
+                    List<Object> submitSectionIds = sectionListFromSubmitRequest.stream().flatMap(x -> desiredKeys.stream().filter(x::containsKey).map(x::get)).collect(toList());
+                    if (!new HashSet<>(hierarchySectionIds).containsAll(submitSectionIds)) {
+                        return Constants.WRONG_SECTION_DETAILS;
+                    } else {
+                        String areQuestionIdsSame = validateIfQuestionIdsAreSame(submitRequest, sectionListFromSubmitRequest, desiredKeys, userId);
+                        if (!areQuestionIdsSame.isEmpty()) return areQuestionIdsSame;
+                    }
+                }
+                else {
+                    return Constants.ASSESSMENT_SUBMIT_EXPIRED;
+                }
             } else {
-                String areQuestionIdsSame = validateIfQuestionIdsAreSame(submitRequest, sectionListFromSubmitRequest, desiredKeys, userId);
-                if (!areQuestionIdsSame.isEmpty()) return areQuestionIdsSame;
+                return Constants.ASSESSMENT_ALREADY_SUBMITTED;
             }
-        } else {
-            return Constants.ASSESSMENT_SUBMIT_EXPIRED;
+        }
+        else {
+            return Constants.USER_ASSESSMENT_DATA_NOT_PRESENT;
         }
         return "";
     }
@@ -524,9 +536,9 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
         return "";
     }
 
-    private Timestamp calculateAssessmentSubmitTime(int expectedDuration, Date assessmentStartTime) {
+    private Timestamp calculateAssessmentSubmitTime(int expectedDuration, Timestamp assessmentStartTime) {
         Calendar cal = Calendar.getInstance();
-        cal.setTimeInMillis(new Timestamp(assessmentStartTime.getTime()).getTime());
+        cal.setTimeInMillis(assessmentStartTime.getTime());
         if (serverProperties.getUserAssessmentSubmissionDuration().isEmpty()) {
             serverProperties.setUserAssessmentSubmissionDuration("120");
         }

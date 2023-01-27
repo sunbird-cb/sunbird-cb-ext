@@ -577,6 +577,8 @@ public class Constants {
 	public static final String READ_ASSESSMENT_START_TIME_FAILED = "Failed to read the assessment start time.";
 	public static final String WRONG_SECTION_DETAILS = "Wrong section details.";
 	public static final String ASSESSMENT_SUBMIT_EXPIRED = "The Assessment submission time-period is over! Assessment can't be submitted";
+	public static final String ASSESSMENT_ALREADY_SUBMITTED = "This Assessment is already Submitted!";
+
 	public static final String ASSESSMENT_SUBMIT_INVALID_QUESTION = "The QuestionId provided don't match to the Assessment Read";
 	public static final String ASSESSMENT_SUBMIT_QUESTION_READ_FAILED = "Failed to read Question Set from DB";
 
