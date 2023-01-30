@@ -507,6 +507,61 @@ public class Constants {
 	public static final String SB_SUB_ORG_TYPE = "sbSubOrgType";
 	public static final String ORG_CODE = "orgCode";
 	public static final String MDO = "mdo";
+
+	public static final String TOTAL_RETAKE_ATTEMPTS_ALLOWED = "attemptsAllowed";
+	public static final String RETAKE_ATTEMPTS_CONSUMED = "attemptsMade";
+	public static final String SELECTED_ANSWER = "selectedAnswer";
+
+	public static final String PARENT_CONTENT_TYPE = "parentContentType";
+	public static final String PRACTICE_QUESTION_SET = "Practice Question Set";
+	public static final String EXPECTED_DURATION = "expectedDuration";
+	public static final String SUBMITTED = "SUBMITTED";
+	public static final String NOT_SUBMITTED = "NOT SUBMITTED";
+	public static final String END_TIME = "endtime";
+	public static final String ASSESSMENT_ID_KEY = "assessmentId";
+	public static final String START_TIME = "starttime";
+	public static final String CONTENT_ID_KEY = "contentId";
+	public static final String QUESTION_TYPE = "qType";
+	public static final String INDEX = "index";
+	public static final String MCQ_SCA = "mcq-sca";
+	public static final String MCQ_MCA = "mcq-mca";
+	public static final String FTB = "ftb";
+	public static final String MTF = "mtf";
+	public static final String IS_CORRECT = "isCorrect";
+	public static final String OPTION_ID = "optionId";
+	public static final String MAX_ASSESSMENT_RETAKE_ATTEMPTS = "maxAssessmentRetakeAttempts";
+	public static final String RETAKE_ASSESSMENT_DURATION = "retakeAssessmentDuration";
+	public static final String USER_ID_DOESNT_EXIST = "User Id doesn't exist! Please supply a valid auth token";
+	public static final String TABLE_USER_ASSESSMENT_DATA = "user_assessment_data";
+	public static final String ASSESSMENT_DATA_START_TIME_NOT_UPDATED = "Assessment Data & Start Time not updated in the DB! Please check!";
+	public static final String FAILED_TO_GET_QUESTION_DETAILS = "Failed to get Question List data from the Question List Api! Please check!";
+
+	public static final String ASSESSMENT_HIERARCHY_READ_FAILED = "Assessment hierarchy read failed, failed to process request";
+	public static final String ASSESSMENT_ID_KEY_IS_NOT_PRESENT_IS_EMPTY = "Assessment Id Key is not present/is empty";
+
+	public static final String USER_ASSESSMENT_DATA_NOT_PRESENT = "User Assessment Data not present in Databases";
+	public static final String ASSESSMENT_ID_INVALID = "The Assessment Id is Invalid/Doesn't match with our records";
+	public static final String IDENTIFIER_LIST_IS_EMPTY = "Identifier List is Empty";
+	public static final String THE_QUESTIONS_IDS_PROVIDED_DONT_MATCH = "The Questions Ids Provided don't match the active user assessment session";
+	public static final String ASSESSMENT_ID_INVALID_SESSION_EXPIRED = "Assessment Id Invalid/Session Expired/Redis Cache doesn't have this question list details";
+	public static final String INVALID_ASSESSMENT_ID = "Invalid Assessment Id";
+	public static final String READ_ASSESSMENT_FAILED = "Failed to read assessment hierarchy for the given AssessmentId.";
+	public static final String READ_ASSESSMENT_START_TIME_FAILED = "Failed to read the assessment start time.";
+	public static final String WRONG_SECTION_DETAILS = "Wrong section details.";
+	public static final String ASSESSMENT_SUBMIT_EXPIRED = "The Assessment submission time-period is over! Assessment can't be submitted";
+	public static final String ASSESSMENT_ALREADY_SUBMITTED = "This Assessment is already Submitted!";
+
+	public static final String ASSESSMENT_SUBMIT_INVALID_QUESTION = "The QuestionId provided don't match to the Assessment Read";
+	public static final String ASSESSMENT_SUBMIT_QUESTION_READ_FAILED = "Failed to read Question Set from DB";
+
+
+	public static final String ASSESSMENT_READ_RESPONSE = "assessmentreadresponse";
+	public static final String API_SUBMIT_ASSESSMENT = "api.submit.asssessment";
+	public static final String API_RETAKE_ASSESSMENT_GET = "api.assessmment.attempt";
+	public static final String TOTAL_SCORE = "totalScore";
+	public static final String SUBMIT_ASSESSMENT_RESPONSE = "submitassessmentresponse";
+	public static final String CONTENT_TYPE_KEY = "contentType";
+	public static final String PARENT = "parent";
   
 	private Constants() {
 		throw new IllegalStateException("Utility class");

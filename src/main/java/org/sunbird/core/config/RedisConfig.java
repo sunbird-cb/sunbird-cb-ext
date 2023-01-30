@@ -5,9 +5,10 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.sunbird.common.util.CbExtServerProperties;
-
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
+
+import java.time.Duration;
 
 @Configuration
 @EnableCaching
@@ -16,15 +17,7 @@ public class RedisConfig {
 	@Autowired
 	CbExtServerProperties cbProperties;
 
-	@Bean
-	public JedisPool jedisPool() {
-		final JedisPoolConfig poolConfig = buildPoolConfig();
-		JedisPool jedisPool = new JedisPool(poolConfig, cbProperties.getRedisHostName(),
-				Integer.parseInt(cbProperties.getRedisPort()));
-		return jedisPool;
-	}
-
-	private JedisPoolConfig buildPoolConfig() {
+	public JedisPoolConfig buildPoolConfig() {
 		final JedisPoolConfig poolConfig = new JedisPoolConfig();
 		poolConfig.setMaxIdle(128);
 		poolConfig.setMaxTotal(3000);
@@ -37,5 +30,13 @@ public class RedisConfig {
 		poolConfig.setNumTestsPerEvictionRun(3);
 		poolConfig.setBlockWhenExhausted(true);
 		return poolConfig;
+	}
+
+	@Bean
+	public JedisPool jedisPool()
+	{
+		final JedisPoolConfig poolConfig = buildPoolConfig();
+		JedisPool jedisPool = new JedisPool(poolConfig, cbProperties.getRedisHostName());
+		return jedisPool;
 	}
 }

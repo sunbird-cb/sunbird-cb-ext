@@ -189,9 +189,6 @@ public class CbExtServerProperties {
 	@Value("${redis.host.name}")
 	private String redisHostName;
 
-	@Value("${redis.port}")
-	private String redisPort;
-
 	@Value("${redis.timeout}")
 	private String redisTimeout;
 
@@ -356,7 +353,20 @@ public class CbExtServerProperties {
 	
 	@Value("${sb.es.user.profile.index}")
 	private String sbEsUserProfileIndex;
-	
+
+	@Value("${kafka.topics.user.assessment.submit}")
+	private String assessmentSubmitTopic;
+
+
+	public String getAssessmentSubmitTopic() {
+		return assessmentSubmitTopic;
+	}
+
+	public void setAssessmentSubmitTopic(String assessmentSubmitTopic) {
+		this.assessmentSubmitTopic = assessmentSubmitTopic;
+	}
+
+
 	public String getUserAssessmentSubmissionDuration() {
 		return userAssessmentSubmissionDuration;
 	}
@@ -676,15 +686,6 @@ public class CbExtServerProperties {
 	public void setCourseBatchCreateEndpoint(String courseBatchCreateEndpoint) {
 		this.courseBatchCreateEndpoint = courseBatchCreateEndpoint;
 	}
-
-	public String getRedisPort() {
-		return redisPort;
-	}
-
-	public void setRedisPort(String redisPort) {
-		this.redisPort = redisPort;
-	}
-
 	public String getRedisHostName() {
 		return redisHostName;
 	}

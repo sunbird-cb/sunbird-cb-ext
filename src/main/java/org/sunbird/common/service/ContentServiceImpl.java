@@ -1,12 +1,10 @@
 package org.sunbird.common.service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 import org.sunbird.common.model.SunbirdApiHierarchyResultBatch;
 import org.sunbird.common.model.SunbirdApiResp;
 import org.sunbird.common.model.SunbirdApiUserCourseListResp;
@@ -172,5 +170,47 @@ public class ContentServiceImpl implements ContentService {
 		}
 
 		return null;
+	}
+
+	public String getContentType(String resourceId) {
+		String parentContentType = "";
+		Map<String, Object> response = getHierarchyResponseMap(resourceId);
+		if (Constants.OK.equalsIgnoreCase((String) response.get(Constants.RESPONSE_CODE))) {
+			Map<String, Object> resultMap = (Map<String, Object>) response.get(Constants.RESULT);
+			if (!ObjectUtils.isEmpty(resultMap)) {
+				Map<String, Object> contentMap = (Map<String, Object>) resultMap.get(Constants.CONTENT);
+				if (!ObjectUtils.isEmpty(contentMap)) {
+					parentContentType = (String) contentMap.get(Constants.CONTENT_TYPE_KEY);
+				}
+			}
+		}
+		return parentContentType;
+	}
+
+	public Map<String, Object> getHierarchyResponseMap(String contentId) {
+		StringBuilder url = new StringBuilder();
+		url.append(serverConfig.getContentHost()).append(serverConfig.getHierarchyEndPoint()).append("/" + contentId)
+				.append("?hierarchyType=detail");
+		Map<String, Object> response = (Map<String, Object>) outboundRequestHandlerService.fetchResult(url.toString());
+		if (ObjectUtils.isEmpty(response)) {
+			return Collections.EMPTY_MAP;
+		}
+
+		return response;
+	}
+
+	public String getParentIdentifier(String resourceId) {
+		String parentId = "";
+		Map<String, Object> response = getHierarchyResponseMap(resourceId);
+		if (Constants.OK.equalsIgnoreCase((String) response.get(Constants.RESPONSE_CODE))) {
+			Map<String, Object> resultMap = (Map<String, Object>) response.get(Constants.RESULT);
+			if (!ObjectUtils.isEmpty(resultMap)) {
+				Map<String, Object> contentMap = (Map<String, Object>) resultMap.get(Constants.CONTENT);
+				if (!ObjectUtils.isEmpty(contentMap)) {
+					parentId = (String) contentMap.get(Constants.PARENT);
+				}
+			}
+		}
+		return parentId;
 	}
 }

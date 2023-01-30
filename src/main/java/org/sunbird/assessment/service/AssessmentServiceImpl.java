@@ -83,18 +83,8 @@ public class AssessmentServiceImpl implements AssessmentService {
 		Map<String, Object> persist = new HashMap<>();
 
 		// Fetch parent of an assessment with status live
-		String parentId = "";
-		try {
-			SunbirdApiResp contentHierarchy = contentService.getHeirarchyResponse(data.getIdentifier());
-			if (contentHierarchy != null) {
-				parentId = contentHierarchy.getResult().getContent().getParent();
-			}
-		} catch (Exception e) {
-			logger.error(e);
-		}
-		if (parentId == null) {
-			parentId = "";
-		}
+		String parentId = contentService.getParentIdentifier(data.getIdentifier());
+
 		persist.put("parent", parentId);
 		persist.put(RESULT, result);
 		persist.put("sourceId", data.getIdentifier());
@@ -107,16 +97,9 @@ public class AssessmentServiceImpl implements AssessmentService {
 
 		if (Boolean.TRUE.equals(data.isAssessment()) && !"".equals(parentId)) {
 			// get parent data for assessment
-			try {
-				SunbirdApiResp contentHierarchy = contentService.getHeirarchyResponse(parentId);
-				if (contentHierarchy != null) {
-					persist.put("parentContentType", contentHierarchy.getResult().getContent().getContentType());
-				}
-			} catch (Exception e) {
-				logger.error(e);
-			}
+			persist.put(Constants.PARENT_CONTENT_TYPE, contentService.getContentType(parentId));
 		} else {
-			persist.put("parentContentType", "");
+			persist.put(Constants.PARENT_CONTENT_TYPE, "");
 		}
 
 		logger.info("Trying to persist assessment data -> " + persist.toString());
@@ -245,7 +228,7 @@ public class AssessmentServiceImpl implements AssessmentService {
 								&& child.getArtifactUrl().endsWith(".json")) {
 							// read assessment json file
 							QuestionSet assessmentContent = mapper.convertValue(outboundRequestHandlerService
-									.fetchUsingGetWithHeaders(child.getArtifactUrl(), new HashMap<>()),
+											.fetchUsingGetWithHeaders(child.getArtifactUrl(), new HashMap<>()),
 									QuestionSet.class);
 
 							QuestionSet assessmentQnsSet = assessUtilServ.removeAssessmentAnsKey(assessmentContent);
