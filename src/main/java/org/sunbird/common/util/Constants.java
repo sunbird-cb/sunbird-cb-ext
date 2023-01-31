@@ -507,6 +507,8 @@ public class Constants {
 	public static final String SB_SUB_ORG_TYPE = "sbSubOrgType";
 	public static final String ORG_CODE = "orgCode";
 	public static final String MDO = "mdo";
+	public static final String BOARD = "board";
+	public static final String TRAINING_INSTITUTE = "TrainingInstitute";
   
 	private Constants() {
 		throw new IllegalStateException("Utility class");
