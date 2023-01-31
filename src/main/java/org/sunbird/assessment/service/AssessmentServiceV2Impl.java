@@ -1,6 +1,16 @@
 package org.sunbird.assessment.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,9 +27,8 @@ import org.sunbird.common.util.RequestInterceptor;
 import org.sunbird.core.exception.ApplicationLogicError;
 import org.sunbird.core.logger.CbExtLogger;
 
-import java.sql.Timestamp;
-import java.util.*;
-import java.util.stream.Collectors;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 @SuppressWarnings("unchecked")
@@ -43,52 +52,62 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
     @Autowired
     AssessmentRepository assessmentRepository;
 
-    public SBApiResponse readAssessment(String assessmentIdentifier, String token) throws Exception {
-        SBApiResponse response = new SBApiResponse();
-        try {
-            String userId = RequestInterceptor.fetchUserIdFromAccessToken(token);
-            if (userId != null) {
-                Map<String, Object> assessmentAllDetail = (Map<String, Object>) redisCacheMgr
-                        .getCache(Constants.ASSESSMENT_ID + assessmentIdentifier);
-                boolean isSuccess = true;
-                if (ObjectUtils.isEmpty(assessmentAllDetail)) {
-                    Map<String, Object> hierarcyReadApiResponse = getReadHierarchyApiResponse(assessmentIdentifier, token);
-                    if (!Constants.OK.equalsIgnoreCase((String) hierarcyReadApiResponse.get(Constants.RESPONSE_CODE))) {
-                        isSuccess = false;
-                    } else {
-                        assessmentAllDetail = (Map<String, Object>) ((Map<String, Object>) hierarcyReadApiResponse
-                                .get(Constants.RESULT)).get(Constants.QUESTION_SET);
-                        redisCacheMgr.putCache(Constants.ASSESSMENT_ID + assessmentIdentifier, assessmentAllDetail);
-                    }
-                }
-                response = prepareAssessmentResponse(assessmentAllDetail, isSuccess);
-                redisCacheMgr.putCache(Constants.USER_ASSESS_REQ + token, response.getResult().get(Constants.QUESTION_SET));
-                if (assessmentAllDetail.get(Constants.DURATION) != null) {
-                    boolean resp = assessmentRepository.addUserAssesmentStartTime(userId, Constants.ASSESSMENT_ID + assessmentIdentifier, new Timestamp(new Date().getTime()));
-                    return response;
-                }
-            }
-        } catch (Exception e) {
-            logger.error(e);
-            throw new ApplicationLogicError("REQUEST_COULD_NOT_BE_PROCESSED", e);
-        }
-        return response;
-    }
+	public SBApiResponse readAssessment(String assessmentIdentifier, String token) throws Exception {
+		SBApiResponse response = new SBApiResponse();
+		try {
+			String userId = RequestInterceptor.fetchUserIdFromAccessToken(token);
+			if (userId != null) {
+				String strAssessmentAllDetail = redisCacheMgr.getCache(Constants.ASSESSMENT_ID + assessmentIdentifier);
+
+				Map<String, Object> assessmentAllDetail = mapper.readValue(strAssessmentAllDetail,
+						new TypeReference<Map<String, Object>>() {
+						});
+				boolean isSuccess = true;
+				if (ObjectUtils.isEmpty(assessmentAllDetail)) {
+					Map<String, Object> hierarcyReadApiResponse = getReadHierarchyApiResponse(assessmentIdentifier,
+							token);
+					if (!Constants.OK.equalsIgnoreCase((String) hierarcyReadApiResponse.get(Constants.RESPONSE_CODE))) {
+						isSuccess = false;
+					} else {
+						assessmentAllDetail = (Map<String, Object>) ((Map<String, Object>) hierarcyReadApiResponse
+								.get(Constants.RESULT)).get(Constants.QUESTION_SET);
+						redisCacheMgr.putCache(Constants.ASSESSMENT_ID + assessmentIdentifier, assessmentAllDetail);
+					}
+				}
+				response = prepareAssessmentResponse(assessmentAllDetail, isSuccess);
+				redisCacheMgr.putCache(Constants.USER_ASSESS_REQ + token,
+						response.getResult().get(Constants.QUESTION_SET));
+				if (assessmentAllDetail.get(Constants.DURATION) != null) {
+					boolean resp = assessmentRepository.addUserAssesmentStartTime(userId,
+							Constants.ASSESSMENT_ID + assessmentIdentifier, new Timestamp(new Date().getTime()));
+					return response;
+				}
+			}
+		} catch (Exception e) {
+			logger.error(e);
+			throw new ApplicationLogicError("REQUEST_COULD_NOT_BE_PROCESSED", e);
+		}
+		return response;
+	}
 
     public SBApiResponse readQuestionList(Map<String, Object> requestBody, String authUserToken) throws Exception {
         try {
             List<String> identifierList = getQuestionIdList(requestBody);
             List<Object> questionList = new ArrayList<>();
             List<String> newIdentifierList = new ArrayList<>();
-            List<Object> map = redisCacheMgr.mget(identifierList);
-            int size = map.size();
-            for (int i = 0; i < map.size(); i++) {
-                if (ObjectUtils.isEmpty(map.get(i))) {
-                    newIdentifierList.add(identifierList.get(i));
-                } else {
-                    questionList.add(filterQuestionMapDetail((Map<String, Object>) map.get(i)));
-                }
-            }
+            List<String> strQuestionList = redisCacheMgr.mget(identifierList);
+            
+            int size = strQuestionList.size();
+			for (int i = 0; i < size; i++) {
+				if (ObjectUtils.isEmpty(strQuestionList.get(i))) {
+					newIdentifierList.add(identifierList.get(i));
+				} else {
+					Map<String, Object> questionMap = mapper.readValue(strQuestionList.get(i),
+							new TypeReference<Map<String, Object>>() {
+							});
+					questionList.add(filterQuestionMapDetail(questionMap));
+				}
+			}
             if (newIdentifierList.size() > 0) {
                 Map<String, Object> questionMapResponse = readQuestionDetails(newIdentifierList);
                 if (questionMapResponse != null && Constants.OK.equalsIgnoreCase((String) questionMapResponse.get(Constants.RESPONSE_CODE))) {
@@ -116,14 +135,13 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
     public SBApiResponse submitAssessment(Map<String, Object> data, String authUserToken) throws Exception {
         SBApiResponse outgoingResponse = new SBApiResponse();
         String assessmentId = (String) data.get(Constants.IDENTIFIER);
-        Map<String, Object> assessmentHierarchy = (Map<String, Object>) redisCacheMgr
+        String strAssessmentHierarchy = redisCacheMgr
                 .getCache(Constants.ASSESSMENT_ID + assessmentId);
-        // logger.info("Submit Assessment: userId: " + userId + ", data: " +
-        // data.toString());
-        // Check User exists
-        // if (!userUtilService.validateUser(userId)) {
-        // throw new BadRequestException("Invalid UserId.");
-        // }
+        
+        Map<String, Object> assessmentHierarchy = mapper.readValue(strAssessmentHierarchy,
+				new TypeReference<Map<String, Object>>() {
+				});
+       
         String userId = RequestInterceptor.fetchUserIdFromAccessToken(authUserToken);
         if (userId != null) {
             Date assessmentStartTime = assessmentRepository.fetchUserAssessmentStartTime(userId, Constants.ASSESSMENT_ID + assessmentId);

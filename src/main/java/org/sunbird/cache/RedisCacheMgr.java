@@ -1,15 +1,23 @@
 package org.sunbird.cache;
 
-import java.util.*;
-import java.util.concurrent.TimeUnit;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.core.logger.CbExtLogger;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
 
 @Component
 public class RedisCacheMgr {
@@ -17,12 +25,20 @@ public class RedisCacheMgr {
     private static final int cache_ttl = 84600;
 
     @Autowired
-    private RedisTemplate<String, Object> redisTemplate;
+    private JedisPool jedisPool;
 
     @Autowired
     CbExtServerProperties cbExtServerProperties;
 
     private CbExtLogger logger = new CbExtLogger(getClass().getName());
+    
+    ObjectMapper objectMapper = new ObjectMapper();
+
+    public Jedis getJedis() {
+        try (Jedis jedis = jedisPool.getResource()) {
+            return jedis;
+        }
+    }
 
     public void putCache(String key, Object object) {
         try {
@@ -30,8 +46,9 @@ public class RedisCacheMgr {
             if (!StringUtils.isEmpty(cbExtServerProperties.getRedisTimeout())) {
                 ttl = Integer.parseInt(cbExtServerProperties.getRedisTimeout());
             }
-            redisTemplate.opsForValue().set(Constants.REDIS_COMMON_KEY + key, object);
-            redisTemplate.expire(Constants.REDIS_COMMON_KEY + key, ttl, TimeUnit.SECONDS);
+            String data = objectMapper.writeValueAsString(object);
+            getJedis().set(Constants.REDIS_COMMON_KEY + key, data);
+            getJedis().expire(Constants.REDIS_COMMON_KEY + key, ttl);
             logger.info("Cache_key_value " + Constants.REDIS_COMMON_KEY + key + " is saved in redis");
         } catch (Exception e) {
             logger.error(e);
@@ -40,7 +57,7 @@ public class RedisCacheMgr {
 
     public boolean deleteKeyByName(String key) {
         try {
-            redisTemplate.delete(Constants.REDIS_COMMON_KEY + key);
+        	getJedis().del(Constants.REDIS_COMMON_KEY + key);
             logger.info("Cache_key_value " + Constants.REDIS_COMMON_KEY + key + " is deleted from redis");
             return true;
         } catch (Exception e) {
@@ -52,9 +69,9 @@ public class RedisCacheMgr {
     public boolean deleteAllCBExtKey() {
         try {
             String keyPattern = Constants.REDIS_COMMON_KEY + "*";
-            Set<String> keys = redisTemplate.keys(keyPattern);
+            Set<String> keys = getJedis().keys(keyPattern);
             for (String key : keys) {
-                redisTemplate.delete(key);
+            	getJedis().del(key);
             }
             logger.info("All Keys starts with " + Constants.REDIS_COMMON_KEY + " is deleted from redis");
             return true;
@@ -64,23 +81,22 @@ public class RedisCacheMgr {
         }
     }
 
-    public Object getCache(String key) {
+    public String getCache(String key) {
         try {
-            return redisTemplate.opsForValue().get(Constants.REDIS_COMMON_KEY + key);
+            return getJedis().get(Constants.REDIS_COMMON_KEY + key);
         } catch (Exception e) {
             logger.error(e);
             return null;
         }
     }
 
-    public List<Object> mget(List<String> fields) {
+    public List<String> mget(List<String> fields) {
         try {
-            List<String> ls = new ArrayList<>();
+        	String[] updatedKeys = new String[fields.size()];
             for (int i = 0; i < fields.size(); i++) {
-				ls.add(Constants.REDIS_COMMON_KEY + Constants.QUESTION_ID + fields.get(i));
+            	updatedKeys[i] = Constants.REDIS_COMMON_KEY + Constants.QUESTION_ID + fields.get(i);
             }
-            Collection<String> questionIdList = ls;
-            return redisTemplate.opsForValue().multiGet(questionIdList);
+            return getJedis().mget(updatedKeys);
         } catch (Exception e) {
             logger.error(e);
         }
@@ -88,15 +104,13 @@ public class RedisCacheMgr {
     }
 
     public Set<String> getAllKeyNames() {
-        Set<String> keys = null;
         try {
             String keyPattern = Constants.REDIS_COMMON_KEY + "*";
-            keys = redisTemplate.keys(keyPattern);
+            return getJedis().keys(keyPattern);
         } catch (Exception e) {
             logger.error(e);
             return Collections.emptySet();
         }
-        return keys;
     }
 
     public List<Map<String, Object>> getAllKeysAndValues() {
@@ -104,11 +118,11 @@ public class RedisCacheMgr {
         try {
             String keyPattern = Constants.REDIS_COMMON_KEY + "*";
             Map<String, Object> res = new HashMap<>();
-            Set<String> keys = redisTemplate.keys(keyPattern);
+            Set<String> keys = getJedis().keys(keyPattern);
             if (!keys.isEmpty()) {
                 for (String key : keys) {
                     Object entries;
-                    entries = redisTemplate.opsForValue().get(key);
+                    entries = getJedis().get(key);
                     res.put(key, entries);
                 }
                 result.add(res);

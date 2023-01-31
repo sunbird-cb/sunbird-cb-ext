@@ -553,6 +553,11 @@ public class Constants {
 	public static final String CONTENT_STATUS = "contentStatus";
 	public static final String ROLE = "role";
 	public static final String SCOPE = "scope";
+	public static final String SB_SUB_ORG_TYPE = "sbSubOrgType";
+	public static final String ORG_CODE = "orgCode";
+	public static final String MDO = "mdo";
+	public static final String BOARD = "board";
+	public static final String TRAINING_INSTITUTE = "TrainingInstitute";
 
 	public static final List<String> USER_ENROLMENT_REPORT_FIELDS = Arrays.asList(USER_ID, FIRSTNAME, LASTNAME, EMAIL,
 			PHONE, ROOT_ORG_ID, CHANNEL);

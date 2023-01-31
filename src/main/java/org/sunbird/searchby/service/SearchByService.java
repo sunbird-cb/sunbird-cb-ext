@@ -25,6 +25,7 @@ import org.sunbird.searchby.model.FracCommonInfo;
 import org.sunbird.searchby.model.ProviderInfo;
 import org.sunbird.workallocation.model.FracStatusInfo;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -39,25 +40,35 @@ public class SearchByService {
 
 	@Autowired
 	RedisCacheMgr redisCacheMgr;
+	
+	@Autowired
+	ObjectMapper mapper;
 
 	@Autowired
 	OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
 
 	public Collection<CompetencyInfo> getCompetencyDetails(String authUserToken) throws Exception {
-		Map<String, CompetencyInfo> competencyMap = (Map<String, CompetencyInfo>) redisCacheMgr
-				.getCache(Constants.COMPETENCY_CACHE_NAME);
+		String strCompetencyMap = redisCacheMgr.getCache(Constants.COMPETENCY_CACHE_NAME);
+		Map<String, CompetencyInfo> competencyMap = new HashMap<>();
+		if (!StringUtils.isEmpty(strCompetencyMap)) {
+			competencyMap = mapper.readValue(strCompetencyMap, new TypeReference<Map<String, CompetencyInfo>>() {
+			});
+		}
 
 		if (CollectionUtils.isEmpty(competencyMap)) {
 			logger.info("Initializing/Refreshing the Cache Value for Key : " + Constants.COMPETENCY_CACHE_NAME);
 			competencyMap = updateCompetencyDetails(authUserToken);
 		}
-
 		return competencyMap.values();
 	}
 
 	public Collection<ProviderInfo> getProviderDetails(String authUserToken) throws Exception {
-		Map<String, ProviderInfo> providerMap = (Map<String, ProviderInfo>) redisCacheMgr
-				.getCache(Constants.PROVIDER_CACHE_NAME);
+		String strProviderInfo = redisCacheMgr.getCache(Constants.PROVIDER_CACHE_NAME);
+		Map<String, ProviderInfo> providerMap = new HashMap<>();
+		if (!StringUtils.isEmpty(strProviderInfo)) {
+			providerMap = mapper.readValue(strProviderInfo, new TypeReference<Map<String, ProviderInfo>>() {
+			});
+		}
 
 		if (CollectionUtils.isEmpty(providerMap)) {
 			logger.info("Initializing/Refreshing the Cache Value for Key : " + Constants.PROVIDER_CACHE_NAME);
@@ -70,22 +81,30 @@ public class SearchByService {
 		FracApiResponse response = new FracApiResponse();
 		response.setStatusInfo(new FracStatusInfo());
 		response.getStatusInfo().setStatusCode(HttpStatus.OK.value());
-
-		Map<String, List<FracCommonInfo>> positionMap = (Map<String, List<FracCommonInfo>>) redisCacheMgr
-				.getCache(Constants.POSITIONS_CACHE_NAME);
-		if (ObjectUtils.isEmpty(positionMap)
-				|| CollectionUtils.isEmpty(positionMap.get(Constants.POSITIONS_CACHE_NAME))) {
-			logger.info("Initializing / Refreshing the Cache value for key : " + Constants.POSITIONS_CACHE_NAME);
-			try {
-				positionMap = updateDesignationDetails(userToken);
-				response.setResponseData(positionMap.get(Constants.POSITIONS_CACHE_NAME));
-			} catch (Exception e) {
-				logger.error(e);
-				response.getStatusInfo().setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
-				response.getStatusInfo().setErrorMessage(e.getMessage());
+		try {
+			Map<String, List<FracCommonInfo>> positionMap = new HashMap<>();
+			String strPositionMap = redisCacheMgr.getCache(Constants.POSITIONS_CACHE_NAME);
+			if (!StringUtils.isEmpty(strPositionMap)) {
+				positionMap = mapper.readValue(strPositionMap, new TypeReference<Map<String, List<FracCommonInfo>>>() {
+				});
 			}
-		} else {
-			response.setResponseData(positionMap.get(Constants.POSITIONS_CACHE_NAME));
+
+			if (ObjectUtils.isEmpty(positionMap)
+					|| CollectionUtils.isEmpty(positionMap.get(Constants.POSITIONS_CACHE_NAME))) {
+				logger.info("Initializing / Refreshing the Cache value for key : " + Constants.POSITIONS_CACHE_NAME);
+				try {
+					positionMap = updateDesignationDetails(userToken);
+					response.setResponseData(positionMap.get(Constants.POSITIONS_CACHE_NAME));
+				} catch (Exception e) {
+					logger.error(e);
+					response.getStatusInfo().setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+					response.getStatusInfo().setErrorMessage(e.getMessage());
+				}
+			} else {
+				response.setResponseData(positionMap.get(Constants.POSITIONS_CACHE_NAME));
+			}
+		} catch (Exception e) {
+			response.getStatusInfo().setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
 		}
 
 		return response;

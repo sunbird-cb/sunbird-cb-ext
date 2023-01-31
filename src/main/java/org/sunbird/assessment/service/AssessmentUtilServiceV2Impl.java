@@ -15,11 +15,16 @@ import org.sunbird.common.util.Constants;
 import org.sunbird.core.exception.ApplicationLogicError;
 import org.sunbird.core.logger.CbExtLogger;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 @Service
 public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 
 	@Autowired
 	RedisCacheMgr redisCacheMgr;
+	
+	ObjectMapper mapper = new ObjectMapper();
 
 	private CbExtLogger logger = new CbExtLogger(getClass().getName());
 
@@ -121,9 +126,9 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 		Map<String, Object> ret = new HashMap<>();
 		for (String questionId : questions) {
 			List<String> correctOption = new ArrayList<>();
-
-			Map<String, Object> question = (Map<String, Object>) redisCacheMgr
-					.getCache(Constants.QUESTION_ID + questionId);
+			String strQuestion = redisCacheMgr.getCache(Constants.QUESTION_ID + questionId);
+			Map<String, Object> question = mapper.readValue(strQuestion, new TypeReference<Map<String, Object>>() {
+			});
 			if (ObjectUtils.isEmpty(question)) {
 				logger.error(new Exception("Failed to get the answer for question: " + questionId));
 				// TODO - Need to handle this scenario.
