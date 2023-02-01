@@ -84,7 +84,7 @@ public class AssessmentServiceImpl implements AssessmentService {
 
 		// Fetch parent of an assessment with status live
 		String parentId = contentService.getParentIdentifier(data.getIdentifier());
-		
+
 		persist.put("parent", parentId);
 		persist.put(RESULT, result);
 		persist.put("sourceId", data.getIdentifier());
@@ -228,7 +228,7 @@ public class AssessmentServiceImpl implements AssessmentService {
 								&& child.getArtifactUrl().endsWith(".json")) {
 							// read assessment json file
 							QuestionSet assessmentContent = mapper.convertValue(outboundRequestHandlerService
-									.fetchUsingGetWithHeaders(child.getArtifactUrl(), new HashMap<>()),
+											.fetchUsingGetWithHeaders(child.getArtifactUrl(), new HashMap<>()),
 									QuestionSet.class);
 
 							QuestionSet assessmentQnsSet = assessUtilServ.removeAssessmentAnsKey(assessmentContent);

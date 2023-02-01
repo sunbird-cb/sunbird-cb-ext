@@ -434,6 +434,18 @@ public class CbExtServerProperties {
 	@Value("${es.user.report.include.fields}")
 	private String esUserReportIncludeFields;
 
+	@Value("${kafka.topics.user.assessment.submit}")
+	private String assessmentSubmitTopic;
+
+
+	public String getAssessmentSubmitTopic() {
+		return assessmentSubmitTopic;
+	}
+
+	public void setAssessmentSubmitTopic(String assessmentSubmitTopic) {
+		this.assessmentSubmitTopic = assessmentSubmitTopic;
+	}
+
 	public String getUserAssessmentSubmissionDuration() {
 		return userAssessmentSubmissionDuration;
 	}
