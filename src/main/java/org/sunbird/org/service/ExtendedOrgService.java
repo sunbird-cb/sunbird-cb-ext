@@ -13,4 +13,6 @@ public interface ExtendedOrgService {
 	public SBApiResponse orgExtSearch(Map<String, Object> request) throws Exception;
 	
 	public void getOrgDetailsFromDB(List<String> orgIds, Map<String, String> orgInfoMap);
+	
+	public SBApiResponse createOrgForUserRegistration(Map<String, Object> requestData);
 }
