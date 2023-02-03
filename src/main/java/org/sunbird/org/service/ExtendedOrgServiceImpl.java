@@ -432,7 +432,63 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 			log.error("Failed to get user details from DB. Exception: ", e);
 		}
 	}
-	
+
+	public SBApiResponse createOrgForUserRegistration(Map<String, Object> request) {
+		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_ORG_EXT_CREATE);
+		try {
+			String errMsg = validateOrgRequestForRegistration(request);
+			if (!StringUtils.isEmpty(errMsg)) {
+				response.getParams().setErrmsg(errMsg);
+				response.setResponseCode(HttpStatus.BAD_REQUEST);
+				return response;
+			}
+
+			Map<String, Object> requestData = (Map<String, Object>) request.get(Constants.REQUEST);
+
+			String orgId = checkOrgExist((String) requestData.get(Constants.CHANNEL), StringUtils.EMPTY);
+
+			if (StringUtils.isEmpty(orgId)) {
+				orgId = createOrgInSunbird(request, (String) requestData.get(Constants.CHANNEL), StringUtils.EMPTY);
+			}
+
+			if (!StringUtils.isEmpty(orgId)) {
+				Map<String, Object> updateRequest = new HashMap<String, Object>();
+				updateRequest.put(Constants.SB_ORG_ID, orgId);
+				String sbRootOrgId = (String) requestData.get(Constants.SB_ROOT_ORG_ID);
+
+				if (StringUtils.isEmpty(sbRootOrgId)) {
+					sbRootOrgId = findRootOrgId((String) requestData.get(Constants.ORG_NAME),
+							(String) requestData.get(Constants.MAP_ID));
+				}
+
+				if (!StringUtils.isEmpty(sbRootOrgId)) {
+					updateRequest.put(Constants.SB_ROOT_ORG_ID, sbRootOrgId);
+				}
+
+				Map<String, Object> compositeKey = new HashMap<String, Object>() {
+					private static final long serialVersionUID = 1L;
+					{
+						put(Constants.ORG_NAME, (String) requestData.get(Constants.ORG_NAME));
+						put(Constants.MAP_ID, requestData.get(Constants.MAP_ID));
+					}
+				};
+				cassandraOperation.updateRecord(Constants.SUNBIRD_KEY_SPACE_NAME, Constants.TABLE_ORG_HIERARCHY,
+						updateRequest, compositeKey);
+				response.getResult().put(Constants.ORGANIZATION_ID, orgId);
+				response.getResult().put(Constants.RESPONSE, Constants.SUCCESS);
+			} else {
+				response.getParams().setErrmsg("Failed to create organisation in Sunbird.");
+				response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+			}
+		} catch (Exception e) {
+			log.error(e);
+			response.getParams().setErrmsg(e.getMessage());
+			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+
+		return response;
+	}
+
 	private String createMapId(Map<String, Object> requestData) {
 		Map<String, Object> queryRequest = new HashMap<>();
 		String prefix = StringUtils.EMPTY;
@@ -490,7 +546,7 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 		}
 		return sbOrgId;
 	}
-	
+
 	private void fetchMapIdFromDB(Map<String, Object> requestData) {
 		Map<String, Object> queryRequest = new HashMap<>();
 		queryRequest.put(Constants.ORG_NAME, requestData.get(Constants.ORG_NAME));
@@ -503,5 +559,37 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 			Map<String, Object> data = sbRootOrgList.get(0);
 			requestData.put(Constants.MAP_ID, (String) data.get(Constants.MAP_ID));
 		}
+	}
+	
+	private String validateOrgRequestForRegistration(Map<String, Object> request) {
+		List<String> params = new ArrayList<String>();
+		StringBuilder strBuilder = new StringBuilder();
+		Map<String, Object> requestData = (Map<String, Object>) request.get(Constants.REQUEST);
+		if (ObjectUtils.isEmpty(requestData)) {
+			strBuilder.append("Request object is empty.");
+			return strBuilder.toString();
+		}
+
+		if (StringUtils.isEmpty((String) requestData.get(Constants.ORG_NAME))) {
+			params.add(Constants.ORG_NAME);
+		}
+
+		if (StringUtils.isEmpty((String) requestData.get(Constants.MAP_ID))) {
+			params.add(Constants.MAP_ID);
+		}
+
+		if (StringUtils.isEmpty((String) requestData.get(Constants.ORGANIZATION_TYPE))) {
+			params.add(Constants.ORGANIZATION_TYPE);
+		}
+
+		if (StringUtils.isEmpty((String) requestData.get(Constants.ORGANIZATION_SUB_TYPE))) {
+			params.add(Constants.ORGANIZATION_SUB_TYPE);
+		}
+
+		if (!params.isEmpty()) {
+			strBuilder.append("Invalid Request. Missing params - " + params);
+		}
+
+		return strBuilder.toString();
 	}
 }
