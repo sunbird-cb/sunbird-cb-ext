@@ -81,6 +81,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                         Map<String, Object> assessmentData = readAssessmentLevelData(assessmentAllDetail);
                         assessmentData.put(Constants.START_TIME, assessmentStartTime.getTime());
                         assessmentData.put(Constants.END_TIME, assessmentEndTime.getTime());
+                        assessmentData.put("maxAssessmentRetakeAttempts", 20);
                         response.getResult().put(Constants.QUESTION_SET, assessmentData);
                         redisCacheMgr.putCache(Constants.USER_ASSESS_REQ + assessmentIdentifier + "_" + token, response.getResult().get(Constants.QUESTION_SET));
                         Boolean isAssessmentUpdatedToDB = assessmentRepository.addUserAssesmentDataToDB(userId, assessmentIdentifier, assessmentStartTime, assessmentEndTime, (Map<String, Object>) (response.getResult().get(Constants.QUESTION_SET)), Constants.NOT_SUBMITTED);
@@ -103,10 +104,10 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                                 }.getType());
                                 questionSetFromAssessment.put(Constants.START_TIME, assessmentStartTime.getTime());
                                 questionSetFromAssessment.put(Constants.END_TIME, existingAssessmentEndTimeTimestamp.getTime());
+                                questionSetFromAssessment.put("maxAssessmentRetakeAttempts", 20);
                                 response.getResult().put(Constants.QUESTION_SET, questionSetFromAssessment);
                                 redisCacheMgr.putCache(Constants.USER_ASSESS_REQ + assessmentIdentifier + "_" + token, questionSetFromAssessment);
                             }
-                            response.getResult().put("maxAssessmentRetakeAttempts", 20);
                             response.getResult().put(Constants.QUESTION_SET, questionSetFromAssessment);
                         } else if ((assessmentStartTime.compareTo(existingAssessmentEndTime) < 0 && ((String) existingDataList.get(0).get(Constants.STATUS)).equalsIgnoreCase(Constants.SUBMITTED)) || assessmentStartTime.compareTo(existingAssessmentEndTime) > 0) {
                             logger.info("Incase the assessment is submitted before the end time, or the endtime has exceeded, read assessment freshly ");
@@ -116,8 +117,8 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                             Timestamp assessmentEndTime = calculateAssessmentSubmitTime(expectedDuration, assessmentStartTime, 0);
                             assessmentData.put(Constants.START_TIME, assessmentStartTime.getTime());
                             assessmentData.put(Constants.END_TIME, assessmentEndTime.getTime());
+                            assessmentData.put("maxAssessmentRetakeAttempts", 20);
                             response.getResult().put(Constants.QUESTION_SET, assessmentData);
-                            response.getResult().put("maxAssessmentRetakeAttempts", 20);
                             Boolean isAssessmentUpdatedToDB = assessmentRepository.addUserAssesmentDataToDB(userId, assessmentIdentifier, assessmentStartTime, calculateAssessmentSubmitTime(expectedDuration, assessmentStartTime, 0), (Map<String, Object>) (response.getResult().get(Constants.QUESTION_SET)), Constants.NOT_SUBMITTED);
                             redisCacheMgr.putCache(Constants.USER_ASSESS_REQ + assessmentIdentifier + "_" + token, response.getResult().get(Constants.QUESTION_SET));
                             if (Boolean.FALSE.equals(isAssessmentUpdatedToDB)) {
@@ -126,8 +127,9 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                         }
                     }
                 } else if (errMsg.isEmpty() && ((String) assessmentAllDetail.get(Constants.PRIMARY_CATEGORY)).equalsIgnoreCase(Constants.PRACTICE_QUESTION_SET)) {
-                    response.getResult().put(Constants.QUESTION_SET, readAssessmentLevelData(assessmentAllDetail));
-                    response.getResult().put("maxAssessmentRetakeAttempts", 20);
+                    Map<String, Object> questions = readAssessmentLevelData(assessmentAllDetail);
+                    questions.put("maxAssessmentRetakeAttempts", 20);
+                    response.getResult().put(Constants.QUESTION_SET, questions);
                     redisCacheMgr.putCache(Constants.USER_ASSESS_REQ + assessmentIdentifier + "_" + token, response.getResult().get(Constants.QUESTION_SET));
                 }
             } else {
