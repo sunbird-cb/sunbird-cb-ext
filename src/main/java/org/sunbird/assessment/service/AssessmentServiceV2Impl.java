@@ -546,9 +546,9 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
         Calendar cal = Calendar.getInstance();
         cal.setTimeInMillis(assessmentStartTime.getTime());
         if (bufferTime > 0) {
-            cal.add(Calendar.SECOND, expectedDuration);
-        } else {
             cal.add(Calendar.SECOND, expectedDuration + Integer.parseInt(serverProperties.getUserAssessmentSubmissionDuration()));
+        } else {
+            cal.add(Calendar.SECOND, expectedDuration);
         }
         return new Timestamp(cal.getTime().getTime());
     }
