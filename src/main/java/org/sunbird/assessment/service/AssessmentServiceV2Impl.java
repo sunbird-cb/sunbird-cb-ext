@@ -76,7 +76,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                     Timestamp assessmentStartTime = new Timestamp(new java.util.Date().getTime());
                     if (existingDataList.isEmpty()) {
                         int expectedDuration = (Integer) assessmentAllDetail.get(Constants.EXPECTED_DURATION);
-                        Timestamp assessmentEndTime = calculateAssessmentSubmitTime(expectedDuration, assessmentStartTime);
+                        Timestamp assessmentEndTime = calculateAssessmentSubmitTime(expectedDuration, assessmentStartTime, 0);
                         logger.info("Assessment read first time for user.");
                         Map<String, Object> assessmentData = readAssessmentLevelData(assessmentAllDetail);
                         assessmentData.put(Constants.START_TIME, assessmentStartTime.getTime());
@@ -106,17 +106,19 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                                 response.getResult().put(Constants.QUESTION_SET, questionSetFromAssessment);
                                 redisCacheMgr.putCache(Constants.USER_ASSESS_REQ + assessmentIdentifier + "_" + token, questionSetFromAssessment);
                             }
+                            response.getResult().put("maxAssessmentRetakeAttempts", 20);
                             response.getResult().put(Constants.QUESTION_SET, questionSetFromAssessment);
                         } else if ((assessmentStartTime.compareTo(existingAssessmentEndTime) < 0 && ((String) existingDataList.get(0).get(Constants.STATUS)).equalsIgnoreCase(Constants.SUBMITTED)) || assessmentStartTime.compareTo(existingAssessmentEndTime) > 0) {
                             logger.info("Incase the assessment is submitted before the end time, or the endtime has exceeded, read assessment freshly ");
                             Map<String, Object> assessmentData = readAssessmentLevelData(assessmentAllDetail);
                             int expectedDuration = (Integer) assessmentAllDetail.get(Constants.EXPECTED_DURATION);
                             assessmentStartTime = new Timestamp(new java.util.Date().getTime());
-                            Timestamp assessmentEndTime = calculateAssessmentSubmitTime(expectedDuration, assessmentStartTime);
+                            Timestamp assessmentEndTime = calculateAssessmentSubmitTime(expectedDuration, assessmentStartTime, 0);
                             assessmentData.put(Constants.START_TIME, assessmentStartTime.getTime());
                             assessmentData.put(Constants.END_TIME, assessmentEndTime.getTime());
                             response.getResult().put(Constants.QUESTION_SET, assessmentData);
-                            Boolean isAssessmentUpdatedToDB = assessmentRepository.addUserAssesmentDataToDB(userId, assessmentIdentifier, assessmentStartTime, calculateAssessmentSubmitTime(expectedDuration, assessmentStartTime), (Map<String, Object>) (response.getResult().get(Constants.QUESTION_SET)), Constants.NOT_SUBMITTED);
+                            response.getResult().put("maxAssessmentRetakeAttempts", 20);
+                            Boolean isAssessmentUpdatedToDB = assessmentRepository.addUserAssesmentDataToDB(userId, assessmentIdentifier, assessmentStartTime, calculateAssessmentSubmitTime(expectedDuration, assessmentStartTime, 0), (Map<String, Object>) (response.getResult().get(Constants.QUESTION_SET)), Constants.NOT_SUBMITTED);
                             redisCacheMgr.putCache(Constants.USER_ASSESS_REQ + assessmentIdentifier + "_" + token, response.getResult().get(Constants.QUESTION_SET));
                             if (Boolean.FALSE.equals(isAssessmentUpdatedToDB)) {
                                 errMsg = Constants.ASSESSMENT_DATA_START_TIME_NOT_UPDATED;
@@ -125,6 +127,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                     }
                 } else if (errMsg.isEmpty() && ((String) assessmentAllDetail.get(Constants.PRIMARY_CATEGORY)).equalsIgnoreCase(Constants.PRACTICE_QUESTION_SET)) {
                     response.getResult().put(Constants.QUESTION_SET, readAssessmentLevelData(assessmentAllDetail));
+                    response.getResult().put("maxAssessmentRetakeAttempts", 20);
                     redisCacheMgr.putCache(Constants.USER_ASSESS_REQ + assessmentIdentifier + "_" + token, response.getResult().get(Constants.QUESTION_SET));
                 }
             } else {
@@ -478,7 +481,10 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                     return Constants.READ_ASSESSMENT_START_TIME_FAILED;
                 }
                 int expectedDuration = (Integer) assessmentHierarchy.get(Constants.EXPECTED_DURATION);
-                Timestamp later = calculateAssessmentSubmitTime(expectedDuration, new Timestamp(assessmentStartTime.getTime()));
+                if (serverProperties.getUserAssessmentSubmissionDuration().isEmpty()) {
+                    serverProperties.setUserAssessmentSubmissionDuration("120");
+                }
+                Timestamp later = calculateAssessmentSubmitTime(expectedDuration, new Timestamp(assessmentStartTime.getTime()), Integer.parseInt(serverProperties.getUserAssessmentSubmissionDuration()));
                 Timestamp submissionTime = new Timestamp(new Date().getTime());
                 int time = submissionTime.compareTo(later);
                 if (time <= 0) {
@@ -491,15 +497,13 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                         String areQuestionIdsSame = validateIfQuestionIdsAreSame(submitRequest, sectionListFromSubmitRequest, desiredKeys, userId);
                         if (!areQuestionIdsSame.isEmpty()) return areQuestionIdsSame;
                     }
-                }
-                else {
+                } else {
                     return Constants.ASSESSMENT_SUBMIT_EXPIRED;
                 }
             } else {
                 return Constants.ASSESSMENT_ALREADY_SUBMITTED;
             }
-        }
-        else {
+        } else {
             return Constants.USER_ASSESSMENT_DATA_NOT_PRESENT;
         }
         return "";
@@ -536,13 +540,14 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
         return "";
     }
 
-    private Timestamp calculateAssessmentSubmitTime(int expectedDuration, Timestamp assessmentStartTime) {
+    private Timestamp calculateAssessmentSubmitTime(int expectedDuration, Timestamp assessmentStartTime, int bufferTime) {
         Calendar cal = Calendar.getInstance();
         cal.setTimeInMillis(assessmentStartTime.getTime());
-        if (serverProperties.getUserAssessmentSubmissionDuration().isEmpty()) {
-            serverProperties.setUserAssessmentSubmissionDuration("120");
+        if (bufferTime > 0) {
+            cal.add(Calendar.SECOND, expectedDuration);
+        } else {
+            cal.add(Calendar.SECOND, expectedDuration + Integer.parseInt(serverProperties.getUserAssessmentSubmissionDuration()));
         }
-        cal.add(Calendar.SECOND, expectedDuration + Integer.parseInt(serverProperties.getUserAssessmentSubmissionDuration()));
         return new Timestamp(cal.getTime().getTime());
     }
 
@@ -716,7 +721,8 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                 Map<String, Object> assessmentAllDetail = new HashMap<>();
                 errMsg = fetchReadHierarchyDetails(assessmentAllDetail, token, assessmentIdentifier);
                 if (assessmentAllDetail.get(Constants.MAX_ASSESSMENT_RETAKE_ATTEMPTS) != null) {
-                    retakeAttemptsAllowed = (int) assessmentAllDetail.get(Constants.MAX_ASSESSMENT_RETAKE_ATTEMPTS);
+                    //retakeAttemptsAllowed = (int) assessmentAllDetail.get(Constants.MAX_ASSESSMENT_RETAKE_ATTEMPTS);
+                    retakeAttemptsAllowed = 20;
                 }
                 retakeAttemptsConsumed = calculateAssessmentRetakeCount(existingDataList);
             } else {
