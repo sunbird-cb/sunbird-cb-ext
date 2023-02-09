@@ -81,7 +81,6 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                         Map<String, Object> assessmentData = readAssessmentLevelData(assessmentAllDetail);
                         assessmentData.put(Constants.START_TIME, assessmentStartTime.getTime());
                         assessmentData.put(Constants.END_TIME, assessmentEndTime.getTime());
-                        assessmentData.put("maxAssessmentRetakeAttempts", 20);
                         response.getResult().put(Constants.QUESTION_SET, assessmentData);
                         redisCacheMgr.putCache(Constants.USER_ASSESS_REQ + assessmentIdentifier + "_" + token, response.getResult().get(Constants.QUESTION_SET));
                         Boolean isAssessmentUpdatedToDB = assessmentRepository.addUserAssesmentDataToDB(userId, assessmentIdentifier, assessmentStartTime, assessmentEndTime, (Map<String, Object>) (response.getResult().get(Constants.QUESTION_SET)), Constants.NOT_SUBMITTED);
@@ -104,7 +103,6 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                                 }.getType());
                                 questionSetFromAssessment.put(Constants.START_TIME, assessmentStartTime.getTime());
                                 questionSetFromAssessment.put(Constants.END_TIME, existingAssessmentEndTimeTimestamp.getTime());
-                                questionSetFromAssessment.put("maxAssessmentRetakeAttempts", 20);
                                 response.getResult().put(Constants.QUESTION_SET, questionSetFromAssessment);
                                 redisCacheMgr.putCache(Constants.USER_ASSESS_REQ + assessmentIdentifier + "_" + token, questionSetFromAssessment);
                             }
@@ -117,7 +115,6 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                             Timestamp assessmentEndTime = calculateAssessmentSubmitTime(expectedDuration, assessmentStartTime, 0);
                             assessmentData.put(Constants.START_TIME, assessmentStartTime.getTime());
                             assessmentData.put(Constants.END_TIME, assessmentEndTime.getTime());
-                            assessmentData.put("maxAssessmentRetakeAttempts", 20);
                             response.getResult().put(Constants.QUESTION_SET, assessmentData);
                             Boolean isAssessmentUpdatedToDB = assessmentRepository.addUserAssesmentDataToDB(userId, assessmentIdentifier, assessmentStartTime, calculateAssessmentSubmitTime(expectedDuration, assessmentStartTime, 0), (Map<String, Object>) (response.getResult().get(Constants.QUESTION_SET)), Constants.NOT_SUBMITTED);
                             redisCacheMgr.putCache(Constants.USER_ASSESS_REQ + assessmentIdentifier + "_" + token, response.getResult().get(Constants.QUESTION_SET));
@@ -127,9 +124,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                         }
                     }
                 } else if (errMsg.isEmpty() && ((String) assessmentAllDetail.get(Constants.PRIMARY_CATEGORY)).equalsIgnoreCase(Constants.PRACTICE_QUESTION_SET)) {
-                    Map<String, Object> questions = readAssessmentLevelData(assessmentAllDetail);
-                    questions.put("maxAssessmentRetakeAttempts", 20);
-                    response.getResult().put(Constants.QUESTION_SET, questions);
+                    response.getResult().put(Constants.QUESTION_SET, readAssessmentLevelData(assessmentAllDetail));
                     redisCacheMgr.putCache(Constants.USER_ASSESS_REQ + assessmentIdentifier + "_" + token, response.getResult().get(Constants.QUESTION_SET));
                 }
             } else {
@@ -723,8 +718,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                 Map<String, Object> assessmentAllDetail = new HashMap<>();
                 errMsg = fetchReadHierarchyDetails(assessmentAllDetail, token, assessmentIdentifier);
                 if (assessmentAllDetail.get(Constants.MAX_ASSESSMENT_RETAKE_ATTEMPTS) != null) {
-                    //retakeAttemptsAllowed = (int) assessmentAllDetail.get(Constants.MAX_ASSESSMENT_RETAKE_ATTEMPTS);
-                    retakeAttemptsAllowed = 20;
+                    retakeAttemptsAllowed = (int) assessmentAllDetail.get(Constants.MAX_ASSESSMENT_RETAKE_ATTEMPTS);
                 }
                 retakeAttemptsConsumed = calculateAssessmentRetakeCount(existingDataList);
             } else {
