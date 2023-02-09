@@ -17,4 +17,6 @@ public interface AssessmentServiceV2 {
 	public SBApiResponse readAssessment(String assessmentIdentifier, String token) throws Exception;
 
 	public SBApiResponse readQuestionList(Map<String, Object> requestBody, String authUserToken) throws Exception;
+
+	public SBApiResponse retakeAssessment(String assessmentIdentifier, String token) throws Exception;
 }

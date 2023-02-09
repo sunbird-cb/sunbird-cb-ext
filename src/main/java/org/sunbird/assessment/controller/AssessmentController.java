@@ -147,6 +147,12 @@ public class AssessmentController {
 		SBApiResponse response = assessmentServiceV2.readQuestionList(requestBody, authUserToken);
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
-	// QUML based Assessment APIs
-	// =======================
+
+	@GetMapping("/v1/quml/assessment/retake/{assessmentIdentifier}")
+	public ResponseEntity<SBApiResponse> retakeAssessment(
+			@PathVariable("assessmentIdentifier") String assessmentIdentifier,
+			@RequestHeader(Constants.X_AUTH_TOKEN) String token) throws Exception {
+		SBApiResponse readResponse = assessmentServiceV2.retakeAssessment(assessmentIdentifier, token);
+		return new ResponseEntity<>(readResponse, readResponse.getResponseCode());
+	}
 }

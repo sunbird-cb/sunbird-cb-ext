@@ -6,47 +6,39 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.sunbird.cache.RedisCacheMgr;
+import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
+import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
-import org.sunbird.core.exception.ApplicationLogicError;
-import org.sunbird.core.logger.CbExtLogger;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 
 	@Autowired
+	CbExtServerProperties serverProperties;
+
+	@Autowired
+	OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
+
+	@Autowired
 	RedisCacheMgr redisCacheMgr;
-	
-	ObjectMapper mapper = new ObjectMapper();
 
-	private CbExtLogger logger = new CbExtLogger(getClass().getName());
+	@Autowired
+	ObjectMapper mapper;
 
-	public static final String QUESTION_TYPE = "qType";
-	public static final String OPTIONS = "options";
-	public static final String IS_CORRECT = "isCorrect";
-	public static final String OPTION_ID = "optionId";
-	public static final String MCQ_SCA = "mcq-sca";
-	public static final String MCQ_MCA = "mcq-mca";
-	public static final String FTB = "ftb";
-	public static final String MTF = "mtf";
-	public static final String QUESTION_ID = "questionId";
-	public static final String RESPONSE = "response";
-	public static final String ANSWER = "answer";
-	public static final String VALUE = "value";
-	public static final String EDITOR_STATE = "editorState";
-	public static final String BODY = "body";
-	public static final String SELECTED_ANSWER = "selectedAnswer";
-	public static final String INDEX = "index";
+	private Logger logger = LoggerFactory.getLogger(AssessmentUtilServiceV2Impl.class);
 
 	public Map<String, Object> validateQumlAssessment(List<String> originalQuestionList,
-			List<Map<String, Object>> userQuestionList) {
+													  List<Map<String, Object>> userQuestionList) {
 		try {
 			Integer correct = 0;
 			Integer blank = 0;
@@ -57,38 +49,35 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 			Map<String, Object> answers = getQumlAnswers(originalQuestionList);
 			for (Map<String, Object> question : userQuestionList) {
 				List<String> marked = new ArrayList<>();
-				if (question.containsKey(QUESTION_TYPE)) {
-					String questionType = ((String) question.get(QUESTION_TYPE)).toLowerCase();
-					Map<String, Object> editorStateObj = (Map<String, Object>) question.get(EDITOR_STATE);
-					List<Map<String, Object>> options = (List<Map<String, Object>>) editorStateObj.get(OPTIONS);
+				if (question.containsKey(Constants.QUESTION_TYPE)) {
+					String questionType = ((String) question.get(Constants.QUESTION_TYPE)).toLowerCase();
+					Map<String, Object> editorStateObj = (Map<String, Object>) question.get(Constants.EDITOR_STATE);
+					List<Map<String, Object>> options = (List<Map<String, Object>>) editorStateObj
+							.get(Constants.OPTIONS);
 					switch (questionType) {
-					case MTF:
-						for (Map<String, Object> option : options) {
-							marked.add(option.get(INDEX).toString() + "-"
-									+ option.get(SELECTED_ANSWER).toString().toLowerCase());
-						}
-						break;
-					case FTB:
-						for (Map<String, Object> option : options) {
-							marked.add((String) option.get(SELECTED_ANSWER));
-						}
-						break;
-					case MCQ_SCA:
-					case MCQ_MCA:
-						for (Map<String, Object> option : options) {
-							if ((boolean) option.get(SELECTED_ANSWER)) {
-								marked.add((String) option.get(INDEX));
+						case Constants.MTF:
+							for (Map<String, Object> option : options) {
+								marked.add(option.get(Constants.INDEX).toString() + "-"
+										+ option.get(Constants.SELECTED_ANSWER).toString().toLowerCase());
 							}
-						}
-						break;
-					default:
-						break;
+							break;
+						case Constants.FTB:
+							for (Map<String, Object> option : options) {
+								marked.add((String) option.get(Constants.SELECTED_ANSWER));
+							}
+							break;
+						case Constants.MCQ_SCA:
+						case Constants.MCQ_MCA:
+							for (Map<String, Object> option : options) {
+								if ((boolean) option.get(Constants.SELECTED_ANSWER)) {
+									marked.add((String) option.get(Constants.INDEX));
+								}
+							}
+							break;
+						default:
+							break;
 					}
-				} else {
-					// TODO - how to handle this case??
-					// Currently throw error
 				}
-
 				if (CollectionUtils.isEmpty(marked))
 					blank++;
 				else {
@@ -102,75 +91,234 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 					else
 						inCorrect++;
 				}
-				total++;
 			}
 			// Increment the blank counter for skipped question objects
 			if (answers.size() > userQuestionList.size()) {
 				blank += answers.size() - userQuestionList.size();
 			}
-			result = ((correct * 100d) / (correct + blank + inCorrect));
-			resultMap.put("result", result);
-			resultMap.put("incorrect", inCorrect);
-			resultMap.put("blank", blank);
-			resultMap.put("correct", correct);
-			resultMap.put("total", total);
+			total = correct + blank + inCorrect;
+			resultMap.put(Constants.RESULT, ((correct * 100d) / total));
+			resultMap.put(Constants.INCORRECT, inCorrect);
+			resultMap.put(Constants.BLANK, blank);
+			resultMap.put(Constants.CORRECT, correct);
+			resultMap.put(Constants.TOTAL, total);
 			return resultMap;
 
 		} catch (Exception ex) {
-			logger.error(ex);
-			throw new ApplicationLogicError("Error when verifying assessment. Error : " + ex.getMessage(), ex);
+			logger.error("Error when verifying assessment. Error : ");
 		}
+		return new HashMap<>();
 	}
 
 	private Map<String, Object> getQumlAnswers(List<String> questions) throws Exception {
 		Map<String, Object> ret = new HashMap<>();
+
+		Map<String, Map<String, Object>> questionMap = new HashMap<String, Map<String, Object>>();
+
 		for (String questionId : questions) {
 			List<String> correctOption = new ArrayList<>();
-			String strQuestion = redisCacheMgr.getCache(Constants.QUESTION_ID + questionId);
-			Map<String, Object> question = mapper.readValue(strQuestion, new TypeReference<Map<String, Object>>() {
-			});
-			if (ObjectUtils.isEmpty(question)) {
-				logger.error(new Exception("Failed to get the answer for question: " + questionId));
-				// TODO - Need to handle this scenario.
+			Map<String, Object> question = new HashMap<>();
+			String questionString = redisCacheMgr
+					.getCache(Constants.QUESTION_ID + questionId);
+			if (!ObjectUtils.isEmpty(question)) {
+				question = mapper.readValue(questionString, new TypeReference<Map<String, Object>>() {
+				});
 			}
-			if (question.containsKey(QUESTION_TYPE)) {
-				String questionType = ((String) question.get(QUESTION_TYPE)).toLowerCase();
-				Map<String, Object> editorStateObj = (Map<String, Object>) question.get(EDITOR_STATE);
-				List<Map<String, Object>> options = (List<Map<String, Object>>) editorStateObj.get(OPTIONS);
+			else
+			{
+				logger.error("Failed to get the answer for question from redis cache: " + questionId);
+				questionMap = fetchQuestionMapDetails(questionId);
+				question = questionMap.get(questionId);
+			}
+			if (question.containsKey(Constants.QUESTION_TYPE)) {
+				String questionType = ((String) question.get(Constants.QUESTION_TYPE)).toLowerCase();
+				Map<String, Object> editorStateObj = (Map<String, Object>) question.get(Constants.EDITOR_STATE);
+				List<Map<String, Object>> options = (List<Map<String, Object>>) editorStateObj.get(Constants.OPTIONS);
 				switch (questionType) {
-				case MTF:
-					for (Map<String, Object> option : options) {
-						Map<String, Object> valueObj = (Map<String, Object>) option.get(VALUE);
-						correctOption.add(
-								valueObj.get(VALUE).toString() + "-" + option.get(ANSWER).toString().toLowerCase());
-					}
-					break;
-				case FTB:
-					for (Map<String, Object> option : options) {
-						correctOption.add((String) option.get(SELECTED_ANSWER));
-					}
-					break;
-				case MCQ_SCA:
-				case MCQ_MCA:
-					for (Map<String, Object> option : options) {
-						if ((boolean) option.get(ANSWER)) {
-							Map<String, Object> valueObj = (Map<String, Object>) option.get(VALUE);
-							correctOption.add(valueObj.get(VALUE).toString());
+					case Constants.MTF:
+						for (Map<String, Object> option : options) {
+							Map<String, Object> valueObj = (Map<String, Object>) option.get(Constants.VALUE);
+							correctOption.add(valueObj.get(Constants.VALUE).toString() + "-"
+									+ option.get(Constants.ANSWER).toString().toLowerCase());
 						}
-					}
-					break;
-				default:
-					break;
+						break;
+					case Constants.FTB:
+						for (Map<String, Object> option : options) {
+							if ((boolean) option.get(Constants.ANSWER)) {
+								Map<String, Object> valueObj = (Map<String, Object>) option.get(Constants.VALUE);
+								correctOption.add(valueObj.get(Constants.BODY).toString());
+							}
+						}
+						break;
+					case Constants.MCQ_SCA:
+					case Constants.MCQ_MCA:
+						for (Map<String, Object> option : options) {
+							if ((boolean) option.get(Constants.ANSWER)) {
+								Map<String, Object> valueObj = (Map<String, Object>) option.get(Constants.VALUE);
+								correctOption.add(valueObj.get(Constants.VALUE).toString());
+							}
+						}
+						break;
+					default:
+						break;
 				}
 			} else {
-				for (Map<String, Object> options : (List<Map<String, Object>>) question.get(OPTIONS)) {
-					if ((boolean) options.get(IS_CORRECT))
-						correctOption.add(options.get(OPTION_ID).toString());
+				for (Map<String, Object> options : (List<Map<String, Object>>) question.get(Constants.OPTIONS)) {
+					if ((boolean) options.get(Constants.IS_CORRECT))
+						correctOption.add(options.get(Constants.OPTION_ID).toString());
 				}
 			}
 			ret.put(question.get(Constants.IDENTIFIER).toString(), correctOption);
 		}
 
 		return ret;
+	}
+
+	private Map<String, Map<String, Object>> fetchQuestionMapDetails(String questionId) {
+		// Taking the list which was formed with the not found values in Redis, we are
+		// making an internal POST call to Question List API to fetch the details
+		Map<String, Map<String, Object>> questionsMap = new HashMap<>();
+		List<Map<String, Object>> questionMapList = readQuestionDetails(Collections.singletonList(questionId));
+		for (Map<String, Object> questionMapResponse : questionMapList) {
+			if (!ObjectUtils.isEmpty(questionMapResponse)
+					&& Constants.OK.equalsIgnoreCase((String) questionMapResponse.get(Constants.RESPONSE_CODE))) {
+				List<Map<String, Object>> questionMap = ((List<Map<String, Object>>) ((Map<String, Object>) questionMapResponse
+						.get(Constants.RESULT)).get(Constants.QUESTIONS));
+				for (Map<String, Object> question : questionMap) {
+					if (!ObjectUtils.isEmpty(questionMap)) {
+						questionsMap.put((String) question.get(Constants.IDENTIFIER), question);
+						redisCacheMgr.putCache(Constants.QUESTION_ID, question);
+					}
+				}
+			}
+		}
+		return questionsMap;
+	}
+
+	@Override
+	public String fetchQuestionIdentifierValue(List<String> identifierList, List<Object> questionList, String primaryCategory)
+			throws Exception {
+		List<String> newIdentifierList = new ArrayList<>();
+		newIdentifierList.addAll(identifierList);
+
+		// Taking the list which was formed with the not found values in Redis, we are
+		// making an internal POST call to Question List API to fetch the details
+		if (!newIdentifierList.isEmpty()) {
+			List<Map<String, Object>> questionMapList = readQuestionDetails(newIdentifierList);
+			for (Map<String, Object> questionMapResponse : questionMapList) {
+				if (!ObjectUtils.isEmpty(questionMapResponse)
+						&& Constants.OK.equalsIgnoreCase((String) questionMapResponse.get(Constants.RESPONSE_CODE))) {
+					List<Map<String, Object>> questionMap = ((List<Map<String, Object>>) ((Map<String, Object>) questionMapResponse
+							.get(Constants.RESULT)).get(Constants.QUESTIONS));
+					for (Map<String, Object> question : questionMap) {
+						if (!ObjectUtils.isEmpty(questionMap)) {
+							questionList.add(filterQuestionMapDetail(question, primaryCategory));
+						} else {
+							logger.error(String.format("Failed to get Question Details for Id: %s",
+									question.get(Constants.IDENTIFIER).toString()));
+							return "Failed to get Question Details for Id: %s";
+						}
+					}
+				} else {
+					logger.error(
+							String.format("Failed to get Question Details from the Question List API for the IDs: %s",
+									newIdentifierList.toString()));
+					return "Failed to get Question Details from the Question List API for the IDs";
+				}
+			}
+		}
+		return "";
+	}
+
+	@Override
+	public Map<String, Object> filterQuestionMapDetail(Map<String, Object> questionMapResponse, String primaryCategory) {
+		List<String> questionParams = serverProperties.getAssessmentQuestionParams();
+		Map<String, Object> updatedQuestionMap = new HashMap<>();
+		for (String questionParam : questionParams) {
+			if (questionMapResponse.containsKey(questionParam)) {
+				updatedQuestionMap.put(questionParam, questionMapResponse.get(questionParam));
+			}
+		}
+		if (questionMapResponse.containsKey(Constants.EDITOR_STATE)
+				&& primaryCategory.equalsIgnoreCase(Constants.PRACTICE_QUESTION_SET)) {
+			Map<String, Object> editorState = (Map<String, Object>) questionMapResponse.get(Constants.EDITOR_STATE);
+			updatedQuestionMap.put(Constants.EDITOR_STATE, editorState);
+		}
+		if (questionMapResponse.containsKey(Constants.CHOICES)
+				&& updatedQuestionMap.containsKey(Constants.PRIMARY_CATEGORY) && !updatedQuestionMap
+				.get(Constants.PRIMARY_CATEGORY).toString().equalsIgnoreCase(Constants.FTB_QUESTION)) {
+			Map<String, Object> choicesObj = (Map<String, Object>) questionMapResponse.get(Constants.CHOICES);
+			Map<String, Object> updatedChoicesMap = new HashMap<>();
+			if (choicesObj.containsKey(Constants.OPTIONS)) {
+				List<Map<String, Object>> optionsMapList = (List<Map<String, Object>>) choicesObj
+						.get(Constants.OPTIONS);
+				updatedChoicesMap.put(Constants.OPTIONS, optionsMapList);
+			}
+			updatedQuestionMap.put(Constants.CHOICES, updatedChoicesMap);
+		}
+		if (questionMapResponse.containsKey(Constants.RHS_CHOICES)
+				&& updatedQuestionMap.containsKey(Constants.PRIMARY_CATEGORY) && updatedQuestionMap
+				.get(Constants.PRIMARY_CATEGORY).toString().equalsIgnoreCase(Constants.MTF_QUESTION)) {
+			List<Object> rhsChoicesObj = (List<Object>) questionMapResponse.get(Constants.RHS_CHOICES);
+			Collections.shuffle(rhsChoicesObj);
+			updatedQuestionMap.put(Constants.RHS_CHOICES, rhsChoicesObj);
+		}
+
+		return updatedQuestionMap;
+	}
+
+	@Override
+	public List<Map<String, Object>> readQuestionDetails(List<String> identifiers) {
+		try {
+			StringBuilder sbUrl = new StringBuilder(serverProperties.getAssessmentHost());
+			sbUrl.append(serverProperties.getAssessmentQuestionListPath());
+			Map<String, String> headers = new HashMap<>();
+			headers.put(Constants.AUTHORIZATION, serverProperties.getSbApiKey());
+			Map<String, Object> requestBody = new HashMap<>();
+			Map<String, Object> requestData = new HashMap<>();
+			Map<String, Object> searchData = new HashMap<>();
+			requestData.put(Constants.SEARCH, searchData);
+			requestBody.put(Constants.REQUEST, requestData);
+			List<Map<String, Object>> questionDataList = new ArrayList<>();
+			int chunkSize = 15;
+			for (int i = 0; i < identifiers.size(); i += chunkSize) {
+				List<String> identifierList;
+				if ((i + chunkSize) >= identifiers.size()) {
+					identifierList = identifiers.subList(i, identifiers.size());
+				} else {
+					identifierList = identifiers.subList(i, i + chunkSize);
+				}
+				searchData.put(Constants.IDENTIFIER, identifierList);
+				Map<String, Object> data = outboundRequestHandlerService.fetchResultUsingPost(sbUrl.toString(),
+						requestBody, headers);
+				if (!ObjectUtils.isEmpty(data)) {
+					questionDataList.add(data);
+				}
+			}
+			return questionDataList;
+		} catch (Exception e) {
+			logger.info(String.format("Failed to process the readQuestionDetails. %s", e.getMessage()));
+		}
+		return new ArrayList<>();
+	}
+
+	@Override
+	public Map<String, Object> getReadHierarchyApiResponse(String assessmentIdentifier, String token) {
+		try {
+			StringBuilder sbUrl = new StringBuilder(serverProperties.getAssessmentHost());
+			sbUrl.append(serverProperties.getAssessmentHierarchyReadPath());
+			String serviceURL = sbUrl.toString().replace(Constants.IDENTIFIER_REPLACER, assessmentIdentifier);
+			Map<String, String> headers = new HashMap<>();
+			headers.put(Constants.X_AUTH_TOKEN, token);
+			headers.put(Constants.AUTHORIZATION, serverProperties.getSbApiKey());
+			logger.info(serviceURL);
+			Object o = outboundRequestHandlerService.fetchUsingGetWithHeaders(serviceURL, headers);
+			Map<String, Object> data = new ObjectMapper().convertValue(o, Map.class);
+			logger.info(data.toString());
+			return data;
+		} catch (Exception e) {
+			logger.error("error in getReadHierarchyApiResponse  " + e.getMessage());
+		}
+		return new HashMap<>();
 	}
 }
