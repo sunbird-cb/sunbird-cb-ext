@@ -598,8 +598,8 @@ public class CbExtServerProperties {
 		this.sbApiKey = sbApiKey;
 	}
 
-	public String getEsHost() {
-		return esHost;
+	public String[] getEsHost() {
+		return esHost.split(",", -1);
 	}
 
 	public void setEsHost(String esHost) {
@@ -1353,8 +1353,8 @@ public class CbExtServerProperties {
 		this.esAutoCompleteIncludeFields = esAutoCompleteIncludeFields;
 	}
 
-	public String getSbEsHost() {
-		return sbEsHost;
+	public String[] getSbEsHost() {
+		return sbEsHost.split(",", -1);
 	}
 
 	public void setSbEsHost(String sbEsHost) {

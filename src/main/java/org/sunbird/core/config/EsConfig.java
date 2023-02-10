@@ -26,36 +26,29 @@ public class EsConfig {
 
 	@Bean(name = "esClient", destroyMethod = "close")
 	public RestHighLevelClient getCbEsRestClient(CbExtServerProperties configuration) {
-		return createRestClient(configuration.getEsHost(), configuration.getEsPort(), configuration.getEsUser(),
+		return createRestClient(configuration.getEsHost(), configuration.getEsUser(),
 				configuration.getEsPassword());
 	}
 
 	@Bean(name = "sbEsClient", destroyMethod = "close")
 	public RestHighLevelClient getSbESRestClient(CbExtServerProperties configuration) {
-		return createRestClient(configuration.getSbEsHost(), configuration.getSbEsPort(), configuration.getSbEsUser(),
+		return createRestClient(configuration.getSbEsHost(), configuration.getSbEsUser(),
 				configuration.getSbEsPassword());
 	}
 
-	private RestHighLevelClient createRestClient(String host, String port, String user, String password) {
+	private RestHighLevelClient createRestClient(String[] hosts, String user, String password) {
 		final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
 		credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(user, password));
-		List<String> hostList = null;
-		if (!StringUtils.isEmpty(host) && !StringUtils.isEmpty(port)) {
-			String[] splitHost = host.split(",");
-			logger.info("splitHost : "+splitHost.toString());
-			for (String val : splitHost) {
-                logger.info("IPS are : "+val);
-				hostList.add(val);
-			}
+
+		HttpHost[] httpHosts = new HttpHost[hosts.length];
+		for (int i = 0; i < httpHosts.length; i++) {
+			String hostIp = hosts[i].split(":")[0];
+			String hostPort = hosts[i].split(":")[1];
+			httpHosts[i] = new HttpHost(hostIp, Integer.parseInt(hostPort));
 		}
-		HttpHost[] httpHost = new HttpHost[hostList.size()];
-		for (int i = 0; i < hostList.size(); i++) {
-			httpHost[i] = new HttpHost(hostList.get(i), Integer.parseInt(port));
-		}
-		logger.info("httpHost is : "+httpHost.toString());
-		RestClientBuilder builder = RestClient.builder(httpHost)
-				.setHttpClientConfigCallback(
-						httpClientBuilder -> httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider));
+
+		RestClientBuilder builder = RestClient.builder(httpHosts).setHttpClientConfigCallback(
+				httpClientBuilder -> httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider));
 
 		return new RestHighLevelClient(builder);
 	}
