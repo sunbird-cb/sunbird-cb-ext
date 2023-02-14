@@ -3,12 +3,9 @@ package org.sunbird.common.util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.ConcurrentHashMap;
-
 public class RequestInterceptor {
 
   private static Logger logger = LoggerFactory.getLogger(RequestInterceptor.class.getName());
-  private static ConcurrentHashMap<String, Short> apiHeaderIgnoreMap = new ConcurrentHashMap<>();
 
   private RequestInterceptor() {
   }
