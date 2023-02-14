@@ -279,16 +279,16 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
             List<String> questionsFromAssessment = new ArrayList<>();
             List<Map<String, Object>> sections = (List<Map<String, Object>>) userAssessmentAllDetail.get(Constants.CHILDREN);
             for (Map<String, Object> section : sections) {
-                questionsFromAssessment.addAll((List<String>) section.get(Constants.CHILD_NODES));
-                // Out of the list of questions received in the payload, checking if the request
+            	// Out of the list of questions received in the payload, checking if the request
                 // has only those ids which are a part of the user's latest assessment
                 // Fetching all the remaining questions details from the Redis
-                if (Boolean.FALSE.equals(validateQuestionListRequest(identifierList, questionsFromAssessment))) {
-                    result.put(Constants.ERROR_MESSAGE, Constants.THE_QUESTIONS_IDS_PROVIDED_DONT_MATCH);
-                    return result;
-                }
+                questionsFromAssessment.addAll((List<String>) section.get(Constants.CHILD_NODES));
             }
-            result.put(Constants.ERROR_MESSAGE, "");
+            if (validateQuestionListRequest(identifierList, questionsFromAssessment)) {
+				result.put(Constants.ERROR_MESSAGE, StringUtils.EMPTY);
+			} else {
+				result.put(Constants.ERROR_MESSAGE, Constants.THE_QUESTIONS_IDS_PROVIDED_DONT_MATCH);
+			}
             return result;
         } else {
             result.put(Constants.ERROR_MESSAGE, Constants.ASSESSMENT_ID_INVALID);
