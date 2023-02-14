@@ -283,12 +283,14 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                 // Out of the list of questions received in the payload, checking if the request
                 // has only those ids which are a part of the user's latest assessment
                 // Fetching all the remaining questions details from the Redis
-                if (Boolean.FALSE.equals(validateQuestionListRequest(identifierList, questionsFromAssessment))) {
-                    result.put(Constants.ERROR_MESSAGE, Constants.THE_QUESTIONS_IDS_PROVIDED_DONT_MATCH);
-                    return result;
-                }
             }
-            result.put(Constants.ERROR_MESSAGE, "");
+            if (Boolean.FALSE.equals(validateQuestionListRequest(identifierList, questionsFromAssessment))) {
+                result.put(Constants.ERROR_MESSAGE, Constants.THE_QUESTIONS_IDS_PROVIDED_DONT_MATCH);
+            }
+            else
+            {
+                result.put(Constants.ERROR_MESSAGE, "");
+            }
             return result;
         } else {
             result.put(Constants.ERROR_MESSAGE, Constants.ASSESSMENT_ID_INVALID);
