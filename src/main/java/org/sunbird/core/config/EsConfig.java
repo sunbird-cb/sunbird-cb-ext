@@ -26,13 +26,13 @@ public class EsConfig {
 
 	@Bean(name = "esClient", destroyMethod = "close")
 	public RestHighLevelClient getCbEsRestClient(CbExtServerProperties configuration) {
-		return createRestClient(configuration.getEsHost(), configuration.getEsUser(),
+		return createRestClient(configuration.getEsHostList(), configuration.getEsUser(),
 				configuration.getEsPassword());
 	}
 
 	@Bean(name = "sbEsClient", destroyMethod = "close")
 	public RestHighLevelClient getSbESRestClient(CbExtServerProperties configuration) {
-		return createRestClient(configuration.getSbEsHost(), configuration.getSbEsUser(),
+		return createRestClient(configuration.getSbEsHostList(), configuration.getSbEsUser(),
 				configuration.getSbEsPassword());
 	}
 

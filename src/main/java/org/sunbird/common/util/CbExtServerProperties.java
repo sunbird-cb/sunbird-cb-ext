@@ -63,7 +63,7 @@ public class CbExtServerProperties {
 	private String sbApiKey;
 
 	@Value("${es.host.list}")
-	private String esHost;
+	private String esHostList;
 
 	@Value("${es.port}")
 	private String esPort;
@@ -345,7 +345,7 @@ public class CbExtServerProperties {
 	private String lmsDataSyncPath;
 
 	@Value("${sb.es.host.list}")
-	private String sbEsHost;
+	private String sbEsHostList;
 
 	@Value("${sb.es.port}")
 	private String sbEsPort;
@@ -598,12 +598,12 @@ public class CbExtServerProperties {
 		this.sbApiKey = sbApiKey;
 	}
 
-	public String[] getEsHost() {
-		return esHost.split(",", -1);
+	public String[] getEsHostList() {
+		return esHostList.split(",", -1);
 	}
 
-	public void setEsHost(String esHost) {
-		this.esHost = esHost;
+	public void setEsHostList(String esHostList) {
+		this.esHostList = esHostList;
 	}
 
 	public String getEsPort() {
@@ -1353,12 +1353,12 @@ public class CbExtServerProperties {
 		this.esAutoCompleteIncludeFields = esAutoCompleteIncludeFields;
 	}
 
-	public String[] getSbEsHost() {
-		return sbEsHost.split(",", -1);
+	public String[] getSbEsHostList() {
+		return sbEsHostList.split(",", -1);
 	}
 
-	public void setSbEsHost(String sbEsHost) {
-		this.sbEsHost = sbEsHost;
+	public void setSbEsHostList(String sbEsHost) {
+		this.sbEsHostList = sbEsHostList;
 	}
 
 	public String getSbEsPort() {
