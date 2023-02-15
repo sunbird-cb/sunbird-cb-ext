@@ -62,7 +62,7 @@ public class CbExtServerProperties {
 	@Value("${sb.api.key}")
 	private String sbApiKey;
 
-	@Value("${es.host}")
+	@Value("${es.host.list}")
 	private String esHost;
 
 	@Value("${es.port}")
@@ -344,7 +344,7 @@ public class CbExtServerProperties {
 	@Value("${sb.data.sync.path}")
 	private String lmsDataSyncPath;
 
-	@Value("${sb.es.host}")
+	@Value("${sb.es.host.list}")
 	private String sbEsHost;
 
 	@Value("${sb.es.port}")
