@@ -42,8 +42,10 @@ public class CassandraOperationImpl implements CassandraOperation {
 			connectionManager.getSession(keyspaceName).execute(boundStatement.bind(array));
 			response.put(Constants.RESPONSE, Constants.SUCCESS);
 		} catch (Exception e) {
-			logger.error(
-					String.format("Exception occurred while inserting record to %s %s", tableName, e.getMessage()));
+			String errMsg = String.format("Exception occurred while inserting record to %s %s", tableName, e.getMessage());
+			logger.error(errMsg);
+			response.put(Constants.RESPONSE, Constants.FAILED);
+			response.put(Constants.ERROR_MESSAGE, errMsg);
 		}
 		return response;
 	}
@@ -225,8 +227,10 @@ public class CassandraOperationImpl implements CassandraOperation {
 			session.execute(updateQuery);
 			response.put(Constants.RESPONSE, Constants.SUCCESS);
 		} catch (Exception e) {
-			logger.error(e.getMessage());
-			throw e;
+			String errMsg = String.format("Exception occurred while updating record to %s %s", tableName, e.getMessage());
+			logger.error(errMsg);
+			response.put(Constants.RESPONSE, Constants.FAILED);
+			response.put(Constants.ERROR_MESSAGE, errMsg);
 		}
 		return response;
 	}

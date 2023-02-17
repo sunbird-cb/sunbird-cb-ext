@@ -4,7 +4,7 @@ import org.sunbird.common.model.SBApiResponse;
 
 import java.util.Map;
 
-public interface FlagService {
+public interface OffensiveDataFlagService {
 	public SBApiResponse createFlag(Map<String, Object> requestBody, String token);
 
 	public SBApiResponse  getFlaggedData(String token);

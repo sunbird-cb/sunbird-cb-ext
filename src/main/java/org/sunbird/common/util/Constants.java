@@ -6,18 +6,11 @@ import java.util.List;
 
 public class Constants {
 	public static final String UUID = "wid";
+	public static final String KID = "kid";
+	public static final String SOURCE_ID = "source_id";
 	public static final String FIRST_NAME = "first_name";
 	public static final String LAST_NAME = "last_name";
-
-	public static final String CONTEXT_TYPE = "contextType";
-	public static final String CONTEXT_TYPE_ID = "contextTypeId";
-	public static final String ACQUIRED_CHANNEL = "acquiredChannel";
-	public static final String ADDITIONAL_PARAMS = "additionalParams";
-	public static final String REQUESTED_BY = "requestedBy";
-	public static final String CONTEXT_STATUS = "contextStatus";
-	public static final String CREATED_AT = "createdAt";
-	public static final String UPDATED_BY = "updatedBy";
-	public static final String UPDATED_AT = "updatedAt";
+	public static final String MIDDLE_NAME = "middle_name";
 	public static final String FIRSTNAME = "firstName";
 	public static final String SURNAME = "surname";
 	public static final String LASTNAME = "lastName";
@@ -203,12 +196,15 @@ public class Constants {
 	public static final String COMMA = ",";
 	public static final String CLOSING_BRACE = ");";
 	public static final String SUCCESS = "success";
+	public static final String UNKNOWN_IDENTIFIER = "Unknown identifier ";
+	public static final String UNDEFINED_IDENTIFIER = "Undefined column name ";
 	public static final String EXCEPTION_MSG_FETCH = "Exception occurred while fetching record from ";
 	public static final String EXCEPTION_MSG_DELETE = "Exception occurred while deleting record from ";
 	public static final String AUDIT_TYPE = "auditType";
 	public static final String CREATED_DATE = "createdDate";
 	public static final String CREATED_BY = "createdBy";
 	public static final String UPDATED_DATE = "updatedDate";
+	public static final String UPDATED_BY = "updatedBy";
 	public static final String TRANSACTION_DETAILS = "transactionDetails";
 	public static final String PROOF_DOCS = "proofDocs";
 	public static final String WORK_ORDER_ID = "workOrderId";
@@ -284,7 +280,6 @@ public class Constants {
 	public static final String PRIMARY_CATEGORY = "primaryCategory";
 	public static final String LIMIT = "limit";
 	public static final String REQUEST = "request";
-	public static final String REQUESTED = "requested";
 	public static final String FIELDS = "fields";
 	public static final String OFFSET = "offset";
 	public static final String BUDGET_DOC_UPLOADED_BY = "uploadedBy";
@@ -585,7 +580,7 @@ public class Constants {
 
 	public static final String TABLE_USER_ASSESSMENT_DATA = "user_assessment_data";
 
-	public static final String TABLE_OFFENSIVE_DATA_FLAGS = "offensive_data_flags";
+
 	public static final String USER_ID_DOESNT_EXIST = "User Id doesn't exist! Please supply a valid auth token";
 	public static final String ASSESSMENT_DATA_START_TIME_NOT_UPDATED = "Assessment Data & Start Time not updated in the DB! Please check!";
 	public static final String FAILED_TO_GET_QUESTION_DETAILS = "Failed to get Question List data from the Question List Api! Please check!";
@@ -623,10 +618,20 @@ public class Constants {
 			COURSE_ORG_NAME);
 
 	public static final List<String> USER_ENROLMENT_COMMON_FIELDS = Arrays.asList(STATUS, COMPLETION_PERCENTAGE);
+
+	public static final String CONTEXT_TYPE = "contextType";
+	public static final String CONTEXT_TYPE_ID = "contextTypeId";
+	public static final String ADDITIONAL_PARAMS = "additionalParams";
+	public static final String CONTEXT_STATUS = "contextStatus";
+	public static final String CREATED_AT = "createdAt";
+	public static final String UPDATED_AT = "updatedAt";
+	public static final String TABLE_OFFENSIVE_DATA_FLAGS = "offensive_data_flags";
 	public static final String ADD_OFFENSIVE_DATA_FLAG = "api.add.offensive.data.flag";
 	public static final String UPDATE_OFFENSIVE_DATA_FLAG = "api.update.offensive.data.flag";
 	public static final String GET_OFFENSIVE_DATA_FLAG = "api.get.offensive.data.flag";
 	public static final String DRAFT = "DRAFT";
+	public static final Object CREATED = "Created";
+	public static final Object UPDATED = "Updated";
 
 	private Constants() {
 		throw new IllegalStateException("Utility class");
