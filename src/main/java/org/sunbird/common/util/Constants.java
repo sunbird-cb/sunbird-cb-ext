@@ -623,8 +623,6 @@ public class Constants {
 	public static final String CONTEXT_TYPE_ID = "contextTypeId";
 	public static final String ADDITIONAL_PARAMS = "additionalParams";
 	public static final String CONTEXT_STATUS = "contextStatus";
-	public static final String CREATED_AT = "createdAt";
-	public static final String UPDATED_AT = "updatedAt";
 	public static final String TABLE_OFFENSIVE_DATA_FLAGS = "offensive_data_flags";
 	public static final String ADD_OFFENSIVE_DATA_FLAG = "api.add.offensive.data.flag";
 	public static final String UPDATE_OFFENSIVE_DATA_FLAG = "api.update.offensive.data.flag";

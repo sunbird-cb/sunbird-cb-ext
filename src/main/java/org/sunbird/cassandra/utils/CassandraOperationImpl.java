@@ -231,6 +231,7 @@ public class CassandraOperationImpl implements CassandraOperation {
 			logger.error(errMsg);
 			response.put(Constants.RESPONSE, Constants.FAILED);
 			response.put(Constants.ERROR_MESSAGE, errMsg);
+			throw e;
 		}
 		return response;
 	}

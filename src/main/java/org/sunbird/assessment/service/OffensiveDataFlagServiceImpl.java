@@ -32,15 +32,14 @@ public class OffensiveDataFlagServiceImpl implements OffensiveDataFlagService {
     public SBApiResponse createFlag(Map<String, Object> requestBody, String token) {
         String errMsg = "";
         String userId = RequestInterceptor.fetchUserIdFromAccessToken(token);
-        errMsg = validateAddRequest(requestBody, userId);
+        errMsg = validateRequest(requestBody, userId, Constants.ADD);
         SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.ADD_OFFENSIVE_DATA_FLAG);
-        try {
             if (StringUtils.isEmpty(errMsg)) {
                 Map<String, Object> request = (Map<String, Object>) requestBody.get(Constants.REQUEST);
                 request.put(Constants.USER_ID, userId);
                 request.put(Constants.CONTEXT_STATUS, Constants.DRAFT);
                 request.put(Constants.CREATED_BY, userId);
-                request.put(Constants.CREATED_AT, new Timestamp(new java.util.Date().getTime()));
+                request.put(Constants.CREATED_DATE, new Timestamp(new java.util.Date().getTime()));
                 SBApiResponse resp = cassandraOperation.insertRecord(Constants.KEYSPACE_SUNBIRD,
                         Constants.TABLE_OFFENSIVE_DATA_FLAGS, request);
                 if (!resp.get(Constants.RESPONSE).equals(Constants.SUCCESS)) {
@@ -49,10 +48,6 @@ public class OffensiveDataFlagServiceImpl implements OffensiveDataFlagService {
                     response.getResult().put(Constants.STATUS, Constants.CREATED);
                 }
             }
-        } catch (Exception e) {
-            errMsg = String.format("Failed to create an offensive flag. Exception: ", e.getMessage());
-            logger.error(errMsg, e);
-        }
         if (StringUtils.isNotBlank(errMsg)) {
             response.getParams().setStatus(Constants.FAILED);
             response.getParams().setErrmsg(errMsg);
@@ -67,10 +62,9 @@ public class OffensiveDataFlagServiceImpl implements OffensiveDataFlagService {
         String errMsg = "";
         SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.UPDATE_OFFENSIVE_DATA_FLAG);
         String userId = RequestInterceptor.fetchUserIdFromAccessToken(token);
-        errMsg = validateUpdateRequest(requestBody, userId);
+        errMsg = validateRequest(requestBody, userId, Constants.UPDATE);
         if (StringUtils.isEmpty(errMsg)) {
             try {
-                if (StringUtils.isEmpty(errMsg)) {
                     Map<String, Object> request = (Map<String, Object>) requestBody.get(Constants.REQUEST);
                     Map<String, Object> compositeKeys = new HashMap<>();
                     compositeKeys.put(Constants.USER_ID, userId);
@@ -82,7 +76,7 @@ public class OffensiveDataFlagServiceImpl implements OffensiveDataFlagService {
                         fieldsToBeUpdated.put(Constants.ADDITIONAL_PARAMS, request.get(Constants.ADDITIONAL_PARAMS));
                     }
                     fieldsToBeUpdated.put(Constants.UPDATED_BY, userId);
-                    fieldsToBeUpdated.put(Constants.UPDATED_AT, new Timestamp(new java.util.Date().getTime()));
+                    fieldsToBeUpdated.put(Constants.UPDATED_DATE, new Timestamp(new java.util.Date().getTime()));
                     Map<String, Object> resp = cassandraOperation.updateRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_OFFENSIVE_DATA_FLAGS,
                             fieldsToBeUpdated, compositeKeys);
                     if (!resp.get(Constants.RESPONSE).equals(Constants.SUCCESS)) {
@@ -90,7 +84,6 @@ public class OffensiveDataFlagServiceImpl implements OffensiveDataFlagService {
                     } else {
                         response.getResult().put(Constants.STATUS, Constants.UPDATED);
                     }
-                }
             } catch (Exception e) {
                 errMsg = String.format("Failed to update an offensive flag with the details. Exception: ", e.getMessage());
                 logger.error(errMsg, e);
@@ -111,22 +104,12 @@ public class OffensiveDataFlagServiceImpl implements OffensiveDataFlagService {
         String errMsg = "";
         SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.GET_OFFENSIVE_DATA_FLAG);
         if (userId != null) {
-            try {
                 Map<String, Object> request = new HashMap<>();
                 request.put(Constants.USER_ID, userId);
                 List<Map<String, Object>> existingDataList = cassandraOperation.getRecordsByProperties(
                         Constants.KEYSPACE_SUNBIRD, Constants.TABLE_OFFENSIVE_DATA_FLAGS, request, null);
-                if (existingDataList.isEmpty()) {
-                    errMsg = "Failed to update records into DB";
-                } else {
-                    response.getResult().put("Content", existingDataList);
-                    response.getResult().put("Count", existingDataList.size());
-
-                }
-            } catch (Exception e) {
-                errMsg = String.format("Failed to update an offensive flag with the details. Exception: ", e.getMessage());
-                logger.error(errMsg, e);
-            }
+                response.getResult().put("Content", existingDataList);
+                response.getResult().put("Count", existingDataList.size());
         } else {
             errMsg = "Invalid User Id";
         }
@@ -139,13 +122,13 @@ public class OffensiveDataFlagServiceImpl implements OffensiveDataFlagService {
         return response;
     }
 
-    private String validateAddRequest(Map<String, Object> requestBody, String userId) {
+    private String validateRequest(Map<String, Object> requestBody, String userId, String type) {
         if (StringUtils.isEmpty(userId)) {
             return "Invalid User Id";
         }
         Map<String, Object> request = (Map<String, Object>) requestBody.get(Constants.REQUEST);
         if (ObjectUtils.isEmpty(request)) {
-            return "Invalid Flag Create request.";
+            return "Invalid Request.";
         }
 
         StringBuilder errMsg = new StringBuilder();
@@ -162,43 +145,11 @@ public class OffensiveDataFlagServiceImpl implements OffensiveDataFlagService {
             missingAttributes.add(Constants.CONTEXT_TYPE_ID);
         }
 
-        if (!missingAttributes.isEmpty()) {
-            errMsg.append("Request doesn't have mandatory parameters - [").append(missingAttributes)
-                    .append("]. ");
-        }
-
-        if (!errList.isEmpty()) {
-            errMsg.append(errList.toString());
-        }
-        return errMsg.toString();
-    }
-
-    private String validateUpdateRequest(Map<String, Object> requestBody, String userId) {
-        if (StringUtils.isEmpty(userId)) {
-            return "Invalid User Id";
-        }
-        Map<String, Object> request = (Map<String, Object>) requestBody.get(Constants.REQUEST);
-        if (ObjectUtils.isEmpty(requestBody)) {
-            return "Invalid Flag Update request.";
-        }
-
-        StringBuilder errMsg = new StringBuilder();
-        List<String> missingAttributes = new ArrayList<>();
-        List<String> errList = new ArrayList<>();
-
-        String contextType = (String) request.get(Constants.CONTEXT_TYPE);
-        if (StringUtils.isBlank(contextType)) {
-            missingAttributes.add(Constants.CONTEXT_TYPE);
-        }
-
-        String contextTypeId = (String) request.get(Constants.CONTEXT_TYPE_ID);
-        if (StringUtils.isBlank(contextTypeId)) {
-            missingAttributes.add(Constants.CONTEXT_TYPE_ID);
-        }
-
-        String contextStatus = (String) request.get(Constants.CONTEXT_STATUS);
-        if (StringUtils.isBlank(contextStatus)) {
-            missingAttributes.add(Constants.CONTEXT_STATUS);
+        if(type.equalsIgnoreCase(Constants.UPDATE)) {
+            String contextStatus = (String) request.get(Constants.CONTEXT_STATUS);
+            if (StringUtils.isBlank(contextStatus)) {
+                missingAttributes.add(Constants.CONTEXT_STATUS);
+            }
         }
 
         if (!missingAttributes.isEmpty()) {
