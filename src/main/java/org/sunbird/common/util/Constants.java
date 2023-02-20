@@ -618,6 +618,19 @@ public class Constants {
 			COURSE_ORG_NAME);
 
 	public static final List<String> USER_ENROLMENT_COMMON_FIELDS = Arrays.asList(STATUS, COMPLETION_PERCENTAGE);
+
+	public static final String CONTEXT_TYPE = "contextType";
+	public static final String CONTEXT_TYPE_ID = "contextTypeId";
+	public static final String ADDITIONAL_PARAMS = "additionalParams";
+	public static final String CONTEXT_STATUS = "contextStatus";
+	public static final String TABLE_OFFENSIVE_DATA_FLAGS = "offensive_data_flags";
+	public static final String ADD_OFFENSIVE_DATA_FLAG = "api.add.offensive.data.flag";
+	public static final String UPDATE_OFFENSIVE_DATA_FLAG = "api.update.offensive.data.flag";
+	public static final String GET_OFFENSIVE_DATA_FLAG = "api.get.offensive.data.flag";
+	public static final String DRAFT = "DRAFT";
+	public static final Object CREATED = "Created";
+	public static final Object UPDATED = "Updated";
+
 	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}
