@@ -158,6 +158,7 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 	@Override
 	public SBApiResponse orgExtSearch(Map<String, Object> request) throws Exception {
 		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_ORG_EXT_SEARCH);
+		log.info("Inside org ext search implementation");
 		try {
 			String errMsg = validateOrgSearchReq(request);
 			if (!StringUtils.isEmpty(errMsg)) {
@@ -178,6 +179,7 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 
 			List<Map<String, Object>> existingDataList = cassandraOperation.getRecordsByProperties(
 					Constants.KEYSPACE_SUNBIRD, Constants.TABLE_ORG_HIERARCHY, searchRequest, null);
+			log.info("existing data list : "+existingDataList);
 			if (CollectionUtils.isNotEmpty(existingDataList)) {
 				List<String> orgIdList = existingDataList.stream().filter(item -> !ObjectUtils.isEmpty(item))
 						.map(item -> {
@@ -185,6 +187,7 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 						}).collect(Collectors.toList());
 				SBApiOrgSearchRequest orgSearchRequest = new SBApiOrgSearchRequest();
 				orgSearchRequest.getFilters().setId(orgIdList);
+				log.info("org id list : "+orgIdList);
 
 				Map<String, Object> orgSearchRequestBody = new HashMap<String, Object>() {
 					private static final long serialVersionUID = 1L;
@@ -199,6 +202,8 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 
 				Map<String, Object> apiResponse = (Map<String, Object>) outboundService.fetchResultUsingPost(url,
 						orgSearchRequestBody, headers);
+				log.info("api response : "+apiResponse);
+
 				if (Constants.OK.equalsIgnoreCase((String) apiResponse.get(Constants.RESPONSE_CODE))) {
 					Map<String, Object> apiResponseResult = (Map<String, Object>) apiResponse.get(Constants.RESULT);
 					response.put(Constants.RESPONSE, apiResponseResult.get(Constants.RESPONSE));
