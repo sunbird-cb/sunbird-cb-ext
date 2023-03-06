@@ -181,7 +181,7 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 			if (CollectionUtils.isNotEmpty(existingDataList)) {
 				List<String> orgIdList = existingDataList.stream().filter(item -> !ObjectUtils.isEmpty(item))
 						.map(item -> {
-							return (String) item.get(Constants.SB_ORG_ID.toLowerCase());
+							return (String) item.get(Constants.SB_ORG_ID);
 						}).collect(Collectors.toList());
 				SBApiOrgSearchRequest orgSearchRequest = new SBApiOrgSearchRequest();
 				orgSearchRequest.getFilters().setId(orgIdList);

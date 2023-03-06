@@ -62,8 +62,8 @@ public class CbExtServerProperties {
 	@Value("${sb.api.key}")
 	private String sbApiKey;
 
-	@Value("${es.host}")
-	private String esHost;
+	@Value("${es.host.list}")
+	private String esHostList;
 
 	@Value("${es.port}")
 	private String esPort;
@@ -344,8 +344,8 @@ public class CbExtServerProperties {
 	@Value("${sb.data.sync.path}")
 	private String lmsDataSyncPath;
 
-	@Value("${sb.es.host}")
-	private String sbEsHost;
+	@Value("${sb.es.host.list}")
+	private String sbEsHostList;
 
 	@Value("${sb.es.port}")
 	private String sbEsPort;
@@ -598,12 +598,12 @@ public class CbExtServerProperties {
 		this.sbApiKey = sbApiKey;
 	}
 
-	public String getEsHost() {
-		return esHost;
+	public String[] getEsHostList() {
+		return esHostList.split(",", -1);
 	}
 
-	public void setEsHost(String esHost) {
-		this.esHost = esHost;
+	public void setEsHostList(String esHostList) {
+		this.esHostList = esHostList;
 	}
 
 	public String getEsPort() {
@@ -1353,12 +1353,12 @@ public class CbExtServerProperties {
 		this.esAutoCompleteIncludeFields = esAutoCompleteIncludeFields;
 	}
 
-	public String getSbEsHost() {
-		return sbEsHost;
+	public String[] getSbEsHostList() {
+		return sbEsHostList.split(",", -1);
 	}
 
-	public void setSbEsHost(String sbEsHost) {
-		this.sbEsHost = sbEsHost;
+	public void setSbEsHostList(String sbEsHost) {
+		this.sbEsHostList = sbEsHostList;
 	}
 
 	public String getSbEsPort() {
