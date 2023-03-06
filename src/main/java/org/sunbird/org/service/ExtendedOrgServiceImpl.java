@@ -191,13 +191,17 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 
 					{
 						put(Constants.REQUEST, orgSearchRequest);
+						if(!ProjectUtil.isStringNullOREmpty((String) searchRequest.get(Constants.QUERY)))
+						{
+							put(Constants.QUERY, searchRequest.get(Constants.QUERY));
+						}
 					}
 				};
 				Map<String, String> headers = new HashMap<String, String>();
 				headers.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
 				String url = configProperties.getSbUrl() + configProperties.getSbOrgSearchPath();
 
-				Map<String, Object> apiResponse = (Map<String, Object>) outboundService.fetchResultUsingPost(url,
+				Map<String, Object> apiResponse = outboundService.fetchResultUsingPost(url,
 						orgSearchRequestBody, headers);
 				if (Constants.OK.equalsIgnoreCase((String) apiResponse.get(Constants.RESPONSE_CODE))) {
 					Map<String, Object> apiResponseResult = (Map<String, Object>) apiResponse.get(Constants.RESULT);
