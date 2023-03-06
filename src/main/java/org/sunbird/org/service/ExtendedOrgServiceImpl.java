@@ -191,9 +191,9 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 
 					{
 						put(Constants.REQUEST, orgSearchRequest);
-						if(!ProjectUtil.isStringNullOREmpty((String) searchRequest.get(Constants.QUERY)))
+						if(!ProjectUtil.isStringNullOREmpty((String) requestData.get(Constants.QUERY)))
 						{
-							put(Constants.QUERY, searchRequest.get(Constants.QUERY));
+							put(Constants.QUERY, requestData.get(Constants.QUERY));
 						}
 					}
 				};
