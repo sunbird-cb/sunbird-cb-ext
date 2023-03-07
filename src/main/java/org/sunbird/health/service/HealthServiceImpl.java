@@ -1,6 +1,5 @@
 package org.sunbird.health.service;
 
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +9,7 @@ import org.sunbird.cache.service.RedisCacheService;
 import org.sunbird.cassandra.utils.CassandraOperation;
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.util.Constants;
+import org.sunbird.common.util.ProjectUtil;
 
 import java.util.*;
 
@@ -27,7 +27,7 @@ public class HealthServiceImpl implements HealthService {
 
     @Override
     public SBApiResponse checkHealthStatus() throws Exception {
-        SBApiResponse response = createDefaultSBResponse(Constants.API_HEALTH_CHECK);
+        SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_HEALTH_CHECK);
         try {
             response.put(Constants.HEALTHY, true);
             List<Map<String, Object>> healthResults = new ArrayList<>();
@@ -68,17 +68,6 @@ public class HealthServiceImpl implements HealthService {
         }
         result.put(Constants.HEALTHY, res);
         ((List<Map<String, Object>>) response.get(Constants.CHECKS)).add(result);
-    }
-
-    private SBApiResponse createDefaultSBResponse(String api) {
-        SBApiResponse response = new SBApiResponse();
-        response.setId(api);
-        response.setVer(Constants.VER);
-        response.getParams().setResmsgid(UUID.randomUUID().toString());
-        response.getParams().setStatus(Constants.SUCCESS);
-        response.setResponseCode(HttpStatus.OK);
-        response.setTs(DateTime.now().toString());
-        return response;
     }
 
 }
