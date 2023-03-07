@@ -185,16 +185,15 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 						}).collect(Collectors.toList());
 				SBApiOrgSearchRequest orgSearchRequest = new SBApiOrgSearchRequest();
 				orgSearchRequest.getFilters().setId(orgIdList);
-
+				if(!ProjectUtil.isStringNullOREmpty((String) requestData.get(Constants.QUERY)))
+				{
+					orgSearchRequest.setQuery((String) requestData.get(Constants.QUERY));
+				}
 				Map<String, Object> orgSearchRequestBody = new HashMap<String, Object>() {
 					private static final long serialVersionUID = 1L;
 
 					{
 						put(Constants.REQUEST, orgSearchRequest);
-						if(!ProjectUtil.isStringNullOREmpty((String) requestData.get(Constants.QUERY)))
-						{
-							put(Constants.QUERY, requestData.get(Constants.QUERY));
-						}
 					}
 				};
 				Map<String, String> headers = new HashMap<String, String>();

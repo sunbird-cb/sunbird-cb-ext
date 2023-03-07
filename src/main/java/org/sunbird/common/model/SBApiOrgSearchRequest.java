@@ -3,6 +3,15 @@ package org.sunbird.common.model;
 public class SBApiOrgSearchRequest {
 	private SBApiOrgFilterRequest filters = new SBApiOrgFilterRequest();
 	private SBApiSortByRequest sort_by = new SBApiSortByRequest();
+	private String query;
+
+	public String getQuery() {
+		return query;
+	}
+
+	public void setQuery(String query) {
+		this.query = query;
+	}
 
 	public SBApiOrgFilterRequest getFilters() {
 		return filters;
