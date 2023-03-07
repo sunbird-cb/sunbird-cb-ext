@@ -631,6 +631,8 @@ public class Constants {
 	public static final Object CREATED = "Created";
 	public static final Object UPDATED = "Updated";
     public static final String QUERY = "query";
+	public static final String SORT_BY_KEYWORD = "sortBy";
+
 	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}

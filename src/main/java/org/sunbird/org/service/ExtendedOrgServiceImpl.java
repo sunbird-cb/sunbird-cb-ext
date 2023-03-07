@@ -1,13 +1,5 @@
 package org.sunbird.org.service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -23,6 +15,9 @@ import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.common.util.ProjectUtil;
 import org.sunbird.core.logger.CbExtLogger;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class ExtendedOrgServiceImpl implements ExtendedOrgService {
@@ -189,6 +184,7 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 				{
 					orgSearchRequest.setQuery((String) requestData.get(Constants.QUERY));
 				}
+				orgSearchRequest.setSortBy((Map<String, String>) requestData.get(Constants.SORT_BY_KEYWORD));
 				Map<String, Object> orgSearchRequestBody = new HashMap<String, Object>() {
 					private static final long serialVersionUID = 1L;
 
