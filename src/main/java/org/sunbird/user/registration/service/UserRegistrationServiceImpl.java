@@ -299,6 +299,10 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 			str.setLength(0);
 			str.append("Invalid email id");
 		}
+		if(StringUtils.isNotBlank(userRegInfo.getPhone()) && !isValidPhoneNumber(userRegInfo.getPhone())) {
+			str.setLength(0);
+			str.append("Invalid phone number");
+		}
 		return str.toString();
 	}
 
@@ -524,5 +528,12 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 		userReg.setOrganisationSubType(userRegInfo.getOrganisationSubType());
 		userReg.setSbRootOrgId(userRegInfo.getSbRootOrgId());
 		userReg.setSbOrgId(userRegInfo.getSbOrgId());
+	}
+	
+	private boolean isValidPhoneNumber(String phone) {
+		if (phone.matches("\\d{10}")) {
+			return true;
+		} else
+			return false;
 	}
 }
