@@ -65,9 +65,6 @@ public class CbExtServerProperties {
 	@Value("${es.host.list}")
 	private String esHostList;
 
-	@Value("${es.port}")
-	private String esPort;
-
 	@Value("${es.username}")
 	private String esUser;
 
@@ -347,9 +344,6 @@ public class CbExtServerProperties {
 	@Value("${sb.es.host.list}")
 	private String sbEsHostList;
 
-	@Value("${sb.es.port}")
-	private String sbEsPort;
-
 	@Value("${sb.es.username}")
 	private String sbEsUser;
 
@@ -604,14 +598,6 @@ public class CbExtServerProperties {
 
 	public void setEsHostList(String esHostList) {
 		this.esHostList = esHostList;
-	}
-
-	public String getEsPort() {
-		return esPort;
-	}
-
-	public void setEsPort(String esPort) {
-		this.esPort = esPort;
 	}
 
 	public String getEsUser() {
@@ -1359,14 +1345,6 @@ public class CbExtServerProperties {
 
 	public void setSbEsHostList(String sbEsHost) {
 		this.sbEsHostList = sbEsHostList;
-	}
-
-	public String getSbEsPort() {
-		return sbEsPort;
-	}
-
-	public void setSbEsPort(String sbEsPort) {
-		this.sbEsPort = sbEsPort;
 	}
 
 	public String getSbEsUser() {
