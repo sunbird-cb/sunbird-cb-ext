@@ -1,9 +1,21 @@
 package org.sunbird.common.model;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class SBApiOrgSearchRequest {
 	private SBApiOrgFilterRequest filters = new SBApiOrgFilterRequest();
-	private SBApiSortByRequest sort_by = new SBApiSortByRequest();
 
+	private Map<String, String> sortBy = new HashMap<>();
+	private String query;
+
+	public String getQuery() {
+		return query;
+	}
+
+	public void setQuery(String query) {
+		this.query = query;
+	}
 	public SBApiOrgFilterRequest getFilters() {
 		return filters;
 	}
@@ -12,11 +24,14 @@ public class SBApiOrgSearchRequest {
 		this.filters = filters;
 	}
 
-	public SBApiSortByRequest getSort_by() {
-		return sort_by;
+	public Map<String, String> getSortBy() {
+		return sortBy;
 	}
 
-	public void setSort_by(SBApiSortByRequest sort_by) {
-		this.sort_by = sort_by;
+	public void setSortBy(Map<String, String> sortBy) {
+		this.sortBy = sortBy;
 	}
+
+
+
 }
