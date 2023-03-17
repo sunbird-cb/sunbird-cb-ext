@@ -631,6 +631,8 @@ public class Constants {
 	public static final String DRAFT = "DRAFT";
 	public static final Object CREATED = "Created";
 	public static final Object UPDATED = "Updated";
+  public static final String QUERY = "query";
+	public static final String SORT_BY_KEYWORD = "sortBy";
 	public static final String HEALTHY = "healthy";
 	public static final String CHECKS = "checks";
 	public static final String CASSANDRA_DB = "cassandra db";
