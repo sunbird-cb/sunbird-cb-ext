@@ -35,6 +35,14 @@ public class Constants {
 	public static final String DEPARTMENT_NAME = "department_name";
 	public static final String UNIT_NAME = "unit_name";
 	public static final String LANGUAGES_KNOWN = "languages_known";
+	public static final String LANGUAGE = "language";
+	public static final String GRADUATION = "graduation";
+	public static final String POST_GRADUATION = "postGraduation";
+	public static final String INDUSTRY = "industry";
+	public static final String CADRE = "cadre";
+	public static final String MINISTRY = "ministry";
+	public static final String SERVICE = "service";
+	public static final String NATIONALITY = "nationality";
 	public static final String ORGANIZATION_LOCATION_COUNTRY = "organization_location_country";
 	public static final String ORGANIZATION_LOCATION_STATE = "organization_location_state";
 	public static final String ORGANIZATION_LOCATION_CITY = "organization_location_city";
@@ -126,6 +134,7 @@ public class Constants {
 	public static final String API_PROFILE_UPDATE = "api.profile.update";
 	public static final String API_GET_EXPLORE_COURSE_DETAIL = "api.explore.course";
 	public static final String API_REFRESH_EXPLORE_COURSE_DETAIL = "api.refresh.explore.course.list";
+	public static final String API_GET_MASTER_DATA = "api.get.master.data";
 
 	public static final String ORG_PROFILE_UPDATE = "org.profile.update";
 	public static final String ID = "id";
@@ -476,7 +485,6 @@ public class Constants {
 	public static final String SPV = "SPV";
 	public static final String TABLE_ORG_HIERARCHY = "org_hierarchy";
 	public static final String PARENT_MAP_ID = "parentMapId";
-	public static final String MINISTRY = "ministry";
 	public static final String SB_ORG_TYPE = "sbOrgType";
 	public static final String SB_ORG_ID = "sbOrgId";
 	public static final String MAP_ID = "mapId";
@@ -509,6 +517,8 @@ public class Constants {
 	public static final String X_AUTH_USER_ORG_ID = "x-authenticated-user-orgid";
 	public static final String X_AUTH_USER_ORG_NAME = "x-authenticated-user-orgname";
 	public static final String API_USER_SIGNUP = "api.user.signup";
+	public static final String API_POSITION_CREATE = "api.create.position";
+	public static final String API_POSITION_UPDATE = "api.update.position";
 	public static final String API_USER_BULK_UPLOAD = "api.user.bulk.upload";
 	public static final String API_USER_BULK_UPLOAD_STATUS = "api.user.bulk.upload.status";
 
@@ -579,6 +589,7 @@ public class Constants {
 	public static final String OPTION_ID = "optionId";
 
 	public static final String TABLE_USER_ASSESSMENT_DATA = "user_assessment_data";
+	public static final String TABLE_MASTER_DATA = "master_data";
 
 
 	public static final String USER_ID_DOESNT_EXIST = "User Id doesn't exist! Please supply a valid auth token";
@@ -620,6 +631,8 @@ public class Constants {
 	public static final List<String> USER_ENROLMENT_COMMON_FIELDS = Arrays.asList(STATUS, COMPLETION_PERCENTAGE);
 
 	public static final String CONTEXT_TYPE = "contextType";
+	public static final String CONTEXT_NAME = "contextName";
+	public static final String CONTEXT_DATA = "contextData";
 	public static final String CONTEXT_TYPE_ID = "contextTypeId";
 	public static final String ADDITIONAL_PARAMS = "additionalParams";
 	public static final String CONTEXT_STATUS = "contextStatus";
