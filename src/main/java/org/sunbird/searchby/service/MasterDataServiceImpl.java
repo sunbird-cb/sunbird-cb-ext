@@ -151,9 +151,7 @@ public class MasterDataServiceImpl implements MasterDataService {
                 Map<String, Object> propertyMap = new HashMap<>();
                 propertyMap.put(Constants.CONTEXT_TYPE.toLowerCase(), masterData.get(Constants.CONTEXT_TYPE));
                 List<Map<String, Object>> totalMasterData = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_MASTER_DATA, propertyMap, new ArrayList<>());
-                long currentMaxId = totalMasterData.size();
-                long nextId = currentMaxId + 1;
-                request.put(Constants.ID, Long.toString(nextId));
+                request.put(Constants.ID, Long.toString(totalMasterData.size() + 1));
                 request.put(Constants.CONTEXT_DATA, masterData.get(Constants.CONTEXT_DATA));
                 response = cassandraOperation.insertRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_MASTER_DATA, request);
                 if (!Constants.SUCCESS.equalsIgnoreCase((String) response.get(Constants.RESPONSE))) {
