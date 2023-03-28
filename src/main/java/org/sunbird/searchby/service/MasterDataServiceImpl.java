@@ -8,7 +8,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
-import org.sunbird.cache.RedisCacheMgr;
 import org.sunbird.cassandra.utils.CassandraOperation;
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
@@ -17,7 +16,6 @@ import org.sunbird.common.util.Constants;
 import org.sunbird.common.util.ProjectUtil;
 import org.sunbird.core.logger.CbExtLogger;
 import org.sunbird.searchby.model.PositionListResponse;
-import org.sunbird.searchby.model.FracCommonInfo;
 import org.sunbird.searchby.model.MasterData;
 import org.sunbird.workallocation.model.FracStatusInfo;
 
@@ -29,8 +27,6 @@ public class MasterDataServiceImpl implements MasterDataService {
     private CbExtLogger logger = new CbExtLogger(getClass().getName());
     @Autowired
     CbExtServerProperties cbExtServerProperties;
-    @Autowired
-    RedisCacheMgr redisCacheMgr;
     @Autowired
     ObjectMapper mapper;
     @Autowired
@@ -44,87 +40,57 @@ public class MasterDataServiceImpl implements MasterDataService {
         response.setStatusInfo(new FracStatusInfo());
         response.getStatusInfo().setStatusCode(HttpStatus.OK.value());
         try {
-            Map<String, List<MasterData>> positionMap = new HashMap<>();
-            String strPositionMap = redisCacheMgr.getCache(Constants.POSITIONS_CACHE_NAME);
-            if (!StringUtils.isEmpty(strPositionMap)) {
-                positionMap = mapper.readValue(strPositionMap, new TypeReference<Map<String, List<FracCommonInfo>>>() {
-                });
-            }
+            Map<String, String> headers = new HashMap<>();
+            HashMap<String, Object> reqBody = new HashMap<>();
+            headers = new HashMap<>();
+            headers.put(Constants.AUTHORIZATION, Constants.BEARER + userToken);
+            reqBody = new HashMap<>();
+            List<Map<String, Object>> searchList = new ArrayList<>();
+            Map<String, Object> compSearchObj = new HashMap<>();
+            compSearchObj.put(Constants.TYPE, Constants.POSITION.toUpperCase());
+            compSearchObj.put(Constants.FIELD, Constants.NAME);
+            compSearchObj.put(Constants.KEYWORD, StringUtils.EMPTY);
+            searchList.add(compSearchObj);
 
-            if (ObjectUtils.isEmpty(positionMap)
-                    || CollectionUtils.isEmpty(positionMap.get(Constants.POSITIONS_CACHE_NAME))) {
-                logger.info("Initializing / Refreshing the Cache value for key : " + Constants.POSITIONS_CACHE_NAME);
-                try {
-                    positionMap = updateDesignationDetails(userToken);
-                    response.setResponseData(positionMap.get(Constants.POSITIONS_CACHE_NAME));
-                } catch (Exception e) {
-                    logger.error(e);
-                    response.getStatusInfo().setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
-                    response.getStatusInfo().setErrorMessage(e.getMessage());
+            compSearchObj = new HashMap<String, Object>();
+            compSearchObj.put(Constants.TYPE, Constants.POSITION.toUpperCase());
+            compSearchObj.put(Constants.KEYWORD, Constants.VERIFIED);
+            compSearchObj.put(Constants.FIELD, Constants.STATUS);
+            searchList.add(compSearchObj);
+
+            reqBody.put(Constants.SEARCHES, searchList);
+
+            List<String> positionNameList = new ArrayList<String>();
+            Map<String, Object> propertyMap = new HashMap<>();
+            propertyMap.put(Constants.CONTEXT_TYPE.toLowerCase(), Constants.POSITION);
+            List<Map<String, Object>> listOfPosition = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
+                    Constants.TABLE_MASTER_DATA, propertyMap, new ArrayList<>());
+            List<MasterData> positionList = mapper.convertValue(listOfPosition, new TypeReference<List<MasterData>>() {
+            });
+            Map<String, Object> fracSearchRes = outboundRequestHandlerService.fetchResultUsingPost(
+                    cbExtServerProperties.getFracHost() + cbExtServerProperties.getFracSearchPath(), reqBody, headers);
+            List<Map<String, Object>> fracResponseList = (List<Map<String, Object>>) fracSearchRes
+                    .get(Constants.RESPONSE_DATA);
+            if (!CollectionUtils.isEmpty(fracResponseList)) {
+                for (Map<String, Object> respObj : fracResponseList) {
+                    if (!positionNameList.contains((String) respObj.get(Constants.CONTEXT_NAME.toLowerCase()))) {
+                        positionList.add(new MasterData((String) respObj.get(Constants.ID), Constants.POSITION,
+                                (String) respObj.get(Constants.NAME), (String) respObj.get(Constants.DESCRIPTION)));
+                        positionNameList.add((String) respObj.get(Constants.NAME));
+                    }
                 }
             } else {
-                response.setResponseData(positionMap.get(Constants.POSITIONS_CACHE_NAME));
+                Exception err = new Exception("Failed to get position info from FRAC API.");
+                logger.error(err);
             }
+            Map<String, List<MasterData>> positionMap = new HashMap<String, List<MasterData>>();
+            positionMap.put(Constants.POSITIONS_CACHE_NAME, positionList);
+            response.setResponseData(positionMap.get(Constants.POSITIONS_CACHE_NAME));
         } catch (Exception e) {
+            logger.error(e);
             response.getStatusInfo().setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
-
         return response;
-    }
-
-    private Map<String, List<MasterData>> updateDesignationDetails(String authUserToken) throws Exception {
-        Map<String, String> headers = new HashMap<>();
-        HashMap<String, Object> reqBody = new HashMap<>();
-        headers = new HashMap<>();
-        headers.put(Constants.AUTHORIZATION, Constants.BEARER + authUserToken);
-        reqBody = new HashMap<>();
-        List<Map<String, Object>> searchList = new ArrayList<>();
-        Map<String, Object> compSearchObj = new HashMap<>();
-        compSearchObj.put(Constants.TYPE, Constants.POSITION.toUpperCase());
-        compSearchObj.put(Constants.FIELD, Constants.NAME);
-        compSearchObj.put(Constants.KEYWORD, StringUtils.EMPTY);
-        searchList.add(compSearchObj);
-
-        compSearchObj = new HashMap<String, Object>();
-        compSearchObj.put(Constants.TYPE, Constants.POSITION.toUpperCase());
-        compSearchObj.put(Constants.KEYWORD, Constants.VERIFIED);
-        compSearchObj.put(Constants.FIELD, Constants.STATUS);
-        searchList.add(compSearchObj);
-
-        reqBody.put(Constants.SEARCHES, searchList);
-
-        List<String> positionNameList = new ArrayList<String>();
-        Map<String, Object> propertyMap = new HashMap<>();
-        propertyMap.put(Constants.CONTEXT_TYPE.toLowerCase(), Constants.POSITION);
-        List<Map<String, Object>> listOfPosition = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
-                Constants.TABLE_MASTER_DATA, propertyMap, new ArrayList<>());
-        List<MasterData> positionList = mapper.convertValue(listOfPosition, new TypeReference<List<MasterData>>() {
-        });
-        Map<String, Object> fracSearchRes = outboundRequestHandlerService.fetchResultUsingPost(
-                cbExtServerProperties.getFracHost() + cbExtServerProperties.getFracSearchPath(), reqBody, headers);
-        List<Map<String, Object>> fracResponseList = (List<Map<String, Object>>) fracSearchRes
-                .get(Constants.RESPONSE_DATA);
-        if (!CollectionUtils.isEmpty(fracResponseList)) {
-            for (Map<String, Object> respObj : fracResponseList) {
-                if (!positionNameList.contains((String) respObj.get(Constants.CONTEXT_NAME.toLowerCase()))) {
-                    positionList.add(new MasterData((String) respObj.get(Constants.ID), Constants.POSITION,
-                            (String) respObj.get(Constants.NAME), (String) respObj.get(Constants.DESCRIPTION)));
-                    positionNameList.add((String) respObj.get(Constants.NAME));
-                }
-            }
-        } else {
-            Exception err = new Exception("Failed to get position info from FRAC API.");
-            logger.error(err);
-            try {
-                logger.info("Received Response: " + (new ObjectMapper()).writeValueAsString(fracSearchRes));
-            } catch (Exception e) {
-            }
-            throw err;
-        }
-        Map<String, List<MasterData>> positionMap = new HashMap<String, List<MasterData>>();
-        positionMap.put(Constants.POSITIONS_CACHE_NAME, positionList);
-        redisCacheMgr.putCache(Constants.POSITIONS_CACHE_NAME, positionMap);
-        return positionMap;
     }
 
     public Map<String,Object> getMasterDataByType(String type) {
@@ -150,49 +116,10 @@ public class MasterDataServiceImpl implements MasterDataService {
             response.put(Constants.RESPONSE_CODE, HttpStatus.BAD_REQUEST);
             return response;
         }
-        Map<String,Object> result = constructResponse(listOfMasterData, type);
-        response.put(Constants.RESPONSE_CODE, HttpStatus.OK);
+        Map<String,Object> result = new HashMap<>();
+        result.put(type, listOfMasterData);
         response.put(Constants.RESULT, result);
         return response;
-    }
-
-    private Map<String, Object> constructResponse(List<Map<String, Object>> listOfMasterData, String contextType) {
-        Map<String,Object> result = new HashMap<>();
-        switch (contextType) {
-            case "graduation":
-                result.put("graduations",listOfMasterData);
-                break;
-            case "postGraduation":
-                result.put("postGraduations",listOfMasterData);
-                break;
-            case "designation":
-                result.put("designations",listOfMasterData);
-                break;
-            case "gradePay":
-                result.put("gradePay",listOfMasterData);
-                break;
-            case "cadre":
-                result.put("cadre",listOfMasterData);
-                break;
-            case "ministry":
-                result.put("ministries",listOfMasterData);
-                break;
-            case "service":
-                result.put("service",listOfMasterData);
-                break;
-            case "industry":
-                result.put("industries",listOfMasterData);
-                break;
-            case "language":
-                result.put("languages",listOfMasterData);
-                break;
-            case "nationality":
-                result.put("nationalities",listOfMasterData);
-                break;
-            default:
-                break;
-        }
-        return result;
     }
 
     public SBApiResponse upsertMasterData(Map<String,Object> requestObj) {
@@ -265,9 +192,6 @@ public class MasterDataServiceImpl implements MasterDataService {
         if (ObjectUtils.isEmpty(masterData.get(Constants.CONTEXT_NAME))) {
             params.add(Constants.CONTEXT_NAME);
         }
-        if (ObjectUtils.isEmpty(masterData.get(Constants.CONTEXT_DATA))) {
-            params.add(Constants.CONTEXT_DATA);
-        }
         if (!params.isEmpty()) {
             strBuilder.append("Invalid Request. Missing params - " + params);
         }
@@ -303,7 +227,6 @@ public class MasterDataServiceImpl implements MasterDataService {
             response.put(Constants.RESPONSE_CODE, HttpStatus.BAD_REQUEST);
             return response;
         }
-        response.put(Constants.RESPONSE_CODE, HttpStatus.OK);
         response.put(Constants.RESULT, transformed);
         return response;
     }
@@ -329,13 +252,13 @@ public class MasterDataServiceImpl implements MasterDataService {
             contextMap.put("name", contextName);
 
             switch (contextType) {
-                case "graduation":
+                case "graduations":
                     degrees.get("graduations").add(contextMap);
                     break;
-                case "postGraduation":
+                case "postGraduations":
                     degrees.get("postGraduations").add(contextMap);
                     break;
-                case "designation":
+                case "designations":
                     designations.get("designations").add(contextMap);
                     break;
                 case "gradePay":
@@ -344,13 +267,13 @@ public class MasterDataServiceImpl implements MasterDataService {
                 case "cadre":
                     govtOrg.get("cadre").add(contextMap);
                     break;
-                case "ministry":
+                case "ministries":
                     govtOrg.get("ministries").add(contextMap);
                     break;
                 case "service":
                     govtOrg.get("service").add(contextMap);
                     break;
-                case "industry":
+                case "industries":
                     industries.add(contextMap);
                     break;
                 default:

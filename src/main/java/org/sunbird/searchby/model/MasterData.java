@@ -1,21 +1,17 @@
 package org.sunbird.searchby.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 public class MasterData {
-    private String Id;
+    private String id;
     private String contextType;
-    @JsonProperty("contextname")
     private String contextName;
-    @JsonProperty("contextdata")
     private String contextData;
 
     public String getId() {
-        return Id;
+        return id;
     }
 
     public void setId(String id) {
-        Id = id;
+        this.id = id;
     }
 
     public String getContextType() {
@@ -46,7 +42,7 @@ public class MasterData {
     }
 
     public MasterData(String id, String contextType, String contextName, String contextData) {
-        Id = id;
+        this.id = id;
         this.contextType = contextType;
         this.contextName = contextName;
         this.contextData = contextData;
