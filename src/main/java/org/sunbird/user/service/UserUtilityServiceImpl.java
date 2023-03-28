@@ -223,6 +223,8 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		requestBody.put(Constants.FIRSTNAME, userRegistration.getFirstName());
 		requestBody.put(Constants.LASTNAME, userRegistration.getLastName());
 		requestBody.put(Constants.EMAIL_VERIFIED, true);
+		requestBody.put(Constants.PHONE, userRegistration.getPhone());
+		requestBody.put(Constants.PHONE_VERIFIED, true);
 		request.put(Constants.REQUEST, requestBody);
 		try {
 			Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPost(
@@ -260,8 +262,9 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		personalDetails.put(Constants.FIRSTNAME.toLowerCase(), userRegistration.getFirstName());
 		personalDetails.put(Constants.SURNAME, userRegistration.getLastName());
 		personalDetails.put(Constants.PRIMARY_EMAIL, userRegistration.getEmail());
+		personalDetails.put(Constants.MOBILE, userRegistration.getPhone());
+		personalDetails.put(Constants.PHONE_VERIFIED, true);
 		profileDetails.put(Constants.PERSONAL_DETAILS, personalDetails);
-
 		Map<String, Object> professionDetailObj = new HashMap<String, Object>();
 		professionDetailObj.put(Constants.ORGANIZATION_TYPE, Constants.GOVERNMENT);
 		if (StringUtils.isNotEmpty(userRegistration.getPosition())) {

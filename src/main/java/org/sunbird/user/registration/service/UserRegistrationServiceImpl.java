@@ -90,8 +90,10 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 		String errMsg = validateRegisterationPayload(userRegInfo);
 		if (StringUtils.isBlank(errMsg)) {
 			try {
-				if (isUserExist(userRegInfo.getEmail().toLowerCase())) {
+				if (isUserExist(Constants.EMAIL, userRegInfo.getEmail().toLowerCase())) {
 					errMsg = Constants.EMAIL_EXIST_ERROR;
+				} if (isUserExist(Constants.PHONE, userRegInfo.getPhone())) {
+					errMsg = Constants.PHONE_NUMBER_EXIST_ERROR;
 				} else {
 					// verify the given email exist in ES Server
 					UserRegistration regDocument = getUserRegistrationDocument(new HashMap<String, Object>() {
@@ -286,6 +288,9 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 		if (StringUtils.isBlank(userRegInfo.getSource())) {
 			errList.add("Source");
 		}
+		if(StringUtils.isBlank(userRegInfo.getPhone())) {
+			errList.add("Phone");
+		}
 		if (!errList.isEmpty()) {
 			str.append("Failed to Register User Details. Missing Params - [").append(errList.toString()).append("]");
 		}
@@ -294,8 +299,11 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 			str.setLength(0);
 			str.append("Invalid email id");
 		}
+		if(StringUtils.isNotBlank(userRegInfo.getPhone()) && !isValidPhoneNumber(userRegInfo.getPhone())) {
+			str.setLength(0);
+			str.append("Invalid phone number");
+		}
 		return str.toString();
-
 	}
 
 	private UserRegistration getUserRegistrationDocument(Map<String, Object> mustMatch) throws Exception {
@@ -324,6 +332,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 		userRegistration.setMapId(userRegInfo.getMapId());
 		userRegistration.setOrganisationType(userRegInfo.getOrganisationType());
 		userRegistration.setOrganisationSubType(userRegInfo.getOrganisationSubType());
+		userRegistration.setPhone(userRegInfo.getPhone());
 
 		if (StringUtils.isBlank(userRegInfo.getRegistrationCode())) {
 			userRegistration.setRegistrationCode(serverProperties.getUserRegCodePrefix() + "-"
@@ -352,13 +361,13 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 		return new SearchSourceBuilder().query(boolBuilder);
 	}
 
-	private boolean isUserExist(String email) {
+	private boolean isUserExist(String key, String value) {
 		// request body
 		SunbirdApiRequest requestObj = new SunbirdApiRequest();
 		Map<String, Object> reqMap = new HashMap<>();
 		reqMap.put(Constants.FILTERS, new HashMap<String, Object>() {
 			{
-				put(Constants.EMAIL, email);
+				put(key, value);
 			}
 		});
 		requestObj.setRequest(reqMap);
@@ -519,5 +528,12 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 		userReg.setOrganisationSubType(userRegInfo.getOrganisationSubType());
 		userReg.setSbRootOrgId(userRegInfo.getSbRootOrgId());
 		userReg.setSbOrgId(userRegInfo.getSbOrgId());
+	}
+	
+	private boolean isValidPhoneNumber(String phone) {
+		if (phone.matches("\\d{10}")) {
+			return true;
+		} else
+			return false;
 	}
 }
