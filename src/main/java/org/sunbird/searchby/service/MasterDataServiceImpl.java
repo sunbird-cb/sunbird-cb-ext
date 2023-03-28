@@ -308,7 +308,7 @@ public class MasterDataServiceImpl implements MasterDataService {
         return response;
     }
 
-    public static Map<String, Object> createDesiredResponse(List<Map<String, Object>> contexts) {
+    private Map<String, Object> createDesiredResponse(List<Map<String, Object>> contexts) {
         Map<String, Object> transformed = new HashMap<>();
         Map<String, List<Map<String, String>>> degrees = new HashMap<>();
         degrees.put("graduations", new ArrayList<>());
