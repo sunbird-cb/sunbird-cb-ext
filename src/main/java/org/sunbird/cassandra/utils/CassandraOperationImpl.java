@@ -305,15 +305,14 @@ public class CassandraOperationImpl implements CassandraOperation {
 	}
 
 	@Override
-	public List<Map<String, Object>> getRecordsWithInClause(String keyspaceName, String tableName,
-																List<Map<String, Object>> propertyMaps, List<String> fields) {
+	public List<Map<String, Object>> getRecordsWithInClause(String keyspaceName, String tableName, List<Map<String, Object>> propertyMaps, List<String> fields) {
 		Select.Where selectQuery = null;
 		List<Map<String, Object>> response = new ArrayList<>();
 		try {
 			if (CollectionUtils.isNotEmpty(fields)) {
 				selectQuery = QueryBuilder.select(fields.toArray(new String[fields.size()])).from(keyspaceName, tableName).where();
 			} else {
-				selectQuery = QueryBuilder.select().all().from(keyspaceName,tableName).where();
+				selectQuery = QueryBuilder.select().all().from(keyspaceName, tableName).where();
 			}
 			List<Object> values = new ArrayList<>();
 			String key = null;
