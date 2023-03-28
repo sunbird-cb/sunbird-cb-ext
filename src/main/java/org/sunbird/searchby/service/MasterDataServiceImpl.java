@@ -3,6 +3,8 @@ package org.sunbird.searchby.service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -20,11 +22,12 @@ import org.sunbird.searchby.model.MasterData;
 import org.sunbird.workallocation.model.FracStatusInfo;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class MasterDataServiceImpl implements MasterDataService {
 
-    private CbExtLogger logger = new CbExtLogger(getClass().getName());
+    private Logger logger = LoggerFactory.getLogger(getClass().getName());
     @Autowired
     CbExtServerProperties cbExtServerProperties;
     @Autowired
@@ -80,14 +83,11 @@ public class MasterDataServiceImpl implements MasterDataService {
                     }
                 }
             } else {
-                Exception err = new Exception("Failed to get position info from FRAC API.");
-                logger.error(err);
+                logger.info("Failed to get position info from FRAC API");
             }
-            Map<String, List<MasterData>> positionMap = new HashMap<String, List<MasterData>>();
-            positionMap.put(Constants.POSITIONS_CACHE_NAME, positionList);
-            response.setResponseData(positionMap.get(Constants.POSITIONS_CACHE_NAME));
+            response.setResponseData(positionList);
         } catch (Exception e) {
-            logger.error(e);
+            logger.error("Failed to get positions details");
             response.getStatusInfo().setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
         return response;
@@ -108,18 +108,32 @@ public class MasterDataServiceImpl implements MasterDataService {
                 return response;
             }
         } catch (Exception e) {
-            logger.info("Exception occurred while fetching details from the database");
             errMsg = "Exception occurred while fetching details from the database";
+            logger.error(errMsg);
         }
         if (StringUtils.isNotBlank(errMsg)) {
             response.put(Constants.ERROR_MESSAGE, errMsg);
             response.put(Constants.RESPONSE_CODE, HttpStatus.BAD_REQUEST);
             return response;
         }
-        Map<String,Object> result = new HashMap<>();
-        result.put(type, listOfMasterData);
-        response.put(Constants.RESULT, result);
+        List<Map<String, Object>> enrichResponse = enrichResponseBasedOnType(type, listOfMasterData);
+        if (!CollectionUtils.isEmpty(enrichResponse)) {
+            response.put(type, enrichResponse);
+        }
         return response;
+    }
+
+    private List<Map<String, Object>> enrichResponseBasedOnType(String type, List<Map<String, Object>> listOfMasterData) {
+        return listOfMasterData.stream()
+                .map(masterData -> {
+                    Map<String, Object> result = new HashMap<>();
+                    result.put(Constants.NAME, masterData.get(Constants.CONTEXT_NAME));
+                    if (Constants.NATIONALITIES.equalsIgnoreCase(type)) {
+                        result.put(Constants.COUNTRY_CODE, masterData.get(Constants.CONTEXT_DATA));
+                    }
+                    return result;
+                })
+                .collect(Collectors.toList());
     }
 
     public SBApiResponse upsertMasterData(Map<String,Object> requestObj) {
@@ -162,8 +176,8 @@ public class MasterDataServiceImpl implements MasterDataService {
                 }
             }
         } catch (Exception e) {
-            logger.info("Exception occurred while performing upsert operation " + e.getMessage());
             errMsg = "Exception occurred while performing upsert operation";
+            logger.error(errMsg, e);
         }
         if (StringUtils.isNotBlank(errMsg)) {
             response.getParams().setStatus(Constants.FAILED);
@@ -217,8 +231,8 @@ public class MasterDataServiceImpl implements MasterDataService {
             }
             transformed = createDesiredResponse(listOfMasterData);
         } catch (Exception e) {
-            logger.info("Exception occurred while fetching details from the database");
             errMsg = "Exception occurred while fetching details from the database";
+            logger.error(errMsg, e);
         }
         if (StringUtils.isNotBlank(errMsg)) {
             response.put(Constants.ERROR_MESSAGE, errMsg);

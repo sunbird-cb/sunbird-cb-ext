@@ -26,31 +26,26 @@ public class MasterDataController {
 
     @GetMapping("/getLanguages")
     public ResponseEntity<?> getLanguagesList() {
-        Map<String,Object> response = masterDataService.getMasterDataByType(Constants.LANGUAGES);
-        return new ResponseEntity<>(response.get(Constants.RESULT), HttpStatus.OK);
+        return new ResponseEntity<>(masterDataService.getMasterDataByType(Constants.LANGUAGES), HttpStatus.OK);
     }
 
     @GetMapping("/getNationalities")
     public ResponseEntity<?> getNationalitiesList() {
-        Map<String,Object> response = masterDataService.getMasterDataByType(Constants.NATIONALITIES);
-        return new ResponseEntity<>(response.get(Constants.RESULT), HttpStatus.OK);
+        return new ResponseEntity<>(masterDataService.getMasterDataByType(Constants.NATIONALITIES), HttpStatus.OK);
     }
     @GetMapping("/getIndustries")
     public ResponseEntity<?> getIndustriesList() {
-        Map<String,Object> response = masterDataService.getMasterDataByType(Constants.INDUSTRIES);
-        return new ResponseEntity<>(response.get(Constants.RESULT), HttpStatus.OK);
+        return new ResponseEntity<>(masterDataService.getMasterDataByType(Constants.INDUSTRIES), HttpStatus.OK);
     }
 
     @GetMapping("/getGraduations")
     public ResponseEntity<?> getGraduationsList() {
-        Map<String, Object> response = masterDataService.getMasterDataByType(Constants.GRADUATIONS);
-        return new ResponseEntity<>(response.get(Constants.RESULT), HttpStatus.OK);
+        return new ResponseEntity<>(masterDataService.getMasterDataByType(Constants.GRADUATIONS), HttpStatus.OK);
     }
 
     @GetMapping("/getPostGraduations")
     public ResponseEntity<?> getPostGraduationsList() {
-        Map<String, Object> response = masterDataService.getMasterDataByType(Constants.POST_GRADUATIONS);
-        return new ResponseEntity<>(response.get(Constants.RESULT), HttpStatus.OK);
+        return new ResponseEntity<>(masterDataService.getMasterDataByType(Constants.POST_GRADUATIONS), HttpStatus.OK);
     }
 
     @GetMapping("/getProfilePageMetaData")
@@ -61,32 +56,27 @@ public class MasterDataController {
 
     @GetMapping("/getMinistries")
     public ResponseEntity<?> getMinistriesList() {
-        Map<String, Object> response = masterDataService.getMasterDataByType(Constants.MINISTRIES);
-        return new ResponseEntity<>(response.get(Constants.RESULT), HttpStatus.OK);
+        return new ResponseEntity<>(masterDataService.getMasterDataByType(Constants.MINISTRIES), HttpStatus.OK);
     }
 
     @GetMapping("/getCadre")
     public ResponseEntity<?> getCadreList() {
-        Map<String, Object> response = masterDataService.getMasterDataByType(Constants.CADRE);
-        return new ResponseEntity<>(response.get(Constants.RESULT), HttpStatus.OK);
+        return new ResponseEntity<>(masterDataService.getMasterDataByType(Constants.CADRE), HttpStatus.OK);
     }
 
     @GetMapping("/getService")
     public ResponseEntity<?> getServiceList() {
-        Map<String, Object> response = masterDataService.getMasterDataByType(Constants.SERVICE);
-        return new ResponseEntity<>(response.get(Constants.RESULT), HttpStatus.OK);
+        return new ResponseEntity<>(masterDataService.getMasterDataByType(Constants.SERVICE), HttpStatus.OK);
     }
 
     @GetMapping("/getDesignation")
     public ResponseEntity<?> getDesignationList() {
-        Map<String, Object> response = masterDataService.getMasterDataByType(Constants.DESIGNATIONS);
-        return new ResponseEntity<>(response.get(Constants.RESULT), HttpStatus.OK);
+       return new ResponseEntity<>(masterDataService.getMasterDataByType(Constants.DESIGNATIONS), HttpStatus.OK);
     }
 
     @GetMapping("/getGradePay")
     public ResponseEntity<?> getGradePayList() {
-        Map<String, Object> response = masterDataService.getMasterDataByType(Constants.GRADE_PAY);
-        return new ResponseEntity<>(response.get(Constants.RESULT), HttpStatus.OK);
+        return new ResponseEntity<>(masterDataService.getMasterDataByType(Constants.GRADE_PAY), HttpStatus.OK);
     }
 
     @PostMapping("/upsert")

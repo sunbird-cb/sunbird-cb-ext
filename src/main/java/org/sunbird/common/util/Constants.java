@@ -146,6 +146,7 @@ public class Constants {
 	public static final String TOTAL_POSITION_FILLED = "totalPositionsFilled";
 	public static final String TOTAL_POSITION_VACANT = "totalPositionsVacant";
 	public static final String NAME = "name";
+	public static final String COUNTRY_CODE = "countryCode";
 	public static final String URL = "url";
 	public static final String DELETED = "deleted";
 	public static final String SCHEME_ID = "schemeId";
