@@ -238,9 +238,9 @@ public class MasterDataServiceImpl implements MasterDataService {
             response.put(Constants.ERROR_MESSAGE, errMsg);
             response.put(Constants.RESPONSE_CODE, HttpStatus.BAD_REQUEST);
             return response;
+        } else {
+            return transformed;
         }
-        response.put(Constants.RESULT, transformed);
-        return response;
     }
 
     private Map<String, Object> createDesiredResponse(List<Map<String, Object>> contexts) {

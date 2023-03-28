@@ -50,8 +50,7 @@ public class MasterDataController {
 
     @GetMapping("/getProfilePageMetaData")
     public ResponseEntity<?> getProfilePageMetaData() {
-        Map<String, Object> response = masterDataService.getProfilePageMetaData();
-        return new ResponseEntity<>(response.get(Constants.RESULT), HttpStatus.OK);
+        return new ResponseEntity<>(masterDataService.getProfilePageMetaData(), HttpStatus.OK);
     }
 
     @GetMapping("/getMinistries")
