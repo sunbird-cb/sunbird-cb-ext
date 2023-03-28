@@ -1,8 +1,5 @@
 package org.sunbird.searchby.service;
 
-import com.datastax.driver.core.ResultSet;
-import com.datastax.driver.core.querybuilder.QueryBuilder;
-import com.datastax.driver.core.querybuilder.Select;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang.StringUtils;
@@ -12,7 +9,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.sunbird.cache.RedisCacheMgr;
-import org.sunbird.cassandra.utils.CassandraConnectionManager;
 import org.sunbird.cassandra.utils.CassandraOperation;
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
@@ -20,7 +16,7 @@ import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.common.util.ProjectUtil;
 import org.sunbird.core.logger.CbExtLogger;
-import org.sunbird.searchby.model.FracApiResponseV2;
+import org.sunbird.searchby.model.PositionListResponse;
 import org.sunbird.searchby.model.FracCommonInfo;
 import org.sunbird.searchby.model.MasterData;
 import org.sunbird.workallocation.model.FracStatusInfo;
@@ -41,12 +37,10 @@ public class MasterDataServiceImpl implements MasterDataService {
     OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
     @Autowired
     CassandraOperation cassandraOperation;
-    @Autowired
-    CassandraConnectionManager cassandraConnectionManager;
 
     @Override
-    public FracApiResponseV2 getListPositions(String userToken) {
-        FracApiResponseV2 response = new FracApiResponseV2();
+    public PositionListResponse getListPositions(String userToken) {
+        PositionListResponse response = new PositionListResponse();
         response.setStatusInfo(new FracStatusInfo());
         response.getStatusInfo().setStatusCode(HttpStatus.OK.value());
         try {
@@ -133,34 +127,118 @@ public class MasterDataServiceImpl implements MasterDataService {
         return positionMap;
     }
 
-    @Override
-    public SBApiResponse create(Map<String, Object> request) {
+    public Map<String,Object> getMasterDataByType(String type) {
+        Map<String,Object> response = new HashMap<>();
+        String errMsg = null;
+        List<Map<String, Object>> listOfMasterData = null;
+        try {
+            Map<String, Object> propertyMap = new HashMap<>();
+            propertyMap.put(Constants.CONTEXT_TYPE.toLowerCase(), type);
+            listOfMasterData = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
+                    Constants.TABLE_MASTER_DATA, propertyMap, new ArrayList<>());
+            if (CollectionUtils.isEmpty(listOfMasterData)) {
+                response.put(Constants.ERROR_MESSAGE, "No details available inside db!");
+                response.put(Constants.RESPONSE_CODE, HttpStatus.BAD_REQUEST);
+                return response;
+            }
+        } catch (Exception e) {
+            logger.info("Exception occurred while fetching details from the database");
+            errMsg = "Exception occurred while fetching details from the database";
+        }
+        if (StringUtils.isNotBlank(errMsg)) {
+            response.put(Constants.ERROR_MESSAGE, errMsg);
+            response.put(Constants.RESPONSE_CODE, HttpStatus.BAD_REQUEST);
+            return response;
+        }
+        Map<String,Object> result = constructResponse(listOfMasterData, type);
+        response.put(Constants.RESPONSE_CODE, HttpStatus.OK);
+        response.put(Constants.RESULT, result);
+        return response;
+    }
+
+    private Map<String, Object> constructResponse(List<Map<String, Object>> listOfMasterData, String contextType) {
+        Map<String,Object> result = new HashMap<>();
+        switch (contextType) {
+            case "graduation":
+                result.put("graduations",listOfMasterData);
+                break;
+            case "postGraduation":
+                result.put("postGraduations",listOfMasterData);
+                break;
+            case "designation":
+                result.put("designations",listOfMasterData);
+                break;
+            case "gradePay":
+                result.put("gradePay",listOfMasterData);
+                break;
+            case "cadre":
+                result.put("cadre",listOfMasterData);
+                break;
+            case "ministry":
+                result.put("ministries",listOfMasterData);
+                break;
+            case "service":
+                result.put("service",listOfMasterData);
+                break;
+            case "industry":
+                result.put("industries",listOfMasterData);
+                break;
+            case "language":
+                result.put("languages",listOfMasterData);
+                break;
+            case "nationality":
+                result.put("nationalities",listOfMasterData);
+                break;
+            default:
+                break;
+        }
+        return result;
+    }
+
+    public SBApiResponse upsertMasterData(Map<String,Object> requestObj) {
         SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_POSITION_CREATE);
-        String errMsg = validateRequest(request);
+        Map<String, Object> masterData = (Map<String, Object>) requestObj.get(Constants.REQUEST);
+        String errMsg = validateUpsertRequest(masterData);
         if (!StringUtils.isEmpty(errMsg)) {
             response.getParams().setErrmsg(errMsg);
             response.setResponseCode(HttpStatus.BAD_REQUEST);
             return response;
         }
         try {
-            Map<String, Object> requestBody = (Map<String, Object>) request.get(Constants.REQUEST);
-            Select select = QueryBuilder.select().max(Constants.ID).from(Constants.TABLE_MASTER_DATA)
-                    .where(QueryBuilder.eq(Constants.CONTEXT_TYPE, requestBody.get(Constants.CONTEXT_TYPE))).allowFiltering();
-            ResultSet result = cassandraConnectionManager.getSession(Constants.SUNBIRD_KEY_SPACE_NAME).execute(select);
-            String currentMaxIdString = result.one().getString(0);
-            long currentMaxId = Long.parseLong(currentMaxIdString);
-            long nextId = currentMaxId + 1;
-            requestBody.put(Constants.ID, Long.toString(nextId));
-            response = cassandraOperation.insertRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_MASTER_DATA, requestBody);
-            if (!Constants.SUCCESS.equalsIgnoreCase((String) response.get(Constants.RESPONSE))) {
-                errMsg = String.format("Failed to Create position");
-                response.setResponseCode(HttpStatus.BAD_REQUEST);
-                response.getParams().setErrmsg(errMsg);
-                return response;
+            Map<String, Object> request = new HashMap<>();
+            request.put(Constants.CONTEXT_TYPE.toLowerCase(), masterData.get(Constants.CONTEXT_TYPE));
+            request.put(Constants.CONTEXT_NAME.toLowerCase(), masterData.get(Constants.CONTEXT_NAME));
+            List<Map<String, Object>> listOfMasterData = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_MASTER_DATA, request, new ArrayList<>());
+
+            if (!CollectionUtils.isEmpty(listOfMasterData)) {
+                Map<String, Object> updateRequest = new HashMap<>();
+                updateRequest.put(Constants.CONTEXT_DATA, masterData.get(Constants.CONTEXT_DATA));
+                Map<String, Object> updateResponse = cassandraOperation.updateRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_MASTER_DATA, updateRequest, request);
+                if (updateResponse != null
+                        && !Constants.SUCCESS.equalsIgnoreCase((String) updateResponse.get(Constants.RESPONSE))) {
+                    errMsg = String.format("Failed to update details");
+                    response.getParams().setErrmsg(errMsg);
+                    return response;
+                }
+            } else {
+                Map<String, Object> propertyMap = new HashMap<>();
+                propertyMap.put(Constants.CONTEXT_TYPE.toLowerCase(), masterData.get(Constants.CONTEXT_TYPE));
+                List<Map<String, Object>> totalMasterData = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_MASTER_DATA, propertyMap, new ArrayList<>());
+                long currentMaxId = totalMasterData.size();
+                long nextId = currentMaxId + 1;
+                request.put(Constants.ID, Long.toString(nextId));
+                request.put(Constants.CONTEXT_DATA, masterData.get(Constants.CONTEXT_DATA));
+                response = cassandraOperation.insertRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_MASTER_DATA, request);
+                if (!Constants.SUCCESS.equalsIgnoreCase((String) response.get(Constants.RESPONSE))) {
+                    errMsg = String.format("Failed to Create position");
+                    response.setResponseCode(HttpStatus.BAD_REQUEST);
+                    response.getParams().setErrmsg(errMsg);
+                    return response;
+                }
             }
         } catch (Exception e) {
-            logger.info("Exception occurred while performing create operation " + e.getMessage());
-            errMsg = "Exception occurred while performing create operation";
+            logger.info("Exception occurred while performing upsert operation " + e.getMessage());
+            errMsg = "Exception occurred while performing upsert operation";
         }
         if (StringUtils.isNotBlank(errMsg)) {
             response.getParams().setStatus(Constants.FAILED);
@@ -174,47 +252,20 @@ public class MasterDataServiceImpl implements MasterDataService {
         return response;
     }
 
-    @Override
-    public SBApiResponse update(Map<String, Object> request, String id, String type) {
-        SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_POSITION_UPDATE);
-        String errMsg = validateUpdateRequest(request, id, type);
-        if (!StringUtils.isEmpty(errMsg)) {
-            response.getParams().setErrmsg(errMsg);
-            response.setResponseCode(HttpStatus.BAD_REQUEST);
-            return response;
-        }
-        Map<String, Object> requestBody = (Map<String, Object>) request.get(Constants.REQUEST);
-        Map<String, Object> compositeKey = new HashMap<>();
-        compositeKey.put(Constants.ID, id);
-        compositeKey.put(Constants.CONTEXT_TYPE, type);
-        Map<String, Object> updateResponse = cassandraOperation.updateRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_MASTER_DATA, requestBody, compositeKey);
-        if (updateResponse != null
-                && !Constants.SUCCESS.equalsIgnoreCase((String) updateResponse.get(Constants.RESPONSE))) {
-            errMsg = String.format("Failed to update details for Id : %s", requestBody.get(Constants.ID));
-            response.getParams().setErrmsg(errMsg);
-            return response;
-        }
-        response.setResponseCode(HttpStatus.OK);
-        response.getResult().put(Constants.RESPONSE, Constants.SUCCESS);
-        response.getParams().setStatus(Constants.SUCCESS);
-        return response;
-    }
-
-    private String validateRequest(Map<String, Object> requestData) {
+    private String validateUpsertRequest(Map<String,Object> masterData) {
         List<String> params = new ArrayList<String>();
         StringBuilder strBuilder = new StringBuilder();
-        Map<String, Object> request = (Map<String, Object>) requestData.get(Constants.REQUEST);
-        if (ObjectUtils.isEmpty(request)) {
-            strBuilder.append("Request object is empty.");
+        if (ObjectUtils.isEmpty(masterData)) {
+            strBuilder.append("Model object is empty.");
             return strBuilder.toString();
         }
-        if (StringUtils.isEmpty((String) request.get(Constants.CONTEXT_TYPE))) {
+        if (StringUtils.isEmpty((String) masterData.get(Constants.CONTEXT_TYPE))) {
             params.add(Constants.CONTEXT_TYPE);
         }
-        if (ObjectUtils.isEmpty(request.get(Constants.CONTEXT_NAME))) {
+        if (ObjectUtils.isEmpty(masterData.get(Constants.CONTEXT_NAME))) {
             params.add(Constants.CONTEXT_NAME);
         }
-        if (ObjectUtils.isEmpty(request.get(Constants.CONTEXT_DATA))) {
+        if (ObjectUtils.isEmpty(masterData.get(Constants.CONTEXT_DATA))) {
             params.add(Constants.CONTEXT_DATA);
         }
         if (!params.isEmpty()) {
@@ -223,60 +274,93 @@ public class MasterDataServiceImpl implements MasterDataService {
         return strBuilder.toString();
     }
 
-    private String validateUpdateRequest(Map<String, Object> requestData, String id, String type) {
-        List<String> params = new ArrayList<String>();
-        StringBuilder strBuilder = new StringBuilder();
-        Map<String, Object> request = (Map<String, Object>) requestData.get(Constants.REQUEST);
-        if (ObjectUtils.isEmpty(request)) {
-            strBuilder.append("Request object is empty.");
-            return strBuilder.toString();
-        }
-        if (StringUtils.isEmpty(id)) {
-            params.add(Constants.ID);
-        }
-        if (ObjectUtils.isEmpty(type)) {
-            params.add(Constants.TYPE);
-        }
-        if (!params.isEmpty()) {
-            strBuilder.append("Missing request params - " + params);
-        }
-        return strBuilder.toString();
-    }
-
-    public SBApiResponse getMasterDataByType(String type) {
-        SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_GET_MASTER_DATA);
+    public Map<String,Object> getProfilePageMetaData() {
+        Map<String,Object> response = new HashMap<>();
         String errMsg = null;
-        if (StringUtils.isEmpty(type)) {
-            errMsg = "Type can not be empty";
-            response.setResponseCode(HttpStatus.BAD_REQUEST);
-            response.getParams().setErrmsg(errMsg);
-            return response;
-        }
-        List<Map<String, Object>> listOfMasterData = null;
+        Map<String, Object> transformed = null;
         try {
-            Map<String, Object> propertyMap = new HashMap<>();
-            propertyMap.put(Constants.CONTEXT_TYPE.toLowerCase(), type);
-            listOfMasterData = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
-                    Constants.TABLE_MASTER_DATA, propertyMap, new ArrayList<>());
+            String[] contextTypes = cbExtServerProperties.getContextTypes();
+            List<Map<String, Object>> listProperty = new ArrayList<>();
+            for (String contextType : contextTypes) {
+                Map<String, Object> properties = new HashMap<>();
+                properties.put(Constants.CONTEXT_TYPE.toLowerCase(), contextType);
+                listProperty.add(properties);
+            }
+            List<Map<String, Object>> listOfMasterData = cassandraOperation.getRecordsWithInClause(Constants.KEYSPACE_SUNBIRD,
+                    Constants.TABLE_MASTER_DATA, listProperty, new ArrayList<>());
             if (CollectionUtils.isEmpty(listOfMasterData)) {
-                errMsg = String.format("No details available inside db!");
-                response.getParams().setErrmsg(errMsg);
+                response.put(Constants.ERROR_MESSAGE, "No details available inside db!");
+                response.put(Constants.RESPONSE_CODE, HttpStatus.BAD_REQUEST);
                 return response;
             }
+            transformed = createDesiredResponse(listOfMasterData);
         } catch (Exception e) {
             logger.info("Exception occurred while fetching details from the database");
             errMsg = "Exception occurred while fetching details from the database";
         }
         if (StringUtils.isNotBlank(errMsg)) {
-            response.getParams().setStatus(Constants.FAILED);
-            response.getParams().setErrmsg(errMsg);
-            response.setResponseCode(HttpStatus.BAD_REQUEST);
+            response.put(Constants.ERROR_MESSAGE, errMsg);
+            response.put(Constants.RESPONSE_CODE, HttpStatus.BAD_REQUEST);
             return response;
         }
-        response.setResponseCode(HttpStatus.OK);
-        response.getResult().put(Constants.RESPONSE, Constants.SUCCESS);
-        response.getResult().put(Constants.CONTENT, listOfMasterData);
-        response.getParams().setStatus(Constants.SUCCESS);
+        response.put(Constants.RESPONSE_CODE, HttpStatus.OK);
+        response.put(Constants.RESULT, transformed);
         return response;
+    }
+
+    public static Map<String, Object> createDesiredResponse(List<Map<String, Object>> contexts) {
+        Map<String, Object> transformed = new HashMap<>();
+        Map<String, List<Map<String, String>>> degrees = new HashMap<>();
+        degrees.put("graduations", new ArrayList<>());
+        degrees.put("postGraduations", new ArrayList<>());
+        Map<String, List<Map<String, String>>> designations = new HashMap<>();
+        designations.put("designations", new ArrayList<>());
+        designations.put("gradePay", new ArrayList<>());
+        Map<String, List<Map<String, String>>> govtOrg = new HashMap<>();
+        govtOrg.put("cadre", new ArrayList<>());
+        govtOrg.put("ministries", new ArrayList<>());
+        govtOrg.put("service", new ArrayList<>());
+        List<Map<String, String>> industries = new ArrayList<>();
+
+        for (Map<String, Object> context : contexts) {
+            String contextType = (String) context.get(Constants.CONTEXT_TYPE);
+            String contextName = (String) context.get(Constants.CONTEXT_NAME);
+            Map<String, String> contextMap = new HashMap<>();
+            contextMap.put("name", contextName);
+
+            switch (contextType) {
+                case "graduation":
+                    degrees.get("graduations").add(contextMap);
+                    break;
+                case "postGraduation":
+                    degrees.get("postGraduations").add(contextMap);
+                    break;
+                case "designation":
+                    designations.get("designations").add(contextMap);
+                    break;
+                case "gradePay":
+                    designations.get("gradePay").add(contextMap);
+                    break;
+                case "cadre":
+                    govtOrg.get("cadre").add(contextMap);
+                    break;
+                case "ministry":
+                    govtOrg.get("ministries").add(contextMap);
+                    break;
+                case "service":
+                    govtOrg.get("service").add(contextMap);
+                    break;
+                case "industry":
+                    industries.add(contextMap);
+                    break;
+                default:
+                    break;
+            }
+        }
+        transformed.put("degrees", degrees);
+        transformed.put("designations", designations);
+        transformed.put("govtOrg", govtOrg);
+        transformed.put("industries", industries);
+        return transformed;
     }
 }

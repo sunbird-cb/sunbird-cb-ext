@@ -431,6 +431,9 @@ public class CbExtServerProperties {
 	@Value("${kafka.topics.user.assessment.submit}")
 	private String assessmentSubmitTopic;
 
+	@Value("${metaData.contextTypes}")
+	private String[] ContextTypes;
+
 
 	public String getAssessmentSubmitTopic() {
 		return assessmentSubmitTopic;
@@ -1573,5 +1576,13 @@ public class CbExtServerProperties {
 
 	public void setEsUserReportIncludeFields(String esUserReportIncludeFields) {
 		this.esUserReportIncludeFields = esUserReportIncludeFields;
+	}
+
+	public String[] getContextTypes() {
+		return ContextTypes;
+	}
+
+	public void setContextTypes(String[] contextTypes) {
+		ContextTypes = contextTypes;
 	}
 }

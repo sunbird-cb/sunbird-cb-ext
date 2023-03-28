@@ -6,84 +6,92 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.util.Constants;
-import org.sunbird.searchby.model.FracApiResponseV2;
+import org.sunbird.searchby.model.PositionListResponse;
 import org.sunbird.searchby.service.MasterDataServiceImpl;
+
 import java.util.Map;
 
 @RestController
+@RequestMapping("/masterData/v1")
 public class MasterDataController {
 
     @Autowired
     private MasterDataServiceImpl masterDataService;
 
-    @GetMapping("/v1/getPositions")
+    @GetMapping("/positions")
     public ResponseEntity<?> getPositionsList(@RequestHeader(Constants.X_AUTH_TOKEN) String userToken) {
-        FracApiResponseV2 response = masterDataService.getListPositions(userToken);
+        PositionListResponse response = masterDataService.getListPositions(userToken);
         return new ResponseEntity<>(response, HttpStatus.valueOf(response.getStatusInfo().getStatusCode()));
     }
 
-    @GetMapping("/v1/getLanguage")
+    @GetMapping("/getLanguages")
     public ResponseEntity<?> getLanguagesList() {
-        SBApiResponse response = masterDataService.getMasterDataByType(Constants.LANGUAGE);
-        return new ResponseEntity<>(response, response.getResponseCode());
+        Map<String,Object> response = masterDataService.getMasterDataByType(Constants.LANGUAGE);
+        return new ResponseEntity<>(response.get(Constants.RESULT), (HttpStatus) response.get(Constants.RESPONSE_CODE));
     }
 
-    @GetMapping("/v1/getNationalities")
+    @GetMapping("/getNationalities")
     public ResponseEntity<?> getNationalitiesList() {
-        SBApiResponse response = masterDataService.getMasterDataByType(Constants.NATIONALITY);
-        return new ResponseEntity<>(response, response.getResponseCode());
+        Map<String,Object> response = masterDataService.getMasterDataByType(Constants.NATIONALITY);
+        return new ResponseEntity<>(response.get(Constants.RESULT), (HttpStatus) response.get(Constants.RESPONSE_CODE));
     }
-
-    @GetMapping("/v1/getIndustries")
+    @GetMapping("/getIndustries")
     public ResponseEntity<?> getIndustriesList() {
-        SBApiResponse response = masterDataService.getMasterDataByType(Constants.INDUSTRY);
-        return new ResponseEntity<>(response, response.getResponseCode());
+        Map<String,Object> response = masterDataService.getMasterDataByType(Constants.INDUSTRY);
+        return new ResponseEntity<>(response.get(Constants.RESULT), (HttpStatus) response.get(Constants.RESPONSE_CODE));
     }
 
-    @GetMapping("/v1/getGraduations")
+    @GetMapping("/getGraduations")
     public ResponseEntity<?> getGraduationsList() {
-        SBApiResponse response = masterDataService.getMasterDataByType(Constants.GRADUATION);
-        return new ResponseEntity<>(response, response.getResponseCode());
+        Map<String, Object> response = masterDataService.getMasterDataByType(Constants.GRADUATION);
+        return new ResponseEntity<>(response.get(Constants.RESULT), (HttpStatus) response.get(Constants.RESPONSE_CODE));
     }
 
-    @GetMapping("/v1/getPostGraduations")
+    @GetMapping("/getPostGraduations")
     public ResponseEntity<?> getPostGraduationsList() {
-        SBApiResponse response = masterDataService.getMasterDataByType(Constants.POST_GRADUATION);
-        return new ResponseEntity<>(response, response.getResponseCode());
+        Map<String, Object> response = masterDataService.getMasterDataByType(Constants.POST_GRADUATION);
+        return new ResponseEntity<>(response.get(Constants.RESULT), (HttpStatus) response.get(Constants.RESPONSE_CODE));
     }
 
-    @GetMapping("/v1/getMinistries")
+    @GetMapping("/getProfilePageMetaData")
+    public ResponseEntity<?> getProfilePageMetaData() {
+        Map<String, Object> response = masterDataService.getProfilePageMetaData();
+        return new ResponseEntity<>(response.get(Constants.RESULT), (HttpStatus) response.get(Constants.RESPONSE_CODE));
+    }
+
+    @GetMapping("/getMinistries")
     public ResponseEntity<?> getMinistriesList() {
-        SBApiResponse response = masterDataService.getMasterDataByType(Constants.MINISTRY);
-        return new ResponseEntity<>(response, response.getResponseCode());
+        Map<String, Object> response = masterDataService.getMasterDataByType(Constants.MINISTRY);
+        return new ResponseEntity<>(response.get(Constants.RESULT), (HttpStatus) response.get(Constants.RESPONSE_CODE));
     }
 
-    @GetMapping("/v1/getCadre")
+    @GetMapping("/getCadre")
     public ResponseEntity<?> getCadreList() {
-        SBApiResponse response = masterDataService.getMasterDataByType(Constants.CADRE);
-        return new ResponseEntity<>(response, response.getResponseCode());
+        Map<String, Object> response = masterDataService.getMasterDataByType(Constants.CADRE);
+        return new ResponseEntity<>(response.get(Constants.RESULT), (HttpStatus) response.get(Constants.RESPONSE_CODE));
     }
 
-    @GetMapping("/v1/getService")
+    @GetMapping("/getService")
     public ResponseEntity<?> getServiceList() {
-        SBApiResponse response = masterDataService.getMasterDataByType(Constants.SERVICE);
-        return new ResponseEntity<>(response, response.getResponseCode());
+        Map<String, Object> response = masterDataService.getMasterDataByType(Constants.SERVICE);
+        return new ResponseEntity<>(response.get(Constants.RESULT), (HttpStatus) response.get(Constants.RESPONSE_CODE));
     }
-    @GetMapping("/v1/getDesignation")
+
+    @GetMapping("/getDesignation")
     public ResponseEntity<?> getDesignationList() {
-        SBApiResponse response = masterDataService.getMasterDataByType(Constants.DESIGNATION);
-        return new ResponseEntity<>(response, response.getResponseCode());
+        Map<String, Object> response = masterDataService.getMasterDataByType(Constants.DESIGNATION);
+        return new ResponseEntity<>(response.get(Constants.RESULT), (HttpStatus) response.get(Constants.RESPONSE_CODE));
     }
 
-    @PostMapping("/v1/create")
-    public ResponseEntity<?> create(@RequestBody Map<String, Object> request) {
-        SBApiResponse response = masterDataService.create(request);
-        return new ResponseEntity<>(response, response.getResponseCode());
+    @GetMapping("/getGradePay")
+    public ResponseEntity<?> getGradePayList() {
+        Map<String, Object> response = masterDataService.getMasterDataByType(Constants.GRADE_PAY);
+        return new ResponseEntity<>(response.get(Constants.RESULT), (HttpStatus) response.get(Constants.RESPONSE_CODE));
     }
 
-    @PatchMapping("/v1/update")
-    public ResponseEntity<?> update(@RequestBody Map<String, Object> request, @RequestParam String id, @RequestParam String type) {
-        SBApiResponse response = masterDataService.update(request, id, type);
+    @PostMapping("/upsert")
+    public ResponseEntity<?> upsertMasterData(@RequestBody Map<String,Object> request) {
+        SBApiResponse response = masterDataService.upsertMasterData(request);
         return new ResponseEntity<>(response, response.getResponseCode());
     }
 }

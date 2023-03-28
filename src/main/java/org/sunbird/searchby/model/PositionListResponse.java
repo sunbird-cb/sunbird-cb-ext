@@ -4,7 +4,7 @@ import org.sunbird.workallocation.model.FracStatusInfo;
 
 import java.util.List;
 
-public class FracApiResponseV2 {
+public class PositionListResponse {
 	private FracStatusInfo statusInfo;
 	private List<MasterData> responseData;
 

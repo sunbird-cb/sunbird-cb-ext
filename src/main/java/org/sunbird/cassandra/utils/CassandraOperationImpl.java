@@ -303,4 +303,32 @@ public class CassandraOperationImpl implements CassandraOperation {
 		logger.info(String.format("Competed Oeration in %s seconds",
 				TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - startTime)));
 	}
+
+	@Override
+	public List<Map<String, Object>> getRecordsWithInClause(String keyspaceName, String tableName,
+																List<Map<String, Object>> propertyMaps, List<String> fields) {
+		Select.Where selectQuery = null;
+		List<Map<String, Object>> response = new ArrayList<>();
+		try {
+			if (CollectionUtils.isNotEmpty(fields)) {
+				selectQuery = QueryBuilder.select(fields.toArray(new String[fields.size()])).from(keyspaceName, tableName).where();
+			} else {
+				selectQuery = QueryBuilder.select().all().from(keyspaceName,tableName).where();
+			}
+			List<Object> values = new ArrayList<>();
+			String key = null;
+			for (Map<String, Object> propertyMap : propertyMaps) {
+				for (Map.Entry<String, Object> entry : propertyMap.entrySet()) {
+					key = entry.getKey();
+					values.add(entry.getValue());
+				}
+			}
+			selectQuery.and(QueryBuilder.in(key, values.toArray()));
+			ResultSet results = connectionManager.getSession(keyspaceName).execute(selectQuery);
+			response = CassandraUtil.createResponse(results);
+		} catch (Exception e) {
+			logger.error(Constants.EXCEPTION_MSG_FETCH + tableName + " : " + e.getMessage(), e);
+		}
+		return response;
+	}
 }
