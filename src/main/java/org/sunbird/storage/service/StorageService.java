@@ -8,4 +8,5 @@ import org.sunbird.common.model.SBApiResponse;
 public interface StorageService {
 	public SBApiResponse uploadFile(MultipartFile file, String containerName) throws IOException;
 	public SBApiResponse deleteFile(String fileName, String containerName);
+	SBApiResponse downloadFile(String fileName);
 }

@@ -17,6 +17,15 @@ public class UserRegistration extends UserRegistrationInfo {
 	private String userId;
 	private String userName;
 	private String proposedDeptName;
+	private int contactNumber;
+
+	public int getContactNumber() {
+		return contactNumber;
+	}
+
+	public void setContactNumber(int contactNumber) {
+		this.contactNumber = contactNumber;
+	}
 
 	public String getWfId() {
 		return wfId;

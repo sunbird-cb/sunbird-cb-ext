@@ -2,6 +2,7 @@ package org.sunbird.common.util;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -11,7 +12,9 @@ import org.springframework.http.HttpStatus;
 import org.sunbird.common.exceptions.ProjectCommonException;
 import org.sunbird.common.exceptions.ResponseCode;
 import org.sunbird.common.model.SBApiResponse;
+import org.sunbird.common.model.SunbirdApiRequest;
 import org.sunbird.common.model.SunbirdApiRespParam;
+import org.sunbird.core.exception.ApplicationLogicError;
 import org.sunbird.core.logger.CbExtLogger;
 
 /**
@@ -107,4 +110,40 @@ public class ProjectUtil {
 		return Stream.of(words.trim().split("\\s")).filter(word -> word.length() > 0)
 				.map(word -> word.substring(0, 1).toUpperCase() + word.substring(1)).collect(Collectors.joining(" "));
 	}
+
+	/**
+	 * Check the email id is valid or not
+	 *
+	 * @param email String
+	 * @return Boolean
+	 */
+
+	public static Boolean validateEmailPattern(String email) {
+		String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\." + "[a-zA-Z0-9_+&*-]+)*@" + "(?:[a-zA-Z0-9-]+\\.)+[a-z"
+				+ "A-Z]{2,7}$";
+		Boolean retValue = Boolean.FALSE;
+		Pattern pat = Pattern.compile(emailRegex);
+		if (pat.matcher(email).matches()) {
+			return Boolean.TRUE;
+		}
+		return Boolean.FALSE;
+	}
+
+	/**
+	 * Check the contact number is valid or not
+	 *
+	 * @param contactNumber String
+	 * @return Boolean
+	 */
+
+	public static Boolean validateContactPattern(String contactNumber) {
+		String contactNumberRegex = "^\\d{10}$";
+		Boolean retValue = Boolean.FALSE;
+		Pattern pat = Pattern.compile(contactNumberRegex);
+		if (pat.matcher(contactNumber).matches()) {
+			retValue = Boolean.TRUE;
+		}
+		return retValue;
+	}
+
 }

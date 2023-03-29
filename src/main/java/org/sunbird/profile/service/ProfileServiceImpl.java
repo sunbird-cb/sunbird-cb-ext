@@ -46,6 +46,7 @@ import org.sunbird.common.util.IndexerService;
 import org.sunbird.common.util.ProjectUtil;
 import org.sunbird.common.util.PropertiesCache;
 import org.sunbird.core.cipher.DecryptServiceImpl;
+import org.sunbird.core.producer.Producer;
 import org.sunbird.org.service.ExtendedOrgService;
 import org.sunbird.storage.service.StorageServiceImpl;
 import org.sunbird.user.report.UserReportService;
@@ -93,6 +94,9 @@ public class ProfileServiceImpl implements ProfileService {
 
 	@Autowired
 	DecryptServiceImpl decryptService;
+
+	@Autowired
+	Producer kafkaProducer;
 
 	private Logger log = LoggerFactory.getLogger(getClass().getName());
 
@@ -658,10 +662,13 @@ public class ProfileServiceImpl implements ProfileService {
 					Constants.TABLE_USER_BULK_UPLOAD, uploadedFile);
 
 			if (!Constants.SUCCESS.equalsIgnoreCase((String) insertResponse.get(Constants.RESPONSE))) {
-				setErrorData(response, "Failed to update databse with user bulk upload file details.");
+				setErrorData(response, "Failed to update database with user bulk upload file details.");
 				return response;
 			}
-
+			else
+			{
+				kafkaProducer.push(serverConfig.getUserBulkUploadTopic(), uploadedFile);
+			}
 			response.getParams().setStatus(Constants.SUCCESSFUL);
 			response.setResponseCode(HttpStatus.OK);
 			response.getResult().putAll(uploadedFile);

@@ -98,6 +98,26 @@ public class StorageServiceImpl implements StorageService {
 		}
 	}
 
+	@Override
+	public SBApiResponse downloadFile(String fileName) {
+		SBApiResponse response = new SBApiResponse();
+		response.setId(Constants.API_FILE_DOWNLOAD);
+		try {
+			String objectKey = serverProperties.getBulkUploadContainerName() + "/" + fileName;
+			storageService.download(serverProperties.getCloudContainerName(), objectKey, "/tmp/",
+					Option.apply(Boolean.FALSE));
+			response.getParams().setStatus(Constants.SUCCESSFUL);
+			response.setResponseCode(HttpStatus.OK);
+			return response;
+		} catch (Exception e) {
+			logger.error("Failed to download the file: " + fileName + ", Exception: ", e);
+			response.getParams().setStatus(Constants.FAILED);
+			response.getParams().setErrmsg("Failed to download the file. Exception: " + e.getMessage());
+			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+			return response;
+		}
+	}
+
 	protected void finalize() {
 		try {
 			if (storageService != null) {

@@ -44,4 +44,8 @@ public interface UserRegistrationService {
 	 * @param registrationCode - User Registration Code
 	 */
 	public void initiateCreateUserFlow(String registrationCode);
+
+    Boolean emailValidation(String email);
+
+	Boolean isPreApprovedDomain(String email);
 }

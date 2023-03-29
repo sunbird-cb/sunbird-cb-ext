@@ -36,4 +36,10 @@ public interface UserUtilityService {
 			Map<String, Map<String, String>> userInfoMap);
 	
 	public void enrichUserInfo(List<String> fields, Map<String, Map<String, String>> userInfoMap);
+
+	boolean isUserExist(String email);
+
+	boolean validateIfUserContactAlreadyExists(int phone);
+
+	Boolean isDomainAccepted(String email);
 }

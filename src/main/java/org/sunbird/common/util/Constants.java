@@ -123,6 +123,7 @@ public class Constants {
 	public static final String API_BUDGET_SCHEME_HISTORY_READ = "api.budget.scheme.history.read";
 	public static final String API_FILE_UPLOAD = "api.file.upload";
 	public static final String API_FILE_DELETE = "api.file.delete";
+	public static final String API_FILE_DOWNLOAD = "api.file.download";
 	public static final String API_PROFILE_UPDATE = "api.profile.update";
 	public static final String API_GET_EXPLORE_COURSE_DETAIL = "api.explore.course";
 	public static final String API_REFRESH_EXPLORE_COURSE_DETAIL = "api.refresh.explore.course.list";
@@ -637,6 +638,9 @@ public class Constants {
 	public static final String REDIS_CACHE = "redis cache";
 	public static final String QUERY = "query";
 	public static final String SORT_BY_KEYWORD = "sortBy";
+	public static final String LOCAL_BASE_PATH= "/tmp/";
+	public static final String USER_CREATION_FAILED = "User Creation Failed";
+
 	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}
