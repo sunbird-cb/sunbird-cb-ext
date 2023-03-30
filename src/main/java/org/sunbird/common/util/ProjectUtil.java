@@ -146,4 +146,12 @@ public class ProjectUtil {
 		return retValue;
 	}
 
+	public static Boolean validateFirstName( String firstName ) {
+		return firstName.matches( "^[a-zA-Z]+(([\\'][a-zA-Z])?[a-zA-Z]*)*$" );
+	}
+
+	public static Boolean validateLastName( String lastName ) {
+		return lastName.matches( "[a-zA-Z]*" );
+	}
+
 }

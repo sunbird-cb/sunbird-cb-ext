@@ -1327,7 +1327,7 @@ public class ProfileServiceImpl implements ProfileService {
 					strStatus = Constants.STATUS_ENROLLED;
 					break;
 				case 1:
-					strStatus = Constants.STAUTS_IN_PROGRESS;
+					strStatus = Constants.STATUS_IN_PROGRESS;
 					break;
 				case 2:
 					strStatus = Constants.STATUS_COMPLETED;

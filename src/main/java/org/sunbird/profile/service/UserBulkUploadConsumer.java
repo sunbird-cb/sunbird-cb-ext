@@ -30,8 +30,8 @@ public class UserBulkUploadConsumer {
 				});
 				}
 				else {
-					logger.error("The Switch for this property is off/Invalid Kafka Msg",
-							new Exception("The Switch for this property is off/Invalid Kafka Msg"));
+					logger.error("Invalid Kafka Msg",
+							new Exception("Invalid Kafka Msg"));
 				}
 		} catch (Exception e) {
 			logger.error(e);
