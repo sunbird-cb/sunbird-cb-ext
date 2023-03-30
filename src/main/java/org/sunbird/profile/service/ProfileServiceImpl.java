@@ -665,15 +665,12 @@ public class ProfileServiceImpl implements ProfileService {
 				setErrorData(response, "Failed to update database with user bulk upload file details.");
 				return response;
 			}
-			else
-			{
-				kafkaProducer.push(serverConfig.getUserBulkUploadTopic(), uploadedFile);
-			}
 			response.getParams().setStatus(Constants.SUCCESSFUL);
 			response.setResponseCode(HttpStatus.OK);
 			response.getResult().putAll(uploadedFile);
 
 			sendBulkUploadNotification(orgId, orgName, (String) uploadResponse.getResult().get(Constants.URL));
+			kafkaProducer.push(serverConfig.getUserBulkUploadTopic(), uploadedFile);
 		} catch (Exception e) {
 			setErrorData(response,
 					String.format("Failed to process user bulk upload request. Error: ", e.getMessage()));
