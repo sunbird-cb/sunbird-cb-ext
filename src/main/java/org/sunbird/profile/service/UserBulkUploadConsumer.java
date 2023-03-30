@@ -25,7 +25,9 @@ public class UserBulkUploadConsumer {
 		String value = data.value();
 		try {
 			if (StringUtils.isNoneBlank(value)) {
-						userBulkUploadService.initiateUserBulkUploadProcess(value);
+				CompletableFuture.runAsync(() -> {
+					userBulkUploadService.initiateUserBulkUploadProcess(value);
+				});
 				}
 				else {
 					logger.error("The Switch for this property is off/Invalid Kafka Msg",
