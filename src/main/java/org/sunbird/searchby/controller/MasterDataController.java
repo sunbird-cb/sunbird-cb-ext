@@ -4,9 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.sunbird.common.model.FracApiResponse;
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.util.Constants;
-import org.sunbird.searchby.model.PositionListResponse;
 import org.sunbird.searchby.service.MasterDataServiceImpl;
 
 import java.util.Map;
@@ -20,7 +20,7 @@ public class MasterDataController {
 
     @GetMapping("/positions")
     public ResponseEntity<?> getPositionsList(@RequestHeader(Constants.X_AUTH_TOKEN) String userToken) {
-        PositionListResponse response = masterDataService.getListPositions(userToken);
+        FracApiResponse response = masterDataService.getListPositions(userToken);
         return new ResponseEntity<>(response, HttpStatus.valueOf(response.getStatusInfo().getStatusCode()));
     }
 

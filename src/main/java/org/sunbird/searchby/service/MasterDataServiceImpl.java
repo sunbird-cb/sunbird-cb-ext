@@ -11,13 +11,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.sunbird.cassandra.utils.CassandraOperation;
+import org.sunbird.common.model.FracApiResponse;
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.common.util.ProjectUtil;
-import org.sunbird.core.logger.CbExtLogger;
-import org.sunbird.searchby.model.PositionListResponse;
+import org.sunbird.searchby.model.FracCommonInfo;
 import org.sunbird.searchby.model.MasterData;
 import org.sunbird.workallocation.model.FracStatusInfo;
 
@@ -38,8 +38,8 @@ public class MasterDataServiceImpl implements MasterDataService {
     CassandraOperation cassandraOperation;
 
     @Override
-    public PositionListResponse getListPositions(String userToken) {
-        PositionListResponse response = new PositionListResponse();
+    public FracApiResponse getListPositions(String userToken) {
+        FracApiResponse response = new FracApiResponse();
         response.setStatusInfo(new FracStatusInfo());
         response.getStatusInfo().setStatusCode(HttpStatus.OK.value());
         try {
@@ -85,7 +85,14 @@ public class MasterDataServiceImpl implements MasterDataService {
             } else {
                 logger.info("Failed to get position info from FRAC API");
             }
-            response.setResponseData(positionList);
+            List<FracCommonInfo> positions = new ArrayList<>();
+            if (!CollectionUtils.isEmpty(positionList)) {
+                positionList.forEach(position -> {
+                    FracCommonInfo commonResponse = new FracCommonInfo(position.getId(), position.getContextName(), position.getContextData());
+                    positions.add(commonResponse);
+                });
+            }
+            response.setResponseData(positions);
         } catch (Exception e) {
             logger.error("Failed to get positions details");
             response.getStatusInfo().setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
