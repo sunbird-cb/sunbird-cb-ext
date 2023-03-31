@@ -45,7 +45,7 @@ public interface CassandraOperation {
 	 * @return List consisting of fetched records
 	 */
 	List<Map<String, Object>> getRecordsByProperties(String keyspaceName, String tableName,
-			Map<String, Object> propertyMap, List<String> fields);
+													 Map<String, Object> propertyMap, List<String> fields);
 
 	/**
 	 * @param keyspaceName Keyspace name
@@ -66,7 +66,7 @@ public interface CassandraOperation {
 	 * @return Response consisting of update query status
 	 */
 	Map<String, Object> updateRecord(String keyspaceName, String tableName, Map<String, Object> updateAttributes,
-			Map<String, Object> compositeKey);
+									 Map<String, Object> compositeKey);
 
 	/**
 	 * To get count of all records
@@ -78,13 +78,15 @@ public interface CassandraOperation {
 	public Long getRecordCount(String keyspace, String table);
 
 	public Map<String, Object> getRecordsByProperties(String keyspaceName, String tableName,
-			Map<String, Object> propertyMap, List<String> fields, String key);
+													  Map<String, Object> propertyMap, List<String> fields, String key);
 
 	public Map<String, Object> getRecordsByPropertiesWithPagination(String keyspaceName, String tableName,
-			Map<String, Object> propertyMap, List<String> fields, int limit, String updatedOn, String key);
+																	Map<String, Object> propertyMap, List<String> fields, int limit, String updatedOn, String key);
 
 	List<Map<String, Object>> searchByWhereClause(String keyspace, String tableName, List<String> fields, Date date);
 
 	public void getAllRecords(String keyspace, String table, List<String> fields, String key,
-			Map<String, Map<String, String>> objectInfo);
+							  Map<String, Map<String, String>> objectInfo);
+
+	List<Map<String, Object>> getRecordsWithInClause(String keyspaceName, String tableName, List<Map<String, Object>> propertyMaps, List<String> fields);
 }
