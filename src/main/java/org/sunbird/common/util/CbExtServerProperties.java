@@ -434,6 +434,9 @@ public class CbExtServerProperties {
 	@Value("${kafka.topics.user.bulk.upload}")
 	private String userBulkUploadTopic;
 
+	@Value("${metaData.contextTypes}")
+	private String[] ContextTypes;
+
 
 	public String getAssessmentSubmitTopic() {
 		return assessmentSubmitTopic;
@@ -1584,5 +1587,13 @@ public class CbExtServerProperties {
 
 	public void setUserBulkUploadTopic(String userBulkUploadTopic) {
 		this.userBulkUploadTopic = userBulkUploadTopic;
+	}
+
+	public String[] getContextTypes() {
+		return ContextTypes;
+	}
+
+	public void setContextTypes(String[] contextTypes) {
+		ContextTypes = contextTypes;
 	}
 }
