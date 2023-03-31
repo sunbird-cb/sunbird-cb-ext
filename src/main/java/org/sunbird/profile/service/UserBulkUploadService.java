@@ -118,7 +118,7 @@ public class UserBulkUploadService {
 						userRegistration.setFirstName(nextRow.getCell(0).getStringCellValue());
 						userRegistration.setLastName(nextRow.getCell(1).getStringCellValue());
 						userRegistration.setEmail(nextRow.getCell(2).getStringCellValue());
-						userRegistration.setContactNumber((int) nextRow.getCell(3).getNumericCellValue());
+						userRegistration.setContactNumber((int)nextRow.getCell(3).getNumericCellValue());
 						List<String> errList = validateEmailContactAndDomain(userRegistration);
 						totalRecordsCount++;
 						Cell statusCell= nextRow.getCell(16);
@@ -198,7 +198,8 @@ public class UserBulkUploadService {
 		if(nextRow.getCell(9)!=null && nextRow.getCell(9).getStringCellValue().equalsIgnoreCase("Y"))
 		{
 			roles.add(Constants.CONTENT_REVIEWER);
-		}if(nextRow.getCell(10)!=null && nextRow.getCell(10).getStringCellValue().equalsIgnoreCase("Y"))
+		}
+		if(nextRow.getCell(10)!=null && nextRow.getCell(10).getStringCellValue().equalsIgnoreCase("Y"))
 		{
 			roles.add(Constants.CONTENT_PUBLISHER);
 		}
