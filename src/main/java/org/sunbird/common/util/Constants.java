@@ -643,8 +643,14 @@ public class Constants {
 	public static final String TOTAL_RECORDS = "totalRecords";
 	public static final String SUCCESSFUL_RECORDS_COUNT = "successfulRecordsCount";
     public static final String FAILED_RECORDS_COUNT = "failedRecordsCount";
+    public static final String MDO_ADMIN = "MDO_ADMIN";
+	public static final String CONTENT_CREATOR = "CONTENT_CREATOR";
+	public static final String CONTENT_REVIEWER = "CONTENT_REVIEWER";
+	public static final String CONTENT_PUBLISHER = "CONTENT_PUBLISHER";
+	public static final String CBP_ADMIN = "CBP_ADMIN";
 
-    private Constants() {
+
+	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}
 

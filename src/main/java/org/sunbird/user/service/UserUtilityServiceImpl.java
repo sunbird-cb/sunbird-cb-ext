@@ -278,7 +278,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 				props.getSbUrl() + props.getLmsUserUpdatePath(), request, ProjectUtil.getDefaultHeaders());
 		if (Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
 			retValue = assignRole(userRegistration.getSbRootOrgId(), userRegistration.getUserId(),
-					userRegistration.toMininumString());
+					userRegistration.toMininumString(), userRegistration.getRoles());
 			if (retValue) {
 				retValue = createNodeBBUser(userRegistration);
 			}
@@ -287,15 +287,18 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		return retValue;
 	}
 
-	public boolean assignRole(String sbOrgId, String userId, String objectDetails) {
+	public boolean assignRole(String sbOrgId, String userId, String objectDetails, List<String> roles) {
 		boolean retValue = false;
 		Map<String, Object> request = new HashMap<>();
 		Map<String, Object> requestBody = new HashMap<String, Object>();
 		requestBody.put(Constants.ORGANIZATION_ID, sbOrgId);
 		requestBody.put(Constants.USER_ID, userId);
-		requestBody.put(Constants.ROLES, Arrays.asList(Constants.PUBLIC));
+		if(!roles.isEmpty())
+			requestBody.put(Constants.ROLES, roles);
+		else
+			requestBody.put(Constants.ROLES, Arrays.asList(Constants.PUBLIC));
 		request.put(Constants.REQUEST, requestBody);
-		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPost(
+		Map<String, Object> readData = outboundRequestHandlerService.fetchResultUsingPost(
 				props.getSbUrl() + props.getSbAssignRolePath(), request, ProjectUtil.getDefaultHeaders());
 		if (Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
 			retValue = true;
@@ -443,7 +446,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 
 	@Override
 	public void getUserDetailsFromDB(List<String> userIds, List<String> fields,
-			Map<String, Map<String, String>> userInfoMap) {
+									 Map<String, Map<String, String>> userInfoMap) {
 		Map<String, Object> propertyMap = new HashMap<>();
 		propertyMap.put(Constants.STATUS, 1);
 

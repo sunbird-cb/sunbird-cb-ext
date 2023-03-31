@@ -134,6 +134,7 @@ public class UserBulkUploadService {
 						if (errList.isEmpty()) {
 							userRegistration.setProposedDeptName(nextRow.getCell(5).getStringCellValue());
 							userRegistration.setOrgName(nextRow.getCell(6).getStringCellValue());
+							userRegistration.setRoles(addRolesIfApplicable(nextRow));
 							boolean isUserCreated = userUtilityService.createUser(userRegistration);
 							if (isUserCreated) {
 								noOfSuccessfulRecords++;
@@ -182,6 +183,34 @@ public class UserBulkUploadService {
 			fis.close();
 			file.delete();
 		}
+	}
+
+	private List<String> addRolesIfApplicable(Row nextRow) {
+		List<String> roles = new ArrayList<>();
+		if(nextRow.getCell(7)!=null && nextRow.getCell(7).getStringCellValue().equalsIgnoreCase("Y"))
+		{
+			roles.add(Constants.MDO_ADMIN);
+		}
+		if(nextRow.getCell(8)!=null && nextRow.getCell(8).getStringCellValue().equalsIgnoreCase("Y"))
+		{
+			roles.add(Constants.CONTENT_CREATOR);
+		}
+		if(nextRow.getCell(9)!=null && nextRow.getCell(9).getStringCellValue().equalsIgnoreCase("Y"))
+		{
+			roles.add(Constants.CONTENT_REVIEWER);
+		}if(nextRow.getCell(10)!=null && nextRow.getCell(10).getStringCellValue().equalsIgnoreCase("Y"))
+		{
+			roles.add(Constants.CONTENT_PUBLISHER);
+		}
+		if(nextRow.getCell(11)!=null && nextRow.getCell(11).getStringCellValue().equalsIgnoreCase("Y"))
+		{
+			roles.add(Constants.CBP_ADMIN);
+		}
+		if(nextRow.getCell(15)!=null && nextRow.getCell(15).getStringCellValue().equalsIgnoreCase("Y"))
+		{
+			roles.add(Constants.PUBLIC);
+		}
+		return roles;
 	}
 
 	private List<String> validateEmailContactAndDomain(UserRegistration userRegistration) {
