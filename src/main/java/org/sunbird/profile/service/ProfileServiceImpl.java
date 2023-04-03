@@ -656,7 +656,6 @@ public class ProfileServiceImpl implements ProfileService {
 			uploadedFile.put(Constants.STATUS, Constants.INITIATED_CAPITAL);
 			uploadedFile.put(Constants.COMMENT, StringUtils.EMPTY);
 			uploadedFile.put(Constants.CREATED_BY, userId);
-			uploadedFile.put(Constants.ORG_NAME, orgName);
 
 			SBApiResponse insertResponse = cassandraOperation.insertRecord(Constants.DATABASE,
 					Constants.TABLE_USER_BULK_UPLOAD, uploadedFile);
@@ -670,6 +669,7 @@ public class ProfileServiceImpl implements ProfileService {
 			response.getResult().putAll(uploadedFile);
 
 			sendBulkUploadNotification(orgId, orgName, (String) uploadResponse.getResult().get(Constants.URL));
+			uploadedFile.put(Constants.ORG_NAME, orgName);
 			kafkaProducer.push(serverConfig.getUserBulkUploadTopic(), uploadedFile);
 		} catch (Exception e) {
 			setErrorData(response,

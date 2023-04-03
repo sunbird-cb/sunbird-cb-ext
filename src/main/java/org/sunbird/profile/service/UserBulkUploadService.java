@@ -104,7 +104,7 @@ public class UserBulkUploadService {
 		try
 		{
 			file = new File(Constants.LOCAL_BASE_PATH + fileName);
-			if (file.exists()) {
+			if (file.exists() && file.length()>0) {
 				fis = new FileInputStream(file);
 				wb = new XSSFWorkbook(fis);
 				XSSFSheet sheet = wb.getSheetAt(0);
@@ -122,7 +122,6 @@ public class UserBulkUploadService {
 						userRegistration.setContactNumber((int)nextRow.getCell(3).getNumericCellValue());
 						userRegistration.setOrgName(orgName);
 						List<String> errList = validateEmailContactAndDomain(userRegistration);
-						totalRecordsCount++;
 						Cell statusCell= nextRow.getCell(4);
 						Cell errorDetails = nextRow.getCell(5);
 						if (statusCell == null)
@@ -133,6 +132,7 @@ public class UserBulkUploadService {
 						{
 							errorDetails = nextRow.createCell(5);
 						}
+						totalRecordsCount++;
 						if (errList.isEmpty()) {
 							boolean isUserCreated = userUtilityService.createUser(userRegistration);
 							if (isUserCreated) {
@@ -150,23 +150,12 @@ public class UserBulkUploadService {
 							errorDetails.setCellValue(errList.toString());
 						}
 					}
-				}
-				FileOutputStream fileOut = new FileOutputStream(file);
-				wb.write(fileOut);
-				fileOut.close();
-				SBApiResponse uploadResponse = storageService.uploadFile(file, serverProperties.getBulkUploadContainerName());
-				if (!HttpStatus.OK.equals(uploadResponse.getResponseCode())) {
-					logger.info(String.format("Failed to upload file. Error: %s",
-							uploadResponse.getParams().getErrmsg()));
-					updateUserBulkUploadStatus(rootOrgId, identifier, Constants.FAILED.toUpperCase(), totalRecordsCount, noOfSuccessfulRecords, failedRecordsCount);
-				}
-				else {
-					if (failedRecordsCount == 0) {
-						updateUserBulkUploadStatus(rootOrgId, identifier, Constants.SUCCESSFUL.toUpperCase(), totalRecordsCount, noOfSuccessfulRecords, failedRecordsCount);
-					} else {
-						updateUserBulkUploadStatus(rootOrgId, identifier, Constants.FAILED.toUpperCase(), totalRecordsCount, noOfSuccessfulRecords, failedRecordsCount);
+					else
+					{
+						break;
 					}
 				}
+				uploadTheUpdatedFileAndUpdateUserBulkUploadStatusAndRecordCount(rootOrgId, identifier, file, wb, totalRecordsCount, noOfSuccessfulRecords, failedRecordsCount);
 			} else {
 				logger.info("Error in Process Bulk Upload : The File is not downloaded/present");
 				updateUserBulkUploadStatus(rootOrgId, identifier, Constants.FAILED.toUpperCase(), totalRecordsCount, noOfSuccessfulRecords, failedRecordsCount);
@@ -181,6 +170,25 @@ public class UserBulkUploadService {
 			wb.close();
 			fis.close();
 			file.delete();
+		}
+	}
+
+	private void uploadTheUpdatedFileAndUpdateUserBulkUploadStatusAndRecordCount(String rootOrgId, String identifier, File file, XSSFWorkbook wb, int totalRecordsCount, int noOfSuccessfulRecords, int failedRecordsCount) throws IOException {
+		FileOutputStream fileOut = new FileOutputStream(file);
+		wb.write(fileOut);
+		fileOut.close();
+		SBApiResponse uploadResponse = storageService.uploadFile(file, serverProperties.getBulkUploadContainerName());
+		if (!HttpStatus.OK.equals(uploadResponse.getResponseCode())) {
+			logger.info(String.format("Failed to upload file. Error: %s",
+					uploadResponse.getParams().getErrmsg()));
+			updateUserBulkUploadStatus(rootOrgId, identifier, Constants.FAILED.toUpperCase(), totalRecordsCount, noOfSuccessfulRecords, failedRecordsCount);
+		}
+		else {
+			if (failedRecordsCount == 0 && totalRecordsCount == noOfSuccessfulRecords) {
+				updateUserBulkUploadStatus(rootOrgId, identifier, Constants.SUCCESSFUL.toUpperCase(), totalRecordsCount, noOfSuccessfulRecords, failedRecordsCount);
+			} else {
+				updateUserBulkUploadStatus(rootOrgId, identifier, Constants.FAILED.toUpperCase(), totalRecordsCount, noOfSuccessfulRecords, failedRecordsCount);
+			}
 		}
 	}
 
