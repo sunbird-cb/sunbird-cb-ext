@@ -184,7 +184,7 @@ public class UserBulkUploadService {
 			updateUserBulkUploadStatus(rootOrgId, identifier, Constants.FAILED.toUpperCase(), totalRecordsCount, noOfSuccessfulRecords, failedRecordsCount);
 		}
 		else {
-			if (failedRecordsCount == 0 && totalRecordsCount == noOfSuccessfulRecords) {
+			if (failedRecordsCount == 0 && totalRecordsCount == noOfSuccessfulRecords && totalRecordsCount>=1) {
 				updateUserBulkUploadStatus(rootOrgId, identifier, Constants.SUCCESSFUL.toUpperCase(), totalRecordsCount, noOfSuccessfulRecords, failedRecordsCount);
 			} else {
 				updateUserBulkUploadStatus(rootOrgId, identifier, Constants.FAILED.toUpperCase(), totalRecordsCount, noOfSuccessfulRecords, failedRecordsCount);
