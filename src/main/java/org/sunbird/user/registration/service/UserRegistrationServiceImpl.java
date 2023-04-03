@@ -90,6 +90,8 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 			try {
 				if (userUtilityService.isUserExist(userRegInfo.getEmail().toLowerCase())) {
 					errMsg = Constants.EMAIL_EXIST_ERROR;
+				} if (isUserExist(Constants.PHONE, userRegInfo.getPhone())) {
+					errMsg = Constants.PHONE_NUMBER_EXIST_ERROR;
 				} else {
 					// verify the given email exist in ES Server
 					UserRegistration regDocument = getUserRegistrationDocument(new HashMap<String, Object>() {
@@ -284,6 +286,9 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 		if (StringUtils.isBlank(userRegInfo.getSource())) {
 			errList.add("Source");
 		}
+		if(StringUtils.isBlank(userRegInfo.getPhone())) {
+			errList.add("Phone");
+		}
 		if (!errList.isEmpty()) {
 			str.append("Failed to Register User Details. Missing Params - [").append(errList.toString()).append("]");
 		}
@@ -292,8 +297,11 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 			str.setLength(0);
 			str.append("Invalid email id");
 		}
+		if(StringUtils.isNotBlank(userRegInfo.getPhone()) && !isValidPhoneNumber(userRegInfo.getPhone())) {
+			str.setLength(0);
+			str.append("Invalid phone number");
+		}
 		return str.toString();
-
 	}
 
 	private UserRegistration getUserRegistrationDocument(Map<String, Object> mustMatch) throws Exception {
@@ -322,6 +330,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 		userRegistration.setMapId(userRegInfo.getMapId());
 		userRegistration.setOrganisationType(userRegInfo.getOrganisationType());
 		userRegistration.setOrganisationSubType(userRegInfo.getOrganisationSubType());
+		userRegistration.setPhone(userRegInfo.getPhone());
 
 		if (StringUtils.isBlank(userRegInfo.getRegistrationCode())) {
 			userRegistration.setRegistrationCode(serverProperties.getUserRegCodePrefix() + "-"
@@ -348,6 +357,66 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 			boolBuilder.must(QueryBuilders.termQuery(entry.getKey() + ".raw", entry.getValue()));
 		}
 		return new SearchSourceBuilder().query(boolBuilder);
+	}
+
+	private boolean isUserExist(String key, String value) {
+		// request body
+		SunbirdApiRequest requestObj = new SunbirdApiRequest();
+		Map<String, Object> reqMap = new HashMap<>();
+		reqMap.put(Constants.FILTERS, new HashMap<String, Object>() {
+			{
+				put(key, value);
+			}
+		});
+		requestObj.setRequest(reqMap);
+
+		HashMap<String, String> headersValue = new HashMap<>();
+		headersValue.put(Constants.CONTENT_TYPE, "application/json");
+		headersValue.put(Constants.AUTHORIZATION, serverProperties.getSbApiKey());
+
+		try {
+			String url = serverProperties.getSbUrl() + serverProperties.getUserSearchEndPoint();
+
+			Map<String, Object> response = outboundRequestHandlerService.fetchResultUsingPost(url, requestObj,
+					headersValue);
+			if (response != null && "OK".equalsIgnoreCase((String) response.get("responseCode"))) {
+				Map<String, Object> map = (Map<String, Object>) response.get("result");
+				if (map.get("response") != null) {
+					Map<String, Object> responseObj = (Map<String, Object>) map.get("response");
+					int count = (int) responseObj.get(Constants.COUNT);
+					if (count == 0)
+						return false;
+					else
+						return true;
+				}
+			}
+		} catch (Exception e) {
+			throw new ApplicationLogicError("Sunbird Service ERROR: ", e);
+		}
+		return true;
+	}
+
+	/**
+	 * Check the email id is valid or not
+	 * 
+	 * @param email String
+	 * @return Boolean
+	 */
+	public Boolean emailValidation(String email) {
+		String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\." + "[a-zA-Z0-9_+&*-]+)*@" + "(?:[a-zA-Z0-9-]+\\.)+[a-z"
+				+ "A-Z]{2,7}$";
+		Boolean retValue = Boolean.FALSE;
+		Pattern pat = Pattern.compile(emailRegex);
+		if (pat.matcher(email).matches()) {
+			String emailDomain = email.split("@")[1];
+			retValue = serverProperties.getUserRegistrationDomain().contains(emailDomain)
+					|| serverProperties.getUserRegistrationPreApprovedDomainList().contains(emailDomain);
+		}
+		return retValue;
+	}
+
+	private Boolean isPreApprovedDomain(String email) {
+		return serverProperties.getUserRegistrationPreApprovedDomainList().contains(email.split("@")[1]);
 	}
 
 	private UserRegistration getUserRegistrationForRegCode(String registrationCode) {
