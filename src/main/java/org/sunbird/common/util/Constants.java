@@ -643,29 +643,6 @@ public class Constants {
 	public static final String TOTAL_RECORDS = "totalRecords";
 	public static final String SUCCESSFUL_RECORDS_COUNT = "successfulRecordsCount";
     public static final String FAILED_RECORDS_COUNT = "failedRecordsCount";
-	public static final String LANGUAGES = "languages";
-	public static final String GRADUATIONS = "graduations";
-	public static final String POST_GRADUATIONS = "postGraduations";
-	public static final String INDUSTRIES = "industries";
-	public static final String CADRE = "cadre";
-	public static final String MINISTRIES = "ministries";
-	public static final String SERVICE = "service";
-	public static final String NATIONALITIES = "nationalities";
-	public static final String DESIGNATIONS = "designations";
-	public static final String GRADE_PAY = "gradePay";
-	public static final String TABLE_MASTER_DATA = "master_data";
-	public static final String CONTEXT_NAME = "contextName";
-	public static final String CONTEXT_DATA = "contextData";
-	public static final String COUNTRY_CODE = "countryCode";
-	public static final String API_POSITION_CREATE = "api.create.position";
-
-	public static final String MDO_ADMIN = "MDO_ADMIN";
-	public static final String CONTENT_CREATOR = "CONTENT_CREATOR";
-	public static final String CONTENT_REVIEWER = "CONTENT_REVIEWER";
-	public static final String CONTENT_PUBLISHER = "CONTENT_PUBLISHER";
-	public static final String CBP_ADMIN = "CBP_ADMIN";
-
-
 
 	private Constants() {
 		throw new IllegalStateException("Utility class");

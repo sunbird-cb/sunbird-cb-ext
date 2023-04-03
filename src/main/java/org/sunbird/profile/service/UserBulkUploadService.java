@@ -51,9 +51,10 @@ public class UserBulkUploadService {
 				String rootOrgId = inputDataMap.get(Constants.ROOT_ORG_ID);
 				String identifier = inputDataMap.get(Constants.IDENTIFIER);
 				String fileName = inputDataMap.get(Constants.FILE_NAME);
+				String orgName = inputDataMap.get(Constants.ORG_NAME);
 				updateUserBulkUploadStatus(rootOrgId, identifier, Constants.STATUS_IN_PROGRESS.toUpperCase(), 0, 0, 0);
 				storageService.downloadFile(fileName);
-				processBulkUpload(fileName, rootOrgId, identifier);
+				processBulkUpload(fileName, rootOrgId, identifier, orgName);
 			} else {
 				logger.info("Error in the scheduler to upload bulk users : File Name not present in the input data");
 			}
@@ -93,7 +94,7 @@ public class UserBulkUploadService {
 		return Boolean.TRUE;
 	}
 
-	private void processBulkUpload(String fileName, String rootOrgId, String identifier) throws IOException {
+	private void processBulkUpload(String fileName, String rootOrgId, String identifier, String orgName) throws IOException {
 		File file = null;
 		FileInputStream fis = null;
 		XSSFWorkbook wb = null;
@@ -119,21 +120,20 @@ public class UserBulkUploadService {
 						userRegistration.setLastName(nextRow.getCell(1).getStringCellValue());
 						userRegistration.setEmail(nextRow.getCell(2).getStringCellValue());
 						userRegistration.setContactNumber((int)nextRow.getCell(3).getNumericCellValue());
+						userRegistration.setOrgName(orgName);
 						List<String> errList = validateEmailContactAndDomain(userRegistration);
 						totalRecordsCount++;
-						Cell statusCell= nextRow.getCell(7);
-						Cell errorDetails = nextRow.getCell(8);
+						Cell statusCell= nextRow.getCell(4);
+						Cell errorDetails = nextRow.getCell(5);
 						if (statusCell == null)
 						{
-							statusCell = nextRow.createCell(7);
+							statusCell = nextRow.createCell(4);
 						}
 						if (errorDetails == null)
 						{
-							errorDetails = nextRow.createCell(8);
+							errorDetails = nextRow.createCell(5);
 						}
 						if (errList.isEmpty()) {
-							userRegistration.setProposedDeptName(nextRow.getCell(5).getStringCellValue());
-							userRegistration.setOrgName(nextRow.getCell(6).getStringCellValue());
 							boolean isUserCreated = userUtilityService.createUser(userRegistration);
 							if (isUserCreated) {
 								noOfSuccessfulRecords++;

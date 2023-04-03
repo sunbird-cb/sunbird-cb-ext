@@ -647,7 +647,6 @@ public class ProfileServiceImpl implements ProfileService {
 						(String) uploadResponse.getParams().getErrmsg()));
 				return response;
 			}
-
 			Map<String, Object> uploadedFile = new HashMap<>();
 			uploadedFile.put(Constants.ROOT_ORG_ID, orgId);
 			uploadedFile.put(Constants.IDENTIFIER, UUID.randomUUID().toString());
@@ -657,6 +656,7 @@ public class ProfileServiceImpl implements ProfileService {
 			uploadedFile.put(Constants.STATUS, Constants.INITIATED_CAPITAL);
 			uploadedFile.put(Constants.COMMENT, StringUtils.EMPTY);
 			uploadedFile.put(Constants.CREATED_BY, userId);
+			uploadedFile.put(Constants.ORG_NAME, orgName);
 
 			SBApiResponse insertResponse = cassandraOperation.insertRecord(Constants.DATABASE,
 					Constants.TABLE_USER_BULK_UPLOAD, uploadedFile);
