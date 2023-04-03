@@ -46,6 +46,7 @@ import org.sunbird.common.util.IndexerService;
 import org.sunbird.common.util.ProjectUtil;
 import org.sunbird.common.util.PropertiesCache;
 import org.sunbird.core.cipher.DecryptServiceImpl;
+import org.sunbird.core.producer.Producer;
 import org.sunbird.org.service.ExtendedOrgService;
 import org.sunbird.storage.service.StorageServiceImpl;
 import org.sunbird.user.report.UserReportService;
@@ -93,6 +94,8 @@ public class ProfileServiceImpl implements ProfileService {
 
 	@Autowired
 	DecryptServiceImpl decryptService;
+	@Autowired
+	Producer kafkaProducer;
 
 	private Logger log = LoggerFactory.getLogger(getClass().getName());
 
@@ -658,14 +661,14 @@ public class ProfileServiceImpl implements ProfileService {
 					Constants.TABLE_USER_BULK_UPLOAD, uploadedFile);
 
 			if (!Constants.SUCCESS.equalsIgnoreCase((String) insertResponse.get(Constants.RESPONSE))) {
-				setErrorData(response, "Failed to update databse with user bulk upload file details.");
+				setErrorData(response, "Failed to update database with user bulk upload file details.");
 				return response;
 			}
 
 			response.getParams().setStatus(Constants.SUCCESSFUL);
 			response.setResponseCode(HttpStatus.OK);
 			response.getResult().putAll(uploadedFile);
-
+			kafkaProducer.push(serverConfig.getUserBulkUploadTopic(), uploadedFile);
 			sendBulkUploadNotification(orgId, orgName, (String) uploadResponse.getResult().get(Constants.URL));
 		} catch (Exception e) {
 			setErrorData(response,
@@ -1323,7 +1326,7 @@ public class ProfileServiceImpl implements ProfileService {
 					strStatus = Constants.STATUS_ENROLLED;
 					break;
 				case 1:
-					strStatus = Constants.STAUTS_IN_PROGRESS;
+					strStatus = Constants.STATUS_IN_PROGRESS;
 					break;
 				case 2:
 					strStatus = Constants.STATUS_COMPLETED;

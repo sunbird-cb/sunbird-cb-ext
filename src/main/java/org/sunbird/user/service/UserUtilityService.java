@@ -22,6 +22,12 @@ public interface UserUtilityService {
 
 	boolean createUser(UserRegistration userRegistration);
 
+	boolean isUserExist(String email);
+
+	boolean validateIfUserContactAlreadyExists(int phone);
+
+	Boolean isDomainAccepted(String email);
+
 	boolean updateUser(UserRegistration userRegistration);
 
 	boolean getActivationLink(UserRegistration userRegistration);

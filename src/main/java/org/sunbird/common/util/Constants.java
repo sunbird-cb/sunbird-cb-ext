@@ -548,7 +548,7 @@ public class Constants {
 	public static final String COURSE_ORG_ID = "courseOrgId";
 	public static final String COURSE_ORG_NAME = "courseOrgName";
 	public static final String STATUS_ENROLLED = "Enrolled";
-	public static final String STAUTS_IN_PROGRESS = "In-Progress";
+	public static final String STATUS_IN_PROGRESS = "In-Progress";
 	public static final String STATUS_COMPLETED = "Completed";
 	public static final String CONTENT_STATUS = "contentStatus";
 	public static final String ROLE = "role";
@@ -639,6 +639,12 @@ public class Constants {
 	public static final String PHONE_VERIFIED = "phoneVerified";
 	public static final String QUERY = "query";
 	public static final String SORT_BY_KEYWORD = "sortBy";
+	public static final String LOCAL_BASE_PATH= "/tmp/";
+	public static final String USER_CREATION_FAILED = "User Creation Failed";
+	public static final String TOTAL_RECORDS = "totalRecords";
+	public static final String SUCCESSFUL_RECORDS_COUNT = "successfulRecordsCount";
+	public static final String FAILED_RECORDS_COUNT = "failedRecordsCount";
+	public static final String API_FILE_DOWNLOAD = "api.file.download";
 	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}

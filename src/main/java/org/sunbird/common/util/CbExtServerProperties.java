@@ -431,6 +431,9 @@ public class CbExtServerProperties {
 	@Value("${kafka.topics.user.assessment.submit}")
 	private String assessmentSubmitTopic;
 
+	@Value("${kafka.topics.user.bulk.upload}")
+	private String userBulkUploadTopic;
+
 
 	public String getAssessmentSubmitTopic() {
 		return assessmentSubmitTopic;
@@ -1573,5 +1576,13 @@ public class CbExtServerProperties {
 
 	public void setEsUserReportIncludeFields(String esUserReportIncludeFields) {
 		this.esUserReportIncludeFields = esUserReportIncludeFields;
+	}
+
+	public String getUserBulkUploadTopic() {
+		return userBulkUploadTopic;
+	}
+
+	public void setUserBulkUploadTopic(String userBulkUploadTopic) {
+		this.userBulkUploadTopic = userBulkUploadTopic;
 	}
 }

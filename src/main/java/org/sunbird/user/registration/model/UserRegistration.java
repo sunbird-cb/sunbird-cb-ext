@@ -1,5 +1,7 @@
 package org.sunbird.user.registration.model;
 
+import java.util.List;
+
 /**
  * Model to store user registration details in ES server
  * 
@@ -17,6 +19,17 @@ public class UserRegistration extends UserRegistrationInfo {
 	private String userId;
 	private String userName;
 	private String proposedDeptName;
+	private int contactNumber;
+
+	private List<String> roles;
+
+	public int getContactNumber() {
+		return contactNumber;
+	}
+
+	public void setContactNumber(int contactNumber) {
+		this.contactNumber = contactNumber;
+	}
 
 	public String getWfId() {
 		return wfId;
@@ -96,6 +109,13 @@ public class UserRegistration extends UserRegistrationInfo {
 
 	public void setProposedDeptName(String proposedDeptName) {
 		this.proposedDeptName = proposedDeptName;
+	}
+	public List<String> getRoles() {
+		return roles;
+	}
+
+	public void setRoles(List<String> roles) {
+		this.roles = roles;
 	}
 
 	public String toMininumString() {

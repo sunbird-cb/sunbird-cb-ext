@@ -223,11 +223,9 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		requestBody.put(Constants.FIRSTNAME, userRegistration.getFirstName());
 		requestBody.put(Constants.LASTNAME, userRegistration.getLastName());
 		requestBody.put(Constants.EMAIL_VERIFIED, true);
-		requestBody.put(Constants.PHONE, userRegistration.getPhone());
-		requestBody.put(Constants.PHONE_VERIFIED, true);
 		request.put(Constants.REQUEST, requestBody);
 		try {
-			Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPost(
+			Map<String, Object> readData = outboundRequestHandlerService.fetchResultUsingPost(
 					props.getSbUrl() + props.getLmsUserCreatePath(), request, ProjectUtil.getDefaultHeaders());
 			if (Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
 				Map<String, Object> result = (Map<String, Object>) readData.get(Constants.RESULT);
@@ -236,6 +234,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 						StringUtils.EMPTY);
 				if (!CollectionUtils.isEmpty(userData)) {
 					userRegistration.setUserName((String) userData.get(Constants.USER_NAME));
+					userRegistration.setSbRootOrgId((String) userData.get(Constants.ROOT_ORG_ID) );
 					retValue = updateUser(userRegistration);
 				}
 			}
@@ -262,9 +261,8 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		personalDetails.put(Constants.FIRSTNAME.toLowerCase(), userRegistration.getFirstName());
 		personalDetails.put(Constants.SURNAME, userRegistration.getLastName());
 		personalDetails.put(Constants.PRIMARY_EMAIL, userRegistration.getEmail());
-		personalDetails.put(Constants.MOBILE, userRegistration.getPhone());
-		personalDetails.put(Constants.PHONE_VERIFIED, true);
 		profileDetails.put(Constants.PERSONAL_DETAILS, personalDetails);
+
 		Map<String, Object> professionDetailObj = new HashMap<String, Object>();
 		professionDetailObj.put(Constants.ORGANIZATION_TYPE, Constants.GOVERNMENT);
 		if (StringUtils.isNotEmpty(userRegistration.getPosition())) {
@@ -279,7 +277,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPatch(
 				props.getSbUrl() + props.getLmsUserUpdatePath(), request, ProjectUtil.getDefaultHeaders());
 		if (Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
-			retValue = assignRole(userRegistration.getSbOrgId(), userRegistration.getUserId(),
+			retValue = assignRole(userRegistration.getSbRootOrgId(), userRegistration.getUserId(),
 					userRegistration.toMininumString());
 			if (retValue) {
 				retValue = createNodeBBUser(userRegistration);
@@ -297,7 +295,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		requestBody.put(Constants.USER_ID, userId);
 		requestBody.put(Constants.ROLES, Arrays.asList(Constants.PUBLIC));
 		request.put(Constants.REQUEST, requestBody);
-		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPost(
+		Map<String, Object> readData = outboundRequestHandlerService.fetchResultUsingPost(
 				props.getSbUrl() + props.getSbAssignRolePath(), request, ProjectUtil.getDefaultHeaders());
 		if (Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
 			retValue = true;
@@ -445,7 +443,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 
 	@Override
 	public void getUserDetailsFromDB(List<String> userIds, List<String> fields,
-			Map<String, Map<String, String>> userInfoMap) {
+									 Map<String, Map<String, String>> userInfoMap) {
 		Map<String, Object> propertyMap = new HashMap<>();
 		propertyMap.put(Constants.STATUS, 1);
 
@@ -504,5 +502,87 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 				}
 			}
 		}
+	}
+
+	@Override
+	public boolean isUserExist(String email) {
+		// request body
+		SunbirdApiRequest requestObj = new SunbirdApiRequest();
+		Map<String, Object> reqMap = new HashMap<>();
+		reqMap.put(Constants.FILTERS, new HashMap<String, Object>() {
+			{
+				put(Constants.EMAIL, email);
+			}
+		});
+		requestObj.setRequest(reqMap);
+
+		HashMap<String, String> headersValue = new HashMap<>();
+		headersValue.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
+		headersValue.put(Constants.AUTHORIZATION, props.getSbApiKey());
+		try {
+			String url = props.getSbUrl() + props.getUserSearchEndPoint();
+
+			Map<String, Object> response = outboundRequestHandlerService.fetchResultUsingPost(url, requestObj,
+					headersValue);
+			if (response != null && "OK".equalsIgnoreCase((String) response.get(Constants.RESPONSE_CODE))) {
+				Map<String, Object> map = (Map<String, Object>) response.get(Constants.RESULT);
+				if (map.get(Constants.RESPONSE) != null) {
+					Map<String, Object> responseObj = (Map<String, Object>) map.get(Constants.RESPONSE);
+					int count = (int) responseObj.get(Constants.COUNT);
+					if (count == 0)
+						return false;
+					else
+						return true;
+				}
+			}
+		} catch (Exception e) {
+			throw new ApplicationLogicError("Sunbird Service ERROR: ", e);
+		}
+		return true;
+	}
+
+	@Override
+	public boolean validateIfUserContactAlreadyExists(int phone) {
+		// request body
+		SunbirdApiRequest requestObj = new SunbirdApiRequest();
+		Map<String, Object> reqMap = new HashMap<>();
+		reqMap.put(Constants.FILTERS, new HashMap<String, Object>() {
+			{
+				put(Constants.PHONE, String.valueOf(phone));
+			}
+		});
+		requestObj.setRequest(reqMap);
+
+		HashMap<String, String> headersValue = new HashMap<>();
+		headersValue.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
+		headersValue.put(Constants.AUTHORIZATION, props.getSbApiKey());
+		try {
+			String url = props.getSbUrl() + props.getUserSearchEndPoint();
+
+			Map<String, Object> response = outboundRequestHandlerService.fetchResultUsingPost(url, requestObj,
+					headersValue);
+			if (response != null && "OK".equalsIgnoreCase((String) response.get(Constants.RESPONSE_CODE))) {
+				Map<String, Object> map = (Map<String, Object>) response.get(Constants.RESULT);
+				if (map.get(Constants.RESPONSE) != null) {
+					Map<String, Object> responseObj = (Map<String, Object>) map.get(Constants.RESPONSE);
+					int count = (int) responseObj.get(Constants.COUNT);
+					if (count == 0)
+						return false;
+					else
+						return true;
+				}
+			}
+		} catch (Exception e) {
+			throw new ApplicationLogicError("Sunbird Service ERROR: ", e);
+		}
+		return true;
+	}
+
+	@Override
+	public Boolean isDomainAccepted(String email) {
+		logger.info(email);
+		String emailDomain = email.split("@")[1];
+		logger.info(emailDomain);
+		return props.getUserRegistrationDomain().contains(emailDomain);
 	}
 }
