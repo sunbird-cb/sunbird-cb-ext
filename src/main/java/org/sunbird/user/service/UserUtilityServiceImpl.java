@@ -225,7 +225,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		requestBody.put(Constants.EMAIL_VERIFIED, true);
 		request.put(Constants.REQUEST, requestBody);
 		try {
-			Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPost(
+			Map<String, Object> readData = outboundRequestHandlerService.fetchResultUsingPost(
 					props.getSbUrl() + props.getLmsUserCreatePath(), request, ProjectUtil.getDefaultHeaders());
 			if (Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
 				Map<String, Object> result = (Map<String, Object>) readData.get(Constants.RESULT);
@@ -278,7 +278,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 				props.getSbUrl() + props.getLmsUserUpdatePath(), request, ProjectUtil.getDefaultHeaders());
 		if (Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
 			retValue = assignRole(userRegistration.getSbRootOrgId(), userRegistration.getUserId(),
-					userRegistration.toMininumString(), userRegistration.getRoles());
+					userRegistration.toMininumString());
 			if (retValue) {
 				retValue = createNodeBBUser(userRegistration);
 			}
@@ -287,16 +287,13 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		return retValue;
 	}
 
-	public boolean assignRole(String sbOrgId, String userId, String objectDetails, List<String> roles) {
+	public boolean assignRole(String sbOrgId, String userId, String objectDetails) {
 		boolean retValue = false;
 		Map<String, Object> request = new HashMap<>();
 		Map<String, Object> requestBody = new HashMap<String, Object>();
 		requestBody.put(Constants.ORGANIZATION_ID, sbOrgId);
 		requestBody.put(Constants.USER_ID, userId);
-		if(!roles.isEmpty())
-			requestBody.put(Constants.ROLES, roles);
-		else
-			requestBody.put(Constants.ROLES, Arrays.asList(Constants.PUBLIC));
+		requestBody.put(Constants.ROLES, Arrays.asList(Constants.PUBLIC));
 		request.put(Constants.REQUEST, requestBody);
 		Map<String, Object> readData = outboundRequestHandlerService.fetchResultUsingPost(
 				props.getSbUrl() + props.getSbAssignRolePath(), request, ProjectUtil.getDefaultHeaders());

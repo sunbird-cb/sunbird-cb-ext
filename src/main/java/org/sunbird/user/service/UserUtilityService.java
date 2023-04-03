@@ -28,7 +28,7 @@ public interface UserUtilityService {
 
 	boolean createNodeBBUser(UserRegistration userRegistration);
 
-	public boolean assignRole(String sbOrgId, String userId, String objectDetails, List<String> roles);
+	public boolean assignRole(String sbOrgId, String userId, String objectDetails);
 
 	public Map<String, Map<String, String>> getUserDetails(List<String> userIds, List<String> fields);
 

@@ -441,7 +441,7 @@ public class ProfileServiceImpl implements ProfileService {
 		}
 
 		boolean assignValue = userUtilityService.assignRole((String) userData.get(Constants.ROOT_ORG_ID), userId,
-				StringUtils.EMPTY, new ArrayList<>());
+				StringUtils.EMPTY);
 
 		if (assignValue) {
 			errMsg = syncUserData(userId);
