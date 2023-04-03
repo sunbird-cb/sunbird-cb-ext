@@ -51,9 +51,10 @@ public class UserBulkUploadService {
 				String rootOrgId = inputDataMap.get(Constants.ROOT_ORG_ID);
 				String identifier = inputDataMap.get(Constants.IDENTIFIER);
 				String fileName = inputDataMap.get(Constants.FILE_NAME);
+				String orgName = inputDataMap.get(Constants.ORG_NAME);
 				updateUserBulkUploadStatus(rootOrgId, identifier, Constants.STATUS_IN_PROGRESS.toUpperCase(), 0, 0, 0);
 				storageService.downloadFile(fileName);
-				processBulkUpload(fileName, rootOrgId, identifier);
+				processBulkUpload(fileName, rootOrgId, identifier, orgName);
 			} else {
 				logger.info("Error in the scheduler to upload bulk users : File Name not present in the input data");
 			}
@@ -93,7 +94,7 @@ public class UserBulkUploadService {
 		return Boolean.TRUE;
 	}
 
-	private void processBulkUpload(String fileName, String rootOrgId, String identifier) throws IOException {
+	private void processBulkUpload(String fileName, String rootOrgId, String identifier, String orgName) throws IOException {
 		File file = null;
 		FileInputStream fis = null;
 		XSSFWorkbook wb = null;
@@ -103,7 +104,7 @@ public class UserBulkUploadService {
 		try
 		{
 			file = new File(Constants.LOCAL_BASE_PATH + fileName);
-			if (file.exists()) {
+			if (file.exists() && file.length()>0) {
 				fis = new FileInputStream(file);
 				wb = new XSSFWorkbook(fis);
 				XSSFSheet sheet = wb.getSheetAt(0);
@@ -119,21 +120,20 @@ public class UserBulkUploadService {
 						userRegistration.setLastName(nextRow.getCell(1).getStringCellValue());
 						userRegistration.setEmail(nextRow.getCell(2).getStringCellValue());
 						userRegistration.setContactNumber((int)nextRow.getCell(3).getNumericCellValue());
+						userRegistration.setOrgName(orgName);
 						List<String> errList = validateEmailContactAndDomain(userRegistration);
-						totalRecordsCount++;
-						Cell statusCell= nextRow.getCell(7);
-						Cell errorDetails = nextRow.getCell(8);
+						Cell statusCell= nextRow.getCell(4);
+						Cell errorDetails = nextRow.getCell(5);
 						if (statusCell == null)
 						{
-							statusCell = nextRow.createCell(7);
+							statusCell = nextRow.createCell(4);
 						}
 						if (errorDetails == null)
 						{
-							errorDetails = nextRow.createCell(8);
+							errorDetails = nextRow.createCell(5);
 						}
+						totalRecordsCount++;
 						if (errList.isEmpty()) {
-							userRegistration.setProposedDeptName(nextRow.getCell(5).getStringCellValue());
-							userRegistration.setOrgName(nextRow.getCell(6).getStringCellValue());
 							boolean isUserCreated = userUtilityService.createUser(userRegistration);
 							if (isUserCreated) {
 								noOfSuccessfulRecords++;
@@ -150,23 +150,12 @@ public class UserBulkUploadService {
 							errorDetails.setCellValue(errList.toString());
 						}
 					}
-				}
-				FileOutputStream fileOut = new FileOutputStream(file);
-				wb.write(fileOut);
-				fileOut.close();
-				SBApiResponse uploadResponse = storageService.uploadFile(file, serverProperties.getBulkUploadContainerName());
-				if (!HttpStatus.OK.equals(uploadResponse.getResponseCode())) {
-					logger.info(String.format("Failed to upload file. Error: %s",
-							uploadResponse.getParams().getErrmsg()));
-					updateUserBulkUploadStatus(rootOrgId, identifier, Constants.FAILED.toUpperCase(), totalRecordsCount, noOfSuccessfulRecords, failedRecordsCount);
-				}
-				else {
-					if (failedRecordsCount == 0) {
-						updateUserBulkUploadStatus(rootOrgId, identifier, Constants.SUCCESSFUL.toUpperCase(), totalRecordsCount, noOfSuccessfulRecords, failedRecordsCount);
-					} else {
-						updateUserBulkUploadStatus(rootOrgId, identifier, Constants.FAILED.toUpperCase(), totalRecordsCount, noOfSuccessfulRecords, failedRecordsCount);
+					else
+					{
+						break;
 					}
 				}
+				uploadTheUpdatedFileAndUpdateUserBulkUploadStatusAndRecordCount(rootOrgId, identifier, file, wb, totalRecordsCount, noOfSuccessfulRecords, failedRecordsCount);
 			} else {
 				logger.info("Error in Process Bulk Upload : The File is not downloaded/present");
 				updateUserBulkUploadStatus(rootOrgId, identifier, Constants.FAILED.toUpperCase(), totalRecordsCount, noOfSuccessfulRecords, failedRecordsCount);
@@ -181,6 +170,25 @@ public class UserBulkUploadService {
 			wb.close();
 			fis.close();
 			file.delete();
+		}
+	}
+
+	private void uploadTheUpdatedFileAndUpdateUserBulkUploadStatusAndRecordCount(String rootOrgId, String identifier, File file, XSSFWorkbook wb, int totalRecordsCount, int noOfSuccessfulRecords, int failedRecordsCount) throws IOException {
+		FileOutputStream fileOut = new FileOutputStream(file);
+		wb.write(fileOut);
+		fileOut.close();
+		SBApiResponse uploadResponse = storageService.uploadFile(file, serverProperties.getBulkUploadContainerName());
+		if (!HttpStatus.OK.equals(uploadResponse.getResponseCode())) {
+			logger.info(String.format("Failed to upload file. Error: %s",
+					uploadResponse.getParams().getErrmsg()));
+			updateUserBulkUploadStatus(rootOrgId, identifier, Constants.FAILED.toUpperCase(), totalRecordsCount, noOfSuccessfulRecords, failedRecordsCount);
+		}
+		else {
+			if (failedRecordsCount == 0 && totalRecordsCount == noOfSuccessfulRecords && totalRecordsCount>=1) {
+				updateUserBulkUploadStatus(rootOrgId, identifier, Constants.SUCCESSFUL.toUpperCase(), totalRecordsCount, noOfSuccessfulRecords, failedRecordsCount);
+			} else {
+				updateUserBulkUploadStatus(rootOrgId, identifier, Constants.FAILED.toUpperCase(), totalRecordsCount, noOfSuccessfulRecords, failedRecordsCount);
+			}
 		}
 	}
 
