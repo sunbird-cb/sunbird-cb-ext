@@ -121,8 +121,8 @@ public class UserBulkUploadService {
 						userRegistration.setContactNumber((int)nextRow.getCell(3).getNumericCellValue());
 						List<String> errList = validateEmailContactAndDomain(userRegistration);
 						totalRecordsCount++;
-						Cell statusCell= nextRow.getCell(16);
-						Cell errorDetails = nextRow.getCell(17);
+						Cell statusCell= nextRow.getCell(7);
+						Cell errorDetails = nextRow.getCell(8);
 						if (statusCell == null)
 						{
 							statusCell = nextRow.createCell(7);
