@@ -20,6 +20,7 @@ public class UserRegistrationInfo {
 	private String mapId;
 	private String sbRootOrgId;
 	private String sbOrgId;
+	private String phone;
 
 	public String getRegistrationCode() {
 		return registrationCode;
@@ -123,5 +124,13 @@ public class UserRegistrationInfo {
 
 	public void setSbOrgId(String sbOrgId) {
 		this.sbOrgId = sbOrgId;
+	}
+
+	public String getPhone() {
+		return phone;
+	}
+
+	public void setPhone(String phone) {
+		this.phone = phone;
 	}
 }
