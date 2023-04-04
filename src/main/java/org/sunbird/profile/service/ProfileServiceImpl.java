@@ -668,6 +668,7 @@ public class ProfileServiceImpl implements ProfileService {
 			response.getParams().setStatus(Constants.SUCCESSFUL);
 			response.setResponseCode(HttpStatus.OK);
 			response.getResult().putAll(uploadedFile);
+			uploadedFile.put(Constants.ORG_NAME, orgName);
 			kafkaProducer.push(serverConfig.getUserBulkUploadTopic(), uploadedFile);
 			sendBulkUploadNotification(orgId, orgName, (String) uploadResponse.getResult().get(Constants.URL));
 		} catch (Exception e) {
