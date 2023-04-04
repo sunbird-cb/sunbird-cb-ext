@@ -52,7 +52,7 @@ public class UserBulkUploadService {
 				String identifier = inputDataMap.get(Constants.IDENTIFIER);
 				String fileName = inputDataMap.get(Constants.FILE_NAME);
 				String orgName = inputDataMap.get(Constants.ORG_NAME);
-				updateUserBulkUploadStatus(rootOrgId, identifier, Constants.STATUS_IN_PROGRESS.toUpperCase(), 0, 0, 0);
+				updateUserBulkUploadStatus(rootOrgId, identifier, Constants.STATUS_IN_PROGRESS_UPPERCASE, 0, 0, 0);
 				storageService.downloadFile(fileName);
 				processBulkUpload(fileName, rootOrgId, identifier, orgName);
 			} else {
@@ -155,7 +155,7 @@ public class UserBulkUploadService {
 						break;
 					}
 				}
-				uploadTheUpdatedFileAndUpdateUserBulkUploadStatusAndRecordCount(rootOrgId, identifier, file, wb, totalRecordsCount, noOfSuccessfulRecords, failedRecordsCount);
+				uploadTheUpdatedFile(rootOrgId, identifier, file, wb, totalRecordsCount, noOfSuccessfulRecords, failedRecordsCount);
 			} else {
 				logger.info("Error in Process Bulk Upload : The File is not downloaded/present");
 				updateUserBulkUploadStatus(rootOrgId, identifier, Constants.FAILED.toUpperCase(), totalRecordsCount, noOfSuccessfulRecords, failedRecordsCount);
@@ -167,13 +167,16 @@ public class UserBulkUploadService {
 			updateUserBulkUploadStatus(rootOrgId, identifier, Constants.FAILED.toUpperCase(), 0, 0, 0);
 		}
 		finally {
-			wb.close();
-			fis.close();
-			file.delete();
+			if(wb!=null)
+				wb.close();
+			if(fis!=null)
+				fis.close();
+			if(file!=null)
+				file.delete();
 		}
 	}
 
-	private void uploadTheUpdatedFileAndUpdateUserBulkUploadStatusAndRecordCount(String rootOrgId, String identifier, File file, XSSFWorkbook wb, int totalRecordsCount, int noOfSuccessfulRecords, int failedRecordsCount) throws IOException {
+	private void uploadTheUpdatedFile(String rootOrgId, String identifier, File file, XSSFWorkbook wb, int totalRecordsCount, int noOfSuccessfulRecords, int failedRecordsCount) throws IOException {
 		FileOutputStream fileOut = new FileOutputStream(file);
 		wb.write(fileOut);
 		fileOut.close();
@@ -213,9 +216,7 @@ public class UserBulkUploadService {
 		if (userUtilityService.isUserExist(userRegistration.getEmail())) {
 			errList.add("Another user with the same email already exists");
 		}
-		if (userUtilityService.validateIfUserContactAlreadyExists(userRegistration.getContactNumber())) {
-			errList.add("Another user with the same phone already exists");
-		}
+
 		if (!errList.isEmpty()) {
 			str.append("Failed to Validate User Details. Error Details - [").append(errList.toString()).append("]");
 		}

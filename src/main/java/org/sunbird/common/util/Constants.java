@@ -549,6 +549,7 @@ public class Constants {
 	public static final String COURSE_ORG_NAME = "courseOrgName";
 	public static final String STATUS_ENROLLED = "Enrolled";
 	public static final String STATUS_IN_PROGRESS = "In-Progress";
+	public static final String STATUS_IN_PROGRESS_UPPERCASE = "IN-PROGRESSS";
 	public static final String STATUS_COMPLETED = "Completed";
 	public static final String CONTENT_STATUS = "contentStatus";
 	public static final String ROLE = "role";

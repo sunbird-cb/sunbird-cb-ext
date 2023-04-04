@@ -137,12 +137,11 @@ public class ProjectUtil {
 
 	public static Boolean validateContactPattern(String contactNumber) {
 		String contactNumberRegex = "^\\d{10}$";
-		Boolean retValue = Boolean.FALSE;
 		Pattern pat = Pattern.compile(contactNumberRegex);
 		if (pat.matcher(contactNumber).matches()) {
-			retValue = Boolean.TRUE;
+			return Boolean.TRUE;
 		}
-		return retValue;
+		return Boolean.FALSE;
 	}
 
 	public static Boolean validateFirstName( String firstName ) {

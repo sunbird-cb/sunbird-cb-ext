@@ -18,7 +18,7 @@ public class UserBulkUploadConsumer {
 
 
 	@KafkaListener(topics = "${kafka.topics.user.bulk.upload}", groupId = "${kafka.topics.user.bulk.upload.group}")
-	public void processUserBulkUploadMessage(ConsumerRecord<String, String> data) {
+	public void processUserBulkUploadMessage(ConsumerRecord<String, String> data) throws Exception {
 		logger.info(
 				"UserBulkUploadConsumer::processMessage: Received event to initiate User Bulk Upload Process...");
 		logger.info("Received message:: " + data.value());
@@ -34,7 +34,8 @@ public class UserBulkUploadConsumer {
 							new Exception("Invalid Kafka Msg"));
 				}
 		} catch (Exception e) {
-			logger.error(e);
+			logger.error(String.format("Error in User Bulk Upload Consumer: Error Msg :%s", e.getMessage()), e);
+			throw new Exception(e);
 		}
 	}
 }

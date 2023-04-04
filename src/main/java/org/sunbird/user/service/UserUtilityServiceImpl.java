@@ -223,6 +223,8 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		requestBody.put(Constants.FIRSTNAME, userRegistration.getFirstName());
 		requestBody.put(Constants.LASTNAME, userRegistration.getLastName());
 		requestBody.put(Constants.EMAIL_VERIFIED, true);
+		requestBody.put(Constants.PHONE, userRegistration.getPhone());
+		requestBody.put(Constants.PHONE_VERIFIED, true);
 		request.put(Constants.REQUEST, requestBody);
 		try {
 			Map<String, Object> readData = outboundRequestHandlerService.fetchResultUsingPost(
@@ -261,6 +263,8 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		personalDetails.put(Constants.FIRSTNAME.toLowerCase(), userRegistration.getFirstName());
 		personalDetails.put(Constants.SURNAME, userRegistration.getLastName());
 		personalDetails.put(Constants.PRIMARY_EMAIL, userRegistration.getEmail());
+		personalDetails.put(Constants.MOBILE, userRegistration.getPhone());
+		personalDetails.put(Constants.PHONE_VERIFIED, true);
 		profileDetails.put(Constants.PERSONAL_DETAILS, personalDetails);
 
 		Map<String, Object> professionDetailObj = new HashMap<String, Object>();
@@ -512,43 +516,6 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		reqMap.put(Constants.FILTERS, new HashMap<String, Object>() {
 			{
 				put(Constants.EMAIL, email);
-			}
-		});
-		requestObj.setRequest(reqMap);
-
-		HashMap<String, String> headersValue = new HashMap<>();
-		headersValue.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
-		headersValue.put(Constants.AUTHORIZATION, props.getSbApiKey());
-		try {
-			String url = props.getSbUrl() + props.getUserSearchEndPoint();
-
-			Map<String, Object> response = outboundRequestHandlerService.fetchResultUsingPost(url, requestObj,
-					headersValue);
-			if (response != null && "OK".equalsIgnoreCase((String) response.get(Constants.RESPONSE_CODE))) {
-				Map<String, Object> map = (Map<String, Object>) response.get(Constants.RESULT);
-				if (map.get(Constants.RESPONSE) != null) {
-					Map<String, Object> responseObj = (Map<String, Object>) map.get(Constants.RESPONSE);
-					int count = (int) responseObj.get(Constants.COUNT);
-					if (count == 0)
-						return false;
-					else
-						return true;
-				}
-			}
-		} catch (Exception e) {
-			throw new ApplicationLogicError("Sunbird Service ERROR: ", e);
-		}
-		return true;
-	}
-
-	@Override
-	public boolean validateIfUserContactAlreadyExists(int phone) {
-		// request body
-		SunbirdApiRequest requestObj = new SunbirdApiRequest();
-		Map<String, Object> reqMap = new HashMap<>();
-		reqMap.put(Constants.FILTERS, new HashMap<String, Object>() {
-			{
-				put(Constants.PHONE, String.valueOf(phone));
 			}
 		});
 		requestObj.setRequest(reqMap);

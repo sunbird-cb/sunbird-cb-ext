@@ -40,6 +40,7 @@ import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.common.util.IndexerService;
+import org.sunbird.common.util.ProjectUtil;
 import org.sunbird.core.producer.Producer;
 import org.sunbird.org.service.ExtendedOrgService;
 import org.sunbird.portal.department.model.DeptPublicInfo;
@@ -284,6 +285,9 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 		if (StringUtils.isBlank(userRegInfo.getSource())) {
 			errList.add("Source");
 		}
+		if(StringUtils.isBlank(userRegInfo.getPhone())) {
+			errList.add("Phone");
+		}
 		if (!errList.isEmpty()) {
 			str.append("Failed to Register User Details. Missing Params - [").append(errList.toString()).append("]");
 		}
@@ -291,6 +295,10 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 		if (StringUtils.isNotBlank(userRegInfo.getEmail()) && !emailValidation(userRegInfo.getEmail())) {
 			str.setLength(0);
 			str.append("Invalid email id");
+		}
+		if(StringUtils.isNotBlank(userRegInfo.getPhone()) && !ProjectUtil.validateContactPattern(userRegInfo.getPhone())) {
+			str.setLength(0);
+			str.append("Invalid phone number");
 		}
 		return str.toString();
 
@@ -322,7 +330,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 		userRegistration.setMapId(userRegInfo.getMapId());
 		userRegistration.setOrganisationType(userRegInfo.getOrganisationType());
 		userRegistration.setOrganisationSubType(userRegInfo.getOrganisationSubType());
-
+		userRegistration.setPhone(userRegInfo.getPhone());
 		if (StringUtils.isBlank(userRegInfo.getRegistrationCode())) {
 			userRegistration.setRegistrationCode(serverProperties.getUserRegCodePrefix() + "-"
 					+ userRegistration.getMapId() + "-" + RandomStringUtils.random(8, Boolean.TRUE, Boolean.TRUE));

@@ -24,8 +24,6 @@ public interface UserUtilityService {
 
 	boolean isUserExist(String email);
 
-	boolean validateIfUserContactAlreadyExists(int phone);
-
 	Boolean isDomainAccepted(String email);
 
 	boolean updateUser(UserRegistration userRegistration);
