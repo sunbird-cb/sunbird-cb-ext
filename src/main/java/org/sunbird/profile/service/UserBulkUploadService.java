@@ -50,12 +50,12 @@ public class UserBulkUploadService {
                     new TypeReference<HashMap<String, String>>() {
                     });
             List<String> errList = validateReceivedKafkaMessage(inputDataMap);
-            if (validateReceivedKafkaMessage(inputDataMap).isEmpty()) {
+            if (errList.isEmpty()) {
                 updateUserBulkUploadStatus(inputDataMap.get(Constants.ROOT_ORG_ID), inputDataMap.get(Constants.IDENTIFIER), Constants.STATUS_IN_PROGRESS_UPPERCASE, 0, 0, 0);
                 storageService.downloadFile(inputDataMap.get(Constants.FILE_NAME));
                 processBulkUpload(inputDataMap);
             } else {
-                logger.info(String.format("Error in the Kafka Message Received : %s", errList));
+                logger.error(String.format("Error in the Kafka Message Received : %s", errList));
             }
         } catch (Exception e) {
             logger.error(String.format("Error in the scheduler to upload bulk users %s", e.getMessage()),
@@ -98,6 +98,7 @@ public class UserBulkUploadService {
         int totalRecordsCount = 0;
         int noOfSuccessfulRecords = 0;
         int failedRecordsCount = 0;
+        String status = "";
         try {
             file = new File(Constants.LOCAL_BASE_PATH + inputDataMap.get(Constants.FILE_NAME));
             if (file.exists() && file.length() > 0) {
@@ -113,46 +114,49 @@ public class UserBulkUploadService {
                     Row nextRow = rowIterator.next();
                     if (nextRow.getCell(0) == null) {
                         break;
-                    } else {
-                        UserRegistration userRegistration = new UserRegistration();
-                        userRegistration.setFirstName(nextRow.getCell(0).getStringCellValue());
-                        userRegistration.setLastName(nextRow.getCell(1).getStringCellValue());
-                        userRegistration.setEmail(nextRow.getCell(2).getStringCellValue());
-                        userRegistration.setPhone(String.valueOf(nextRow.getCell(3).getNumericCellValue()));
-                        userRegistration.setOrgName(inputDataMap.get(Constants.ORG_NAME));
-                        List<String> errList = validateEmailContactAndDomain(userRegistration);
-                        Cell statusCell = nextRow.getCell(4);
-                        Cell errorDetails = nextRow.getCell(5);
-                        if (statusCell == null) {
-                            statusCell = nextRow.createCell(4);
-                        }
-                        if (errorDetails == null) {
-                            errorDetails = nextRow.createCell(5);
-                        }
-                        totalRecordsCount++;
-                        if (errList.isEmpty()) {
-                            boolean isUserCreated = userUtilityService.createUser(userRegistration);
-                            if (isUserCreated) {
-                                noOfSuccessfulRecords++;
-                                statusCell.setCellValue(Constants.SUCCESS.toUpperCase());
-                                errorDetails.setCellValue("");
-                            } else {
-                                failedRecordsCount++;
-                                statusCell.setCellValue(Constants.FAILED.toUpperCase());
-                                errorDetails.setCellValue(Constants.USER_CREATION_FAILED);
-                            }
+                    }
+                    UserRegistration userRegistration = new UserRegistration();
+                    userRegistration.setFirstName(nextRow.getCell(0).getStringCellValue());
+                    userRegistration.setLastName(nextRow.getCell(1).getStringCellValue());
+                    userRegistration.setEmail(nextRow.getCell(2).getStringCellValue());
+                    userRegistration.setPhone(String.valueOf(nextRow.getCell(3).getNumericCellValue()));
+                    userRegistration.setOrgName(inputDataMap.get(Constants.ORG_NAME));
+                    List<String> errList = validateEmailContactAndDomain(userRegistration);
+                    Cell statusCell = nextRow.getCell(4);
+                    Cell errorDetails = nextRow.getCell(5);
+                    if (statusCell == null) {
+                        statusCell = nextRow.createCell(4);
+                    }
+                    if (errorDetails == null) {
+                        errorDetails = nextRow.createCell(5);
+                    }
+                    totalRecordsCount++;
+                    if (errList.isEmpty()) {
+                        boolean isUserCreated = userUtilityService.createUser(userRegistration);
+                        if (isUserCreated) {
+                            noOfSuccessfulRecords++;
+                            statusCell.setCellValue(Constants.SUCCESS.toUpperCase());
+                            errorDetails.setCellValue("");
                         } else {
                             failedRecordsCount++;
                             statusCell.setCellValue(Constants.FAILED.toUpperCase());
-                            errorDetails.setCellValue(errList.toString());
+                            errorDetails.setCellValue(Constants.USER_CREATION_FAILED);
                         }
+                    } else {
+                        failedRecordsCount++;
+                        statusCell.setCellValue(Constants.FAILED.toUpperCase());
+                        errorDetails.setCellValue(errList.toString());
                     }
                 }
-                uploadTheUpdatedFile(inputDataMap.get(Constants.ROOT_ORG_ID), inputDataMap.get(Constants.IDENTIFIER), file, wb, totalRecordsCount, noOfSuccessfulRecords, failedRecordsCount);
+                status = uploadTheUpdatedFile(inputDataMap.get(Constants.ROOT_ORG_ID), inputDataMap.get(Constants.IDENTIFIER), file, wb);
+                if (!(status.equalsIgnoreCase(Constants.SUCCESSFUL) && failedRecordsCount == 0 && totalRecordsCount == noOfSuccessfulRecords && totalRecordsCount >= 1)) {
+                    status = Constants.FAILED_UPPERCASE;
+                }
             } else {
                 logger.info("Error in Process Bulk Upload : The File is not downloaded/present");
-                updateUserBulkUploadStatus(inputDataMap.get(Constants.ROOT_ORG_ID), inputDataMap.get(Constants.IDENTIFIER), Constants.FAILED.toUpperCase(), totalRecordsCount, noOfSuccessfulRecords, failedRecordsCount);
+                status = Constants.FAILED_UPPERCASE;
             }
+            updateUserBulkUploadStatus(inputDataMap.get(Constants.ROOT_ORG_ID), inputDataMap.get(Constants.IDENTIFIER), status, totalRecordsCount, noOfSuccessfulRecords, failedRecordsCount);
         } catch (Exception e) {
             logger.error(String.format("Error in Process Bulk Upload %s", e.getMessage()), e);
             updateUserBulkUploadStatus(inputDataMap.get(Constants.ROOT_ORG_ID), inputDataMap.get(Constants.IDENTIFIER), Constants.FAILED.toUpperCase(), 0, 0, 0);
@@ -166,7 +170,7 @@ public class UserBulkUploadService {
         }
     }
 
-    private void uploadTheUpdatedFile(String rootOrgId, String identifier, File file, XSSFWorkbook wb, int totalRecordsCount, int noOfSuccessfulRecords, int failedRecordsCount) throws IOException {
+    private String uploadTheUpdatedFile(String rootOrgId, String identifier, File file, XSSFWorkbook wb) throws IOException {
         FileOutputStream fileOut = new FileOutputStream(file);
         wb.write(fileOut);
         fileOut.close();
@@ -174,14 +178,9 @@ public class UserBulkUploadService {
         if (!HttpStatus.OK.equals(uploadResponse.getResponseCode())) {
             logger.info(String.format("Failed to upload file. Error: %s",
                     uploadResponse.getParams().getErrmsg()));
-            updateUserBulkUploadStatus(rootOrgId, identifier, Constants.FAILED.toUpperCase(), totalRecordsCount, noOfSuccessfulRecords, failedRecordsCount);
-        } else {
-            if (failedRecordsCount == 0 && totalRecordsCount == noOfSuccessfulRecords && totalRecordsCount >= 1) {
-                updateUserBulkUploadStatus(rootOrgId, identifier, Constants.SUCCESSFUL.toUpperCase(), totalRecordsCount, noOfSuccessfulRecords, failedRecordsCount);
-            } else {
-                updateUserBulkUploadStatus(rootOrgId, identifier, Constants.FAILED.toUpperCase(), totalRecordsCount, noOfSuccessfulRecords, failedRecordsCount);
-            }
+            return Constants.FAILED_UPPERCASE;
         }
+        return Constants.SUCCESSFUL_UPPERCASE;
     }
 
     private List<String> validateEmailContactAndDomain(UserRegistration userRegistration) {

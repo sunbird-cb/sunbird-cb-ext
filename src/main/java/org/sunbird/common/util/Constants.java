@@ -87,7 +87,9 @@ public class Constants {
 	public static final String AUTH_TOKEN = "Authorization";
 	public static final String X_AUTH_TOKEN = "x-authenticated-user-token";
 	public static final String SUCCESSFUL = "Successful";
+	public static final String SUCCESSFUL_UPPERCASE = "SUCCESSFUL";
 	public static final String FAILED = "Failed";
+	public static final String FAILED_UPPERCASE = "FAILED";
 	public static final String MESSAGE = "message";
 	public static final String DATA = "data";
 	public static final String STATUS = "status";

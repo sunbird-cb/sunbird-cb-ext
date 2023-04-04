@@ -21,6 +21,7 @@ import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 
+import org.sunbird.common.util.ProjectUtil;
 import scala.Option;
 
 @Service
@@ -46,8 +47,7 @@ public class StorageServiceImpl implements StorageService {
 
 	@Override
 	public SBApiResponse uploadFile(MultipartFile mFile, String containerName) {
-		SBApiResponse response = new SBApiResponse();
-		response.setId(Constants.API_FILE_UPLOAD);
+		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_FILE_UPLOAD);
 		File file = null;
 		try {
 			file = new File(System.currentTimeMillis() + "_" + mFile.getOriginalFilename());
@@ -71,8 +71,7 @@ public class StorageServiceImpl implements StorageService {
 
 	@Override
 	public SBApiResponse uploadFile(File file, String containerName) {
-		SBApiResponse response = new SBApiResponse();
-		response.setId(Constants.API_FILE_UPLOAD);
+		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_FILE_UPLOAD);
 		try {
 			String objectKey = containerName + "/" + file.getName();
 			String url = storageService.upload(serverProperties.getCloudContainerName(), file.getAbsolutePath(),
@@ -80,8 +79,6 @@ public class StorageServiceImpl implements StorageService {
 			Map<String, String> uploadedFile = new HashMap<>();
 			uploadedFile.put(Constants.NAME, file.getName());
 			uploadedFile.put(Constants.URL, url);
-			response.getParams().setStatus(Constants.SUCCESSFUL);
-			response.setResponseCode(HttpStatus.OK);
 			response.getResult().putAll(uploadedFile);
 			return response;
 		} catch (Exception e) {
@@ -99,14 +96,11 @@ public class StorageServiceImpl implements StorageService {
 
 	@Override
 	public SBApiResponse deleteFile(String fileName, String containerName) {
-		SBApiResponse response = new SBApiResponse();
-		response.setId(Constants.API_FILE_DELETE);
+		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_FILE_DELETE);
 		try {
 			String objectKey = serverProperties.getCloudContainerName() + "/" + fileName;
 			storageService.deleteObject(serverProperties.getCloudContainerName(), objectKey,
 					Option.apply(Boolean.FALSE));
-			response.getParams().setStatus(Constants.SUCCESSFUL);
-			response.setResponseCode(HttpStatus.OK);
 			return response;
 		} catch (Exception e) {
 			logger.error("Failed to delete file: " + fileName + ", Exception: ", e);
@@ -119,14 +113,11 @@ public class StorageServiceImpl implements StorageService {
 
 	@Override
 	public SBApiResponse downloadFile(String fileName) {
-		SBApiResponse response = new SBApiResponse();
-		response.setId(Constants.API_FILE_DOWNLOAD);
+		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_FILE_DOWNLOAD);
 		try {
 			String objectKey = serverProperties.getBulkUploadContainerName() + "/" + fileName;
-			storageService.download(serverProperties.getCloudContainerName(), objectKey, "/tmp/",
+			storageService.download(serverProperties.getCloudContainerName(), objectKey, Constants.LOCAL_BASE_PATH,
 					Option.apply(Boolean.FALSE));
-			response.getParams().setStatus(Constants.SUCCESSFUL);
-			response.setResponseCode(HttpStatus.OK);
 			return response;
 		} catch (Exception e) {
 			logger.error("Failed to download the file: " + fileName + ", Exception: ", e);

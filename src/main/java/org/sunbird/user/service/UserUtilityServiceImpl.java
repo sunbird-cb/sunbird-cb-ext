@@ -236,7 +236,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 						StringUtils.EMPTY);
 				if (!CollectionUtils.isEmpty(userData)) {
 					userRegistration.setUserName((String) userData.get(Constants.USER_NAME));
-					userRegistration.setSbRootOrgId((String) userData.get(Constants.ROOT_ORG_ID) );
+					userRegistration.setSbOrgId((String) userData.get(Constants.ROOT_ORG_ID) );
 					retValue = updateUser(userRegistration);
 				}
 			}
@@ -281,7 +281,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPatch(
 				props.getSbUrl() + props.getLmsUserUpdatePath(), request, ProjectUtil.getDefaultHeaders());
 		if (Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
-			retValue = assignRole(userRegistration.getSbRootOrgId(), userRegistration.getUserId(),
+			retValue = assignRole(userRegistration.getSbOrgId(), userRegistration.getUserId(),
 					userRegistration.toMininumString());
 			if (retValue) {
 				retValue = createNodeBBUser(userRegistration);
@@ -549,9 +549,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 
 	@Override
 	public Boolean isDomainAccepted(String email) {
-		logger.info(email);
 		String emailDomain = email.split("@")[1];
-		logger.info(emailDomain);
 		return props.getUserRegistrationDomain().contains(emailDomain);
 	}
 }

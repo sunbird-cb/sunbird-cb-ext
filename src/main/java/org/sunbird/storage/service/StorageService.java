@@ -10,6 +10,6 @@ public interface StorageService {
 	public SBApiResponse uploadFile(MultipartFile file, String containerName) throws IOException;
 	public SBApiResponse deleteFile(String fileName, String containerName);
 
-	SBApiResponse uploadFile(File mFile, String containerName);
+	SBApiResponse uploadFile(File file, String containerName);
 	SBApiResponse downloadFile(String fileName);
 }
