@@ -198,7 +198,7 @@ public class UserBulkUploadService {
         if (!ProjectUtil.validateEmailPattern(userRegistration.getEmail())) {
             errList.add("Invalid Email Address");
         }
-        if (!ProjectUtil.validateContactPattern(String.valueOf(userRegistration.getPhone()))) {
+        if (!ProjectUtil.validateContactPattern(userRegistration.getPhone())) {
             errList.add("Invalid Contact Number");
         }
         if (userUtilityService.isUserExist(Constants.EMAIL, userRegistration.getEmail())) {
