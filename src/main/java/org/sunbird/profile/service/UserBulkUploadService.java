@@ -121,7 +121,7 @@ public class UserBulkUploadService {
 						userRegistration.setFirstName(nextRow.getCell(0).getStringCellValue());
 						userRegistration.setLastName(nextRow.getCell(1).getStringCellValue());
 						userRegistration.setEmail(nextRow.getCell(2).getStringCellValue());
-						userRegistration.setContactNumber((int)nextRow.getCell(3).getNumericCellValue());
+						userRegistration.setPhone(String.valueOf(nextRow.getCell(3).getNumericCellValue()));
 						userRegistration.setOrgName(inputDataMap.get(Constants.ORG_NAME));
 						List<String> errList = validateEmailContactAndDomain(userRegistration);
 						Cell statusCell= nextRow.getCell(4);
@@ -208,13 +208,13 @@ public class UserBulkUploadService {
 		if (!ProjectUtil.validateEmailPattern(userRegistration.getEmail())) {
 			errList.add("Invalid Email Address");
 		}
-		if (!ProjectUtil.validateContactPattern(String.valueOf(userRegistration.getContactNumber()))) {
+		if (!ProjectUtil.validateContactPattern(String.valueOf(userRegistration.getPhone()))) {
 			errList.add("Invalid Contact Number");
 		}
 		if (userUtilityService.isUserExist(Constants.EMAIL, userRegistration.getEmail())) {
 			errList.add(Constants.EMAIL_EXIST_ERROR);
 		}
-		if (userUtilityService.isUserExist(Constants.PHONE, String.valueOf(userRegistration.getContactNumber()))) {
+		if (userUtilityService.isUserExist(Constants.PHONE, String.valueOf(userRegistration.getPhone()))) {
 			errList.add(Constants.PHONE_NUMBER_EXIST_ERROR);
 		}
 
