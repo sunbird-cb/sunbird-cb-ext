@@ -4,38 +4,37 @@ import java.util.concurrent.CompletableFuture;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
+import org.sunbird.catalog.service.CatalogServiceImpl;
 import org.sunbird.core.logger.CbExtLogger;
 
 @Component
 public class UserBulkUploadConsumer {
-	private static final CbExtLogger logger = new CbExtLogger(UserBulkUploadConsumer.class.getName());
-
+	private Logger logger = LoggerFactory.getLogger(UserBulkUploadConsumer.class);
 	@Autowired
 	UserBulkUploadService userBulkUploadService;
 
 
 	@KafkaListener(topics = "${kafka.topics.user.bulk.upload}", groupId = "${kafka.topics.user.bulk.upload.group}")
-	public void processUserBulkUploadMessage(ConsumerRecord<String, String> data) throws Exception {
+	public void processUserBulkUploadMessage(ConsumerRecord<String, String> data) {
 		logger.info(
 				"UserBulkUploadConsumer::processMessage: Received event to initiate User Bulk Upload Process...");
 		logger.info("Received message:: " + data.value());
-		String value = data.value();
 		try {
-			if (StringUtils.isNoneBlank(value)) {
+			if (StringUtils.isNoneBlank(data.value())) {
 				CompletableFuture.runAsync(() -> {
-					userBulkUploadService.initiateUserBulkUploadProcess(value);
+					userBulkUploadService.initiateUserBulkUploadProcess(data.value());
 				});
 				}
 				else {
-					logger.error("Invalid Kafka Msg",
-							new Exception("Invalid Kafka Msg"));
+					logger.error("Error in User Bulk Upload Consumer: Invalid Kafka Msg");
 				}
 		} catch (Exception e) {
 			logger.error(String.format("Error in User Bulk Upload Consumer: Error Msg :%s", e.getMessage()), e);
-			throw new Exception(e);
 		}
 	}
 }

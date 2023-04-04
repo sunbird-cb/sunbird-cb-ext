@@ -6,15 +6,17 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 import org.sunbird.cassandra.utils.CassandraOperation;
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.common.util.ProjectUtil;
-import org.sunbird.core.logger.CbExtLogger;
 import org.sunbird.storage.service.StorageService;
 import org.sunbird.user.registration.model.UserRegistration;
 import org.sunbird.user.service.UserUtilityService;
@@ -27,7 +29,7 @@ import java.util.*;
 
 @Service
 public class UserBulkUploadService {
-	private static final CbExtLogger logger = new CbExtLogger(UserBulkUploadService.class.getName());
+	private Logger logger = LoggerFactory.getLogger(UserBulkUploadService.class);
 	ObjectMapper objectMapper = new ObjectMapper();
 	@Autowired
 	CbExtServerProperties serverProperties;
@@ -47,16 +49,13 @@ public class UserBulkUploadService {
 			HashMap<String, String> inputDataMap = objectMapper.readValue(inputData,
 					new TypeReference<HashMap<String, String>>() {
 					});
-			if (inputDataMap.containsKey(Constants.FILE_NAME)) {
-				String rootOrgId = inputDataMap.get(Constants.ROOT_ORG_ID);
-				String identifier = inputDataMap.get(Constants.IDENTIFIER);
-				String fileName = inputDataMap.get(Constants.FILE_NAME);
-				String orgName = inputDataMap.get(Constants.ORG_NAME);
-				updateUserBulkUploadStatus(rootOrgId, identifier, Constants.STATUS_IN_PROGRESS_UPPERCASE, 0, 0, 0);
-				storageService.downloadFile(fileName);
-				processBulkUpload(fileName, rootOrgId, identifier, orgName);
+			List<String> errList = validateReceivedKafkaMessage(inputDataMap);
+			if (validateReceivedKafkaMessage(inputDataMap).isEmpty()) {
+				updateUserBulkUploadStatus(inputDataMap.get(Constants.ROOT_ORG_ID), inputDataMap.get(Constants.IDENTIFIER), Constants.STATUS_IN_PROGRESS_UPPERCASE, 0, 0, 0);
+				storageService.downloadFile(inputDataMap.get(Constants.FILE_NAME));
+				processBulkUpload(inputDataMap);
 			} else {
-				logger.info("Error in the scheduler to upload bulk users : File Name not present in the input data");
+				logger.info(String.format("Error in the Kafka Message Received : %s", errList));
 			}
 		} catch (Exception e) {
 			logger.error(String.format("Error in the scheduler to upload bulk users %s", e.getMessage()),
@@ -67,7 +66,7 @@ public class UserBulkUploadService {
 				+ duration + " milli-seconds");
 	}
 
-	public Boolean updateUserBulkUploadStatus(String rootOrgId, String identifier, String status, int totalRecordsCount, int successfulRecordsCount, int failedRecordsCount) {
+	public void updateUserBulkUploadStatus(String rootOrgId, String identifier, String status, int totalRecordsCount, int successfulRecordsCount, int failedRecordsCount) {
 		try {
 			Map<String, Object> compositeKeys = new HashMap<>();
 			compositeKeys.put(Constants.ROOT_ORG_ID_LOWER, rootOrgId);
@@ -89,12 +88,10 @@ public class UserBulkUploadService {
 					fieldsToBeUpdated, compositeKeys);
 		} catch (Exception e) {
 			logger.error(String.format("Error in Updating User Bulk Upload Status in Cassandra %s", e.getMessage()), e);
-			return Boolean.FALSE;
 		}
-		return Boolean.TRUE;
 	}
 
-	private void processBulkUpload(String fileName, String rootOrgId, String identifier, String orgName) throws IOException {
+	private void processBulkUpload(HashMap<String, String> inputDataMap) throws IOException {
 		File file = null;
 		FileInputStream fis = null;
 		XSSFWorkbook wb = null;
@@ -103,24 +100,29 @@ public class UserBulkUploadService {
 		int failedRecordsCount=0;
 		try
 		{
-			file = new File(Constants.LOCAL_BASE_PATH + fileName);
+			file = new File(Constants.LOCAL_BASE_PATH + inputDataMap.get(Constants.FILE_NAME));
 			if (file.exists() && file.length()>0) {
 				fis = new FileInputStream(file);
 				wb = new XSSFWorkbook(fis);
 				XSSFSheet sheet = wb.getSheetAt(0);
 				Iterator<Row> rowIterator = sheet.iterator();
+				//incrementing the iterator inorder to skip the headers in the first row
 				if(rowIterator.hasNext()) {
 					rowIterator.next();
 				}
 				while (rowIterator.hasNext()) {
 					Row nextRow = rowIterator.next();
-					if (nextRow.getCell(0)!=null) {
+					if (nextRow.getCell(0)==null) {
+						break;
+					}
+					else
+					{
 						UserRegistration userRegistration = new UserRegistration();
 						userRegistration.setFirstName(nextRow.getCell(0).getStringCellValue());
 						userRegistration.setLastName(nextRow.getCell(1).getStringCellValue());
 						userRegistration.setEmail(nextRow.getCell(2).getStringCellValue());
 						userRegistration.setContactNumber((int)nextRow.getCell(3).getNumericCellValue());
-						userRegistration.setOrgName(orgName);
+						userRegistration.setOrgName(inputDataMap.get(Constants.ORG_NAME));
 						List<String> errList = validateEmailContactAndDomain(userRegistration);
 						Cell statusCell= nextRow.getCell(4);
 						Cell errorDetails = nextRow.getCell(5);
@@ -150,21 +152,17 @@ public class UserBulkUploadService {
 							errorDetails.setCellValue(errList.toString());
 						}
 					}
-					else
-					{
-						break;
-					}
 				}
-				uploadTheUpdatedFile(rootOrgId, identifier, file, wb, totalRecordsCount, noOfSuccessfulRecords, failedRecordsCount);
+				uploadTheUpdatedFile(inputDataMap.get(Constants.ROOT_ORG_ID), inputDataMap.get(Constants.IDENTIFIER), file, wb, totalRecordsCount, noOfSuccessfulRecords, failedRecordsCount);
 			} else {
 				logger.info("Error in Process Bulk Upload : The File is not downloaded/present");
-				updateUserBulkUploadStatus(rootOrgId, identifier, Constants.FAILED.toUpperCase(), totalRecordsCount, noOfSuccessfulRecords, failedRecordsCount);
+				updateUserBulkUploadStatus(inputDataMap.get(Constants.ROOT_ORG_ID), inputDataMap.get(Constants.IDENTIFIER), Constants.FAILED.toUpperCase(), totalRecordsCount, noOfSuccessfulRecords, failedRecordsCount);
 			}
 		}
 		catch(Exception e)
 		{
 			logger.error(String.format("Error in Process Bulk Upload %s", e.getMessage()), e);
-			updateUserBulkUploadStatus(rootOrgId, identifier, Constants.FAILED.toUpperCase(), 0, 0, 0);
+			updateUserBulkUploadStatus(inputDataMap.get(Constants.ROOT_ORG_ID), inputDataMap.get(Constants.IDENTIFIER), Constants.FAILED.toUpperCase(), 0, 0, 0);
 		}
 		finally {
 			if(wb!=null)
@@ -220,6 +218,27 @@ public class UserBulkUploadService {
 			errList.add(Constants.PHONE_NUMBER_EXIST_ERROR);
 		}
 
+		if (!errList.isEmpty()) {
+			str.append("Failed to Validate User Details. Error Details - [").append(errList.toString()).append("]");
+		}
+		return errList;
+	}
+
+	private List<String> validateReceivedKafkaMessage(HashMap<String, String> inputDataMap) {
+		StringBuffer str = new StringBuffer();
+		List<String> errList = new ArrayList<>();
+		if (ObjectUtils.isEmpty(inputDataMap.get(Constants.ROOT_ORG_ID))) {
+			errList.add("RootOrgId is not present");
+		}
+		if (ObjectUtils.isEmpty(inputDataMap.get(Constants.IDENTIFIER))) {
+			errList.add("Identifier is not present");
+		}
+		if (ObjectUtils.isEmpty(inputDataMap.get(Constants.FILE_NAME))) {
+			errList.add("Filename is not present");
+		}
+		if (ObjectUtils.isEmpty(inputDataMap.get(Constants.ORG_NAME))) {
+			errList.add("Orgname is not present");
+		}
 		if (!errList.isEmpty()) {
 			str.append("Failed to Validate User Details. Error Details - [").append(errList.toString()).append("]");
 		}
