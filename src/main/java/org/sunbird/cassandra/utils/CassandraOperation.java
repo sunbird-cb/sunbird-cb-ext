@@ -87,4 +87,6 @@ public interface CassandraOperation {
 
 	public void getAllRecords(String keyspace, String table, List<String> fields, String key,
 			Map<String, Map<String, String>> objectInfo);
+
+	List<Map<String, Object>> getRecordsWithInClause(String keyspaceName, String tableName, List<Map<String, Object>> propertyMaps, List<String> fields);
 }
