@@ -213,8 +213,11 @@ public class UserBulkUploadService {
 		if (!ProjectUtil.validateContactPattern(String.valueOf(userRegistration.getContactNumber()))) {
 			errList.add("Invalid Contact Number");
 		}
-		if (userUtilityService.isUserExist(userRegistration.getEmail())) {
-			errList.add("Another user with the same email already exists");
+		if (userUtilityService.isUserExist(Constants.EMAIL, userRegistration.getEmail())) {
+			errList.add(Constants.EMAIL_EXIST_ERROR);
+		}
+		if (userUtilityService.isUserExist(Constants.PHONE, String.valueOf(userRegistration.getContactNumber()))) {
+			errList.add(Constants.PHONE_NUMBER_EXIST_ERROR);
 		}
 
 		if (!errList.isEmpty()) {

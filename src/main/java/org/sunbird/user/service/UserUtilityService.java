@@ -22,7 +22,7 @@ public interface UserUtilityService {
 
 	boolean createUser(UserRegistration userRegistration);
 
-	boolean isUserExist(String email);
+	boolean isUserExist(String key, String value);
 
 	Boolean isDomainAccepted(String email);
 
