@@ -20,10 +20,8 @@ import org.sunbird.common.util.ProjectUtil;
 import org.sunbird.searchby.model.FracCommonInfo;
 import org.sunbird.searchby.model.MasterData;
 import org.sunbird.workallocation.model.FracStatusInfo;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -40,85 +38,23 @@ public class MasterDataServiceImpl implements MasterDataService {
     CassandraOperation cassandraOperation;
 
     @Override
-	public FracApiResponse getListPositions() {
-		FracApiResponse response = new FracApiResponse();
-		response.setStatusInfo(new FracStatusInfo());
-		response.getStatusInfo().setStatusCode(HttpStatus.OK.value());
-		try {
-			Map<String, Object> propertyMap = new HashMap<>();
-			propertyMap.put(Constants.CONTEXT_TYPE.toLowerCase(), Constants.POSITION);
-			List<Map<String, Object>> listOfPosition = cassandraOperation.getRecordsByProperties(
-					Constants.KEYSPACE_SUNBIRD, Constants.TABLE_MASTER_DATA, propertyMap, new ArrayList<>());
-			List<MasterData> positionList = mapper.convertValue(listOfPosition, new TypeReference<List<MasterData>>() {
-			});
-
-			List<FracCommonInfo> positions = new ArrayList<>();
-			if (!CollectionUtils.isEmpty(positionList)) {
-				positionList.forEach(position -> {
-					FracCommonInfo commonResponse = new FracCommonInfo(position.getId(), position.getContextName(),
-							position.getContextData());
-					positions.add(commonResponse);
-				});
-			}
-			response.setResponseData(positions);
-		} catch (Exception e) {
-			logger.error("Failed to get positions details");
-			response.getStatusInfo().setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
-		}
-		return response;
-	}
-
-    public FracApiResponse getListPositions(String userToken) {
+    public FracApiResponse getListPositions() {
         FracApiResponse response = new FracApiResponse();
         response.setStatusInfo(new FracStatusInfo());
         response.getStatusInfo().setStatusCode(HttpStatus.OK.value());
         try {
-            Map<String, String> headers = new HashMap<>();
-            HashMap<String, Object> reqBody = new HashMap<>();
-            headers = new HashMap<>();
-            headers.put(Constants.AUTHORIZATION, Constants.BEARER + userToken);
-            reqBody = new HashMap<>();
-            List<Map<String, Object>> searchList = new ArrayList<>();
-            Map<String, Object> compSearchObj = new HashMap<>();
-            compSearchObj.put(Constants.TYPE, Constants.POSITION.toUpperCase());
-            compSearchObj.put(Constants.FIELD, Constants.NAME);
-            compSearchObj.put(Constants.KEYWORD, StringUtils.EMPTY);
-            searchList.add(compSearchObj);
-
-            compSearchObj = new HashMap<String, Object>();
-            compSearchObj.put(Constants.TYPE, Constants.POSITION.toUpperCase());
-            compSearchObj.put(Constants.KEYWORD, Constants.VERIFIED);
-            compSearchObj.put(Constants.FIELD, Constants.STATUS);
-            searchList.add(compSearchObj);
-
-            reqBody.put(Constants.SEARCHES, searchList);
-
-            List<String> positionNameList = new ArrayList<String>();
             Map<String, Object> propertyMap = new HashMap<>();
             propertyMap.put(Constants.CONTEXT_TYPE.toLowerCase(), Constants.POSITION);
-            List<Map<String, Object>> listOfPosition = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
-                    Constants.TABLE_MASTER_DATA, propertyMap, new ArrayList<>());
+            List<Map<String, Object>> listOfPosition = cassandraOperation.getRecordsByProperties(
+                    Constants.KEYSPACE_SUNBIRD, Constants.TABLE_MASTER_DATA, propertyMap, new ArrayList<>());
             List<MasterData> positionList = mapper.convertValue(listOfPosition, new TypeReference<List<MasterData>>() {
             });
-            Map<String, Object> fracSearchRes = outboundRequestHandlerService.fetchResultUsingPost(
-                    cbExtServerProperties.getFracHost() + cbExtServerProperties.getFracSearchPath(), reqBody, headers);
-            List<Map<String, Object>> fracResponseList = (List<Map<String, Object>>) fracSearchRes
-                    .get(Constants.RESPONSE_DATA);
-            if (!CollectionUtils.isEmpty(fracResponseList)) {
-                for (Map<String, Object> respObj : fracResponseList) {
-                    if (!positionNameList.contains((String) respObj.get(Constants.CONTEXT_NAME.toLowerCase()))) {
-                        positionList.add(new MasterData((String) respObj.get(Constants.ID), Constants.POSITION,
-                                (String) respObj.get(Constants.NAME), (String) respObj.get(Constants.DESCRIPTION)));
-                        positionNameList.add((String) respObj.get(Constants.NAME));
-                    }
-                }
-            } else {
-                logger.info("Failed to get position info from FRAC API");
-            }
+
             List<FracCommonInfo> positions = new ArrayList<>();
             if (!CollectionUtils.isEmpty(positionList)) {
                 positionList.forEach(position -> {
-                    FracCommonInfo commonResponse = new FracCommonInfo(position.getId(), position.getContextName(), position.getContextData());
+                    FracCommonInfo commonResponse = new FracCommonInfo(position.getId(), position.getContextName(),
+                            position.getContextData());
                     positions.add(commonResponse);
                 });
             }
@@ -335,43 +271,43 @@ public class MasterDataServiceImpl implements MasterDataService {
         transformed.put("industries", industries);
         return transformed;
     }
-    
-	private void enrichFracPositions(List<MasterData> positionList, String userToken) {
-		Map<String, String> headers = new HashMap<>();
-		HashMap<String, Object> reqBody = new HashMap<>();
-		headers = new HashMap<>();
-		headers.put(Constants.AUTHORIZATION, Constants.BEARER + userToken);
-		reqBody = new HashMap<>();
-		List<Map<String, Object>> searchList = new ArrayList<>();
-		Map<String, Object> compSearchObj = new HashMap<>();
-		compSearchObj.put(Constants.TYPE, Constants.POSITION.toUpperCase());
-		compSearchObj.put(Constants.FIELD, Constants.NAME);
-		compSearchObj.put(Constants.KEYWORD, StringUtils.EMPTY);
-		searchList.add(compSearchObj);
 
-		compSearchObj = new HashMap<String, Object>();
-		compSearchObj.put(Constants.TYPE, Constants.POSITION.toUpperCase());
-		compSearchObj.put(Constants.KEYWORD, Constants.VERIFIED);
-		compSearchObj.put(Constants.FIELD, Constants.STATUS);
-		searchList.add(compSearchObj);
+    private void enrichFracPositions(List<MasterData> positionList, String userToken) {
+        Map<String, String> headers = new HashMap<>();
+        HashMap<String, Object> reqBody = new HashMap<>();
+        headers = new HashMap<>();
+        headers.put(Constants.AUTHORIZATION, Constants.BEARER + userToken);
+        reqBody = new HashMap<>();
+        List<Map<String, Object>> searchList = new ArrayList<>();
+        Map<String, Object> compSearchObj = new HashMap<>();
+        compSearchObj.put(Constants.TYPE, Constants.POSITION.toUpperCase());
+        compSearchObj.put(Constants.FIELD, Constants.NAME);
+        compSearchObj.put(Constants.KEYWORD, StringUtils.EMPTY);
+        searchList.add(compSearchObj);
 
-		reqBody.put(Constants.SEARCHES, searchList);
+        compSearchObj = new HashMap<String, Object>();
+        compSearchObj.put(Constants.TYPE, Constants.POSITION.toUpperCase());
+        compSearchObj.put(Constants.KEYWORD, Constants.VERIFIED);
+        compSearchObj.put(Constants.FIELD, Constants.STATUS);
+        searchList.add(compSearchObj);
 
-		List<String> positionNameList = new ArrayList<String>();
-		Map<String, Object> fracSearchRes = outboundRequestHandlerService.fetchResultUsingPost(
-				cbExtServerProperties.getFracHost() + cbExtServerProperties.getFracSearchPath(), reqBody, headers);
-		List<Map<String, Object>> fracResponseList = (List<Map<String, Object>>) fracSearchRes
-				.get(Constants.RESPONSE_DATA);
-		if (!CollectionUtils.isEmpty(fracResponseList)) {
-			for (Map<String, Object> respObj : fracResponseList) {
-				if (!positionNameList.contains((String) respObj.get(Constants.CONTEXT_NAME.toLowerCase()))) {
-					positionList.add(new MasterData((String) respObj.get(Constants.ID), Constants.POSITION,
-							(String) respObj.get(Constants.NAME), (String) respObj.get(Constants.DESCRIPTION)));
-					positionNameList.add((String) respObj.get(Constants.NAME));
-				}
-			}
-		} else {
-			logger.info("Failed to get position info from FRAC API");
-		}
-	}
+        reqBody.put(Constants.SEARCHES, searchList);
+
+        List<String> positionNameList = new ArrayList<String>();
+        Map<String, Object> fracSearchRes = outboundRequestHandlerService.fetchResultUsingPost(
+                cbExtServerProperties.getFracHost() + cbExtServerProperties.getFracSearchPath(), reqBody, headers);
+        List<Map<String, Object>> fracResponseList = (List<Map<String, Object>>) fracSearchRes
+                .get(Constants.RESPONSE_DATA);
+        if (!CollectionUtils.isEmpty(fracResponseList)) {
+            for (Map<String, Object> respObj : fracResponseList) {
+                if (!positionNameList.contains((String) respObj.get(Constants.CONTEXT_NAME.toLowerCase()))) {
+                    positionList.add(new MasterData((String) respObj.get(Constants.ID), Constants.POSITION,
+                            (String) respObj.get(Constants.NAME), (String) respObj.get(Constants.DESCRIPTION)));
+                    positionNameList.add((String) respObj.get(Constants.NAME));
+                }
+            }
+        } else {
+            logger.info("Failed to get position info from FRAC API");
+        }
+    }
 }
