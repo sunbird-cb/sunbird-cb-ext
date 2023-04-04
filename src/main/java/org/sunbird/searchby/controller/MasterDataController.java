@@ -15,72 +15,73 @@ import java.util.Map;
 @RequestMapping("/masterData/v1")
 public class MasterDataController {
 
-    @Autowired
-    private MasterDataServiceImpl masterDataService;
+	@Autowired
+	private MasterDataServiceImpl masterDataService;
 
-    @GetMapping("/positions")
-    public ResponseEntity<?> getPositionsList(@RequestHeader(Constants.X_AUTH_TOKEN) String userToken) {
-        FracApiResponse response = masterDataService.getListPositions(userToken);
-        return new ResponseEntity<>(response, HttpStatus.valueOf(response.getStatusInfo().getStatusCode()));
-    }
+	@GetMapping("/positions")
+	public ResponseEntity<?> getPositionsList() {
+		FracApiResponse response = masterDataService.getListPositions();
+		return new ResponseEntity<>(response, HttpStatus.valueOf(response.getStatusInfo().getStatusCode()));
+	}
 
-    @GetMapping("/getLanguages")
-    public ResponseEntity<?> getLanguagesList() {
-        return new ResponseEntity<>(masterDataService.getMasterDataByType(Constants.LANGUAGES), HttpStatus.OK);
-    }
+	@GetMapping("/getLanguages")
+	public ResponseEntity<?> getLanguagesList() {
+		return new ResponseEntity<>(masterDataService.getMasterDataByType(Constants.LANGUAGES), HttpStatus.OK);
+	}
 
-    @GetMapping("/getNationalities")
-    public ResponseEntity<?> getNationalitiesList() {
-        return new ResponseEntity<>(masterDataService.getMasterDataByType(Constants.NATIONALITIES), HttpStatus.OK);
-    }
-    @GetMapping("/getIndustries")
-    public ResponseEntity<?> getIndustriesList() {
-        return new ResponseEntity<>(masterDataService.getMasterDataByType(Constants.INDUSTRIES), HttpStatus.OK);
-    }
+	@GetMapping("/getNationalities")
+	public ResponseEntity<?> getNationalitiesList() {
+		return new ResponseEntity<>(masterDataService.getMasterDataByType(Constants.NATIONALITIES), HttpStatus.OK);
+	}
 
-    @GetMapping("/getGraduations")
-    public ResponseEntity<?> getGraduationsList() {
-        return new ResponseEntity<>(masterDataService.getMasterDataByType(Constants.GRADUATIONS), HttpStatus.OK);
-    }
+	@GetMapping("/getIndustries")
+	public ResponseEntity<?> getIndustriesList() {
+		return new ResponseEntity<>(masterDataService.getMasterDataByType(Constants.INDUSTRIES), HttpStatus.OK);
+	}
 
-    @GetMapping("/getPostGraduations")
-    public ResponseEntity<?> getPostGraduationsList() {
-        return new ResponseEntity<>(masterDataService.getMasterDataByType(Constants.POST_GRADUATIONS), HttpStatus.OK);
-    }
+	@GetMapping("/getGraduations")
+	public ResponseEntity<?> getGraduationsList() {
+		return new ResponseEntity<>(masterDataService.getMasterDataByType(Constants.GRADUATIONS), HttpStatus.OK);
+	}
 
-    @GetMapping("/getProfilePageMetaData")
-    public ResponseEntity<?> getProfilePageMetaData() {
-        return new ResponseEntity<>(masterDataService.getProfilePageMetaData(), HttpStatus.OK);
-    }
+	@GetMapping("/getPostGraduations")
+	public ResponseEntity<?> getPostGraduationsList() {
+		return new ResponseEntity<>(masterDataService.getMasterDataByType(Constants.POST_GRADUATIONS), HttpStatus.OK);
+	}
 
-    @GetMapping("/getMinistries")
-    public ResponseEntity<?> getMinistriesList() {
-        return new ResponseEntity<>(masterDataService.getMasterDataByType(Constants.MINISTRIES), HttpStatus.OK);
-    }
+	@GetMapping("/getProfilePageMetaData")
+	public ResponseEntity<?> getProfilePageMetaData() {
+		return new ResponseEntity<>(masterDataService.getProfilePageMetaData(), HttpStatus.OK);
+	}
 
-    @GetMapping("/getCadre")
-    public ResponseEntity<?> getCadreList() {
-        return new ResponseEntity<>(masterDataService.getMasterDataByType(Constants.CADRE), HttpStatus.OK);
-    }
+	@GetMapping("/getMinistries")
+	public ResponseEntity<?> getMinistriesList() {
+		return new ResponseEntity<>(masterDataService.getMasterDataByType(Constants.MINISTRIES), HttpStatus.OK);
+	}
 
-    @GetMapping("/getService")
-    public ResponseEntity<?> getServiceList() {
-        return new ResponseEntity<>(masterDataService.getMasterDataByType(Constants.SERVICE), HttpStatus.OK);
-    }
+	@GetMapping("/getCadre")
+	public ResponseEntity<?> getCadreList() {
+		return new ResponseEntity<>(masterDataService.getMasterDataByType(Constants.CADRE), HttpStatus.OK);
+	}
 
-    @GetMapping("/getDesignation")
-    public ResponseEntity<?> getDesignationList() {
-       return new ResponseEntity<>(masterDataService.getMasterDataByType(Constants.DESIGNATIONS), HttpStatus.OK);
-    }
+	@GetMapping("/getService")
+	public ResponseEntity<?> getServiceList() {
+		return new ResponseEntity<>(masterDataService.getMasterDataByType(Constants.SERVICE), HttpStatus.OK);
+	}
 
-    @GetMapping("/getGradePay")
-    public ResponseEntity<?> getGradePayList() {
-        return new ResponseEntity<>(masterDataService.getMasterDataByType(Constants.GRADE_PAY), HttpStatus.OK);
-    }
+	@GetMapping("/getDesignation")
+	public ResponseEntity<?> getDesignationList() {
+		return new ResponseEntity<>(masterDataService.getMasterDataByType(Constants.DESIGNATIONS), HttpStatus.OK);
+	}
 
-    @PostMapping("/upsert")
-    public ResponseEntity<?> upsertMasterData(@RequestBody Map<String,Object> request) {
-        SBApiResponse response = masterDataService.upsertMasterData(request);
-        return new ResponseEntity<>(response, response.getResponseCode());
-    }
+	@GetMapping("/getGradePay")
+	public ResponseEntity<?> getGradePayList() {
+		return new ResponseEntity<>(masterDataService.getMasterDataByType(Constants.GRADE_PAY), HttpStatus.OK);
+	}
+
+	@PostMapping("/upsert")
+	public ResponseEntity<?> upsertMasterData(@RequestBody Map<String, Object> request) {
+		SBApiResponse response = masterDataService.upsertMasterData(request);
+		return new ResponseEntity<>(response, response.getResponseCode());
+	}
 }
