@@ -32,6 +32,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.web.client.RestTemplate;
 import org.sunbird.cache.RedisCacheMgr;
 import org.sunbird.common.model.SBApiResponse;
+import org.sunbird.common.model.SunbirdApiRequest;
 import org.sunbird.common.model.SunbirdApiResp;
 import org.sunbird.common.model.SunbirdApiRespContent;
 import org.sunbird.common.model.SunbirdApiRespParam;
@@ -41,6 +42,7 @@ import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.common.util.IndexerService;
 import org.sunbird.common.util.ProjectUtil;
+import org.sunbird.core.exception.ApplicationLogicError;
 import org.sunbird.core.producer.Producer;
 import org.sunbird.org.service.ExtendedOrgService;
 import org.sunbird.portal.department.model.DeptPublicInfo;
@@ -93,7 +95,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 					errMsg = Constants.EMAIL_EXIST_ERROR;
 				} if (userUtilityService.isUserExist(Constants.PHONE, userRegInfo.getPhone())) {
 					errMsg = Constants.PHONE_NUMBER_EXIST_ERROR;
-				}else {
+				} else {
 					// verify the given email exist in ES Server
 					UserRegistration regDocument = getUserRegistrationDocument(new HashMap<String, Object>() {
 						private static final long serialVersionUID = 1L;
@@ -303,7 +305,6 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 			str.append("Invalid phone number");
 		}
 		return str.toString();
-
 	}
 
 	private UserRegistration getUserRegistrationDocument(Map<String, Object> mustMatch) throws Exception {
@@ -333,6 +334,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 		userRegistration.setOrganisationType(userRegInfo.getOrganisationType());
 		userRegistration.setOrganisationSubType(userRegInfo.getOrganisationSubType());
 		userRegistration.setPhone(userRegInfo.getPhone());
+
 		if (StringUtils.isBlank(userRegInfo.getRegistrationCode())) {
 			userRegistration.setRegistrationCode(serverProperties.getUserRegCodePrefix() + "-"
 					+ userRegistration.getMapId() + "-" + RandomStringUtils.random(8, Boolean.TRUE, Boolean.TRUE));
@@ -358,6 +360,30 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 			boolBuilder.must(QueryBuilders.termQuery(entry.getKey() + ".raw", entry.getValue()));
 		}
 		return new SearchSourceBuilder().query(boolBuilder);
+	}
+
+
+	/**
+	 * Check the email id is valid or not
+	 *
+	 * @param email String
+	 * @return Boolean
+	 */
+	public Boolean emailValidation(String email) {
+		String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\." + "[a-zA-Z0-9_+&*-]+)*@" + "(?:[a-zA-Z0-9-]+\\.)+[a-z"
+				+ "A-Z]{2,7}$";
+		Boolean retValue = Boolean.FALSE;
+		Pattern pat = Pattern.compile(emailRegex);
+		if (pat.matcher(email).matches()) {
+			String emailDomain = email.split("@")[1];
+			retValue = serverProperties.getUserRegistrationDomain().contains(emailDomain)
+					|| serverProperties.getUserRegistrationPreApprovedDomainList().contains(emailDomain);
+		}
+		return retValue;
+	}
+
+	public Boolean isPreApprovedDomain(String email) {
+		return serverProperties.getUserRegistrationPreApprovedDomainList().contains(email.split("@")[1]);
 	}
 
 	private UserRegistration getUserRegistrationForRegCode(String registrationCode) {
@@ -400,7 +426,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 			requestMap.put(Constants.OFFSET, iterateCount);
 			requestMap.put(Constants.LIMIT, 1000);
 			requestMap.put(Constants.FIELDS, new ArrayList<>(Arrays.asList(Constants.CHANNEL, Constants.IDENTIFIER)));
-			Map<String, Object> sortByMap = new HashMap<>();
+			Map<String, Object> sortByMap = new HashMap<String, Object>();
 			sortByMap.put(Constants.CHANNEL, Constants.ASC_ORDER);
 			requestMap.put(Constants.SORT_BY, sortByMap);
 			requestMap.put(Constants.FILTERS, new HashMap<String, Object>() {
@@ -467,30 +493,5 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 		userReg.setOrganisationSubType(userRegInfo.getOrganisationSubType());
 		userReg.setSbRootOrgId(userRegInfo.getSbRootOrgId());
 		userReg.setSbOrgId(userRegInfo.getSbOrgId());
-	}
-
-	/**
-	 * Check the email id is valid or not
-	 *
-	 * @param email String
-	 * @return Boolean
-	 */
-	@Override
-	public Boolean emailValidation(String email) {
-		String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\." + "[a-zA-Z0-9_+&*-]+)*@" + "(?:[a-zA-Z0-9-]+\\.)+[a-z"
-				+ "A-Z]{2,7}$";
-		Boolean retValue = Boolean.FALSE;
-		Pattern pat = Pattern.compile(emailRegex);
-		if (pat.matcher(email).matches()) {
-			String emailDomain = email.split("@")[1];
-			retValue = serverProperties.getUserRegistrationDomain().contains(emailDomain)
-					|| serverProperties.getUserRegistrationPreApprovedDomainList().contains(emailDomain);
-		}
-		return retValue;
-	}
-
-	@Override
-	public Boolean isPreApprovedDomain(String email) {
-		return serverProperties.getUserRegistrationPreApprovedDomainList().contains(email.split("@")[1]);
 	}
 }
