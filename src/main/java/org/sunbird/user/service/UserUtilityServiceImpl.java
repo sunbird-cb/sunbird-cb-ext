@@ -227,7 +227,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		requestBody.put(Constants.PHONE_VERIFIED, true);
 		request.put(Constants.REQUEST, requestBody);
 		try {
-			Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPost(
+			Map<String, Object> readData = outboundRequestHandlerService.fetchResultUsingPost(
 					props.getSbUrl() + props.getLmsUserCreatePath(), request, ProjectUtil.getDefaultHeaders());
 			if (Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
 				Map<String, Object> result = (Map<String, Object>) readData.get(Constants.RESULT);
@@ -317,7 +317,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 				userRegistration.getFirstName() + " " + userRegistration.getLastName());
 		request.put(Constants.REQUEST, requestBody);
 
-		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPost(
+		Map<String, Object> readData = outboundRequestHandlerService.fetchResultUsingPost(
 				props.getDiscussionHubHost() + props.getDiscussionHubCreateUserPath(), request,
 				ProjectUtil.getDefaultHeaders());
 		if (Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
@@ -505,4 +505,50 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 			}
 		}
 	}
+
+	@Override
+	public boolean isUserExist(String key, String value) {
+		// request body
+		SunbirdApiRequest requestObj = new SunbirdApiRequest();
+		Map<String, Object> reqMap = new HashMap<>();
+		reqMap.put(Constants.FILTERS, new HashMap<String, Object>() {
+			{
+				put(key, value);
+			}
+		});
+		requestObj.setRequest(reqMap);
+
+		HashMap<String, String> headersValue = new HashMap<>();
+		headersValue.put(Constants.CONTENT_TYPE, "application/json");
+		headersValue.put(Constants.AUTHORIZATION, props.getSbApiKey());
+
+		try {
+			String url = props.getSbUrl() + props.getUserSearchEndPoint();
+
+			Map<String, Object> response = outboundRequestHandlerService.fetchResultUsingPost(url, requestObj,
+					headersValue);
+			if (response != null && "OK".equalsIgnoreCase((String) response.get("responseCode"))) {
+				Map<String, Object> map = (Map<String, Object>) response.get("result");
+				if (map.get("response") != null) {
+					Map<String, Object> responseObj = (Map<String, Object>) map.get("response");
+					int count = (int) responseObj.get(Constants.COUNT);
+					if (count == 0)
+						return false;
+					else
+						return true;
+				}
+			}
+		} catch (Exception e) {
+			throw new ApplicationLogicError("Sunbird Service ERROR: ", e);
+		}
+		return true;
+	}
+
+
+	@Override
+	public Boolean isDomainAccepted(String email) {
+		String emailDomain = email.split("@")[1];
+		return props.getUserRegistrationDomain().contains(emailDomain);
+	}
 }
+

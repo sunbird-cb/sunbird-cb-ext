@@ -41,6 +41,7 @@ import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.common.util.IndexerService;
+import org.sunbird.common.util.ProjectUtil;
 import org.sunbird.core.exception.ApplicationLogicError;
 import org.sunbird.core.producer.Producer;
 import org.sunbird.org.service.ExtendedOrgService;
@@ -90,9 +91,9 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 		String errMsg = validateRegisterationPayload(userRegInfo);
 		if (StringUtils.isBlank(errMsg)) {
 			try {
-				if (isUserExist(Constants.EMAIL, userRegInfo.getEmail().toLowerCase())) {
+				if (userUtilityService.isUserExist(Constants.EMAIL, userRegInfo.getEmail().toLowerCase())) {
 					errMsg = Constants.EMAIL_EXIST_ERROR;
-				} if (isUserExist(Constants.PHONE, userRegInfo.getPhone())) {
+				} if (userUtilityService.isUserExist(Constants.PHONE, userRegInfo.getPhone())) {
 					errMsg = Constants.PHONE_NUMBER_EXIST_ERROR;
 				} else {
 					// verify the given email exist in ES Server
@@ -299,7 +300,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 			str.setLength(0);
 			str.append("Invalid email id");
 		}
-		if(StringUtils.isNotBlank(userRegInfo.getPhone()) && !isValidPhoneNumber(userRegInfo.getPhone())) {
+		if(StringUtils.isNotBlank(userRegInfo.getPhone()) && !ProjectUtil.validateContactPattern(userRegInfo.getPhone())) {
 			str.setLength(0);
 			str.append("Invalid phone number");
 		}
@@ -359,43 +360,6 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 			boolBuilder.must(QueryBuilders.termQuery(entry.getKey() + ".raw", entry.getValue()));
 		}
 		return new SearchSourceBuilder().query(boolBuilder);
-	}
-
-	private boolean isUserExist(String key, String value) {
-		// request body
-		SunbirdApiRequest requestObj = new SunbirdApiRequest();
-		Map<String, Object> reqMap = new HashMap<>();
-		reqMap.put(Constants.FILTERS, new HashMap<String, Object>() {
-			{
-				put(key, value);
-			}
-		});
-		requestObj.setRequest(reqMap);
-
-		HashMap<String, String> headersValue = new HashMap<>();
-		headersValue.put(Constants.CONTENT_TYPE, "application/json");
-		headersValue.put(Constants.AUTHORIZATION, serverProperties.getSbApiKey());
-
-		try {
-			String url = serverProperties.getSbUrl() + serverProperties.getUserSearchEndPoint();
-
-			Map<String, Object> response = outboundRequestHandlerService.fetchResultUsingPost(url, requestObj,
-					headersValue);
-			if (response != null && "OK".equalsIgnoreCase((String) response.get("responseCode"))) {
-				Map<String, Object> map = (Map<String, Object>) response.get("result");
-				if (map.get("response") != null) {
-					Map<String, Object> responseObj = (Map<String, Object>) map.get("response");
-					int count = (int) responseObj.get(Constants.COUNT);
-					if (count == 0)
-						return false;
-					else
-						return true;
-				}
-			}
-		} catch (Exception e) {
-			throw new ApplicationLogicError("Sunbird Service ERROR: ", e);
-		}
-		return true;
 	}
 
 	/**
@@ -529,11 +493,5 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 		userReg.setSbRootOrgId(userRegInfo.getSbRootOrgId());
 		userReg.setSbOrgId(userRegInfo.getSbOrgId());
 	}
-	
-	private boolean isValidPhoneNumber(String phone) {
-		if (phone.matches("\\d{10}")) {
-			return true;
-		} else
-			return false;
-	}
+
 }

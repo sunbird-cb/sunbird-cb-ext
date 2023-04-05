@@ -2,6 +2,7 @@ package org.sunbird.common.util;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -106,5 +107,46 @@ public class ProjectUtil {
 	public static String firstLetterCapitalWithSingleSpace(final String words) {
 		return Stream.of(words.trim().split("\\s")).filter(word -> word.length() > 0)
 				.map(word -> word.substring(0, 1).toUpperCase() + word.substring(1)).collect(Collectors.joining(" "));
+	}
+	/**
+	 * Check the email id is valid or not
+	 *
+	 * @param email String
+	 * @return Boolean
+	 */
+
+	public static Boolean validateEmailPattern(String email) {
+		String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\." + "[a-zA-Z0-9_+&*-]+)*@" + "(?:[a-zA-Z0-9-]+\\.)+[a-z"
+				+ "A-Z]{2,7}$";
+		Boolean retValue = Boolean.FALSE;
+		Pattern pat = Pattern.compile(emailRegex);
+		if (pat.matcher(email).matches()) {
+			return Boolean.TRUE;
+		}
+		return Boolean.FALSE;
+	}
+
+	/**
+	 * Check the contact number is valid or not
+	 *
+	 * @param contactNumber String
+	 * @return Boolean
+	 */
+
+	public static Boolean validateContactPattern(String contactNumber) {
+		String contactNumberRegex = "^\\d{10}$";
+		Pattern pat = Pattern.compile(contactNumberRegex);
+		if (pat.matcher(contactNumber).matches()) {
+			return Boolean.TRUE;
+		}
+		return Boolean.FALSE;
+	}
+
+	public static Boolean validateFirstName( String firstName ) {
+		return firstName.matches( "^[a-zA-Z]+(([\\'][a-zA-Z])?[a-zA-Z]*)*$" );
+	}
+
+	public static Boolean validateLastName( String lastName ) {
+		return lastName.matches( "[a-zA-Z]*" );
 	}
 }
