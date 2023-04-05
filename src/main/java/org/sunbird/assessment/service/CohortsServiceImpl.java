@@ -98,7 +98,7 @@ public class CohortsServiceImpl implements CohortsService {
 		Map<String, Object> learnerUUIDEmailMap = new HashMap<>();
 		if (!topLearnerUUIDSet.isEmpty()) {
 			learnerUUIDEmailMap = userUtilService.getUsersDataFromUserIds(rootOrg, topLearnierIdList,
-					new ArrayList<>(Arrays.asList(Constants.FIRST_NAME, Constants.LAST_NAME, Constants.EMAIL,
+					new ArrayList<>(Arrays.asList(Constants.FIRST_NAME, Constants.EMAIL,
 							Constants.DEPARTMENT_NAME)));
 			logger.info("enrichDepartmentInfo UserIds -> " + topLearnierIdList.toString() + ", fetched Information -> "
 					+ learnerUUIDEmailMap.size());
@@ -119,7 +119,7 @@ public class CohortsServiceImpl implements CohortsService {
 					user.setUser_id(userProfile.getPersonalDetails().getPrimaryEmail());
 					user.setEmail(userProfile.getPersonalDetails().getPrimaryEmail());
 					user.setFirst_name(userProfile.getPersonalDetails().getFirstname());
-					user.setLast_name(userProfile.getPersonalDetails().getSurname());
+					//user.setLast_name(userProfile.getPersonalDetails().getSurname());
 					userNames.add(userProfile.getPersonalDetails().getPrimaryEmail());
 					topPerformers.add(user);
 					if (counter == count)
@@ -363,7 +363,7 @@ public class CohortsServiceImpl implements CohortsService {
 		}
 		try {
 			Map<String, Object> participantMap = userUtilService.getUsersDataFromUserIds(rootOrg, participantList,
-					new ArrayList<>(Arrays.asList(Constants.FIRST_NAME, Constants.LAST_NAME, Constants.EMAIL,
+					new ArrayList<>(Arrays.asList(Constants.FIRST_NAME, Constants.EMAIL,
 							Constants.DEPARTMENT_NAME)));
 			if (!CollectionUtils.isEmpty(participantMap)) {
 				logger.info("enrichDepartmentInfo UserIds -> " + participantList.toString()
@@ -378,7 +378,7 @@ public class CohortsServiceImpl implements CohortsService {
 						user.setUser_id(userInfo.getUserId());
 						user.setEmail(userInfo.getEmail());
 						user.setFirst_name(userInfo.getFirstName());
-						user.setLast_name(userInfo.getLastName());
+						//user.setLast_name(userInfo.getLastName());
 						user.setDesc(desc);
 						user.setDepartment(userInfo.getChannel());
 						if (userInfo.getProfileDetails() != null

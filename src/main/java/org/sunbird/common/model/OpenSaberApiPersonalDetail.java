@@ -2,7 +2,7 @@ package org.sunbird.common.model;
 
 public class OpenSaberApiPersonalDetail {
 	private String firstname;
-	private String surname;
+	//private String surname;
 	private String primaryEmail;
 	private String username;
 	private String osid;
@@ -15,13 +15,13 @@ public class OpenSaberApiPersonalDetail {
 		this.firstname = firstname;
 	}
 
-	public String getSurname() {
-		return surname;
-	}
-
-	public void setSurname(String surname) {
-		this.surname = surname;
-	}
+//	public String getSurname() {
+//		return surname;
+//	}
+//
+//	public void setSurname(String surname) {
+//		this.surname = surname;
+//	}
 
 	public String getPrimaryEmail() {
 		return primaryEmail;

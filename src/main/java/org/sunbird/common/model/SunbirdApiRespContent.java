@@ -19,7 +19,7 @@ public class SunbirdApiRespContent {
 
 	private String userType;
 
-	private String lastName;
+	//private String lastName;
 
 	private String gender;
 
@@ -101,13 +101,13 @@ public class SunbirdApiRespContent {
 		this.userType = userType;
 	}
 
-	public String getLastName() {
-		return lastName;
-	}
-
-	public void setLastName(String lastName) {
-		this.lastName = lastName;
-	}
+//	public String getLastName() {
+//		return lastName;
+//	}
+//
+//	public void setLastName(String lastName) {
+//		this.lastName = lastName;
+//	}
 
 	public String getGender() {
 		return gender;

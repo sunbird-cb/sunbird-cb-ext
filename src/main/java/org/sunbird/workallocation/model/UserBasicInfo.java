@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public class UserBasicInfo {
     private String wid;
     private String department_name;
-    private String last_name;
+    //private String last_name;
     private String first_name;
     private String email;
     private String designation;
@@ -27,13 +27,13 @@ public class UserBasicInfo {
         this.department_name = department_name;
     }
 
-    public String getLast_name() {
-        return last_name;
-    }
-
-    public void setLast_name(String last_name) {
-        this.last_name = last_name;
-    }
+//    public String getLast_name() {
+//        return last_name;
+//    }
+//
+//    public void setLast_name(String last_name) {
+//        this.last_name = last_name;
+//    }
 
     public String getFirst_name() {
         return first_name;

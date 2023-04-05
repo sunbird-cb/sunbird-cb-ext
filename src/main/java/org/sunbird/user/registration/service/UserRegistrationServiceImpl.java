@@ -271,9 +271,6 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 		if (StringUtils.isBlank(userRegInfo.getFirstName())) {
 			errList.add("FirstName");
 		}
-		if (StringUtils.isBlank(userRegInfo.getLastName())) {
-			errList.add("LastName");
-		}
 		if (StringUtils.isBlank(userRegInfo.getEmail())) {
 			errList.add("Email");
 		}
@@ -322,7 +319,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 	private UserRegistration getRegistrationObject(UserRegistrationInfo userRegInfo) {
 		UserRegistration userRegistration = new UserRegistration();
 		userRegistration.setFirstName(userRegInfo.getFirstName());
-		userRegistration.setLastName(userRegInfo.getLastName());
+		//userRegistration.setLastName(userRegInfo.getLastName());
 		userRegistration.setEmail(userRegInfo.getEmail());
 		userRegistration.setSbOrgId(userRegInfo.getSbOrgId());
 		userRegistration.setOrgName(userRegInfo.getOrgName());
