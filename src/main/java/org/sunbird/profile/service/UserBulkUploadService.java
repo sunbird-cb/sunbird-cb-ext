@@ -2,6 +2,7 @@ package org.sunbird.profile.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
@@ -13,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.util.ObjectUtils;
 import org.sunbird.cassandra.utils.CassandraOperation;
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.util.CbExtServerProperties;
@@ -122,8 +122,8 @@ public class UserBulkUploadService {
                     userRegistration.setFirstName(nextRow.getCell(0).getStringCellValue());
                     userRegistration.setLastName(nextRow.getCell(1).getStringCellValue());
                     userRegistration.setEmail(nextRow.getCell(2).getStringCellValue());
-                    if(nextRow.getCell(3).getCellType() == CellType.NUMERIC) {
-                         phone = NumberToTextConverter.toText(nextRow.getCell(3).getNumericCellValue());
+                    if (nextRow.getCell(3).getCellType() == CellType.NUMERIC) {
+                        phone = NumberToTextConverter.toText(nextRow.getCell(3).getNumericCellValue());
                     }
                     userRegistration.setPhone(phone);
                     userRegistration.setOrgName(inputDataMap.get(Constants.ORG_NAME));
@@ -155,7 +155,7 @@ public class UserBulkUploadService {
                     }
                 }
                 status = uploadTheUpdatedFile(inputDataMap.get(Constants.ROOT_ORG_ID), inputDataMap.get(Constants.IDENTIFIER), file, wb);
-                if (!(status.equalsIgnoreCase(Constants.SUCCESSFUL) && failedRecordsCount == 0 && totalRecordsCount == noOfSuccessfulRecords && totalRecordsCount >= 1)) {
+                if (!(Constants.SUCCESSFUL.equalsIgnoreCase(status) && failedRecordsCount == 0 && totalRecordsCount == noOfSuccessfulRecords && totalRecordsCount >= 1)) {
                     status = Constants.FAILED_UPPERCASE;
                 }
             } else {
@@ -215,7 +215,7 @@ public class UserBulkUploadService {
         }
 
         if (!errList.isEmpty()) {
-            str.append("Failed to Validate User Details. Error Details - [").append(errList.toString()).append("]");
+            str.append("Failed to Validate User Details. Error Details - [").append(errList).append("]");
         }
         return errList;
     }
@@ -223,16 +223,16 @@ public class UserBulkUploadService {
     private List<String> validateReceivedKafkaMessage(HashMap<String, String> inputDataMap) {
         StringBuffer str = new StringBuffer();
         List<String> errList = new ArrayList<>();
-        if (ObjectUtils.isEmpty(inputDataMap.get(Constants.ROOT_ORG_ID))) {
+        if (StringUtils.isEmpty(inputDataMap.get(Constants.ROOT_ORG_ID))) {
             errList.add("RootOrgId is not present");
         }
-        if (ObjectUtils.isEmpty(inputDataMap.get(Constants.IDENTIFIER))) {
+        if (StringUtils.isEmpty(inputDataMap.get(Constants.IDENTIFIER))) {
             errList.add("Identifier is not present");
         }
-        if (ObjectUtils.isEmpty(inputDataMap.get(Constants.FILE_NAME))) {
+        if (StringUtils.isEmpty(inputDataMap.get(Constants.FILE_NAME))) {
             errList.add("Filename is not present");
         }
-        if (ObjectUtils.isEmpty(inputDataMap.get(Constants.ORG_NAME))) {
+        if (StringUtils.isEmpty(inputDataMap.get(Constants.ORG_NAME))) {
             errList.add("Orgname is not present");
         }
         if (!errList.isEmpty()) {
