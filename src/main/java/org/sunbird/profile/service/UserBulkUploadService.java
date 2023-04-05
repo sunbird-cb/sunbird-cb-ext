@@ -3,7 +3,9 @@ package org.sunbird.profile.service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.util.NumberToTextConverter;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
@@ -99,6 +101,7 @@ public class UserBulkUploadService {
         int noOfSuccessfulRecords = 0;
         int failedRecordsCount = 0;
         String status = "";
+        String phone = "";
         try {
             file = new File(Constants.LOCAL_BASE_PATH + inputDataMap.get(Constants.FILE_NAME));
             if (file.exists() && file.length() > 0) {
@@ -119,7 +122,10 @@ public class UserBulkUploadService {
                     userRegistration.setFirstName(nextRow.getCell(0).getStringCellValue());
                     userRegistration.setLastName(nextRow.getCell(1).getStringCellValue());
                     userRegistration.setEmail(nextRow.getCell(2).getStringCellValue());
-                    userRegistration.setPhone(String.valueOf(nextRow.getCell(3).getNumericCellValue()));
+                    if(nextRow.getCell(3).getCellType() == CellType.NUMERIC) {
+                         phone = NumberToTextConverter.toText(nextRow.getCell(3).getNumericCellValue());
+                    }
+                    userRegistration.setPhone(phone);
                     userRegistration.setOrgName(inputDataMap.get(Constants.ORG_NAME));
                     List<String> errList = validateEmailContactAndDomain(userRegistration);
                     Cell statusCell = nextRow.getCell(4);
