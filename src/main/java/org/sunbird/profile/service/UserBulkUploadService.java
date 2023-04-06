@@ -27,6 +27,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.*;
 
 @Service
@@ -86,6 +87,7 @@ public class UserBulkUploadService {
             if (failedRecordsCount >= 0) {
                 fieldsToBeUpdated.put(Constants.FAILED_RECORDS_COUNT, failedRecordsCount);
             }
+            fieldsToBeUpdated.put(Constants.DATE_UPDATE_ON, new Timestamp(System.currentTimeMillis()));
             cassandraOperation.updateRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_USER_BULK_UPLOAD,
                     fieldsToBeUpdated, compositeKeys);
         } catch (Exception e) {
