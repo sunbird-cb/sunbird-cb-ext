@@ -227,7 +227,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		requestBody.put(Constants.PHONE_VERIFIED, true);
 		request.put(Constants.REQUEST, requestBody);
 		try {
-			Map<String, Object> readData = outboundRequestHandlerService.fetchResultUsingPost(
+			Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPost(
 					props.getSbUrl() + props.getLmsUserCreatePath(), request, ProjectUtil.getDefaultHeaders());
 			if (Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
 				Map<String, Object> result = (Map<String, Object>) readData.get(Constants.RESULT);
@@ -317,7 +317,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 				userRegistration.getFirstName() + " " + userRegistration.getLastName());
 		request.put(Constants.REQUEST, requestBody);
 
-		Map<String, Object> readData = outboundRequestHandlerService.fetchResultUsingPost(
+		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPost(
 				props.getDiscussionHubHost() + props.getDiscussionHubCreateUserPath(), request,
 				ProjectUtil.getDefaultHeaders());
 		if (Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
