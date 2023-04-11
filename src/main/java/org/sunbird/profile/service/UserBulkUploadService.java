@@ -121,7 +121,7 @@ public class UserBulkUploadService {
                         break;
                     }
                     UserRegistration userRegistration = new UserRegistration();
-                    userRegistration.setFullName(nextRow.getCell(0).getStringCellValue());
+                    userRegistration.setFirstName(nextRow.getCell(0).getStringCellValue());
                     //userRegistration.setLastName(nextRow.getCell(1).getStringCellValue());
                     userRegistration.setEmail(nextRow.getCell(1).getStringCellValue());
                     if (nextRow.getCell(2).getCellType() == CellType.NUMERIC) {

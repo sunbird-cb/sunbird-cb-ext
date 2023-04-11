@@ -319,6 +319,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 				userRegistration.getFirstName());
 		logger.info((String) requestBody.get(Constants.USER_FULL_NAME));
 		request.put(Constants.REQUEST, requestBody);
+		logger.info(requestBody.toString());
 
 		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPost(
 				props.getDiscussionHubHost() + props.getDiscussionHubCreateUserPath(), request,
