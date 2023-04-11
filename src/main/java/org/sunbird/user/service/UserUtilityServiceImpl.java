@@ -314,12 +314,14 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		Map<String, Object> requestBody = new HashMap<String, Object>();
 		requestBody.put(Constants.USER_NAME.toLowerCase(), userRegistration.getUserName());
 		requestBody.put(Constants.IDENTIFIER, userRegistration.getUserId());
-		if (userRegistration.getLastName() != null)
+		logger.info(userRegistration.getLastName());
+		if (!StringUtils.isEmpty(userRegistration.getLastName()))
 			requestBody.put(Constants.USER_FULL_NAME.toLowerCase(),
 					userRegistration.getFirstName() + " " + userRegistration.getLastName());
 		else
 			requestBody.put(Constants.USER_FULL_NAME.toLowerCase(),
 					userRegistration.getFirstName());
+		logger.info((String) requestBody.get(Constants.USER_FULL_NAME));
 		request.put(Constants.REQUEST, requestBody);
 
 		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPost(
