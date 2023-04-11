@@ -143,6 +143,6 @@ public class ProjectUtil {
 	}
 
 	public static Boolean validateFirstName( String firstName ) {
-		return firstName.matches( "^[A-Za-z\\\\s]+$" );
+		return firstName.matches( "^[a-zA-Z ]*$" );
 	}
 }
