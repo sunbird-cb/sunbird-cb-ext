@@ -221,7 +221,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		requestBody.put(Constants.EMAIL, userRegistration.getEmail());
 		requestBody.put(Constants.CHANNEL, userRegistration.getOrgName());
 		requestBody.put(Constants.FIRSTNAME, userRegistration.getFirstName());
-		requestBody.put(Constants.LASTNAME, userRegistration.getLastName());
+		//requestBody.put(Constants.LASTNAME, userRegistration.getLastName());
 		requestBody.put(Constants.EMAIL_VERIFIED, true);
 		requestBody.put(Constants.PHONE, userRegistration.getPhone());
 		requestBody.put(Constants.PHONE_VERIFIED, true);
@@ -261,7 +261,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		profileDetails.put(Constants.EMPLOYMENTDETAILS, employementDetails);
 		Map<String, Object> personalDetails = new HashMap<String, Object>();
 		personalDetails.put(Constants.FIRSTNAME.toLowerCase(), userRegistration.getFirstName());
-		personalDetails.put(Constants.SURNAME, userRegistration.getLastName());
+		//personalDetails.put(Constants.SURNAME, userRegistration.getLastName());
 		personalDetails.put(Constants.PRIMARY_EMAIL, userRegistration.getEmail());
 		personalDetails.put(Constants.MOBILE, userRegistration.getPhone());
 		personalDetails.put(Constants.PHONE_VERIFIED, true);
@@ -314,13 +314,9 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		Map<String, Object> requestBody = new HashMap<String, Object>();
 		requestBody.put(Constants.USER_NAME.toLowerCase(), userRegistration.getUserName());
 		requestBody.put(Constants.IDENTIFIER, userRegistration.getUserId());
-		logger.info(userRegistration.getLastName());
-		if (!StringUtils.isEmpty(userRegistration.getLastName()))
-			requestBody.put(Constants.USER_FULL_NAME.toLowerCase(),
-					userRegistration.getFirstName() + " " + userRegistration.getLastName());
-		else
-			requestBody.put(Constants.USER_FULL_NAME.toLowerCase(),
-					userRegistration.getFirstName());
+		logger.info(userRegistration.getFirstName());
+		requestBody.put(Constants.USER_FULL_NAME.toLowerCase(),
+				userRegistration.getFirstName());
 		logger.info((String) requestBody.get(Constants.USER_FULL_NAME));
 		request.put(Constants.REQUEST, requestBody);
 
@@ -556,6 +552,16 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 	public Boolean isDomainAccepted(String email) {
 		String emailDomain = email.split("@")[1];
 		return props.getUserRegistrationDomain().contains(emailDomain);
+	}
+
+	@Override
+	public boolean validatePosition(String position) {
+		Map<String, Object> propertyMap = new HashMap<>();
+		propertyMap.put(Constants.CONTEXT_TYPE, Constants.POSITION);
+		propertyMap.put(Constants.CONTEXT_NAME, position);
+		List<Map<String, Object>> positionsList = cassandraOperation
+				.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_MASTER_DATA, propertyMap, null);
+		return positionsList.size() > 0;
 	}
 }
 
