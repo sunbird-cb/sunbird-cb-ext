@@ -124,11 +124,11 @@ public class UserBulkUploadService {
                     userRegistration.setFirstName(nextRow.getCell(0).getStringCellValue());
                     userRegistration.setLastName(nextRow.getCell(1).getStringCellValue());
                     userRegistration.setEmail(nextRow.getCell(2).getStringCellValue());
-                    if (nextRow.getCell(3) != null)
-                        userRegistration.setPosition(nextRow.getCell(3).getStringCellValue());
-                    if (nextRow.getCell(4).getCellType() == CellType.NUMERIC) {
-                        phone = NumberToTextConverter.toText(nextRow.getCell(4).getNumericCellValue());
+                    if (nextRow.getCell(3).getCellType() == CellType.NUMERIC) {
+                        phone = NumberToTextConverter.toText(nextRow.getCell(3).getNumericCellValue());
                     }
+                    if(nextRow.getCell(4)!=null)
+                        userRegistration.setPosition(nextRow.getCell(4).getStringCellValue());
                     userRegistration.setPhone(phone);
                     userRegistration.setOrgName(inputDataMap.get(Constants.ORG_NAME));
                     List<String> errList = validateEmailContactAndDomain(userRegistration);
