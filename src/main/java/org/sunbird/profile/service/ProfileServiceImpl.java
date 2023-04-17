@@ -479,7 +479,7 @@ public class ProfileServiceImpl implements ProfileService {
 	}
 
 	public SBApiResponse userBasicInfo(String userId) {
-		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_USER_BASIC_INFO);
+			SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_USER_BASIC_INFO);
 		try {
 			Map<String, Object> userData = userUtilityService.getUsersReadData(userId, StringUtils.EMPTY,
 					StringUtils.EMPTY);
@@ -814,7 +814,7 @@ public class ProfileServiceImpl implements ProfileService {
 				Map<String, Object> data = existingDataList.get(0);
 				custodianOrgId = (String) data.get(Constants.VALUE.toLowerCase());
 			}
-			redisCacheMgr.putCache(Constants.CUSTODIAN_ORG_ID, custodianOrgId);
+			redisCacheMgr.putStringInCache(Constants.CUSTODIAN_ORG_ID, custodianOrgId);
 		}
 		return custodianOrgId;
 	}
@@ -831,7 +831,7 @@ public class ProfileServiceImpl implements ProfileService {
 				Map<String, Object> data = existingDataList.get(0);
 				custodianOrgChannel = (String) data.get(Constants.VALUE.toLowerCase());
 			}
-			redisCacheMgr.putCache(Constants.CUSTODIAN_ORG_CHANNEL, custodianOrgChannel);
+			redisCacheMgr.putStringInCache(Constants.CUSTODIAN_ORG_CHANNEL, custodianOrgChannel);
 		}
 		return custodianOrgChannel;
 	}

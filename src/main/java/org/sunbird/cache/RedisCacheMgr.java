@@ -55,6 +55,20 @@ public class RedisCacheMgr {
         }
     }
 
+    public void putStringInCache(String key, String value) {
+        try {
+            int ttl = cache_ttl;
+            if (!StringUtils.isEmpty(cbExtServerProperties.getRedisTimeout())) {
+                ttl = Integer.parseInt(cbExtServerProperties.getRedisTimeout());
+            }
+            getJedis().set(Constants.REDIS_COMMON_KEY + key, value);
+            getJedis().expire(Constants.REDIS_COMMON_KEY + key, ttl);
+            logger.info("Cache_key_value " + Constants.REDIS_COMMON_KEY + key + " is saved in redis");
+        } catch (Exception e) {
+            logger.error(e);
+        }
+    }
+
     public boolean deleteKeyByName(String key) {
         try {
         	getJedis().del(Constants.REDIS_COMMON_KEY + key);
