@@ -45,4 +45,10 @@ public class ExtendedOrgController {
 		SBApiResponse response = orgService.orgExtSearch(request);
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
+
+	@PostMapping("/org/v2/ext/signup/search")
+	public ResponseEntity<?> orgExtSearchV2(@RequestBody Map<String, Object> request) {
+		SBApiResponse response = orgService.orgExtSearchV2(request);
+		return new ResponseEntity<>(response, response.getResponseCode());
+	}
 }

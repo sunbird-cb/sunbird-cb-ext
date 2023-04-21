@@ -23,6 +23,9 @@ import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.common.util.ProjectUtil;
 import org.sunbird.core.logger.CbExtLogger;
+import org.sunbird.org.model.OrgHierarchy;
+import org.sunbird.org.model.OrgHierarchyInfo;
+import org.sunbird.org.repository.OrgHierarchyRepository;
 
 @Service
 public class ExtendedOrgServiceImpl implements ExtendedOrgService {
@@ -36,6 +39,9 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 
 	@Autowired
 	CbExtServerProperties configProperties;
+
+	@Autowired
+	OrgHierarchyRepository orgRepository;
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -185,8 +191,7 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 						}).collect(Collectors.toList());
 				SBApiOrgSearchRequest orgSearchRequest = new SBApiOrgSearchRequest();
 				orgSearchRequest.getFilters().setId(orgIdList);
-				if(!ProjectUtil.isStringNullOREmpty((String) requestData.get(Constants.QUERY)))
-				{
+				if (!ProjectUtil.isStringNullOREmpty((String) requestData.get(Constants.QUERY))) {
 					orgSearchRequest.setQuery((String) requestData.get(Constants.QUERY));
 				}
 				orgSearchRequest.setSortBy((Map<String, String>) requestData.get(Constants.SORT_BY_KEYWORD));
@@ -564,7 +569,7 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 			requestData.put(Constants.MAP_ID, (String) data.get(Constants.MAP_ID));
 		}
 	}
-	
+
 	private String validateOrgRequestForRegistration(Map<String, Object> request) {
 		List<String> params = new ArrayList<String>();
 		StringBuilder strBuilder = new StringBuilder();
@@ -595,5 +600,53 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 		}
 
 		return strBuilder.toString();
+	}
+
+	public SBApiResponse orgExtSearchV2(Map<String, Object> request) {
+		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_ORG_HIERACHY_SEARCH);
+		try {
+			StringBuilder searchKey = new StringBuilder("");
+			String errMsg = validateSearchRequest(request, searchKey);
+			if (StringUtils.isNotBlank(errMsg)) {
+				response.setResponseCode(HttpStatus.BAD_REQUEST);
+				response.getParams().setErrmsg(errMsg);
+				return response;
+			}
+			log.info("Received Search Key ? " + searchKey.toString());
+			List<OrgHierarchy> orgList = orgRepository.searchOrgWithHierarchy(searchKey.toString());
+			List<OrgHierarchyInfo> orgInfoList = new ArrayList<OrgHierarchyInfo>();
+			if (CollectionUtils.isEmpty(orgList)) {
+				orgList = Collections.emptyList();
+			}
+			for (OrgHierarchy org : orgList) {
+				OrgHierarchyInfo orgInfo = org.toOrgInfo();
+				orgInfoList.add(orgInfo);
+			}
+			response.getResult().put(Constants.COUNT, orgInfoList.size());
+			response.getResult().put(Constants.RESPONSE, orgInfoList);
+		} catch (Exception e) {
+			log.error("Failed to retrieve details from org hierarchy table. Exception: ", e);
+		}
+		return response;
+	}
+
+	private String validateSearchRequest(Map<String, Object> request, StringBuilder searchKey) {
+		String errMsg = "";
+		Map<String, Object> requestBody = (Map<String, Object>) request.get(Constants.REQUEST);
+		if (ObjectUtils.isEmpty(requestBody)) {
+			errMsg = Constants.INVALID_REQUEST;
+			return errMsg;
+		}
+		Map<String, Object> filters = (Map<String, Object>) requestBody.get(Constants.FILTERS);
+		if (ObjectUtils.isEmpty(filters)) {
+			errMsg = Constants.INVALID_REQUEST;
+			return errMsg;
+		}
+		if (StringUtils.isNotBlank((String) filters.get(Constants.ORG_NAME))) {
+			searchKey.append(((String) filters.get(Constants.ORG_NAME)).trim());
+		} else {
+			errMsg = "OrgName is empty in search request.";
+		}
+		return errMsg;
 	}
 }
