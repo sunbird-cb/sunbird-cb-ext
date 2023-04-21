@@ -2,6 +2,8 @@ package org.sunbird.profile.service;
 
 import java.util.Map;
 
+import org.springframework.core.io.Resource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 import org.sunbird.common.model.SBApiResponse;
 
@@ -29,4 +31,6 @@ public interface ProfileService {
 	SBApiResponse getUserEnrollmentReport();
 	
 	SBApiResponse getUserReport();
+
+	ResponseEntity<Resource> downloadFile(String fileName);
 }
