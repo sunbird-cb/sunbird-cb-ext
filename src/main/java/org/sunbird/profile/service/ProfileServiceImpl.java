@@ -2,6 +2,7 @@ package org.sunbird.profile.service;
 
 import static java.util.stream.Collectors.toList;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -63,7 +64,6 @@ import org.sunbird.user.service.UserUtilityService;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import scala.Option;
 
 @Service
 @SuppressWarnings({ "unchecked", "serial" })
@@ -1548,21 +1548,28 @@ public class ProfileServiceImpl implements ProfileService {
 
 	@Override
 	public ResponseEntity<Resource> downloadFile(String fileName) {
-		storageService.downloadFile(fileName);
-		Path tmpPath = Paths.get(Constants.LOCAL_BASE_PATH + fileName);
-		ByteArrayResource resource;
 		try {
-			resource = new ByteArrayResource(Files.readAllBytes(tmpPath));
+			storageService.downloadFile(fileName);
+			Path tmpPath = Paths.get(Constants.LOCAL_BASE_PATH + fileName);
+			ByteArrayResource resource = new ByteArrayResource(Files.readAllBytes(tmpPath));
+			HttpHeaders headers = new HttpHeaders();
+			headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"");
+			return ResponseEntity.ok()
+					.headers(headers)
+					.contentLength(tmpPath.toFile().length())
+					.contentType(MediaType.parseMediaType(MediaType.MULTIPART_FORM_DATA_VALUE))
+					.body(resource);
 		} catch (IOException e) {
 			log.error("Failed to read the downloaded file: " + fileName + ", Exception: ", e);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+		} finally {
+			try {
+				File file = new File(Constants.LOCAL_BASE_PATH + fileName);
+				if(file.exists()) {
+					file.delete();
+				}
+			} catch(Exception e1) {
+			}
 		}
-		HttpHeaders headers = new HttpHeaders();
-		headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"");
-		return ResponseEntity.ok()
-				.headers(headers)
-				.contentLength(tmpPath.toFile().length())
-				.contentType(MediaType.parseMediaType(MediaType.MULTIPART_FORM_DATA_VALUE))
-				.body(resource);
 	}
 }
