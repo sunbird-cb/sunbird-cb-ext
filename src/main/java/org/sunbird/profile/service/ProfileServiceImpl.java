@@ -2,6 +2,10 @@ package org.sunbird.profile.service;
 
 import static java.util.stream.Collectors.toList;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,7 +34,12 @@ import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -54,6 +63,7 @@ import org.sunbird.user.service.UserUtilityService;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import scala.Option;
 
 @Service
 @SuppressWarnings({ "unchecked", "serial" })
@@ -1534,5 +1544,25 @@ public class ProfileServiceImpl implements ProfileService {
 				enrolmentReport.put(field, StringUtils.EMPTY);
 			}
 		}
+	}
+
+	@Override
+	public ResponseEntity<Resource> downloadFile(String fileName) {
+		storageService.downloadFile(fileName);
+		Path tmpPath = Paths.get(Constants.LOCAL_BASE_PATH + fileName);
+		ByteArrayResource resource;
+		try {
+			resource = new ByteArrayResource(Files.readAllBytes(tmpPath));
+		} catch (IOException e) {
+			log.error("Failed to read the downloaded file: " + fileName + ", Exception: ", e);
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+		}
+		HttpHeaders headers = new HttpHeaders();
+		headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"");
+		return ResponseEntity.ok()
+				.headers(headers)
+				.contentLength(tmpPath.toFile().length())
+				.contentType(MediaType.parseMediaType(MediaType.MULTIPART_FORM_DATA_VALUE))
+				.body(resource);
 	}
 }
