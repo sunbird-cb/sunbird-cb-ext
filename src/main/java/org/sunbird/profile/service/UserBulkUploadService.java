@@ -211,6 +211,9 @@ public class UserBulkUploadService {
         if (!ProjectUtil.validateContactPattern(userRegistration.getPhone())) {
             errList.add("Invalid Contact Number");
         }
+        if (!StringUtils.isBlank(userRegistration.getPosition())) {
+            errList.add("Position is missing");
+        }
         if (!userUtilityService.validatePosition(userRegistration.getPosition())) {
             errList.add("Invalid Position");
         }
