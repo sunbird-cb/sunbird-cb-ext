@@ -12,7 +12,6 @@ public class SearchUserApiContent {
     private String userId;
     private String email;
     private String firstName;
-    private String lastName;
     private String desc;
     private String channel;
     private String phone;
@@ -88,14 +87,6 @@ public class SearchUserApiContent {
         this.firstName = firstName;
     }
 
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
     public String getDesc() {
         return desc;
     }
@@ -127,7 +118,6 @@ public class SearchUserApiContent {
                 ", userId='" + userId + '\'' +
                 ", email='" + email + '\'' +
                 ", firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
                 ", desc='" + desc + '\'' +
                 ", channel='" + channel + '\'' +
                 ", phone='" + phone + '\'' +

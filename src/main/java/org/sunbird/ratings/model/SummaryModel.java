@@ -118,16 +118,14 @@ public class SummaryModel {
         private Float rating;
         private String review;
         private String firstName;
-        private String lastName;
 
-        public latestReviews(String objectType, String user_id, Timestamp date, Float rating, String review, String firstName, String lastName) {
+        public latestReviews(String objectType, String user_id, Timestamp date, Float rating, String review, String firstName) {
             this.objectType = objectType;
             this.user_id = user_id;
             this.date = date;
             this.rating = rating;
             this.review = review;
             this.firstName = firstName;
-            this.lastName = lastName;
         }
 
         public String getObjectType() {
@@ -176,14 +174,6 @@ public class SummaryModel {
 
         public void setFirstName(String firstName) {
             this.firstName = firstName;
-        }
-
-        public String getLastName() {
-            return lastName;
-        }
-
-        public void setLastName(String lastName) {
-            this.lastName = lastName;
         }
     }
 }

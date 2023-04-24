@@ -29,17 +29,6 @@
           "analyzer": "cs_index_analyzer",
           "search_analyzer": "cs_search_analyzer"
         },
-        "lastName": {
-          "type": "text",
-          "fields": {
-            "raw": {
-              "type": "text",
-              "analyzer": "keylower"
-            }
-          },
-          "analyzer": "cs_index_analyzer",
-          "search_analyzer": "cs_search_analyzer"
-        },
         "email": {
           "type": "keyword",
           "fields": {

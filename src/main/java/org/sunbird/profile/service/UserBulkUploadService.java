@@ -198,7 +198,7 @@ public class UserBulkUploadService {
             errList.add("Domain not accepted");
         }
         if (!ProjectUtil.validateFirstName(userRegistration.getFirstName())) {
-            errList.add("Invalid First Name");
+            errList.add("Invalid Name");
         }
         if (!ProjectUtil.validateEmailPattern(userRegistration.getEmail())) {
             errList.add("Invalid Email Address");
@@ -208,9 +208,10 @@ public class UserBulkUploadService {
         }
         if (StringUtils.isBlank(userRegistration.getPosition())) {
             errList.add("Position is missing");
-        }
-        if (!userUtilityService.validatePosition(userRegistration.getPosition())) {
-            errList.add("Invalid Position");
+        } else {
+            if (!userUtilityService.validatePosition(userRegistration.getPosition())) {
+                errList.add("Invalid Position");
+            }
         }
         if (userUtilityService.isUserExist(Constants.EMAIL, userRegistration.getEmail())) {
             errList.add(Constants.EMAIL_EXIST_ERROR);

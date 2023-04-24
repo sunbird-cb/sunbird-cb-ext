@@ -378,7 +378,6 @@ public class CohortsServiceImpl implements CohortsService {
 						user.setUser_id(userInfo.getUserId());
 						user.setEmail(userInfo.getEmail());
 						user.setFirst_name(userInfo.getFirstName());
-						user.setLast_name(userInfo.getLastName());
 						user.setDesc(desc);
 						user.setDepartment(userInfo.getChannel());
 						if (userInfo.getProfileDetails() != null

@@ -182,7 +182,7 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
 			List<String> enrolledUserId = userEnrolmentList.stream()
 					.map(obj -> (String) obj.get(Constants.USER_ID_CONSTANT)).collect(Collectors.toList());
 			List<String> userFields = new ArrayList<>(Arrays.asList(Constants.USER_ID_CONSTANT, Constants.FIRSTNAME,
-					Constants.LASTNAME, Constants.PROFILE_DETAILS_PRIMARY_EMAIL, Constants.CHANNEL,
+					Constants.PROFILE_DETAILS_PRIMARY_EMAIL, Constants.CHANNEL,
 					Constants.PROFILE_DETAILS_DESIGNATION, Constants.PROFILE_DETAILS_DESIGNATION_OTHER));
 			Map<String, Object> userMap = userUtilService.getUsersDataFromUserIds(enrolledUserId, userFields,
 					authUserToken);
@@ -252,7 +252,6 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
 	private void appendUserDetails(Map<String, Object> responseObj, SearchUserApiContent userObj) throws Exception {
 		if (!ObjectUtils.isEmpty(userObj)) {
 			responseObj.put(Constants.FIRSTNAME, userObj.getFirstName());
-			responseObj.put(Constants.LASTNAME, userObj.getLastName());
 			responseObj.put(Constants.DEPARTMENT, userObj.getChannel());
 
 			if (!ObjectUtils.isEmpty(userObj.getProfileDetails())) {
