@@ -122,23 +122,21 @@ public class UserBulkUploadService {
                     }
                     UserRegistration userRegistration = new UserRegistration();
                     userRegistration.setFirstName(nextRow.getCell(0).getStringCellValue());
-                    userRegistration.setLastName(nextRow.getCell(1).getStringCellValue());
-                    userRegistration.setEmail(nextRow.getCell(2).getStringCellValue());
-                    if (nextRow.getCell(3).getCellType() == CellType.NUMERIC) {
-                        phone = NumberToTextConverter.toText(nextRow.getCell(3).getNumericCellValue());
+                    userRegistration.setEmail(nextRow.getCell(1).getStringCellValue());
+                    if (nextRow.getCell(2).getCellType() == CellType.NUMERIC) {
+                        phone = NumberToTextConverter.toText(nextRow.getCell(2).getNumericCellValue());
                     }
-                    if(nextRow.getCell(4)!=null)
-                        userRegistration.setPosition(nextRow.getCell(4).getStringCellValue());
                     userRegistration.setPhone(phone);
+                    userRegistration.setPosition(nextRow.getCell(3).getStringCellValue());
                     userRegistration.setOrgName(inputDataMap.get(Constants.ORG_NAME));
                     List<String> errList = validateEmailContactAndDomain(userRegistration);
-                    Cell statusCell = nextRow.getCell(5);
-                    Cell errorDetails = nextRow.getCell(6);
+                    Cell statusCell = nextRow.getCell(4);
+                    Cell errorDetails = nextRow.getCell(5);
                     if (statusCell == null) {
-                        statusCell = nextRow.createCell(5);
+                        statusCell = nextRow.createCell(4);
                     }
                     if (errorDetails == null) {
-                        errorDetails = nextRow.createCell(6);
+                        errorDetails = nextRow.createCell(5);
                     }
                     totalRecordsCount++;
                     if (errList.isEmpty()) {
@@ -202,16 +200,13 @@ public class UserBulkUploadService {
         if (!ProjectUtil.validateFirstName(userRegistration.getFirstName())) {
             errList.add("Invalid First Name");
         }
-        if (!ProjectUtil.validateLastName(userRegistration.getLastName())) {
-            errList.add("Invalid Last Name");
-        }
         if (!ProjectUtil.validateEmailPattern(userRegistration.getEmail())) {
             errList.add("Invalid Email Address");
         }
         if (!ProjectUtil.validateContactPattern(userRegistration.getPhone())) {
             errList.add("Invalid Contact Number");
         }
-        if (!StringUtils.isBlank(userRegistration.getPosition())) {
+        if (StringUtils.isBlank(userRegistration.getPosition())) {
             errList.add("Position is missing");
         }
         if (!userUtilityService.validatePosition(userRegistration.getPosition())) {
