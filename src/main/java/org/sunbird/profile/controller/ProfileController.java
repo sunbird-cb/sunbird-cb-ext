@@ -101,4 +101,9 @@ public class ProfileController {
 		SBApiResponse response = profileService.getUserReport();
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
+
+	@GetMapping("/user/v1/bulkuser/download/{fileName}")
+	public ResponseEntity<?> downloadFile(@PathVariable("fileName") String fileName) {
+		return profileService.downloadFile(fileName);
+	}
 }
