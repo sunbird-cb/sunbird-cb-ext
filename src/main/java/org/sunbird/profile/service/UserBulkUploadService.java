@@ -128,15 +128,16 @@ public class UserBulkUploadService {
                         phone = NumberToTextConverter.toText(nextRow.getCell(3).getNumericCellValue());
                     }
                     userRegistration.setPhone(phone);
+                    userRegistration.setPosition(nextRow.getCell(4).getStringCellValue());
                     userRegistration.setOrgName(inputDataMap.get(Constants.ORG_NAME));
                     List<String> errList = validateEmailContactAndDomain(userRegistration);
-                    Cell statusCell = nextRow.getCell(4);
-                    Cell errorDetails = nextRow.getCell(5);
+                    Cell statusCell = nextRow.getCell(5);
+                    Cell errorDetails = nextRow.getCell(6);
                     if (statusCell == null) {
-                        statusCell = nextRow.createCell(4);
+                        statusCell = nextRow.createCell(5);
                     }
                     if (errorDetails == null) {
-                        errorDetails = nextRow.createCell(5);
+                        errorDetails = nextRow.createCell(6);
                     }
                     totalRecordsCount++;
                     if (errList.isEmpty()) {
@@ -208,6 +209,13 @@ public class UserBulkUploadService {
         }
         if (!ProjectUtil.validateContactPattern(userRegistration.getPhone())) {
             errList.add("Invalid Contact Number");
+        }
+        if (StringUtils.isBlank(userRegistration.getPosition())) {
+            errList.add("Position is missing");
+        } else {
+            if (!userUtilityService.validatePosition(userRegistration.getPosition())) {
+                errList.add("Invalid Position");
+            }
         }
         if (userUtilityService.isUserExist(Constants.EMAIL, userRegistration.getEmail())) {
             errList.add(Constants.EMAIL_EXIST_ERROR);
