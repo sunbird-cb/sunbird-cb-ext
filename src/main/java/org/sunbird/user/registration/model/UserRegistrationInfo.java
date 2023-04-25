@@ -8,8 +8,7 @@ package org.sunbird.user.registration.model;
  */
 public class UserRegistrationInfo {
 	private String registrationCode;
-	private String firstName;
-	private String lastName;
+	private String fullName;
 	private String email;
 	private String position;
 	private String source;
@@ -28,22 +27,6 @@ public class UserRegistrationInfo {
 
 	public void setRegistrationCode(String registrationCode) {
 		this.registrationCode = registrationCode;
-	}
-
-	public String getFirstName() {
-		return firstName;
-	}
-
-	public void setFirstName(String firstName) {
-		this.firstName = firstName;
-	}
-
-	public String getLastName() {
-		return lastName;
-	}
-
-	public void setLastName(String lastName) {
-		this.lastName = lastName;
 	}
 
 	public String getEmail() {
@@ -133,4 +116,13 @@ public class UserRegistrationInfo {
 	public void setPhone(String phone) {
 		this.phone = phone;
 	}
+
+	public String getFullName() {
+		return fullName;
+	}
+
+	public void setFullName(String fullName) {
+		this.fullName = fullName;
+	}
+
 }

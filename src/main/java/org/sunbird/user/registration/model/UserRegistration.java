@@ -17,6 +17,15 @@ public class UserRegistration extends UserRegistrationInfo {
 	private String userId;
 	private String userName;
 	private String proposedDeptName;
+	private String firstName;
+
+	public String getFirstName() {
+		return firstName;
+	}
+
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
+	}
 
 	public String getWfId() {
 		return wfId;

@@ -268,11 +268,8 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 	private String validateRegisterationPayload(UserRegistrationInfo userRegInfo) {
 		StringBuffer str = new StringBuffer();
 		List<String> errList = new ArrayList<String>();
-		if (StringUtils.isBlank(userRegInfo.getFirstName())) {
-			errList.add("FirstName");
-		}
-		if (StringUtils.isBlank(userRegInfo.getLastName())) {
-			errList.add("LastName");
+		if (StringUtils.isBlank(userRegInfo.getFullName())) {
+			errList.add("FullName");
 		}
 		if (StringUtils.isBlank(userRegInfo.getEmail())) {
 			errList.add("Email");
@@ -321,8 +318,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 
 	private UserRegistration getRegistrationObject(UserRegistrationInfo userRegInfo) {
 		UserRegistration userRegistration = new UserRegistration();
-		userRegistration.setFirstName(userRegInfo.getFirstName());
-		userRegistration.setLastName(userRegInfo.getLastName());
+		userRegistration.setFirstName(userRegInfo.getFullName());
 		userRegistration.setEmail(userRegInfo.getEmail());
 		userRegistration.setSbOrgId(userRegInfo.getSbOrgId());
 		userRegistration.setOrgName(userRegInfo.getOrgName());
