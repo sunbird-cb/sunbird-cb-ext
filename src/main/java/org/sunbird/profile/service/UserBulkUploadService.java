@@ -194,6 +194,9 @@ public class UserBulkUploadService {
     private List<String> validateEmailContactAndDomain(UserRegistration userRegistration) {
         StringBuffer str = new StringBuffer();
         List<String> errList = new ArrayList<>();
+        if (!ProjectUtil.validateEmailPattern(userRegistration.getEmail())) {
+            errList.add("Invalid Email Address");
+        }
         if (!userUtilityService.isDomainAccepted(userRegistration.getEmail())) {
             errList.add("Domain not accepted");
         }
@@ -202,9 +205,6 @@ public class UserBulkUploadService {
         }
         if (!ProjectUtil.validateLastName(userRegistration.getLastName())) {
             errList.add("Invalid Last Name");
-        }
-        if (!ProjectUtil.validateEmailPattern(userRegistration.getEmail())) {
-            errList.add("Invalid Email Address");
         }
         if (!ProjectUtil.validateContactPattern(userRegistration.getPhone())) {
             errList.add("Invalid Contact Number");
