@@ -123,7 +123,10 @@ public class UserBulkUploadService {
                     UserRegistration userRegistration = new UserRegistration();
                     userRegistration.setFirstName(nextRow.getCell(0).getStringCellValue());
                     userRegistration.setLastName(nextRow.getCell(1).getStringCellValue());
+                    logger.info("1:"+ userRegistration.getEmail());
                     userRegistration.setEmail(nextRow.getCell(2).getStringCellValue());
+                    logger.info("11:"+ nextRow.getCell(2).getStringCellValue());
+                    logger.info("12:"+ userRegistration.getEmail());
                     if (nextRow.getCell(3).getCellType() == CellType.NUMERIC) {
                         phone = NumberToTextConverter.toText(nextRow.getCell(3).getNumericCellValue());
                     }
@@ -194,9 +197,11 @@ public class UserBulkUploadService {
     private List<String> validateEmailContactAndDomain(UserRegistration userRegistration) {
         StringBuffer str = new StringBuffer();
         List<String> errList = new ArrayList<>();
+        logger.info("1:"+ userRegistration.getEmail());
         if (!ProjectUtil.validateEmailPattern(userRegistration.getEmail())) {
             errList.add("Invalid Email Address");
         }
+        logger.info("3:"+ userRegistration.getEmail());
         if (!userUtilityService.isDomainAccepted(userRegistration.getEmail())) {
             errList.add("Domain not accepted");
         }

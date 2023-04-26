@@ -116,6 +116,7 @@ public class ProjectUtil {
 	 */
 
 	public static Boolean validateEmailPattern(String email) {
+		logger.info("2:"+ email);
 		String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\." + "[a-zA-Z0-9_+&*-]+)*@" + "(?:[a-zA-Z0-9-]+\\.)+[a-z"
 				+ "A-Z]{2,7}$";
 		Boolean retValue = Boolean.FALSE;
