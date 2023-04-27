@@ -213,7 +213,7 @@ public class UserBulkUploadService {
             errList.add(Constants.EMAIL_EXIST_ERROR);
         }
         if (userUtilityService.isUserExist(Constants.PHONE, String.valueOf(userRegistration.getPhone()))) {
-            errList.add(Constants.CONTACT_NUMBER_EXIST_ERROR);
+            errList.add(Constants.MOBILE_NUMBER_EXIST_ERROR);
         }
 
         if (!errList.isEmpty()) {
