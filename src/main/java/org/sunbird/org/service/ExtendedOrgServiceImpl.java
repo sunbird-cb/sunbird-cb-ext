@@ -158,7 +158,13 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 			parentMapId = Constants.SPV;
 		}
 
-		List<OrgHierarchy> orgHierarchyList = orgRepository.findAllByParentMapId(parentMapId);
+		List<OrgHierarchy> orgHierarchyList = null;
+		if (Constants.MINISTRY.equalsIgnoreCase(parentMapId) 
+			|| Constants.STATE.equalsIgnoreCase(parentMapId)) {
+			orgHierarchyList = orgRepository.findAllBySbOrgType(parentMapId);
+		} else {
+			orgHierarchyList = orgRepository.findAllByParentMapId(parentMapId);
+		}
 		if (CollectionUtils.isNotEmpty(orgHierarchyList)) {
 			Map<String, Object> responseMap = new HashMap<String, Object>();
 			List<OrgHierarchySearchInfo> orgSearchList = new ArrayList<OrgHierarchySearchInfo>();
