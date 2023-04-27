@@ -647,7 +647,7 @@ public class ProfileServiceImpl implements ProfileService {
 	}
 
 	@Override
-	public SBApiResponse bulkUpload(MultipartFile mFile, String orgId, String orgName, String userId) {
+	public SBApiResponse bulkUpload(MultipartFile mFile, String orgId, String channel, String userId) {
 		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_USER_BULK_UPLOAD);
 		try {
 			SBApiResponse uploadResponse = storageService.uploadFile(mFile, serverConfig.getBulkUploadContainerName());
@@ -678,9 +678,9 @@ public class ProfileServiceImpl implements ProfileService {
 			response.getParams().setStatus(Constants.SUCCESSFUL);
 			response.setResponseCode(HttpStatus.OK);
 			response.getResult().putAll(uploadedFile);
-			uploadedFile.put(Constants.ORG_NAME, orgName);
+			uploadedFile.put(Constants.ORG_NAME, channel);
 			kafkaProducer.push(serverConfig.getUserBulkUploadTopic(), uploadedFile);
-			sendBulkUploadNotification(orgId, orgName, (String) uploadResponse.getResult().get(Constants.URL));
+			sendBulkUploadNotification(orgId, channel, (String) uploadResponse.getResult().get(Constants.URL));
 		} catch (Exception e) {
 			setErrorData(response,
 					String.format("Failed to process user bulk upload request. Error: ", e.getMessage()));

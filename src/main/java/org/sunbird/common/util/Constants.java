@@ -520,6 +520,7 @@ public class Constants {
 	public static final String DESCENDING_ORDER = "desc";
 	public static final String X_AUTH_USER_ORG_ID = "x-authenticated-user-orgid";
 	public static final String X_AUTH_USER_ORG_NAME = "x-authenticated-user-orgname";
+	public static final String X_AUTH_USER_CHANNEL = "x-authenticated-user-channel";
 	public static final String API_USER_SIGNUP = "api.user.signup";
 	public static final String API_POSITION_CREATE = "api.create.position";
 	public static final String API_POSITION_UPDATE = "api.update.position";
@@ -667,6 +668,10 @@ public class Constants {
 	public static final String API_FILE_DOWNLOAD = "api.file.download";
 	public static final String API_ORG_HIERACHY_SEARCH = "api.org.hierarchy.search";
 	public static final String INVALID_REQUEST = "Invalid Request";
+	public static final String L1_MAP_ID = "l1MapId";
+	public static final String L2_MAP_ID = "l2MapId";
+	public static final String L1_ORG_NAME = "l1OrgName";
+	public static final String L2_ORG_NAME = "l2OrgName";
 	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}
