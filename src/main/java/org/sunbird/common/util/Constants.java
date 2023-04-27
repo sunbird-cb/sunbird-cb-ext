@@ -653,6 +653,7 @@ public class Constants {
 	public static final String CASSANDRA_DB = "cassandra db";
 	public static final String REDIS_CACHE = "redis cache";
 	public static final String PHONE_NUMBER_EXIST_ERROR = "Phone number is already registered.";
+	public static final String CONTACT_NUMBER_EXIST_ERROR = "Contact number is already registered.";
 	public static final String PHONE_VERIFIED = "phoneVerified";
 	public static final String QUERY = "query";
 	public static final String SORT_BY_KEYWORD = "sortBy";

@@ -207,13 +207,13 @@ public class UserBulkUploadService {
             errList.add("Invalid Email Id");
         }
         if (!ProjectUtil.validateContactPattern(userRegistration.getPhone())) {
-            errList.add("Invalid Phone Number");
+            errList.add("Invalid Contact Number");
         }
         if (userUtilityService.isUserExist(Constants.EMAIL, userRegistration.getEmail())) {
             errList.add(Constants.EMAIL_EXIST_ERROR);
         }
         if (userUtilityService.isUserExist(Constants.PHONE, String.valueOf(userRegistration.getPhone()))) {
-            errList.add(Constants.PHONE_NUMBER_EXIST_ERROR);
+            errList.add(Constants.CONTACT_NUMBER_EXIST_ERROR);
         }
 
         if (!errList.isEmpty()) {
