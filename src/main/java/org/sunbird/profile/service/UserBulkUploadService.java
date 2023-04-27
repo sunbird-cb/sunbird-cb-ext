@@ -204,10 +204,10 @@ public class UserBulkUploadService {
             errList.add("Invalid Last Name");
         }
         if (!ProjectUtil.validateEmailPattern(userRegistration.getEmail())) {
-            errList.add("Invalid Email Address");
+            errList.add("Invalid Email Id");
         }
         if (!ProjectUtil.validateContactPattern(userRegistration.getPhone())) {
-            errList.add("Invalid Contact Number");
+            errList.add("Invalid Phone Number");
         }
         if (userUtilityService.isUserExist(Constants.EMAIL, userRegistration.getEmail())) {
             errList.add(Constants.EMAIL_EXIST_ERROR);
