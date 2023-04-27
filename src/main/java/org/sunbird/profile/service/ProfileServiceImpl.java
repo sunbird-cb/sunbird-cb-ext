@@ -897,7 +897,7 @@ public class ProfileServiceImpl implements ProfileService {
 		String errMsg = StringUtils.EMPTY;
 		// Create the org if it's not already onboarded.
 		if (StringUtils.isEmpty((String) requestBody.get(Constants.SB_ORG_ID))) {
-			SBApiResponse orgResponse = extOrgService.createOrg(getOrgCreateRequest(requestBody), StringUtils.EMPTY);
+			SBApiResponse orgResponse = extOrgService.createOrgForUserRegistration(getOrgCreateRequest(requestBody));
 			if (orgResponse.getResponseCode() == HttpStatus.OK) {
 				String orgId = (String) orgResponse.getResult().get(Constants.ORGANIZATION_ID);
 				requestBody.put(Constants.SB_ORG_ID, orgId);
