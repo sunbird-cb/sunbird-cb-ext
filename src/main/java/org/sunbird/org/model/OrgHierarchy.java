@@ -198,18 +198,4 @@ public class OrgHierarchy {
         orgInfo.setL2OrgName(l2OrgName);
         return orgInfo;
     }
-
-    public OrgHierarchySearchInfo toOrgHierarchySearchInfo() {
-        OrgHierarchySearchInfo orgSearchInfo = new OrgHierarchySearchInfo();
-        orgSearchInfo.setChannel(channel);
-        orgSearchInfo.setMapId(mapId);
-        orgSearchInfo.setOrgcode(orgCode);
-        orgSearchInfo.setSborgtype(sbOrgType);
-        orgSearchInfo.setSbsuborgtype(sbOrgSubType);
-        orgSearchInfo.setSbrootorgid(sbRootOrgId);
-        orgSearchInfo.setParentmapid(parentMapId);
-        orgSearchInfo.setOrgname(orgName);
-        orgSearchInfo.setSbOrgId(sbOrgId);
-        return orgSearchInfo;
-    }
 }
