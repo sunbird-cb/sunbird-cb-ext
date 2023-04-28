@@ -647,7 +647,7 @@ public class ProfileServiceImpl implements ProfileService {
 	}
 
 	@Override
-	public SBApiResponse bulkUpload(MultipartFile mFile, String orgId, String orgName, String userId) {
+	public SBApiResponse bulkUpload(MultipartFile mFile, String orgId, String channel, String userId) {
 		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_USER_BULK_UPLOAD);
 		try {
 			SBApiResponse uploadResponse = storageService.uploadFile(mFile, serverConfig.getBulkUploadContainerName());
@@ -678,9 +678,9 @@ public class ProfileServiceImpl implements ProfileService {
 			response.getParams().setStatus(Constants.SUCCESSFUL);
 			response.setResponseCode(HttpStatus.OK);
 			response.getResult().putAll(uploadedFile);
-			uploadedFile.put(Constants.ORG_NAME, orgName);
+			uploadedFile.put(Constants.ORG_NAME, channel);
 			kafkaProducer.push(serverConfig.getUserBulkUploadTopic(), uploadedFile);
-			sendBulkUploadNotification(orgId, orgName, (String) uploadResponse.getResult().get(Constants.URL));
+			sendBulkUploadNotification(orgId, channel, (String) uploadResponse.getResult().get(Constants.URL));
 		} catch (Exception e) {
 			setErrorData(response,
 					String.format("Failed to process user bulk upload request. Error: ", e.getMessage()));
@@ -871,7 +871,7 @@ public class ProfileServiceImpl implements ProfileService {
 
 	private Map<String, Object> getOrgCreateRequest(Map<String, Object> request) {
 		Map<String, Object> requestBody = new HashMap<String, Object>();
-		requestBody.put(Constants.ORG_NAME, request.get(Constants.CHANNEL));
+		requestBody.put(Constants.ORG_NAME, request.get(Constants.ORG_NAME));
 		requestBody.put(Constants.CHANNEL, request.get(Constants.CHANNEL));
 		requestBody.put(Constants.SB_ROOT_ORG_ID, request.get(Constants.SB_ROOT_ORG_ID));
 		requestBody.put(Constants.ORGANIZATION_TYPE, request.get(Constants.ORGANIZATION_TYPE));
@@ -907,7 +907,7 @@ public class ProfileServiceImpl implements ProfileService {
 		String errMsg = StringUtils.EMPTY;
 		// Create the org if it's not already onboarded.
 		if (StringUtils.isEmpty((String) requestBody.get(Constants.SB_ORG_ID))) {
-			SBApiResponse orgResponse = extOrgService.createOrg(getOrgCreateRequest(requestBody), StringUtils.EMPTY);
+			SBApiResponse orgResponse = extOrgService.createOrgForUserRegistration(getOrgCreateRequest(requestBody));
 			if (orgResponse.getResponseCode() == HttpStatus.OK) {
 				String orgId = (String) orgResponse.getResult().get(Constants.ORGANIZATION_ID);
 				requestBody.put(Constants.SB_ORG_ID, orgId);

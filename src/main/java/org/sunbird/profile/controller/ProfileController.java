@@ -78,9 +78,9 @@ public class ProfileController {
 	@PostMapping("/user/v1/bulkupload")
 	public ResponseEntity<?> bulkUpload(@RequestParam(value = "file", required = true) MultipartFile multipartFile,
 			@RequestHeader(Constants.X_AUTH_USER_ORG_ID) String rootOrgId,
-			@RequestHeader(Constants.X_AUTH_USER_ORG_NAME) String orgName,
+			@RequestHeader(Constants.X_AUTH_USER_CHANNEL) String channel,
 			@RequestHeader(Constants.X_AUTH_USER_ID) String userId) {
-		SBApiResponse uploadResponse = profileService.bulkUpload(multipartFile, rootOrgId, orgName, userId);
+		SBApiResponse uploadResponse = profileService.bulkUpload(multipartFile, rootOrgId, channel, userId);
 		return new ResponseEntity<>(uploadResponse, uploadResponse.getResponseCode());
 	}
 

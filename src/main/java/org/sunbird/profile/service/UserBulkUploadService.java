@@ -54,7 +54,8 @@ public class UserBulkUploadService {
                     });
             List<String> errList = validateReceivedKafkaMessage(inputDataMap);
             if (errList.isEmpty()) {
-                updateUserBulkUploadStatus(inputDataMap.get(Constants.ROOT_ORG_ID), inputDataMap.get(Constants.IDENTIFIER), Constants.STATUS_IN_PROGRESS_UPPERCASE, 0, 0, 0);
+                updateUserBulkUploadStatus(inputDataMap.get(Constants.ROOT_ORG_ID),
+                        inputDataMap.get(Constants.IDENTIFIER), Constants.STATUS_IN_PROGRESS_UPPERCASE, 0, 0, 0);
                 storageService.downloadFile(inputDataMap.get(Constants.FILE_NAME));
                 processBulkUpload(inputDataMap);
             } else {
@@ -69,7 +70,8 @@ public class UserBulkUploadService {
                 + duration + " milli-seconds");
     }
 
-    public void updateUserBulkUploadStatus(String rootOrgId, String identifier, String status, int totalRecordsCount, int successfulRecordsCount, int failedRecordsCount) {
+    public void updateUserBulkUploadStatus(String rootOrgId, String identifier, String status, int totalRecordsCount,
+            int successfulRecordsCount, int failedRecordsCount) {
         try {
             Map<String, Object> compositeKeys = new HashMap<>();
             compositeKeys.put(Constants.ROOT_ORG_ID_LOWER, rootOrgId);
@@ -111,13 +113,13 @@ public class UserBulkUploadService {
                 wb = new XSSFWorkbook(fis);
                 XSSFSheet sheet = wb.getSheetAt(0);
                 Iterator<Row> rowIterator = sheet.iterator();
-                //incrementing the iterator inorder to skip the headers in the first row
+                // incrementing the iterator inorder to skip the headers in the first row
                 if (rowIterator.hasNext()) {
                     rowIterator.next();
                 }
                 while (rowIterator.hasNext()) {
                     Row nextRow = rowIterator.next();
-                    if (nextRow.getCell(0) == null) {
+                    if (StringUtils.isBlank(nextRow.getCell(0).getStringCellValue())) {
                         break;
                     }
                     UserRegistration userRegistration = new UserRegistration();
@@ -156,18 +158,22 @@ public class UserBulkUploadService {
                         errorDetails.setCellValue(errList.toString());
                     }
                 }
-                status = uploadTheUpdatedFile(inputDataMap.get(Constants.ROOT_ORG_ID), inputDataMap.get(Constants.IDENTIFIER), file, wb);
-                if (!(Constants.SUCCESSFUL.equalsIgnoreCase(status) && failedRecordsCount == 0 && totalRecordsCount == noOfSuccessfulRecords && totalRecordsCount >= 1)) {
+                status = uploadTheUpdatedFile(inputDataMap.get(Constants.ROOT_ORG_ID),
+                        inputDataMap.get(Constants.IDENTIFIER), file, wb);
+                if (!(Constants.SUCCESSFUL.equalsIgnoreCase(status) && failedRecordsCount == 0
+                        && totalRecordsCount == noOfSuccessfulRecords && totalRecordsCount >= 1)) {
                     status = Constants.FAILED_UPPERCASE;
                 }
             } else {
                 logger.info("Error in Process Bulk Upload : The File is not downloaded/present");
                 status = Constants.FAILED_UPPERCASE;
             }
-            updateUserBulkUploadStatus(inputDataMap.get(Constants.ROOT_ORG_ID), inputDataMap.get(Constants.IDENTIFIER), status, totalRecordsCount, noOfSuccessfulRecords, failedRecordsCount);
+            updateUserBulkUploadStatus(inputDataMap.get(Constants.ROOT_ORG_ID), inputDataMap.get(Constants.IDENTIFIER),
+                    status, totalRecordsCount, noOfSuccessfulRecords, failedRecordsCount);
         } catch (Exception e) {
             logger.error(String.format("Error in Process Bulk Upload %s", e.getMessage()), e);
-            updateUserBulkUploadStatus(inputDataMap.get(Constants.ROOT_ORG_ID), inputDataMap.get(Constants.IDENTIFIER), Constants.FAILED.toUpperCase(), 0, 0, 0);
+            updateUserBulkUploadStatus(inputDataMap.get(Constants.ROOT_ORG_ID), inputDataMap.get(Constants.IDENTIFIER),
+                    Constants.FAILED.toUpperCase(), 0, 0, 0);
         } finally {
             if (wb != null)
                 wb.close();
@@ -178,7 +184,8 @@ public class UserBulkUploadService {
         }
     }
 
-    private String uploadTheUpdatedFile(String rootOrgId, String identifier, File file, XSSFWorkbook wb) throws IOException {
+    private String uploadTheUpdatedFile(String rootOrgId, String identifier, File file, XSSFWorkbook wb)
+            throws IOException {
         FileOutputStream fileOut = new FileOutputStream(file);
         wb.write(fileOut);
         fileOut.close();

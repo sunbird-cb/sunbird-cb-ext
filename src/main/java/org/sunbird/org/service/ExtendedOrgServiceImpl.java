@@ -6,16 +6,15 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
-import org.sunbird.cassandra.utils.CassandraOperation;
 import org.sunbird.common.model.SBApiOrgSearchRequest;
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
@@ -23,19 +22,22 @@ import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.common.util.ProjectUtil;
 import org.sunbird.core.logger.CbExtLogger;
+import org.sunbird.org.model.OrgHierarchy;
+import org.sunbird.org.model.OrgHierarchyInfo;
+import org.sunbird.org.repository.OrgHierarchyRepository;
 
 @Service
 public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 	private CbExtLogger log = new CbExtLogger(getClass().getName());
 
 	@Autowired
-	CassandraOperation cassandraOperation;
-
-	@Autowired
 	OutboundRequestHandlerServiceImpl outboundService;
 
 	@Autowired
 	CbExtServerProperties configProperties;
+
+	@Autowired
+	OrgHierarchyRepository orgRepository;
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -51,6 +53,24 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 
 			Map<String, Object> requestData = (Map<String, Object>) request.get(Constants.REQUEST);
 
+			String channelName = prepareChannelName((String) requestData.get(Constants.PARENT_MAP_ID), requestData);
+			String orgType = (String) requestData.get(Constants.ORGANIZATION_TYPE);
+			if (StringUtils.isBlank(channelName)) {
+				// We tried to construct channelName but returred empty.
+				// So orgType could be only ministry / state.
+				if (Constants.STATE.equalsIgnoreCase(orgType)
+						|| Constants.MINISTRY.equalsIgnoreCase(orgType)) {
+					channelName = (String) requestData.get(Constants.CHANNEL);
+				} else {
+					log.error("Failed to identify channelName.", null);
+					// Need to treat this as error.
+				}
+
+			} else {
+				channelName = channelName + (String) requestData.get(Constants.CHANNEL);
+				requestData.put(Constants.CHANNEL, channelName);
+			}
+
 			String orgId = checkOrgExist((String) requestData.get(Constants.CHANNEL), userToken);
 
 			if (StringUtils.isEmpty(orgId)) {
@@ -59,11 +79,16 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 
 			if (!StringUtils.isEmpty(orgId)) {
 				Map<String, Object> updateRequest = new HashMap<String, Object>();
-				String orgType = (String) requestData.get(Constants.ORGANIZATION_TYPE);
 				String orgName = (String) requestData.get(Constants.ORG_NAME);
+				updateRequest.put(Constants.CHANNEL, channelName);
 				updateRequest.put(Constants.SB_ORG_ID, orgId);
 				updateRequest.put(Constants.ORG_NAME, orgName);
 				updateRequest.put(Constants.SB_ORG_TYPE, orgType);
+				updateRequest.put(Constants.L1_MAP_ID, (String) requestData.get(Constants.L1_MAP_ID));
+				updateRequest.put(Constants.L2_MAP_ID, (String) requestData.get(Constants.L2_MAP_ID));
+				updateRequest.put(Constants.L1_ORG_NAME, (String) requestData.get(Constants.L1_ORG_NAME));
+				updateRequest.put(Constants.L2_ORG_NAME, (String) requestData.get(Constants.L2_ORG_NAME));
+
 				String mapId = (String) requestData.get(Constants.MAP_ID);
 				if (StringUtils.isEmpty(mapId)) {
 					// There is a possibility that this Org already exists in table. Get the MapId
@@ -95,20 +120,20 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 					updateRequest.put(Constants.PARENT_MAP_ID, Constants.SPV);
 				}
 				if (!StringUtils.isEmpty((String) requestData.get(Constants.MAP_ID))) {
-					Map<String, Object> compositeKey = new HashMap<String, Object>() {
-						private static final long serialVersionUID = 1L;
-						{
-							put(Constants.ORG_NAME, orgName);
-							put(Constants.MAP_ID, requestData.get(Constants.MAP_ID));
-						}
-					};
-					updateRequest.remove(Constants.ORG_NAME);
-					updateRequest.remove(Constants.MAP_ID);
-					cassandraOperation.updateRecord(Constants.SUNBIRD_KEY_SPACE_NAME, Constants.TABLE_ORG_HIERARCHY,
-							updateRequest, compositeKey);
+					ObjectMapper om = new ObjectMapper();
+					log.info("Need to update the record here... " + om.writeValueAsString(updateRequest));
+					if (ObjectUtils.isEmpty(updateRequest.get(Constants.SB_ROOT_ORG_ID))) {
+						orgRepository.updateOrgIdForChannel(channelName,
+								(String) updateRequest.get(Constants.SB_ORG_ID));
+					} else {
+						orgRepository.updateSbOrgIdAndSbOrgRootIdForChannel(channelName,
+								(String) updateRequest.get(Constants.SB_ORG_ID),
+								(String) updateRequest.get(Constants.SB_ROOT_ORG_ID));
+					}
 				} else {
-					cassandraOperation.insertRecord(Constants.SUNBIRD_KEY_SPACE_NAME, Constants.TABLE_ORG_HIERARCHY,
-							updateRequest);
+					OrgHierarchy newOrg = new OrgHierarchy(orgName, channelName, mapId,
+							(String) updateRequest.get(Constants.PARENT_MAP_ID));
+					orgRepository.save(getOrgRecord(updateRequest, newOrg));
 				}
 				response.getResult().put(Constants.ORGANIZATION_ID, orgId);
 				response.getResult().put(Constants.RESPONSE, Constants.SUCCESS);
@@ -128,28 +153,25 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 	@Override
 	public SBApiResponse listOrg(String parentMapId) {
 		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_ORG_LIST);
-
-		Map<String, Object> request = new HashMap<>();
 		if (StringUtils.isEmpty(parentMapId)) {
 			parentMapId = Constants.SPV;
 		}
 
-		if (Constants.MINISTRY.equalsIgnoreCase(parentMapId) || Constants.STATE.equalsIgnoreCase(parentMapId)) {
-			request.put(Constants.SB_ORG_TYPE, parentMapId);
+		List<OrgHierarchy> orgHierarchyList = null;
+		if (Constants.MINISTRY.equalsIgnoreCase(parentMapId) 
+			|| Constants.STATE.equalsIgnoreCase(parentMapId)) {
+			orgHierarchyList = orgRepository.findAllBySbOrgType(parentMapId);
 		} else {
-			request.put(Constants.PARENT_MAP_ID, parentMapId);
+			orgHierarchyList = orgRepository.findAllByParentMapId(parentMapId);
 		}
-
-		List<Map<String, Object>> existingDataList = cassandraOperation
-				.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_ORG_HIERARCHY, request, null);
-		if (CollectionUtils.isNotEmpty(existingDataList)) {
+		if (CollectionUtils.isNotEmpty(orgHierarchyList)) {
 			Map<String, Object> responseMap = new HashMap<String, Object>();
-			responseMap.put(Constants.CONTENT, existingDataList);
-			responseMap.put(Constants.COUNT, existingDataList.size());
+			responseMap.put(Constants.CONTENT, orgHierarchyList);
+			responseMap.put(Constants.COUNT, orgHierarchyList.size());
 			response.put(Constants.RESPONSE, responseMap);
 		} else {
 			response.setResponseCode(HttpStatus.NOT_FOUND);
-			response.getParams().setErrmsg("Failed to get Org Details");
+			response.getParams().setErrmsg("Failed to get Org Details for Id: " + parentMapId);
 		}
 
 		return response;
@@ -169,30 +191,17 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 			Map<String, Object> requestData = (Map<String, Object>) request.get(Constants.REQUEST);
 			Map<String, Object> filters = (Map<String, Object>) requestData.get(Constants.FILTERS);
 			String sbRootOrgId = (String) filters.get(Constants.SB_ROOT_ORG_ID);
-			Map<String, Object> searchRequest = new HashMap<String, Object>() {
-				private static final long serialVersionUID = 1L;
-				{
-					put(Constants.SB_ROOT_ORG_ID, sbRootOrgId);
-				}
-			};
 
-			List<Map<String, Object>> existingDataList = cassandraOperation.getRecordsByProperties(
-					Constants.KEYSPACE_SUNBIRD, Constants.TABLE_ORG_HIERARCHY, searchRequest, null);
-			if (CollectionUtils.isNotEmpty(existingDataList)) {
-				List<String> orgIdList = existingDataList.stream().filter(item -> !ObjectUtils.isEmpty(item))
-						.map(item -> {
-							return (String) item.get(Constants.SB_ORG_ID);
-						}).collect(Collectors.toList());
+			List<String> orgIdList = orgRepository.findAllBySbRootOrgId(sbRootOrgId);
+			if (CollectionUtils.isNotEmpty(orgIdList)) {
 				SBApiOrgSearchRequest orgSearchRequest = new SBApiOrgSearchRequest();
 				orgSearchRequest.getFilters().setId(orgIdList);
-				if(!ProjectUtil.isStringNullOREmpty((String) requestData.get(Constants.QUERY)))
-				{
+				if (!ProjectUtil.isStringNullOREmpty((String) requestData.get(Constants.QUERY))) {
 					orgSearchRequest.setQuery((String) requestData.get(Constants.QUERY));
 				}
 				orgSearchRequest.setSortBy((Map<String, String>) requestData.get(Constants.SORT_BY_KEYWORD));
 				Map<String, Object> orgSearchRequestBody = new HashMap<String, Object>() {
 					private static final long serialVersionUID = 1L;
-
 					{
 						put(Constants.REQUEST, orgSearchRequest);
 					}
@@ -349,37 +358,6 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 		return StringUtils.EMPTY;
 	}
 
-	private String findRootOrgId(String orgName, String mapId) {
-		String parentMapId = StringUtils.EMPTY;
-		// We are going to search only 3 times
-		for (int i = 0; i < 3; i++) {
-			Map<String, Object> searchRequest = new HashMap<String, Object>();
-			if (StringUtils.isNotEmpty(orgName)) {
-				searchRequest.put(Constants.ORG_NAME, orgName);
-			}
-			searchRequest.put(Constants.MAP_ID, mapId);
-
-			List<Map<String, Object>> existingDataList = cassandraOperation.getRecordsByProperties(
-					Constants.KEYSPACE_SUNBIRD, Constants.TABLE_ORG_HIERARCHY, searchRequest, null);
-			if (CollectionUtils.isNotEmpty(existingDataList)) {
-				Map<String, Object> data = existingDataList.get(0);
-				parentMapId = (String) data.get(Constants.PARENT_MAP_ID.toLowerCase());
-				// We found the 1st level object
-				if (Constants.SPV.equalsIgnoreCase(parentMapId)) {
-					return (String) data.get(Constants.SB_ORG_ID.toLowerCase());
-				} else {
-					mapId = (String) data.get(Constants.PARENT_MAP_ID.toLowerCase());
-					orgName = StringUtils.EMPTY;
-					continue;
-				}
-			} else {
-				break;
-			}
-		}
-
-		return StringUtils.EMPTY;
-	}
-
 	public Map<String, Object> getOrgDetails(List<String> orgIds, List<String> fields) {
 		Map<String, Object> filters = new HashMap<>();
 		filters.put(Constants.IDENTIFIER, orgIds);
@@ -408,33 +386,8 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 	}
 
 	public void getOrgDetailsFromDB(List<String> orgIds, Map<String, String> orgInfoMap) {
-		Map<String, Object> propertyMap = new HashMap<>();
-		propertyMap.put(Constants.STATUS, 1);
-
-		try {
-			for (int i = 0; i < orgIds.size(); i += 10) {
-				List<String> orgList = orgIds.subList(i, Math.min(orgIds.size(), i + 10));
-				propertyMap.put(Constants.ID, orgList);
-
-				List<Map<String, Object>> orgInfoList = cassandraOperation.getRecordsByProperties(
-						Constants.KEYSPACE_SUNBIRD, Constants.TABLE_ORGANIZATION, propertyMap,
-						Arrays.asList(Constants.CHANNEL));
-				for (Map<String, Object> org : orgInfoList) {
-					String orgId = (String) org.get(Constants.ID);
-
-					if (orgInfoMap.containsKey(orgId)) {
-						continue;
-					}
-
-					if (org.containsKey(Constants.CHANNEL)) {
-
-						orgInfoMap.put(orgId, (String) org.get(Constants.CHANNEL));
-					}
-				}
-			}
-		} catch (Exception e) {
-			log.error("Failed to get user details from DB. Exception: ", e);
-		}
+		// This method is called from report tool.
+		// Not doing anything for now.
 	}
 
 	public SBApiResponse createOrgForUserRegistration(Map<String, Object> request) {
@@ -456,28 +409,19 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 			}
 
 			if (!StringUtils.isEmpty(orgId)) {
-				Map<String, Object> updateRequest = new HashMap<String, Object>();
-				updateRequest.put(Constants.SB_ORG_ID, orgId);
 				String sbRootOrgId = (String) requestData.get(Constants.SB_ROOT_ORG_ID);
 
 				if (StringUtils.isEmpty(sbRootOrgId)) {
-					sbRootOrgId = findRootOrgId((String) requestData.get(Constants.ORG_NAME),
-							(String) requestData.get(Constants.MAP_ID));
+					sbRootOrgId = orgRepository.getSbOrgIdFromMapId((String) requestData.get(Constants.MAP_ID));
 				}
 
 				if (!StringUtils.isEmpty(sbRootOrgId)) {
-					updateRequest.put(Constants.SB_ROOT_ORG_ID, sbRootOrgId);
+					orgRepository.updateSbOrgIdAndSbOrgRootIdForChannel((String) requestData.get(Constants.CHANNEL),
+							orgId, sbRootOrgId);
+				} else {
+					orgRepository.updateOrgIdForChannel((String) requestData.get(Constants.CHANNEL), orgId);
 				}
 
-				Map<String, Object> compositeKey = new HashMap<String, Object>() {
-					private static final long serialVersionUID = 1L;
-					{
-						put(Constants.ORG_NAME, (String) requestData.get(Constants.ORG_NAME));
-						put(Constants.MAP_ID, requestData.get(Constants.MAP_ID));
-					}
-				};
-				cassandraOperation.updateRecord(Constants.SUNBIRD_KEY_SPACE_NAME, Constants.TABLE_ORG_HIERARCHY,
-						updateRequest, compositeKey);
 				response.getResult().put(Constants.ORGANIZATION_ID, orgId);
 				response.getResult().put(Constants.RESPONSE, Constants.SUCCESS);
 			} else {
@@ -494,14 +438,14 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 	}
 
 	private String createMapId(Map<String, Object> requestData) {
-		Map<String, Object> queryRequest = new HashMap<>();
+		List<OrgHierarchy> existingOrgList = null;
 		String prefix = StringUtils.EMPTY;
 		String mapIdNew = StringUtils.EMPTY;
 		String orgType = (String) requestData.get(Constants.ORGANIZATION_TYPE);
 		if (!Constants.STATE.equalsIgnoreCase(orgType) && !Constants.MINISTRY.equalsIgnoreCase(orgType)) {
 			String orgSubType = (String) requestData.get(Constants.ORGANIZATION_SUB_TYPE);
 			String parentMapId = (String) requestData.get(Constants.PARENT_MAP_ID);
-			queryRequest.put(Constants.PARENT_MAP_ID, parentMapId);
+			existingOrgList = orgRepository.findAllByParentMapId(parentMapId);
 			if (Constants.DEPARTMENT.equalsIgnoreCase(orgSubType)) {
 				prefix = "D_";
 			} else if (Constants.BOARD.equalsIgnoreCase(orgSubType)) {
@@ -513,21 +457,20 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 			}
 			prefix = parentMapId + "_" + prefix;
 		} else {
-			queryRequest.put(Constants.SB_ORG_TYPE, orgType);
+			existingOrgList = orgRepository.findAllBySbOrgType(orgType);
 			if (Constants.STATE.equalsIgnoreCase(orgType)) {
 				prefix = "S_";
 			} else if (Constants.MINISTRY.equalsIgnoreCase(orgType)) {
 				prefix = "M_";
 			}
 		}
-		List<Map<String, Object>> existingDataList = cassandraOperation.getRecordsByProperties(
-				Constants.KEYSPACE_SUNBIRD, Constants.TABLE_ORG_HIERARCHY, queryRequest,
-				Arrays.asList(Constants.MAP_ID));
-		if (CollectionUtils.isNotEmpty(existingDataList)) {
+
+		if (CollectionUtils.isNotEmpty(existingOrgList)) {
 			List<String> mapIdList = new ArrayList<>();
-			for (Map<String, Object> map : existingDataList) {
-				if (((String) map.get(Constants.MAP_ID)).startsWith(prefix))
-					mapIdList.add((String) map.get(Constants.MAP_ID));
+			for (OrgHierarchy org : existingOrgList) {
+				if (org.getMapId().startsWith(prefix)) {
+					mapIdList.add(org.getMapId());
+				}
 			}
 			mapIdNew = prefix + (mapIdList.size() + 1);
 		} else {
@@ -537,34 +480,32 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 	}
 
 	private String fetchRootOrgId(Map<String, Object> requestData) {
-		String sbOrgId = null;
-		Map<String, Object> queryRequest = new HashMap<>();
-		queryRequest.put(Constants.MAP_ID, requestData.get(Constants.PARENT_MAP_ID));
-		List<String> fields = new ArrayList<>();
-		fields.add(Constants.SB_ORG_ID);
-		List<Map<String, Object>> sbRootOrgList = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
-				Constants.TABLE_ORG_HIERARCHY, queryRequest, fields);
-		if (CollectionUtils.isNotEmpty(sbRootOrgList)) {
-			Map<String, Object> data = sbRootOrgList.get(0);
-			sbOrgId = (String) data.get(Constants.SB_ORG_ID);
-		}
-		return sbOrgId;
+		return orgRepository.getSbOrgIdFromMapId((String) requestData.get(Constants.PARENT_MAP_ID));
 	}
 
 	private void fetchMapIdFromDB(Map<String, Object> requestData) {
-		Map<String, Object> queryRequest = new HashMap<>();
-		queryRequest.put(Constants.ORG_NAME, requestData.get(Constants.ORG_NAME));
-		List<String> fields = new ArrayList<>();
-		fields.add(Constants.SB_ORG_ID);
-		fields.add(Constants.MAP_ID);
-		List<Map<String, Object>> sbRootOrgList = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
-				Constants.TABLE_ORG_HIERARCHY, queryRequest, fields);
-		if (CollectionUtils.isNotEmpty(sbRootOrgList)) {
-			Map<String, Object> data = sbRootOrgList.get(0);
-			requestData.put(Constants.MAP_ID, (String) data.get(Constants.MAP_ID));
+		List<OrgHierarchy> orgList = orgRepository.findAllByOrgName((String) requestData.get(Constants.ORG_NAME));
+		if (ObjectUtils.isEmpty(orgList) || orgList.size() > 1) {
+			// There are no args or multiple orgs. return from here.
+			return;
+		} else {
+			// There is one org exist with the given name.
+			// Otherwise this new dept name which already exist in someother ministry /
+			// state / department.
+			if (ObjectUtils.isEmpty(requestData.get(Constants.PARENT_MAP_ID))) {
+				// ParentMapId is empty -- we are trying to create dept / state with same name.
+				// Return simply.
+				return;
+			} else {
+				OrgHierarchy existingOrg = orgList.get(0);
+				// Check given parentMapId is same as existing record parentMapId.
+				if (existingOrg.getParentMapId().equalsIgnoreCase((String) requestData.get(Constants.PARENT_MAP_ID))) {
+					requestData.put(Constants.MAP_ID, existingOrg.getParentMapId());
+				}
+			}
 		}
 	}
-	
+
 	private String validateOrgRequestForRegistration(Map<String, Object> request) {
 		List<String> params = new ArrayList<String>();
 		StringBuilder strBuilder = new StringBuilder();
@@ -572,6 +513,10 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 		if (ObjectUtils.isEmpty(requestData)) {
 			strBuilder.append("Request object is empty.");
 			return strBuilder.toString();
+		}
+
+		if (StringUtils.isBlank((String) requestData.get(Constants.CHANNEL))) {
+			params.add(Constants.CHANNEL);
 		}
 
 		if (StringUtils.isEmpty((String) requestData.get(Constants.ORG_NAME))) {
@@ -595,5 +540,87 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 		}
 
 		return strBuilder.toString();
+	}
+
+	public SBApiResponse orgExtSearchV2(Map<String, Object> request) {
+		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_ORG_HIERACHY_SEARCH);
+		try {
+			StringBuilder searchKey = new StringBuilder("");
+			String errMsg = validateSearchRequest(request, searchKey);
+			if (StringUtils.isNotBlank(errMsg)) {
+				response.setResponseCode(HttpStatus.BAD_REQUEST);
+				response.getParams().setErrmsg(errMsg);
+				return response;
+			}
+			log.info("Received Search Key ? " + searchKey.toString());
+			List<OrgHierarchy> orgList = orgRepository.searchOrgWithHierarchy(searchKey.toString());
+			List<OrgHierarchyInfo> orgInfoList = new ArrayList<OrgHierarchyInfo>();
+			if (CollectionUtils.isEmpty(orgList)) {
+				orgList = Collections.emptyList();
+			}
+			for (OrgHierarchy org : orgList) {
+				OrgHierarchyInfo orgInfo = org.toOrgInfo();
+				orgInfoList.add(orgInfo);
+			}
+			response.getResult().put(Constants.COUNT, orgInfoList.size());
+			response.getResult().put(Constants.RESPONSE, orgInfoList);
+		} catch (Exception e) {
+			log.error("Failed to retrieve details from org hierarchy table. Exception: ", e);
+		}
+		return response;
+	}
+
+	private String validateSearchRequest(Map<String, Object> request, StringBuilder searchKey) {
+		String errMsg = "";
+		Map<String, Object> requestBody = (Map<String, Object>) request.get(Constants.REQUEST);
+		if (ObjectUtils.isEmpty(requestBody)) {
+			errMsg = Constants.INVALID_REQUEST;
+			return errMsg;
+		}
+		Map<String, Object> filters = (Map<String, Object>) requestBody.get(Constants.FILTERS);
+		if (ObjectUtils.isEmpty(filters)) {
+			errMsg = Constants.INVALID_REQUEST;
+			return errMsg;
+		}
+		if (StringUtils.isNotBlank((String) filters.get(Constants.ORG_NAME))) {
+			searchKey.append(((String) filters.get(Constants.ORG_NAME)).trim());
+		} else {
+			errMsg = "OrgName is empty in search request.";
+		}
+		return errMsg;
+	}
+
+	private String prepareChannelName(String parentMapId, Map<String, Object> requestData) {
+		String channelName = "";
+		if (StringUtils.isBlank(parentMapId)) {
+			return channelName;
+		}
+		List<OrgHierarchy> parentList = orgRepository.findAllByMapId(parentMapId);
+		if (!ObjectUtils.isEmpty(parentList) && parentList.size() > 0) {
+			OrgHierarchy parent = parentList.get(0);
+			if (!Constants.SPV.equalsIgnoreCase(parent.getParentMapId())) {
+				prepareChannelName(parent.getParentMapId(), requestData);
+				requestData.put(Constants.L2_MAP_ID, parent.getMapId());
+				requestData.put(Constants.L2_ORG_NAME, parent.getOrgName());
+			} else {
+				requestData.put(Constants.L1_MAP_ID, parent.getMapId());
+				requestData.put(Constants.L1_ORG_NAME, parent.getOrgName());
+			}
+			channelName = parent.getChannel() + configProperties.getOrgChannelDelimitter();
+		}
+		return channelName;
+	}
+
+	private OrgHierarchy getOrgRecord(Map<String, Object> request, OrgHierarchy newOrg) {
+		newOrg.setOrgCode((String) request.get(Constants.MAP_ID));
+		newOrg.setSbOrgId((String) request.get(Constants.SB_ORG_ID));
+		newOrg.setSbOrgType((String) request.get(Constants.SB_ORG_TYPE));
+		newOrg.setSbOrgSubType((String) request.get(Constants.SB_SUB_ORG_TYPE));
+		newOrg.setSbRootOrgId((String) request.get(Constants.SB_ROOT_ORG_ID));
+		newOrg.setL1MapId((String) request.get(Constants.L1_MAP_ID));
+		newOrg.setL1OrgName((String) request.get(Constants.L1_ORG_NAME));
+		newOrg.setL2MapId((String) request.get(Constants.L2_MAP_ID));
+		newOrg.setL2OrgName((String) request.get(Constants.L2_ORG_NAME));
+		return newOrg;
 	}
 }

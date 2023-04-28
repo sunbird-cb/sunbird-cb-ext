@@ -433,10 +433,12 @@ public class CbExtServerProperties {
 
 	@Value("${metaData.contextTypes}")
 	private String[] ContextTypes;
+
 	@Value("${kafka.topics.user.bulk.upload}")
 	private String userBulkUploadTopic;
 
-
+	@Value("${org.channel.delimitter}")
+	private String orgChannelDelimitter;
 
 	public String getAssessmentSubmitTopic() {
 		return assessmentSubmitTopic;
@@ -1595,5 +1597,13 @@ public class CbExtServerProperties {
 
 	public void setUserBulkUploadTopic(String userBulkUploadTopic) {
 		this.userBulkUploadTopic = userBulkUploadTopic;
+	}
+
+	public String getOrgChannelDelimitter() {
+		return orgChannelDelimitter;
+	}
+
+	public void setOrgChannelDelimitter(String orgChannelDelimitter) {
+		this.orgChannelDelimitter = orgChannelDelimitter;
 	}
 }
