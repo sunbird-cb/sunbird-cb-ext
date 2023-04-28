@@ -24,7 +24,6 @@ import org.sunbird.common.util.ProjectUtil;
 import org.sunbird.core.logger.CbExtLogger;
 import org.sunbird.org.model.OrgHierarchy;
 import org.sunbird.org.model.OrgHierarchyInfo;
-import org.sunbird.org.model.OrgHierarchySearchInfo;
 import org.sunbird.org.repository.OrgHierarchyRepository;
 
 @Service
@@ -167,12 +166,8 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 		}
 		if (CollectionUtils.isNotEmpty(orgHierarchyList)) {
 			Map<String, Object> responseMap = new HashMap<String, Object>();
-			List<OrgHierarchySearchInfo> orgSearchList = new ArrayList<OrgHierarchySearchInfo>();
-			for (OrgHierarchy org : orgHierarchyList) {
-				orgSearchList.add(org.toOrgHierarchySearchInfo());
-			}
-			responseMap.put(Constants.CONTENT, orgSearchList);
-			responseMap.put(Constants.COUNT, orgSearchList.size());
+			responseMap.put(Constants.CONTENT, orgHierarchyList);
+			responseMap.put(Constants.COUNT, orgHierarchyList.size());
 			response.put(Constants.RESPONSE, responseMap);
 		} else {
 			response.setResponseCode(HttpStatus.NOT_FOUND);
