@@ -205,10 +205,10 @@ public class UserBulkUploadService {
             errList.add("Invalid Last Name");
         }
         if (!ProjectUtil.validateEmailPattern(userRegistration.getEmail())) {
-            errList.add("Invalid Email Address");
+            errList.add("Invalid Email Id");
         }
         if (!ProjectUtil.validateContactPattern(userRegistration.getPhone())) {
-            errList.add("Invalid Contact Number");
+            errList.add("Invalid Mobile Number");
         }
         if (StringUtils.isBlank(userRegistration.getPosition())) {
             errList.add("Position is missing");
@@ -221,7 +221,7 @@ public class UserBulkUploadService {
             errList.add(Constants.EMAIL_EXIST_ERROR);
         }
         if (userUtilityService.isUserExist(Constants.PHONE, String.valueOf(userRegistration.getPhone()))) {
-            errList.add(Constants.PHONE_NUMBER_EXIST_ERROR);
+            errList.add(Constants.MOBILE_NUMBER_EXIST_ERROR);
         }
 
         if (!errList.isEmpty()) {
