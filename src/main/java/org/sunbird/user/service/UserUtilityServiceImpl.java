@@ -274,7 +274,9 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		List<Map<String, Object>> professionalDetailsList = new ArrayList<Map<String, Object>>();
 		professionalDetailsList.add(professionDetailObj);
 		profileDetails.put(Constants.PROFESSIONAL_DETAILS, professionalDetailsList);
-
+		Map<String, Object> additionalProperties = new HashMap<String, Object>();
+		additionalProperties.put(Constants.TAG, userRegistration.getTag());
+		profileDetails.put(Constants.ADDITIONAL_PROPERTIES, additionalProperties);
 		requestBody.put(Constants.PROFILE_DETAILS, profileDetails);
 		request.put(Constants.REQUEST, requestBody);
 		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPatch(

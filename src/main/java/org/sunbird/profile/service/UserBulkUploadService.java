@@ -129,15 +129,16 @@ public class UserBulkUploadService {
                     }
                     userRegistration.setPhone(phone);
                     userRegistration.setPosition(nextRow.getCell(4).getStringCellValue());
+                    userRegistration.setTag(nextRow.getCell(5).getStringCellValue());
                     userRegistration.setOrgName(inputDataMap.get(Constants.ORG_NAME));
                     List<String> errList = validateEmailContactAndDomain(userRegistration);
-                    Cell statusCell = nextRow.getCell(5);
-                    Cell errorDetails = nextRow.getCell(6);
+                    Cell statusCell = nextRow.getCell(6);
+                    Cell errorDetails = nextRow.getCell(7);
                     if (statusCell == null) {
-                        statusCell = nextRow.createCell(5);
+                        statusCell = nextRow.createCell(6);
                     }
                     if (errorDetails == null) {
-                        errorDetails = nextRow.createCell(6);
+                        errorDetails = nextRow.createCell(7);
                     }
                     totalRecordsCount++;
                     if (errList.isEmpty()) {
@@ -216,6 +217,9 @@ public class UserBulkUploadService {
             if (!userUtilityService.validatePosition(userRegistration.getPosition())) {
                 errList.add("Invalid Position");
             }
+        }
+        if (!ProjectUtil.validateTag(userRegistration.getTag())) {
+            errList.add("Invalid Tag");
         }
         if (userUtilityService.isUserExist(Constants.EMAIL, userRegistration.getEmail())) {
             errList.add(Constants.EMAIL_EXIST_ERROR);
