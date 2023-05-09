@@ -218,7 +218,7 @@ public class UserBulkUploadService {
                 errList.add("Invalid Position");
             }
         }
-        if (!StringUtils.isBlank(userRegistration.getTag())) {
+        if (StringUtils.isBlank(userRegistration.getTag())) {
             errList.add("Tag is missing");
         }
         if (!ProjectUtil.validateTag(userRegistration.getTag())) {
