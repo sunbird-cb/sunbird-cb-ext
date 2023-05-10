@@ -57,35 +57,84 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 			}
 
 			Map<String, Object> requestData = (Map<String, Object>) request.get(Constants.REQUEST);
-
-			String channelName = prepareChannelName((String) requestData.get(Constants.PARENT_MAP_ID), requestData);
-			String orgType = (String) requestData.get(Constants.ORGANIZATION_TYPE);
-			if (StringUtils.isBlank(channelName)) {
-				// We tried to construct channelName but returred empty.
-				// So orgType could be only ministry / state.
-				if (Constants.STATE.equalsIgnoreCase(orgType)
-						|| Constants.MINISTRY.equalsIgnoreCase(orgType)) {
-					channelName = (String) requestData.get(Constants.CHANNEL);
-				} else {
-					log.error("Failed to identify channelName.", null);
-					// Need to treat this as error.
-				}
-
-			} else {
-				channelName = channelName + (String) requestData.get(Constants.CHANNEL);
-				requestData.put(Constants.CHANNEL, channelName);
-			}
-
 			String orgId = checkOrgExist((String) requestData.get(Constants.CHANNEL), userToken);
+			String orgType = (String) requestData.get(Constants.ORGANIZATION_TYPE);
+			String channelName = null;
+			boolean dbUpdateRequired = false;
+			boolean orgCreatedWithNewChannel = false;
 
 			if (StringUtils.isEmpty(orgId)) {
+				// There is no org exist for given Channel. We can simply create the same in
+				// system.
 				orgId = createOrgInSunbird(request, (String) requestData.get(Constants.CHANNEL), userToken);
+				if (StringUtils.isBlank(orgId)) {
+					response.getParams().setErrmsg("Failed to create organisation in Sunbird.");
+					response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+					return response;
+				}
+				dbUpdateRequired = true;
+			} else {
+				// The channel already exist. We need to check OrgHierarchy table for duplicate.
+				if (Constants.STATE.equalsIgnoreCase(orgType)
+						|| Constants.MINISTRY.equalsIgnoreCase(orgType)) {
+					// We are not allowing duplicates @ L1 -- Need to throw error
+					response.getParams().setErrmsg("Organisation is already exist.");
+					response.setResponseCode(HttpStatus.BAD_REQUEST);
+					return response;
+				} else {
+					OrgHierarchy existingDBRecord = orgRepository.findByOrgNameAndParentMapId(
+							(String) requestData.get(Constants.CHANNEL),
+							(String) requestData.get(Constants.PARENT_MAP_ID));
+					if (existingDBRecord == null) {
+						channelName = prepareChannelName((String) requestData.get(Constants.PARENT_MAP_ID),
+								requestData);
+						channelName = channelName + (String) requestData.get(Constants.CHANNEL);
+						requestData.put(Constants.CHANNEL, channelName);
+						orgId = createOrgInSunbird(request, (String) requestData.get(Constants.CHANNEL), userToken);
+						if (StringUtils.isBlank(orgId)) {
+							response.getParams().setErrmsg("Failed to create organisation in Sunbird.");
+							response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+							return response;
+						}
+						dbUpdateRequired = true;
+						orgCreatedWithNewChannel = true;
+					} else if (StringUtils.isBlank(existingDBRecord.getSbOrgId())) {
+						existingDBRecord.setSbOrgId(orgId);
+						if (StringUtils.isEmpty(existingDBRecord.getSbRootOrgId())) {
+							existingDBRecord.setSbRootOrgId(fetchRootOrgId(requestData));
+						}
+						orgRepository.save(existingDBRecord);
+					} else if (existingDBRecord.getSbOrgId().equalsIgnoreCase(orgId)) {
+						response.getParams().setErrmsg("Duplicate Record Found in OrgHierarchy. Contact Admin");
+						response.setResponseCode(HttpStatus.BAD_REQUEST);
+						return response;
+					}
+				}
 			}
 
-			if (!StringUtils.isEmpty(orgId)) {
+			if (dbUpdateRequired) {
+				OrgHierarchy existingDBRecord = orgRepository.findByOrgNameAndParentMapId(
+						(String) requestData.get(Constants.CHANNEL), (String) requestData.get(Constants.PARENT_MAP_ID));
+				if (existingDBRecord != null) {
+					existingDBRecord.setSbOrgId(orgId);
+					if (StringUtils.isEmpty(existingDBRecord.getSbRootOrgId())) {
+						existingDBRecord.setSbRootOrgId(fetchRootOrgId(requestData));
+					}
+					orgRepository.save(existingDBRecord);
+				} else {
+					// We just created with given channel name. but this is new record in
+					// orgHierarchy...
+					// By calling prepareChannelName we will update L1 and L2 details.
+					prepareChannelName((String) requestData.get(Constants.PARENT_MAP_ID), requestData);
+					channelName = (String) requestData.get(Constants.CHANNEL);
+					orgCreatedWithNewChannel = true;
+				}
+			}
+
+			if (orgCreatedWithNewChannel) {
 				Map<String, Object> updateRequest = new HashMap<String, Object>();
 				String orgName = (String) requestData.get(Constants.ORG_NAME);
-				updateRequest.put(Constants.CHANNEL, channelName);
+				updateRequest.put(Constants.CHANNEL, (String) requestData.get(Constants.CHANNEL));
 				updateRequest.put(Constants.SB_ORG_ID, orgId);
 				updateRequest.put(Constants.ORG_NAME, orgName);
 				updateRequest.put(Constants.SB_ORG_TYPE, orgType);
@@ -142,9 +191,6 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 				}
 				response.getResult().put(Constants.ORGANIZATION_ID, orgId);
 				response.getResult().put(Constants.RESPONSE, Constants.SUCCESS);
-			} else {
-				response.getParams().setErrmsg("Failed to create organisation in Sunbird.");
-				response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
 			}
 		} catch (Exception e) {
 			log.error(e);
@@ -197,8 +243,14 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 			Map<String, Object> filters = (Map<String, Object>) requestData.get(Constants.FILTERS);
 			String sbRootOrgId = (String) filters.get(Constants.SB_ROOT_ORG_ID);
 
+			//sbRootOrgId is State Id. Let's get all the children (i.e. departments)
 			List<String> orgIdList = orgRepository.findAllBySbRootOrgId(sbRootOrgId);
+			
 			if (CollectionUtils.isNotEmpty(orgIdList)) {
+				List<String> orgIdChildList = orgRepository.fetchL2LevelOrgList(orgIdList);
+				if(CollectionUtils.isNotEmpty(orgIdChildList)) {
+					orgIdList.addAll(orgIdChildList);
+				}
 				SBApiOrgSearchRequest orgSearchRequest = new SBApiOrgSearchRequest();
 				orgSearchRequest.getFilters().setId(orgIdList);
 				if (!ProjectUtil.isStringNullOREmpty((String) requestData.get(Constants.QUERY))) {
@@ -505,7 +557,7 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 				OrgHierarchy existingOrg = orgList.get(0);
 				// Check given parentMapId is same as existing record parentMapId.
 				if (existingOrg.getParentMapId().equalsIgnoreCase((String) requestData.get(Constants.PARENT_MAP_ID))) {
-					requestData.put(Constants.MAP_ID, existingOrg.getParentMapId());
+					requestData.put(Constants.MAP_ID, existingOrg.getMapId());
 				}
 			}
 		}
