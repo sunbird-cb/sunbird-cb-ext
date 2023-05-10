@@ -149,14 +149,12 @@ public class UserBulkUploadService {
                     }
                     if (nextRow.getCell(4) == null) {
                         errList.add("Position is Missing");
-                        break;
                     }
                     else {
                         userRegistration.setPosition(nextRow.getCell(4).getStringCellValue());
                     }
                     if (nextRow.getCell(5) == null) {
                         errList.add("Tag is Missing");
-                        break;
                     }
                     else {
                         userRegistration.setTag(nextRow.getCell(5).getStringCellValue());
