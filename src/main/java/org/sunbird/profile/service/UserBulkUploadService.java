@@ -124,7 +124,6 @@ public class UserBulkUploadService {
                     }
                     UserRegistration userRegistration = new UserRegistration();
                     userRegistration.setFirstName(nextRow.getCell(0).getStringCellValue());
-                    userRegistration.setLastName(nextRow.getCell(1).getStringCellValue());
                     userRegistration.setEmail(nextRow.getCell(2).getStringCellValue());
                     if (nextRow.getCell(3).getCellType() == CellType.NUMERIC) {
                         phone = NumberToTextConverter.toText(nextRow.getCell(3).getNumericCellValue());
@@ -206,9 +205,6 @@ public class UserBulkUploadService {
         }
         if (!ProjectUtil.validateFirstName(userRegistration.getFirstName())) {
             errList.add("Invalid First Name");
-        }
-        if (!ProjectUtil.validateLastName(userRegistration.getLastName())) {
-            errList.add("Invalid Last Name");
         }
         if (!ProjectUtil.validateEmailPattern(userRegistration.getEmail())) {
             errList.add("Invalid Email Id");
