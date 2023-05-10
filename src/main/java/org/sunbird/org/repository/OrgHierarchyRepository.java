@@ -38,8 +38,11 @@ public interface OrgHierarchyRepository extends JpaRepository<OrgHierarchy, Inte
     @Query(value = "UPDATE org_hierarchy_v2 set sborgid=?2, sbrootorgid=?3 where channel=?1", nativeQuery = true)
     void updateSbOrgIdAndSbOrgRootIdForChannel(String channel, String sbOrgId, String sbRootOrgId);
 
-    @Query(value = "SELECT sborgid from org_hierarchy_v2 where sbrootorgid=?1", nativeQuery=true)
+    @Query(value = "SELECT sborgid from org_hierarchy_v2 where sbrootorgid=?1", nativeQuery = true)
     List<String> findAllBySbRootOrgId(String sbRootOrgId);
+
+    @Query(value = "SELECT sborgid from org_hierarchy_v2 where sbrootorgid in (?1)", nativeQuery = true)
+    List<String> fetchL2LevelOrgList(List<String> orgIdList);
 
     @Query(value = "SELECT * from org_hierarchy_v2 where mapid in (?1)", nativeQuery = true)
     List<OrgHierarchy> searchOrgForL1MapId(Set<String> l1MapIdSet);

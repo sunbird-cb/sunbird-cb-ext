@@ -100,10 +100,13 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 						orgCreatedWithNewChannel = true;
 					} else if (StringUtils.isBlank(existingDBRecord.getSbOrgId())) {
 						existingDBRecord.setSbOrgId(orgId);
+						if (StringUtils.isEmpty(existingDBRecord.getSbRootOrgId())) {
+							existingDBRecord.setSbRootOrgId(fetchRootOrgId(requestData));
+						}
 						orgRepository.save(existingDBRecord);
 					} else if (existingDBRecord.getSbOrgId().equalsIgnoreCase(orgId)) {
 						response.getParams().setErrmsg("Duplicate Record Found in OrgHierarchy. Contact Admin");
-						response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+						response.setResponseCode(HttpStatus.BAD_REQUEST);
 						return response;
 					}
 				}
@@ -114,6 +117,9 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 						(String) requestData.get(Constants.CHANNEL), (String) requestData.get(Constants.PARENT_MAP_ID));
 				if (existingDBRecord != null) {
 					existingDBRecord.setSbOrgId(orgId);
+					if (StringUtils.isEmpty(existingDBRecord.getSbRootOrgId())) {
+						existingDBRecord.setSbRootOrgId(fetchRootOrgId(requestData));
+					}
 					orgRepository.save(existingDBRecord);
 				} else {
 					// We just created with given channel name. but this is new record in
@@ -237,8 +243,14 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 			Map<String, Object> filters = (Map<String, Object>) requestData.get(Constants.FILTERS);
 			String sbRootOrgId = (String) filters.get(Constants.SB_ROOT_ORG_ID);
 
+			//sbRootOrgId is State Id. Let's get all the children (i.e. departments)
 			List<String> orgIdList = orgRepository.findAllBySbRootOrgId(sbRootOrgId);
+			
 			if (CollectionUtils.isNotEmpty(orgIdList)) {
+				List<String> orgIdChildList = orgRepository.fetchL2LevelOrgList(orgIdList);
+				if(CollectionUtils.isNotEmpty(orgIdChildList)) {
+					orgIdList.addAll(orgIdChildList);
+				}
 				SBApiOrgSearchRequest orgSearchRequest = new SBApiOrgSearchRequest();
 				orgSearchRequest.getFilters().setId(orgIdList);
 				if (!ProjectUtil.isStringNullOREmpty((String) requestData.get(Constants.QUERY))) {
