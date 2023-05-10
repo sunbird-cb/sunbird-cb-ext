@@ -666,9 +666,9 @@ public class Constants {
 	public static final String SUCCESSFUL_RECORDS_COUNT = "successfulRecordsCount";
 	public static final String FAILED_RECORDS_COUNT = "failedRecordsCount";
 	public static final String API_FILE_DOWNLOAD = "api.file.download";
-    public static final String TAG = "tag";
+	public static final String TAG = "tag";
 
-    private Constants() {
+	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}
 
