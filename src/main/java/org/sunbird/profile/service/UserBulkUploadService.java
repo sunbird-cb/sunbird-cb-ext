@@ -221,9 +221,10 @@ public class UserBulkUploadService {
         }
         if (StringUtils.isBlank(userRegistration.getTag())) {
             errList.add("Tag is missing");
-        }
-        if (!ProjectUtil.validateTag(userRegistration.getTag())) {
-            errList.add("Invalid Tag");
+        } else {
+            if (!ProjectUtil.validateTag(userRegistration.getTag())) {
+                errList.add("Invalid Tag");
+            }
         }
         if (userUtilityService.isUserExist(Constants.EMAIL, userRegistration.getEmail())) {
             errList.add(Constants.EMAIL_EXIST_ERROR);
