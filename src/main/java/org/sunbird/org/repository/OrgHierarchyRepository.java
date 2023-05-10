@@ -1,6 +1,7 @@
 package org.sunbird.org.repository;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.transaction.Transactional;
 
@@ -10,7 +11,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.sunbird.org.model.OrgHierarchy;
 
 public interface OrgHierarchyRepository extends JpaRepository<OrgHierarchy, Integer> {
-    @Query(value = "SELECT * FROM org_hierarchy_v2 org WHERE LOWER(org.orgname) LIKE LOWER(CONCAT('%',?1, '%'))", nativeQuery = true)
+    @Query(value = "SELECT * FROM org_hierarchy_v2 org WHERE org.orgname ~* ?1", nativeQuery = true)
     List<OrgHierarchy> searchOrgWithHierarchy(String orgName);
 
     List<OrgHierarchy> findAllByOrgName(String orgName);
@@ -39,4 +40,7 @@ public interface OrgHierarchyRepository extends JpaRepository<OrgHierarchy, Inte
 
     @Query(value = "SELECT sborgid from org_hierarchy_v2 where sbrootorgid=?1", nativeQuery=true)
     List<String> findAllBySbRootOrgId(String sbRootOrgId);
+
+    @Query(value = "SELECT * from org_hierarchy_v2 where mapid in (?1)", nativeQuery = true)
+    List<OrgHierarchy> searchOrgForL1MapId(Set<String> l1MapIdSet);
 }

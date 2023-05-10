@@ -6,6 +6,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
@@ -38,6 +41,8 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 
 	@Autowired
 	OrgHierarchyRepository orgRepository;
+
+	ObjectMapper objectMapper = new ObjectMapper();
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -158,8 +163,8 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 		}
 
 		List<OrgHierarchy> orgHierarchyList = null;
-		if (Constants.MINISTRY.equalsIgnoreCase(parentMapId) 
-			|| Constants.STATE.equalsIgnoreCase(parentMapId)) {
+		if (Constants.MINISTRY.equalsIgnoreCase(parentMapId)
+				|| Constants.STATE.equalsIgnoreCase(parentMapId)) {
 			orgHierarchyList = orgRepository.findAllBySbOrgType(parentMapId);
 		} else {
 			orgHierarchyList = orgRepository.findAllByParentMapId(parentMapId);
@@ -545,23 +550,48 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 	public SBApiResponse orgExtSearchV2(Map<String, Object> request) {
 		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_ORG_HIERACHY_SEARCH);
 		try {
-			StringBuilder searchKey = new StringBuilder("");
-			String errMsg = validateSearchRequest(request, searchKey);
+			Map<String, Object> searchFilters = new HashMap<String, Object>();
+			String errMsg = validateSearchRequest(request, searchFilters);
 			if (StringUtils.isNotBlank(errMsg)) {
 				response.setResponseCode(HttpStatus.BAD_REQUEST);
 				response.getParams().setErrmsg(errMsg);
 				return response;
 			}
-			log.info("Received Search Key ? " + searchKey.toString());
-			List<OrgHierarchy> orgList = orgRepository.searchOrgWithHierarchy(searchKey.toString());
+			log.info("Received Search Filters ? " + objectMapper.writeValueAsString(searchFilters));
+			List<OrgHierarchy> orgList = orgRepository
+					.searchOrgWithHierarchy((String) searchFilters.get(Constants.ORG_NAME));
 			List<OrgHierarchyInfo> orgInfoList = new ArrayList<OrgHierarchyInfo>();
 			if (CollectionUtils.isEmpty(orgList)) {
 				orgList = Collections.emptyList();
+			} else {
+				Set<String> l1MapIdSet = orgList.stream().map(OrgHierarchy::getL1MapId)
+						.filter(l1MapId -> Objects.nonNull(l1MapId)).collect(Collectors.toSet());
+
+				List<OrgHierarchy> parentList = orgRepository.searchOrgForL1MapId(l1MapIdSet);
+				Map<String, OrgHierarchy> parentListMap = parentList.stream()
+						.collect(Collectors.toMap(OrgHierarchy::getMapId, orgHierarchy -> orgHierarchy));
+				int limit = (Integer) searchFilters.get(Constants.LIMIT);
+				String parentType = (String) searchFilters.get(Constants.PARENT_TYPE);
+				for (OrgHierarchy org : orgList) {
+					OrgHierarchy parentObj = parentListMap.get(org.getL1MapId());
+					if (parentObj != null) {
+						// We found the parent for this orgObj.. check this parent's sbOrgType is given
+						// parentType
+						if (parentType.equalsIgnoreCase(parentObj.getSbOrgType())) {
+							orgInfoList.add(org.toOrgInfo());
+						}
+					} else {
+						// If Org doesn't have l1MapId then it could be State / Ministry
+						if (parentType.equalsIgnoreCase(org.getSbOrgType())) {
+							orgInfoList.add(org.toOrgInfo());
+						}
+					}
+				}
+				if (orgInfoList.size() > limit) {
+					orgInfoList.subList(limit, orgInfoList.size()).clear();
+				}
 			}
-			for (OrgHierarchy org : orgList) {
-				OrgHierarchyInfo orgInfo = org.toOrgInfo();
-				orgInfoList.add(orgInfo);
-			}
+
 			response.getResult().put(Constants.COUNT, orgInfoList.size());
 			response.getResult().put(Constants.RESPONSE, orgInfoList);
 		} catch (Exception e) {
@@ -570,7 +600,7 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 		return response;
 	}
 
-	private String validateSearchRequest(Map<String, Object> request, StringBuilder searchKey) {
+	private String validateSearchRequest(Map<String, Object> request, Map<String, Object> searchFilters) {
 		String errMsg = "";
 		Map<String, Object> requestBody = (Map<String, Object>) request.get(Constants.REQUEST);
 		if (ObjectUtils.isEmpty(requestBody)) {
@@ -583,9 +613,22 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 			return errMsg;
 		}
 		if (StringUtils.isNotBlank((String) filters.get(Constants.ORG_NAME))) {
-			searchKey.append(((String) filters.get(Constants.ORG_NAME)).trim());
+			searchFilters.put(Constants.ORG_NAME, ((String) filters.get(Constants.ORG_NAME)).trim());
 		} else {
 			errMsg = "OrgName is empty in search request.";
+		}
+
+		if (StringUtils.isNotBlank((String) filters.get(Constants.PARENT_TYPE))) {
+			searchFilters.put(Constants.PARENT_TYPE, ((String) filters.get(Constants.PARENT_TYPE)).trim());
+		} else {
+			errMsg = "ParentType is empty in search request";
+		}
+
+		Integer limit = (Integer) requestBody.get(Constants.LIMIT);
+		if (limit == null) {
+			searchFilters.put(Constants.LIMIT, configProperties.getOrgSearchResponseDefaultLimit());
+		} else {
+			searchFilters.put(Constants.LIMIT, limit);
 		}
 		return errMsg;
 	}
