@@ -129,7 +129,7 @@ public class UserBulkUploadService {
                     }
                     userRegistration.setPhone(phone);
                     userRegistration.setPosition(nextRow.getCell(4).getStringCellValue());
-                    if(nextRow.getCell(5) == null)
+                    if(nextRow.getCell(5) != null)
                         userRegistration.setTag(nextRow.getCell(5).getStringCellValue());
                     userRegistration.setOrgName(inputDataMap.get(Constants.ORG_NAME));
                     List<String> errList = validateEmailContactAndDomain(userRegistration);
