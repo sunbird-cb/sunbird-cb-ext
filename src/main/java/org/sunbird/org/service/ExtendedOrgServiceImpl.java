@@ -243,12 +243,12 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 			Map<String, Object> filters = (Map<String, Object>) requestData.get(Constants.FILTERS);
 			String sbRootOrgId = (String) filters.get(Constants.SB_ROOT_ORG_ID);
 
-			//sbRootOrgId is State Id. Let's get all the children (i.e. departments)
+			// sbRootOrgId is State Id. Let's get all the children (i.e. departments)
 			List<String> orgIdList = orgRepository.findAllBySbRootOrgId(sbRootOrgId);
-			
+
 			if (CollectionUtils.isNotEmpty(orgIdList)) {
 				List<String> orgIdChildList = orgRepository.fetchL2LevelOrgList(orgIdList);
-				if(CollectionUtils.isNotEmpty(orgIdChildList)) {
+				if (CollectionUtils.isNotEmpty(orgIdChildList)) {
 					orgIdList.addAll(orgIdChildList);
 				}
 				SBApiOrgSearchRequest orgSearchRequest = new SBApiOrgSearchRequest();
@@ -537,7 +537,12 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 	}
 
 	private String fetchRootOrgId(Map<String, Object> requestData) {
-		return orgRepository.getSbOrgIdFromMapId((String) requestData.get(Constants.PARENT_MAP_ID));
+		OrgHierarchy parentOrg = orgRepository.findByMapId((String) requestData.get(Constants.PARENT_MAP_ID));
+		if(StringUtils.isBlank(parentOrg.getSbOrgId())) {
+			//Let's try to create parent org
+			createParentOrg(parentOrg);
+		}
+		return parentOrg.getSbOrgId();
 	}
 
 	private void fetchMapIdFromDB(Map<String, Object> requestData) {
@@ -717,5 +722,53 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 		newOrg.setL2MapId((String) request.get(Constants.L2_MAP_ID));
 		newOrg.setL2OrgName((String) request.get(Constants.L2_ORG_NAME));
 		return newOrg;
+	}
+
+	public SBApiResponse createParentOrg(OrgHierarchy parentOrg) {
+		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_ORG_EXT_CREATE);
+		try {
+
+			String orgId = checkOrgExist(parentOrg.getChannel(), StringUtils.EMPTY);
+
+			if (StringUtils.isEmpty(orgId)) {
+				Map<String, Object> request = new HashMap<String, Object>();
+				Map<String, Object> requestBody = new HashMap<String, Object>();
+
+				requestBody.put(Constants.ORG_NAME, parentOrg.getOrgName());
+				requestBody.put(Constants.CHANNEL, parentOrg.getChannel());
+				requestBody.put(Constants.IS_TENANT, true);
+				requestBody.put(Constants.ORGANIZATION_TYPE, parentOrg.getSbOrgType());
+				requestBody.put(Constants.ORGANIZATION_SUB_TYPE, parentOrg.getSbOrgSubType());
+				request.put(Constants.REQUEST, requestBody);
+				orgId = createOrgInSunbird(request, parentOrg.getChannel(), StringUtils.EMPTY);
+			}
+
+			if (!StringUtils.isEmpty(orgId)) {
+				String sbRootOrgId = orgRepository.getSbOrgIdFromMapId(parentOrg.getParentMapId());
+				;
+				if (StringUtils.isBlank(parentOrg.getSbRootOrgId())) {
+					sbRootOrgId = orgRepository.getSbOrgIdFromMapId(parentOrg.getParentMapId());
+				}
+				if (StringUtils.isBlank(parentOrg.getSbRootOrgId()) && !StringUtils.isEmpty(sbRootOrgId)) {
+					orgRepository.updateSbOrgIdAndSbOrgRootIdForChannel(parentOrg.getChannel(),
+							orgId, sbRootOrgId);
+				} else {
+					orgRepository.updateOrgIdForChannel(parentOrg.getChannel(), orgId);
+				}
+
+				response.getResult().put(Constants.ORGANIZATION_ID, orgId);
+				response.getResult().put(Constants.RESPONSE, Constants.SUCCESS);
+				parentOrg.setSbOrgId(orgId);
+			} else {
+				response.getParams().setErrmsg("Failed to create parent organisation in Sunbird.");
+				response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+			}
+		} catch (Exception e) {
+			log.error(e);
+			response.getParams().setErrmsg(e.getMessage());
+			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+
+		return response;
 	}
 }
