@@ -14,6 +14,8 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -31,7 +33,7 @@ import org.sunbird.org.repository.OrgHierarchyRepository;
 
 @Service
 public class ExtendedOrgServiceImpl implements ExtendedOrgService {
-	private CbExtLogger log = new CbExtLogger(getClass().getName());
+	private Logger logger = LoggerFactory.getLogger(getClass().getName());
 
 	@Autowired
 	OutboundRequestHandlerServiceImpl outboundService;
@@ -101,7 +103,8 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 					} else if (StringUtils.isBlank(existingDBRecord.getSbOrgId())) {
 						existingDBRecord.setSbOrgId(orgId);
 						if (StringUtils.isEmpty(existingDBRecord.getSbRootOrgId())) {
-							existingDBRecord.setSbRootOrgId(fetchRootOrgId(requestData));
+							existingDBRecord
+									.setSbRootOrgId(fetchRootOrgId((String) requestData.get(Constants.PARENT_MAP_ID)));
 						}
 						orgRepository.save(existingDBRecord);
 					} else if (existingDBRecord.getSbOrgId().equalsIgnoreCase(orgId)) {
@@ -118,7 +121,8 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 				if (existingDBRecord != null) {
 					existingDBRecord.setSbOrgId(orgId);
 					if (StringUtils.isEmpty(existingDBRecord.getSbRootOrgId())) {
-						existingDBRecord.setSbRootOrgId(fetchRootOrgId(requestData));
+						existingDBRecord
+								.setSbRootOrgId(fetchRootOrgId((String) requestData.get(Constants.PARENT_MAP_ID)));
 					}
 					orgRepository.save(existingDBRecord);
 				} else {
@@ -168,14 +172,15 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 					if (!StringUtils.isEmpty(sbRootOrgid)) {
 						updateRequest.put(Constants.SB_ROOT_ORG_ID, sbRootOrgid);
 					} else {
-						updateRequest.put(Constants.SB_ROOT_ORG_ID, fetchRootOrgId(requestData));
+						updateRequest.put(Constants.SB_ROOT_ORG_ID,
+								fetchRootOrgId((String) requestData.get(Constants.PARENT_MAP_ID)));
 					}
 				} else {
 					updateRequest.put(Constants.PARENT_MAP_ID, Constants.SPV);
 				}
 				if (!StringUtils.isEmpty((String) requestData.get(Constants.MAP_ID))) {
 					ObjectMapper om = new ObjectMapper();
-					log.info("Need to update the record here... " + om.writeValueAsString(updateRequest));
+					logger.info("Need to update the record here... " + om.writeValueAsString(updateRequest));
 					if (ObjectUtils.isEmpty(updateRequest.get(Constants.SB_ROOT_ORG_ID))) {
 						orgRepository.updateOrgIdForChannel(channelName,
 								(String) updateRequest.get(Constants.SB_ORG_ID));
@@ -193,7 +198,7 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 				response.getResult().put(Constants.RESPONSE, Constants.SUCCESS);
 			}
 		} catch (Exception e) {
-			log.error(e);
+			logger.error("Failed to create user. Exception: ", e);
 			response.getParams().setErrmsg(e.getMessage());
 			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -283,7 +288,7 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 				response.put(Constants.RESPONSE, responseMap);
 			}
 		} catch (Exception e) {
-			log.error(e);
+			logger.error("Failed to search org details. Exception: ", e);
 			response.getParams().setErrmsg(e.getMessage());
 			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -408,7 +413,7 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 				headers);
 		if (Constants.OK.equalsIgnoreCase((String) apiResponse.get(Constants.RESPONSE_CODE))) {
 			Map<String, Object> result = (Map<String, Object>) apiResponse.get(Constants.RESULT);
-			log.info(String.format("Org onboarded successfully for Name: %s, with orgId: %s", channel,
+			logger.info(String.format("Org onboarded successfully for Name: %s, with orgId: %s", channel,
 					result.get(Constants.ORGANIZATION_ID)));
 			return (String) result.get(Constants.ORGANIZATION_ID);
 		}
@@ -459,26 +464,30 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 
 			Map<String, Object> requestData = (Map<String, Object>) request.get(Constants.REQUEST);
 
+			boolean dbUpdateRequired = false;
 			String orgId = checkOrgExist((String) requestData.get(Constants.CHANNEL), StringUtils.EMPTY);
 
 			if (StringUtils.isEmpty(orgId)) {
 				orgId = createOrgInSunbird(request, (String) requestData.get(Constants.CHANNEL), StringUtils.EMPTY);
+				dbUpdateRequired = true;
 			}
 
 			if (!StringUtils.isEmpty(orgId)) {
-				String sbRootOrgId = (String) requestData.get(Constants.SB_ROOT_ORG_ID);
-
-				if (StringUtils.isEmpty(sbRootOrgId)) {
-					sbRootOrgId = orgRepository.getSbOrgIdFromMapId((String) requestData.get(Constants.MAP_ID));
+				if (dbUpdateRequired) {
+					OrgHierarchy existingDBRecord = orgRepository
+							.findByChannel((String) requestData.get(Constants.CHANNEL));
+					if (StringUtils.isBlank(existingDBRecord.getSbOrgId())) {
+						existingDBRecord.setSbOrgId(orgId);
+						if (StringUtils.isEmpty(existingDBRecord.getSbRootOrgId())) {
+							existingDBRecord.setSbRootOrgId(fetchRootOrgId(existingDBRecord.getParentMapId()));
+						}
+						orgRepository.save(existingDBRecord);
+					} else {
+						logger.error(String.format(
+								"Failed to update rootOrg details. RootOrg is already available in DB record. Existing: %s, NewValue: %s",
+								existingDBRecord.getSbOrgId(), orgId));
+					}
 				}
-
-				if (!StringUtils.isEmpty(sbRootOrgId)) {
-					orgRepository.updateSbOrgIdAndSbOrgRootIdForChannel((String) requestData.get(Constants.CHANNEL),
-							orgId, sbRootOrgId);
-				} else {
-					orgRepository.updateOrgIdForChannel((String) requestData.get(Constants.CHANNEL), orgId);
-				}
-
 				response.getResult().put(Constants.ORGANIZATION_ID, orgId);
 				response.getResult().put(Constants.RESPONSE, Constants.SUCCESS);
 			} else {
@@ -486,7 +495,7 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 				response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
 			}
 		} catch (Exception e) {
-			log.error(e);
+			logger.error("Failed to create org for user registration. Exception: ", e);
 			response.getParams().setErrmsg(e.getMessage());
 			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -536,13 +545,14 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 		return mapIdNew;
 	}
 
-	private String fetchRootOrgId(Map<String, Object> requestData) {
-		OrgHierarchy parentOrg = orgRepository.findByMapId((String) requestData.get(Constants.PARENT_MAP_ID));
-		if(StringUtils.isBlank(parentOrg.getSbOrgId())) {
-			//Let's try to create parent org
+	private String fetchRootOrgId(String mapId) {
+		OrgHierarchy parentOrg = orgRepository.findByMapId(mapId);
+		if (parentOrg != null && StringUtils.isBlank(parentOrg.getSbOrgId())) {
+			// Let's try to create parent org
 			createParentOrg(parentOrg);
+			return parentOrg.getSbOrgId();
 		}
-		return parentOrg.getSbOrgId();
+		return StringUtils.EMPTY;
 	}
 
 	private void fetchMapIdFromDB(Map<String, Object> requestData) {
@@ -614,7 +624,7 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 				response.getParams().setErrmsg(errMsg);
 				return response;
 			}
-			log.info("Received Search Filters ? " + objectMapper.writeValueAsString(searchFilters));
+			logger.info("Received Search Filters ? " + objectMapper.writeValueAsString(searchFilters));
 			List<OrgHierarchy> orgList = orgRepository
 					.searchOrgWithHierarchy((String) searchFilters.get(Constants.ORG_NAME));
 			List<OrgHierarchyInfo> orgInfoList = new ArrayList<OrgHierarchyInfo>();
@@ -652,7 +662,7 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 			response.getResult().put(Constants.COUNT, orgInfoList.size());
 			response.getResult().put(Constants.RESPONSE, orgInfoList);
 		} catch (Exception e) {
-			log.error("Failed to retrieve details from org hierarchy table. Exception: ", e);
+			logger.error("Failed to retrieve details from org hierarchy table. Exception: ", e);
 		}
 		return response;
 	}
@@ -755,7 +765,6 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 				} else {
 					orgRepository.updateOrgIdForChannel(parentOrg.getChannel(), orgId);
 				}
-
 				response.getResult().put(Constants.ORGANIZATION_ID, orgId);
 				response.getResult().put(Constants.RESPONSE, Constants.SUCCESS);
 				parentOrg.setSbOrgId(orgId);
@@ -764,11 +773,10 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 				response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
 			}
 		} catch (Exception e) {
-			log.error(e);
+			logger.error("Failed to create parent org. Exception: ", e);
 			response.getParams().setErrmsg(e.getMessage());
 			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-
 		return response;
 	}
 }
