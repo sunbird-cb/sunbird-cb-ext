@@ -118,20 +118,37 @@ public class UserBulkUploadService {
                     rowIterator.next();
                 }
                 while (rowIterator.hasNext()) {
+                    StringBuffer str = new StringBuffer();
+                    List<String> errList = new ArrayList<>();
                     Row nextRow = rowIterator.next();
                     if (StringUtils.isBlank(nextRow.getCell(0).getStringCellValue())) {
                         break;
                     }
                     UserRegistration userRegistration = new UserRegistration();
-                    userRegistration.setFirstName(nextRow.getCell(0).getStringCellValue());
-                    userRegistration.setLastName(nextRow.getCell(1).getStringCellValue());
-                    userRegistration.setEmail(nextRow.getCell(2).getStringCellValue());
-                    if (nextRow.getCell(3).getCellType() == CellType.NUMERIC) {
-                        phone = NumberToTextConverter.toText(nextRow.getCell(3).getNumericCellValue());
+                    if (nextRow.getCell(0) == null) {
+                        errList.add("First Name is Missing");
+                    } else {
+                        userRegistration.setFirstName(nextRow.getCell(0).getStringCellValue());
                     }
-                    userRegistration.setPhone(phone);
+                    if (nextRow.getCell(1) == null) {
+                        errList.add("Last Name is Missing");
+                    } else {
+                        userRegistration.setLastName(nextRow.getCell(1).getStringCellValue());
+                    }
+                    if (nextRow.getCell(2) == null) {
+                        errList.add("Email is Missing");
+                    } else {
+                        userRegistration.setEmail(nextRow.getCell(2).getStringCellValue());
+                    }
+                    if (nextRow.getCell(3) == null) {
+                        errList.add("Phone number is Missing");
+                    } else {
+                        if (nextRow.getCell(3).getCellType() == CellType.NUMERIC) {
+                            phone = NumberToTextConverter.toText(nextRow.getCell(3).getNumericCellValue());
+                            userRegistration.setPhone(phone);
+                        }
+                    }
                     userRegistration.setOrgName(inputDataMap.get(Constants.ORG_NAME));
-                    List<String> errList = validateEmailContactAndDomain(userRegistration);
                     Cell statusCell = nextRow.getCell(4);
                     Cell errorDetails = nextRow.getCell(5);
                     if (statusCell == null) {
@@ -141,16 +158,26 @@ public class UserBulkUploadService {
                         errorDetails = nextRow.createCell(5);
                     }
                     totalRecordsCount++;
+                    if (!errList.isEmpty()) {
+                        str.append("Failed to Process the Uploaded File. Error Details - [").append(errList).append("]");
+                    }
                     if (errList.isEmpty()) {
-                        boolean isUserCreated = userUtilityService.createUser(userRegistration);
-                        if (isUserCreated) {
-                            noOfSuccessfulRecords++;
-                            statusCell.setCellValue(Constants.SUCCESS.toUpperCase());
-                            errorDetails.setCellValue("");
+                        errList = validateEmailContactAndDomain(userRegistration);
+                        if (errList.isEmpty()) {
+                            boolean isUserCreated = userUtilityService.createUser(userRegistration);
+                            if (isUserCreated) {
+                                noOfSuccessfulRecords++;
+                                statusCell.setCellValue(Constants.SUCCESS.toUpperCase());
+                                errorDetails.setCellValue("");
+                            } else {
+                                failedRecordsCount++;
+                                statusCell.setCellValue(Constants.FAILED.toUpperCase());
+                                errorDetails.setCellValue(Constants.USER_CREATION_FAILED);
+                            }
                         } else {
                             failedRecordsCount++;
                             statusCell.setCellValue(Constants.FAILED.toUpperCase());
-                            errorDetails.setCellValue(Constants.USER_CREATION_FAILED);
+                            errorDetails.setCellValue(errList.toString());
                         }
                     } else {
                         failedRecordsCount++;
