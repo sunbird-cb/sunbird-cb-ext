@@ -121,9 +121,9 @@ public class UserBulkUploadService {
                     StringBuffer str = new StringBuffer();
                     List<String> errList = new ArrayList<>();
                     Row nextRow = rowIterator.next();
-                    if (totalRecordsCount > 0 && StringUtils.isBlank(nextRow.getCell(0).getStringCellValue())) {
-                        break;
-                    }
+//                    if (totalRecordsCount > 0 && StringUtils.isBlank(nextRow.getCell(0).getStringCellValue())) {
+//                        break;
+//                    }
                     UserRegistration userRegistration = new UserRegistration();
                     if (nextRow.getCell(0) == null) {
                         errList.add("First Name is Missing");
