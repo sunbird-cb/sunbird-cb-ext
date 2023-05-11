@@ -18,6 +18,8 @@ public interface OrgHierarchyRepository extends JpaRepository<OrgHierarchy, Inte
 
     List<OrgHierarchy> findAllByMapId(String mapId);
 
+    OrgHierarchy findByMapId(String mapId);
+
     @Query(value = "SELECT sborgid from org_hierarchy_v2 where mapid=?1", nativeQuery = true)
     String getSbOrgIdFromMapId(String mapId);
 
