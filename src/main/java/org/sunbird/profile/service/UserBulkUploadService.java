@@ -160,8 +160,11 @@ public class UserBulkUploadService {
                     totalRecordsCount++;
                     if (!errList.isEmpty()) {
                         str.append("Failed to Process the Uploaded File. Error Details - [").append(errList).append("]");
+                        failedRecordsCount++;
+                        statusCell.setCellValue(Constants.FAILED.toUpperCase());
+                        errorDetails.setCellValue(errList.toString());
                     }
-                    if (errList.isEmpty()) {
+                    else {
                         errList = validateEmailContactAndDomain(userRegistration);
                         if (errList.isEmpty()) {
                             boolean isUserCreated = userUtilityService.createUser(userRegistration);
@@ -179,10 +182,6 @@ public class UserBulkUploadService {
                             statusCell.setCellValue(Constants.FAILED.toUpperCase());
                             errorDetails.setCellValue(errList.toString());
                         }
-                    } else {
-                        failedRecordsCount++;
-                        statusCell.setCellValue(Constants.FAILED.toUpperCase());
-                        errorDetails.setCellValue(errList.toString());
                     }
                 }
                 status = uploadTheUpdatedFile(inputDataMap.get(Constants.ROOT_ORG_ID),
