@@ -326,7 +326,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 		userRegistration.setEmail(userRegInfo.getEmail());
 		userRegistration.setSbOrgId(userRegInfo.getSbOrgId());
 		userRegistration.setOrgName(userRegInfo.getOrgName());
-		userRegistration.setChannel(userRegistration.getChannel());
+		userRegistration.setChannel(userRegInfo.getChannel());
 		userRegistration.setSbRootOrgId(userRegInfo.getSbRootOrgId());
 		userRegistration.setPosition(userRegInfo.getPosition());
 		userRegistration.setSource(userRegInfo.getSource());
