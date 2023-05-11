@@ -121,7 +121,7 @@ public class UserBulkUploadService {
                     StringBuffer str = new StringBuffer();
                     List<String> errList = new ArrayList<>();
                     Row nextRow = rowIterator.next();
-                    if (StringUtils.isBlank(nextRow.getCell(0).getStringCellValue())) {
+                    if (totalRecordsCount > 0 && StringUtils.isBlank(nextRow.getCell(0).getStringCellValue())) {
                         break;
                     }
                     UserRegistration userRegistration = new UserRegistration();
