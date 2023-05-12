@@ -88,6 +88,7 @@ public class Constants {
 	public static final String X_AUTH_TOKEN = "x-authenticated-user-token";
 	public static final String SUCCESSFUL = "Successful";
 	public static final String FAILED = "Failed";
+	public static final String FAILED_UPPERCASE = "FAILED";
 	public static final String MESSAGE = "message";
 	public static final String DATA = "data";
 	public static final String STATUS = "status";
@@ -209,6 +210,7 @@ public class Constants {
 	public static final String COMMA = ",";
 	public static final String CLOSING_BRACE = ");";
 	public static final String SUCCESS = "success";
+	public static final String SUCCESS_UPPERCASE = "SUCCESS";
 	public static final String UNKNOWN_IDENTIFIER = "Unknown identifier ";
 	public static final String UNDEFINED_IDENTIFIER = "Undefined column name ";
 	public static final String EXCEPTION_MSG_FETCH = "Exception occurred while fetching record from ";
@@ -659,7 +661,6 @@ public class Constants {
 	public static final String QUERY = "query";
 	public static final String SORT_BY_KEYWORD = "sortBy";
 	public static final String SUCCESSFUL_UPPERCASE = "SUCCESSFUL";
-	public static final String FAILED_UPPERCASE = "FAILED";
 	public static final String STATUS_IN_PROGRESS_UPPERCASE = "IN-PROGRESS";
 	public static final String LOCAL_BASE_PATH= "/tmp/";
 	public static final String USER_CREATION_FAILED = "User Creation Failed";
