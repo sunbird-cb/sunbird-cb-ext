@@ -121,9 +121,6 @@ public class UserBulkUploadService {
                     StringBuffer str = new StringBuffer();
                     List<String> errList = new ArrayList<>();
                     Row nextRow = rowIterator.next();
-                    if (totalRecordsCount > 0 && nextRow.getCell(0) == null) {
-                            break;
-                    }
                     UserRegistration userRegistration = new UserRegistration();
                     if (nextRow.getCell(0) == null) {
                         errList.add("First Name");
@@ -147,6 +144,9 @@ public class UserBulkUploadService {
                             phone = NumberToTextConverter.toText(nextRow.getCell(3).getNumericCellValue());
                             userRegistration.setPhone(phone);
                         }
+                    }
+                    if (totalRecordsCount > 0 && errList.size()==4) {
+                        break;
                     }
                     userRegistration.setOrgName(inputDataMap.get(Constants.ORG_NAME));
                     Cell statusCell = nextRow.getCell(4);
