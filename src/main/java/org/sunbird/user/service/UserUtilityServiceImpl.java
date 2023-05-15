@@ -548,7 +548,13 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 
 	@Override
 	public Boolean isDomainAccepted(String email) {
-		String emailDomain = email.split("@")[1];
+		String emailDomain = "";
+		try {
+			emailDomain = email.split("@")[1];
+		} catch (Exception e) {
+			logger.error("Failed to fetch the email domain : ",
+					e);
+		}
 		return props.getUserRegistrationDomain().contains(emailDomain);
 	}
 }
