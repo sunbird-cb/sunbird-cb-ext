@@ -154,12 +154,12 @@ public class UserBulkUploadService {
                     if (errorDetails == null) {
                         errorDetails = nextRow.createCell(5);
                     }
-                    if (totalRecordsCount > 0 && errList.size() == 4) {
-                        break;
-                    }
-                    else if (totalRecordsCount == 0 && errList.size() == 4)
+                    if (totalRecordsCount == 0 && errList.size() == 4)
                     {
                         failedRecordsCount = setErrorDetails(failedRecordsCount, str, errList, statusCell, errorDetails);
+                        break;
+                    }
+                    else if (totalRecordsCount > 0 && errList.size() == 4) {
                         break;
                     }
                     totalRecordsCount++;
