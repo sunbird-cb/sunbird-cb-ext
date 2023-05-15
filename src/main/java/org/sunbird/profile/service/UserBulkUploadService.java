@@ -234,6 +234,7 @@ public class UserBulkUploadService {
     private List<String> validateEmailContactAndDomain(UserRegistration userRegistration) {
         StringBuffer str = new StringBuffer();
         List<String> errList = new ArrayList<>();
+        logger.info(userRegistration.getEmail());
         if (!userUtilityService.isDomainAccepted(userRegistration.getEmail())) {
             errList.add("Domain not accepted");
         }
