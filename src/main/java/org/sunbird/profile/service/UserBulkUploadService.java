@@ -71,7 +71,7 @@ public class UserBulkUploadService {
     }
 
     public void updateUserBulkUploadStatus(String rootOrgId, String identifier, String status, int totalRecordsCount,
-            int successfulRecordsCount, int failedRecordsCount) {
+                                           int successfulRecordsCount, int failedRecordsCount) {
         try {
             Map<String, Object> compositeKeys = new HashMap<>();
             compositeKeys.put(Constants.ROOT_ORG_ID_LOWER, rootOrgId);
@@ -154,19 +154,18 @@ public class UserBulkUploadService {
                     if (errorDetails == null) {
                         errorDetails = nextRow.createCell(5);
                     }
-                    if (totalRecordsCount == 0 && errList.size() == 4)
-                    {
-                        failedRecordsCount = setErrorDetails(failedRecordsCount, str, errList, statusCell, errorDetails);
+                    if (totalRecordsCount == 0 && errList.size() == 4) {
+                        setErrorDetails(str, errList, statusCell, errorDetails);
+                        failedRecordsCount++;
                         break;
-                    }
-                    else if (totalRecordsCount > 0 && errList.size() == 4) {
+                    } else if (totalRecordsCount > 0 && errList.size() == 4) {
                         break;
                     }
                     totalRecordsCount++;
                     if (!errList.isEmpty()) {
-                        failedRecordsCount = setErrorDetails(failedRecordsCount, str, errList, statusCell, errorDetails);
-                    }
-                    else {
+                        setErrorDetails(str, errList, statusCell, errorDetails);
+                        failedRecordsCount++;
+                    } else {
                         errList = validateEmailContactAndDomain(userRegistration);
                         if (errList.isEmpty()) {
                             boolean isUserCreated = userUtilityService.createUser(userRegistration);
@@ -212,12 +211,10 @@ public class UserBulkUploadService {
         }
     }
 
-    private static int setErrorDetails(int failedRecordsCount, StringBuffer str, List<String> errList, Cell statusCell, Cell errorDetails) {
+    private void setErrorDetails(StringBuffer str, List<String> errList, Cell statusCell, Cell errorDetails) {
         str.append("Failed to process user record. Missing Parameters - ").append(errList);
-        failedRecordsCount++;
         statusCell.setCellValue(Constants.FAILED_UPPERCASE);
         errorDetails.setCellValue(str.toString());
-        return failedRecordsCount;
     }
 
     private String uploadTheUpdatedFile(String rootOrgId, String identifier, File file, XSSFWorkbook wb)
