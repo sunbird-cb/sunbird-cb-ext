@@ -159,7 +159,7 @@ public class UserBulkUploadService {
                     }
                     totalRecordsCount++;
                     if (!errList.isEmpty()) {
-                        str.append("Failed to process user record. Missing Parameters - [").append(errList).append("]");
+                        str.append("Failed to process user record. Missing Parameters - ").append(errList);
                         failedRecordsCount++;
                         statusCell.setCellValue(Constants.FAILED_UPPERCASE);
                         errorDetails.setCellValue(str.toString());
