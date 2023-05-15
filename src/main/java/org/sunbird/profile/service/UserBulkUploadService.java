@@ -122,22 +122,22 @@ public class UserBulkUploadService {
                     List<String> errList = new ArrayList<>();
                     Row nextRow = rowIterator.next();
                     UserRegistration userRegistration = new UserRegistration();
-                    if (nextRow.getCell(0) == null) {
+                    if (nextRow.getCell(0) == null || StringUtils.isBlank(nextRow.getCell(0).toString())) {
                         errList.add("First Name");
                     } else {
                         userRegistration.setFirstName(nextRow.getCell(0).getStringCellValue());
                     }
-                    if (nextRow.getCell(1) == null) {
+                    if (nextRow.getCell(1) == null || StringUtils.isBlank(nextRow.getCell(1).toString())) {
                         errList.add("Last Name");
                     } else {
                         userRegistration.setLastName(nextRow.getCell(1).getStringCellValue());
                     }
-                    if (nextRow.getCell(2) == null) {
+                    if (nextRow.getCell(2) == null || StringUtils.isBlank(nextRow.getCell(2).toString())) {
                         errList.add("Email");
                     } else {
                         userRegistration.setEmail(nextRow.getCell(2).getStringCellValue());
                     }
-                    if (nextRow.getCell(3) == null) {
+                    if (nextRow.getCell(3) == null || StringUtils.isBlank(nextRow.getCell(3).toString())) {
                         errList.add("Phone");
                     } else {
                         if (nextRow.getCell(3).getCellType() == CellType.NUMERIC) {
