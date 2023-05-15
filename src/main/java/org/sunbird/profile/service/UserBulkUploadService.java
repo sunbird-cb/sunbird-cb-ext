@@ -157,19 +157,16 @@ public class UserBulkUploadService {
                     if (errorDetails == null) {
                         errorDetails = nextRow.createCell(5);
                     }
-                    if(totalRecordsCount==0 && errList.size()==4)
-                    {
-                        str.append("Failed to process the file. Missing Parameters - ").append(errList);
-                        failedRecordsCount++;
-                        statusCell.setCellValue(Constants.FAILED_UPPERCASE);
-                        errorDetails.setCellValue(str.toString());
-                    }
                     totalRecordsCount++;
                     if (!errList.isEmpty()) {
                         str.append("Failed to process user record. Missing Parameters - ").append(errList);
                         failedRecordsCount++;
                         statusCell.setCellValue(Constants.FAILED_UPPERCASE);
                         errorDetails.setCellValue(str.toString());
+                        if(totalRecordsCount==1 && errList.size()==4)
+                        {
+                            break;
+                        }
                     }
                     else {
                         errList = validateEmailContactAndDomain(userRegistration);
