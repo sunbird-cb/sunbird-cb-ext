@@ -145,9 +145,6 @@ public class UserBulkUploadService {
                             userRegistration.setPhone(phone);
                         }
                     }
-                    if (totalRecordsCount > 0 && errList.size()==4) {
-                        break;
-                    }
                     userRegistration.setOrgName(inputDataMap.get(Constants.ORG_NAME));
                     Cell statusCell = nextRow.getCell(4);
                     Cell errorDetails = nextRow.getCell(5);
@@ -157,16 +154,17 @@ public class UserBulkUploadService {
                     if (errorDetails == null) {
                         errorDetails = nextRow.createCell(5);
                     }
+                    if (totalRecordsCount > 0 && errList.size() == 4) {
+                        break;
+                    }
+                    else if (totalRecordsCount == 0 && errList.size() == 4)
+                    {
+                        failedRecordsCount = setErrorDetails(failedRecordsCount, str, errList, statusCell, errorDetails);
+                        break;
+                    }
                     totalRecordsCount++;
                     if (!errList.isEmpty()) {
-                        str.append("Failed to process user record. Missing Parameters - ").append(errList);
-                        failedRecordsCount++;
-                        statusCell.setCellValue(Constants.FAILED_UPPERCASE);
-                        errorDetails.setCellValue(str.toString());
-                        if(totalRecordsCount==1 && errList.size()==4)
-                        {
-                            break;
-                        }
+                        failedRecordsCount = setErrorDetails(failedRecordsCount, str, errList, statusCell, errorDetails);
                     }
                     else {
                         errList = validateEmailContactAndDomain(userRegistration);
@@ -212,6 +210,14 @@ public class UserBulkUploadService {
             if (file != null)
                 file.delete();
         }
+    }
+
+    private static int setErrorDetails(int failedRecordsCount, StringBuffer str, List<String> errList, Cell statusCell, Cell errorDetails) {
+        str.append("Failed to process user record. Missing Parameters - ").append(errList);
+        failedRecordsCount++;
+        statusCell.setCellValue(Constants.FAILED_UPPERCASE);
+        errorDetails.setCellValue(str.toString());
+        return failedRecordsCount;
     }
 
     private String uploadTheUpdatedFile(String rootOrgId, String identifier, File file, XSSFWorkbook wb)
