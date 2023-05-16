@@ -6,11 +6,16 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -28,7 +33,7 @@ import org.sunbird.org.repository.OrgHierarchyRepository;
 
 @Service
 public class ExtendedOrgServiceImpl implements ExtendedOrgService {
-	private CbExtLogger log = new CbExtLogger(getClass().getName());
+	private Logger logger = LoggerFactory.getLogger(getClass().getName());
 
 	@Autowired
 	OutboundRequestHandlerServiceImpl outboundService;
@@ -38,6 +43,8 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 
 	@Autowired
 	OrgHierarchyRepository orgRepository;
+
+	ObjectMapper objectMapper = new ObjectMapper();
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -52,35 +59,86 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 			}
 
 			Map<String, Object> requestData = (Map<String, Object>) request.get(Constants.REQUEST);
-
-			String channelName = prepareChannelName((String) requestData.get(Constants.PARENT_MAP_ID), requestData);
-			String orgType = (String) requestData.get(Constants.ORGANIZATION_TYPE);
-			if (StringUtils.isBlank(channelName)) {
-				// We tried to construct channelName but returred empty.
-				// So orgType could be only ministry / state.
-				if (Constants.STATE.equalsIgnoreCase(orgType)
-						|| Constants.MINISTRY.equalsIgnoreCase(orgType)) {
-					channelName = (String) requestData.get(Constants.CHANNEL);
-				} else {
-					log.error("Failed to identify channelName.", null);
-					// Need to treat this as error.
-				}
-
-			} else {
-				channelName = channelName + (String) requestData.get(Constants.CHANNEL);
-				requestData.put(Constants.CHANNEL, channelName);
-			}
-
 			String orgId = checkOrgExist((String) requestData.get(Constants.CHANNEL), userToken);
+			String orgType = (String) requestData.get(Constants.ORGANIZATION_TYPE);
+			String channelName = null;
+			boolean dbUpdateRequired = false;
+			boolean orgCreatedWithNewChannel = false;
 
 			if (StringUtils.isEmpty(orgId)) {
+				// There is no org exist for given Channel. We can simply create the same in
+				// system.
 				orgId = createOrgInSunbird(request, (String) requestData.get(Constants.CHANNEL), userToken);
+				if (StringUtils.isBlank(orgId)) {
+					response.getParams().setErrmsg("Failed to create organisation in Sunbird.");
+					response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+					return response;
+				}
+				dbUpdateRequired = true;
+			} else {
+				// The channel already exist. We need to check OrgHierarchy table for duplicate.
+				if (Constants.STATE.equalsIgnoreCase(orgType)
+						|| Constants.MINISTRY.equalsIgnoreCase(orgType)) {
+					// We are not allowing duplicates @ L1 -- Need to throw error
+					response.getParams().setErrmsg("Organisation is already exist.");
+					response.setResponseCode(HttpStatus.BAD_REQUEST);
+					return response;
+				} else {
+					OrgHierarchy existingDBRecord = orgRepository.findByOrgNameAndParentMapId(
+							(String) requestData.get(Constants.CHANNEL),
+							(String) requestData.get(Constants.PARENT_MAP_ID));
+					if (existingDBRecord == null) {
+						channelName = prepareChannelName((String) requestData.get(Constants.PARENT_MAP_ID),
+								requestData);
+						channelName = channelName + (String) requestData.get(Constants.CHANNEL);
+						requestData.put(Constants.CHANNEL, channelName);
+						orgId = createOrgInSunbird(request, (String) requestData.get(Constants.CHANNEL), userToken);
+						if (StringUtils.isBlank(orgId)) {
+							response.getParams().setErrmsg("Failed to create organisation in Sunbird.");
+							response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+							return response;
+						}
+						dbUpdateRequired = true;
+						orgCreatedWithNewChannel = true;
+					} else if (StringUtils.isBlank(existingDBRecord.getSbOrgId())) {
+						existingDBRecord.setSbOrgId(orgId);
+						if (StringUtils.isEmpty(existingDBRecord.getSbRootOrgId())) {
+							existingDBRecord
+									.setSbRootOrgId(fetchRootOrgId((String) requestData.get(Constants.PARENT_MAP_ID)));
+						}
+						orgRepository.save(existingDBRecord);
+					} else if (existingDBRecord.getSbOrgId().equalsIgnoreCase(orgId)) {
+						response.getParams().setErrmsg("Duplicate Record Found in OrgHierarchy. Contact Admin");
+						response.setResponseCode(HttpStatus.BAD_REQUEST);
+						return response;
+					}
+				}
 			}
 
-			if (!StringUtils.isEmpty(orgId)) {
+			if (dbUpdateRequired) {
+				OrgHierarchy existingDBRecord = orgRepository.findByOrgNameAndParentMapId(
+						(String) requestData.get(Constants.CHANNEL), (String) requestData.get(Constants.PARENT_MAP_ID));
+				if (existingDBRecord != null) {
+					existingDBRecord.setSbOrgId(orgId);
+					if (StringUtils.isEmpty(existingDBRecord.getSbRootOrgId())) {
+						existingDBRecord
+								.setSbRootOrgId(fetchRootOrgId((String) requestData.get(Constants.PARENT_MAP_ID)));
+					}
+					orgRepository.save(existingDBRecord);
+				} else {
+					// We just created with given channel name. but this is new record in
+					// orgHierarchy...
+					// By calling prepareChannelName we will update L1 and L2 details.
+					prepareChannelName((String) requestData.get(Constants.PARENT_MAP_ID), requestData);
+					channelName = (String) requestData.get(Constants.CHANNEL);
+					orgCreatedWithNewChannel = true;
+				}
+			}
+
+			if (orgCreatedWithNewChannel) {
 				Map<String, Object> updateRequest = new HashMap<String, Object>();
 				String orgName = (String) requestData.get(Constants.ORG_NAME);
-				updateRequest.put(Constants.CHANNEL, channelName);
+				updateRequest.put(Constants.CHANNEL, (String) requestData.get(Constants.CHANNEL));
 				updateRequest.put(Constants.SB_ORG_ID, orgId);
 				updateRequest.put(Constants.ORG_NAME, orgName);
 				updateRequest.put(Constants.SB_ORG_TYPE, orgType);
@@ -114,14 +172,15 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 					if (!StringUtils.isEmpty(sbRootOrgid)) {
 						updateRequest.put(Constants.SB_ROOT_ORG_ID, sbRootOrgid);
 					} else {
-						updateRequest.put(Constants.SB_ROOT_ORG_ID, fetchRootOrgId(requestData));
+						updateRequest.put(Constants.SB_ROOT_ORG_ID,
+								fetchRootOrgId((String) requestData.get(Constants.PARENT_MAP_ID)));
 					}
 				} else {
 					updateRequest.put(Constants.PARENT_MAP_ID, Constants.SPV);
 				}
 				if (!StringUtils.isEmpty((String) requestData.get(Constants.MAP_ID))) {
 					ObjectMapper om = new ObjectMapper();
-					log.info("Need to update the record here... " + om.writeValueAsString(updateRequest));
+					logger.info("Need to update the record here... " + om.writeValueAsString(updateRequest));
 					if (ObjectUtils.isEmpty(updateRequest.get(Constants.SB_ROOT_ORG_ID))) {
 						orgRepository.updateOrgIdForChannel(channelName,
 								(String) updateRequest.get(Constants.SB_ORG_ID));
@@ -137,12 +196,9 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 				}
 				response.getResult().put(Constants.ORGANIZATION_ID, orgId);
 				response.getResult().put(Constants.RESPONSE, Constants.SUCCESS);
-			} else {
-				response.getParams().setErrmsg("Failed to create organisation in Sunbird.");
-				response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
 			}
 		} catch (Exception e) {
-			log.error(e);
+			logger.error("Failed to create user. Exception: ", e);
 			response.getParams().setErrmsg(e.getMessage());
 			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -158,8 +214,8 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 		}
 
 		List<OrgHierarchy> orgHierarchyList = null;
-		if (Constants.MINISTRY.equalsIgnoreCase(parentMapId) 
-			|| Constants.STATE.equalsIgnoreCase(parentMapId)) {
+		if (Constants.MINISTRY.equalsIgnoreCase(parentMapId)
+				|| Constants.STATE.equalsIgnoreCase(parentMapId)) {
 			orgHierarchyList = orgRepository.findAllBySbOrgType(parentMapId);
 		} else {
 			orgHierarchyList = orgRepository.findAllByParentMapId(parentMapId);
@@ -192,8 +248,14 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 			Map<String, Object> filters = (Map<String, Object>) requestData.get(Constants.FILTERS);
 			String sbRootOrgId = (String) filters.get(Constants.SB_ROOT_ORG_ID);
 
+			// sbRootOrgId is State Id. Let's get all the children (i.e. departments)
 			List<String> orgIdList = orgRepository.findAllBySbRootOrgId(sbRootOrgId);
+
 			if (CollectionUtils.isNotEmpty(orgIdList)) {
+				List<String> orgIdChildList = orgRepository.fetchL2LevelOrgList(orgIdList);
+				if (CollectionUtils.isNotEmpty(orgIdChildList)) {
+					orgIdList.addAll(orgIdChildList);
+				}
 				SBApiOrgSearchRequest orgSearchRequest = new SBApiOrgSearchRequest();
 				orgSearchRequest.getFilters().setId(orgIdList);
 				if (!ProjectUtil.isStringNullOREmpty((String) requestData.get(Constants.QUERY))) {
@@ -226,7 +288,7 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 				response.put(Constants.RESPONSE, responseMap);
 			}
 		} catch (Exception e) {
-			log.error(e);
+			logger.error("Failed to search org details. Exception: ", e);
 			response.getParams().setErrmsg(e.getMessage());
 			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -351,7 +413,7 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 				headers);
 		if (Constants.OK.equalsIgnoreCase((String) apiResponse.get(Constants.RESPONSE_CODE))) {
 			Map<String, Object> result = (Map<String, Object>) apiResponse.get(Constants.RESULT);
-			log.info(String.format("Org onboarded successfully for Name: %s, with orgId: %s", channel,
+			logger.info(String.format("Org onboarded successfully for Name: %s, with orgId: %s", channel,
 					result.get(Constants.ORGANIZATION_ID)));
 			return (String) result.get(Constants.ORGANIZATION_ID);
 		}
@@ -402,26 +464,30 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 
 			Map<String, Object> requestData = (Map<String, Object>) request.get(Constants.REQUEST);
 
+			boolean dbUpdateRequired = false;
 			String orgId = checkOrgExist((String) requestData.get(Constants.CHANNEL), StringUtils.EMPTY);
 
 			if (StringUtils.isEmpty(orgId)) {
 				orgId = createOrgInSunbird(request, (String) requestData.get(Constants.CHANNEL), StringUtils.EMPTY);
+				dbUpdateRequired = true;
 			}
 
 			if (!StringUtils.isEmpty(orgId)) {
-				String sbRootOrgId = (String) requestData.get(Constants.SB_ROOT_ORG_ID);
-
-				if (StringUtils.isEmpty(sbRootOrgId)) {
-					sbRootOrgId = orgRepository.getSbOrgIdFromMapId((String) requestData.get(Constants.MAP_ID));
+				if (dbUpdateRequired) {
+					OrgHierarchy existingDBRecord = orgRepository
+							.findByChannel((String) requestData.get(Constants.CHANNEL));
+					if (StringUtils.isBlank(existingDBRecord.getSbOrgId())) {
+						existingDBRecord.setSbOrgId(orgId);
+						if (StringUtils.isEmpty(existingDBRecord.getSbRootOrgId())) {
+							existingDBRecord.setSbRootOrgId(fetchRootOrgId(existingDBRecord.getParentMapId()));
+						}
+						orgRepository.save(existingDBRecord);
+					} else {
+						logger.error(String.format(
+								"Failed to update rootOrg details. RootOrg is already available in DB record. Existing: %s, NewValue: %s",
+								existingDBRecord.getSbOrgId(), orgId));
+					}
 				}
-
-				if (!StringUtils.isEmpty(sbRootOrgId)) {
-					orgRepository.updateSbOrgIdAndSbOrgRootIdForChannel((String) requestData.get(Constants.CHANNEL),
-							orgId, sbRootOrgId);
-				} else {
-					orgRepository.updateOrgIdForChannel((String) requestData.get(Constants.CHANNEL), orgId);
-				}
-
 				response.getResult().put(Constants.ORGANIZATION_ID, orgId);
 				response.getResult().put(Constants.RESPONSE, Constants.SUCCESS);
 			} else {
@@ -429,7 +495,7 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 				response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
 			}
 		} catch (Exception e) {
-			log.error(e);
+			logger.error("Failed to create org for user registration. Exception: ", e);
 			response.getParams().setErrmsg(e.getMessage());
 			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -479,8 +545,14 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 		return mapIdNew;
 	}
 
-	private String fetchRootOrgId(Map<String, Object> requestData) {
-		return orgRepository.getSbOrgIdFromMapId((String) requestData.get(Constants.PARENT_MAP_ID));
+	private String fetchRootOrgId(String mapId) {
+		OrgHierarchy parentOrg = orgRepository.findByMapId(mapId);
+		if (parentOrg != null && StringUtils.isBlank(parentOrg.getSbOrgId())) {
+			// Let's try to create parent org
+			createParentOrg(parentOrg);
+			return parentOrg.getSbOrgId();
+		}
+		return StringUtils.EMPTY;
 	}
 
 	private void fetchMapIdFromDB(Map<String, Object> requestData) {
@@ -500,7 +572,7 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 				OrgHierarchy existingOrg = orgList.get(0);
 				// Check given parentMapId is same as existing record parentMapId.
 				if (existingOrg.getParentMapId().equalsIgnoreCase((String) requestData.get(Constants.PARENT_MAP_ID))) {
-					requestData.put(Constants.MAP_ID, existingOrg.getParentMapId());
+					requestData.put(Constants.MAP_ID, existingOrg.getMapId());
 				}
 			}
 		}
@@ -545,32 +617,57 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 	public SBApiResponse orgExtSearchV2(Map<String, Object> request) {
 		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_ORG_HIERACHY_SEARCH);
 		try {
-			StringBuilder searchKey = new StringBuilder("");
-			String errMsg = validateSearchRequest(request, searchKey);
+			Map<String, Object> searchFilters = new HashMap<String, Object>();
+			String errMsg = validateSearchRequest(request, searchFilters);
 			if (StringUtils.isNotBlank(errMsg)) {
 				response.setResponseCode(HttpStatus.BAD_REQUEST);
 				response.getParams().setErrmsg(errMsg);
 				return response;
 			}
-			log.info("Received Search Key ? " + searchKey.toString());
-			List<OrgHierarchy> orgList = orgRepository.searchOrgWithHierarchy(searchKey.toString());
+			logger.info("Received Search Filters ? " + objectMapper.writeValueAsString(searchFilters));
+			List<OrgHierarchy> orgList = orgRepository
+					.searchOrgWithHierarchy((String) searchFilters.get(Constants.ORG_NAME));
 			List<OrgHierarchyInfo> orgInfoList = new ArrayList<OrgHierarchyInfo>();
 			if (CollectionUtils.isEmpty(orgList)) {
 				orgList = Collections.emptyList();
+			} else {
+				Set<String> l1MapIdSet = orgList.stream().map(OrgHierarchy::getL1MapId)
+						.filter(l1MapId -> Objects.nonNull(l1MapId)).collect(Collectors.toSet());
+
+				List<OrgHierarchy> parentList = orgRepository.searchOrgForL1MapId(l1MapIdSet);
+				Map<String, OrgHierarchy> parentListMap = parentList.stream()
+						.collect(Collectors.toMap(OrgHierarchy::getMapId, orgHierarchy -> orgHierarchy));
+				int limit = (Integer) searchFilters.get(Constants.LIMIT);
+				String parentType = (String) searchFilters.get(Constants.PARENT_TYPE);
+				for (OrgHierarchy org : orgList) {
+					OrgHierarchy parentObj = parentListMap.get(org.getL1MapId());
+					if (parentObj != null) {
+						// We found the parent for this orgObj.. check this parent's sbOrgType is given
+						// parentType
+						if (parentType.equalsIgnoreCase(parentObj.getSbOrgType())) {
+							orgInfoList.add(org.toOrgInfo());
+						}
+					} else {
+						// If Org doesn't have l1MapId then it could be State / Ministry
+						if (parentType.equalsIgnoreCase(org.getSbOrgType())) {
+							orgInfoList.add(org.toOrgInfo());
+						}
+					}
+				}
+				if (orgInfoList.size() > limit) {
+					orgInfoList.subList(limit, orgInfoList.size()).clear();
+				}
 			}
-			for (OrgHierarchy org : orgList) {
-				OrgHierarchyInfo orgInfo = org.toOrgInfo();
-				orgInfoList.add(orgInfo);
-			}
+
 			response.getResult().put(Constants.COUNT, orgInfoList.size());
 			response.getResult().put(Constants.RESPONSE, orgInfoList);
 		} catch (Exception e) {
-			log.error("Failed to retrieve details from org hierarchy table. Exception: ", e);
+			logger.error("Failed to retrieve details from org hierarchy table. Exception: ", e);
 		}
 		return response;
 	}
 
-	private String validateSearchRequest(Map<String, Object> request, StringBuilder searchKey) {
+	private String validateSearchRequest(Map<String, Object> request, Map<String, Object> searchFilters) {
 		String errMsg = "";
 		Map<String, Object> requestBody = (Map<String, Object>) request.get(Constants.REQUEST);
 		if (ObjectUtils.isEmpty(requestBody)) {
@@ -583,9 +680,22 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 			return errMsg;
 		}
 		if (StringUtils.isNotBlank((String) filters.get(Constants.ORG_NAME))) {
-			searchKey.append(((String) filters.get(Constants.ORG_NAME)).trim());
+			searchFilters.put(Constants.ORG_NAME, ((String) filters.get(Constants.ORG_NAME)).trim());
 		} else {
 			errMsg = "OrgName is empty in search request.";
+		}
+
+		if (StringUtils.isNotBlank((String) filters.get(Constants.PARENT_TYPE))) {
+			searchFilters.put(Constants.PARENT_TYPE, ((String) filters.get(Constants.PARENT_TYPE)).trim());
+		} else {
+			errMsg = "ParentType is empty in search request";
+		}
+
+		Integer limit = (Integer) requestBody.get(Constants.LIMIT);
+		if (limit == null) {
+			searchFilters.put(Constants.LIMIT, configProperties.getOrgSearchResponseDefaultLimit());
+		} else {
+			searchFilters.put(Constants.LIMIT, limit);
 		}
 		return errMsg;
 	}
@@ -622,5 +732,51 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 		newOrg.setL2MapId((String) request.get(Constants.L2_MAP_ID));
 		newOrg.setL2OrgName((String) request.get(Constants.L2_ORG_NAME));
 		return newOrg;
+	}
+
+	public SBApiResponse createParentOrg(OrgHierarchy parentOrg) {
+		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_ORG_EXT_CREATE);
+		try {
+
+			String orgId = checkOrgExist(parentOrg.getChannel(), StringUtils.EMPTY);
+
+			if (StringUtils.isEmpty(orgId)) {
+				Map<String, Object> request = new HashMap<String, Object>();
+				Map<String, Object> requestBody = new HashMap<String, Object>();
+
+				requestBody.put(Constants.ORG_NAME, parentOrg.getOrgName());
+				requestBody.put(Constants.CHANNEL, parentOrg.getChannel());
+				requestBody.put(Constants.IS_TENANT, true);
+				requestBody.put(Constants.ORGANIZATION_TYPE, parentOrg.getSbOrgType());
+				requestBody.put(Constants.ORGANIZATION_SUB_TYPE, parentOrg.getSbOrgSubType());
+				request.put(Constants.REQUEST, requestBody);
+				orgId = createOrgInSunbird(request, parentOrg.getChannel(), StringUtils.EMPTY);
+			}
+
+			if (!StringUtils.isEmpty(orgId)) {
+				String sbRootOrgId = orgRepository.getSbOrgIdFromMapId(parentOrg.getParentMapId());
+				;
+				if (StringUtils.isBlank(parentOrg.getSbRootOrgId())) {
+					sbRootOrgId = orgRepository.getSbOrgIdFromMapId(parentOrg.getParentMapId());
+				}
+				if (StringUtils.isBlank(parentOrg.getSbRootOrgId()) && !StringUtils.isEmpty(sbRootOrgId)) {
+					orgRepository.updateSbOrgIdAndSbOrgRootIdForChannel(parentOrg.getChannel(),
+							orgId, sbRootOrgId);
+				} else {
+					orgRepository.updateOrgIdForChannel(parentOrg.getChannel(), orgId);
+				}
+				response.getResult().put(Constants.ORGANIZATION_ID, orgId);
+				response.getResult().put(Constants.RESPONSE, Constants.SUCCESS);
+				parentOrg.setSbOrgId(orgId);
+			} else {
+				response.getParams().setErrmsg("Failed to create parent organisation in Sunbird.");
+				response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+			}
+		} catch (Exception e) {
+			logger.error("Failed to create parent org. Exception: ", e);
+			response.getParams().setErrmsg(e.getMessage());
+			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		return response;
 	}
 }

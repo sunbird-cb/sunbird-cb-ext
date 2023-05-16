@@ -41,7 +41,6 @@ public class RedisCacheServiceImpl implements RedisCacheService {
 		SBApiResponse response = new SBApiResponse(Constants.API_REDIS_GET_KEYS);
 		Set<String> res = redisCache.getAllKeyNames();
 		if (!res.isEmpty()) {
-			logger.info("All Keys in Redis Cache is Fetched");
 			response.getParams().setStatus(Constants.SUCCESSFUL);
 			response.put(Constants.RESPONSE, res);
 			response.setResponseCode(HttpStatus.OK);

@@ -440,6 +440,9 @@ public class CbExtServerProperties {
 	@Value("${org.channel.delimitter}")
 	private String orgChannelDelimitter;
 
+	@Value("${org.search.response.default.limit}")
+	private Integer orgSearchResponseDefaultLimit;
+
 	public String getAssessmentSubmitTopic() {
 		return assessmentSubmitTopic;
 	}
@@ -1605,5 +1608,13 @@ public class CbExtServerProperties {
 
 	public void setOrgChannelDelimitter(String orgChannelDelimitter) {
 		this.orgChannelDelimitter = orgChannelDelimitter;
+	}
+
+	public Integer getOrgSearchResponseDefaultLimit() {
+		return orgSearchResponseDefaultLimit;
+	}
+
+	public void setOrgSearchResponseDefaultLimit(Integer orgSearchResponseDefaultLimit) {
+		this.orgSearchResponseDefaultLimit = orgSearchResponseDefaultLimit;
 	}
 }
