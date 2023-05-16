@@ -121,7 +121,6 @@ public class UserBulkUploadService {
                 }
                 else
                 {
-                    XSSFSheet sheet1 = wb.createSheet("Sheet1");
                     setErrorDetailsIncaseOfEmptyFile(sheet1, 0);
                 }
                 while (rowIterator.hasNext()) {
