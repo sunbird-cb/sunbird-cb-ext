@@ -128,11 +128,17 @@ public class UserBulkUploadService {
                         errList.add("First Name");
                     } else {
                         userRegistration.setFirstName(nextRow.getCell(0).getStringCellValue());
+                        if (!ProjectUtil.validateFirstName(userRegistration.getFirstName())) {
+                            errList.add("Invalid First Name");
+                        }
                     }
                     if (nextRow.getCell(1) == null || StringUtils.isBlank(nextRow.getCell(1).toString())) {
                         errList.add("Last Name");
                     } else {
                         userRegistration.setLastName(nextRow.getCell(1).getStringCellValue());
+                        if (!ProjectUtil.validateLastName(userRegistration.getLastName())) {
+                            errList.add("Invalid Last Name");
+                        }
                     }
                     if (nextRow.getCell(2) == null || StringUtils.isBlank(nextRow.getCell(2).toString())) {
                         errList.add("Email");
@@ -256,20 +262,28 @@ public class UserBulkUploadService {
     private List<String> validateEmailContactAndDomain(UserRegistration userRegistration) {
         StringBuffer str = new StringBuffer();
         List<String> errList = new ArrayList<>();
-        if (!userUtilityService.isDomainAccepted(userRegistration.getEmail())) {
-            errList.add("Domain not accepted");
-        }
-        if (!ProjectUtil.validateFirstName(userRegistration.getFirstName())) {
-            errList.add("Invalid First Name");
-        }
-        if (!ProjectUtil.validateLastName(userRegistration.getLastName())) {
-            errList.add("Invalid Last Name");
-        }
         if (!ProjectUtil.validateEmailPattern(userRegistration.getEmail())) {
             errList.add("Invalid Email Id");
         }
+        else
+        {
+            if (!userUtilityService.isDomainAccepted(userRegistration.getEmail())) {
+                errList.add("Invalid Email Domain");
+            }
+            else
+            {
+                if (userUtilityService.isUserExist(Constants.EMAIL, userRegistration.getEmail())) {
+                    errList.add(Constants.EMAIL_EXIST_ERROR);
+                }
+            }
+        }
         if (!ProjectUtil.validateContactPattern(userRegistration.getPhone())) {
             errList.add("Invalid Mobile Number");
+        }
+        else {
+            if (userUtilityService.isUserExist(Constants.PHONE, String.valueOf(userRegistration.getPhone()))) {
+                errList.add(Constants.MOBILE_NUMBER_EXIST_ERROR);
+            }
         }
         if (!userUtilityService.validatePosition(userRegistration.getPosition())) {
             errList.add("Invalid Position");
@@ -277,13 +291,6 @@ public class UserBulkUploadService {
         if (!ProjectUtil.validateTag(userRegistration.getTag())) {
             errList.add("Invalid Tag");
         }
-        if (userUtilityService.isUserExist(Constants.EMAIL, userRegistration.getEmail())) {
-            errList.add(Constants.EMAIL_EXIST_ERROR);
-        }
-        if (userUtilityService.isUserExist(Constants.PHONE, String.valueOf(userRegistration.getPhone()))) {
-            errList.add(Constants.MOBILE_NUMBER_EXIST_ERROR);
-        }
-
         if (!errList.isEmpty()) {
             str.append("Failed to Validate User Details. Error Details - [").append(errList).append("]");
         }

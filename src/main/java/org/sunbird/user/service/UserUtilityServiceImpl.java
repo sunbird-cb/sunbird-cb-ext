@@ -219,7 +219,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		Map<String, Object> request = new HashMap<>();
 		Map<String, Object> requestBody = new HashMap<String, Object>();
 		requestBody.put(Constants.EMAIL, userRegistration.getEmail());
-		requestBody.put(Constants.CHANNEL, userRegistration.getOrgName());
+		requestBody.put(Constants.CHANNEL, userRegistration.getChannel());
 		requestBody.put(Constants.FIRSTNAME, userRegistration.getFirstName());
 		requestBody.put(Constants.LASTNAME, userRegistration.getLastName());
 		requestBody.put(Constants.EMAIL_VERIFIED, true);

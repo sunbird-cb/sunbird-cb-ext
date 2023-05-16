@@ -326,7 +326,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 		userRegistration.setEmail(userRegInfo.getEmail());
 		userRegistration.setSbOrgId(userRegInfo.getSbOrgId());
 		userRegistration.setOrgName(userRegInfo.getOrgName());
-		userRegistration.setChannel(userRegistration.getChannel());
+		userRegistration.setChannel(userRegInfo.getChannel());
 		userRegistration.setSbRootOrgId(userRegInfo.getSbRootOrgId());
 		userRegistration.setPosition(userRegInfo.getPosition());
 		userRegistration.setSource(userRegInfo.getSource());
@@ -475,7 +475,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 		Map<String, Object> orgRequestBody = new HashMap<String, Object>();
 		Map<String, Object> orgRequest = new HashMap<String, Object>();
 		orgRequest.put(Constants.ORG_NAME, userReg.getOrgName());
-		orgRequest.put(Constants.CHANNEL, userReg.getOrgName());
+		orgRequest.put(Constants.CHANNEL, userReg.getChannel());
 		orgRequest.put(Constants.ORGANIZATION_TYPE, userReg.getOrganisationType());
 		orgRequest.put(Constants.ORGANIZATION_SUB_TYPE, userReg.getOrganisationSubType());
 		orgRequest.put(Constants.MAP_ID, userReg.getMapId());
