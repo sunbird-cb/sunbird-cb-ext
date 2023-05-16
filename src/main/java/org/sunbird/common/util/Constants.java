@@ -674,6 +674,7 @@ public class Constants {
 	public static final String L2_MAP_ID = "l2MapId";
 	public static final String L1_ORG_NAME = "l1OrgName";
 	public static final String L2_ORG_NAME = "l2OrgName";
+	public static final String EMPTY_FILE_FAILED = "The uploaded file is empty";
 	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}

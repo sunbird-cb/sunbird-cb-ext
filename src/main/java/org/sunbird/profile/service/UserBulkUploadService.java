@@ -7,6 +7,7 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.util.NumberToTextConverter;
+import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
@@ -117,6 +118,10 @@ public class UserBulkUploadService {
                 if (rowIterator.hasNext()) {
                     rowIterator.next();
                 }
+                else
+                {
+                    setErrorDetailsIncaseOfEmptyFile(sheet, 0);
+                }
                 while (rowIterator.hasNext()) {
                     StringBuffer str = new StringBuffer();
                     List<String> errList = new ArrayList<>();
@@ -185,6 +190,11 @@ public class UserBulkUploadService {
                         }
                     }
                 }
+                if(totalRecordsCount == 0)
+                {
+                    setErrorDetailsIncaseOfEmptyFile(sheet, 1);
+
+                }
                 status = uploadTheUpdatedFile(inputDataMap.get(Constants.ROOT_ORG_ID),
                         inputDataMap.get(Constants.IDENTIFIER), file, wb);
                 if (!(Constants.SUCCESSFUL.equalsIgnoreCase(status) && failedRecordsCount == 0
@@ -209,6 +219,14 @@ public class UserBulkUploadService {
             if (file != null)
                 file.delete();
         }
+    }
+
+    private void setErrorDetailsIncaseOfEmptyFile(XSSFSheet sheet, int rownum) {
+        XSSFRow row = sheet.createRow(rownum);
+        Cell statusCell = row.createCell(4);
+        Cell errorDetails = row.createCell(5);
+        statusCell.setCellValue(Constants.FAILED_UPPERCASE);
+        errorDetails.setCellValue(Constants.EMPTY_FILE_FAILED);
     }
 
     private void setErrorDetails(StringBuffer str, List<String> errList, Cell statusCell, Cell errorDetails) {

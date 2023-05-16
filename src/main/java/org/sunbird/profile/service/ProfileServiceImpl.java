@@ -489,7 +489,7 @@ public class ProfileServiceImpl implements ProfileService {
 	}
 
 	public SBApiResponse userBasicInfo(String userId) {
-			SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_USER_BASIC_INFO);
+		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_USER_BASIC_INFO);
 		try {
 			Map<String, Object> userData = userUtilityService.getUsersReadData(userId, StringUtils.EMPTY,
 					StringUtils.EMPTY);
@@ -1088,7 +1088,7 @@ public class ProfileServiceImpl implements ProfileService {
 				|| !Constants.OK.equalsIgnoreCase((String) migrateResponse.get(Constants.RESPONSE_CODE))) {
 			errMsg = migrateResponse == null ? "Failed to migrate User."
 					: (String) ((Map<String, Object>) migrateResponse.get(Constants.PARAMS))
-							.get(Constants.ERROR_MESSAGE);
+					.get(Constants.ERROR_MESSAGE);
 		}
 		return errMsg;
 	}
@@ -1333,17 +1333,17 @@ public class ProfileServiceImpl implements ProfileService {
 				Integer status = (Integer) enrolment.get(Constants.STATUS);
 				String strStatus = StringUtils.EMPTY;
 				switch (status) {
-				case 0:
-					strStatus = Constants.STATUS_ENROLLED;
-					break;
-				case 1:
-					strStatus = Constants.STATUS_IN_PROGRESS;
-					break;
-				case 2:
-					strStatus = Constants.STATUS_COMPLETED;
-					break;
-				default:
-					strStatus = "NA";
+					case 0:
+						strStatus = Constants.STATUS_ENROLLED;
+						break;
+					case 1:
+						strStatus = Constants.STATUS_IN_PROGRESS;
+						break;
+					case 2:
+						strStatus = Constants.STATUS_COMPLETED;
+						break;
+					default:
+						strStatus = "NA";
 				}
 				enrolmentReport.put(Constants.STATUS, strStatus);
 
@@ -1443,7 +1443,7 @@ public class ProfileServiceImpl implements ProfileService {
 	}
 
 	private void processUserDetails(List<Map<String, Object>> userMapList,
-			Map<String, Map<String, String>> userInfoMap) {
+									Map<String, Map<String, String>> userInfoMap) {
 		for (Map<String, Object> user : userMapList) {
 			Map<String, String> userInfo = new HashMap<String, String>();
 			userInfo.put(Constants.USER_ID, (String) user.get(Constants.USER_ID));
@@ -1475,7 +1475,7 @@ public class ProfileServiceImpl implements ProfileService {
 	}
 
 	private void enrichUserDetails(List<String> userIdList, Map<String, Map<String, String>> userInfoMap,
-			Map<String, String> orgInfoMap) {
+								   Map<String, String> orgInfoMap) {
 		long startTime = System.currentTimeMillis();
 		userUtilityService.getUserDetailsFromDB(userIdList, Constants.USER_ENROLMENT_REPORT_FIELDS, userInfoMap);
 		log.info(String.format("User enrichment took %s seconds", (System.currentTimeMillis() - startTime) / 1000));
@@ -1492,7 +1492,7 @@ public class ProfileServiceImpl implements ProfileService {
 	}
 
 	private void enrichCourseDetails(List<String> courseIdList, Map<String, Map<String, String>> courseInfoMap,
-			Map<String, String> orgInfoMap) {
+									 Map<String, String> orgInfoMap) {
 
 		contentService.getLiveContentDetails(courseIdList,
 				Arrays.asList(Constants.IDENTIFIER, Constants.NAME, Constants.CREATED_FOR, Constants.LEAF_NODES_COUNT),
@@ -1525,17 +1525,17 @@ public class ProfileServiceImpl implements ProfileService {
 	}
 
 	private void copyReportDetails(Map<String, String> enrolmentReport, Map<String, String> objectInfo,
-			String objectType) {
+								   String objectType) {
 		List<String> fields = ListUtils.EMPTY_LIST;
 		switch (objectType) {
-		case Constants.USER_CONST: {
-			fields = Constants.USER_ENROLMENT_REPORT_FIELDS;
-			break;
-		}
-		case Constants.COURSE: {
-			fields = Constants.COURSE_ENROLMENT_REPORT_FIELDS;
-			break;
-		}
+			case Constants.USER_CONST: {
+				fields = Constants.USER_ENROLMENT_REPORT_FIELDS;
+				break;
+			}
+			case Constants.COURSE: {
+				fields = Constants.COURSE_ENROLMENT_REPORT_FIELDS;
+				break;
+			}
 		}
 		for (String field : fields) {
 			if (objectInfo.containsKey(field)) {
