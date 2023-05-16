@@ -17,6 +17,7 @@ public class UserRegistration extends UserRegistrationInfo {
 	private String userId;
 	private String userName;
 	private String proposedDeptName;
+	private String tag;
 
 	public String getWfId() {
 		return wfId;
@@ -96,6 +97,13 @@ public class UserRegistration extends UserRegistrationInfo {
 
 	public void setProposedDeptName(String proposedDeptName) {
 		this.proposedDeptName = proposedDeptName;
+	}
+	public String getTag() {
+		return tag;
+	}
+
+	public void setTag(String tag) {
+		this.tag = tag;
 	}
 
 	public String toMininumString() {

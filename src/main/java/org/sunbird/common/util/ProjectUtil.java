@@ -149,4 +149,8 @@ public class ProjectUtil {
 	public static Boolean validateLastName( String lastName ) {
 		return lastName.matches( "[a-zA-Z]*" );
 	}
+
+	public static Boolean validateTag( String tag ) {
+		return tag.matches( "[a-zA-Z]*" );
+	}
 }
