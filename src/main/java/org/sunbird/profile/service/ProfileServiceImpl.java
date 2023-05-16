@@ -174,9 +174,9 @@ public class ProfileServiceImpl implements ProfileService {
 				}
 				String schema = getVerifiedProfileSchema();
 				if (validateJsonAgainstSchema(schema, new Gson().toJson(existingProfileDetails))) {
-					existingProfileDetails.put(Constants.VERIFIED_KARMAYOGI_BADGE, true);
+					existingProfileDetails.put(Constants.VERIFIED_KARMAYOGI, true);
 				} else {
-					existingProfileDetails.put(Constants.VERIFIED_KARMAYOGI_BADGE, false);
+					existingProfileDetails.put(Constants.VERIFIED_KARMAYOGI, false);
 				}
 				Map<String, Object> updateRequestValue = requestData;
 				updateRequestValue.put(Constants.PROFILE_DETAILS, existingProfileDetails);
