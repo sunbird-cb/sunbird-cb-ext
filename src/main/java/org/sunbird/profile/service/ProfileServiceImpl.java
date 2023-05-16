@@ -1,25 +1,8 @@
 package org.sunbird.profile.service;
 
-import static java.util.stream.Collectors.toList;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.ListUtils;
 import org.apache.commons.collections.MapUtils;
@@ -31,7 +14,13 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.rest.RestStatus;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.everit.json.schema.Schema;
+import org.everit.json.schema.ValidationException;
+import org.everit.json.schema.loader.SchemaLoader;
 import org.joda.time.DateTime;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONTokener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,11 +39,7 @@ import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.model.SunbirdApiRespParam;
 import org.sunbird.common.service.ContentService;
 import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
-import org.sunbird.common.util.CbExtServerProperties;
-import org.sunbird.common.util.Constants;
-import org.sunbird.common.util.IndexerService;
-import org.sunbird.common.util.ProjectUtil;
-import org.sunbird.common.util.PropertiesCache;
+import org.sunbird.common.util.*;
 import org.sunbird.core.cipher.DecryptServiceImpl;
 import org.sunbird.core.producer.Producer;
 import org.sunbird.org.service.ExtendedOrgService;
@@ -62,8 +47,18 @@ import org.sunbird.storage.service.StorageServiceImpl;
 import org.sunbird.user.report.UserReportService;
 import org.sunbird.user.service.UserUtilityService;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.sql.Timestamp;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 @Service
 @SuppressWarnings({ "unchecked", "serial" })
@@ -177,11 +172,16 @@ public class ProfileServiceImpl implements ProfileService {
 						getModifiedPersonalDetails(profileDetailsMap.get(changedObj), requestData);
 					}
 				}
+				String schema = getVerifiedProfileSchema();
+				if (validateJsonAgainstSchema(schema, new Gson().toJson(existingProfileDetails))) {
+					existingProfileDetails.put(Constants.VERIFIED_KARMAYOGI_BADGE, true);
+				} else {
+					existingProfileDetails.put(Constants.VERIFIED_KARMAYOGI_BADGE, false);
+				}
 				Map<String, Object> updateRequestValue = requestData;
 				updateRequestValue.put(Constants.PROFILE_DETAILS, existingProfileDetails);
 				Map<String, Object> updateRequest = new HashMap<>();
 				updateRequest.put(Constants.REQUEST, updateRequestValue);
-
 				url.append(serverConfig.getSbUrl()).append(serverConfig.getLmsUserUpdatePath());
 				updateResponse = outboundRequestHandlerService.fetchResultUsingPatch(
 						serverConfig.getSbUrl() + serverConfig.getLmsUserUpdatePath(), updateRequest, headerValues);
@@ -302,6 +302,31 @@ public class ProfileServiceImpl implements ProfileService {
 			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		return response;
+	}
+
+	public boolean validateJsonAgainstSchema(String jsonSchema, String jsonData) {
+		JSONObject rawSchema;
+		try {
+			rawSchema = new JSONObject(new JSONTokener(jsonSchema));
+		} catch (JSONException e) {
+			throw new RuntimeException("Can't parse json schema: " + e.getMessage(), e);
+		}
+		JSONObject data;
+		try {
+			data = new JSONObject(new JSONTokener(jsonData));
+		} catch (JSONException e) {
+			throw new RuntimeException("Can't parse json data: " + e.getMessage(), e);
+		}
+		Schema schema = SchemaLoader.load(rawSchema);
+		try {
+			schema.validate(data);
+		} catch (ValidationException ex) {
+			StringBuffer result = new StringBuffer("Validation against Json schema failed: \n");
+			ex.getAllMessages().stream().peek(e -> result.append("\n")).forEach(result::append);
+			log.info(String.format("Exception : %s", result.toString()));
+			return false;
+		}
+		return true;
 	}
 
 	@Override
@@ -733,6 +758,16 @@ public class ProfileServiceImpl implements ProfileService {
 			return approvalValues;
 		}
 	}
+
+	public String getVerifiedProfileSchema() {
+			Map<String, String> header = new HashMap<>();
+			Map<String, Object> data = (Map<String, Object>) outboundRequestHandlerService
+					.fetchUsingGetWithHeadersProfile(serverConfig.getSbUrl() + serverConfig.getLmsSystemSettingsVerifiedProfileFieldsPath(),
+							header);
+			Map<String, Object> result = (Map<String, Object>) data.get(Constants.RESULT);
+			Map<String, Object> response = (Map<String, Object>) result.get(Constants.RESPONSE);
+		    return (String) response.get(Constants.VALUE);
+		}
 
 	public String checkDepartment(Map<String, Object> requestProfile) throws Exception {
 		String requestDeptName = null;
