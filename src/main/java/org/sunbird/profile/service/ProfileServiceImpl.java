@@ -760,14 +760,14 @@ public class ProfileServiceImpl implements ProfileService {
 	}
 
 	public String getVerifiedProfileSchema() {
-			Map<String, String> header = new HashMap<>();
-			Map<String, Object> data = (Map<String, Object>) outboundRequestHandlerService
-					.fetchUsingGetWithHeadersProfile(serverConfig.getSbUrl() + serverConfig.getLmsSystemSettingsVerifiedProfileFieldsPath(),
-							header);
-			Map<String, Object> result = (Map<String, Object>) data.get(Constants.RESULT);
-			Map<String, Object> response = (Map<String, Object>) result.get(Constants.RESPONSE);
-		    return (String) response.get(Constants.VALUE);
-		}
+		Map<String, String> header = new HashMap<>();
+		Map<String, Object> data = (Map<String, Object>) outboundRequestHandlerService
+				.fetchUsingGetWithHeadersProfile(serverConfig.getSbUrl() + serverConfig.getLmsSystemSettingsVerifiedProfileFieldsPath(),
+						header);
+		Map<String, Object> result = (Map<String, Object>) data.get(Constants.RESULT);
+		Map<String, Object> response = (Map<String, Object>) result.get(Constants.RESPONSE);
+		return (String) response.get(Constants.VALUE);
+	}
 
 	public String checkDepartment(Map<String, Object> requestProfile) throws Exception {
 		String requestDeptName = null;
