@@ -1,6 +1,7 @@
 package org.sunbird.common.util;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -150,7 +151,13 @@ public class ProjectUtil {
 		return lastName.matches( "[a-zA-Z]*" );
 	}
 
-	public static Boolean validateTag( String tag ) {
-		return tag.matches( "[a-zA-Z]*" );
+	public static Boolean validateTag(List<String> tags) {
+		for(String tag : tags) {
+			if(!tag.matches("[a-zA-Z]*"))
+			{
+				return false;
+			}
+		}
+		return true;
 	}
 }
