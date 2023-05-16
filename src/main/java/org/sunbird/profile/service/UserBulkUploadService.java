@@ -6,6 +6,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.NumberToTextConverter;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -120,7 +121,8 @@ public class UserBulkUploadService {
                 }
                 else
                 {
-                    setErrorDetailsIncaseOfEmptyFile(sheet, 0);
+                    XSSFSheet sheet1 = wb.createSheet("Sheet1");
+                    setErrorDetailsIncaseOfEmptyFile(sheet1, 0);
                 }
                 while (rowIterator.hasNext()) {
                     StringBuffer str = new StringBuffer();
