@@ -121,7 +121,8 @@ public class UserBulkUploadService {
                 }
                 else
                 {
-                    setErrorDetailsIncaseOfEmptyFile(sheet1, 0);
+                    int rowNum = sheet.getLastRowNum() + 1;
+                    setErrorDetailsIncaseOfEmptyFile(sheet, rowNum);
                 }
                 while (rowIterator.hasNext()) {
                     StringBuffer str = new StringBuffer();
@@ -193,7 +194,8 @@ public class UserBulkUploadService {
                 }
                 if(totalRecordsCount == 0)
                 {
-                    setErrorDetailsIncaseOfEmptyFile(sheet, 1);
+                    int rowNum = sheet.getLastRowNum() + 1;
+                    setErrorDetailsIncaseOfEmptyFile(sheet, rowNum);
 
                 }
                 status = uploadTheUpdatedFile(inputDataMap.get(Constants.ROOT_ORG_ID),
