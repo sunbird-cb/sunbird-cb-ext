@@ -119,11 +119,6 @@ public class UserBulkUploadService {
                 if (rowIterator.hasNext()) {
                     rowIterator.next();
                 }
-                else
-                {
-                    int rowNum = sheet.getLastRowNum() + 1;
-                    setErrorDetailsIncaseOfEmptyFile(sheet, rowNum);
-                }
                 while (rowIterator.hasNext()) {
                     StringBuffer str = new StringBuffer();
                     List<String> errList = new ArrayList<>();
