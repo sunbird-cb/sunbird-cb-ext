@@ -187,10 +187,12 @@ public class UserBulkUploadService {
                         }
                     }
                 }
-                if(totalRecordsCount == 0)
-                {
-                    int rowNum = sheet.getLastRowNum() + 1;
-                    setErrorDetailsIncaseOfEmptyFile(sheet, rowNum);
+                if (totalRecordsCount == 0) {
+                    XSSFRow row = sheet.createRow(sheet.getLastRowNum() + 1);
+                    Cell statusCell = row.createCell(4);
+                    Cell errorDetails = row.createCell(5);
+                    statusCell.setCellValue(Constants.FAILED_UPPERCASE);
+                    errorDetails.setCellValue(Constants.EMPTY_FILE_FAILED);
 
                 }
                 status = uploadTheUpdatedFile(inputDataMap.get(Constants.ROOT_ORG_ID),
@@ -217,14 +219,6 @@ public class UserBulkUploadService {
             if (file != null)
                 file.delete();
         }
-    }
-
-    private void setErrorDetailsIncaseOfEmptyFile(XSSFSheet sheet, int rownum) {
-        XSSFRow row = sheet.createRow(rownum);
-        Cell statusCell = row.createCell(4);
-        Cell errorDetails = row.createCell(5);
-        statusCell.setCellValue(Constants.FAILED_UPPERCASE);
-        errorDetails.setCellValue(Constants.EMPTY_FILE_FAILED);
     }
 
     private void setErrorDetails(StringBuffer str, List<String> errList, Cell statusCell, Cell errorDetails) {
