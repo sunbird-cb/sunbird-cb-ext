@@ -185,13 +185,6 @@ public class UserBulkUploadService {
                     } else if (totalRecordsCount > 0 && errList.size() == 6) {
                         break;
                     }
-                    if (totalRecordsCount == 0 && errList.size() == 4) {
-                        setErrorDetails(str, errList, statusCell, errorDetails);
-                        failedRecordsCount++;
-                        break;
-                    } else if (totalRecordsCount > 0 && errList.size() == 4) {
-                        break;
-                    }
                     totalRecordsCount++;
                     if (!errList.isEmpty()) {
                         setErrorDetails(str, errList, statusCell, errorDetails);
