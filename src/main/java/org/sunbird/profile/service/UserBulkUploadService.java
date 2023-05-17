@@ -154,16 +154,20 @@ public class UserBulkUploadService {
                         }
                     }
                     if (nextRow.getCell(4) == null || StringUtils.isBlank(nextRow.getCell(4).toString())) {
-                        errList.add("Position is Missing");
-                    }
-                    else {
+                        errList.add("Position");
+                    } else {
                         userRegistration.setPosition(nextRow.getCell(4).getStringCellValue());
+                        if (!userUtilityService.validatePosition(userRegistration.getPosition())) {
+                            errList.add("Invalid Position");
+                        }
                     }
                     if (nextRow.getCell(5) == null || StringUtils.isBlank(nextRow.getCell(5).toString())) {
-                        errList.add("Tag is Missing");
-                    }
-                    else {
+                        errList.add("Tag");
+                    } else {
                         userRegistration.setTag(nextRow.getCell(5).getStringCellValue());
+                        if (!ProjectUtil.validateTag(userRegistration.getTag())) {
+                            errList.add("Invalid Tag");
+                        }
                     }
                     userRegistration.setOrgName(inputDataMap.get(Constants.ORG_NAME));
                     Cell statusCell = nextRow.getCell(6);
@@ -271,14 +275,10 @@ public class UserBulkUploadService {
         List<String> errList = new ArrayList<>();
         if (!ProjectUtil.validateEmailPattern(userRegistration.getEmail())) {
             errList.add("Invalid Email Id");
-        }
-        else
-        {
+        } else {
             if (!userUtilityService.isDomainAccepted(userRegistration.getEmail())) {
                 errList.add("Invalid Email Domain");
-            }
-            else
-            {
+            } else {
                 if (userUtilityService.isUserExist(Constants.EMAIL, userRegistration.getEmail())) {
                     errList.add(Constants.EMAIL_EXIST_ERROR);
                 }
@@ -286,17 +286,10 @@ public class UserBulkUploadService {
         }
         if (!ProjectUtil.validateContactPattern(userRegistration.getPhone())) {
             errList.add("Invalid Mobile Number");
-        }
-        else {
+        } else {
             if (userUtilityService.isUserExist(Constants.PHONE, String.valueOf(userRegistration.getPhone()))) {
                 errList.add(Constants.MOBILE_NUMBER_EXIST_ERROR);
             }
-        }
-        if (!userUtilityService.validatePosition(userRegistration.getPosition())) {
-            errList.add("Invalid Position");
-        }
-        if (!ProjectUtil.validateTag(userRegistration.getTag())) {
-            errList.add("Invalid Tag");
         }
         if (!errList.isEmpty()) {
             str.append("Failed to Validate User Details. Error Details - [").append(errList).append("]");
