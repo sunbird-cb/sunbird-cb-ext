@@ -219,7 +219,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		Map<String, Object> request = new HashMap<>();
 		Map<String, Object> requestBody = new HashMap<String, Object>();
 		requestBody.put(Constants.EMAIL, userRegistration.getEmail());
-		requestBody.put(Constants.CHANNEL, userRegistration.getOrgName());
+		requestBody.put(Constants.CHANNEL, userRegistration.getChannel());
 		requestBody.put(Constants.FIRSTNAME, userRegistration.getFirstName());
 		requestBody.put(Constants.EMAIL_VERIFIED, true);
 		requestBody.put(Constants.PHONE, userRegistration.getPhone());
@@ -272,7 +272,11 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		List<Map<String, Object>> professionalDetailsList = new ArrayList<Map<String, Object>>();
 		professionalDetailsList.add(professionDetailObj);
 		profileDetails.put(Constants.PROFESSIONAL_DETAILS, professionalDetailsList);
-
+		if (!CollectionUtils.isEmpty(userRegistration.getTag())) {
+			Map<String, Object> additionalProperties = new HashMap<String, Object>();
+			additionalProperties.put(Constants.TAG, userRegistration.getTag());
+			profileDetails.put(Constants.ADDITIONAL_PROPERTIES, additionalProperties);
+		}
 		requestBody.put(Constants.PROFILE_DETAILS, profileDetails);
 		request.put(Constants.REQUEST, requestBody);
 		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPatch(
@@ -443,7 +447,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 
 	@Override
 	public void getUserDetailsFromDB(List<String> userIds, List<String> fields,
-			Map<String, Map<String, String>> userInfoMap) {
+									 Map<String, Map<String, String>> userInfoMap) {
 		Map<String, Object> propertyMap = new HashMap<>();
 		propertyMap.put(Constants.STATUS, 1);
 
@@ -548,5 +552,14 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		String emailDomain = email.split("@")[1];
 		return props.getUserRegistrationDomain().contains(emailDomain);
 	}
-}
 
+	@Override
+	public boolean validatePosition(String position) {
+		Map<String, Object> propertyMap = new HashMap<>();
+		propertyMap.put(Constants.CONTEXT_TYPE, Constants.POSITION);
+		propertyMap.put(Constants.CONTEXT_NAME, position);
+		List<Map<String, Object>> positionsList = cassandraOperation
+				.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_MASTER_DATA, propertyMap, null);
+		return positionsList.size() > 0;
+	}
+}
