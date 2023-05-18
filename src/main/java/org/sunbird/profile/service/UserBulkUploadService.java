@@ -6,7 +6,9 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.NumberToTextConverter;
+import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
@@ -71,7 +73,7 @@ public class UserBulkUploadService {
     }
 
     public void updateUserBulkUploadStatus(String rootOrgId, String identifier, String status, int totalRecordsCount,
-            int successfulRecordsCount, int failedRecordsCount) {
+                                           int successfulRecordsCount, int failedRecordsCount) {
         try {
             Map<String, Object> compositeKeys = new HashMap<>();
             compositeKeys.put(Constants.ROOT_ORG_ID_LOWER, rootOrgId);
@@ -118,44 +120,94 @@ public class UserBulkUploadService {
                     rowIterator.next();
                 }
                 while (rowIterator.hasNext()) {
+                    StringBuffer str = new StringBuffer();
+                    List<String> errList = new ArrayList<>();
                     Row nextRow = rowIterator.next();
-                    if (StringUtils.isBlank(nextRow.getCell(0).getStringCellValue())) {
-                        break;
-                    }
                     UserRegistration userRegistration = new UserRegistration();
-                    userRegistration.setFirstName(nextRow.getCell(0).getStringCellValue());
-                    userRegistration.setEmail(nextRow.getCell(2).getStringCellValue());
-                    if (nextRow.getCell(3).getCellType() == CellType.NUMERIC) {
-                        phone = NumberToTextConverter.toText(nextRow.getCell(3).getNumericCellValue());
+                    if (nextRow.getCell(0) == null || StringUtils.isBlank(nextRow.getCell(0).toString())) {
+                        errList.add("First Name");
+                    } else {
+                        userRegistration.setFirstName(nextRow.getCell(0).getStringCellValue());
+                        if (!ProjectUtil.validateFirstName(userRegistration.getFirstName())) {
+                            errList.add("Invalid First Name");
+                        }
                     }
-                    userRegistration.setPhone(phone);
+                    if (nextRow.getCell(1) == null || StringUtils.isBlank(nextRow.getCell(1).toString())) {
+                        errList.add("Email");
+                    } else {
+                        userRegistration.setEmail(nextRow.getCell(2).getStringCellValue());
+                    }
+                    if (nextRow.getCell(2) == null || StringUtils.isBlank(nextRow.getCell(2).toString())) {
+                        errList.add("Phone");
+                    } else {
+                        if (nextRow.getCell(2).getCellType() == CellType.NUMERIC) {
+                            phone = NumberToTextConverter.toText(nextRow.getCell(3).getNumericCellValue());
+                            userRegistration.setPhone(phone);
+                        }
+                    }
+                    if (nextRow.getCell(3) == null || StringUtils.isBlank(nextRow.getCell(3).toString())) {
+                        errList.add("Position");
+                    } else {
+                        userRegistration.setPosition(nextRow.getCell(3).getStringCellValue());
+                        if (!userUtilityService.validatePosition(userRegistration.getPosition())) {
+                            errList.add("Invalid Position");
+                        }
+                    }
+                    if (nextRow.getCell(4) == null || StringUtils.isBlank(nextRow.getCell(4).toString())) {
+                        errList.add("Tag");
+                    } else {
+                        userRegistration.setTag(nextRow.getCell(4).getStringCellValue());
+                        if (!ProjectUtil.validateTag(userRegistration.getTag())) {
+                            errList.add("Invalid Tag");
+                        }
+                    }
                     userRegistration.setOrgName(inputDataMap.get(Constants.ORG_NAME));
-                    List<String> errList = validateEmailContactAndDomain(userRegistration);
-                    Cell statusCell = nextRow.getCell(4);
-                    Cell errorDetails = nextRow.getCell(5);
+                    Cell statusCell = nextRow.getCell(5);
+                    Cell errorDetails = nextRow.getCell(6);
                     if (statusCell == null) {
-                        statusCell = nextRow.createCell(4);
+                        statusCell = nextRow.createCell(5);
                     }
                     if (errorDetails == null) {
-                        errorDetails = nextRow.createCell(5);
+                        errorDetails = nextRow.createCell(6);
+                    }
+                    if (totalRecordsCount == 0 && errList.size() == 5) {
+                        setErrorDetails(str, errList, statusCell, errorDetails);
+                        failedRecordsCount++;
+                        break;
+                    } else if (totalRecordsCount > 0 && errList.size() == 5) {
+                        break;
                     }
                     totalRecordsCount++;
-                    if (errList.isEmpty()) {
-                        boolean isUserCreated = userUtilityService.createUser(userRegistration);
-                        if (isUserCreated) {
-                            noOfSuccessfulRecords++;
-                            statusCell.setCellValue(Constants.SUCCESS.toUpperCase());
-                            errorDetails.setCellValue("");
+                    if (!errList.isEmpty()) {
+                        setErrorDetails(str, errList, statusCell, errorDetails);
+                        failedRecordsCount++;
+                    } else {
+                        errList = validateEmailContactAndDomain(userRegistration);
+                        if (errList.isEmpty()) {
+                            boolean isUserCreated = userUtilityService.createUser(userRegistration);
+                            if (isUserCreated) {
+                                noOfSuccessfulRecords++;
+                                statusCell.setCellValue(Constants.SUCCESS_UPPERCASE);
+                                errorDetails.setCellValue("");
+                            } else {
+                                failedRecordsCount++;
+                                statusCell.setCellValue(Constants.FAILED_UPPERCASE);
+                                errorDetails.setCellValue(Constants.USER_CREATION_FAILED);
+                            }
                         } else {
                             failedRecordsCount++;
-                            statusCell.setCellValue(Constants.FAILED.toUpperCase());
-                            errorDetails.setCellValue(Constants.USER_CREATION_FAILED);
+                            statusCell.setCellValue(Constants.FAILED_UPPERCASE);
+                            errorDetails.setCellValue(errList.toString());
                         }
-                    } else {
-                        failedRecordsCount++;
-                        statusCell.setCellValue(Constants.FAILED.toUpperCase());
-                        errorDetails.setCellValue(errList.toString());
                     }
+                }
+                if (totalRecordsCount == 0) {
+                    XSSFRow row = sheet.createRow(sheet.getLastRowNum() + 1);
+                    Cell statusCell = row.createCell(5);
+                    Cell errorDetails = row.createCell(6);
+                    statusCell.setCellValue(Constants.FAILED_UPPERCASE);
+                    errorDetails.setCellValue(Constants.EMPTY_FILE_FAILED);
+
                 }
                 status = uploadTheUpdatedFile(inputDataMap.get(Constants.ROOT_ORG_ID),
                         inputDataMap.get(Constants.IDENTIFIER), file, wb);
@@ -172,7 +224,7 @@ public class UserBulkUploadService {
         } catch (Exception e) {
             logger.error(String.format("Error in Process Bulk Upload %s", e.getMessage()), e);
             updateUserBulkUploadStatus(inputDataMap.get(Constants.ROOT_ORG_ID), inputDataMap.get(Constants.IDENTIFIER),
-                    Constants.FAILED.toUpperCase(), 0, 0, 0);
+                    Constants.FAILED_UPPERCASE, 0, 0, 0);
         } finally {
             if (wb != null)
                 wb.close();
@@ -181,6 +233,12 @@ public class UserBulkUploadService {
             if (file != null)
                 file.delete();
         }
+    }
+
+    private void setErrorDetails(StringBuffer str, List<String> errList, Cell statusCell, Cell errorDetails) {
+        str.append("Failed to process user record. Missing Parameters - ").append(errList);
+        statusCell.setCellValue(Constants.FAILED_UPPERCASE);
+        errorDetails.setCellValue(str.toString());
     }
 
     private String uploadTheUpdatedFile(String rootOrgId, String identifier, File file, XSSFWorkbook wb)
@@ -200,25 +258,24 @@ public class UserBulkUploadService {
     private List<String> validateEmailContactAndDomain(UserRegistration userRegistration) {
         StringBuffer str = new StringBuffer();
         List<String> errList = new ArrayList<>();
-        if (!userUtilityService.isDomainAccepted(userRegistration.getEmail())) {
-            errList.add("Domain not accepted");
-        }
-        if (!ProjectUtil.validateFirstName(userRegistration.getFirstName())) {
-            errList.add("Invalid First Name");
-        }
         if (!ProjectUtil.validateEmailPattern(userRegistration.getEmail())) {
             errList.add("Invalid Email Id");
+        } else {
+            if (!userUtilityService.isDomainAccepted(userRegistration.getEmail())) {
+                errList.add("Invalid Email Domain");
+            } else {
+                if (userUtilityService.isUserExist(Constants.EMAIL, userRegistration.getEmail())) {
+                    errList.add(Constants.EMAIL_EXIST_ERROR);
+                }
+            }
         }
         if (!ProjectUtil.validateContactPattern(userRegistration.getPhone())) {
             errList.add("Invalid Mobile Number");
+        } else {
+            if (userUtilityService.isUserExist(Constants.PHONE, String.valueOf(userRegistration.getPhone()))) {
+                errList.add(Constants.MOBILE_NUMBER_EXIST_ERROR);
+            }
         }
-        if (userUtilityService.isUserExist(Constants.EMAIL, userRegistration.getEmail())) {
-            errList.add(Constants.EMAIL_EXIST_ERROR);
-        }
-        if (userUtilityService.isUserExist(Constants.PHONE, String.valueOf(userRegistration.getPhone()))) {
-            errList.add(Constants.MOBILE_NUMBER_EXIST_ERROR);
-        }
-
         if (!errList.isEmpty()) {
             str.append("Failed to Validate User Details. Error Details - [").append(errList).append("]");
         }
