@@ -131,6 +131,7 @@ public class ProfileServiceImpl implements ProfileService {
 			}
 			Map<String, Object> responseMap = userUtilityService.getUsersReadData(userId, StringUtils.EMPTY,
 					StringUtils.EMPTY);
+			log.info("Reading Profile Details : " + responseMap.toString());
 			String deptName = (String) responseMap.get(Constants.CHANNEL);
 			Map<String, Object> existingProfileDetails = (Map<String, Object>) responseMap
 					.get(Constants.PROFILE_DETAILS);
@@ -172,7 +173,7 @@ public class ProfileServiceImpl implements ProfileService {
 						getModifiedPersonalDetails(profileDetailsMap.get(changedObj), requestData);
 					}
 				}
-				log.info(new Gson().toJson(existingProfileDetails));
+				log.info("Existing Profile Details : " + new Gson().toJson(existingProfileDetails));
 				String schema = getVerifiedProfileSchema();
 				if (validateJsonAgainstSchema(schema, new Gson().toJson(existingProfileDetails))) {
 					existingProfileDetails.put(Constants.VERIFIED_KARMAYOGI, true);
