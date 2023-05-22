@@ -172,6 +172,7 @@ public class ProfileServiceImpl implements ProfileService {
 						getModifiedPersonalDetails(profileDetailsMap.get(changedObj), requestData);
 					}
 				}
+				log.info(new Gson().toJson(existingProfileDetails));
 				String schema = getVerifiedProfileSchema();
 				if (validateJsonAgainstSchema(schema, new Gson().toJson(existingProfileDetails))) {
 					existingProfileDetails.put(Constants.VERIFIED_KARMAYOGI, true);
