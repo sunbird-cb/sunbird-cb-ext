@@ -112,7 +112,7 @@ public class ProfileServiceImpl implements ProfileService {
 	private ObjectMapper ob = new ObjectMapper();
 
 	@Override
-	public SBApiResponse profileUpdate(Map<String, Object> request, String userToken, String authToken)
+	public SBApiResponse profileUpdate(Map<String, Object> request, String userToken, String authToken, String rootOrgId)
 			throws Exception {
 		SBApiResponse response = new SBApiResponse(Constants.API_PROFILE_UPDATE);
 		try {
@@ -268,6 +268,7 @@ public class ProfileServiceImpl implements ProfileService {
 				transitionRequests.put(Constants.APPLICATION_ID, userId);
 				transitionRequests.put(Constants.ACTOR_USER_ID, userId);
 				transitionRequests.put(Constants.SERVICE_NAME, Constants.PROFILE);
+				transitionRequests.put(Constants.ROOT_ORG_ID, rootOrgId);
 				transitionRequests.put(Constants.COMMENT, "");
 				transitionRequests.put(Constants.WFID, "");
 				if (null != newDeptName) {

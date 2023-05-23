@@ -27,8 +27,9 @@ public class ProfileController {
 	public ResponseEntity<?> profileUpdate(
 			@RequestHeader(value = Constants.X_AUTH_TOKEN, required = false) String userToken,
 			@RequestHeader(value = Constants.AUTH_TOKEN, required = false) String authToken,
+			@RequestHeader(value = Constants.X_AUTH_USER_ORG_ID, required = false) String rootOrgId,
 			@RequestBody Map<String, Object> request) throws Exception {
-		SBApiResponse response = profileService.profileUpdate(request, userToken, authToken);
+		SBApiResponse response = profileService.profileUpdate(request, userToken, authToken, rootOrgId);
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
 
