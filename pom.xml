@@ -194,6 +194,16 @@
 			<artifactId>hibernate-core</artifactId>
 			<version>5.4.33.Final</version>
 		</dependency>
+		<dependency>
+			<groupId>com.networknt</groupId>
+			<artifactId>json-schema-validator</artifactId>
+			<version>1.0.42</version>
+		</dependency>
+		<dependency>
+			<groupId>com.github.erosb</groupId>
+			<artifactId>everit-json-schema</artifactId>
+			<version>1.14.2</version>
+		</dependency>
 	</dependencies>
 
 	<build>
