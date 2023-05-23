@@ -63,7 +63,7 @@ public class AllocationService {
 	public static final String ACCEPT = "Accept";
 	private Logger logger = LoggerFactory.getLogger(AllocationService.class);
 
-	final String[] includeFields = { "personalDetails.firstname", "personalDetails.surname",
+	final String[] includeFields = { "personalDetails.firstname",
 			"personalDetails.primaryEmail", "id", "professionalDetails.name", "professionalDetails.designation" };
 
 	@Autowired
@@ -294,7 +294,6 @@ public class AllocationService {
 		}
 		HashMap<String, Object> result = new HashMap<>();
 		result.put("first_name", personalDetails.get("firstname"));
-		result.put("last_name", personalDetails.get("surname"));
 		result.put("email", personalDetails.get("primaryEmail"));
 		result.put("wid", searObjectMap.get("id"));
 		result.put("department_name", depName);
@@ -316,8 +315,7 @@ public class AllocationService {
 		Map<String, Object> result;
 		final BoolQueryBuilder query = QueryBuilders.boolQuery();
 		query.should(QueryBuilders.matchPhrasePrefixQuery("personalDetails.primaryEmail", searchTerm))
-				.should(QueryBuilders.matchPhrasePrefixQuery("personalDetails.firstname", searchTerm))
-				.should(QueryBuilders.matchPhrasePrefixQuery("personalDetails.surname", searchTerm));
+				.should(QueryBuilders.matchPhrasePrefixQuery("personalDetails.firstname", searchTerm));
 		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder().query(query);
 		sourceBuilder.fetchSource(includeFields, new String[] {});
 		SearchResponse searchResponse = indexerService.getEsResult(configuration.getEsProfileIndex(),

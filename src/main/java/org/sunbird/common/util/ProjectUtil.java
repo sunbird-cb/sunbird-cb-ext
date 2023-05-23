@@ -147,10 +147,6 @@ public class ProjectUtil {
 		return firstName.matches( "^[a-zA-Z]+(([\\'][a-zA-Z])?[a-zA-Z]*)*$" );
 	}
 
-	public static Boolean validateLastName( String lastName ) {
-		return lastName.matches( "[a-zA-Z]*" );
-	}
-
 	public static Boolean validateTag(List<String> tags) {
 		for (String tag : tags) {
 			if (!tag.matches("[a-zA-Z]*")) {

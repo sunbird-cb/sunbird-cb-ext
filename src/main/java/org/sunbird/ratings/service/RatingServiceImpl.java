@@ -134,7 +134,6 @@ public class RatingServiceImpl implements RatingService {
                     List<String> fields = new ArrayList<>();
                     fields.add(Constants.ID);
                     fields.add(Constants.FIRSTNAME);
-                    fields.add(Constants.LASTNAME);
 
                     Map<String, Object> existingUserList = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
                             Constants.TABLE_USER, userRequest, fields, Constants.ID);
@@ -150,8 +149,7 @@ public class RatingServiceImpl implements RatingService {
                                 new Timestamp(updatedTime),
                                 summaryNodeModel.getRating().floatValue(),
                                 summaryNodeModel.getReview(),
-                                (userModel.getFirstName() != null) ? userModel.getFirstName() : "",
-                                (userModel.getLastName() != null) ? userModel.getLastName() : ""
+                                (userModel.getFirstName() != null) ? userModel.getFirstName() : ""
                         ));
                     }
                 }
@@ -302,7 +300,6 @@ public class RatingServiceImpl implements RatingService {
                 List<String> fields = new ArrayList<>();
                 fields.add(Constants.USERID);
                 fields.add(Constants.FIRSTNAME);
-                fields.add(Constants.LASTNAME);
 
                 Map<String, Object> existingUserList = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
                         Constants.TABLE_USER, userRequest, fields, Constants.ID);
@@ -319,8 +316,7 @@ public class RatingServiceImpl implements RatingService {
                             lookupModel.getUpdatedon(),
                             lookupModel.getActivitytype(),
                             lookupModel.getUserId(),
-                            (userModel.getFirstName() != null) ? userModel.getFirstName() : "",
-                            (userModel.getLastName() != null) ? userModel.getLastName() : ""
+                            (userModel.getFirstName() != null) ? userModel.getFirstName() : ""
                     ));
 
                 }

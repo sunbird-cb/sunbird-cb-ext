@@ -133,56 +133,48 @@ public class UserBulkUploadService {
                         }
                     }
                     if (nextRow.getCell(1) == null || StringUtils.isBlank(nextRow.getCell(1).toString())) {
-                        errList.add("Last Name");
-                    } else {
-                        userRegistration.setLastName(nextRow.getCell(1).getStringCellValue());
-                        if (!ProjectUtil.validateLastName(userRegistration.getLastName())) {
-                            errList.add("Invalid Last Name");
-                        }
-                    }
-                    if (nextRow.getCell(2) == null || StringUtils.isBlank(nextRow.getCell(2).toString())) {
                         errList.add("Email");
                     } else {
                         userRegistration.setEmail(nextRow.getCell(2).getStringCellValue());
                     }
-                    if (nextRow.getCell(3) == null || StringUtils.isBlank(nextRow.getCell(3).toString())) {
+                    if (nextRow.getCell(2) == null || StringUtils.isBlank(nextRow.getCell(2).toString())) {
                         errList.add("Phone");
                     } else {
-                        if (nextRow.getCell(3).getCellType() == CellType.NUMERIC) {
+                        if (nextRow.getCell(2).getCellType() == CellType.NUMERIC) {
                             phone = NumberToTextConverter.toText(nextRow.getCell(3).getNumericCellValue());
                             userRegistration.setPhone(phone);
                         }
                     }
-                    if (nextRow.getCell(4) == null || StringUtils.isBlank(nextRow.getCell(4).toString())) {
+                    if (nextRow.getCell(3) == null || StringUtils.isBlank(nextRow.getCell(3).toString())) {
                         errList.add("Position");
                     } else {
-                        userRegistration.setPosition(nextRow.getCell(4).getStringCellValue());
+                        userRegistration.setPosition(nextRow.getCell(3).getStringCellValue());
                         if (!userUtilityService.validatePosition(userRegistration.getPosition())) {
                             errList.add("Invalid Position");
                         }
                     }
-                    if (nextRow.getCell(5) == null || StringUtils.isBlank(nextRow.getCell(5).toString())) {
+                    if (nextRow.getCell(4) == null || StringUtils.isBlank(nextRow.getCell(4).toString())) {
                         errList.add("Tag");
                     } else {
-                        userRegistration.setTag(nextRow.getCell(5).getStringCellValue());
+                        userRegistration.setTag(nextRow.getCell(4).getStringCellValue());
                         if (!ProjectUtil.validateTag(userRegistration.getTag())) {
                             errList.add("Invalid Tag");
                         }
                     }
                     userRegistration.setOrgName(inputDataMap.get(Constants.ORG_NAME));
-                    Cell statusCell = nextRow.getCell(6);
-                    Cell errorDetails = nextRow.getCell(7);
+                    Cell statusCell = nextRow.getCell(5);
+                    Cell errorDetails = nextRow.getCell(6);
                     if (statusCell == null) {
-                        statusCell = nextRow.createCell(6);
+                        statusCell = nextRow.createCell(5);
                     }
                     if (errorDetails == null) {
-                        errorDetails = nextRow.createCell(7);
+                        errorDetails = nextRow.createCell(6);
                     }
-                    if (totalRecordsCount == 0 && errList.size() == 6) {
+                    if (totalRecordsCount == 0 && errList.size() == 5) {
                         setErrorDetails(str, errList, statusCell, errorDetails);
                         failedRecordsCount++;
                         break;
-                    } else if (totalRecordsCount > 0 && errList.size() == 6) {
+                    } else if (totalRecordsCount > 0 && errList.size() == 5) {
                         break;
                     }
                     totalRecordsCount++;
@@ -211,8 +203,8 @@ public class UserBulkUploadService {
                 }
                 if (totalRecordsCount == 0) {
                     XSSFRow row = sheet.createRow(sheet.getLastRowNum() + 1);
-                    Cell statusCell = row.createCell(6);
-                    Cell errorDetails = row.createCell(7);
+                    Cell statusCell = row.createCell(5);
+                    Cell errorDetails = row.createCell(6);
                     statusCell.setCellValue(Constants.FAILED_UPPERCASE);
                     errorDetails.setCellValue(Constants.EMPTY_FILE_FAILED);
 
