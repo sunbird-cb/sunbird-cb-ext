@@ -21,6 +21,8 @@ public class UserRegistration extends UserRegistrationInfo {
 	private String userName;
 	private String proposedDeptName;
 	private String tag;
+	private String externalSystemId;
+	private String externalSystem;
 
 	public String getWfId() {
 		return wfId;
@@ -108,6 +110,23 @@ public class UserRegistration extends UserRegistrationInfo {
 	public void setTag(String tag) {
 		this.tag = tag;
 	}
+
+	public String getExternalSystemId() {
+		return externalSystemId;
+	}
+
+	public void setExternalSystemId(String externalSystemId) {
+		this.externalSystemId = externalSystemId;
+	}
+
+	public String getExternalSystem() {
+		return externalSystem;
+	}
+
+	public void setExternalSystem(String externalSystem) {
+		this.externalSystem = externalSystem;
+	}
+
 	public String toMininumString() {
 		StringBuilder strBuilder = new StringBuilder("[ UserRegistrationCode : ");
 		strBuilder.append(this.getRegistrationCode()).append(", UserId : ").append(this.getUserId()).append("]");

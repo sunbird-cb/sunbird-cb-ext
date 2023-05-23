@@ -169,20 +169,36 @@ public class UserBulkUploadService {
                             errList.add("Invalid Tag");
                         }
                     }
+                    if (nextRow.getCell(6) == null || StringUtils.isBlank(nextRow.getCell(6).toString())) {
+                        errList.add("External System ID");
+                    } else {
+                        userRegistration.setExternalSystemId(nextRow.getCell(6).getStringCellValue());
+                        if (!ProjectUtil.validateExternalSystemId(userRegistration.getExternalSystemId())) {
+                            errList.add("Invalid External System ID");
+                        }
+                    }
+                    if (nextRow.getCell(7) == null || StringUtils.isBlank(nextRow.getCell(7).toString())) {
+                        errList.add("External System");
+                    } else {
+                        userRegistration.setExternalSystem(nextRow.getCell(7).getStringCellValue());
+                        if (!ProjectUtil.validateExternalSystem(userRegistration.getExternalSystem())) {
+                            errList.add("Invalid External System");
+                        }
+                    }
                     userRegistration.setOrgName(inputDataMap.get(Constants.ORG_NAME));
-                    Cell statusCell = nextRow.getCell(6);
-                    Cell errorDetails = nextRow.getCell(7);
+                    Cell statusCell = nextRow.getCell(8);
+                    Cell errorDetails = nextRow.getCell(9);
                     if (statusCell == null) {
-                        statusCell = nextRow.createCell(6);
+                        statusCell = nextRow.createCell(8);
                     }
                     if (errorDetails == null) {
-                        errorDetails = nextRow.createCell(7);
+                        errorDetails = nextRow.createCell(9);
                     }
-                    if (totalRecordsCount == 0 && errList.size() == 6) {
+                    if (totalRecordsCount == 0 && errList.size() == 8) {
                         setErrorDetails(str, errList, statusCell, errorDetails);
                         failedRecordsCount++;
                         break;
-                    } else if (totalRecordsCount > 0 && errList.size() == 6) {
+                    } else if (totalRecordsCount > 0 && errList.size() == 8) {
                         break;
                     }
                     totalRecordsCount++;
@@ -211,8 +227,8 @@ public class UserBulkUploadService {
                 }
                 if (totalRecordsCount == 0) {
                     XSSFRow row = sheet.createRow(sheet.getLastRowNum() + 1);
-                    Cell statusCell = row.createCell(6);
-                    Cell errorDetails = row.createCell(7);
+                    Cell statusCell = row.createCell(8);
+                    Cell errorDetails = row.createCell(9);
                     statusCell.setCellValue(Constants.FAILED_UPPERCASE);
                     errorDetails.setCellValue(Constants.EMPTY_FILE_FAILED);
 

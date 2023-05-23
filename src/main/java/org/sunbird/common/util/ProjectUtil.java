@@ -159,4 +159,12 @@ public class ProjectUtil {
 		}
 		return true;
 	}
+
+	public static Boolean validateExternalSystemId(String externalSystemId) {
+		return externalSystemId.matches("[a-zA-Z]{0,30}$");
+	}
+
+	public static Boolean validateExternalSystem(String externalSystem) {
+		return externalSystem.matches("[a-zA-Z]{0,255}$");
+	}
 }
