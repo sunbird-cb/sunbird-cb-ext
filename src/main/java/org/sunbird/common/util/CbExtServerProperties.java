@@ -443,6 +443,9 @@ public class CbExtServerProperties {
 	@Value("${org.search.response.default.limit}")
 	private Integer orgSearchResponseDefaultLimit;
 
+	@Value("${lms.system.settings.verified.profile.fields.path}")
+	private String verifiedProfileFieldsPath;
+
 	public String getAssessmentSubmitTopic() {
 		return assessmentSubmitTopic;
 	}
@@ -1616,5 +1619,13 @@ public class CbExtServerProperties {
 
 	public void setOrgSearchResponseDefaultLimit(Integer orgSearchResponseDefaultLimit) {
 		this.orgSearchResponseDefaultLimit = orgSearchResponseDefaultLimit;
+	}
+
+	public String getVerifiedProfileFieldsPath() {
+		return verifiedProfileFieldsPath;
+	}
+
+	public void setVerifiedProfileFieldsPath(String verifiedProfileFieldsPath) {
+		this.verifiedProfileFieldsPath = verifiedProfileFieldsPath;
 	}
 }

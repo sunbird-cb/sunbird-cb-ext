@@ -673,6 +673,8 @@ public class Constants {
 	public static final String EMPTY_FILE_FAILED = "The uploaded file is empty";
 	public static final String TAG = "tag";
 	public static final String PARENT_TYPE = "parentType";
+	public static final String VERIFIED_KARMAYOGI = "verifiedKarmayogi";
+
 	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}
