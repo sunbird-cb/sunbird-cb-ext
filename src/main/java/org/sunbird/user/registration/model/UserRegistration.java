@@ -101,6 +101,7 @@ public class UserRegistration extends UserRegistrationInfo {
 	public void setProposedDeptName(String proposedDeptName) {
 		this.proposedDeptName = proposedDeptName;
 	}
+
 	public List<String> getTag() {
 		return Arrays.asList(tag.split(",", -1));
 	}
@@ -108,6 +109,7 @@ public class UserRegistration extends UserRegistrationInfo {
 	public void setTag(String tag) {
 		this.tag = tag;
 	}
+
 	public String toMininumString() {
 		StringBuilder strBuilder = new StringBuilder("[ UserRegistrationCode : ");
 		strBuilder.append(this.getRegistrationCode()).append(", UserId : ").append(this.getUserId()).append("]");

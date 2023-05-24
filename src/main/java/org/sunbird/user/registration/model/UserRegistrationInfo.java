@@ -22,6 +22,8 @@ public class UserRegistrationInfo {
 	private String sbOrgId;
 	private String phone;
 
+	private String tag;
+
 	public String getRegistrationCode() {
 		return registrationCode;
 	}

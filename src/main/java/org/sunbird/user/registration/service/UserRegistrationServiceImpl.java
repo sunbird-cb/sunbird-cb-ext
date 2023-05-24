@@ -330,6 +330,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 		userRegistration.setOrganisationType(userRegInfo.getOrganisationType());
 		userRegistration.setOrganisationSubType(userRegInfo.getOrganisationSubType());
 		userRegistration.setPhone(userRegInfo.getPhone());
+		userRegistration.setTag("");
 
 		if (StringUtils.isBlank(userRegInfo.getRegistrationCode())) {
 			userRegistration.setRegistrationCode(serverProperties.getUserRegCodePrefix() + "-"
