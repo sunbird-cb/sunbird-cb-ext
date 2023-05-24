@@ -131,7 +131,6 @@ public class ProfileServiceImpl implements ProfileService {
 			}
 			Map<String, Object> responseMap = userUtilityService.getUsersReadData(userId, StringUtils.EMPTY,
 					StringUtils.EMPTY);
-			log.info("Reading Profile Details : " + responseMap.toString());
 			String deptName = (String) responseMap.get(Constants.CHANNEL);
 			Map<String, Object> existingProfileDetails = (Map<String, Object>) responseMap
 					.get(Constants.PROFILE_DETAILS);
@@ -173,9 +172,7 @@ public class ProfileServiceImpl implements ProfileService {
 						getModifiedPersonalDetails(profileDetailsMap.get(changedObj), requestData);
 					}
 				}
-				log.info("Existing Profile Details : " + new Gson().toJson(existingProfileDetails));
-				String schema = getVerifiedProfileSchema();
-				if (validateJsonAgainstSchema(schema, new Gson().toJson(existingProfileDetails))) {
+				if (validateJsonAgainstSchema(existingProfileDetails)) {
 					existingProfileDetails.put(Constants.VERIFIED_KARMAYOGI, true);
 				} else {
 					existingProfileDetails.put(Constants.VERIFIED_KARMAYOGI, false);
@@ -307,22 +304,17 @@ public class ProfileServiceImpl implements ProfileService {
 		return response;
 	}
 
-	public boolean validateJsonAgainstSchema(String jsonSchema, String jsonData) {
+	public boolean validateJsonAgainstSchema(Map<String, Object> existingProfileDetails) {
+		String jsonData = new Gson().toJson(existingProfileDetails);
+		String jsonSchema = getVerifiedProfileSchema();
 		JSONObject rawSchema;
 		try {
 			rawSchema = new JSONObject(new JSONTokener(jsonSchema));
+			JSONObject data = new JSONObject(new JSONTokener(jsonData));
+			Schema schema = SchemaLoader.load(rawSchema);
+			schema.validate(data);
 		} catch (JSONException e) {
 			throw new RuntimeException("Can't parse json schema: " + e.getMessage(), e);
-		}
-		JSONObject data;
-		try {
-			data = new JSONObject(new JSONTokener(jsonData));
-		} catch (JSONException e) {
-			throw new RuntimeException("Can't parse json data: " + e.getMessage(), e);
-		}
-		Schema schema = SchemaLoader.load(rawSchema);
-		try {
-			schema.validate(data);
 		} catch (ValidationException ex) {
 			StringBuffer result = new StringBuffer("Validation against Json schema failed: \n");
 			ex.getAllMessages().stream().peek(e -> result.append("\n")).forEach(result::append);
