@@ -305,11 +305,10 @@ public class ProfileServiceImpl implements ProfileService {
 	}
 
 	public boolean validateJsonAgainstSchema(Map<String, Object> existingProfileDetails) {
-		String jsonData = new Gson().toJson(existingProfileDetails);
-		String jsonSchema = getVerifiedProfileSchema();
-		JSONObject rawSchema;
 		try {
-			rawSchema = new JSONObject(new JSONTokener(jsonSchema));
+			String jsonData = new Gson().toJson(existingProfileDetails);
+			String jsonSchema = getVerifiedProfileSchema();
+			JSONObject rawSchema = new JSONObject(new JSONTokener(jsonSchema));
 			JSONObject data = new JSONObject(new JSONTokener(jsonData));
 			Schema schema = SchemaLoader.load(rawSchema);
 			schema.validate(data);
