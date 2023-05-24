@@ -722,7 +722,6 @@ public class AllocationServiceV2 {
 								record = new HashMap<>();
 								record.put("wid", userProfile.get("userId"));
 								record.put("first_name", personalDetails.get("firstname"));
-								record.put("last_name", personalDetails.get("surname"));
 								record.put("email", personalDetails.get("primaryEmail"));
 								if (profileDetails.get("employmentDetails") != null) {
 									record.put("department_name",
