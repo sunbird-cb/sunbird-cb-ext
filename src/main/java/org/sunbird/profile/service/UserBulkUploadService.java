@@ -122,6 +122,7 @@ public class UserBulkUploadService {
                 while (rowIterator.hasNext()) {
                     StringBuffer str = new StringBuffer();
                     List<String> errList = new ArrayList<>();
+                    List<String> invalidErrList = new ArrayList<>();
                     Row nextRow = rowIterator.next();
                     UserRegistration userRegistration = new UserRegistration();
                     if (nextRow.getCell(0) == null || StringUtils.isBlank(nextRow.getCell(0).toString())) {
@@ -129,7 +130,7 @@ public class UserBulkUploadService {
                     } else {
                         userRegistration.setFirstName(nextRow.getCell(0).getStringCellValue());
                         if (!ProjectUtil.validateFirstName(userRegistration.getFirstName())) {
-                            errList.add("Invalid First Name");
+                            invalidErrList.add("Invalid First Name");
                         }
                     }
                     if (nextRow.getCell(1) == null || StringUtils.isBlank(nextRow.getCell(1).toString())) {
@@ -150,7 +151,7 @@ public class UserBulkUploadService {
                     } else {
                         userRegistration.setGroup(nextRow.getCell(3).getStringCellValue());
                         if (!userUtilityService.validateGroup(userRegistration.getGroup())) {
-                            errList.add("Invalid Group");
+                            invalidErrList.add("Invalid Group");
                         }
                     }
                     if (nextRow.getCell(4) == null || StringUtils.isBlank(nextRow.getCell(4).toString())) {
@@ -158,7 +159,7 @@ public class UserBulkUploadService {
                     } else {
                         userRegistration.setTag(nextRow.getCell(4).getStringCellValue());
                         if (!ProjectUtil.validateTag(userRegistration.getTag())) {
-                            errList.add("Invalid Tag");
+                            invalidErrList.add("Invalid Tag");
                         }
                     }
                     if (nextRow.getCell(5) == null || StringUtils.isBlank(nextRow.getCell(5).toString())) {
@@ -166,7 +167,7 @@ public class UserBulkUploadService {
                     } else {
                         userRegistration.setExternalSystemId(nextRow.getCell(5).getStringCellValue());
                         if (!ProjectUtil.validateExternalSystemId(userRegistration.getExternalSystemId())) {
-                            errList.add("Invalid External System ID");
+                            invalidErrList.add("Invalid External System ID");
                         }
                     }
                     if (nextRow.getCell(6) == null || StringUtils.isBlank(nextRow.getCell(6).toString())) {
@@ -174,7 +175,7 @@ public class UserBulkUploadService {
                     } else {
                         userRegistration.setExternalSystem(nextRow.getCell(6).getStringCellValue());
                         if (!ProjectUtil.validateExternalSystem(userRegistration.getExternalSystem())) {
-                            errList.add("Invalid External System");
+                            invalidErrList.add("Invalid External System");
                         }
                     }
                     userRegistration.setOrgName(inputDataMap.get(Constants.ORG_NAME));
@@ -198,8 +199,8 @@ public class UserBulkUploadService {
                         setErrorDetails(str, errList, statusCell, errorDetails);
                         failedRecordsCount++;
                     } else {
-                        errList = validateEmailContactAndDomain(userRegistration);
-                        if (errList.isEmpty()) {
+                        invalidErrList = validateEmailContactAndDomain(userRegistration);
+                        if (invalidErrList.isEmpty()) {
                             boolean isUserCreated = userUtilityService.createUser(userRegistration);
                             if (isUserCreated) {
                                 noOfSuccessfulRecords++;
@@ -213,7 +214,7 @@ public class UserBulkUploadService {
                         } else {
                             failedRecordsCount++;
                             statusCell.setCellValue(Constants.FAILED_UPPERCASE);
-                            errorDetails.setCellValue(errList.toString());
+                            errorDetails.setCellValue(invalidErrList.toString());
                         }
                     }
                 }
