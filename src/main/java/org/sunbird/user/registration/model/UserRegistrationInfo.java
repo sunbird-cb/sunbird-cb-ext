@@ -1,11 +1,13 @@
 package org.sunbird.user.registration.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 /**
  * Model object to store user registration details.
  * 
  * @author karthik
  *
- */
+ */@JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserRegistrationInfo {
 	private String registrationCode;
 	private String firstName;

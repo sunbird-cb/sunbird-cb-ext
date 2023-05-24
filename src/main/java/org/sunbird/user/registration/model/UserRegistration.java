@@ -1,5 +1,7 @@
 package org.sunbird.user.registration.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -9,6 +11,7 @@ import java.util.List;
  * @author karthik
  *
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserRegistration extends UserRegistrationInfo {
 	private String wfId;
 	private String priviousStatus;
