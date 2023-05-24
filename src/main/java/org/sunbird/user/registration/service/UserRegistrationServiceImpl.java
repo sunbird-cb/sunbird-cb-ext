@@ -93,12 +93,14 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 			try {
 				if (userUtilityService.isUserExist(Constants.EMAIL, userRegInfo.getEmail().toLowerCase())) {
 					errMsg = Constants.EMAIL_EXIST_ERROR;
-				} if (userUtilityService.isUserExist(Constants.PHONE, userRegInfo.getPhone())) {
+				}
+				if (userUtilityService.isUserExist(Constants.PHONE, userRegInfo.getPhone())) {
 					errMsg = Constants.PHONE_NUMBER_EXIST_ERROR;
 				} else {
 					// verify the given email exist in ES Server
 					UserRegistration regDocument = getUserRegistrationDocument(new HashMap<String, Object>() {
 						private static final long serialVersionUID = 1L;
+
 						{
 							put(Constants.EMAIL, userRegInfo.getEmail());
 						}
@@ -271,9 +273,6 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 		if (StringUtils.isBlank(userRegInfo.getFirstName())) {
 			errList.add("FirstName");
 		}
-		if (StringUtils.isBlank(userRegInfo.getLastName())) {
-			errList.add("LastName");
-		}
 		if (StringUtils.isBlank(userRegInfo.getEmail())) {
 			errList.add("Email");
 		}
@@ -322,7 +321,6 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 	private UserRegistration getRegistrationObject(UserRegistrationInfo userRegInfo) {
 		UserRegistration userRegistration = new UserRegistration();
 		userRegistration.setFirstName(userRegInfo.getFirstName());
-		userRegistration.setLastName(userRegInfo.getLastName());
 		userRegistration.setEmail(userRegInfo.getEmail());
 		userRegistration.setSbOrgId(userRegInfo.getSbOrgId());
 		userRegistration.setOrgName(userRegInfo.getOrgName());

@@ -20,9 +20,6 @@ public class UserRegistration extends UserRegistrationInfo {
 	private String userId;
 	private String userName;
 	private String proposedDeptName;
-	private String tag;
-	private String externalSystemId;
-	private String externalSystem;
 
 	public String getWfId() {
 		return wfId;
@@ -102,29 +99,6 @@ public class UserRegistration extends UserRegistrationInfo {
 
 	public void setProposedDeptName(String proposedDeptName) {
 		this.proposedDeptName = proposedDeptName;
-	}
-	public List<String> getTag() {
-		return Arrays.asList(tag.split(",", -1));
-	}
-
-	public void setTag(String tag) {
-		this.tag = tag;
-	}
-
-	public String getExternalSystemId() {
-		return externalSystemId;
-	}
-
-	public void setExternalSystemId(String externalSystemId) {
-		this.externalSystemId = externalSystemId;
-	}
-
-	public String getExternalSystem() {
-		return externalSystem;
-	}
-
-	public void setExternalSystem(String externalSystem) {
-		this.externalSystem = externalSystem;
 	}
 
 	public String toMininumString() {

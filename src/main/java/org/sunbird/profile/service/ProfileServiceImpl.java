@@ -107,7 +107,7 @@ public class ProfileServiceImpl implements ProfileService {
 	private ObjectMapper ob = new ObjectMapper();
 
 	@Override
-	public SBApiResponse profileUpdate(Map<String, Object> request, String userToken, String authToken)
+	public SBApiResponse profileUpdate(Map<String, Object> request, String userToken, String authToken, String rootOrgId)
 			throws Exception {
 		SBApiResponse response = new SBApiResponse(Constants.API_PROFILE_UPDATE);
 		try {
@@ -173,9 +173,7 @@ public class ProfileServiceImpl implements ProfileService {
 						getModifiedPersonalDetails(profileDetailsMap.get(changedObj), requestData);
 					}
 				}
-				log.info("Existing Profile Details : " + new Gson().toJson(existingProfileDetails));
-				String schema = getVerifiedProfileSchema();
-				if (validateJsonAgainstSchema(schema, new Gson().toJson(existingProfileDetails))) {
+				if (validateJsonAgainstSchema(existingProfileDetails)) {
 					existingProfileDetails.put(Constants.VERIFIED_KARMAYOGI, true);
 				} else {
 					existingProfileDetails.put(Constants.VERIFIED_KARMAYOGI, false);
@@ -270,6 +268,7 @@ public class ProfileServiceImpl implements ProfileService {
 				transitionRequests.put(Constants.APPLICATION_ID, userId);
 				transitionRequests.put(Constants.ACTOR_USER_ID, userId);
 				transitionRequests.put(Constants.SERVICE_NAME, Constants.PROFILE);
+				transitionRequests.put(Constants.ROOT_ORG_ID, rootOrgId);
 				transitionRequests.put(Constants.COMMENT, "");
 				transitionRequests.put(Constants.WFID, "");
 				if (null != newDeptName) {
@@ -306,22 +305,16 @@ public class ProfileServiceImpl implements ProfileService {
 		return response;
 	}
 
-	public boolean validateJsonAgainstSchema(String jsonSchema, String jsonData) {
-		JSONObject rawSchema;
+	public boolean validateJsonAgainstSchema(Map<String, Object> existingProfileDetails) {
 		try {
-			rawSchema = new JSONObject(new JSONTokener(jsonSchema));
+			String jsonData = new Gson().toJson(existingProfileDetails);
+			String jsonSchema = getVerifiedProfileSchema();
+			JSONObject rawSchema = new JSONObject(new JSONTokener(jsonSchema));
+			JSONObject data = new JSONObject(new JSONTokener(jsonData));
+			Schema schema = SchemaLoader.load(rawSchema);
+			schema.validate(data);
 		} catch (JSONException e) {
 			throw new RuntimeException("Can't parse json schema: " + e.getMessage(), e);
-		}
-		JSONObject data;
-		try {
-			data = new JSONObject(new JSONTokener(jsonData));
-		} catch (JSONException e) {
-			throw new RuntimeException("Can't parse json data: " + e.getMessage(), e);
-		}
-		Schema schema = SchemaLoader.load(rawSchema);
-		try {
-			schema.validate(data);
 		} catch (ValidationException ex) {
 			StringBuffer result = new StringBuffer("Validation against Json schema failed: \n");
 			ex.getAllMessages().stream().peek(e -> result.append("\n")).forEach(result::append);
@@ -556,7 +549,6 @@ public class ProfileServiceImpl implements ProfileService {
 				}
 
 				responseMap.put(Constants.FIRSTNAME, userData.get(Constants.FIRSTNAME));
-				responseMap.put(Constants.LASTNAME, userData.get(Constants.LASTNAME));
 				responseMap.put(Constants.ROLES, userData.get(Constants.ROLES));
 				responseMap.put(Constants.ROOT_ORG_ID, userData.get(Constants.ROOT_ORG_ID));
 				responseMap.put(Constants.CHANNEL, userData.get(Constants.CHANNEL));
@@ -764,7 +756,7 @@ public class ProfileServiceImpl implements ProfileService {
 	public String getVerifiedProfileSchema() {
 		Map<String, String> header = new HashMap<>();
 		Map<String, Object> data = (Map<String, Object>) outboundRequestHandlerService
-				.fetchUsingGetWithHeadersProfile(serverConfig.getSbUrl() + serverConfig.getLmsSystemSettingsVerifiedProfileFieldsPath(),
+				.fetchUsingGetWithHeadersProfile(serverConfig.getSbUrl() + serverConfig.getVerifiedProfileFieldsPath(),
 						header);
 		Map<String, Object> result = (Map<String, Object>) data.get(Constants.RESULT);
 		Map<String, Object> response = (Map<String, Object>) result.get(Constants.RESPONSE);
@@ -799,8 +791,6 @@ public class ProfileServiceImpl implements ProfileService {
 				for (String paramName : personalDetailsMap.keySet()) {
 					if (Constants.FIRST_NAME_LOWER_CASE.equalsIgnoreCase(paramName)) {
 						updatedRequest.put(Constants.FIRSTNAME, (String) personalDetailsMap.get(paramName));
-					} else if (Constants.SURNAME.equalsIgnoreCase(paramName)) {
-						updatedRequest.put(Constants.LASTNAME, (String) personalDetailsMap.get(paramName));
 					} else if (Constants.MOBILE.equalsIgnoreCase(paramName)) {
 						updatedRequest.put(Constants.PHONE, String.valueOf(personalDetailsMap.get(paramName)));
 					}
@@ -1043,10 +1033,6 @@ public class ProfileServiceImpl implements ProfileService {
 				existingPersonalDetail.put(Constants.FIRSTNAME.toLowerCase(), request.get(Constants.FIRSTNAME));
 				updateReqBody.put(Constants.FIRSTNAME, request.get(Constants.FIRSTNAME));
 			}
-			if (StringUtils.isNotBlank((String) request.get(Constants.LASTNAME))) {
-				existingPersonalDetail.put(Constants.SURNAME, request.get(Constants.LASTNAME));
-				updateReqBody.put(Constants.LASTNAME, request.get(Constants.LASTNAME));
-			}
 		}
 		updateReqBody.put(Constants.PROFILE_DETAILS, existingProfile);
 		updateReqBody.put(Constants.USER_ID, request.get(Constants.USER_ID));
@@ -1194,7 +1180,6 @@ public class ProfileServiceImpl implements ProfileService {
 		Map<String, Object> personalDetails = new HashMap<String, Object>();
 		Map<String, Object> requestBody = (Map<String, Object>) requestObject.get(Constants.REQUEST);
 		personalDetails.put(Constants.FIRSTNAME.toLowerCase(), requestBody.get(Constants.FIRSTNAME));
-		personalDetails.put(Constants.SURNAME, requestBody.get(Constants.LASTNAME));
 		personalDetails.put(Constants.PRIMARY_EMAIL, requestBody.get(Constants.EMAIL));
 		profileDetails.put(Constants.PERSONAL_DETAILS, personalDetails);
 
@@ -1250,9 +1235,6 @@ public class ProfileServiceImpl implements ProfileService {
 
 		if (StringUtils.isEmpty((String) request.get(Constants.FIRSTNAME))) {
 			params.add(Constants.FIRST_NAME);
-		}
-		if (StringUtils.isEmpty((String) request.get(Constants.LASTNAME))) {
-			params.add(Constants.LAST_NAME);
 		}
 		if (StringUtils.isEmpty((String) request.get(Constants.EMAIL))) {
 			params.add(Constants.EMAIL);
@@ -1485,7 +1467,6 @@ public class ProfileServiceImpl implements ProfileService {
 			Map<String, String> userInfo = new HashMap<String, String>();
 			userInfo.put(Constants.USER_ID, (String) user.get(Constants.USER_ID));
 			userInfo.put(Constants.FIRSTNAME, (String) user.get(Constants.FIRSTNAME));
-			userInfo.put(Constants.LASTNAME, (String) user.get(Constants.LASTNAME));
 			userInfo.put(Constants.ROOT_ORG_ID, (String) user.get(Constants.ROOT_ORG_ID));
 			userInfo.put(Constants.CHANNEL, (String) user.get(Constants.CHANNEL));
 			if (StringUtils.isNotBlank((String) user.get(Constants.EMAIL))) {

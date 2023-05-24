@@ -147,10 +147,6 @@ public class ProjectUtil {
 		return firstName.matches( "^[a-zA-Z]+(([\\'][a-zA-Z])?[a-zA-Z]*)*$" );
 	}
 
-	public static Boolean validateLastName( String lastName ) {
-		return lastName.matches( "[a-zA-Z]*" );
-	}
-
 	public static Boolean validateTag(List<String> tags) {
 		for (String tag : tags) {
 			if (!tag.matches("[a-zA-Z]*")) {
@@ -161,7 +157,7 @@ public class ProjectUtil {
 	}
 
 	public static Boolean validateExternalSystemId(String externalSystemId) {
-		return externalSystemId.matches("[a-zA-Z]{0,30}$");
+		return externalSystemId.matches("[a-zA-Z0-9]{0,30}$");
 	}
 
 	public static Boolean validateExternalSystem(String externalSystem) {

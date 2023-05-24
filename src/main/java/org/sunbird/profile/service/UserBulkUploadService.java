@@ -133,22 +133,14 @@ public class UserBulkUploadService {
                         }
                     }
                     if (nextRow.getCell(1) == null || StringUtils.isBlank(nextRow.getCell(1).toString())) {
-                        errList.add("Last Name");
-                    } else {
-                        userRegistration.setLastName(nextRow.getCell(1).getStringCellValue());
-                        if (!ProjectUtil.validateLastName(userRegistration.getLastName())) {
-                            errList.add("Invalid Last Name");
-                        }
-                    }
-                    if (nextRow.getCell(2) == null || StringUtils.isBlank(nextRow.getCell(2).toString())) {
                         errList.add("Email");
                     } else {
                         userRegistration.setEmail(nextRow.getCell(2).getStringCellValue());
                     }
-                    if (nextRow.getCell(3) == null || StringUtils.isBlank(nextRow.getCell(3).toString())) {
+                    if (nextRow.getCell(2) == null || StringUtils.isBlank(nextRow.getCell(2).toString())) {
                         errList.add("Phone");
                     } else {
-                        if (nextRow.getCell(3).getCellType() == CellType.NUMERIC) {
+                        if (nextRow.getCell(2).getCellType() == CellType.NUMERIC) {
                             phone = NumberToTextConverter.toText(nextRow.getCell(3).getNumericCellValue());
                             userRegistration.setPhone(phone);
                         }
