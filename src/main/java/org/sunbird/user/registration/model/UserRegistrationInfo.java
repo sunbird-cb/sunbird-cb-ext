@@ -2,7 +2,9 @@ package org.sunbird.user.registration.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import org.apache.commons.lang.StringUtils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -150,7 +152,9 @@ public class UserRegistrationInfo {
 	}
 
 	public List<String> getTag() {
-		return Arrays.asList(tag.split(",", -1));
+		if (!StringUtils.isEmpty(tag))
+			return Arrays.asList(tag.split(",", -1));
+		return new ArrayList<>();
 	}
 
 	public void setTag(String tag) {
