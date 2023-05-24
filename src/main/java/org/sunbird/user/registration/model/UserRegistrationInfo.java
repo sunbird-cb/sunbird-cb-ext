@@ -1,6 +1,7 @@
 package org.sunbird.user.registration.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.util.Arrays;
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.List;
  * @author karthik
  *
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserRegistrationInfo {
 	private String registrationCode;
 	private String firstName;
@@ -26,6 +28,8 @@ public class UserRegistrationInfo {
 	private String sbRootOrgId;
 	private String sbOrgId;
 	private String phone;
+	@JsonIgnore
+	private String group;
 	@JsonIgnore
 	private String tag;
 	@JsonIgnore
@@ -167,5 +171,13 @@ public class UserRegistrationInfo {
 
 	public void setExternalSystem(String externalSystem) {
 		this.externalSystem = externalSystem;
+	}
+
+	public String getGroup() {
+		return group;
+	}
+
+	public void setGroup(String group) {
+		this.group = group;
 	}
 }

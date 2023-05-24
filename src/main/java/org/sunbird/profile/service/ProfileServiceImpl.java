@@ -131,7 +131,6 @@ public class ProfileServiceImpl implements ProfileService {
 			}
 			Map<String, Object> responseMap = userUtilityService.getUsersReadData(userId, StringUtils.EMPTY,
 					StringUtils.EMPTY);
-			log.info("Reading Profile Details : " + responseMap.toString());
 			String deptName = (String) responseMap.get(Constants.CHANNEL);
 			Map<String, Object> existingProfileDetails = (Map<String, Object>) responseMap
 					.get(Constants.PROFILE_DETAILS);

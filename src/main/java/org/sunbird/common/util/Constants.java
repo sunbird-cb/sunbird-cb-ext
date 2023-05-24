@@ -674,6 +674,8 @@ public class Constants {
 	public static final String TAG = "tag";
 	public static final String PARENT_TYPE = "parentType";
 	public static final String VERIFIED_KARMAYOGI = "verifiedKarmayogi";
+	public static final String EXTERNAL_SYSTEM_ID = "externalSystemId";
+	public static final String EXTERNAL_SYSTEM = "externalSystem";
 
 	private Constants() {
 		throw new IllegalStateException("Utility class");

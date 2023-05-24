@@ -272,11 +272,17 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		List<Map<String, Object>> professionalDetailsList = new ArrayList<Map<String, Object>>();
 		professionalDetailsList.add(professionDetailObj);
 		profileDetails.put(Constants.PROFESSIONAL_DETAILS, professionalDetailsList);
+		Map<String, Object> additionalProperties = new HashMap<String, Object>();
 		if (!CollectionUtils.isEmpty(userRegistration.getTag())) {
-			Map<String, Object> additionalProperties = new HashMap<String, Object>();
 			additionalProperties.put(Constants.TAG, userRegistration.getTag());
-			profileDetails.put(Constants.ADDITIONAL_PROPERTIES, additionalProperties);
 		}
+		if (!StringUtils.isEmpty(userRegistration.getExternalSystemId())) {
+			additionalProperties.put(Constants.EXTERNAL_SYSTEM_ID, userRegistration.getExternalSystemId());
+		}
+		if (!StringUtils.isEmpty(userRegistration.getExternalSystem())) {
+			additionalProperties.put(Constants.EXTERNAL_SYSTEM, userRegistration.getExternalSystem());
+		}
+		profileDetails.put(Constants.ADDITIONAL_PROPERTIES, additionalProperties);
 		requestBody.put(Constants.PROFILE_DETAILS, profileDetails);
 		request.put(Constants.REQUEST, requestBody);
 		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPatch(
@@ -554,12 +560,9 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 	}
 
 	@Override
-	public boolean validatePosition(String position) {
-		Map<String, Object> propertyMap = new HashMap<>();
-		propertyMap.put(Constants.CONTEXT_TYPE, Constants.POSITION);
-		propertyMap.put(Constants.CONTEXT_NAME, position);
-		List<Map<String, Object>> positionsList = cassandraOperation
-				.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_MASTER_DATA, propertyMap, null);
-		return positionsList.size() > 0;
+	public boolean validateGroup(String group) {
+		if (!CollectionUtils.isEmpty(serverConfig.getBulkUploadGroupValue()))
+			return serverConfig.getBulkUploadGroupValue().stream().anyMatch(group::equalsIgnoreCase);
+		return false;
 	}
 }
