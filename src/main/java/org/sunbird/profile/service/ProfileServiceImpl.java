@@ -764,7 +764,7 @@ public class ProfileServiceImpl implements ProfileService {
 	public String getVerifiedProfileSchema() {
 		Map<String, String> header = new HashMap<>();
 		Map<String, Object> data = (Map<String, Object>) outboundRequestHandlerService
-				.fetchUsingGetWithHeadersProfile(serverConfig.getSbUrl() + serverConfig.getLmsSystemSettingsVerifiedProfileFieldsPath(),
+				.fetchUsingGetWithHeadersProfile(serverConfig.getSbUrl() + serverConfig.getVerifiedProfileFieldsPath(),
 						header);
 		Map<String, Object> result = (Map<String, Object>) data.get(Constants.RESULT);
 		Map<String, Object> response = (Map<String, Object>) result.get(Constants.RESPONSE);
