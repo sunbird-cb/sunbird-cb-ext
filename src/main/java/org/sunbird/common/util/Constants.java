@@ -9,11 +9,8 @@ public class Constants {
 	public static final String KID = "kid";
 	public static final String SOURCE_ID = "source_id";
 	public static final String FIRST_NAME = "first_name";
-	public static final String LAST_NAME = "last_name";
 	public static final String MIDDLE_NAME = "middle_name";
 	public static final String FIRSTNAME = "firstName";
-	public static final String SURNAME = "surname";
-	public static final String LASTNAME = "lastName";
 	public static final String MOBILE = "mobile";
 	public static final String PHONE = "phone";
 	public static final String CONTACT_PHONE_NUMBER_OFFICE = "contact_phone_number_office";
@@ -169,7 +166,6 @@ public class Constants {
 	public static final String ACTIVITY_TYPE = "activityType";
 	public static final String RATINGS_USER_ID = "userId";
 	public static final String USER_FIRST_NAME = "firstName";
-	public static final String USER_LAST_NAME = "lastName";
 	public static final String USERID = "id";
 	public static final String COMMENT = "comment";
 	public static final String COMMENT_BY = "commentBy";
@@ -627,7 +623,7 @@ public class Constants {
 	public static final String RETAKE_ATTEMPTS_CONSUMED = "attemptsMade";
 	public static final String API_RETAKE_ASSESSMENT_GET = "api.assessmment.attempt";
 
-	public static final List<String> USER_ENROLMENT_REPORT_FIELDS = Arrays.asList(USER_ID, FIRSTNAME, LASTNAME, EMAIL,
+	public static final List<String> USER_ENROLMENT_REPORT_FIELDS = Arrays.asList(USER_ID, FIRSTNAME, EMAIL,
 			PHONE, ROOT_ORG_ID, CHANNEL);
 
 	public static final List<String> COURSE_ENROLMENT_REPORT_FIELDS = Arrays.asList(COURSE_ID, NAME, COURSE_ORG_ID,
@@ -675,6 +671,7 @@ public class Constants {
 	public static final String L2_ORG_NAME = "l2OrgName";
 	public static final String SUCCESS_UPPERCASE = "SUCCESS";
 	public static final String EMPTY_FILE_FAILED = "The uploaded file is empty";
+	public static final String TAG = "tag";
 	public static final String PARENT_TYPE = "parentType";
 	public static final String VERIFIED_KARMAYOGI = "verifiedKarmayogi";
 

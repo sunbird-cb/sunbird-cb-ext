@@ -127,7 +127,6 @@ public class SearchUserApiContent {
                 ", userId='" + userId + '\'' +
                 ", email='" + email + '\'' +
                 ", firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
                 ", desc='" + desc + '\'' +
                 ", channel='" + channel + '\'' +
                 ", phone='" + phone + '\'' +
