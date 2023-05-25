@@ -1,6 +1,7 @@
 package org.sunbird.user.registration.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.ArrayList;
@@ -12,6 +13,7 @@ import java.util.List;
  *
  * @author karthik
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserRegistrationInfo {
     private String registrationCode;
     private String firstName;
@@ -149,9 +151,7 @@ public class UserRegistrationInfo {
     }
 
     public List<String> getTag() {
-        if (!StringUtils.isEmpty(tag))
-            return Arrays.asList(tag.split(",", -1));
-        return new ArrayList<>();
+        return (!StringUtils.isEmpty(tag)) ? Arrays.asList(tag.split(",", -1)) : new ArrayList<>();
     }
 
     public void setTag(String tag) {
