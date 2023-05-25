@@ -157,11 +157,16 @@ public class UserBulkUploadService {
                     if (nextRow.getCell(4) == null || StringUtils.isBlank(nextRow.getCell(4).toString())) {
                         errList.add("Tag");
                     } else {
-                        userRegistration.setTag(nextRow.getCell(4).getStringCellValue());
+                        String tagStr = nextRow.getCell(4).getStringCellValue();
+                        List<String> tagList = new ArrayList<String>();
+                        if(!StringUtils.isEmpty(tagStr)) {
+                            tagList = Arrays.asList(tagStr.split(",", -1));
+                        }
+                        userRegistration.setTag(tagList);
                         if (!ProjectUtil.validateTag(userRegistration.getTag())) {
                             invalidErrList.add("Invalid Tag");
                         }
-                    }
+                    }   
                     if (nextRow.getCell(5) == null || StringUtils.isBlank(nextRow.getCell(5).toString())) {
                         errList.add("External System ID");
                     } else {

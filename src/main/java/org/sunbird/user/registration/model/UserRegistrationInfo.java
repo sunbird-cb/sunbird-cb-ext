@@ -30,7 +30,7 @@ public class UserRegistrationInfo {
     private String sbOrgId;
     private String phone;
     private String group;
-    private String tag;
+    private List<String> tag;
     private String externalSystemId;
     private String externalSystem;
 
@@ -147,10 +147,10 @@ public class UserRegistrationInfo {
     }
 
     public List<String> getTag() {
-        return (!StringUtils.isEmpty(tag)) ? Arrays.asList(tag.split(",", -1)) : new ArrayList<>();
+        return tag;
     }
 
-    public void setTag(String tag) {
+    public void setTag(List<String> tag) {
         this.tag = tag;
     }
 
