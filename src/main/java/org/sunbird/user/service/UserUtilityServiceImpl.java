@@ -560,6 +560,16 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 	}
 
 	@Override
+	public boolean validatePosition(String position) {
+		Map<String, Object> propertyMap = new HashMap<>();
+		propertyMap.put(Constants.CONTEXT_TYPE, Constants.POSITION);
+		propertyMap.put(Constants.CONTEXT_NAME, position);
+		List<Map<String, Object>> positionsList = cassandraOperation
+				.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_MASTER_DATA, propertyMap, null);
+		return positionsList.size() > 0;
+	}
+
+	@Override
 	public boolean validateGroup(String group) {
 		return (!CollectionUtils.isEmpty(serverConfig.getBulkUploadGroupValue())) ? serverConfig.getBulkUploadGroupValue().stream().anyMatch(group::equalsIgnoreCase) : false;
 	}

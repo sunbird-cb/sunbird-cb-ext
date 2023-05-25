@@ -100,7 +100,6 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 					// verify the given email exist in ES Server
 					UserRegistration regDocument = getUserRegistrationDocument(new HashMap<String, Object>() {
 						private static final long serialVersionUID = 1L;
-
 						{
 							put(Constants.EMAIL, userRegInfo.getEmail());
 						}
