@@ -1,7 +1,6 @@
 package org.sunbird.user.registration.model;
 
-import java.util.Arrays;
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
  * Model to store user registration details in ES server
@@ -9,6 +8,7 @@ import java.util.List;
  * @author karthik
  *
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class UserRegistration extends UserRegistrationInfo {
 	private String wfId;
 	private String priviousStatus;
