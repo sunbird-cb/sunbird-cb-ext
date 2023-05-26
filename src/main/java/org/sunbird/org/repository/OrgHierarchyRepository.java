@@ -50,4 +50,7 @@ public interface OrgHierarchyRepository extends JpaRepository<OrgHierarchy, Inte
     List<OrgHierarchy> searchOrgForL1MapId(Set<String> l1MapIdSet);
 
     OrgHierarchy findByOrgNameAndParentMapId(String orgName, String parentMapId);
+
+    @Query(value = "SELECT * from org_hierarchy_v2 where sborgid in (?1)", nativeQuery = true)
+    List<OrgHierarchy> findAllBySbOrgId(List<String> sbOrgIdList);
 }
