@@ -126,11 +126,11 @@ public class UserBulkUploadService {
                     Row nextRow = rowIterator.next();
                     UserRegistration userRegistration = new UserRegistration();
                     if (nextRow.getCell(0) == null || StringUtils.isBlank(nextRow.getCell(0).toString())) {
-                        errList.add("First Name");
+                        errList.add("Full Name");
                     } else {
                         userRegistration.setFirstName(nextRow.getCell(0).getStringCellValue());
                         if (!ProjectUtil.validateFirstName(userRegistration.getFirstName())) {
-                            invalidErrList.add("Invalid First Name");
+                            invalidErrList.add("Invalid Full Name");
                         }
                     }
                     if (nextRow.getCell(1) == null || StringUtils.isBlank(nextRow.getCell(1).toString())) {
