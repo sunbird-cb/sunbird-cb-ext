@@ -269,13 +269,13 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		if (StringUtils.isNotEmpty(userRegistration.getPosition())) {
 			professionDetailObj.put(Constants.DESIGNATION, userRegistration.getPosition());
 		}
+		if (!StringUtils.isEmpty(userRegistration.getGroup())) {
+			professionDetailObj.put(Constants.GROUP, userRegistration.getGroup());
+		}
 		List<Map<String, Object>> professionalDetailsList = new ArrayList<Map<String, Object>>();
 		professionalDetailsList.add(professionDetailObj);
 		profileDetails.put(Constants.PROFESSIONAL_DETAILS, professionalDetailsList);
 		Map<String, Object> additionalProperties = new HashMap<String, Object>();
-		if (!StringUtils.isEmpty(userRegistration.getGroup())) {
-			additionalProperties.put(Constants.GROUP, userRegistration.getGroup());
-		}
 		if (!CollectionUtils.isEmpty(userRegistration.getTag())) {
 			additionalProperties.put(Constants.TAG, userRegistration.getTag());
 		}
