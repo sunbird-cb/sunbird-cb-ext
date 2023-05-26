@@ -42,4 +42,6 @@ public interface UserUtilityService {
 	Boolean isDomainAccepted(String email);
 
 	boolean validatePosition(String position);
+
+	boolean validateGroup(String group);
 }

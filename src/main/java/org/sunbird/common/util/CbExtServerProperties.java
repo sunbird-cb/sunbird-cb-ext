@@ -446,6 +446,9 @@ public class CbExtServerProperties {
 	@Value("${lms.system.settings.verified.profile.fields.path}")
 	private String verifiedProfileFieldsPath;
 
+	@Value("${user.bulk.upload.group.value}")
+	private String bulkUploadGroupValue;
+
 	public String getAssessmentSubmitTopic() {
 		return assessmentSubmitTopic;
 	}
@@ -1627,5 +1630,13 @@ public class CbExtServerProperties {
 
 	public void setVerifiedProfileFieldsPath(String verifiedProfileFieldsPath) {
 		this.verifiedProfileFieldsPath = verifiedProfileFieldsPath;
+	}
+
+	public List<String> getBulkUploadGroupValue() {
+		return Arrays.asList(bulkUploadGroupValue.split(",", -1));
+	}
+
+	public void setBulkUploadGroupValue(String bulkUploadGroupValue) {
+		this.bulkUploadGroupValue = bulkUploadGroupValue;
 	}
 }

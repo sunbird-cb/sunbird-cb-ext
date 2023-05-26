@@ -1,7 +1,6 @@
 package org.sunbird.user.registration.model;
 
-import java.util.Arrays;
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
  * Model to store user registration details in ES server
@@ -9,6 +8,7 @@ import java.util.List;
  * @author karthik
  *
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class UserRegistration extends UserRegistrationInfo {
 	private String wfId;
 	private String priviousStatus;
@@ -20,7 +20,6 @@ public class UserRegistration extends UserRegistrationInfo {
 	private String userId;
 	private String userName;
 	private String proposedDeptName;
-	private String tag;
 
 	public String getWfId() {
 		return wfId;
@@ -101,13 +100,7 @@ public class UserRegistration extends UserRegistrationInfo {
 	public void setProposedDeptName(String proposedDeptName) {
 		this.proposedDeptName = proposedDeptName;
 	}
-	public List<String> getTag() {
-		return Arrays.asList(tag.split(",", -1));
-	}
 
-	public void setTag(String tag) {
-		this.tag = tag;
-	}
 	public String toMininumString() {
 		StringBuilder strBuilder = new StringBuilder("[ UserRegistrationCode : ");
 		strBuilder.append(this.getRegistrationCode()).append(", UserId : ").append(this.getUserId()).append("]");

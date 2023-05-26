@@ -93,7 +93,8 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 			try {
 				if (userUtilityService.isUserExist(Constants.EMAIL, userRegInfo.getEmail().toLowerCase())) {
 					errMsg = Constants.EMAIL_EXIST_ERROR;
-				} if (userUtilityService.isUserExist(Constants.PHONE, userRegInfo.getPhone())) {
+				}
+				if (userUtilityService.isUserExist(Constants.PHONE, userRegInfo.getPhone())) {
 					errMsg = Constants.PHONE_NUMBER_EXIST_ERROR;
 				} else {
 					// verify the given email exist in ES Server

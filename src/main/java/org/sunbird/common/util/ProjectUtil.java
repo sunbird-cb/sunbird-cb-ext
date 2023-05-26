@@ -144,7 +144,7 @@ public class ProjectUtil {
 	}
 
 	public static Boolean validateFirstName( String firstName ) {
-		return firstName.matches( "^[a-zA-Z]+(([\\'][a-zA-Z])?[a-zA-Z]*)*$" );
+		return firstName.matches( "^[a-zA-Z ]+(([\\'][a-zA-Z])?[a-zA-Z]*)*$" );
 	}
 
 	public static Boolean validateTag(List<String> tags) {
@@ -154,5 +154,13 @@ public class ProjectUtil {
 			}
 		}
 		return true;
+	}
+
+	public static Boolean validateExternalSystemId(String externalSystemId) {
+		return externalSystemId.matches("[a-zA-Z0-9]{0,30}$");
+	}
+
+	public static Boolean validateExternalSystem(String externalSystem) {
+		return externalSystem.matches("[a-zA-Z ]{0,255}$");
 	}
 }
