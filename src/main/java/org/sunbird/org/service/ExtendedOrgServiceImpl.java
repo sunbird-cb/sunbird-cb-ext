@@ -624,12 +624,20 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 				response.getParams().setErrmsg(errMsg);
 				return response;
 			}
-			logger.info("Received Search Filters ? " + objectMapper.writeValueAsString(searchFilters));
-			List<OrgHierarchy> orgList = orgRepository
-					.searchOrgWithHierarchy((String) searchFilters.get(Constants.ORG_NAME));
 			List<OrgHierarchyInfo> orgInfoList = new ArrayList<OrgHierarchyInfo>();
+			List<OrgHierarchy> orgList = Collections.emptyList();
+			if (searchFilters.containsKey(Constants.IDENTIFIER)) {
+				orgList = orgRepository.findAllBySbOrgId((List<String>) searchFilters.get(Constants.IDENTIFIER));
+			} else {
+				orgList = orgRepository
+						.searchOrgWithHierarchy((String) searchFilters.get(Constants.ORG_NAME));
+			}
 			if (CollectionUtils.isEmpty(orgList)) {
 				orgList = Collections.emptyList();
+			} else if (StringUtils.isBlank((String) searchFilters.get(Constants.PARENT_TYPE))) {
+				for (OrgHierarchy org : orgList) {
+					orgInfoList.add(org.toOrgInfo());
+				}
 			} else {
 				Set<String> l1MapIdSet = orgList.stream().map(OrgHierarchy::getL1MapId)
 						.filter(l1MapId -> Objects.nonNull(l1MapId)).collect(Collectors.toSet());
@@ -637,7 +645,6 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 				List<OrgHierarchy> parentList = orgRepository.searchOrgForL1MapId(l1MapIdSet);
 				Map<String, OrgHierarchy> parentListMap = parentList.stream()
 						.collect(Collectors.toMap(OrgHierarchy::getMapId, orgHierarchy -> orgHierarchy));
-				int limit = (Integer) searchFilters.get(Constants.LIMIT);
 				String parentType = (String) searchFilters.get(Constants.PARENT_TYPE);
 				for (OrgHierarchy org : orgList) {
 					OrgHierarchy parentObj = parentListMap.get(org.getL1MapId());
@@ -654,9 +661,10 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 						}
 					}
 				}
-				if (orgInfoList.size() > limit) {
-					orgInfoList.subList(limit, orgInfoList.size()).clear();
-				}
+			}
+			int limit = (Integer) searchFilters.get(Constants.LIMIT);
+			if (orgInfoList.size() > limit) {
+				orgInfoList.subList(limit, orgInfoList.size()).clear();
 			}
 
 			response.getResult().put(Constants.COUNT, orgInfoList.size());
@@ -679,18 +687,36 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 			errMsg = Constants.INVALID_REQUEST;
 			return errMsg;
 		}
-		if (StringUtils.isNotBlank((String) filters.get(Constants.ORG_NAME))) {
-			searchFilters.put(Constants.ORG_NAME, ((String) filters.get(Constants.ORG_NAME)).trim());
-		} else {
-			errMsg = "OrgName is empty in search request.";
+
+		boolean filterExist = false;
+		if (filters.containsKey(Constants.IDENTIFIER)) {
+			filterExist = true;
+			List<String> orgList = (List<String>) filters.get(Constants.IDENTIFIER);
+			if (CollectionUtils.isNotEmpty(orgList)) {
+				searchFilters.put(Constants.IDENTIFIER, orgList);
+			} else {
+				errMsg = "Identifier list is empty";
+			}
 		}
 
-		if (StringUtils.isNotBlank((String) filters.get(Constants.PARENT_TYPE))) {
-			searchFilters.put(Constants.PARENT_TYPE, ((String) filters.get(Constants.PARENT_TYPE)).trim());
-		} else {
-			errMsg = "ParentType is empty in search request";
+		if (filters.containsKey(Constants.ORG_NAME) && filters.containsKey(Constants.PARENT_TYPE)) {
+			filterExist = true;
+			if (StringUtils.isNotBlank((String) filters.get(Constants.ORG_NAME))) {
+				searchFilters.put(Constants.ORG_NAME, ((String) filters.get(Constants.ORG_NAME)).trim());
+			} else {
+				errMsg = "OrgName is empty in search request.";
+			}
+
+			if (StringUtils.isNotBlank((String) filters.get(Constants.PARENT_TYPE))) {
+				searchFilters.put(Constants.PARENT_TYPE, ((String) filters.get(Constants.PARENT_TYPE)).trim());
+			} else {
+				errMsg = "ParentType is empty in search request";
+			}
 		}
 
+		if (!filterExist) {
+			errMsg = "Need identifier OR orgName and parentType in Filters";
+		}
 		Integer limit = (Integer) requestBody.get(Constants.LIMIT);
 		if (limit == null) {
 			searchFilters.put(Constants.LIMIT, configProperties.getOrgSearchResponseDefaultLimit());

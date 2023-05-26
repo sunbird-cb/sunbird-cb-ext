@@ -276,9 +276,12 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		if (!CollectionUtils.isEmpty(userRegistration.getTag())) {
 			additionalProperties.put(Constants.TAG, userRegistration.getTag());
 		}
+<<<<<<< HEAD
 		if (!StringUtils.isEmpty(userRegistration.getGroup())) {
 			additionalProperties.put(Constants.GROUP, userRegistration.getGroup());
 		}
+=======
+>>>>>>> 312e4c73b602a43cf3b77f45475e1a2efa8ba5cc
 		if (!StringUtils.isEmpty(userRegistration.getExternalSystemId())) {
 			additionalProperties.put(Constants.EXTERNAL_SYSTEM_ID, userRegistration.getExternalSystemId());
 		}
