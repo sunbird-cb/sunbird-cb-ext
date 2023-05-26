@@ -678,7 +678,7 @@ public class Constants {
 	public static final String EXTERNAL_SYSTEM = "externalSystem";
 	public static final String GROUP = "group";
 
-    private Constants() {
+	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}
 
