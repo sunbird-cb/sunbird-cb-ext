@@ -146,9 +146,7 @@ public class UserBulkUploadService {
                             userRegistration.setPhone(phone);
                         }
                     }
-                    if (nextRow.getCell(3) == null || StringUtils.isBlank(nextRow.getCell(3).toString())) {
-                        errList.add("Group");
-                    } else {
+                    if (nextRow.getCell(3) != null && !StringUtils.isBlank(nextRow.getCell(3).toString())) {
                         userRegistration.setGroup(nextRow.getCell(3).getStringCellValue());
                         if (!userUtilityService.validateGroup(userRegistration.getGroup())) {
                             invalidErrList.add("Invalid Group");
@@ -167,17 +165,13 @@ public class UserBulkUploadService {
                             invalidErrList.add("Invalid Tag");
                         }
                     }   
-                    if (nextRow.getCell(5) == null || StringUtils.isBlank(nextRow.getCell(5).toString())) {
-                        errList.add("External System ID");
-                    } else {
+                    if (nextRow.getCell(5) != null && !StringUtils.isBlank(nextRow.getCell(5).toString())) {
                         userRegistration.setExternalSystemId(nextRow.getCell(5).getStringCellValue());
                         if (!ProjectUtil.validateExternalSystemId(userRegistration.getExternalSystemId())) {
                             invalidErrList.add("Invalid External System ID");
                         }
                     }
-                    if (nextRow.getCell(6) == null || StringUtils.isBlank(nextRow.getCell(6).toString())) {
-                        errList.add("External System");
-                    } else {
+                    if (nextRow.getCell(6) != null && !StringUtils.isBlank(nextRow.getCell(6).toString())) {
                         userRegistration.setExternalSystem(nextRow.getCell(6).getStringCellValue());
                         if (!ProjectUtil.validateExternalSystem(userRegistration.getExternalSystem())) {
                             invalidErrList.add("Invalid External System");
@@ -192,11 +186,11 @@ public class UserBulkUploadService {
                     if (errorDetails == null) {
                         errorDetails = nextRow.createCell(8);
                     }
-                    if (totalRecordsCount == 0 && errList.size() == 7) {
+                    if (totalRecordsCount == 0 && errList.size() == 4) {
                         setErrorDetails(str, errList, statusCell, errorDetails);
                         failedRecordsCount++;
                         break;
-                    } else if (totalRecordsCount > 0 && errList.size() == 7) {
+                    } else if (totalRecordsCount > 0 && errList.size() == 4) {
                         break;
                     }
                     totalRecordsCount++;
