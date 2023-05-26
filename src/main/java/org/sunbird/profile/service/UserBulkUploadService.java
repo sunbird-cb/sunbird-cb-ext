@@ -128,7 +128,6 @@ public class UserBulkUploadService {
                     }
                     statusCell.setCellValue("Status");
                     errorDetails.setCellValue("Error Details");
-                    rowIterator.next();
                 }
                 while (rowIterator.hasNext()) {
                     StringBuffer str = new StringBuffer();
