@@ -146,25 +146,25 @@ public class UserBulkUploadService {
                             userRegistration.setPhone(phone);
                         }
                     }
-                    if (nextRow.getCell(3) != null && !StringUtils.isBlank(nextRow.getCell(3).toString())) {
+                    if (nextRow.getCell(3) == null || StringUtils.isBlank(nextRow.getCell(3).toString())) {
+                        errList.add("Group");
+                    } else {
                         userRegistration.setGroup(nextRow.getCell(3).getStringCellValue());
                         if (!userUtilityService.validateGroup(userRegistration.getGroup())) {
                             invalidErrList.add("Invalid Group");
                         }
                     }
-                    if (nextRow.getCell(4) == null || StringUtils.isBlank(nextRow.getCell(4).toString())) {
-                        errList.add("Tag");
-                    } else {
+                    if (nextRow.getCell(4) != null && !StringUtils.isBlank(nextRow.getCell(4).toString())) {
                         String tagStr = nextRow.getCell(4).getStringCellValue();
                         List<String> tagList = new ArrayList<String>();
-                        if(!StringUtils.isEmpty(tagStr)) {
+                        if (!StringUtils.isEmpty(tagStr)) {
                             tagList = Arrays.asList(tagStr.split(",", -1));
                         }
                         userRegistration.setTag(tagList);
                         if (!ProjectUtil.validateTag(userRegistration.getTag())) {
                             invalidErrList.add("Invalid Tag");
                         }
-                    }   
+                    }
                     if (nextRow.getCell(5) != null && !StringUtils.isBlank(nextRow.getCell(5).toString())) {
                         userRegistration.setExternalSystemId(nextRow.getCell(5).getStringCellValue());
                         if (!ProjectUtil.validateExternalSystemId(userRegistration.getExternalSystemId())) {
