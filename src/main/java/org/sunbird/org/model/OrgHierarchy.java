@@ -9,7 +9,7 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
 @Entity
-@Table(name = "org_hierarchy_v2")
+@Table(name = "org_hierarchy_v4")
 public class OrgHierarchy {
     @Id
     @Column(name = "id")
