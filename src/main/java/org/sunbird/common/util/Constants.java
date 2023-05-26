@@ -676,8 +676,9 @@ public class Constants {
 	public static final String VERIFIED_KARMAYOGI = "verifiedKarmayogi";
 	public static final String EXTERNAL_SYSTEM_ID = "externalSystemId";
 	public static final String EXTERNAL_SYSTEM = "externalSystem";
+    public static final String GROUP = "group";
 
-	private Constants() {
+    private Constants() {
 		throw new IllegalStateException("Utility class");
 	}
 

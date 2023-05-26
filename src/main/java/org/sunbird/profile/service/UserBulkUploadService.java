@@ -117,6 +117,17 @@ public class UserBulkUploadService {
                 Iterator<Row> rowIterator = sheet.iterator();
                 // incrementing the iterator inorder to skip the headers in the first row
                 if (rowIterator.hasNext()) {
+                    Row firstRow = rowIterator.next();
+                    Cell statusCell = firstRow.getCell(7);
+                    Cell errorDetails = firstRow.getCell(8);
+                    if (statusCell == null) {
+                        statusCell = firstRow.createCell(7);
+                    }
+                    if (errorDetails == null) {
+                        errorDetails = firstRow.createCell(8);
+                    }
+                    statusCell.setCellValue("Status");
+                    errorDetails.setCellValue("Error Details");
                     rowIterator.next();
                 }
                 while (rowIterator.hasNext()) {
