@@ -676,6 +676,10 @@ public class Constants {
 	public static final String SUCCESS_UPPERCASE = "SUCCESS";
 	public static final String EMPTY_FILE_FAILED = "The uploaded file is empty";
 	public static final String PARENT_TYPE = "parentType";
+	public static final String TAG = "tag";
+	public static final String EXTERNAL_SYSTEM_ID = "externalSystemId";
+	public static final String EXTERNAL_SYSTEM = "externalSystem";
+	public static final String GROUP = "group";
 	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}

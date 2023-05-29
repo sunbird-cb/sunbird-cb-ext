@@ -1,11 +1,16 @@
 package org.sunbird.user.registration.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import java.util.List;
+
 /**
  * Model object to store user registration details.
  * 
  * @author karthik
  *
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class UserRegistrationInfo {
 	private String registrationCode;
 	private String firstName;
@@ -21,6 +26,10 @@ public class UserRegistrationInfo {
 	private String sbRootOrgId;
 	private String sbOrgId;
 	private String phone;
+	private String group;
+	private List<String> tag;
+	private String externalSystemId;
+	private String externalSystem;
 
 	public String getRegistrationCode() {
 		return registrationCode;
@@ -132,5 +141,37 @@ public class UserRegistrationInfo {
 
 	public void setPhone(String phone) {
 		this.phone = phone;
+	}
+
+	public String getGroup() {
+		return group;
+	}
+
+	public void setGroup(String group) {
+		this.group = group;
+	}
+
+	public List<String> getTag() {
+		return tag;
+	}
+
+	public void setTag(List<String> tag) {
+		this.tag = tag;
+	}
+
+	public String getExternalSystemId() {
+		return externalSystemId;
+	}
+
+	public void setExternalSystemId(String externalSystemId) {
+		this.externalSystemId = externalSystemId;
+	}
+
+	public String getExternalSystem() {
+		return externalSystem;
+	}
+
+	public void setExternalSystem(String externalSystem) {
+		this.externalSystem = externalSystem;
 	}
 }

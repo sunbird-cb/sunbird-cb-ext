@@ -40,4 +40,6 @@ public interface UserUtilityService {
 	boolean isUserExist(String key, String value);
 
 	Boolean isDomainAccepted(String email);
+
+	boolean validateGroup(String group);
 }

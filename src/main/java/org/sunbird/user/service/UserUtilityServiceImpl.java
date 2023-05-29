@@ -271,10 +271,24 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		if (StringUtils.isNotEmpty(userRegistration.getPosition())) {
 			professionDetailObj.put(Constants.DESIGNATION, userRegistration.getPosition());
 		}
+		if (!StringUtils.isEmpty(userRegistration.getGroup())) {
+			professionDetailObj.put(Constants.GROUP, userRegistration.getGroup());
+		}
 		List<Map<String, Object>> professionalDetailsList = new ArrayList<Map<String, Object>>();
 		professionalDetailsList.add(professionDetailObj);
 		profileDetails.put(Constants.PROFESSIONAL_DETAILS, professionalDetailsList);
 
+		Map<String, Object> additionalProperties = new HashMap<String, Object>();
+		if (!CollectionUtils.isEmpty(userRegistration.getTag())) {
+			additionalProperties.put(Constants.TAG, userRegistration.getTag());
+		}
+		if (!StringUtils.isEmpty(userRegistration.getExternalSystemId())) {
+			additionalProperties.put(Constants.EXTERNAL_SYSTEM_ID, userRegistration.getExternalSystemId());
+		}
+		if (!StringUtils.isEmpty(userRegistration.getExternalSystem())) {
+			additionalProperties.put(Constants.EXTERNAL_SYSTEM, userRegistration.getExternalSystem());
+		}
+		profileDetails.put(Constants.ADDITIONAL_PROPERTIES, additionalProperties);
 		requestBody.put(Constants.PROFILE_DETAILS, profileDetails);
 		request.put(Constants.REQUEST, requestBody);
 		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPatch(
@@ -551,5 +565,12 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		String emailDomain = email.split("@")[1];
 		return props.getUserRegistrationDomain().contains(emailDomain);
 	}
+
+	@Override
+	public boolean validateGroup(String group) {
+		return (!CollectionUtils.isEmpty(serverConfig.getBulkUploadGroupValue())) ? serverConfig.getBulkUploadGroupValue().stream().anyMatch(group::equalsIgnoreCase) : false;
+	}
+
+
 }
 
