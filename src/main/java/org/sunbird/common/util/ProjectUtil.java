@@ -1,6 +1,7 @@
 package org.sunbird.common.util;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -148,5 +149,22 @@ public class ProjectUtil {
 
 	public static Boolean validateLastName( String lastName ) {
 		return lastName.matches( "[a-zA-Z]*" );
+	}
+
+	public static Boolean validateTag(List<String> tags) {
+		for (String tag : tags) {
+			if (!tag.matches("[a-zA-Z]*")) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public static Boolean validateExternalSystemId(String externalSystemId) {
+		return externalSystemId.matches("[a-zA-Z0-9]{0,30}$");
+	}
+
+	public static Boolean validateExternalSystem(String externalSystem) {
+		return externalSystem.matches("[a-zA-Z ]{0,255}$");
 	}
 }
