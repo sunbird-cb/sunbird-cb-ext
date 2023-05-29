@@ -118,13 +118,13 @@ public class UserBulkUploadService {
                 // incrementing the iterator inorder to skip the headers in the first row
                 if (rowIterator.hasNext()) {
                     Row firstRow = rowIterator.next();
-                    Cell statusCell = firstRow.getCell(7);
-                    Cell errorDetails = firstRow.getCell(8);
+                    Cell statusCell = firstRow.getCell(8);
+                    Cell errorDetails = firstRow.getCell(9);
                     if (statusCell == null) {
-                        statusCell = firstRow.createCell(7);
+                        statusCell = firstRow.createCell(8);
                     }
                     if (errorDetails == null) {
-                        errorDetails = firstRow.createCell(8);
+                        errorDetails = firstRow.createCell(9);
                     }
                     statusCell.setCellValue("Status");
                     errorDetails.setCellValue("Error Details");
