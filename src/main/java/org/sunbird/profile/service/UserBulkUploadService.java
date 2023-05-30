@@ -183,9 +183,13 @@ public class UserBulkUploadService {
                             invalidErrList.add("Invalid Tag");
                         }
                     }
-                    if (nextRow.getCell(6) != null && !StringUtils.isBlank(nextRow.getCell(6).toString())) {
-                        userRegistration.setExternalSystemId(nextRow.getCell(6).getStringCellValue());
-                        if (!ProjectUtil.validateExternalSystemId(userRegistration.getExternalSystemId())) {
+                    if (nextRow.getCell(6) != null && nextRow.getCell(6).getCellType() != CellType.BLANK) {
+                        if (nextRow.getCell(6).getCellType() == CellType.NUMERIC) {
+                            userRegistration.setExternalSystemId(NumberToTextConverter.toText(nextRow.getCell(6).getNumericCellValue()));
+                        } else if (nextRow.getCell(6).getCellType() == CellType.STRING) {
+                            userRegistration.setExternalSystemId(nextRow.getCell(6).getStringCellValue());
+                        }
+                        if (!StringUtils.isEmpty(userRegistration.getExternalSystemId()) && !ProjectUtil.validateExternalSystemId(userRegistration.getExternalSystemId())) {
                             invalidErrList.add("Invalid External System ID");
                         }
                     }
@@ -296,12 +300,8 @@ public class UserBulkUploadService {
         if (!ProjectUtil.validateEmailPattern(userRegistration.getEmail())) {
             errList.add("Invalid Email Id");
         } else {
-            if (!userUtilityService.isDomainAccepted(userRegistration.getEmail())) {
-                errList.add("Invalid Email Domain");
-            } else {
-                if (userUtilityService.isUserExist(Constants.EMAIL, userRegistration.getEmail())) {
-                    errList.add(Constants.EMAIL_EXIST_ERROR);
-                }
+            if (userUtilityService.isUserExist(Constants.EMAIL, userRegistration.getEmail())) {
+                errList.add(Constants.EMAIL_EXIST_ERROR);
             }
         }
         if (!ProjectUtil.validateContactPattern(userRegistration.getPhone())) {

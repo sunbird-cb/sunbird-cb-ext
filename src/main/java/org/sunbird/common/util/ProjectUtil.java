@@ -117,8 +117,7 @@ public class ProjectUtil {
 	 */
 
 	public static Boolean validateEmailPattern(String email) {
-		String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\." + "[a-zA-Z0-9_+&*-]+)*@" + "(?:[a-zA-Z0-9-]+\\.)+[a-z"
-				+ "A-Z]{2,7}$";
+		String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\." + "[a-zA-Z0-9_+&*-]+)*@" + "(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
 		Boolean retValue = Boolean.FALSE;
 		Pattern pat = Pattern.compile(emailRegex);
 		if (pat.matcher(email).matches()) {
@@ -153,7 +152,7 @@ public class ProjectUtil {
 
 	public static Boolean validateTag(List<String> tags) {
 		for (String tag : tags) {
-			if (!tag.matches("[a-zA-Z ]*")) {
+			if (!tag.matches("^[a-zA-Z]+(?: [a-zA-Z]+)*$")) {
 				return false;
 			}
 		}
@@ -161,7 +160,7 @@ public class ProjectUtil {
 	}
 
 	public static Boolean validateExternalSystemId(String externalSystemId) {
-		return externalSystemId.matches("[a-zA-Z0-9]{0,30}$");
+		return externalSystemId.matches("^(?=.{1,30}$)[a-zA-Z0-9]+(?:-[a-zA-Z0-9]+)*$");
 	}
 
 	public static Boolean validateExternalSystem(String externalSystem) {
