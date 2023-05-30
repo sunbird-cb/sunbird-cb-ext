@@ -188,6 +188,7 @@ public class UserBulkUploadService {
                         }
                     }
                     userRegistration.setOrgName(inputDataMap.get(Constants.ORG_NAME));
+                    userRegistration.setChannel(inputDataMap.get(Constants.ORG_NAME));
                     Cell statusCell = nextRow.getCell(7);
                     Cell errorDetails = nextRow.getCell(8);
                     if (statusCell == null) {
