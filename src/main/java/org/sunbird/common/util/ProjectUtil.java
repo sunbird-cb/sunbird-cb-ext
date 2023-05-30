@@ -149,7 +149,7 @@ public class ProjectUtil {
 
 	public static Boolean validateTag(List<String> tags) {
 		for (String tag : tags) {
-			if (!tag.matches("[a-zA-Z]*")) {
+			if (!tag.matches("[a-zA-Z ]*")) {
 				return false;
 			}
 		}
