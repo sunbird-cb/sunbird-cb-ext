@@ -677,6 +677,9 @@ public class Constants {
 	public static final String EXTERNAL_SYSTEM_ID = "externalSystemId";
 	public static final String EXTERNAL_SYSTEM = "externalSystem";
 	public static final String GROUP = "group";
+	public static final String USER_DOES_NOT_HAVE_ACCESS = "User doesn't have access to this courseId :";
+	public static final String SECURE_SETTINGS = "secureSettings";
+	public static final String ORGANISATION = "organisation";
 
 	private Constants() {
 		throw new IllegalStateException("Utility class");
