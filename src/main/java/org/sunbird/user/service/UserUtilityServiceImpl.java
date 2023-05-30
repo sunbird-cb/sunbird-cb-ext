@@ -559,13 +559,6 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		return true;
 	}
 
-
-	@Override
-	public Boolean isDomainAccepted(String email) {
-		String emailDomain = email.split("@")[1];
-		return props.getUserRegistrationDomain().contains(emailDomain);
-	}
-
 	@Override
 	public boolean validateGroup(String group) {
 		return (!CollectionUtils.isEmpty(serverConfig.getBulkUploadGroupValue())) ? serverConfig.getBulkUploadGroupValue().stream().anyMatch(group::equalsIgnoreCase) : false;

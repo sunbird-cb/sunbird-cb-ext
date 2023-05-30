@@ -38,8 +38,5 @@ public interface UserUtilityService {
 	public void enrichUserInfo(List<String> fields, Map<String, Map<String, String>> userInfoMap);
 
 	boolean isUserExist(String key, String value);
-
-	Boolean isDomainAccepted(String email);
-
 	boolean validateGroup(String group);
 }

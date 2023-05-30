@@ -117,8 +117,7 @@ public class ProjectUtil {
 	 */
 
 	public static Boolean validateEmailPattern(String email) {
-		String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\." + "[a-zA-Z0-9_+&*-]+)*@" + "(?:[a-zA-Z0-9-]+\\.)+[a-z"
-				+ "A-Z]{2,7}$";
+		String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\." + "[a-zA-Z0-9_+&*-]+)*@" + "(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
 		Boolean retValue = Boolean.FALSE;
 		Pattern pat = Pattern.compile(emailRegex);
 		if (pat.matcher(email).matches()) {
