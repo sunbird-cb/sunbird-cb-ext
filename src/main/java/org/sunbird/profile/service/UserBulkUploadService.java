@@ -300,9 +300,9 @@ public class UserBulkUploadService {
         if (!ProjectUtil.validateEmailPattern(userRegistration.getEmail())) {
             errList.add("Invalid Email Id");
         } else {
-                if (userUtilityService.isUserExist(Constants.EMAIL, userRegistration.getEmail())) {
-                    errList.add(Constants.EMAIL_EXIST_ERROR);
-                }
+            if (userUtilityService.isUserExist(Constants.EMAIL, userRegistration.getEmail())) {
+                errList.add(Constants.EMAIL_EXIST_ERROR);
+            }
         }
         if (!ProjectUtil.validateContactPattern(userRegistration.getPhone())) {
             errList.add("Invalid Mobile Number");
