@@ -175,13 +175,13 @@ public class UserBulkUploadService {
                             invalidErrList.add("Invalid Tag");
                         }
                     }
-                    if (nextRow.getCell(5) != null && !StringUtils.isBlank(nextRow.getCell(5).toString())) {
+                    if (nextRow.getCell(5) != null && nextRow.getCell(5).getCellType() != CellType.BLANK) {
                         if (nextRow.getCell(5).getCellType() == CellType.NUMERIC) {
                             userRegistration.setExternalSystemId(NumberToTextConverter.toText(nextRow.getCell(5).getNumericCellValue()));
                         } else if (nextRow.getCell(5).getCellType() == CellType.STRING) {
                             userRegistration.setExternalSystemId(nextRow.getCell(5).getStringCellValue());
                         }
-                        if (!ProjectUtil.validateExternalSystemId(userRegistration.getExternalSystemId())) {
+                        if (!StringUtils.isEmpty(userRegistration.getExternalSystemId()) && !ProjectUtil.validateExternalSystemId(userRegistration.getExternalSystemId())) {
                             invalidErrList.add("Invalid External System ID");
                         }
                     }
