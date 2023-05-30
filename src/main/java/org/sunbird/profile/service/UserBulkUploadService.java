@@ -235,8 +235,7 @@ public class UserBulkUploadService {
                     errorDetails.setCellValue(Constants.EMPTY_FILE_FAILED);
 
                 }
-                status = uploadTheUpdatedFile(inputDataMap.get(Constants.ROOT_ORG_ID),
-                        inputDataMap.get(Constants.IDENTIFIER), file, wb);
+                status = uploadTheUpdatedFile(file, wb);
                 if (!(Constants.SUCCESSFUL.equalsIgnoreCase(status) && failedRecordsCount == 0
                         && totalRecordsCount == noOfSuccessfulRecords && totalRecordsCount >= 1)) {
                     status = Constants.FAILED_UPPERCASE;
@@ -267,7 +266,7 @@ public class UserBulkUploadService {
         errorDetails.setCellValue(str.toString());
     }
 
-    private String uploadTheUpdatedFile(String rootOrgId, String identifier, File file, XSSFWorkbook wb)
+    private String uploadTheUpdatedFile(File file, XSSFWorkbook wb)
             throws IOException {
         FileOutputStream fileOut = new FileOutputStream(file);
         wb.write(fileOut);
