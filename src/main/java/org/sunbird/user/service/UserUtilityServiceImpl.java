@@ -269,6 +269,9 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		if (StringUtils.isNotEmpty(userRegistration.getPosition())) {
 			professionDetailObj.put(Constants.DESIGNATION, userRegistration.getPosition());
 		}
+		if (!StringUtils.isEmpty(userRegistration.getGroup())) {
+			professionDetailObj.put(Constants.GROUP, userRegistration.getGroup());
+		}
 		List<Map<String, Object>> professionalDetailsList = new ArrayList<Map<String, Object>>();
 		professionalDetailsList.add(professionDetailObj);
 		profileDetails.put(Constants.PROFESSIONAL_DETAILS, professionalDetailsList);
@@ -553,23 +556,6 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 			throw new ApplicationLogicError("Sunbird Service ERROR: ", e);
 		}
 		return true;
-	}
-
-
-	@Override
-	public Boolean isDomainAccepted(String email) {
-		String emailDomain = email.split("@")[1];
-		return props.getUserRegistrationDomain().contains(emailDomain);
-	}
-
-	@Override
-	public boolean validatePosition(String position) {
-		Map<String, Object> propertyMap = new HashMap<>();
-		propertyMap.put(Constants.CONTEXT_TYPE, Constants.POSITION);
-		propertyMap.put(Constants.CONTEXT_NAME, position);
-		List<Map<String, Object>> positionsList = cassandraOperation
-				.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_MASTER_DATA, propertyMap, null);
-		return positionsList.size() > 0;
 	}
 
 	@Override

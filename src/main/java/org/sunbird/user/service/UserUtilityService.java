@@ -39,9 +39,5 @@ public interface UserUtilityService {
 
 	boolean isUserExist(String key, String value);
 
-	Boolean isDomainAccepted(String email);
-
-	boolean validatePosition(String position);
-
 	boolean validateGroup(String group);
 }

@@ -6,7 +6,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.NumberToTextConverter;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -139,7 +138,7 @@ public class UserBulkUploadService {
                         errList.add("Full Name");
                     } else {
                         userRegistration.setFirstName(nextRow.getCell(0).getStringCellValue());
-                        if (!ProjectUtil.validateFirstName(userRegistration.getFirstName())) {
+                        if (!ProjectUtil.validateFullName(userRegistration.getFirstName())) {
                             invalidErrList.add("Invalid Full Name");
                         }
                     }
@@ -175,9 +174,13 @@ public class UserBulkUploadService {
                             invalidErrList.add("Invalid Tag");
                         }
                     }
-                    if (nextRow.getCell(5) != null && !StringUtils.isBlank(nextRow.getCell(5).toString())) {
-                        userRegistration.setExternalSystemId(nextRow.getCell(5).getStringCellValue());
-                        if (!ProjectUtil.validateExternalSystemId(userRegistration.getExternalSystemId())) {
+                    if (nextRow.getCell(5) != null && nextRow.getCell(5).getCellType() != CellType.BLANK) {
+                        if (nextRow.getCell(5).getCellType() == CellType.NUMERIC) {
+                            userRegistration.setExternalSystemId(NumberToTextConverter.toText(nextRow.getCell(5).getNumericCellValue()));
+                        } else if (nextRow.getCell(5).getCellType() == CellType.STRING) {
+                            userRegistration.setExternalSystemId(nextRow.getCell(5).getStringCellValue());
+                        }
+                        if (!StringUtils.isEmpty(userRegistration.getExternalSystemId()) && !ProjectUtil.validateExternalSystemId(userRegistration.getExternalSystemId())) {
                             invalidErrList.add("Invalid External System ID");
                         }
                     }
@@ -188,6 +191,7 @@ public class UserBulkUploadService {
                         }
                     }
                     userRegistration.setOrgName(inputDataMap.get(Constants.ORG_NAME));
+                    userRegistration.setChannel(inputDataMap.get(Constants.ORG_NAME));
                     Cell statusCell = nextRow.getCell(7);
                     Cell errorDetails = nextRow.getCell(8);
                     if (statusCell == null) {
@@ -235,8 +239,7 @@ public class UserBulkUploadService {
                     errorDetails.setCellValue(Constants.EMPTY_FILE_FAILED);
 
                 }
-                status = uploadTheUpdatedFile(inputDataMap.get(Constants.ROOT_ORG_ID),
-                        inputDataMap.get(Constants.IDENTIFIER), file, wb);
+                status = uploadTheUpdatedFile(file, wb);
                 if (!(Constants.SUCCESSFUL.equalsIgnoreCase(status) && failedRecordsCount == 0
                         && totalRecordsCount == noOfSuccessfulRecords && totalRecordsCount >= 1)) {
                     status = Constants.FAILED_UPPERCASE;
@@ -267,7 +270,7 @@ public class UserBulkUploadService {
         errorDetails.setCellValue(str.toString());
     }
 
-    private String uploadTheUpdatedFile(String rootOrgId, String identifier, File file, XSSFWorkbook wb)
+    private String uploadTheUpdatedFile(File file, XSSFWorkbook wb)
             throws IOException {
         FileOutputStream fileOut = new FileOutputStream(file);
         wb.write(fileOut);
@@ -287,12 +290,8 @@ public class UserBulkUploadService {
         if (!ProjectUtil.validateEmailPattern(userRegistration.getEmail())) {
             errList.add("Invalid Email Id");
         } else {
-            if (!userUtilityService.isDomainAccepted(userRegistration.getEmail())) {
-                errList.add("Invalid Email Domain");
-            } else {
-                if (userUtilityService.isUserExist(Constants.EMAIL, userRegistration.getEmail())) {
-                    errList.add(Constants.EMAIL_EXIST_ERROR);
-                }
+            if (userUtilityService.isUserExist(Constants.EMAIL, userRegistration.getEmail())) {
+                errList.add(Constants.EMAIL_EXIST_ERROR);
             }
         }
         if (!ProjectUtil.validateContactPattern(userRegistration.getPhone())) {

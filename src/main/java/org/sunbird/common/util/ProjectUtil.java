@@ -143,13 +143,13 @@ public class ProjectUtil {
 		return Boolean.FALSE;
 	}
 
-	public static Boolean validateFirstName( String firstName ) {
-		return firstName.matches( "^[a-zA-Z ]+(([\\'][a-zA-Z])?[a-zA-Z]*)*$" );
+	public static Boolean validateFullName(String firstName ) {
+		return firstName.matches( "^[a-zA-Z']+\\s[a-zA-Z']+$" );
 	}
 
 	public static Boolean validateTag(List<String> tags) {
 		for (String tag : tags) {
-			if (!tag.matches("[a-zA-Z]*")) {
+			if (!tag.matches("^[a-zA-Z]+(?: [a-zA-Z]+)*$")) {
 				return false;
 			}
 		}
@@ -157,7 +157,7 @@ public class ProjectUtil {
 	}
 
 	public static Boolean validateExternalSystemId(String externalSystemId) {
-		return externalSystemId.matches("[a-zA-Z0-9]{0,30}$");
+		return externalSystemId.matches("^(?=.{1,30}$)[a-zA-Z0-9]+(?:-[a-zA-Z0-9]+)*$");
 	}
 
 	public static Boolean validateExternalSystem(String externalSystem) {
