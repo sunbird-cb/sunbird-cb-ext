@@ -60,7 +60,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
     @Autowired
     ObjectMapper mapper;
 
-    public SBApiResponse readAssessment(String assessmentIdentifier, String token) {
+    public SBApiResponse readAssessment(String assessmentIdentifier, String token, String rootOrgId) {
         logger.info("AssessmentServiceV2Impl::readAssessment... Started");
         SBApiResponse response = createDefaultResponse(Constants.API_QUESTIONSET_HIERARCHY_GET);
         String errMsg;
@@ -70,6 +70,13 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                 logger.info("readAssessment.. userId :" + userId);
                 Map<String, Object> assessmentAllDetail = new HashMap<>();
                 errMsg = fetchReadHierarchyDetails(assessmentAllDetail, token, assessmentIdentifier);
+                boolean hasAccess = validateSecureSettings(assessmentAllDetail, rootOrgId);
+                if (!hasAccess) {
+                    response.getParams().setStatus(Constants.FAILED);
+                    response.getParams().setErrmsg(Constants.USER_DOES_NOT_HAVE_ACCESS);
+                    response.setResponseCode(HttpStatus.NOT_FOUND);
+                    return response;
+                }
                 if (errMsg.isEmpty() && !((String) assessmentAllDetail.get(Constants.PRIMARY_CATEGORY)).equalsIgnoreCase(Constants.PRACTICE_QUESTION_SET)) {
                     logger.info("Fetched assessment Details... for : " + assessmentIdentifier);
                     List<Map<String, Object>> existingDataList = assessmentRepository.fetchUserAssessmentDataFromDB(userId, assessmentIdentifier);
@@ -744,5 +751,20 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
         List<Object> values = userAssessmentData.stream().flatMap(x -> desiredKeys.stream().filter(x::containsKey).map(x::get)).collect(toList());
         Iterables.removeIf(values, Predicates.isNull());
         return values.size();
+    }
+
+    private boolean validateSecureSettings(Map<String, Object> assessmentAllDetail, String rootOrgId) {
+        List<String> organizationIds = new ArrayList<>();
+        Optional.ofNullable((String) assessmentAllDetail.get(Constants.SECURE_SETTINGS))
+                .ifPresent(jsonString -> {
+                    try {
+                        ObjectMapper objectMapper = new ObjectMapper();
+                        Map<String, Object> secureSettings = objectMapper.readValue(jsonString, Map.class);
+                        organizationIds.addAll((List<String>) secureSettings.get(Constants.ORGANISATION));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                });
+        return organizationIds.isEmpty() || organizationIds.contains(rootOrgId);
     }
 }
