@@ -6,7 +6,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.NumberToTextConverter;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -139,7 +138,7 @@ public class UserBulkUploadService {
                         errList.add("Full Name");
                     } else {
                         userRegistration.setFirstName(nextRow.getCell(0).getStringCellValue());
-                        if (!ProjectUtil.validateFirstName(userRegistration.getFirstName())) {
+                        if (!ProjectUtil.validateFullName(userRegistration.getFirstName())) {
                             invalidErrList.add("Invalid Full Name");
                         }
                     }

@@ -143,8 +143,8 @@ public class ProjectUtil {
 		return Boolean.FALSE;
 	}
 
-	public static Boolean validateFirstName( String firstName ) {
-		return firstName.matches( "^[a-zA-Z ]+(([\\'][a-zA-Z])?[a-zA-Z]*)*$" );
+	public static Boolean validateFullName(String firstName ) {
+		return firstName.matches( "^[a-zA-Z']+\\\\s[a-zA-Z']+$" );
 	}
 
 	public static Boolean validateTag(List<String> tags) {
