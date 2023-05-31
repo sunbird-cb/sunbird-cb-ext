@@ -212,7 +212,10 @@ public class UserBulkUploadService {
                         setErrorDetails(str, errList, statusCell, errorDetails);
                         failedRecordsCount++;
                     } else {
-                        invalidErrList = validateEmailContactAndDomain(userRegistration);
+                        List<String> err = validateEmailContactAndDomain(userRegistration);
+                        if (!err.isEmpty()) {
+                            invalidErrList.addAll(err);
+                        }
                         if (invalidErrList.isEmpty()) {
                             boolean isUserCreated = userUtilityService.createUser(userRegistration);
                             if (isUserCreated) {
