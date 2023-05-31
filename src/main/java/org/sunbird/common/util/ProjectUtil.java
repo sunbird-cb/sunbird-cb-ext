@@ -144,7 +144,7 @@ public class ProjectUtil {
 	}
 
 	public static Boolean validateFullName(String firstName ) {
-		return firstName.matches( "^[a-zA-Z']+\\\\s[a-zA-Z']+$" );
+		return firstName.matches( "^[a-zA-Z']+\\s[a-zA-Z']+$" );
 	}
 
 	public static Boolean validateTag(List<String> tags) {
