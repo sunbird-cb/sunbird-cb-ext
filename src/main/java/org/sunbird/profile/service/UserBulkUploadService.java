@@ -128,13 +128,17 @@ public class UserBulkUploadService {
                     statusCell.setCellValue("Status");
                     errorDetails.setCellValue("Error Details");
                 }
+                int count = 0;
                 while (rowIterator.hasNext()) {
+                    logger.info("UserBulkUploadService:: Record " + count++);
+                    long duration = 0;
+                    long startTime = System.currentTimeMillis();
                     StringBuffer str = new StringBuffer();
                     List<String> errList = new ArrayList<>();
                     List<String> invalidErrList = new ArrayList<>();
                     Row nextRow = rowIterator.next();
                     UserRegistration userRegistration = new UserRegistration();
-                    if (nextRow.getCell(0) == null || StringUtils.isBlank(nextRow.getCell(0).toString())) {
+                    if (nextRow.getCell(0) == null || nextRow.getCell(0).getCellType() == CellType.BLANK) {
                         errList.add("Full Name");
                     } else {
                         userRegistration.setFirstName(nextRow.getCell(0).getStringCellValue());
@@ -142,12 +146,12 @@ public class UserBulkUploadService {
                             invalidErrList.add("Invalid Full Name");
                         }
                     }
-                    if (nextRow.getCell(1) == null || StringUtils.isBlank(nextRow.getCell(1).toString())) {
+                    if (nextRow.getCell(1) == null || nextRow.getCell(1).getCellType() == CellType.BLANK) {
                         errList.add("Email");
                     } else {
                         userRegistration.setEmail(nextRow.getCell(1).getStringCellValue());
                     }
-                    if (nextRow.getCell(2) == null || StringUtils.isBlank(nextRow.getCell(2).toString())) {
+                    if (nextRow.getCell(2) == null || nextRow.getCell(2).getCellType() == CellType.BLANK) {
                         errList.add("Phone");
                     } else {
                         if (nextRow.getCell(2).getCellType() == CellType.NUMERIC) {
@@ -155,7 +159,7 @@ public class UserBulkUploadService {
                             userRegistration.setPhone(phone);
                         }
                     }
-                    if (nextRow.getCell(3) == null || StringUtils.isBlank(nextRow.getCell(3).toString())) {
+                    if (nextRow.getCell(3) == null || nextRow.getCell(3).getCellType() == CellType.BLANK) {
                         errList.add("Group");
                     } else {
                         userRegistration.setGroup(nextRow.getCell(3).getStringCellValue());
@@ -163,7 +167,7 @@ public class UserBulkUploadService {
                             invalidErrList.add("Invalid Group");
                         }
                     }
-                    if (nextRow.getCell(4) != null && !StringUtils.isBlank(nextRow.getCell(4).toString())) {
+                    if (nextRow.getCell(4) != null && nextRow.getCell(4).getCellType() == CellType.BLANK) {
                         String tagStr = nextRow.getCell(4).getStringCellValue();
                         List<String> tagList = new ArrayList<String>();
                         if (!StringUtils.isEmpty(tagStr)) {
@@ -184,7 +188,7 @@ public class UserBulkUploadService {
                             invalidErrList.add("Invalid External System ID");
                         }
                     }
-                    if (nextRow.getCell(6) != null && !StringUtils.isBlank(nextRow.getCell(6).toString())) {
+                    if (nextRow.getCell(6) != null && nextRow.getCell(6).getCellType() != CellType.BLANK) {
                         userRegistration.setExternalSystem(nextRow.getCell(6).getStringCellValue());
                         if (!ProjectUtil.validateExternalSystem(userRegistration.getExternalSystem())) {
                             invalidErrList.add("Invalid External System");
@@ -212,17 +216,17 @@ public class UserBulkUploadService {
                         setErrorDetails(str, errList, statusCell, errorDetails);
                         failedRecordsCount++;
                     } else {
-                        invalidErrList = validateEmailContactAndDomain(userRegistration);
+                        invalidErrList.addAll(validateEmailContactAndDomain(userRegistration));
                         if (invalidErrList.isEmpty()) {
-                            boolean isUserCreated = userUtilityService.createUser(userRegistration);
-                            if (isUserCreated) {
+                            String responseCode = userUtilityService.createBulkUploadUser(userRegistration);
+                            if(StringUtils.isBlank(responseCode) || !responseCode.equalsIgnoreCase("OK")) {
+                                failedRecordsCount++;
+                                statusCell.setCellValue(Constants.FAILED_UPPERCASE);
+                                errorDetails.setCellValue(responseCode);
+                            } else {
                                 noOfSuccessfulRecords++;
                                 statusCell.setCellValue(Constants.SUCCESS_UPPERCASE);
                                 errorDetails.setCellValue("");
-                            } else {
-                                failedRecordsCount++;
-                                statusCell.setCellValue(Constants.FAILED_UPPERCASE);
-                                errorDetails.setCellValue(Constants.USER_CREATION_FAILED);
                             }
                         } else {
                             failedRecordsCount++;
@@ -230,6 +234,9 @@ public class UserBulkUploadService {
                             errorDetails.setCellValue(invalidErrList.toString());
                         }
                     }
+                    duration = System.currentTimeMillis() - startTime;
+                    logger.info("UserBulkUploadService:: Record Completed. Time taken: "
+                            + duration + " milli-seconds");
                 }
                 if (totalRecordsCount == 0) {
                     XSSFRow row = sheet.createRow(sheet.getLastRowNum() + 1);
@@ -289,17 +296,9 @@ public class UserBulkUploadService {
         List<String> errList = new ArrayList<>();
         if (!ProjectUtil.validateEmailPattern(userRegistration.getEmail())) {
             errList.add("Invalid Email Id");
-        } else {
-            if (userUtilityService.isUserExist(Constants.EMAIL, userRegistration.getEmail())) {
-                errList.add(Constants.EMAIL_EXIST_ERROR);
-            }
         }
         if (!ProjectUtil.validateContactPattern(userRegistration.getPhone())) {
             errList.add("Invalid Mobile Number");
-        } else {
-            if (userUtilityService.isUserExist(Constants.PHONE, String.valueOf(userRegistration.getPhone()))) {
-                errList.add(Constants.MOBILE_NUMBER_EXIST_ERROR);
-            }
         }
         if (!errList.isEmpty()) {
             str.append("Failed to Validate User Details. Error Details - [").append(errList).append("]");
