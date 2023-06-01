@@ -22,6 +22,8 @@ public interface UserUtilityService {
 
 	boolean createUser(UserRegistration userRegistration);
 
+	String createBulkUploadUser(UserRegistration userRegistration);
+
 	boolean updateUser(UserRegistration userRegistration);
 
 	boolean getActivationLink(UserRegistration userRegistration);
@@ -40,4 +42,6 @@ public interface UserUtilityService {
 	boolean isUserExist(String key, String value);
 
 	boolean validateGroup(String group);
+
+	String updateBulkUploadUser(UserRegistration userRegistration);
 }
