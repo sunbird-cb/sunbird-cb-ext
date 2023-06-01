@@ -134,7 +134,7 @@ public class UserBulkUploadService {
                     List<String> invalidErrList = new ArrayList<>();
                     Row nextRow = rowIterator.next();
                     UserRegistration userRegistration = new UserRegistration();
-                    if (nextRow.getCell(0) == null || StringUtils.isBlank(nextRow.getCell(0).toString())) {
+                    if (nextRow.getCell(0) == null || nextRow.getCell(0).getCellType() == CellType.BLANK) {
                         errList.add("Full Name");
                     } else {
                         userRegistration.setFirstName(nextRow.getCell(0).getStringCellValue());
@@ -142,12 +142,12 @@ public class UserBulkUploadService {
                             invalidErrList.add("Invalid Full Name");
                         }
                     }
-                    if (nextRow.getCell(1) == null || StringUtils.isBlank(nextRow.getCell(1).toString())) {
+                    if (nextRow.getCell(1) == null || nextRow.getCell(1).getCellType() == CellType.BLANK) {
                         errList.add("Email");
                     } else {
                         userRegistration.setEmail(nextRow.getCell(1).getStringCellValue());
                     }
-                    if (nextRow.getCell(2) == null || StringUtils.isBlank(nextRow.getCell(2).toString())) {
+                    if (nextRow.getCell(2) == null || nextRow.getCell(2).getCellType() == CellType.BLANK) {
                         errList.add("Phone");
                     } else {
                         if (nextRow.getCell(2).getCellType() == CellType.NUMERIC) {
@@ -155,7 +155,7 @@ public class UserBulkUploadService {
                             userRegistration.setPhone(phone);
                         }
                     }
-                    if (nextRow.getCell(3) == null || StringUtils.isBlank(nextRow.getCell(3).toString())) {
+                    if (nextRow.getCell(3) == null || nextRow.getCell(3).getCellType() == CellType.BLANK) {
                         errList.add("Group");
                     } else {
                         userRegistration.setGroup(nextRow.getCell(3).getStringCellValue());
@@ -163,7 +163,7 @@ public class UserBulkUploadService {
                             invalidErrList.add("Invalid Group");
                         }
                     }
-                    if (nextRow.getCell(4) != null && !StringUtils.isBlank(nextRow.getCell(4).toString())) {
+                    if (nextRow.getCell(4) != null && nextRow.getCell(4).getCellType() == CellType.BLANK) {
                         String tagStr = nextRow.getCell(4).getStringCellValue();
                         List<String> tagList = new ArrayList<String>();
                         if (!StringUtils.isEmpty(tagStr)) {
@@ -184,7 +184,7 @@ public class UserBulkUploadService {
                             invalidErrList.add("Invalid External System ID");
                         }
                     }
-                    if (nextRow.getCell(6) != null && !StringUtils.isBlank(nextRow.getCell(6).toString())) {
+                    if (nextRow.getCell(6) != null && nextRow.getCell(6).getCellType() != CellType.BLANK) {
                         userRegistration.setExternalSystem(nextRow.getCell(6).getStringCellValue());
                         if (!ProjectUtil.validateExternalSystem(userRegistration.getExternalSystem())) {
                             invalidErrList.add("Invalid External System");
