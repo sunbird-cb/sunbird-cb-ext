@@ -143,11 +143,11 @@ public class ProjectUtil {
 	}
 
 	public static Boolean validateFirstName( String firstName ) {
-		return firstName.matches( "^[a-zA-Z]+(([\\'][a-zA-Z])?[a-zA-Z]*)*$" );
+		return firstName.matches( "^[a-zA-Z]+(?:['\\s][a-zA-Z]+)*(?<!\\.|\\s)$" );
 	}
 
 	public static Boolean validateLastName( String lastName ) {
-		return lastName.matches( "[a-zA-Z]*" );
+		return lastName.matches( "^[a-zA-Z]+(?:['\\s][a-zA-Z]+)*(?<!\\.|\\s)$" );
 	}
 
 	public static Boolean validateTag(List<String> tags) {
