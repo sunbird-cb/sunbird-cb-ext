@@ -579,23 +579,27 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		try {
 			Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPost(
 					props.getSbUrl() + props.getLmsUserCreatePath(), request, ProjectUtil.getDefaultHeaders());
-			if (readData != null && Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
+			if (readData != null && !Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
+				Map<String, Object> params = (Map<String, Object>) readData.get(Constants.PARAMS);
+				if (!MapUtils.isEmpty(params)) {
+					return (String) params.get(Constants.ERROR_MESSAGE);
+				}
+			} else if (readData != null && Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
 				Map<String, Object> result = (Map<String, Object>) readData.get(Constants.RESULT);
 				userRegistration.setUserId((String) result.get(Constants.USER_ID));
 				Map<String, Object> userData = getUsersReadData(userRegistration.getUserId(), StringUtils.EMPTY,
 						StringUtils.EMPTY);
 				if (!CollectionUtils.isEmpty(userData)) {
 					userRegistration.setUserName((String) userData.get(Constants.USER_NAME));
-					userRegistration.setSbOrgId((String) userData.get(Constants.ROOT_ORG_ID) );
+					userRegistration.setSbOrgId((String) userData.get(Constants.ROOT_ORG_ID));
 					return updateBulkUploadUser(userRegistration);
 				}
 			}
-
 		} catch (Exception e) {
 			logger.error("Failed to run the create user flow. UserRegCode : " + userRegistration.getRegistrationCode(),
 					e);
 		}
-		return Constants.PHONE_OR_EMAIL_EXIST_ERROR;
+		return Constants.BULK_USER_CREATE_API_FAILED;
 	}
 
 	@Override
@@ -643,12 +647,17 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		request.put(Constants.REQUEST, requestBody);
 		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPatch(
 				props.getSbUrl() + props.getLmsUserUpdatePath(), request, ProjectUtil.getDefaultHeaders());
-		if (Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
+		if (readData != null && !Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
+			Map<String, Object> params = (Map<String, Object>) readData.get(Constants.PARAMS);
+			if (!MapUtils.isEmpty(params)) {
+				return (String) params.get(Constants.ERROR_MESSAGE);
+			}
+		} else if (readData != null && Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
 			//	if (getActivationLink(userRegistration)) {
 			return (String) readData.get(Constants.RESPONSE_CODE);
 			//	}
 		}
-		return Constants.BULK_USER_API_FAILED;
+		return Constants.BULK_USER_UPDATE_API_FAILED;
 	}
 
 

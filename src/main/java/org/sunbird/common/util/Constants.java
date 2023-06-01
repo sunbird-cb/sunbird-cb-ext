@@ -680,8 +680,8 @@ public class Constants {
 	public static final String EXTERNAL_SYSTEM_ID = "externalSystemId";
 	public static final String EXTERNAL_SYSTEM = "externalSystem";
 	public static final String GROUP = "group";
-	public static final String PHONE_OR_EMAIL_EXIST_ERROR = "User with same Email Id/Phone already registered";
-	public static final String BULK_USER_API_FAILED = "Bulk User Update API Failed";
+	public static final String BULK_USER_CREATE_API_FAILED = "Bulk User Create API Failed";
+	public static final String BULK_USER_UPDATE_API_FAILED = "Bulk User Update API Failed";
 
 	private Constants() {
 		throw new IllegalStateException("Utility class");
