@@ -166,7 +166,15 @@ public class OutboundRequestHandlerServiceImpl {
 				str.append(mapper.writeValueAsString(response)).append(System.lineSeparator());
 				log.debug(str.toString());
 			}
-		} catch (HttpClientErrorException | JsonProcessingException e) {
+		} catch (HttpClientErrorException hce) {
+			try {
+				response = (new ObjectMapper()).readValue(hce.getResponseBodyAsString(),
+						new TypeReference<HashMap<String, Object>>() {
+						});
+			} catch (Exception e1) {
+			}
+			log.error("Error received: " + hce.getResponseBodyAsString(), hce);
+		} catch(JsonProcessingException e) {
 			log.error(e);
 			try {
 				log.warn("Error Response: " + mapper.writeValueAsString(response));
