@@ -602,7 +602,6 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		Map<String, Object> request = new HashMap<>();
 		Map<String, Object> requestBody = new HashMap<String, Object>();
 		requestBody.put(Constants.USER_ID, userRegistration.getUserId());
-		logger.info(userRegistration.getUserId());
 		Map<String, Object> profileDetails = new HashMap<String, Object>();
 		profileDetails.put(Constants.MANDATORY_FIELDS_EXISTS, false);
 		Map<String, Object> employementDetails = new HashMap<String, Object>();
