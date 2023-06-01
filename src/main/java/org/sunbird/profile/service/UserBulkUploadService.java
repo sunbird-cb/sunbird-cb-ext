@@ -205,6 +205,7 @@ public class UserBulkUploadService {
                     }
                     userRegistration.setOrgName(inputDataMap.get(Constants.ORG_NAME));
                     userRegistration.setChannel(inputDataMap.get(Constants.ORG_NAME));
+                    userRegistration.setSbOrgId(inputDataMap.get(Constants.ROOT_ORG_ID));
                     Cell statusCell = nextRow.getCell(8);
                     Cell errorDetails = nextRow.getCell(9);
                     if (statusCell == null) {

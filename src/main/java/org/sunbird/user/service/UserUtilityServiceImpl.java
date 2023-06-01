@@ -587,13 +587,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 			} else if (readData != null && Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
 				Map<String, Object> result = (Map<String, Object>) readData.get(Constants.RESULT);
 				userRegistration.setUserId((String) result.get(Constants.USER_ID));
-				Map<String, Object> userData = getUsersReadData(userRegistration.getUserId(), StringUtils.EMPTY,
-						StringUtils.EMPTY);
-				if (!CollectionUtils.isEmpty(userData)) {
-					userRegistration.setUserName((String) userData.get(Constants.USER_NAME));
-					userRegistration.setSbOrgId((String) userData.get(Constants.ROOT_ORG_ID));
-					return updateBulkUploadUser(userRegistration);
-				}
+				return updateBulkUploadUser(userRegistration);
 			}
 		} catch (Exception e) {
 			logger.error("Failed to run the create user flow. UserRegCode : " + userRegistration.getRegistrationCode(),
