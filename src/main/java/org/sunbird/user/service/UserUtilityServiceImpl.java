@@ -562,4 +562,94 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 	public boolean validateGroup(String group) {
 		return (!CollectionUtils.isEmpty(serverConfig.getBulkUploadGroupValue())) ? serverConfig.getBulkUploadGroupValue().stream().anyMatch(group::equalsIgnoreCase) : false;
 	}
+
+	@Override
+	public String createBulkUploadUser(UserRegistration userRegistration) {
+		Map<String, Object> request = new HashMap<>();
+		Map<String, Object> requestBody = new HashMap<String, Object>();
+		requestBody.put(Constants.EMAIL, userRegistration.getEmail());
+		requestBody.put(Constants.CHANNEL, userRegistration.getChannel());
+		requestBody.put(Constants.FIRSTNAME, userRegistration.getFirstName());
+		requestBody.put(Constants.EMAIL_VERIFIED, true);
+		requestBody.put(Constants.PHONE, userRegistration.getPhone());
+		requestBody.put(Constants.PHONE_VERIFIED, true);
+		requestBody.put(Constants.ROLES, Arrays.asList(Constants.PUBLIC));
+		request.put(Constants.REQUEST, requestBody);
+		try {
+			Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPost(
+					props.getSbUrl() + props.getLmsUserCreatePath(), request, ProjectUtil.getDefaultHeaders());
+			if (readData != null && !Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
+				Map<String, Object> params = (Map<String, Object>) readData.get(Constants.PARAMS);
+				if (!MapUtils.isEmpty(params)) {
+					return (String) params.get(Constants.ERROR_MESSAGE);
+				}
+			} else if (readData != null && Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
+				Map<String, Object> result = (Map<String, Object>) readData.get(Constants.RESULT);
+				userRegistration.setUserId((String) result.get(Constants.USER_ID));
+				return updateBulkUploadUser(userRegistration);
+			}
+		} catch (Exception e) {
+			logger.error("Failed to run the create user flow. UserRegCode : " + userRegistration.getRegistrationCode(),
+					e);
+		}
+		return Constants.BULK_USER_CREATE_API_FAILED;
+	}
+
+	@Override
+	public String updateBulkUploadUser(UserRegistration userRegistration) {
+		Map<String, Object> request = new HashMap<>();
+		Map<String, Object> requestBody = new HashMap<String, Object>();
+		requestBody.put(Constants.USER_ID, userRegistration.getUserId());
+		Map<String, Object> profileDetails = new HashMap<String, Object>();
+		profileDetails.put(Constants.MANDATORY_FIELDS_EXISTS, false);
+		Map<String, Object> employementDetails = new HashMap<String, Object>();
+		employementDetails.put(Constants.DEPARTMENTNAME, userRegistration.getOrgName());
+		profileDetails.put(Constants.EMPLOYMENTDETAILS, employementDetails);
+		Map<String, Object> personalDetails = new HashMap<String, Object>();
+		personalDetails.put(Constants.FIRSTNAME.toLowerCase(), userRegistration.getFirstName());
+		personalDetails.put(Constants.PRIMARY_EMAIL, userRegistration.getEmail());
+		personalDetails.put(Constants.MOBILE, userRegistration.getPhone());
+		personalDetails.put(Constants.PHONE_VERIFIED, true);
+		profileDetails.put(Constants.PERSONAL_DETAILS, personalDetails);
+		Map<String, Object> professionDetailObj = new HashMap<String, Object>();
+		professionDetailObj.put(Constants.ORGANIZATION_TYPE, Constants.GOVERNMENT);
+		if (StringUtils.isNotEmpty(userRegistration.getPosition())) {
+			professionDetailObj.put(Constants.DESIGNATION, userRegistration.getPosition());
+		}
+		if (!StringUtils.isEmpty(userRegistration.getGroup())) {
+			professionDetailObj.put(Constants.GROUP, userRegistration.getGroup());
+		}
+		List<Map<String, Object>> professionalDetailsList = new ArrayList<Map<String, Object>>();
+		professionalDetailsList.add(professionDetailObj);
+		profileDetails.put(Constants.PROFESSIONAL_DETAILS, professionalDetailsList);
+		Map<String, Object> additionalProperties = new HashMap<String, Object>();
+		if (!StringUtils.isEmpty(userRegistration.getGroup())) {
+			additionalProperties.put(Constants.GROUP, userRegistration.getGroup());
+		}
+		if (!CollectionUtils.isEmpty(userRegistration.getTag())) {
+			additionalProperties.put(Constants.TAG, userRegistration.getTag());
+		}
+		if (!StringUtils.isEmpty(userRegistration.getExternalSystemId())) {
+			additionalProperties.put(Constants.EXTERNAL_SYSTEM_ID, userRegistration.getExternalSystemId());
+		}
+		if (!StringUtils.isEmpty(userRegistration.getExternalSystem())) {
+			additionalProperties.put(Constants.EXTERNAL_SYSTEM, userRegistration.getExternalSystem());
+		}
+		profileDetails.put(Constants.ADDITIONAL_PROPERTIES, additionalProperties);
+		requestBody.put(Constants.PROFILE_DETAILS, profileDetails);
+		request.put(Constants.REQUEST, requestBody);
+		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPatch(
+				props.getSbUrl() + props.getLmsUserUpdatePath(), request, ProjectUtil.getDefaultHeaders());
+		if (readData != null && !Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
+			Map<String, Object> params = (Map<String, Object>) readData.get(Constants.PARAMS);
+			if (!MapUtils.isEmpty(params)) {
+				return (String) params.get(Constants.ERROR_MESSAGE);
+			}
+		} else if (readData != null && Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
+			//	if (getActivationLink(userRegistration)) {
+			return (String) readData.get(Constants.RESPONSE_CODE);
+			//	}
+		}
+		return Constants.BULK_USER_UPDATE_API_FAILED;
+	}
 }
