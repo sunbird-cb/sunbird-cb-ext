@@ -40,4 +40,8 @@ public interface UserUtilityService {
 	boolean isUserExist(String key, String value);
 
 	boolean validateGroup(String group);
+
+	String createBulkUploadUser(UserRegistration userRegistration);
+
+	String updateBulkUploadUser(UserRegistration userRegistration);
 }
