@@ -144,7 +144,7 @@ public class UserBulkUploadService {
                     } else {
                         userRegistration.setFirstName(nextRow.getCell(0).getStringCellValue());
                         if (!ProjectUtil.validateFullName(userRegistration.getFirstName())) {
-                            invalidErrList.add("Invalid First Name");
+                            invalidErrList.add("Invalid Full Name");
                         }
                     }
                     if (nextRow.getCell(1) == null || nextRow.getCell(1).getCellType() == CellType.BLANK) {
