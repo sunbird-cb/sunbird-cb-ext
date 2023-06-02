@@ -143,14 +143,7 @@ public class UserBulkUploadService {
                             invalidErrList.add("Invalid First Name");
                         }
                     }
-                    if (nextRow.getCell(1) == null || StringUtils.isBlank(nextRow.getCell(1).toString())) {
-                        errList.add("Last Name");
-                    } else {
-                        userRegistration.setLastName(nextRow.getCell(1).getStringCellValue());
-                        if (!ProjectUtil.validateLastName(userRegistration.getLastName())) {
-                            invalidErrList.add("Invalid Last Name");
-                        }
-                    }
+                    userRegistration.setLastName(" ");
                     if (nextRow.getCell(2) == null || StringUtils.isBlank(nextRow.getCell(2).toString())) {
                         errList.add("Email");
                     } else {
@@ -209,11 +202,11 @@ public class UserBulkUploadService {
                     if (errorDetails == null) {
                         errorDetails = nextRow.createCell(9);
                     }
-                    if (totalRecordsCount == 0 && errList.size() == 5) {
+                    if (totalRecordsCount == 0 && errList.size() == 4) {
                         setErrorDetails(str, errList, statusCell, errorDetails);
                         failedRecordsCount++;
                         break;
-                    } else if (totalRecordsCount > 0 && errList.size() == 5) {
+                    } else if (totalRecordsCount > 0 && errList.size() == 4) {
                         break;
                     }
                     totalRecordsCount++;
