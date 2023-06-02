@@ -276,6 +276,9 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		professionalDetailsList.add(professionDetailObj);
 		profileDetails.put(Constants.PROFESSIONAL_DETAILS, professionalDetailsList);
 		Map<String, Object> additionalProperties = new HashMap<String, Object>();
+		if (!StringUtils.isEmpty(userRegistration.getGroup())) {
+			additionalProperties.put(Constants.GROUP, userRegistration.getGroup());
+		}
 		if (!CollectionUtils.isEmpty(userRegistration.getTag())) {
 			additionalProperties.put(Constants.TAG, userRegistration.getTag());
 		}
