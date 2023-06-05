@@ -136,8 +136,9 @@ public class AssessmentController {
 	@GetMapping("/v1/quml/assessment/read/{assessmentIdentifier}")
 	public ResponseEntity<SBApiResponse> readAssessment(
 			@PathVariable("assessmentIdentifier") String assessmentIdentifier,
-			@RequestHeader(Constants.X_AUTH_TOKEN) String token) throws Exception {
-		SBApiResponse readResponse = assessmentServiceV2.readAssessment(assessmentIdentifier, token);
+			@RequestHeader(Constants.X_AUTH_TOKEN) String token,
+			@RequestHeader(value = Constants.X_AUTH_USER_ORG_ID, required = false) String rootOrgId) throws Exception {
+		SBApiResponse readResponse = assessmentServiceV2.readAssessment(assessmentIdentifier, token, rootOrgId);
 		return new ResponseEntity<>(readResponse, readResponse.getResponseCode());
 	}
 
