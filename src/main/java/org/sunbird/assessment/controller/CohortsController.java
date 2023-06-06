@@ -146,7 +146,8 @@ public class CohortsController {
 	@GetMapping("/v1/autoenrollment")
 	public ResponseEntity<SBApiResponse> userAutoEnrollment(@RequestHeader("x-authenticated-user-token") String authUserToken,
 															@RequestHeader(Constants.X_AUTH_USER_ORG_ID) String rootOrgId,
-															@RequestHeader("courseId") String contentId, @RequestHeader("rootOrg") String rootOrg,
+															@RequestHeader("courseId") String contentId,
+															@RequestHeader("rootOrg") String rootOrg,
 															@RequestHeader("userUUID") String userUUID)throws Exception {
 
 		SBApiResponse response = cohortsServ.autoEnrollmentInCourse(authUserToken, rootOrgId, rootOrg, contentId, userUUID);
