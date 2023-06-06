@@ -359,7 +359,6 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                     switch (scoreCutOffType) {
                         case Constants.ASSESSMENT_LEVEL_SCORE_CUTOFF: {
                             result.putAll(createResponseMapWithProperStructure(hierarchySection, assessUtilServ.validateQumlAssessment(questionsListFromAssessmentHierarchy, questionsListFromSubmitRequest)));
-                            outgoingResponse.getResult().putAll(calculateAssessmentFinalResults(result));
                             writeDataToDatabaseAndTriggerKafkaEvent(submitRequest, userId, questionSetFromAssessment, result, (String) assessmentHierarchy.get(Constants.PRIMARY_CATEGORY));
                             return outgoingResponse;
                         }
@@ -371,7 +370,6 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                         default:
                             break;
                     }
-
                 } else {
                     hierarchySection.put(Constants.SCORE_CUTOFF_TYPE, scoreCutOffType);
                     List<Map<String, Object>> questionsListFromSubmitRequest = new ArrayList<>();
