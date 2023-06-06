@@ -77,14 +77,15 @@ public class CohortsController {
 	 */
 	@GetMapping("/v1/autoenrollment/{userUUID}/{courseId}")
 	public ResponseEntity<SBApiResponse> autoEnrollmentInCourse(@RequestHeader("Authorization") String authUserToken,
-														   @RequestHeader(Constants.X_AUTH_USER_ORG_ID) String rootOrgId,
-														   @PathVariable("courseId") String contentId, @RequestHeader("rootOrg") String rootOrg,
-														   @PathVariable("userUUID") String userUUID)throws Exception {
+																@RequestHeader(Constants.X_AUTH_USER_ORG_ID) String rootOrgId,
+																@PathVariable("courseId") String contentId,
+																@RequestHeader("rootOrg") String rootOrg,
+																@PathVariable("userUUID") String userUUID) throws Exception {
 		if (authUserToken.contains(" ")) {
 			authUserToken = authUserToken.split(" ")[1];
 		}
-		SBApiResponse Response = cohortsServ.autoEnrollmentInCourse(authUserToken, rootOrgId, rootOrg, contentId, userUUID);
-		return new ResponseEntity<>(Response, Response.getResponseCode());
+		SBApiResponse response = cohortsServ.autoEnrollmentInCourse(authUserToken, rootOrgId, rootOrg, contentId, userUUID);
+		return new ResponseEntity<>(response, response.getResponseCode());
 	}
 
 
@@ -148,8 +149,8 @@ public class CohortsController {
 															@RequestHeader("courseId") String contentId, @RequestHeader("rootOrg") String rootOrg,
 															@RequestHeader("userUUID") String userUUID)throws Exception {
 
-		SBApiResponse Response = cohortsServ.autoEnrollmentInCourse(authUserToken, rootOrgId, rootOrg, contentId, userUUID);
-		return new ResponseEntity<>(Response, Response.getResponseCode());
+		SBApiResponse response = cohortsServ.autoEnrollmentInCourse(authUserToken, rootOrgId, rootOrg, contentId, userUUID);
+		return new ResponseEntity<>(response, response.getResponseCode());
 
 	}
 }
