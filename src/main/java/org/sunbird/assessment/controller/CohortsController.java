@@ -52,7 +52,7 @@ public class CohortsController {
 	 */
 	@GetMapping("/v2/resources/{resourceId}/user/{userUUID}/cohorts/activeusers")
 	public ResponseEntity<List<CohortUsers>> getActiveUsers(@RequestHeader("Authorization") String authUserToken,
-			@RequestHeader(Constants.X_AUTH_USER_ORG_ID) String rootOrgId,
+			@RequestHeader(name = Constants.X_AUTH_USER_ORG_ID, required = false) String rootOrgId,
 			@PathVariable("resourceId") String contentId, @RequestHeader("rootOrg") String rootOrg,
 			@PathVariable("userUUID") String userUUID,
 			@RequestParam(value = "count", required = false, defaultValue = "50") Integer count,
@@ -77,7 +77,7 @@ public class CohortsController {
 	 */
 	@GetMapping("/v1/autoenrollment/{userUUID}/{courseId}")
 	public ResponseEntity<SBApiResponse> autoEnrollmentInCourse(@RequestHeader("Authorization") String authUserToken,
-																@RequestHeader(Constants.X_AUTH_USER_ORG_ID) String rootOrgId,
+																@RequestHeader(name = Constants.X_AUTH_USER_ORG_ID, required = false) String rootOrgId,
 																@PathVariable("courseId") String contentId,
 																@RequestHeader("rootOrg") String rootOrg,
 																@PathVariable("userUUID") String userUUID) throws Exception {
@@ -123,7 +123,7 @@ public class CohortsController {
 	 */
 	@GetMapping("/v2/resources/user/cohorts/activeusers")
 	public ResponseEntity<List<CohortUsers>> getActiveUsersForResource(@RequestHeader("x-authenticated-user-token") String authUserToken,
-															@RequestHeader(Constants.X_AUTH_USER_ORG_ID) String rootOrgId,
+															@RequestHeader(name = Constants.X_AUTH_USER_ORG_ID, required = false) String rootOrgId,
 															@RequestHeader("resourceId") String contentId, @RequestHeader("rootOrg") String rootOrg,
 															@RequestHeader("userUUID") String userUUID,
 															@RequestParam(value = "count", required = false, defaultValue = "50") Integer count,
@@ -145,7 +145,7 @@ public class CohortsController {
 	 */
 	@GetMapping("/v1/autoenrollment")
 	public ResponseEntity<SBApiResponse> userAutoEnrollment(@RequestHeader("x-authenticated-user-token") String authUserToken,
-															@RequestHeader(Constants.X_AUTH_USER_ORG_ID) String rootOrgId,
+															@RequestHeader(name = Constants.X_AUTH_USER_ORG_ID, required = false) String rootOrgId,
 															@RequestHeader("courseId") String contentId,
 															@RequestHeader("rootOrg") String rootOrg,
 															@RequestHeader("userUUID") String userUUID)throws Exception {
