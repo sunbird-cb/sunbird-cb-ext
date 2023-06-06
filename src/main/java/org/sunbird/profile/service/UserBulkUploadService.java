@@ -147,7 +147,17 @@ public class UserBulkUploadService {
                             invalidErrList.add("Invalid First Name");
                         }
                     }
-                    userRegistration.setLastName(".");
+                    if (nextRow.getCell(1) == null || nextRow.getCell(1).getCellType() == CellType.BLANK) {
+                        userRegistration.setLastName(".");
+                    } else {
+                        userRegistration.setLastName(nextRow.getCell(1).getStringCellValue());
+                        if(!userRegistration.getLastName().equals("."))
+                        {
+                            if (!ProjectUtil.validateLastName(userRegistration.getLastName())) {
+                                invalidErrList.add("Invalid Last Name");
+                            }
+                        }
+                    }
                     if (nextRow.getCell(2) == null || nextRow.getCell(2).getCellType() == CellType.BLANK) {
                         errList.add("Email");
                     } else {
