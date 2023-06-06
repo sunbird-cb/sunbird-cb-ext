@@ -161,4 +161,9 @@ public class ProjectUtil {
 	public static Boolean validateExternalSystem(String externalSystem) {
 		return externalSystem.matches("[a-zA-Z ]{0,255}$");
 	}
+
+	public static Boolean validateLastName( String lastName ) {
+		return lastName.matches( "^[a-zA-Z]+(?:['\\s][a-zA-Z]+)*(?<!\\.|\\s)$" );
+	}
+
 }
