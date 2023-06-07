@@ -25,6 +25,7 @@ import org.sunbird.common.service.ContentService;
 import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
+import org.sunbird.common.util.ProjectUtil;
 import org.sunbird.core.logger.CbExtLogger;
 import org.sunbird.user.service.UserUtilityService;
 
@@ -155,7 +156,7 @@ public class CohortsServiceImpl implements CohortsService {
 		headers.put("x-authenticated-user-token", authUserToken);
 		headers.put("authorization", cbExtServerProperties.getSbApiKey());
 		headers.put(Constants.X_AUTH_USER_ORG_ID, rootOrgId);
-		SBApiResponse finalResponse = null;
+		SBApiResponse finalResponse = ProjectUtil.createDefaultResponse(Constants.API_USER_ENROLMENT);
 		if (CollectionUtils.isEmpty(batchIdList)) {
 			finalResponse = createBatchAndEnroll(contentId, userUUID, headers);
 		} else {
@@ -181,9 +182,9 @@ public class CohortsServiceImpl implements CohortsService {
 						if (StringUtils.isEmpty(batch.getEndDate())) {
 							Map<String,Object> enrollResponse = new HashMap<>();
 							enrollResponse = enrollInCourse(contentId, userUUID, headers, batch.getBatchId());
-							if (!ObjectUtils.isEmpty(enrollResponse) && Constants.OK == enrollResponse.get(Constants.RESPONSE_CODE)) {
+							if (!ObjectUtils.isEmpty(enrollResponse) && Constants.OK.equalsIgnoreCase((String) enrollResponse.get(Constants.RESPONSE_CODE))) {
 								finalResponse = constructAutoEnrollResponse(batch);
-							}else {
+							} else {
 								finalResponse.setResult(enrollResponse);
 								finalResponse.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
 							}
