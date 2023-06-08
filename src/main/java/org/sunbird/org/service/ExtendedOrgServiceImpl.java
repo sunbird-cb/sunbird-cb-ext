@@ -226,8 +226,11 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 			responseMap.put(Constants.COUNT, orgHierarchyList.size());
 			response.put(Constants.RESPONSE, responseMap);
 		} else {
-			response.setResponseCode(HttpStatus.NOT_FOUND);
-			response.getParams().setErrmsg("Failed to get Org Details for Id: " + parentMapId);
+			Map<String, Object> responseMap = new HashMap<>();
+			responseMap.put(Constants.CONTENT, orgHierarchyList);
+			responseMap.put(Constants.COUNT, orgHierarchyList.size());
+			response.put(Constants.RESPONSE, responseMap);
+			response.getParams().setErrmsg("No child org found for Id: " + parentMapId);
 		}
 
 		return response;
