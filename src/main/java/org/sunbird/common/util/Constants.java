@@ -681,6 +681,13 @@ public class Constants {
 	public static final String BULK_USER_UPDATE_API_FAILED = "Bulk User Update API Failed";
 	public static final String SECURE_SETTINGS = "secureSettings";
 	public static final String API_USER_ENROLMENT = "user.enrolment";
+
+	public static final String API_READ_NOTIFICATION_PREFERENCE = "api.read.notification.preference";
+	public static final String API_UPDATE_NOTIFICATION_PREFERENCE = "api.update.notification.preference";
+	public static final String NOTIFICATION_PREFERENCE="notification_preference";
+	public static final String TABLE_USER_NOTIFICATION_PREFERENCE = "user_notification_preference";
+	public static final String ERROR_INVALID_USER_ID = "Invalid UserId";
+	public static final String ERROR_INVALID_REQUEST_BODY = "Invalid Request Body";
 	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}

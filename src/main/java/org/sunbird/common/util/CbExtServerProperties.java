@@ -449,6 +449,9 @@ public class CbExtServerProperties {
 	@Value("${user.bulk.upload.group.value}")
 	private String bulkUploadGroupValue;
 
+	@Value("${sb.es.user.notification.preference.index}")
+	private String sbUserNotificationPreferenceIndex;
+
 	public String getAssessmentSubmitTopic() {
 		return assessmentSubmitTopic;
 	}
@@ -1638,5 +1641,13 @@ public class CbExtServerProperties {
 
 	public void setBulkUploadGroupValue(String bulkUploadGroupValue) {
 		this.bulkUploadGroupValue = bulkUploadGroupValue;
+	}
+
+	public String getSbUserNotificationPreferenceIndex() {
+		return sbUserNotificationPreferenceIndex;
+	}
+
+	public void setSbUserNotificationPreferenceIndex(String sbUserNotificationPreferenceIndex) {
+		this.sbUserNotificationPreferenceIndex = sbUserNotificationPreferenceIndex;
 	}
 }

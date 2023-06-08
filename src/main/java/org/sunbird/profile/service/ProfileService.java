@@ -33,4 +33,8 @@ public interface ProfileService {
 	SBApiResponse getUserReport();
 
 	ResponseEntity<Resource> downloadFile(String fileName);
+
+	SBApiResponse getNotificationPreferencesById(String userId);
+
+	SBApiResponse updateNotificationPreference(String userId,Map<String,Object> request);
 }
