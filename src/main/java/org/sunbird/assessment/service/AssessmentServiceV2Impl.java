@@ -298,6 +298,12 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
 
     @Override
     public SBApiResponse submitAssessment(Map<String, Object> submitRequest, String authUserToken) throws IOException {
+        logger.info("Assessment Service Impl:: submitAssessment: Started");
+        long duration = 0;
+        long startTime = System.currentTimeMillis();
+        long initialStartTime = startTime;
+        long finalDuration = 0;
+        logger.info("Assessment Service Impl:: submitAssessment: Started");
         SBApiResponse outgoingResponse = createDefaultResponse(Constants.API_SUBMIT_ASSESSMENT);
         String errMsg;
         List<Map<String, Object>> sectionListFromSubmitRequest = new ArrayList<>();
@@ -305,6 +311,10 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
         List<String> questionsListFromAssessmentHierarchy = new ArrayList<>();
         Map<String, Object> assessmentHierarchy = new HashMap<>();
         errMsg = validateSubmitAssessmentRequest(submitRequest, authUserToken, hierarchySectionList, sectionListFromSubmitRequest, assessmentHierarchy);
+        duration = System.currentTimeMillis() - startTime;
+        logger.info("UserBulkUploadService:: validateSubmitAssessmentRequest: Completed. Time taken: "
+                + duration + " milli-seconds");
+        startTime = System.currentTimeMillis();
         if (errMsg.isEmpty()) {
             String userId = validateAuthTokenAndFetchUserId(authUserToken);
             String scoreCutOffType = ((String) assessmentHierarchy.get(Constants.SCORE_CUTOFF_TYPE)).toLowerCase();
@@ -361,6 +371,12 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                             result.putAll(createResponseMapWithProperStructure(hierarchySection, assessUtilServ.validateQumlAssessment(questionsListFromAssessmentHierarchy, questionsListFromSubmitRequest)));
                             outgoingResponse.getResult().putAll(calculateAssessmentFinalResults(result));
                             writeDataToDatabaseAndTriggerKafkaEvent(submitRequest, userId, questionSetFromAssessment, result, (String) assessmentHierarchy.get(Constants.PRIMARY_CATEGORY));
+                            duration = System.currentTimeMillis() - startTime;
+                            logger.info("UserBulkUploadService:: Primary Category !PracticeQuestionSet - Assessment Level Score Cutoff: Completed. Time taken: "
+                                    + duration + " milli-seconds");
+                            finalDuration = System.currentTimeMillis() - initialStartTime;
+                            logger.info("UserBulkUploadService::Total Time: Completed. Time taken: "
+                                    + finalDuration + " milli-seconds");
                             return outgoingResponse;
                         }
                         case Constants.SECTION_LEVEL_SCORE_CUTOFF: {
@@ -371,7 +387,6 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                         default:
                             break;
                     }
-
                 } else {
                     hierarchySection.put(Constants.SCORE_CUTOFF_TYPE, scoreCutOffType);
                     List<Map<String, Object>> questionsListFromSubmitRequest = new ArrayList<>();
@@ -386,6 +401,12 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                         case Constants.ASSESSMENT_LEVEL_SCORE_CUTOFF: {
                             result.putAll(createResponseMapWithProperStructure(hierarchySection, assessUtilServ.validateQumlAssessment(questionsListFromAssessmentHierarchy, questionsListFromSubmitRequest)));
                             outgoingResponse.getResult().putAll(calculateAssessmentFinalResults(result));
+                            duration = System.currentTimeMillis() - startTime;
+                            logger.info("UserBulkUploadService:: Primary Category.. Practice Assessment - Assessment Level Score Cutoff: Completed. Time taken: "
+                                    + duration + " milli-seconds");
+                            finalDuration = System.currentTimeMillis() - initialStartTime;
+                            logger.info("UserBulkUploadService::Total Time: Completed. Time taken: "
+                                    + finalDuration + " milli-seconds");
                             return outgoingResponse;
                         }
                         case Constants.SECTION_LEVEL_SCORE_CUTOFF: {
@@ -402,6 +423,12 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                 Map<String, Object> result = calculateSectionFinalResults(sectionLevelsResults);
                 outgoingResponse.getResult().putAll(result);
                 writeDataToDatabaseAndTriggerKafkaEvent(submitRequest, userId, questionSetFromAssessment, result, (String) assessmentHierarchy.get(Constants.PRIMARY_CATEGORY));
+                duration = System.currentTimeMillis() - startTime;
+                logger.info("UserBulkUploadService::Sectional Level Score Cutoff: Completed. Time taken: "
+                        + duration + " milli-seconds");
+                finalDuration = System.currentTimeMillis() - initialStartTime;
+                logger.info("UserBulkUploadService::Total Time: Completed. Time taken: "
+                        + finalDuration + " milli-seconds");
                 return outgoingResponse;
             }
         }
