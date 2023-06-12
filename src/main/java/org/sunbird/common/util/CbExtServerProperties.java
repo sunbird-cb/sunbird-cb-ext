@@ -449,6 +449,9 @@ public class CbExtServerProperties {
 	@Value("${user.bulk.upload.group.value}")
 	private String bulkUploadGroupValue;
 
+	@Value("${content.search.primary.category.filter}")
+	private String contentSearchPrimaryCategoryFilter;
+
 	public String getAssessmentSubmitTopic() {
 		return assessmentSubmitTopic;
 	}
@@ -1638,5 +1641,13 @@ public class CbExtServerProperties {
 
 	public void setBulkUploadGroupValue(String bulkUploadGroupValue) {
 		this.bulkUploadGroupValue = bulkUploadGroupValue;
+	}
+
+	public List<String> getContentSearchPrimaryCategoryFilter() {
+		return Arrays.asList(contentSearchPrimaryCategoryFilter.split(",", -1));
+	}
+
+	public void setContentSearchPrimaryCategoryFilter(String contentSearchPrimaryCategoryFilter) {
+		this.contentSearchPrimaryCategoryFilter = contentSearchPrimaryCategoryFilter;
 	}
 }
