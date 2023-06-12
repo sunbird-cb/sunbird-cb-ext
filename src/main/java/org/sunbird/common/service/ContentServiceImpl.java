@@ -188,7 +188,7 @@ public class ContentServiceImpl implements ContentService {
 			headerValues.put(Constants.X_AUTH_USER_ORG_ID, rootOrgId);
 		}
 		Map<String, Object> filters = new HashMap<>();
-		filters.put(Constants.PRIMARY_CATEGORY, Arrays.asList(Constants.COURSE, Constants.PROGRAM));
+		filters.put(Constants.PRIMARY_CATEGORY, serverConfig.getContentSearchPrimaryCategoryFilter());
 		filters.put(Constants.STATUS, Arrays.asList(Constants.LIVE));
 		filters.put(Constants.IDENTIFIER, contentId);
 		Map<String, Object> contentRequestValue = new HashMap<>();
