@@ -449,6 +449,9 @@ public class CbExtServerProperties {
 	@Value("${user.bulk.upload.group.value}")
 	private String bulkUploadGroupValue;
 
+	@Value("${assessment.primary.category.params}")
+	private String assessmentPrimaryCategoryParams;
+
 	public String getAssessmentSubmitTopic() {
 		return assessmentSubmitTopic;
 	}
@@ -1638,5 +1641,13 @@ public class CbExtServerProperties {
 
 	public void setBulkUploadGroupValue(String bulkUploadGroupValue) {
 		this.bulkUploadGroupValue = bulkUploadGroupValue;
+	}
+
+	public String getAssessmentPrimaryCategoryParams() {
+		return Arrays.asList(assessmentPrimaryCategoryParams.split(",", -1);
+	}
+
+	public void setAssessmentPrimaryCategoryParams(String assessmentPrimaryCategoryParams) {
+		this.assessmentPrimaryCategoryParams = assessmentPrimaryCategoryParams;
 	}
 }
