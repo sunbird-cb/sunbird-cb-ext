@@ -1643,8 +1643,8 @@ public class CbExtServerProperties {
 		this.bulkUploadGroupValue = bulkUploadGroupValue;
 	}
 
-	public String getContentSearchPrimaryCategoryFilter() {
-		return Arrays.asList(contentSearchPrimaryCategoryFilter.split(",", -1);
+	public List<String> getContentSearchPrimaryCategoryFilter() {
+		return Arrays.asList(contentSearchPrimaryCategoryFilter.split(",", -1));
 	}
 
 	public void setContentSearchPrimaryCategoryFilter(String contentSearchPrimaryCategoryFilter) {
