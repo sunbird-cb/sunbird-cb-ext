@@ -53,6 +53,7 @@ public class PortalServiceImpl implements PortalService {
 				requestMap.put(Constants.FILTERS, new HashMap<String, Object>() {
 					{
 						put(Constants.IS_TENANT, Boolean.TRUE);
+						put(Constants.STATUS, 1);
 					}
 				});
 
