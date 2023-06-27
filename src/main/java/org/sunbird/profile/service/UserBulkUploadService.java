@@ -141,7 +141,7 @@ public class UserBulkUploadService {
                     if (nextRow.getCell(0) == null || nextRow.getCell(0).getCellType() == CellType.BLANK) {
                         errList.add("Full Name");
                     } else {
-                        userRegistration.setFirstName(nextRow.getCell(0).getStringCellValue());
+                        userRegistration.setFirstName(nextRow.getCell(0).getStringCellValue().trim());
                         if (!ProjectUtil.validateFullName(userRegistration.getFirstName())) {
                             invalidErrList.add("Invalid Full Name");
                         }
@@ -149,14 +149,14 @@ public class UserBulkUploadService {
                     if (nextRow.getCell(1) == null || nextRow.getCell(1).getCellType() == CellType.BLANK) {
                         errList.add("Email");
                     } else {
-                        userRegistration.setEmail(nextRow.getCell(1).getStringCellValue());
+                        userRegistration.setEmail(nextRow.getCell(1).getStringCellValue().trim());
                     }
                     if (nextRow.getCell(2) == null || nextRow.getCell(2).getCellType() == CellType.BLANK) {
                         errList.add("Phone");
                     } else {
                         if (nextRow.getCell(2).getCellType() == CellType.NUMERIC) {
                             phone = NumberToTextConverter.toText(nextRow.getCell(2).getNumericCellValue());
-                            userRegistration.setPhone(phone);
+                            userRegistration.setPhone(phone.trim());
                         }
                     }
                     if (nextRow.getCell(3) == null || nextRow.getCell(3).getCellType() == CellType.BLANK) {
