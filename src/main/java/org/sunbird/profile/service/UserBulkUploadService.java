@@ -158,6 +158,10 @@ public class UserBulkUploadService {
                             phone = NumberToTextConverter.toText(nextRow.getCell(2).getNumericCellValue());
                             userRegistration.setPhone(phone.trim());
                         }
+                        else if (nextRow.getCell(2).getCellType() == CellType.STRING)
+                        {
+                            userRegistration.setPhone(nextRow.getCell(2).getStringCellValue().trim());
+                        }
                     }
                     if (nextRow.getCell(3) == null || nextRow.getCell(3).getCellType() == CellType.BLANK) {
                         errList.add("Group");
