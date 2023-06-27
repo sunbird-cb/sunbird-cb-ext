@@ -164,7 +164,7 @@ public class UserBulkUploadService {
                     } else {
                         userRegistration.setGroup(nextRow.getCell(3).getStringCellValue());
                         if (!userUtilityService.validateGroup(userRegistration.getGroup())) {
-                            invalidErrList.add("Invalid Group : Group can be only among one of this " + serverProperties.getBulkUploadGroupValue());
+                            invalidErrList.add("Invalid Group : Group can be only among one of these " + serverProperties.getBulkUploadGroupValue());
                         }
                     }
                     if (nextRow.getCell(4) != null && nextRow.getCell(4).getCellType() != CellType.BLANK) {
