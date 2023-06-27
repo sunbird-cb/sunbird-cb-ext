@@ -13,6 +13,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.sunbird.assessment.repo.CohortUsers;
 import org.sunbird.assessment.service.CohortsService;
 import org.sunbird.common.model.Response;
+import org.sunbird.common.model.SBApiResponse;
+import org.sunbird.common.util.Constants;
+
 
 @RestController
 public class CohortsController {
@@ -49,6 +52,7 @@ public class CohortsController {
 	 */
 	@GetMapping("/v2/resources/{resourceId}/user/{userUUID}/cohorts/activeusers")
 	public ResponseEntity<List<CohortUsers>> getActiveUsers(@RequestHeader("Authorization") String authUserToken,
+			@RequestHeader(name = Constants.X_AUTH_USER_ORG_ID, required = false) String rootOrgId,
 			@PathVariable("resourceId") String contentId, @RequestHeader("rootOrg") String rootOrg,
 			@PathVariable("userUUID") String userUUID,
 			@RequestParam(value = "count", required = false, defaultValue = "50") Integer count,
@@ -58,7 +62,7 @@ public class CohortsController {
 			authUserToken = authUserToken.split(" ")[1];
 		}
 		return new ResponseEntity<>(
-				cohortsServ.getActiveUsers(authUserToken, rootOrg, contentId, userUUID, count, toFilter),
+				cohortsServ.getActiveUsers(authUserToken, rootOrgId, rootOrg, contentId, userUUID, count, toFilter),
 				HttpStatus.OK);
 	}
 
@@ -72,15 +76,16 @@ public class CohortsController {
 	 * @throws Exception
 	 */
 	@GetMapping("/v1/autoenrollment/{userUUID}/{courseId}")
-	public ResponseEntity<Response> autoEnrollmentInCourse(@RequestHeader("Authorization") String authUserToken,
-														   @PathVariable("courseId") String contentId, @RequestHeader("rootOrg") String rootOrg,
-														   @PathVariable("userUUID") String userUUID)throws Exception {
+	public ResponseEntity<SBApiResponse> autoEnrollmentInCourse(@RequestHeader("Authorization") String authUserToken,
+																@RequestHeader(name = Constants.X_AUTH_USER_ORG_ID, required = false) String rootOrgId,
+																@PathVariable("courseId") String contentId,
+																@RequestHeader("rootOrg") String rootOrg,
+																@PathVariable("userUUID") String userUUID) throws Exception {
 		if (authUserToken.contains(" ")) {
 			authUserToken = authUserToken.split(" ")[1];
 		}
-		return new ResponseEntity<>(
-				cohortsServ.autoEnrollmentInCourse(authUserToken, rootOrg, contentId, userUUID),
-				HttpStatus.OK);
+		SBApiResponse response = cohortsServ.autoEnrollmentInCourse(authUserToken, rootOrgId, rootOrg, contentId, userUUID);
+		return new ResponseEntity<>(response, response.getResponseCode());
 	}
 
 
@@ -118,13 +123,14 @@ public class CohortsController {
 	 */
 	@GetMapping("/v2/resources/user/cohorts/activeusers")
 	public ResponseEntity<List<CohortUsers>> getActiveUsersForResource(@RequestHeader("x-authenticated-user-token") String authUserToken,
+															@RequestHeader(name = Constants.X_AUTH_USER_ORG_ID, required = false) String rootOrgId,
 															@RequestHeader("resourceId") String contentId, @RequestHeader("rootOrg") String rootOrg,
 															@RequestHeader("userUUID") String userUUID,
 															@RequestParam(value = "count", required = false, defaultValue = "50") Integer count,
 															@RequestParam(value = "filter", required = false, defaultValue = "false") Boolean toFilter)
 			throws Exception {
 		return new ResponseEntity<>(
-				cohortsServ.getActiveUsers(authUserToken, rootOrg, contentId, userUUID, count, toFilter),
+				cohortsServ.getActiveUsers(authUserToken, rootOrgId, rootOrg, contentId, userUUID, count, toFilter),
 				HttpStatus.OK);
 	}
 
@@ -138,11 +144,14 @@ public class CohortsController {
 	 * @throws Exception
 	 */
 	@GetMapping("/v1/autoenrollment")
-	public ResponseEntity<Response> userAutoEnrollment(@RequestHeader("x-authenticated-user-token") String authUserToken,
-														   @RequestHeader("courseId") String contentId, @RequestHeader("rootOrg") String rootOrg,
-														   @RequestHeader("userUUID") String userUUID)throws Exception {
-		return new ResponseEntity<>(
-				cohortsServ.autoEnrollmentInCourse(authUserToken, rootOrg, contentId, userUUID),
-				HttpStatus.OK);
+	public ResponseEntity<SBApiResponse> userAutoEnrollment(@RequestHeader("x-authenticated-user-token") String authUserToken,
+															@RequestHeader(name = Constants.X_AUTH_USER_ORG_ID, required = false) String rootOrgId,
+															@RequestHeader("courseId") String contentId,
+															@RequestHeader("rootOrg") String rootOrg,
+															@RequestHeader("userUUID") String userUUID)throws Exception {
+
+		SBApiResponse response = cohortsServ.autoEnrollmentInCourse(authUserToken, rootOrgId, rootOrg, contentId, userUUID);
+		return new ResponseEntity<>(response, response.getResponseCode());
+
 	}
 }

@@ -164,7 +164,7 @@ public class UserBulkUploadService {
                     } else {
                         userRegistration.setGroup(nextRow.getCell(3).getStringCellValue());
                         if (!userUtilityService.validateGroup(userRegistration.getGroup())) {
-                            invalidErrList.add("Invalid Group");
+                            invalidErrList.add("Invalid Group : Group can be only among one of this " + serverProperties.getBulkUploadGroupValue());
                         }
                     }
                     if (nextRow.getCell(4) != null && nextRow.getCell(4).getCellType() != CellType.BLANK) {
@@ -175,7 +175,7 @@ public class UserBulkUploadService {
                         }
                         userRegistration.setTag(tagList);
                         if (!ProjectUtil.validateTag(userRegistration.getTag())) {
-                            invalidErrList.add("Invalid Tag");
+                            invalidErrList.add("Invalid Tag : Tag can contain only alphabets with spaces");
                         }
                     }
                     if (nextRow.getCell(5) != null && nextRow.getCell(5).getCellType() != CellType.BLANK) {
@@ -185,13 +185,13 @@ public class UserBulkUploadService {
                             userRegistration.setExternalSystemId(nextRow.getCell(5).getStringCellValue());
                         }
                         if (!StringUtils.isEmpty(userRegistration.getExternalSystemId()) && !ProjectUtil.validateExternalSystemId(userRegistration.getExternalSystemId())) {
-                            invalidErrList.add("Invalid External System ID");
+                            invalidErrList.add("Invalid External System ID : External System Id can contain alphanumeric characters and have a max length of 30");
                         }
                     }
                     if (nextRow.getCell(6) != null && !StringUtils.isBlank(nextRow.getCell(6).toString())) {
                         userRegistration.setExternalSystem(nextRow.getCell(6).getStringCellValue());
                         if (!ProjectUtil.validateExternalSystem(userRegistration.getExternalSystem())) {
-                            invalidErrList.add("Invalid External System");
+                            invalidErrList.add("Invalid External System : External System can contain only alphabets and can have a max length of 255");
                         }
                     }
                     userRegistration.setOrgName(inputDataMap.get(Constants.ORG_NAME));

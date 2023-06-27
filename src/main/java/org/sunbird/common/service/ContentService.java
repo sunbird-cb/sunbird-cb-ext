@@ -17,11 +17,13 @@ public interface ContentService {
 
 	public List<String> getParticipantsForBatch(String xAuthUser, String batchId);
 
-	public SunbirdApiUserCourseListResp getUserCourseListResponse(String authToken, String userId);
+	public SunbirdApiUserCourseListResp getUserCourseListResponse(String authToken, String userId, String rootOrgId);
 
 	public SunbirdApiResp getQuestionListDetails(List<String> questionIdList);
 
 	Map<String, Object> searchLiveContentByContentIds(List<String> contentIds);
+
+	public Map<String, Object> searchLiveContent(String rootOrgId, String contentId);
 
 	public Map<String, Object> searchLiveContent(String contentId);
 
