@@ -633,6 +633,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 			additionalProperties.put(Constants.EXTERNAL_SYSTEM, userRegistration.getExternalSystem());
 		}
 		profileDetails.put(Constants.ADDITIONAL_PROPERTIES, additionalProperties);
+		profileDetails.put(Constants.VERIFIED_KARMAYOGI, false);
 		requestBody.put(Constants.PROFILE_DETAILS, profileDetails);
 		request.put(Constants.REQUEST, requestBody);
 		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPatch(
