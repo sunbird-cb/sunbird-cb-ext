@@ -188,7 +188,7 @@ public class UserBulkUploadService {
                         } else if (nextRow.getCell(5).getCellType() == CellType.STRING) {
                             userRegistration.setExternalSystemId(nextRow.getCell(5).getStringCellValue().trim());
                         }
-                        if (!StringUtils.isEmpty(userRegistration.getExternalSystemId()) && !ProjectUtil.validateExternalSystemId(userRegistration.getExternalSystemId())) {
+                        if (!ProjectUtil.validateExternalSystemId(userRegistration.getExternalSystemId())) {
                             invalidErrList.add("Invalid External System ID : External System Id can contain alphanumeric characters and have a max length of 30");
                         }
                     }
