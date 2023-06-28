@@ -199,8 +199,14 @@ public class UserBulkUploadService {
                         }
                     }
                     if (nextRow.getCell(6) != null && !StringUtils.isBlank(nextRow.getCell(6).toString())) {
-                        userRegistration.setExternalSystem(nextRow.getCell(6).getStringCellValue().trim());
-                        if (!ProjectUtil.validateExternalSystem(userRegistration.getExternalSystem())) {
+                        if (nextRow.getCell(6).getCellType() == CellType.STRING) {
+                            userRegistration.setExternalSystem(nextRow.getCell(6).getStringCellValue().trim());
+                            if (!ProjectUtil.validateExternalSystem(userRegistration.getExternalSystem())) {
+                                invalidErrList.add("Invalid External System : External System can contain only alphabets and can have a max length of 255");
+                            }
+                        }
+                        else
+                        {
                             invalidErrList.add("Invalid External System : External System can contain only alphabets and can have a max length of 255");
                         }
                     }
