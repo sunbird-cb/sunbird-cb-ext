@@ -179,7 +179,7 @@ public class UserBulkUploadService {
                         }
                         userRegistration.setTag(tagList);
                         if (!ProjectUtil.validateTag(userRegistration.getTag())) {
-                            invalidErrList.add("Invalid Tag : Tag can contain only alphabets with spaces");
+                            invalidErrList.add("Invalid Tag : Tag can contain only alphabets with spaces. eg: Bihar Circle, Patna Division");
                         }
                     }
                     if (nextRow.getCell(5) != null && nextRow.getCell(5).getCellType() != CellType.BLANK) {
