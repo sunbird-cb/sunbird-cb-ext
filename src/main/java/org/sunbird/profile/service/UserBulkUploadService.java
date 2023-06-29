@@ -168,7 +168,7 @@ public class UserBulkUploadService {
                         } else if (nextRow.getCell(2).getCellType() == CellType.STRING) {
                             userRegistration.setPhone(nextRow.getCell(2).getStringCellValue().trim());
                         } else {
-                            invalidErrList.add("Invalid column type. Expecting number format");
+                            invalidErrList.add("Invalid column type. Expecting number/string format");
                         }
                     }
                     if (nextRow.getCell(3) == null || nextRow.getCell(3).getCellType() == CellType.BLANK) {
@@ -192,7 +192,7 @@ public class UserBulkUploadService {
                             }
                             userRegistration.setTag(tagList);
                             if (!ProjectUtil.validateTag(userRegistration.getTag())) {
-                                invalidErrList.add("Invalid Tag : Tag can contain only alphabets with spaces. eg: Bihar Circle, Patna Division");
+                                invalidErrList.add("Invalid Tag : Tags are comma seperated string values. A Tag can contain only alphabets with spaces. eg: Bihar Circle, Patna Division");
                             }
                         } else {
                             invalidErrList.add("Invalid column type. Expecting string format");
