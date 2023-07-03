@@ -141,57 +141,86 @@ public class UserBulkUploadService {
                     if (nextRow.getCell(0) == null || nextRow.getCell(0).getCellType() == CellType.BLANK) {
                         errList.add("Full Name");
                     } else {
-                        userRegistration.setFirstName(nextRow.getCell(0).getStringCellValue());
-                        if (!ProjectUtil.validateFullName(userRegistration.getFirstName())) {
-                            invalidErrList.add("Invalid Full Name");
+                        if (nextRow.getCell(0).getCellType() == CellType.STRING) {
+                            userRegistration.setFirstName(nextRow.getCell(0).getStringCellValue().trim());
+                            if (!ProjectUtil.validateFullName(userRegistration.getFirstName())) {
+                                invalidErrList.add("Invalid Full Name");
+                            }
+                        } else {
+                            invalidErrList.add("Invalid column type. Expecting string format");
                         }
                     }
                     if (nextRow.getCell(1) == null || nextRow.getCell(1).getCellType() == CellType.BLANK) {
                         errList.add("Email");
                     } else {
-                        userRegistration.setEmail(nextRow.getCell(1).getStringCellValue());
+                        if (nextRow.getCell(1).getCellType() == CellType.STRING) {
+                            userRegistration.setEmail(nextRow.getCell(1).getStringCellValue().trim());
+                        } else {
+                            invalidErrList.add("Invalid column type. Expecting string format");
+                        }
                     }
                     if (nextRow.getCell(2) == null || nextRow.getCell(2).getCellType() == CellType.BLANK) {
                         errList.add("Phone");
                     } else {
                         if (nextRow.getCell(2).getCellType() == CellType.NUMERIC) {
                             phone = NumberToTextConverter.toText(nextRow.getCell(2).getNumericCellValue());
-                            userRegistration.setPhone(phone);
+                            userRegistration.setPhone(phone.trim());
+                        } else if (nextRow.getCell(2).getCellType() == CellType.STRING) {
+                            userRegistration.setPhone(nextRow.getCell(2).getStringCellValue().trim());
+                        } else {
+                            invalidErrList.add("Invalid column type. Expecting number/string format");
                         }
                     }
                     if (nextRow.getCell(3) == null || nextRow.getCell(3).getCellType() == CellType.BLANK) {
                         errList.add("Group");
                     } else {
-                        userRegistration.setGroup(nextRow.getCell(3).getStringCellValue());
-                        if (!userUtilityService.validateGroup(userRegistration.getGroup())) {
-                            invalidErrList.add("Invalid Group");
+                        if (nextRow.getCell(3).getCellType() == CellType.STRING) {
+                            userRegistration.setGroup(nextRow.getCell(3).getStringCellValue().trim());
+                            if (!userUtilityService.validateGroup(userRegistration.getGroup())) {
+                                invalidErrList.add("Invalid Group : Group can be only among one of these " + serverProperties.getBulkUploadGroupValue());
+                            }
+                        } else {
+                            invalidErrList.add("Invalid column type. Expecting string format");
                         }
                     }
                     if (nextRow.getCell(4) != null && nextRow.getCell(4).getCellType() != CellType.BLANK) {
-                        String tagStr = nextRow.getCell(4).getStringCellValue();
-                        List<String> tagList = new ArrayList<String>();
-                        if (!StringUtils.isEmpty(tagStr)) {
-                            tagList = Arrays.asList(tagStr.split(",", -1));
-                        }
-                        userRegistration.setTag(tagList);
-                        if (!ProjectUtil.validateTag(userRegistration.getTag())) {
-                            invalidErrList.add("Invalid Tag");
+                        if (nextRow.getCell(4).getCellType() == CellType.STRING) {
+                            String tagStr = nextRow.getCell(4).getStringCellValue().trim();
+                            List<String> tagList = new ArrayList<String>();
+                            if (!StringUtils.isEmpty(tagStr)) {
+                                tagList = Arrays.asList(tagStr.split(",", -1));
+                            }
+                            userRegistration.setTag(tagList);
+                            if (!ProjectUtil.validateTag(userRegistration.getTag())) {
+                                invalidErrList.add("Invalid Tag : Tags are comma seperated string values. A Tag can contain only alphabets with spaces. eg: Bihar Circle, Patna Division");
+                            }
+                        } else {
+                            invalidErrList.add("Invalid column type. Expecting string format");
                         }
                     }
                     if (nextRow.getCell(5) != null && nextRow.getCell(5).getCellType() != CellType.BLANK) {
                         if (nextRow.getCell(5).getCellType() == CellType.NUMERIC) {
-                            userRegistration.setExternalSystemId(NumberToTextConverter.toText(nextRow.getCell(5).getNumericCellValue()));
+                            userRegistration.setExternalSystemId(NumberToTextConverter.toText(nextRow.getCell(5).getNumericCellValue()).trim());
+                            if (!ProjectUtil.validateExternalSystemId(userRegistration.getExternalSystemId())) {
+                                invalidErrList.add("Invalid External System ID : External System Id can contain alphanumeric characters and have a max length of 30");
+                            }
                         } else if (nextRow.getCell(5).getCellType() == CellType.STRING) {
-                            userRegistration.setExternalSystemId(nextRow.getCell(5).getStringCellValue());
-                        }
-                        if (!StringUtils.isEmpty(userRegistration.getExternalSystemId()) && !ProjectUtil.validateExternalSystemId(userRegistration.getExternalSystemId())) {
-                            invalidErrList.add("Invalid External System ID");
+                            userRegistration.setExternalSystemId(nextRow.getCell(5).getStringCellValue().trim());
+                            if (!ProjectUtil.validateExternalSystemId(userRegistration.getExternalSystemId())) {
+                                invalidErrList.add("Invalid External System ID : External System Id can contain alphanumeric characters and have a max length of 30");
+                            }
+                        } else {
+                            invalidErrList.add("Invalid column type. Expecting string/number format");
                         }
                     }
                     if (nextRow.getCell(6) != null && !StringUtils.isBlank(nextRow.getCell(6).toString())) {
-                        userRegistration.setExternalSystem(nextRow.getCell(6).getStringCellValue());
-                        if (!ProjectUtil.validateExternalSystem(userRegistration.getExternalSystem())) {
-                            invalidErrList.add("Invalid External System");
+                        if (nextRow.getCell(6).getCellType() == CellType.STRING) {
+                            userRegistration.setExternalSystem(nextRow.getCell(6).getStringCellValue().trim());
+                            if (!ProjectUtil.validateExternalSystem(userRegistration.getExternalSystem())) {
+                                invalidErrList.add("Invalid External System : External System can contain only alphabets and can have a max length of 255");
+                            }
+                        } else {
+                            invalidErrList.add("Invalid column type. Expecting string format");
                         }
                     }
                     userRegistration.setOrgName(inputDataMap.get(Constants.ORG_NAME));
