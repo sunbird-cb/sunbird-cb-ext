@@ -33,4 +33,6 @@ public interface ProfileService {
 	SBApiResponse getUserReport();
 
 	ResponseEntity<Resource> downloadFile(String fileName);
+
+    SBApiResponse getGroupList();
 }
