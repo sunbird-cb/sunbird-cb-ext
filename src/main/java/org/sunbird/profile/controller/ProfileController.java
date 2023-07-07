@@ -107,4 +107,10 @@ public class ProfileController {
 	public ResponseEntity<?> downloadFile(@PathVariable("fileName") String fileName) {
 		return profileService.downloadFile(fileName);
 	}
+
+	@GetMapping("/user/v1/groups")
+	public ResponseEntity<?> getGroupList() throws Exception {
+		SBApiResponse response = profileService.getGroupList();
+		return new ResponseEntity<>(response, response.getResponseCode());
+	}
 }

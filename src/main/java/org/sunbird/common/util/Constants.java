@@ -681,6 +681,8 @@ public class Constants {
 	public static final String BULK_USER_UPDATE_API_FAILED = "Bulk User Update API Failed";
 	public static final String SECURE_SETTINGS = "secureSettings";
 	public static final String API_USER_ENROLMENT = "user.enrolment";
+	public static final String USER_REGISTRATION_GROUP_LIST = "api.user.registration.group.list";
+
 	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}
