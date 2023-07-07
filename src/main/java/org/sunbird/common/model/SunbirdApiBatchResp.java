@@ -1,8 +1,12 @@
 package org.sunbird.common.model;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class SunbirdApiBatchResp {
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class SunbirdApiBatchResp implements Serializable {
 	private List<String> createdFor;
 	private String endDate;
 	private String name;
