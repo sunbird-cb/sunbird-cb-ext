@@ -1593,10 +1593,7 @@ public class ProfileServiceImpl implements ProfileService {
 	@Override
 	public SBApiResponse getGroupList() {
 		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.USER_REGISTRATION_GROUP_LIST);
-		List<String> groupList = serverConfig.getBulkUploadGroupValue()
-				.stream()
-				.map(String::trim)
-				.collect(Collectors.toList());
+		List<String> groupList = serverConfig.getBulkUploadGroupValue();
 		if (CollectionUtils.isNotEmpty(groupList)) {
 			response.getResult().put(Constants.COUNT, groupList.size());
 			response.getResult().put(Constants.RESPONSE, groupList);
