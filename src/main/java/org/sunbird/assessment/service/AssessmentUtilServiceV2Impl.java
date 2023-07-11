@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.sunbird.cache.RedisCacheMgr;
+import org.sunbird.cassandra.utils.CassandraOperation;
 import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
@@ -34,6 +35,9 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 
 	@Autowired
 	ObjectMapper mapper;
+
+	@Autowired
+	CassandraOperation cassandraOperation;
 
 	private Logger logger = LoggerFactory.getLogger(AssessmentUtilServiceV2Impl.class);
 
@@ -320,5 +324,22 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 			logger.error("error in getReadHierarchyApiResponse  " + e.getMessage());
 		}
 		return new HashMap<>();
+	}
+
+	public Map<String, Object> readAssessmentHierarchyFromDB(String assessmentIdentifier) {
+		Map<String, Object> propertyMap = new HashMap<String, Object>();
+		List<String> fields = Constants.ASSESSMENT_HIERARCHY_FIELDS;
+		return cassandraOperation.getRecordsByPropertiesWithoutFiltering(serverProperties.getAssessmentHierarchyNameSpace(),
+				serverProperties.getAssessmentHierarchyTable(), propertyMap, fields,
+				assessmentIdentifier);
+	}
+
+	public List<Map<String, Object>> readUserSubmittedAssessmentRecords(String userId, String assessmentId) {
+		Map<String, Object> propertyMap = new HashMap<String, Object>();
+		propertyMap.put(Constants.USER_ID, userId);
+		propertyMap.put(Constants.ASSESSMENT_ID_KEY, assessmentId);
+		return cassandraOperation.getRecordsByPropertiesWithoutFiltering(
+				serverProperties.getAssessmentHierarchyNameSpace(), serverProperties.getAssessmentUserSubmitDataTable(),
+				propertyMap, null);
 	}
 }

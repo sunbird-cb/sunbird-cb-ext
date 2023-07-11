@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.sunbird.assessment.dto.AssessmentSubmissionDTO;
 import org.sunbird.assessment.service.AssessmentService;
 import org.sunbird.assessment.service.AssessmentServiceV2;
+import org.sunbird.assessment.service.AssessmentServiceV4;
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.util.Constants;
 
@@ -27,6 +28,9 @@ public class AssessmentController {
 
 	@Autowired
 	AssessmentServiceV2 assessmentServiceV2;
+
+	@Autowired
+	AssessmentServiceV4 assessmentServiceV4;
 
 	/**
 	 * validates, submits and inserts assessments and quizzes into the db
@@ -155,4 +159,53 @@ public class AssessmentController {
 		SBApiResponse readResponse = assessmentServiceV2.retakeAssessment(assessmentIdentifier, token);
 		return new ResponseEntity<>(readResponse, readResponse.getResponseCode());
 	}
+
+	// =======================
+	// V4 Enhancements
+	// Async capability and not using Redis
+	// =======================
+	@PostMapping("/v4/user/assessment/submit")
+	public ResponseEntity<?> submitUserAssessmentV4(@Valid @RequestBody Map<String, Object> requestBody,
+			@RequestHeader("x-authenticated-user-token") String authUserToken) {
+		SBApiResponse submitResponse = assessmentServiceV4.submitAssessmentAsync(requestBody, authUserToken);
+		return new ResponseEntity<>(submitResponse, submitResponse.getResponseCode());
+	}
+
+	/**
+	 * 
+	 * @param assessmentIdentifier
+	 * @param rootOrg
+	 * @return
+	 * @throws Exception
+	 */
+
+	@GetMapping("/v4/quml/assessment/read/{assessmentIdentifier}")
+	public ResponseEntity<SBApiResponse> readAssessmentV4(
+			@PathVariable("assessmentIdentifier") String assessmentIdentifier,
+			@RequestHeader(Constants.X_AUTH_TOKEN) String token) {
+		SBApiResponse readResponse = assessmentServiceV4.readAssessment(assessmentIdentifier, token);
+		return new ResponseEntity<>(readResponse, readResponse.getResponseCode());
+	}
+
+	@PostMapping("/v4/quml/question/list")
+	public ResponseEntity<?> readQuestionListV4(@Valid @RequestBody Map<String, Object> requestBody,
+			@RequestHeader("x-authenticated-user-token") String authUserToken) {
+		SBApiResponse response = assessmentServiceV4.readQuestionList(requestBody, authUserToken);
+		return new ResponseEntity<>(response, response.getResponseCode());
+	}
+
+	@GetMapping("/v4/quml/assessment/retake/{assessmentIdentifier}")
+	public ResponseEntity<SBApiResponse> retakeAssessmentV4(
+			@PathVariable("assessmentIdentifier") String assessmentIdentifier,
+			@RequestHeader(Constants.X_AUTH_TOKEN) String token) {
+		SBApiResponse readResponse = assessmentServiceV4.retakeAssessment(assessmentIdentifier, token);
+		return new ResponseEntity<>(readResponse, readResponse.getResponseCode());
+	}
+
+	@PostMapping("/v4/quml/question/result")
+	public ResponseEntity<?> readAssessmentResultV4(@Valid @RequestBody Map<String, Object> requestBody,
+			@RequestHeader("x-authenticated-user-token") String authUserToken) {
+		SBApiResponse response = assessmentServiceV4.readAssessmentResultV4(requestBody, authUserToken);
+		return new ResponseEntity<>(response, response.getResponseCode());
+	}	
 }
