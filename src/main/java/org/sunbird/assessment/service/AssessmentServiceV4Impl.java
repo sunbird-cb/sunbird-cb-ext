@@ -430,11 +430,9 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
             }
 
             String latestResponse = (String) existingDataList.get(0).get(Constants.SUBMIT_ASSESSMENT_RESPONSE_KEY);
-            if (!latestResponse.isEmpty()) {
-                response.putAll(new Gson().fromJson(latestResponse,
-                        new TypeToken<HashMap<String, Object>>() {
-                        }.getType()));
-                response.getResult().put(Constants.RESULT, existingDataList.get(0));
+            if (StringUtils.isNotBlank(latestResponse)) {
+                response.putAll(mapper.readValue(latestResponse, new TypeReference<Map<String, Object>>() {
+                }));
             }
         } catch (Exception e) {
             String errMsg = String.format("Failed to process Assessment read response. Excption: %s", e.getMessage());
@@ -453,7 +451,7 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
                 return outgoingResponse;
             }
 
-            String errMsg;                          
+            String errMsg;
             List<Map<String, Object>> sectionListFromSubmitRequest = new ArrayList<>();
             List<Map<String, Object>> hierarchySectionList = new ArrayList<>();
             Map<String, Object> assessmentHierarchy = new HashMap<>();
@@ -659,7 +657,7 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
                                     assessUtilServ.validateQumlAssessment(questionsListFromAssessmentHierarchy,
                                             questionsListFromSubmitRequest)));
                             Map<String, Object> finalResult = calculateAssessmentFinalResults(result);
-                            finalResult.put(Constants.ASSESSMENT_SUBMIT_IN_PROGRESS, false);
+                            finalResult.put(Constants.STATUS_IS_IN_PROGRESS, false);
                             writeDataToDatabaseAndTriggerKafkaEvent(submitRequest, userId, questionSetFromAssessment,
                                     finalResult, (String) assessmentHierarchy.get(Constants.PRIMARY_CATEGORY));
                         }
@@ -679,7 +677,7 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
             if (errMsg.isEmpty() && !ObjectUtils.isEmpty(scoreCutOffType)
                     && scoreCutOffType.equalsIgnoreCase(Constants.SECTION_LEVEL_SCORE_CUTOFF)) {
                 Map<String, Object> result = calculateSectionFinalResults(sectionLevelsResults);
-                result.put(Constants.ASSESSMENT_SUBMIT_IN_PROGRESS, false);
+                result.put(Constants.STATUS_IS_IN_PROGRESS, false);
                 writeDataToDatabaseAndTriggerKafkaEvent(submitRequest, userId, questionSetFromAssessment, result,
                         (String) assessmentHierarchy.get(Constants.PRIMARY_CATEGORY));
             }
