@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+
+import org.apache.commons.collections.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -328,10 +330,15 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 
 	public Map<String, Object> readAssessmentHierarchyFromDB(String assessmentIdentifier) {
 		Map<String, Object> propertyMap = new HashMap<String, Object>();
+		propertyMap.put(Constants.IDENTIFIER, assessmentIdentifier);
 		List<String> fields = Constants.ASSESSMENT_HIERARCHY_FIELDS;
-		return cassandraOperation.getRecordsByPropertiesWithoutFiltering(serverProperties.getAssessmentHierarchyNameSpace(),
-				serverProperties.getAssessmentHierarchyTable(), propertyMap, fields,
-				assessmentIdentifier);
+		List<Map<String, Object>> hierarchyList = cassandraOperation.getRecordsByPropertiesWithoutFiltering(
+				serverProperties.getAssessmentHierarchyNameSpace(),
+				serverProperties.getAssessmentHierarchyTable(), propertyMap, fields);
+		if (!CollectionUtils.isEmpty(hierarchyList)) {
+			return hierarchyList.get(0);
+		}
+		return MapUtils.EMPTY_MAP;
 	}
 
 	public List<Map<String, Object>> readUserSubmittedAssessmentRecords(String userId, String assessmentId) {

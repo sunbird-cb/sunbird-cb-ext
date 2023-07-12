@@ -76,8 +76,7 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
                 return response;
             }
 
-            Map<String, Object> assessmentAllDetail = assessUtilServ
-                    .readAssessmentHierarchyFromDB(assessmentIdentifier);
+            Map<String, Object> assessmentAllDetail = assessUtilServ.readAssessmentHierarchyFromDB(assessmentIdentifier);
             if (MapUtils.isEmpty(assessmentAllDetail)) {
                 updateErrorDetails(response, Constants.ASSESSMENT_HIERARCHY_READ_FAILED,
                         HttpStatus.INTERNAL_SERVER_ERROR);
