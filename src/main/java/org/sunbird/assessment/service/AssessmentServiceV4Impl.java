@@ -444,6 +444,7 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
     }
 
     public SBApiResponse submitAssessmentAsync(Map<String, Object> submitRequest, String userAuthToken) {
+        logger.info("AssessmentServiceV4Impl::submitAssessmentAsync.. started");
         SBApiResponse outgoingResponse = ProjectUtil.createDefaultResponse(Constants.API_SUBMIT_ASSESSMENT);
         try {
             String userId = RequestInterceptor.fetchUserIdFromAccessToken(userAuthToken);
@@ -452,7 +453,7 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
                 return outgoingResponse;
             }
 
-            String errMsg;
+            String errMsg;                          
             List<Map<String, Object>> sectionListFromSubmitRequest = new ArrayList<>();
             List<Map<String, Object>> hierarchySectionList = new ArrayList<>();
             Map<String, Object> assessmentHierarchy = new HashMap<>();
@@ -465,6 +466,7 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
             }
 
             Map<String, Object> existingAssessmentData = existingDataList.get(0);
+            logger.info("Existing assessmentData keySet -> " + existingAssessmentData.keySet().toString());
 
             errMsg = validateSubmitAssessmentRequest(submitRequest, userId, hierarchySectionList,
                     sectionListFromSubmitRequest, assessmentHierarchy, existingAssessmentData);
