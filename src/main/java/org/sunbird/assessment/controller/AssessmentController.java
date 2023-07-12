@@ -202,7 +202,7 @@ public class AssessmentController {
 		return new ResponseEntity<>(readResponse, readResponse.getResponseCode());
 	}
 
-	@PostMapping("/v4/quml/question/result")
+	@PostMapping("/v4/quml/assessment/result")
 	public ResponseEntity<?> readAssessmentResultV4(@Valid @RequestBody Map<String, Object> requestBody,
 			@RequestHeader("x-authenticated-user-token") String authUserToken) {
 		SBApiResponse response = assessmentServiceV4.readAssessmentResultV4(requestBody, authUserToken);
