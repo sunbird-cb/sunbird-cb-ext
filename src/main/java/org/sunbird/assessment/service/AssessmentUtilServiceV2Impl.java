@@ -9,6 +9,7 @@ import java.util.Map;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 import org.apache.commons.collections.MapUtils;
+import org.codehaus.plexus.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,8 @@ import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 @Service
 public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
@@ -331,12 +334,20 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 	public Map<String, Object> readAssessmentHierarchyFromDB(String assessmentIdentifier) {
 		Map<String, Object> propertyMap = new HashMap<String, Object>();
 		propertyMap.put(Constants.IDENTIFIER, assessmentIdentifier);
-		List<String> fields = Constants.ASSESSMENT_HIERARCHY_FIELDS;
 		List<Map<String, Object>> hierarchyList = cassandraOperation.getRecordsByPropertiesWithoutFiltering(
 				serverProperties.getAssessmentHierarchyNameSpace(),
-				serverProperties.getAssessmentHierarchyTable(), propertyMap, fields);
+				serverProperties.getAssessmentHierarchyTable(), propertyMap, null);
 		if (!CollectionUtils.isEmpty(hierarchyList)) {
-			return hierarchyList.get(0);
+			Map<String, Object> assessmentEntry = hierarchyList.get(0);
+			String hierarchyStr = (String) assessmentEntry.get(Constants.HIERARCHY);
+			if (StringUtils.isNotBlank(hierarchyStr)) {
+				try {
+					return mapper.readValue(hierarchyStr, new TypeReference<Map<String, Object>>() {
+					});
+				} catch (Exception e) {
+					logger.error("Failed to read hierarchy data. Exception: ", e);
+				}
+			}
 		}
 		return MapUtils.EMPTY_MAP;
 	}
@@ -346,7 +357,7 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 		propertyMap.put(Constants.USER_ID, userId);
 		propertyMap.put(Constants.ASSESSMENT_ID_KEY, assessmentId);
 		return cassandraOperation.getRecordsByPropertiesWithoutFiltering(
-				serverProperties.getAssessmentHierarchyNameSpace(), serverProperties.getAssessmentUserSubmitDataTable(),
+				Constants.SUNBIRD_KEY_SPACE_NAME, serverProperties.getAssessmentUserSubmitDataTable(),
 				propertyMap, null);
 	}
 }

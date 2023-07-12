@@ -96,6 +96,7 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
             response.getResult().put(Constants.TOTAL_RETAKE_ATTEMPTS_ALLOWED, retakeAttemptsAllowed);
             response.getResult().put(Constants.RETAKE_ATTEMPTS_CONSUMED, retakeAttemptsConsumed);
         }
+        logger.info("AssessmentServiceV2Impl::retakeAssessment... Completed");
         return response;
     }
 
@@ -772,7 +773,7 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
                 return result;
             }
         }
-        if (MapUtils.isEmpty(userAssessmentAllDetail)) {
+        if (!MapUtils.isEmpty(userAssessmentAllDetail)) {
             result.put(Constants.PRIMARY_CATEGORY, (String) userAssessmentAllDetail.get(Constants.PRIMARY_CATEGORY));
             List<String> questionsFromAssessment = new ArrayList<>();
             List<Map<String, Object>> sections = (List<Map<String, Object>>) userAssessmentAllDetail
