@@ -429,7 +429,7 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
                 return response;
             }
 
-            String latestResponse = (String) existingDataList.get(0).get(Constants.SUBMIT_ASSESSMENT_RESPONSE);
+            String latestResponse = (String) existingDataList.get(0).get(Constants.SUBMIT_ASSESSMENT_RESPONSE_KEY);
             if (!latestResponse.isEmpty()) {
                 response.putAll(new Gson().fromJson(latestResponse,
                         new TypeToken<HashMap<String, Object>>() {
