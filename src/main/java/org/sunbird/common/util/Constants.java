@@ -686,6 +686,8 @@ public class Constants {
 	public static final String API_READ_ASSESSMENT_RESULT = "api.assessment.read.result";
 	public static final String STATUS_IS_IN_PROGRESS = "isInProgress";
 	public static final String ASSESSMENT_SUBMIT_IN_PROGRESS = "SUBMIT_IN_PROGRESS";
+	public static final String ASSESSMENT_READ_RESPONSE_KEY = "assessmentReadResponse";
+	public static final String START_TIME_KEY = "startTime";
 
 	private Constants() {
 		throw new IllegalStateException("Utility class");

@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections4.MapUtils;
+import org.codehaus.plexus.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.sunbird.assessment.dto.AssessmentSubmissionDTO;
@@ -167,13 +169,13 @@ public class AssessmentRepositoryImpl implements AssessmentRepository {
 		compositeKeys.put(Constants.ASSESSMENT_ID_KEY, assessmentIdentifier);
 		compositeKeys.put(Constants.START_TIME, startTime);
 		Map<String, Object> fieldsToBeUpdated = new HashMap<>();
-		if (!submitAssessmentRequest.isEmpty()) {
+		if (MapUtils.isNotEmpty(submitAssessmentRequest)) {
 			fieldsToBeUpdated.put("submitassessmentrequest", new Gson().toJson(submitAssessmentRequest));
 		}
-		if (!submitAssessmentResponse.isEmpty()) {
+		if (MapUtils.isNotEmpty(submitAssessmentResponse)) {
 			fieldsToBeUpdated.put("submitassessmentresponse", new Gson().toJson(submitAssessmentResponse));
 		}
-		if (!status.isEmpty()) {
+		if (StringUtils.isNotBlank(status)) {
 			fieldsToBeUpdated.put(Constants.STATUS, status);
 		}
 		cassandraOperation.updateRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_USER_ASSESSMENT_DATA,
