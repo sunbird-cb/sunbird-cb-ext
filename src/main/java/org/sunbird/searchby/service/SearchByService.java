@@ -179,6 +179,7 @@ public class SearchByService {
 			System.out.println("CompetencyObject::" + compSearchObj);
 		}
 		reqBody.put(Constants.SEARCHES, searchList);
+		System.out.println("SearchList Size" + searchList.size());
 		reqBody.put(Constants.CHILD_COUNT, false);
 		reqBody.put(Constants.CHILD_NODES, false);
 
