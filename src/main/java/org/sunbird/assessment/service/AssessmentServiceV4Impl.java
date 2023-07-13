@@ -329,9 +329,9 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
                 updateErrorDetails(outgoingResponse, errMsg, HttpStatus.BAD_REQUEST);
                 return outgoingResponse;
             }
+            String assessmentPrimaryCategory = (String) assessmentHierarchy.get(Constants.PRIMARY_CATEGORY);
 
-            if (Constants.PRACTICE_QUESTION_SET
-                    .equalsIgnoreCase((String) (assessmentHierarchy.get(Constants.PRIMARY_CATEGORY)))) {
+            if (Constants.PRACTICE_QUESTION_SET.equalsIgnoreCase(assessmentPrimaryCategory)) {
                 String scoreCutOffType = ((String) assessmentHierarchy.get(Constants.SCORE_CUTOFF_TYPE)).toLowerCase();
                 List<Map<String, Object>> sectionLevelsResults = new ArrayList<>();
                 for (Map<String, Object> hierarchySection : hierarchySectionList) {
@@ -365,6 +365,7 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
                                     assessUtilServ.validateQumlAssessment(questionsListFromAssessmentHierarchy,
                                             questionsListFromSubmitRequest)));
                             outgoingResponse.getResult().putAll(calculateAssessmentFinalResults(result));
+                            outgoingResponse.getResult().put(Constants.PRIMARY_CATEGORY, assessmentPrimaryCategory);
                             return outgoingResponse;
                         }
                         case Constants.SECTION_LEVEL_SCORE_CUTOFF: {
@@ -383,6 +384,7 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
                     outgoingResponse.getResult().putAll(result);
                     outgoingResponse.getParams().setStatus(Constants.SUCCESS);
                     outgoingResponse.setResponseCode(HttpStatus.OK);
+                    outgoingResponse.getResult().put(Constants.PRIMARY_CATEGORY, assessmentPrimaryCategory);
                     return outgoingResponse;
                 }
             } else {
@@ -410,6 +412,7 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
                     kafkaProducer.push(serverProperties.getAssessmentAsyncSubmitHandlerTopic(), asyncRequest);
                     outgoingResponse.getParams().setStatus(Constants.SUCCESS);
                     outgoingResponse.setResponseCode(HttpStatus.OK);
+                    outgoingResponse.getResult().put(Constants.PRIMARY_CATEGORY, assessmentPrimaryCategory);
                 }
             }
         } catch (Exception e) {
