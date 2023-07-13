@@ -311,16 +311,7 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
             List<Map<String, Object>> sectionListFromSubmitRequest = new ArrayList<>();
             List<Map<String, Object>> hierarchySectionList = new ArrayList<>();
             Map<String, Object> assessmentHierarchy = new HashMap<>();
-            List<Map<String, Object>> existingDataList = assessUtilServ.readUserSubmittedAssessmentRecords(
-                    userId, (String) submitRequest.get(Constants.IDENTIFIER));
-            if (existingDataList.isEmpty()) {
-                updateErrorDetails(outgoingResponse, Constants.USER_ASSESSMENT_DATA_NOT_PRESENT,
-                        HttpStatus.BAD_REQUEST);
-                return outgoingResponse;
-            }
-
-            Map<String, Object> existingAssessmentData = existingDataList.get(0);
-            logger.info("Existing assessmentData keySet -> " + existingAssessmentData.keySet().toString());
+            Map<String, Object> existingAssessmentData = new HashMap<>();
 
             errMsg = validateSubmitAssessmentRequest(submitRequest, userId, hierarchySectionList,
                     sectionListFromSubmitRequest, assessmentHierarchy, existingAssessmentData);
@@ -639,24 +630,30 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
             result.put(Constants.ERROR_MESSAGE, Constants.ASSESSMENT_HIERARCHY_READ_FAILED);
             return result;
         }
+        String primaryCategory = (String) assessmentAllDetail.get(Constants.PRIMARY_CATEGORY);
+        if (Constants.PRACTICE_QUESTION_SET
+                .equalsIgnoreCase(primaryCategory)) {
+            result.put(Constants.PRIMARY_CATEGORY, primaryCategory);
+            result.put(Constants.ERROR_MESSAGE, StringUtils.EMPTY);
+            return result;
+        }
 
         Map<String, Object> userAssessmentAllDetail = new HashMap<String, Object>();
-        if (!((String) assessmentAllDetail.get(Constants.PRIMARY_CATEGORY))
-                .equalsIgnoreCase(Constants.PRACTICE_QUESTION_SET)) {
-            List<Map<String, Object>> existingDataList = assessUtilServ.readUserSubmittedAssessmentRecords(
-                    userId, assessmentIdFromRequest);
-            String questionSetFromAssessmentString = (!existingDataList.isEmpty())
-                    ? (String) existingDataList.get(0).get(Constants.ASSESSMENT_READ_RESPONSE_KEY)
-                    : "";
-            if (StringUtils.isNotBlank(questionSetFromAssessmentString)) {
-                userAssessmentAllDetail.putAll(mapper.readValue(questionSetFromAssessmentString,
+
+        List<Map<String, Object>> existingDataList = assessUtilServ.readUserSubmittedAssessmentRecords(
+                userId, assessmentIdFromRequest);
+        String questionSetFromAssessmentString = (!existingDataList.isEmpty())
+                ? (String) existingDataList.get(0).get(Constants.ASSESSMENT_READ_RESPONSE_KEY)
+                : "";
+        if (StringUtils.isNotBlank(questionSetFromAssessmentString)) {
+            userAssessmentAllDetail.putAll(mapper.readValue(questionSetFromAssessmentString,
                     new TypeReference<Map<String, Object>>() {
                     }));
-            } else {
-                result.put(Constants.ERROR_MESSAGE, Constants.USER_ASSESSMENT_DATA_NOT_PRESENT);
-                return result;
-            }
+        } else {
+            result.put(Constants.ERROR_MESSAGE, Constants.USER_ASSESSMENT_DATA_NOT_PRESENT);
+            return result;
         }
+
         if (!MapUtils.isEmpty(userAssessmentAllDetail)) {
             result.put(Constants.PRIMARY_CATEGORY, (String) userAssessmentAllDetail.get(Constants.PRIMARY_CATEGORY));
             List<String> questionsFromAssessment = new ArrayList<>();
@@ -720,6 +717,14 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
         if (((String) (assessmentHierarchy.get(Constants.PRIMARY_CATEGORY)))
                 .equalsIgnoreCase(Constants.PRACTICE_QUESTION_SET))
             return "";
+
+        List<Map<String, Object>> existingDataList = assessUtilServ.readUserSubmittedAssessmentRecords(
+                userId, (String) submitRequest.get(Constants.IDENTIFIER));
+        if (existingDataList.isEmpty()) {
+            return Constants.USER_ASSESSMENT_DATA_NOT_PRESENT;
+        } else {
+            existingAssessmentData.putAll(existingDataList.get(0));
+        }
 
         if (Constants.SUBMITTED.equalsIgnoreCase((String) existingAssessmentData.get(Constants.STATUS))) {
             return Constants.ASSESSMENT_ALREADY_SUBMITTED;
