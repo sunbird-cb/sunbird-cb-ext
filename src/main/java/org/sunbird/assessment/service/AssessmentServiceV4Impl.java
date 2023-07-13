@@ -726,9 +726,9 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
             existingAssessmentData.putAll(existingDataList.get(0));
         }
 
-        if (Constants.SUBMITTED.equalsIgnoreCase((String) existingAssessmentData.get(Constants.STATUS))) {
-            return Constants.ASSESSMENT_ALREADY_SUBMITTED;
-        }
+        //if (Constants.SUBMITTED.equalsIgnoreCase((String) existingAssessmentData.get(Constants.STATUS))) {
+        //    return Constants.ASSESSMENT_ALREADY_SUBMITTED;
+        //}
 
         Date assessmentStartTime = (Date) existingAssessmentData.get(Constants.START_TIME);
         if (assessmentStartTime == null) {
