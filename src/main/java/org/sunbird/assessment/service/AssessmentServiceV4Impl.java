@@ -710,7 +710,7 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
             return Constants.INVALID_ASSESSMENT_ID;
         }
         String assessmentIdFromRequest = (String) submitRequest.get(Constants.IDENTIFIER);
-        assessmentHierarchy = assessUtilServ.readAssessmentHierarchyFromDB(assessmentIdFromRequest);
+        assessmentHierarchy.putAll(assessUtilServ.readAssessmentHierarchyFromDB(assessmentIdFromRequest));
         if (MapUtils.isEmpty(assessmentHierarchy)) {
             return Constants.READ_ASSESSMENT_FAILED;
         }
