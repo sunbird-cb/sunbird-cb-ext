@@ -32,7 +32,6 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.web.client.RestTemplate;
 import org.sunbird.cache.RedisCacheMgr;
 import org.sunbird.common.model.SBApiResponse;
-import org.sunbird.common.model.SunbirdApiRequest;
 import org.sunbird.common.model.SunbirdApiResp;
 import org.sunbird.common.model.SunbirdApiRespContent;
 import org.sunbird.common.model.SunbirdApiRespParam;
@@ -42,7 +41,6 @@ import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.common.util.IndexerService;
 import org.sunbird.common.util.ProjectUtil;
-import org.sunbird.core.exception.ApplicationLogicError;
 import org.sunbird.core.producer.Producer;
 import org.sunbird.org.service.ExtendedOrgService;
 import org.sunbird.portal.department.model.DeptPublicInfo;
@@ -175,10 +173,12 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 
 		try {
 			String strDeptListMap = redisCacheMgr.getCache(Constants.DEPARTMENT_LIST_CACHE_NAME);
-
-			Map<String, List<DeptPublicInfo>> deptListMap = mapper.readValue(strDeptListMap,
-					new TypeReference<Map<String, List<DeptPublicInfo>>>() {
-					});
+			Map<String, List<DeptPublicInfo>> deptListMap = new HashMap<>();
+			if (StringUtils.isNotBlank(strDeptListMap)) {
+				deptListMap = mapper.readValue(strDeptListMap,
+						new TypeReference<Map<String, List<DeptPublicInfo>>>() {
+						});
+			}
 			List<DeptPublicInfo> orgList = null;
 			if (ObjectUtils.isEmpty(deptListMap)
 					|| CollectionUtils.isEmpty(deptListMap.get(Constants.DEPARTMENT_LIST_CACHE_NAME))) {
