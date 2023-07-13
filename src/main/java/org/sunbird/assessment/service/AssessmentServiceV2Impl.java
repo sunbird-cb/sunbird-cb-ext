@@ -207,7 +207,6 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
     private String fetchReadHierarchyDetails(Map<String, Object> assessmentAllDetail, String token, String assessmentIdentifier) throws IOException {
         try {
             String assessmentData = redisCacheMgr.getCache(Constants.ASSESSMENT_ID + assessmentIdentifier);
-            logger.info("Reading assessmentData from redis" + assessmentData);
             if (!ObjectUtils.isEmpty(assessmentData)) {
                 assessmentAllDetail.putAll(mapper.readValue(assessmentData, new TypeReference<Map<String, Object>>() {
                 }));

@@ -594,8 +594,8 @@ public class Constants {
 
 
 	public static final String USER_ID_DOESNT_EXIST = "User Id doesn't exist! Please supply a valid auth token";
-	public static final String ASSESSMENT_DATA_START_TIME_NOT_UPDATED = "Assessment Data & Start Time not updated in the DB! Please check!";
-	public static final String FAILED_TO_GET_QUESTION_DETAILS = "Failed to get Question List data from the Question List Api! Please check!";
+	public static final String ASSESSMENT_DATA_START_TIME_NOT_UPDATED = "Assessment Data & Start Time not updated in the DB.";
+	public static final String FAILED_TO_GET_QUESTION_DETAILS = "Failed to get Question List data from the Question List Api.";
 
 	public static final String ASSESSMENT_HIERARCHY_READ_FAILED = "Assessment hierarchy read failed, failed to process request";
 	public static final String ASSESSMENT_ID_KEY_IS_NOT_PRESENT_IS_EMPTY = "Assessment Id Key is not present/is empty";
@@ -681,6 +681,14 @@ public class Constants {
 	public static final String BULK_USER_UPDATE_API_FAILED = "Bulk User Update API Failed";
 	public static final String SECURE_SETTINGS = "secureSettings";
 	public static final String API_USER_ENROLMENT = "user.enrolment";
+	public static final String SUBMIT_ASSESSMENT_RESPONSE_KEY = "submitAssessmentResponse";
+	public static final String API_READ_ASSESSMENT = "api.assessment.read";
+	public static final String API_READ_ASSESSMENT_RESULT = "api.assessment.read.result";
+	public static final String STATUS_IS_IN_PROGRESS = "isInProgress";
+	public static final String ASSESSMENT_SUBMIT_IN_PROGRESS = "SUBMIT_IN_PROGRESS";
+	public static final String ASSESSMENT_READ_RESPONSE_KEY = "assessmentReadResponse";
+	public static final String START_TIME_KEY = "startTime";
+
 	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}

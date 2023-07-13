@@ -452,6 +452,18 @@ public class CbExtServerProperties {
 	@Value("${content.search.primary.category.filter}")
 	private String contentSearchPrimaryCategoryFilter;
 
+	@Value("${assessment.hierarchy.namespace}")
+	private String assessmentHierarchyNameSpace;
+
+	@Value("${assessment.hierarchy.table}")
+	private String assessmentHierarchyTable;
+
+	@Value("${assessment.user.submit.data.table}")
+	private String assessmentUserSubmitDataTable;
+
+	@Value("${kafka.topics.user.assessment.async.submit.handler}")
+	private String assessmentAsyncSubmitHandlerTopic;
+
 	public String getAssessmentSubmitTopic() {
 		return assessmentSubmitTopic;
 	}
@@ -1650,4 +1662,36 @@ public class CbExtServerProperties {
 	public void setContentSearchPrimaryCategoryFilter(String contentSearchPrimaryCategoryFilter) {
 		this.contentSearchPrimaryCategoryFilter = contentSearchPrimaryCategoryFilter;
 	}
+
+	public String getAssessmentHierarchyNameSpace() {
+		return assessmentHierarchyNameSpace;
+	}
+
+	public void setAssessmentHierarchyNameSpace(String assessmentHierarchyNameSpace) {
+		this.assessmentHierarchyNameSpace = assessmentHierarchyNameSpace;
+	}
+
+	public String getAssessmentHierarchyTable() {
+		return assessmentHierarchyTable;
+	}
+
+	public void setAssessmentHierarchyTable(String assessmentHierarchyTable) {
+		this.assessmentHierarchyTable = assessmentHierarchyTable;
+	}
+
+	public String getAssessmentUserSubmitDataTable() {
+		return assessmentUserSubmitDataTable;
+	}
+
+	public void setAssessmentUserSubmitDataTable(String assessmentUserSubmitDataTable) {
+		this.assessmentUserSubmitDataTable = assessmentUserSubmitDataTable;
+	}
+
+	public String getAssessmentAsyncSubmitHandlerTopic() {
+		return assessmentAsyncSubmitHandlerTopic;
+	}
+
+	public void setAssessmentAsyncSubmitHandlerTopic(String assessmentAsyncSubmitHandlerTopic) {
+		this.assessmentAsyncSubmitHandlerTopic = assessmentAsyncSubmitHandlerTopic;
+	}	
 }
