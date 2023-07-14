@@ -176,13 +176,17 @@ public class SearchByService {
 			compSearchObj.put(Constants.FIELD, Constants.NAME);
 			compSearchObj.put(Constants.KEYWORD, compName);
 			searchList.add(compSearchObj);
+			System.out.println("CompetencyObject::" + compSearchObj);
 		}
 		reqBody.put(Constants.SEARCHES, searchList);
+		System.out.println("SearchList Size" + searchList.size());
 		reqBody.put(Constants.CHILD_COUNT, false);
 		reqBody.put(Constants.CHILD_NODES, false);
 
 		Map<String, Object> fracSearchRes = outboundRequestHandlerService.fetchResultUsingPost(
 				cbExtServerProperties.getFracHost() + cbExtServerProperties.getFracSearchPath(), reqBody, headers);
+		System.out.println("Executed the searchnodes API::");
+		
 		List<Map<String, Object>> fracResponseList = (List<Map<String, Object>>) fracSearchRes
 				.get(Constants.RESPONSE_DATA);
 

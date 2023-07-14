@@ -6,18 +6,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.core.type.TypeReference;
+import org.apache.commons.collections.MapUtils;
+import org.codehaus.plexus.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
-import org.sunbird.cache.RedisCacheMgr;
+import org.sunbird.cassandra.utils.CassandraOperation;
 import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
@@ -30,15 +32,15 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 	OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
 
 	@Autowired
-	RedisCacheMgr redisCacheMgr;
+	ObjectMapper mapper;
 
 	@Autowired
-	ObjectMapper mapper;
+	CassandraOperation cassandraOperation;
 
 	private Logger logger = LoggerFactory.getLogger(AssessmentUtilServiceV2Impl.class);
 
 	public Map<String, Object> validateQumlAssessment(List<String> originalQuestionList,
-													  List<Map<String, Object>> userQuestionList) {
+			List<Map<String, Object>> userQuestionList) {
 		try {
 			Integer correct = 0;
 			Integer blank = 0;
@@ -117,19 +119,8 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 
 		for (String questionId : questions) {
 			List<String> correctOption = new ArrayList<>();
-			Map<String, Object> question = new HashMap<>();
-			String questionString = redisCacheMgr
-					.getCache(Constants.QUESTION_ID + questionId);
-			if (!ObjectUtils.isEmpty(question)) {
-				question = mapper.readValue(questionString, new TypeReference<Map<String, Object>>() {
-				});
-			}
-			else
-			{
-				logger.error("Failed to get the answer for question from redis cache: " + questionId);
-				questionMap = fetchQuestionMapDetails(questionId);
-				question = questionMap.get(questionId);
-			}
+			questionMap = fetchQuestionMapDetails(questionId);
+			Map<String, Object> question = questionMap.get(questionId);
 			if (question.containsKey(Constants.QUESTION_TYPE)) {
 				String questionType = ((String) question.get(Constants.QUESTION_TYPE)).toLowerCase();
 				Map<String, Object> editorStateObj = (Map<String, Object>) question.get(Constants.EDITOR_STATE);
@@ -187,7 +178,6 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 				for (Map<String, Object> question : questionMap) {
 					if (!ObjectUtils.isEmpty(questionMap)) {
 						questionsMap.put((String) question.get(Constants.IDENTIFIER), question);
-						redisCacheMgr.putCache(Constants.QUESTION_ID, question);
 					}
 				}
 			}
@@ -196,7 +186,8 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 	}
 
 	@Override
-	public String fetchQuestionIdentifierValue(List<String> identifierList, List<Object> questionList, String primaryCategory)
+	public String fetchQuestionIdentifierValue(List<String> identifierList, List<Object> questionList,
+			String primaryCategory)
 			throws Exception {
 		List<String> newIdentifierList = new ArrayList<>();
 		newIdentifierList.addAll(identifierList);
@@ -231,7 +222,8 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 	}
 
 	@Override
-	public Map<String, Object> filterQuestionMapDetail(Map<String, Object> questionMapResponse, String primaryCategory) {
+	public Map<String, Object> filterQuestionMapDetail(Map<String, Object> questionMapResponse,
+			String primaryCategory) {
 		List<String> questionParams = serverProperties.getAssessmentQuestionParams();
 		Map<String, Object> updatedQuestionMap = new HashMap<>();
 		for (String questionParam : questionParams) {
@@ -246,7 +238,7 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 		}
 		if (questionMapResponse.containsKey(Constants.CHOICES)
 				&& updatedQuestionMap.containsKey(Constants.PRIMARY_CATEGORY) && !updatedQuestionMap
-				.get(Constants.PRIMARY_CATEGORY).toString().equalsIgnoreCase(Constants.FTB_QUESTION)) {
+						.get(Constants.PRIMARY_CATEGORY).toString().equalsIgnoreCase(Constants.FTB_QUESTION)) {
 			Map<String, Object> choicesObj = (Map<String, Object>) questionMapResponse.get(Constants.CHOICES);
 			Map<String, Object> updatedChoicesMap = new HashMap<>();
 			if (choicesObj.containsKey(Constants.OPTIONS)) {
@@ -258,7 +250,7 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 		}
 		if (questionMapResponse.containsKey(Constants.RHS_CHOICES)
 				&& updatedQuestionMap.containsKey(Constants.PRIMARY_CATEGORY) && updatedQuestionMap
-				.get(Constants.PRIMARY_CATEGORY).toString().equalsIgnoreCase(Constants.MTF_QUESTION)) {
+						.get(Constants.PRIMARY_CATEGORY).toString().equalsIgnoreCase(Constants.MTF_QUESTION)) {
 			List<Object> rhsChoicesObj = (List<Object>) questionMapResponse.get(Constants.RHS_CHOICES);
 			Collections.shuffle(rhsChoicesObj);
 			updatedQuestionMap.put(Constants.RHS_CHOICES, rhsChoicesObj);
@@ -311,14 +303,42 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 			Map<String, String> headers = new HashMap<>();
 			headers.put(Constants.X_AUTH_TOKEN, token);
 			headers.put(Constants.AUTHORIZATION, serverProperties.getSbApiKey());
-			logger.info(serviceURL);
 			Object o = outboundRequestHandlerService.fetchUsingGetWithHeaders(serviceURL, headers);
 			Map<String, Object> data = new ObjectMapper().convertValue(o, Map.class);
-			logger.info(data.toString());
 			return data;
 		} catch (Exception e) {
 			logger.error("error in getReadHierarchyApiResponse  " + e.getMessage());
 		}
 		return new HashMap<>();
+	}
+
+	public Map<String, Object> readAssessmentHierarchyFromDB(String assessmentIdentifier) {
+		Map<String, Object> propertyMap = new HashMap<String, Object>();
+		propertyMap.put(Constants.IDENTIFIER, assessmentIdentifier);
+		List<Map<String, Object>> hierarchyList = cassandraOperation.getRecordsByPropertiesWithoutFiltering(
+				serverProperties.getAssessmentHierarchyNameSpace(),
+				serverProperties.getAssessmentHierarchyTable(), propertyMap, null);
+		if (!CollectionUtils.isEmpty(hierarchyList)) {
+			Map<String, Object> assessmentEntry = hierarchyList.get(0);
+			String hierarchyStr = (String) assessmentEntry.get(Constants.HIERARCHY);
+			if (StringUtils.isNotBlank(hierarchyStr)) {
+				try {
+					return mapper.readValue(hierarchyStr, new TypeReference<Map<String, Object>>() {
+					});
+				} catch (Exception e) {
+					logger.error("Failed to read hierarchy data. Exception: ", e);
+				}
+			}
+		}
+		return MapUtils.EMPTY_MAP;
+	}
+
+	public List<Map<String, Object>> readUserSubmittedAssessmentRecords(String userId, String assessmentId) {
+		Map<String, Object> propertyMap = new HashMap<String, Object>();
+		propertyMap.put(Constants.USER_ID, userId);
+		propertyMap.put(Constants.ASSESSMENT_ID_KEY, assessmentId);
+		return cassandraOperation.getRecordsByPropertiesWithoutFiltering(
+				Constants.SUNBIRD_KEY_SPACE_NAME, serverProperties.getAssessmentUserSubmitDataTable(),
+				propertyMap, null);
 	}
 }

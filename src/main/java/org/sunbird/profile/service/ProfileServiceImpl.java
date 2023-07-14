@@ -728,28 +728,21 @@ public class ProfileServiceImpl implements ProfileService {
 	}
 
 	public List<String> approvalFields() {
-		Map<String, Object> approvalFieldsCache = (Map<String, Object>) mapper
-				.convertValue(redisCacheMgr.getCache(Constants.PROFILE_UPDATE_FIELDS), Map.class);
-
-		if (!ObjectUtils.isEmpty(approvalFieldsCache)) {
-			Map<String, Object> approvalResult = (Map<String, Object>) approvalFieldsCache.get(Constants.RESULT);
-			Map<String, Object> approvalResponse = (Map<String, Object>) approvalResult.get(Constants.RESPONSE);
-			String value = (String) approvalResponse.get(Constants.VALUE);
-			List<String> approvalValues = new ArrayList<>();
-			approvalValues.add(value);
-			return approvalValues;
-		} else {
-			Map<String, String> header = new HashMap<>();
-			Map<String, Object> approvalData = (Map<String, Object>) outboundRequestHandlerService
-					.fetchUsingGetWithHeadersProfile(serverConfig.getSbUrl() + serverConfig.getLmsSystemSettingsPath(),
-							header);
+		Map<String, String> header = new HashMap<>();
+		Map<String, Object> approvalData = (Map<String, Object>) outboundRequestHandlerService
+				.fetchUsingGetWithHeadersProfile(serverConfig.getSbUrl() + serverConfig.getLmsSystemSettingsPath(),
+						header);
+		if (approvalData != null) {
 			Map<String, Object> approvalResult = (Map<String, Object>) approvalData.get(Constants.RESULT);
 			Map<String, Object> approvalResponse = (Map<String, Object>) approvalResult.get(Constants.RESPONSE);
 			String value = (String) approvalResponse.get(Constants.VALUE);
-			String strArray[] = value.split(" ");
-			List<String> approvalValues = Arrays.asList(strArray);
-			return approvalValues;
+			if (StringUtils.isNotBlank(value)) {
+				String strArray[] = value.split(" ");
+				List<String> approvalValues = Arrays.asList(strArray);
+				return approvalValues;
+			}
 		}
+		return new ArrayList<>();
 	}
 
 	public String getVerifiedProfileSchema() {
