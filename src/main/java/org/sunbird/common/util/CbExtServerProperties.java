@@ -1,12 +1,12 @@
 package org.sunbird.common.util;
 
-import org.codehaus.plexus.util.StringUtils;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
+import org.codehaus.plexus.util.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 @Component
 public class CbExtServerProperties {
@@ -463,6 +463,9 @@ public class CbExtServerProperties {
 
 	@Value("${kafka.topics.user.assessment.async.submit.handler}")
 	private String assessmentAsyncSubmitHandlerTopic;
+
+	@Value("${assessment.ratake.count.verification.enabled}")
+	private boolean assessmentRetakeCountVerificationEnabled;
 
 	public String getAssessmentSubmitTopic() {
 		return assessmentSubmitTopic;
@@ -1693,5 +1696,13 @@ public class CbExtServerProperties {
 
 	public void setAssessmentAsyncSubmitHandlerTopic(String assessmentAsyncSubmitHandlerTopic) {
 		this.assessmentAsyncSubmitHandlerTopic = assessmentAsyncSubmitHandlerTopic;
-	}	
+	}
+
+	public boolean isAssessmentRetakeCountVerificationEnabled() {
+		return assessmentRetakeCountVerificationEnabled;
+	}
+
+	public void setAssessmentRetakeCountVerificationEnabled(boolean assessmentRetakeCountVerificationEnabled) {
+		this.assessmentRetakeCountVerificationEnabled = assessmentRetakeCountVerificationEnabled;
+	}
 }
