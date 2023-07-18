@@ -87,7 +87,10 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
             if (assessmentAllDetail.get(Constants.MAX_ASSESSMENT_RETAKE_ATTEMPTS) != null) {
                 retakeAttemptsAllowed = (int) assessmentAllDetail.get(Constants.MAX_ASSESSMENT_RETAKE_ATTEMPTS);
             }
-            retakeAttemptsConsumed = calculateAssessmentRetakeCount(userId, assessmentIdentifier);
+            
+            if (serverProperties.isAssessmentRetakeCountVerificationEnabled()) {
+                retakeAttemptsConsumed = calculateAssessmentRetakeCount(userId, assessmentIdentifier);
+            }
         } catch (Exception e) {
             errMsg = String.format("Error while calculating retake assessment. Exception: %s", e.getMessage());
             logger.error(errMsg, e);
