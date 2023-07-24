@@ -681,6 +681,7 @@ public class Constants {
 	public static final String BULK_USER_UPDATE_API_FAILED = "Bulk User Update API Failed";
 	public static final String SECURE_SETTINGS = "secureSettings";
 	public static final String API_USER_ENROLMENT = "user.enrolment";
+	public static final String USER_REGISTRATION_GROUP_LIST = "api.user.registration.group.list";
 	public static final String SUBMIT_ASSESSMENT_RESPONSE_KEY = "submitAssessmentResponse";
 	public static final String API_READ_ASSESSMENT = "api.assessment.read";
 	public static final String API_READ_ASSESSMENT_RESULT = "api.assessment.read.result";
@@ -688,6 +689,7 @@ public class Constants {
 	public static final String ASSESSMENT_SUBMIT_IN_PROGRESS = "SUBMIT_IN_PROGRESS";
 	public static final String ASSESSMENT_READ_RESPONSE_KEY = "assessmentReadResponse";
 	public static final String START_TIME_KEY = "startTime";
+	public static final String BULK_UPLOAD_VERIFICATION_REGEX = "bulk.upload.tag.verification.regex";
 
 	private Constants() {
 		throw new IllegalStateException("Utility class");
