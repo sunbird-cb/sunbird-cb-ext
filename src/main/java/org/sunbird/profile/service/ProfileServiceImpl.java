@@ -880,7 +880,7 @@ public class ProfileServiceImpl implements ProfileService {
 			errList.add(Constants.REQUEST);
 		} else {
 			Map<String, Object> request = (Map<String, Object>) requestObj.get(Constants.REQUEST);
-			List<String> keys = Arrays.asList(Constants.USER_ID, Constants.POSITION, Constants.CHANNEL,
+			List<String> keys = Arrays.asList(Constants.USER_ID, Constants.GROUP, Constants.CHANNEL,
 					Constants.MAP_ID, Constants.ORGANIZATION_TYPE, Constants.ORGANIZATION_SUB_TYPE);
 			for (String key : keys) {
 				if (StringUtils.isBlank((String) request.get(key))) {
@@ -1011,7 +1011,7 @@ public class ProfileServiceImpl implements ProfileService {
 			};
 			existingProfile.put(Constants.PROFESSIONAL_DETAILS, professionalDetails);
 		}
-		professionalDetails.get(0).put(Constants.DESIGNATION, request.get(Constants.POSITION));
+		professionalDetails.get(0).put(Constants.GROUP, request.get(Constants.GROUP));
 		professionalDetails.get(0).put(Constants.ORGANIZATION_TYPE, Constants.GOVERNMENT);
 
 		Map<String, Object> empDetails;
