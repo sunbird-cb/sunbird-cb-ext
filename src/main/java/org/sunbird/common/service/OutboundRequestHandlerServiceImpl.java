@@ -135,9 +135,19 @@ public class OutboundRequestHandlerServiceImpl {
 			HttpEntity<Object> entity = new HttpEntity<>(headers);
 			response = restTemplate.exchange(uri, HttpMethod.GET, entity, Map.class).getBody();
 		} catch (HttpClientErrorException e) {
-			log.error(e);
+			try {
+				response = (new ObjectMapper()).readValue(e.getResponseBodyAsString(),
+						new TypeReference<HashMap<String, Object>>() {
+						});
+			} catch (Exception e1) {
+			}
+			log.error("Error received: " + e.getResponseBodyAsString(), e);
 		} catch (Exception e) {
 			log.error(e);
+			try {
+				log.warn("Error Response: " + mapper.writeValueAsString(response));
+			} catch (Exception e1) {
+			}
 		}
 		return response;
 	}
