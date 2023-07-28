@@ -33,7 +33,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
-import org.sunbird.cache.RedisCacheMgr;
+import org.sunbird.cache.DataCacheMgr;
 import org.sunbird.cassandra.utils.CassandraOperation;
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.model.SunbirdApiRespParam;
@@ -61,7 +61,7 @@ import java.util.stream.Collectors;
 import static java.util.stream.Collectors.toList;
 
 @Service
-@SuppressWarnings({ "unchecked", "serial" })
+@SuppressWarnings({ "unchecked" })
 public class ProfileServiceImpl implements ProfileService {
 
 	@Autowired
@@ -69,9 +69,6 @@ public class ProfileServiceImpl implements ProfileService {
 
 	@Autowired
 	OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
-
-	@Autowired
-	RedisCacheMgr redisCacheMgr;
 
 	@Autowired
 	UserUtilityService userUtilityService;
@@ -99,12 +96,14 @@ public class ProfileServiceImpl implements ProfileService {
 
 	@Autowired
 	DecryptServiceImpl decryptService;
+
 	@Autowired
 	Producer kafkaProducer;
 
-	private Logger log = LoggerFactory.getLogger(getClass().getName());
+	@Autowired
+	DataCacheMgr dataCacheMgr;
 
-	private ObjectMapper ob = new ObjectMapper();
+	private Logger log = LoggerFactory.getLogger(getClass().getName());
 
 	@Override
 	public SBApiResponse profileUpdate(Map<String, Object> request, String userToken, String authToken, String rootOrgId)
@@ -200,6 +199,7 @@ public class ProfileServiceImpl implements ProfileService {
 							.get(Constants.ERROR_MESSAGE);
 					errMsg = PropertiesCache.getInstance().readCustomError(errMsg);
 					response.getParams().setErrmsg(errMsg);
+					log.error(errMsg, new Exception(errMsg));
 					return response;
 				}
 			}
@@ -292,7 +292,9 @@ public class ProfileServiceImpl implements ProfileService {
 				} else {
 					response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
 					response.getParams().setStatus(Constants.FAILED);
-					response.getParams().setErrmsg("Failed to raise workflow transition request.");
+					String errMsg = "Failed to raise workflow transition request.";
+					response.getParams().setErrmsg(errMsg);
+					log.error(errMsg, new Exception(errMsg));
 				}
 			}
 		} catch (Exception e) {
@@ -313,11 +315,10 @@ public class ProfileServiceImpl implements ProfileService {
 			Schema schema = SchemaLoader.load(rawSchema);
 			schema.validate(data);
 		} catch (JSONException e) {
+			log.error("Failed to parse json schema. Exception: ", e);
 			throw new RuntimeException("Can't parse json schema: " + e.getMessage(), e);
 		} catch (ValidationException ex) {
-			StringBuffer result = new StringBuffer("Validation against Json schema failed: \n");
-			ex.getAllMessages().stream().peek(e -> result.append("\n")).forEach(result::append);
-			log.info(String.format("Exception : %s", result.toString()));
+			log.warn("Validation against Json schema failed. Exception : %s", ex);
 			return false;
 		}
 		return true;
@@ -728,31 +729,46 @@ public class ProfileServiceImpl implements ProfileService {
 	}
 
 	public List<String> approvalFields() {
-		Map<String, String> header = new HashMap<>();
-		Map<String, Object> approvalData = (Map<String, Object>) outboundRequestHandlerService
-				.fetchUsingGetWithHeadersProfile(serverConfig.getSbUrl() + serverConfig.getLmsSystemSettingsPath(),
-						header);
-		if (approvalData != null) {
-			Map<String, Object> approvalResult = (Map<String, Object>) approvalData.get(Constants.RESULT);
-			Map<String, Object> approvalResponse = (Map<String, Object>) approvalResult.get(Constants.RESPONSE);
-			String value = (String) approvalResponse.get(Constants.VALUE);
-			if (StringUtils.isNotBlank(value)) {
-				String strArray[] = value.split(" ");
-				List<String> approvalValues = Arrays.asList(strArray);
-				return approvalValues;
+		List<String> approvalFields = (List<String>) dataCacheMgr
+				.getObjectFromCache(Constants.PROFILE_APPROVAL_FIELDS_KEY);
+		if (CollectionUtils.isEmpty(approvalFields)) {
+			Map<String, Object> searchRequest = new HashMap<String, Object>();
+			searchRequest.put(Constants.ID, Constants.PROFILE_APPROVAL_FIELDS_KEY);
+
+			List<Map<String, Object>> existingDataList = cassandraOperation.getRecordsByPropertiesWithoutFiltering(
+					Constants.KEYSPACE_SUNBIRD, Constants.TABLE_SYSTEM_SETTINGS, searchRequest, null);
+			if (CollectionUtils.isNotEmpty(existingDataList)) {
+				Map<String, Object> data = existingDataList.get(0);
+				String strApprovalFields = (String) data.get(Constants.VALUE);
+
+				if (StringUtils.isNotBlank(strApprovalFields)) {
+					String strArray[] = strApprovalFields.split(",", -1);
+					approvalFields = Arrays.asList(strArray);
+					dataCacheMgr.putObjectInCache(Constants.PROFILE_APPROVAL_FIELDS_KEY, approvalFields);
+					return approvalFields;
+				}
 			}
+		} else {
+			return approvalFields;
 		}
 		return new ArrayList<>();
 	}
 
 	public String getVerifiedProfileSchema() {
-		Map<String, String> header = new HashMap<>();
-		Map<String, Object> data = (Map<String, Object>) outboundRequestHandlerService
-				.fetchUsingGetWithHeadersProfile(serverConfig.getSbUrl() + serverConfig.getVerifiedProfileFieldsPath(),
-						header);
-		Map<String, Object> result = (Map<String, Object>) data.get(Constants.RESULT);
-		Map<String, Object> response = (Map<String, Object>) result.get(Constants.RESPONSE);
-		return (String) response.get(Constants.VALUE);
+		String strSchema = dataCacheMgr.getStringFromCache(Constants.VERIFIED_PROFILE_FIELDS_KEY);
+		if (StringUtils.isEmpty(strSchema)) {
+			Map<String, Object> searchRequest = new HashMap<String, Object>();
+			searchRequest.put(Constants.ID, Constants.VERIFIED_PROFILE_FIELDS_KEY);
+
+			List<Map<String, Object>> existingDataList = cassandraOperation.getRecordsByPropertiesWithoutFiltering(
+					Constants.KEYSPACE_SUNBIRD, Constants.TABLE_SYSTEM_SETTINGS, searchRequest, null);
+			if (CollectionUtils.isNotEmpty(existingDataList)) {
+				Map<String, Object> data = existingDataList.get(0);
+				strSchema = (String) data.get(Constants.VALUE);
+			}
+			dataCacheMgr.putStringInCache(Constants.VERIFIED_PROFILE_FIELDS_KEY, strSchema);
+		}
+		return strSchema;
 	}
 
 	public String checkDepartment(Map<String, Object> requestProfile) throws Exception {
@@ -832,35 +848,35 @@ public class ProfileServiceImpl implements ProfileService {
 	}
 
 	public String getCustodianOrgId() {
-		String custodianOrgId = (String) redisCacheMgr.getCache(Constants.CUSTODIAN_ORG_ID);
+		String custodianOrgId = dataCacheMgr.getStringFromCache(Constants.CUSTODIAN_ORG_ID);
 		if (StringUtils.isEmpty(custodianOrgId)) {
 			Map<String, Object> searchRequest = new HashMap<String, Object>();
 			searchRequest.put(Constants.ID, Constants.CUSTODIAN_ORG_ID);
 
-			List<Map<String, Object>> existingDataList = cassandraOperation.getRecordsByProperties(
+			List<Map<String, Object>> existingDataList = cassandraOperation.getRecordsByPropertiesWithoutFiltering(
 					Constants.KEYSPACE_SUNBIRD, Constants.TABLE_SYSTEM_SETTINGS, searchRequest, null);
 			if (CollectionUtils.isNotEmpty(existingDataList)) {
 				Map<String, Object> data = existingDataList.get(0);
 				custodianOrgId = (String) data.get(Constants.VALUE.toLowerCase());
 			}
-			redisCacheMgr.putStringInCache(Constants.CUSTODIAN_ORG_ID, custodianOrgId);
+			dataCacheMgr.putStringInCache(Constants.CUSTODIAN_ORG_ID, custodianOrgId);
 		}
 		return custodianOrgId;
 	}
 
 	public String getCustodianOrgChannel() {
-		String custodianOrgChannel = (String) redisCacheMgr.getCache(Constants.CUSTODIAN_ORG_CHANNEL);
+		String custodianOrgChannel = dataCacheMgr.getStringFromCache(Constants.CUSTODIAN_ORG_CHANNEL);
 		if (StringUtils.isEmpty(custodianOrgChannel)) {
 			Map<String, Object> searchRequest = new HashMap<String, Object>();
 			searchRequest.put(Constants.ID, Constants.CUSTODIAN_ORG_CHANNEL);
 
-			List<Map<String, Object>> existingDataList = cassandraOperation.getRecordsByProperties(
+			List<Map<String, Object>> existingDataList = cassandraOperation.getRecordsByPropertiesWithoutFiltering(
 					Constants.KEYSPACE_SUNBIRD, Constants.TABLE_SYSTEM_SETTINGS, searchRequest, null);
 			if (CollectionUtils.isNotEmpty(existingDataList)) {
 				Map<String, Object> data = existingDataList.get(0);
 				custodianOrgChannel = (String) data.get(Constants.VALUE.toLowerCase());
 			}
-			redisCacheMgr.putStringInCache(Constants.CUSTODIAN_ORG_CHANNEL, custodianOrgChannel);
+			dataCacheMgr.putStringInCache(Constants.CUSTODIAN_ORG_CHANNEL, custodianOrgChannel);
 		}
 		return custodianOrgChannel;
 	}
@@ -1111,7 +1127,7 @@ public class ProfileServiceImpl implements ProfileService {
 	private Map<String, Object> getUserDetailsForId(String userId) {
 		Map<String, Object> request = new HashMap<>();
 		request.put(Constants.ID, userId);
-		List<Map<String, Object>> userList = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
+		List<Map<String, Object>> userList = cassandraOperation.getRecordsByPropertiesWithoutFiltering(Constants.KEYSPACE_SUNBIRD,
 				Constants.TABLE_USER, request, null);
 		if (CollectionUtils.isNotEmpty(userList)) {
 			return userList.get(0);
