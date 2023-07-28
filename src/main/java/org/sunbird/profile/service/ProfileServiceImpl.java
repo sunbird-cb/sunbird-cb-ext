@@ -318,7 +318,7 @@ public class ProfileServiceImpl implements ProfileService {
 			log.error("Failed to parse json schema. Exception: ", e);
 			throw new RuntimeException("Can't parse json schema: " + e.getMessage(), e);
 		} catch (ValidationException ex) {
-			log.error("Validation against Json schema failed. Exception : %s", ex);
+			log.warn("Validation against Json schema failed. Exception : %s", ex);
 			return false;
 		}
 		return true;
