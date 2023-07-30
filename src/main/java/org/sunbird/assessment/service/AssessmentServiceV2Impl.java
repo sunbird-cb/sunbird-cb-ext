@@ -507,8 +507,8 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
 
     private String validateIfQuestionIdsAreSame(Map<String, Object> submitRequest, List<Map<String, Object>> sectionListFromSubmitRequest, List<String> desiredKeys, String userId) {
         List<Map<String, Object>> existingDataList = assessmentRepository.fetchUserAssessmentDataFromDB(userId, (String) submitRequest.get(Constants.IDENTIFIER));
-        String questionSetFromAssessmentString = (!existingDataList.isEmpty()) ? (String) existingDataList.get(0).get(Constants.ASSESSMENT_READ_RESPONSE) : "";
-        if (!questionSetFromAssessmentString.isEmpty()) {
+        String questionSetFromAssessmentString = (!existingDataList.isEmpty()) ? (String) existingDataList.get(0).get(Constants.ASSESSMENT_READ_RESPONSE_KEY) : "";
+        if (StringUtils.isNotBlank(questionSetFromAssessmentString)) {
             Map<String, Object> questionSetFromAssessment = new Gson().fromJson(questionSetFromAssessmentString, new TypeToken<HashMap<String, Object>>() {
             }.getType());
             if (questionSetFromAssessment != null && questionSetFromAssessment.get(Constants.CHILDREN) != null) {
