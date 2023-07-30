@@ -116,7 +116,7 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
                 updateErrorDetails(response, Constants.USER_ID_DOESNT_EXIST, HttpStatus.INTERNAL_SERVER_ERROR);
                 return response;
             }
-            logger.info("readAssessment.. userId :" + userId);
+            logger.info(String.format("ReadAssessment... UserId: %s, AssessmentIdentifier: %s", userId, assessmentIdentifier));
             Map<String, Object> assessmentAllDetail = assessUtilServ
                     .readAssessmentHierarchyFromDB(assessmentIdentifier);
             if (MapUtils.isEmpty(assessmentAllDetail)) {
@@ -135,10 +135,10 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
                     userId, assessmentIdentifier);
             Timestamp assessmentStartTime = new Timestamp(new java.util.Date().getTime());
             if (existingDataList.isEmpty()) {
+                logger.info("Assessment read first time for user.");
                 int expectedDuration = (Integer) assessmentAllDetail.get(Constants.EXPECTED_DURATION);
                 Timestamp assessmentEndTime = calculateAssessmentSubmitTime(expectedDuration,
-                        assessmentStartTime, 0);
-                logger.info("Assessment read first time for user.");
+                        assessmentStartTime, 0);                
                 Map<String, Object> assessmentData = readAssessmentLevelData(assessmentAllDetail);
                 assessmentData.put(Constants.START_TIME, assessmentStartTime.getTime());
                 assessmentData.put(Constants.END_TIME, assessmentEndTime.getTime());
@@ -157,8 +157,7 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
                 Timestamp existingAssessmentEndTimeTimestamp = new Timestamp(
                         existingAssessmentEndTime.getTime());
                 if (assessmentStartTime.compareTo(existingAssessmentEndTimeTimestamp) < 0
-                        && ((String) existingDataList.get(0).get(Constants.STATUS))
-                                .equalsIgnoreCase(Constants.NOT_SUBMITTED)) {
+                        && Constants.NOT_SUBMITTED.equalsIgnoreCase((String) existingDataList.get(0).get(Constants.STATUS))) {
                     String questionSetFromAssessmentString = (String) existingDataList.get(0)
                             .get(Constants.ASSESSMENT_READ_RESPONSE_KEY);
                     Map<String, Object> questionSetFromAssessment = new Gson().fromJson(
