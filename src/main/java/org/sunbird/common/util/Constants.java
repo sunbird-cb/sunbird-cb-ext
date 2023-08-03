@@ -689,6 +689,8 @@ public class Constants {
 	public static final String ASSESSMENT_SUBMIT_IN_PROGRESS = "SUBMIT_IN_PROGRESS";
 	public static final String ASSESSMENT_READ_RESPONSE_KEY = "assessmentReadResponse";
 	public static final String START_TIME_KEY = "startTime";
+	public static final String VERIFIED_PROFILE_FIELDS_KEY = "verifiedProfileFields";
+	public static final String PROFILE_APPROVAL_FIELDS_KEY = "profileApprovalFields";
 	public static final String BULK_UPLOAD_VERIFICATION_REGEX = "bulk.upload.tag.verification.regex";
 
 	private Constants() {
