@@ -144,9 +144,6 @@ public class ProfileServiceImpl implements ProfileService {
 				for (String keys : profileDetailsMap.keySet()) {
 					listOfChangedDetails.add(keys);
 				}
-				if (listOfChangedDetails.contains(Constants.EMPLOYMENTDETAILS)) {
-					listOfChangedDetails.remove(Constants.EMPLOYMENTDETAILS);
-				}
 				for (String changedObj : listOfChangedDetails) {
 					if (profileDetailsMap.get(changedObj) instanceof ArrayList) {
 						existingProfileDetails.put(changedObj, profileDetailsMap.get(changedObj));
