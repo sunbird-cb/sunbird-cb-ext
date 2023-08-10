@@ -693,6 +693,14 @@ public class Constants {
 	public static final String PROFILE_APPROVAL_FIELDS_KEY = "profileApprovalFields";
 	public static final String BULK_UPLOAD_VERIFICATION_REGEX = "bulk.upload.tag.verification.regex";
 
+	public static final String USER_BULK_UPLOAD_FULLNAME_ERROR_MSG = "Invalid value for Full Name. Expecting only alphabets.";
+	public static final String USER_BULK_UPLOAD_EMAIL_ERROR_MSG = "Invalid value for Email. Expecting only alphanumeric.";
+	public static final String USER_BULK_UPLOAD_PHONE_ERROR_MSG = "Invalid value for Phone. Expecting only numeric.";
+	public static final String USER_BULK_UPLOAD_GROUP_ERROR_MSG = "Invalid value for Group. Expecting only alphabets.";
+	public static final String USER_BULK_UPLOAD_TAGS_ERROR_MSG = "Invalid value for Tags. Expecting only alphabets.";
+	public static final String USER_BULK_UPLOAD_EXTERNAL_SYSTEM_ID_ERROR_MSG = "Invalid value for External System ID. Expecting only alphanumeric.";
+	public static final String USER_BULK_UPLOAD_EXTERNAL_SYSTEM_ERROR_MSG = "Invalid value for External System. Expecting only alphabets.";
+
 	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}
