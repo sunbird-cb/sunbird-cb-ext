@@ -101,7 +101,7 @@ public class MasterDataServiceImpl implements MasterDataService {
                 .map(masterData -> {
                     Map<String, Object> result = new HashMap<>();
                     result.put(Constants.NAME, masterData.get(Constants.CONTEXT_NAME));
-                    if (Constants.NATIONALITIES.equalsIgnoreCase(type)) {
+                    if (Constants.NATIONALITY.equalsIgnoreCase(type) || Constants.COUNTRIES.equalsIgnoreCase(type)) {
                         result.put(Constants.COUNTRY_CODE, masterData.get(Constants.CONTEXT_DATA));
                     }
                     return result;
