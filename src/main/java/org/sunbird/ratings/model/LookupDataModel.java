@@ -3,32 +3,32 @@ package org.sunbird.ratings.model;
 import java.util.UUID;
 
 public class LookupDataModel {
-    private String activityid;
+    private String activityId;
     private String review;
     private Float rating;
-    private String updatedon;
-    private String activitytype;
+    private String updatedOn;
+    private String activityType;
     private String userId;
 
     public LookupDataModel() {
 
     }
 
-    public LookupDataModel(String activityid, String review, Float rating, UUID updatedon, String activitytype, String userId) {
-        this.activityid = activityid;
+    public LookupDataModel(String activityId, String review, Float rating, UUID updatedOn, String activityType, String userId) {
+        this.activityId = activityId;
         this.review = review;
         this.rating = rating;
-        this.updatedon = updatedon.toString();
-        this.activitytype = activitytype;
+        this.updatedOn = updatedOn.toString();
+        this.activityType = activityType;
         this.userId = userId;
     }
 
-    public String getActivityid() {
-        return activityid;
+    public String getActivityId() {
+        return activityId;
     }
 
-    public void setActivityid(String activityid) {
-        this.activityid = activityid;
+    public void setActivityId(String activityId) {
+        this.activityId = activityId;
     }
 
     public String getReview() {
@@ -48,20 +48,20 @@ public class LookupDataModel {
     }
 
 
-    public String getUpdatedon() {
-        return updatedon;
+    public String getUpdatedOn() {
+        return updatedOn;
     }
 
-    public void setUpdatedon(UUID updatedon) {
-        this.updatedon = updatedon.toString();
+    public void setUpdatedon(UUID updatedOn) {
+        this.updatedOn = updatedOn.toString();
     }
 
-    public String getActivitytype() {
-        return activitytype;
+    public String getActivityType() {
+        return activityType;
     }
 
-    public void setActivitytype(String activitytype) {
-        this.activitytype = activitytype;
+    public void setActivitytype(String activityType) {
+        this.activityType = activityType;
     }
 
     public String getUserId() {
@@ -75,11 +75,11 @@ public class LookupDataModel {
     @Override
     public String toString() {
         return "LookupDataModel{" +
-                "activityid='" + activityid + '\'' +
+                "activityId='" + activityId + '\'' +
                 ", review='" + review + '\'' +
                 ", rating=" + rating +
-                ", updatedon='" + updatedon + '\'' +
-                ", activitytype='" + activitytype + '\'' +
+                ", updatedOn='" + updatedOn + '\'' +
+                ", activityType='" + activityType + '\'' +
                 ", userId='" + userId + '\'' +
                 '}';
     }
