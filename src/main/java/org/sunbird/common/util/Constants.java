@@ -171,11 +171,11 @@ public class Constants {
 	public static final String USERID = "id";
 	public static final String COMMENT = "comment";
 	public static final String COMMENT_BY = "commentBy";
-	public static final String COMMENT_UPDATED_ON = "commentupdatedon";
-	public static final String CREATED_ON = "createdon";
+	public static final String COMMENT_UPDATED_ON = "commentUpdatedOn";
+	public static final String CREATED_ON = "createdOn";
 	public static final String RATING = "rating";
 	public static final String REVIEW = "review";
-	public static final String UPDATED_ON = "updatedon";
+	public static final String UPDATED_ON = "updatedOn";
 	public static final String LATEST50REVIEWS = "latest50reviews";
 	public static final String SUMMARY_ACTIVITY_ID = "activityid";
 	public static final String SUMMARY_ACTIVITY_TYPE = "activitytype";
