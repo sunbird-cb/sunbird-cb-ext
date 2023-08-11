@@ -31,7 +31,12 @@ public class MasterDataController {
 
 	@GetMapping("/getNationalities")
 	public ResponseEntity<?> getNationalitiesList() {
-		return new ResponseEntity<>(masterDataService.getMasterDataByType(Constants.NATIONALITIES), HttpStatus.OK);
+		return new ResponseEntity<>(masterDataService.getMasterDataByType(Constants.NATIONALITY), HttpStatus.OK);
+	}
+
+	@GetMapping("/getCountries")
+	public ResponseEntity<?> getCountriesList() {
+		return new ResponseEntity<>(masterDataService.getMasterDataByType(Constants.COUNTRIES), HttpStatus.OK);
 	}
 
 	@GetMapping("/getIndustries")

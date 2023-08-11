@@ -41,6 +41,8 @@ public class Constants {
 	public static final String MINISTRIES = "ministries";
 	public static final String SERVICE = "service";
 	public static final String NATIONALITIES = "nationalities";
+	public static final String COUNTRIES = "countries";
+	public static final String NATIONALITY = "nationality";
 	public static final String ORGANIZATION_LOCATION_COUNTRY = "organization_location_country";
 	public static final String ORGANIZATION_LOCATION_STATE = "organization_location_state";
 	public static final String ORGANIZATION_LOCATION_CITY = "organization_location_city";
