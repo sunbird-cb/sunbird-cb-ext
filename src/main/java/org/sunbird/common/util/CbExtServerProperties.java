@@ -467,6 +467,9 @@ public class CbExtServerProperties {
 	@Value("${assessment.ratake.count.verification.enabled}")
 	private boolean assessmentRetakeCountVerificationEnabled;
 
+	@Value("${bulk.upload.tag.verification.regex}")
+	private String bulkUploadTagVerificationRegex;
+
 	public String getAssessmentSubmitTopic() {
 		return assessmentSubmitTopic;
 	}
@@ -1704,5 +1707,13 @@ public class CbExtServerProperties {
 
 	public void setAssessmentRetakeCountVerificationEnabled(boolean assessmentRetakeCountVerificationEnabled) {
 		this.assessmentRetakeCountVerificationEnabled = assessmentRetakeCountVerificationEnabled;
+	}
+
+	public String getBulkUploadTagVerificationRegex() {
+		return bulkUploadTagVerificationRegex;
+	}
+
+	public void setBulkUploadTagVerificationRegex(String bulkUploadTagVerificationRegex) {
+		this.bulkUploadTagVerificationRegex = bulkUploadTagVerificationRegex;
 	}
 }

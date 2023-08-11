@@ -188,7 +188,10 @@ public class UserBulkUploadService {
                             String tagStr = nextRow.getCell(4).getStringCellValue().trim();
                             List<String> tagList = new ArrayList<String>();
                             if (!StringUtils.isEmpty(tagStr)) {
-                                tagList = Arrays.asList(tagStr.split(",", -1));
+                                String[] tagStrList = tagStr.split(",", -1);
+                                for(String tag : tagStrList) {
+                                    tagList.add(tag.trim());
+                                }
                             }
                             userRegistration.setTag(tagList);
                             if (!ProjectUtil.validateTag(userRegistration.getTag())) {
