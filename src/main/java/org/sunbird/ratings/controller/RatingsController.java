@@ -51,7 +51,7 @@ public class RatingsController {
         return new ResponseEntity<>(response, response.getResponseCode());
     }
 
-    @PostMapping("/ratings/v1/read")
+    @PostMapping("/ratings/v2/read")
     public ResponseEntity<?> readRating(@RequestBody Map<String, Object> request) {
         SBApiResponse response = ratingService.readRatings(request);
         return new ResponseEntity<>(response, response.getResponseCode());
