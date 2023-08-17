@@ -1,5 +1,6 @@
 package org.sunbird.progress.controller;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,4 +42,18 @@ public class MandatoryContentController {
 		return new ResponseEntity<>(service.getUserProgress(requestBody, authUserToken), HttpStatus.OK);
 	}
 
+	@PostMapping("/v1/progress/markUsersAttendance")
+	public ResponseEntity<String> markUserAttendanceForSession(@RequestBody SunbirdApiRequest requestBody,
+															   @RequestHeader(Constants.USER_TOKEN) String authUserToken) {
+
+		String responseMsg = "";
+		if(requestBody.getRequest() instanceof List) {
+			List<Object> objectList = (List<Object>) requestBody.getRequest();
+			for(Object obj: objectList) {
+				responseMsg = service.markUserAttendanceForSession(authUserToken, obj);
+			}
+		}
+
+		return new ResponseEntity<>(responseMsg, HttpStatus.OK);
+	}
 }

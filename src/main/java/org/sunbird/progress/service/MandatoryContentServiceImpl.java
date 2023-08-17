@@ -57,7 +57,7 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
 
 	@Override
 	public MandatoryContentResponse getMandatoryContentStatusForUser(String authUserToken, String rootOrg, String org,
-			String userId) {
+																	 String userId) {
 		MandatoryContentResponse response = new MandatoryContentResponse();
 
 		Map<String, Object> propertyMap = new HashMap<>();
@@ -110,7 +110,7 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
 	}
 
 	public void enrichProgressDetails(String authUserToken, MandatoryContentResponse mandatoryContentInfo,
-			String userId) {
+									  String userId) {
 		HashMap<String, Object> req;
 		HashMap<String, Object> reqObj;
 		List<String> fields = Arrays.asList("progressdetails");
@@ -296,5 +296,32 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
 			responseObj.put(Constants.COMPLETION_PERCENTAGE, 100);
 			responseObj.put(Constants.STATUS, 2);
 		}
+	}
+
+	/**
+	 * Marking the attendance for offline sessions
+	 *
+	 * @param authUserToken
+	 * @param request
+	 */
+	@Override
+	public String markUserAttendanceForSession(String authUserToken, Object request) {
+		HashMap<String, Object> req;
+		HashMap<String, String> headersValues = new HashMap<>();
+		headersValues.put("X-Authenticated-User-Token", authUserToken);
+		headersValues.put("Authorization", cbExtServerProperties.getSbApiKey());
+		try {
+			req = new HashMap<>();
+			req.put("request", request);
+			Map<String, Object> response = outboundReqService.fetchResultUsingPatch(
+					cbExtServerProperties.getCourseServiceHost() + cbExtServerProperties.getProgressUpdateEndPoint(),
+					req, headersValues);
+			if (response.get("responseCode").equals("OK")) {
+				return "Attendance is marked";
+			}
+		} catch (Exception ex) {
+			logger.error(ex);
+		}
+		return "Error in marking Attendance";
 	}
 }

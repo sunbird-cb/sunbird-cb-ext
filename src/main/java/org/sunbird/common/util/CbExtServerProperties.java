@@ -59,6 +59,9 @@ public class CbExtServerProperties {
 	@Value("${progress.api.endpoint}")
 	private String progressReadEndPoint;
 
+	@Value("${progress.api.update.endpoint}")
+	private String progressUpdateEndPoint;
+
 	@Value("${sb.api.key}")
 	private String sbApiKey;
 
@@ -467,6 +470,9 @@ public class CbExtServerProperties {
 	@Value("${assessment.ratake.count.verification.enabled}")
 	private boolean assessmentRetakeCountVerificationEnabled;
 
+	@Value("${bulk.upload.tag.verification.regex}")
+	private String bulkUploadTagVerificationRegex;
+
 	public String getAssessmentSubmitTopic() {
 		return assessmentSubmitTopic;
 	}
@@ -617,6 +623,14 @@ public class CbExtServerProperties {
 
 	public void setProgressReadEndPoint(String progressReadEndPoint) {
 		this.progressReadEndPoint = progressReadEndPoint;
+	}
+
+	public String getProgressUpdateEndPoint() {
+		return progressUpdateEndPoint;
+	}
+
+	public void setProgressUpdateEndPoint(String progressUpdateEndPoint) {
+		this.progressUpdateEndPoint = progressUpdateEndPoint;
 	}
 
 	public String getSbApiKey() {
@@ -1704,5 +1718,13 @@ public class CbExtServerProperties {
 
 	public void setAssessmentRetakeCountVerificationEnabled(boolean assessmentRetakeCountVerificationEnabled) {
 		this.assessmentRetakeCountVerificationEnabled = assessmentRetakeCountVerificationEnabled;
+	}
+
+	public String getBulkUploadTagVerificationRegex() {
+		return bulkUploadTagVerificationRegex;
+	}
+
+	public void setBulkUploadTagVerificationRegex(String bulkUploadTagVerificationRegex) {
+		this.bulkUploadTagVerificationRegex = bulkUploadTagVerificationRegex;
 	}
 }
