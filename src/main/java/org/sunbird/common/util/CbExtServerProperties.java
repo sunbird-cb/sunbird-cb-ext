@@ -470,6 +470,9 @@ public class CbExtServerProperties {
 	@Value("${bulk.upload.tag.verification.regex}")
 	private String bulkUploadTagVerificationRegex;
 
+	@Value("${report.download.container.name}")
+	private String reportDownloadContainerName;
+
 	public String getAssessmentSubmitTopic() {
 		return assessmentSubmitTopic;
 	}
@@ -1715,5 +1718,13 @@ public class CbExtServerProperties {
 
 	public void setBulkUploadTagVerificationRegex(String bulkUploadTagVerificationRegex) {
 		this.bulkUploadTagVerificationRegex = bulkUploadTagVerificationRegex;
+	}
+
+	public String getReportDownloadContainerName() {
+		return reportDownloadContainerName;
+	}
+
+	public void setReportDownloadContainerName(String reportDownloadContainerName) {
+		this.reportDownloadContainerName = reportDownloadContainerName;
 	}
 }
