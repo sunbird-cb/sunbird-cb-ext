@@ -49,7 +49,7 @@ public class RedisCacheMgr {
             String data = objectMapper.writeValueAsString(object);
             getJedis().set(Constants.REDIS_COMMON_KEY + key, data);
             getJedis().expire(Constants.REDIS_COMMON_KEY + key, ttl);
-            logger.info("Cache_key_value " + Constants.REDIS_COMMON_KEY + key + " is saved in redis");
+            logger.debug("Cache_key_value " + Constants.REDIS_COMMON_KEY + key + " is saved in redis");
         } catch (Exception e) {
             logger.error(e);
         }
@@ -63,7 +63,7 @@ public class RedisCacheMgr {
             }
             getJedis().set(Constants.REDIS_COMMON_KEY + key, value);
             getJedis().expire(Constants.REDIS_COMMON_KEY + key, ttl);
-            logger.info("Cache_key_value " + Constants.REDIS_COMMON_KEY + key + " is saved in redis");
+            logger.debug("Cache_key_value " + Constants.REDIS_COMMON_KEY + key + " is saved in redis");
         } catch (Exception e) {
             logger.error(e);
         }
@@ -72,7 +72,7 @@ public class RedisCacheMgr {
     public boolean deleteKeyByName(String key) {
         try {
         	getJedis().del(Constants.REDIS_COMMON_KEY + key);
-            logger.info("Cache_key_value " + Constants.REDIS_COMMON_KEY + key + " is deleted from redis");
+            logger.debug("Cache_key_value " + Constants.REDIS_COMMON_KEY + key + " is deleted from redis");
             return true;
         } catch (Exception e) {
             logger.error(e);

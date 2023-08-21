@@ -108,7 +108,7 @@ public class CassandraConnectionManagerImpl implements CassandraConnectionManage
     }
 
     private static ConsistencyLevel getConsistencyLevel() {
-        String consistency = ProjectUtil.getConfigValue(Constants.SUNBIRD_CASSANDRA_CONSISTENCY_LEVEL);
+        String consistency = PropertiesCache.getInstance().readProperty(Constants.SUNBIRD_CASSANDRA_CONSISTENCY_LEVEL);
 
         logger.info("CassandraConnectionManagerImpl:getConsistencyLevel: level = " + consistency);
 

@@ -24,19 +24,7 @@ import org.sunbird.core.logger.CbExtLogger;
 public class ProjectUtil {
 
 	public static CbExtLogger logger = new CbExtLogger(ProjectUtil.class.getName());
-
-	public static PropertiesCache propertiesCache;
-
-	static {
-		propertiesCache = PropertiesCache.getInstance();
-	}
-
-	public static String getConfigValue(String key) {
-		if (StringUtils.isNotBlank(System.getenv(key))) {
-			return System.getenv(key);
-		}
-		return propertiesCache.readProperty(key);
-	}
+	public static String DEFAULT_BULK_UPLOAD_VERIFICATION_REGEX = "^[a-zA-Z\\s,]+$";
 
 	/**
 	 * This method will check incoming value is null or empty it will do empty check
@@ -119,7 +107,6 @@ public class ProjectUtil {
 	public static Boolean validateEmailPattern(String email) {
 		String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\." + "[a-zA-Z0-9_+&*-]+)*@" + "(?:[a-zA-Z0-9-]+\\.)+[a-z"
 				+ "A-Z]{2,7}$";
-		Boolean retValue = Boolean.FALSE;
 		Pattern pat = Pattern.compile(emailRegex);
 		if (pat.matcher(email).matches()) {
 			return Boolean.TRUE;
@@ -148,8 +135,12 @@ public class ProjectUtil {
 	}
 
 	public static Boolean validateTag(List<String> tags) {
+		String regEx = PropertiesCache.getInstance().getProperty(Constants.BULK_UPLOAD_VERIFICATION_REGEX);
+		if (StringUtils.isBlank(regEx)) {
+			regEx = DEFAULT_BULK_UPLOAD_VERIFICATION_REGEX;
+		}
 		for (String tag : tags) {
-			if (!tag.matches("^[a-zA-Z]+(?: [a-zA-Z]+)*$")) {
+			if (!tag.matches(regEx)) {
 				return false;
 			}
 		}
