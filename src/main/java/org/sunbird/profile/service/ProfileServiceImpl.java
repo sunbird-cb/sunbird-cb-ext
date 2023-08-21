@@ -543,6 +543,9 @@ public class ProfileServiceImpl implements ProfileService {
 					Map<String, Object> personalDetail = (Map<String, Object>) profileData
 							.get(Constants.PERSONAL_DETAILS);
 					responseMap.put(Constants.EMAIL, personalDetail.get(Constants.PRIMARY_EMAIL));
+					if (personalDetail.containsKey(Constants.MOBILE)) {
+						responseMap.put(Constants.PHONE, String.valueOf(personalDetail.get(Constants.MOBILE)));
+					}
 				}
 
 				responseMap.put(Constants.FIRSTNAME, userData.get(Constants.FIRSTNAME));
@@ -1186,6 +1189,17 @@ public class ProfileServiceImpl implements ProfileService {
 		Map<String, Object> requestBody = (Map<String, Object>) requestObject.get(Constants.REQUEST);
 		personalDetails.put(Constants.FIRSTNAME.toLowerCase(), requestBody.get(Constants.FIRSTNAME));
 		personalDetails.put(Constants.PRIMARY_EMAIL, requestBody.get(Constants.EMAIL));
+		if (requestBody.containsKey(Constants.PHONE)) {
+			String incomingPhoneValue = "";
+			try {
+				incomingPhoneValue = (String) requestBody.get(Constants.PHONE);
+				long mobileNumber = Long.parseLong(incomingPhoneValue);
+				personalDetails.put(Constants.MOBILE, mobileNumber);
+			} catch (NumberFormatException e) {
+				log.error("Failed to parse mobile number from signup request. Received Phone: " + incomingPhoneValue
+						+ ", Exception: " + e.getMessage(), e);
+			}
+		}
 		profileDetails.put(Constants.PERSONAL_DETAILS, personalDetails);
 
 		Map<String, Object> professionDetailObj = new HashMap<String, Object>();

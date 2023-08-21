@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-SbCbExtApplication<sb-cb-ext>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "org.sunbird.portal.SbCbExtApplication",
+            "projectName": "sb-cb-ext",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}
