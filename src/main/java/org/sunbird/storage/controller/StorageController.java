@@ -36,11 +36,11 @@ public class StorageController {
 		return new ResponseEntity<>(deleteResponse, deleteResponse.getResponseCode());
 	}
 
-	@GetMapping("/v1/report/{cloudContainerName}/{date}/{folderName}/{fileName}")
-	public ResponseEntity<?> downloadFile(@PathVariable("cloudContainerName") String cloudContainerName,
+	@GetMapping("/v1/report/{reportType}/{date}/{orgId}/{fileName}")
+	public ResponseEntity<?> downloadFile(@PathVariable("reportType") String reportType,
 										  @PathVariable("date") String date,
-										  @PathVariable("folderName") String folderName,
+										  @PathVariable("orgId") String orgId,
 										  @PathVariable("fileName") String fileName) {
-		return storageService.downloadFile(cloudContainerName, date, folderName, fileName);
+		return storageService.downloadFile(reportType, date, orgId, fileName);
 	}
 }

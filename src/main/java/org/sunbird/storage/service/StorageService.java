@@ -17,5 +17,5 @@ public interface StorageService {
 
     SBApiResponse downloadFile(String fileName);
 
-	ResponseEntity<Resource> downloadFile(String cloudContainerName, String date, String folderName, String fileName);
+	ResponseEntity<Resource> downloadFile(String reportType, String date, String orgId, String fileName);
 }

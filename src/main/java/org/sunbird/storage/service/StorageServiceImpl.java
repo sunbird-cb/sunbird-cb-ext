@@ -139,10 +139,10 @@ public class StorageServiceImpl implements StorageService {
 	}
 
 	@Override
-	public ResponseEntity<Resource> downloadFile(String cloudContainerName, String date, String folderName, String fileName) {
+	public ResponseEntity<Resource> downloadFile(String reportType, String date, String orgId, String fileName) {
 		try {
-			String objectKey = date + "/" + folderName + "/" + fileName;
-			storageService.download(serverProperties.getReportDownloadContainerName() + "/" + cloudContainerName, objectKey, Constants.LOCAL_BASE_PATH,
+			String objectKey = reportType + "/" + date + "/" + orgId + "/" + fileName;
+			storageService.download(serverProperties.getReportDownloadContainerName(), objectKey, Constants.LOCAL_BASE_PATH,
 					Option.apply(Boolean.FALSE));
 			Path tmpPath = Paths.get(Constants.LOCAL_BASE_PATH + fileName);
 			ByteArrayResource resource = new ByteArrayResource(Files.readAllBytes(tmpPath));
