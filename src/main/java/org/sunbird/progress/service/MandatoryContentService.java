@@ -12,5 +12,5 @@ public interface MandatoryContentService {
 
 	public Map<String, Object> getUserProgress(SunbirdApiRequest requestBody, String authUserToken);
 
-	String markUserAttendanceForSession(String authUserToken, Object request);
+	public String markUserAttendanceForOfflineSession(String authUserToken, SunbirdApiRequest requestBody);
 }
