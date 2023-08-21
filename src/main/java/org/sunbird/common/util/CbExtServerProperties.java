@@ -473,6 +473,9 @@ public class CbExtServerProperties {
 	@Value("${report.download.container.name}")
 	private String reportDownloadContainerName;
 
+	@Value("${report.download.folder.name}")
+	private String reportDownloadFolderName;
+
 	public String getAssessmentSubmitTopic() {
 		return assessmentSubmitTopic;
 	}
@@ -1726,5 +1729,13 @@ public class CbExtServerProperties {
 
 	public void setReportDownloadContainerName(String reportDownloadContainerName) {
 		this.reportDownloadContainerName = reportDownloadContainerName;
+	}
+
+	public String getReportDownloadFolderName() {
+		return reportDownloadFolderName;
+	}
+
+	public void setReportDownloadFolderName(String reportDownloadFolderName) {
+		this.reportDownloadFolderName = reportDownloadFolderName;
 	}
 }
