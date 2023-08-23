@@ -318,7 +318,7 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
 			attendanceAttributes = new HashMap<>();
 			attendanceAttributes.put("requestBody", requestBody);
 			attendanceAttributes.put("headersValues", headersValues);
-			kafkaProducer.push("kafka.topic.mark.attendance",attendanceAttributes);
+			kafkaProducer.push(cbExtServerProperties.getUserMarkAttendanceKafkaTopic(), attendanceAttributes);
 			return Constants.MARK_ATTENDANCE_SESSION_SUCCESS_MSG;
 		} catch (Exception ex) {
 			logger.error(ex);
