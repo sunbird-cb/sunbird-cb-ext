@@ -473,6 +473,9 @@ public class CbExtServerProperties {
 	@Value("${progress.api.update.endpoint}")
 	private String progressUpdateEndPoint;
 
+	@Value("${kafka.topic.mark.attendance.offline.session}")
+	private String userMarkAttendanceKafkaTopic;
+
 	public String getAssessmentSubmitTopic() {
 		return assessmentSubmitTopic;
 	}
@@ -1726,5 +1729,13 @@ public class CbExtServerProperties {
 
 	public void setProgressUpdateEndPoint(String progressUpdateEndPoint) {
 		this.progressUpdateEndPoint = progressUpdateEndPoint;
+	}
+
+	public String getUserMarkAttendanceKafkaTopic() {
+		return userMarkAttendanceKafkaTopic;
+	}
+
+	public void setUserMarkAttendanceKafkaTopic(String userMarkAttendanceKafkaTopic) {
+		this.userMarkAttendanceKafkaTopic = userMarkAttendanceKafkaTopic;
 	}
 }
