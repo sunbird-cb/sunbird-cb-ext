@@ -470,6 +470,9 @@ public class CbExtServerProperties {
 	@Value("${bulk.upload.tag.verification.regex}")
 	private String bulkUploadTagVerificationRegex;
 
+	@Value("${progress.api.update.endpoint}")
+	private String progressUpdateEndPoint;
+
 	public String getAssessmentSubmitTopic() {
 		return assessmentSubmitTopic;
 	}
@@ -1715,5 +1718,13 @@ public class CbExtServerProperties {
 
 	public void setBulkUploadTagVerificationRegex(String bulkUploadTagVerificationRegex) {
 		this.bulkUploadTagVerificationRegex = bulkUploadTagVerificationRegex;
+	}
+
+	public String getProgressUpdateEndPoint() {
+		return progressUpdateEndPoint;
+	}
+
+	public void setProgressUpdateEndPoint(String progressUpdateEndPoint) {
+		this.progressUpdateEndPoint = progressUpdateEndPoint;
 	}
 }

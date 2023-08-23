@@ -24,6 +24,7 @@ import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.core.logger.CbExtLogger;
+import org.sunbird.core.producer.Producer;
 import org.sunbird.progress.model.BatchEnrolment;
 import org.sunbird.progress.model.MandatoryContentInfo;
 import org.sunbird.progress.model.MandatoryContentResponse;
@@ -50,6 +51,9 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
 
 	@Autowired
 	private ContentServiceImpl contentService;
+
+	@Autowired
+	Producer kafkaProducer;
 
 	private CbExtLogger logger = new CbExtLogger(getClass().getName());
 
@@ -296,5 +300,29 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
 			responseObj.put(Constants.COMPLETION_PERCENTAGE, 100);
 			responseObj.put(Constants.STATUS, 2);
 		}
+	}
+
+	/**
+	 * Marking the attendance for offline sessions
+	 *
+	 * @param authUserToken
+	 * @param request
+	 */
+	@Override
+	public String markUserAttendanceForOfflineSession(String authUserToken, SunbirdApiRequest requestBody) {
+		Map<String, Object> attendanceAttributes;
+		Map<String, String> headersValues = new HashMap<>();
+		headersValues.put("X-Authenticated-User-Token", authUserToken);
+		headersValues.put("Authorization", cbExtServerProperties.getSbApiKey());
+		try {
+			attendanceAttributes = new HashMap<>();
+			attendanceAttributes.put("requestBody", requestBody);
+			attendanceAttributes.put("headersValues", headersValues);
+			kafkaProducer.push("kafka.topic.mark.attendance",attendanceAttributes);
+			return Constants.MARK_ATTENDANCE_SESSION_SUCCESS_MSG;
+		} catch (Exception ex) {
+			logger.error(ex);
+		}
+		return Constants.MARK_ATTENDANCE_SESSION_ERROR_MSG;
 	}
 }
