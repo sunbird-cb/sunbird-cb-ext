@@ -694,6 +694,8 @@ public class Constants {
 	public static final String VERIFIED_PROFILE_FIELDS_KEY = "verifiedProfileFields";
 	public static final String PROFILE_APPROVAL_FIELDS_KEY = "profileApprovalFields";
 	public static final String BULK_UPLOAD_VERIFICATION_REGEX = "bulk.upload.tag.verification.regex";
+	public static final String MARK_ATTENDANCE_SESSION_SUCCESS_MSG = "Attendance is marked.";
+	public static final String MARK_ATTENDANCE_SESSION_ERROR_MSG = "Error in marking Attendance.";
 
 	private Constants() {
 		throw new IllegalStateException("Utility class");

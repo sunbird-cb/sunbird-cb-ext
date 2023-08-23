@@ -41,4 +41,11 @@ public class MandatoryContentController {
 		return new ResponseEntity<>(service.getUserProgress(requestBody, authUserToken), HttpStatus.OK);
 	}
 
+	@PostMapping("/blendedprogram/v1/update/progress")
+	public ResponseEntity<String> markUserAttendanceForSession(@RequestBody SunbirdApiRequest requestBody,
+															   @RequestHeader(Constants.USER_TOKEN) String authUserToken) {
+
+		String responseMsg = service.markUserAttendanceForOfflineSession(authUserToken, requestBody);
+		return new ResponseEntity<>(responseMsg, HttpStatus.OK);
+	}
 }
