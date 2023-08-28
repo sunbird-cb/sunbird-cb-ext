@@ -281,8 +281,8 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 		if (StringUtils.isBlank(userRegInfo.getOrgName())) {
 			errList.add("OrgName");
 		}
-		if (StringUtils.isBlank(userRegInfo.getPosition())) {
-			errList.add("Position");
+		if (StringUtils.isBlank(userRegInfo.getGroup())) {
+			errList.add("Group");
 		}
 		if (StringUtils.isBlank(userRegInfo.getSource())) {
 			errList.add("Source");
@@ -301,6 +301,11 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 		if(StringUtils.isNotBlank(userRegInfo.getPhone()) && !ProjectUtil.validateContactPattern(userRegInfo.getPhone())) {
 			str.setLength(0);
 			str.append("Invalid phone number");
+		}
+		//group validation
+		if (StringUtils.isNotBlank(userRegInfo.getGroup()) && !serverProperties.getBulkUploadGroupValue().contains(userRegInfo.getGroup())) {
+			str.setLength(0);
+			str.append("Invalid Group : Group can be only among one of these ").append(serverProperties.getBulkUploadGroupValue());
 		}
 		return str.toString();
 	}
@@ -325,12 +330,15 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 		userRegistration.setOrgName(userRegInfo.getOrgName());
 		userRegistration.setChannel(userRegInfo.getChannel());
 		userRegistration.setSbRootOrgId(userRegInfo.getSbRootOrgId());
-		userRegistration.setPosition(userRegInfo.getPosition());
+		if (StringUtils.isNotBlank(userRegInfo.getPosition())) {
+			userRegistration.setPosition(userRegInfo.getPosition());
+		}
 		userRegistration.setSource(userRegInfo.getSource());
 		userRegistration.setMapId(userRegInfo.getMapId());
 		userRegistration.setOrganisationType(userRegInfo.getOrganisationType());
 		userRegistration.setOrganisationSubType(userRegInfo.getOrganisationSubType());
 		userRegistration.setPhone(userRegInfo.getPhone());
+		userRegistration.setGroup(userRegInfo.getGroup());
 
 		if (StringUtils.isBlank(userRegInfo.getRegistrationCode())) {
 			userRegistration.setRegistrationCode(serverProperties.getUserRegCodePrefix() + "-"
