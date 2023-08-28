@@ -107,7 +107,7 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 			return resultMap;
 
 		} catch (Exception ex) {
-			logger.error("Error when verifying assessment. Error : ");
+			logger.error("Error when verifying assessment. Error : ", ex);
 		}
 		return new HashMap<>();
 	}
@@ -191,6 +191,7 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 			throws Exception {
 		List<String> newIdentifierList = new ArrayList<>();
 		newIdentifierList.addAll(identifierList);
+		String errMsg = "";
 
 		// Taking the list which was formed with the not found values in Redis, we are
 		// making an internal POST call to Question List API to fetch the details
@@ -205,16 +206,17 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 						if (!ObjectUtils.isEmpty(questionMap)) {
 							questionList.add(filterQuestionMapDetail(question, primaryCategory));
 						} else {
-							logger.error(String.format("Failed to get Question Details for Id: %s",
-									question.get(Constants.IDENTIFIER).toString()));
-							return "Failed to get Question Details for Id: %s";
+							errMsg = String.format("Failed to get Question Details for Id: %s",
+									question.get(Constants.IDENTIFIER).toString());
+							logger.error(errMsg);
+							return errMsg;
 						}
 					}
 				} else {
-					logger.error(
-							String.format("Failed to get Question Details from the Question List API for the IDs: %s",
-									newIdentifierList.toString()));
-					return "Failed to get Question Details from the Question List API for the IDs";
+					errMsg = String.format("Failed to get Question Details from the Question List API for the IDs: %s",
+									newIdentifierList.toString());
+					logger.error(errMsg);
+					return errMsg;
 				}
 			}
 		}
@@ -307,7 +309,7 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 			Map<String, Object> data = new ObjectMapper().convertValue(o, Map.class);
 			return data;
 		} catch (Exception e) {
-			logger.error("error in getReadHierarchyApiResponse  " + e.getMessage());
+			logger.error("error in getReadHierarchyApiResponse  " + e.getMessage(), e);
 		}
 		return new HashMap<>();
 	}

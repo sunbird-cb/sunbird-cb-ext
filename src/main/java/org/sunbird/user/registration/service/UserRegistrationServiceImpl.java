@@ -282,7 +282,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 			errList.add("OrgName");
 		}
 		if (StringUtils.isBlank(userRegInfo.getGroup())) {
-			errList.add("group");
+			errList.add("Group");
 		}
 		if (StringUtils.isBlank(userRegInfo.getSource())) {
 			errList.add("Source");
@@ -330,7 +330,9 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 		userRegistration.setOrgName(userRegInfo.getOrgName());
 		userRegistration.setChannel(userRegInfo.getChannel());
 		userRegistration.setSbRootOrgId(userRegInfo.getSbRootOrgId());
-		userRegistration.setPosition(userRegInfo.getPosition());
+		if (StringUtils.isNotBlank(userRegInfo.getPosition())) {
+			userRegistration.setPosition(userRegInfo.getPosition());
+		}
 		userRegistration.setSource(userRegInfo.getSource());
 		userRegistration.setMapId(userRegInfo.getMapId());
 		userRegistration.setOrganisationType(userRegInfo.getOrganisationType());

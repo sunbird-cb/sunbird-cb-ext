@@ -41,6 +41,8 @@ public class Constants {
 	public static final String MINISTRIES = "ministries";
 	public static final String SERVICE = "service";
 	public static final String NATIONALITIES = "nationalities";
+	public static final String COUNTRIES = "countries";
+	public static final String NATIONALITY = "nationality";
 	public static final String ORGANIZATION_LOCATION_COUNTRY = "organization_location_country";
 	public static final String ORGANIZATION_LOCATION_STATE = "organization_location_state";
 	public static final String ORGANIZATION_LOCATION_CITY = "organization_location_city";
@@ -169,11 +171,11 @@ public class Constants {
 	public static final String USERID = "id";
 	public static final String COMMENT = "comment";
 	public static final String COMMENT_BY = "commentBy";
-	public static final String COMMENT_UPDATED_ON = "commentupdatedon";
-	public static final String CREATED_ON = "createdon";
+	public static final String COMMENT_UPDATED_ON = "commentUpdatedOn";
+	public static final String CREATED_ON = "createdOn";
 	public static final String RATING = "rating";
 	public static final String REVIEW = "review";
-	public static final String UPDATED_ON = "updatedon";
+	public static final String UPDATED_ON = "updatedOn";
 	public static final String LATEST50REVIEWS = "latest50reviews";
 	public static final String SUMMARY_ACTIVITY_ID = "activityid";
 	public static final String SUMMARY_ACTIVITY_TYPE = "activitytype";
@@ -681,7 +683,6 @@ public class Constants {
 	public static final String BULK_USER_UPDATE_API_FAILED = "Bulk User Update API Failed";
 	public static final String SECURE_SETTINGS = "secureSettings";
 	public static final String API_USER_ENROLMENT = "user.enrolment";
-	public static final String USER_REGISTRATION_GROUP_LIST = "api.user.registration.group.list";
 	public static final String SUBMIT_ASSESSMENT_RESPONSE_KEY = "submitAssessmentResponse";
 	public static final String API_READ_ASSESSMENT = "api.assessment.read";
 	public static final String API_READ_ASSESSMENT_RESULT = "api.assessment.read.result";
@@ -692,6 +693,7 @@ public class Constants {
 	public static final String VERIFIED_PROFILE_FIELDS_KEY = "verifiedProfileFields";
 	public static final String PROFILE_APPROVAL_FIELDS_KEY = "profileApprovalFields";
 	public static final String BULK_UPLOAD_VERIFICATION_REGEX = "bulk.upload.tag.verification.regex";
+	public static final String USER_REGISTRATION_GROUP_LIST = "api.user.registration.group.list";
 
 	private Constants() {
 		throw new IllegalStateException("Utility class");

@@ -180,7 +180,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                         }
                     } else {
                         errMsg = Constants.FAILED_TO_GET_QUESTION_DETAILS;
-                        logger.error(String.valueOf(new Exception("Failed to get Question Details for Ids")));
+                        logger.error(errMsg, new Exception());
                     }
                 }
                 if (errMsg.isEmpty() && identifierList.size() == questionList.size()) {
@@ -188,8 +188,8 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                 }
             }
         } catch (Exception e) {
-            logger.error(String.format("Exception in %s : %s", "get Question List", e.getMessage()), e);
             errMsg = "Failed to fetch the question list. Exception: " + e.getMessage();
+            logger.error(errMsg, e);
         }
         if (StringUtils.isNotBlank(errMsg)) {
             response.getParams().setStatus(Constants.FAILED);
@@ -197,7 +197,6 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
             response.setResponseCode(HttpStatus.BAD_REQUEST);
         }
         return response;
-
     }
 
     private String validateAuthTokenAndFetchUserId(String authUserToken) {
@@ -656,7 +655,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                 }
             }
         } catch (Exception e) {
-            logger.error(String.format("Failed to process the questionList request body. %s", e.getMessage()));
+            logger.error(String.format("Failed to process the questionList request body. %s", e.getMessage()), e);
         }
         return Collections.emptyList();
     }
