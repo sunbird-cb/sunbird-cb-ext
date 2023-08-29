@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.sunbird.workallocation.model.PdfGeneratorRequest;
 import org.sunbird.workallocation.service.PdfGeneratorService;
 
+import java.io.IOException;
+
 @RestController
 public class PdfGeneratorController {
     @Autowired
@@ -47,6 +49,11 @@ public class PdfGeneratorController {
 	@GetMapping(value = "/getWOPublishedPdf/{woId}")
 	public ResponseEntity<String> getWOPublishedPdf(@PathVariable("woId") String woId) {
 		return new ResponseEntity<>(pdfGeneratorService.getPublishedPdfLink(woId), HttpStatus.OK);
+	}
+
+	@GetMapping(value = "/getBatchSessionQRPdf/{courseId}/{batchId}", produces = MediaType.APPLICATION_PDF_VALUE)
+	public ResponseEntity<?> getBatchSessionQRPdf(@PathVariable("courseId") String courseId,@PathVariable("batchId") String batchId) throws IOException {
+		return new ResponseEntity<>(pdfGeneratorService.getBatchSessionQRPdf(courseId,batchId), HttpStatus.OK);
 	}
 
 }
