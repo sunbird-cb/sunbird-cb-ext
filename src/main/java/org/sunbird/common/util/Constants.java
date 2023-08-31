@@ -697,6 +697,7 @@ public class Constants {
 	public static final String UPDATE_CONTENT_PROGRESS_SUCCESS_MSG = "Content progress is updated.";
 	public static final String UPDATE_CONTENT_PROGRESS_ERROR_MSG = "Error in updating the content progress.";
 	public static final String API_UPDATE_CONTENT_PROGRESS = "api.content.progress.ext.update";
+	public static final String TABLE_ENROLMENT_BATCH_LOOKUP = "enrollment_batch_lookup";
 
 	private Constants() {
 		throw new IllegalStateException("Utility class");
