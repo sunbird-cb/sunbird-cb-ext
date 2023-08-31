@@ -14,5 +14,5 @@ public interface ContentProgressService {
      * @param authUserToken - It's authorization token received in request header.
      * @return - Return the response of success/failure after processing the request.
      */
-    String getUserSessionDetailsAndCourseProgress(String authUserToken, SunbirdApiRequest requestBody) throws IOException;
+    SBApiResponse getUserSessionDetailsAndCourseProgress(String authUserToken, SunbirdApiRequest requestBody);
 }

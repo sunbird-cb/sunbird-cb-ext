@@ -1,5 +1,6 @@
 package org.sunbird.user.service;
 
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,8 +11,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.jcraft.jsch.UserInfo;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +38,7 @@ import org.sunbird.common.model.SunbirdUserProfileDetail;
 import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
+import org.sunbird.common.util.IndexerService;
 import org.sunbird.common.util.ProjectUtil;
 import org.sunbird.core.cipher.DecryptServiceImpl;
 import org.sunbird.core.exception.ApplicationLogicError;
@@ -66,6 +75,12 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 
 	@Autowired
 	DecryptServiceImpl decryptService;
+
+	@Autowired
+	IndexerService indexerService;
+
+	@Autowired
+	ObjectMapper objectMapper;
 
 	private Logger logger = LoggerFactory.getLogger(UserUtilityServiceImpl.class);
 
@@ -650,5 +665,80 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 			//	}
 		}
 		return Constants.BULK_USER_UPDATE_API_FAILED;
+	}
+
+	/**
+	 * @return - The user details after processing the elastic search query.
+	 * @throws IOException - will throw an IO Exception if any occurs.
+	 */
+	@Override
+	public Map<String, Map<String, Object>> getUserDetailsFromES(List<String> userIdList, List<String> userFields) throws IOException {
+		int index = 0;
+		int size = 500;
+		long userCount = 0L;
+		boolean isCompleted = false;
+		SearchSourceBuilder sourceBuilder = null;
+		List<Map<String, Object>> resultArray = new ArrayList<>();
+		Map<String, Map<String, Object>> backupUserInfoMap = new HashMap<>();
+		Map<String, Object> result;
+		Map<String, Map<String, Object>> userInfoMap = new HashMap<>();
+		final BoolQueryBuilder finalQuery = QueryBuilders.boolQuery();
+		finalQuery.must(QueryBuilders.termQuery("status.raw", 1));
+		finalQuery.must(QueryBuilders.termsQuery("identifier.raw", userIdList));
+		do {
+			sourceBuilder = new SearchSourceBuilder().query(finalQuery).from(index).size(size);
+			sourceBuilder.fetchSource(userFields.toArray(new String[0]), new String[]{});
+			SearchResponse searchResponse = indexerService.getEsResult(serverConfig.getSbEsUserProfileIndex(),
+					serverConfig.getSbEsProfileIndexType(), sourceBuilder, true);
+			if (index == 0) {
+				userCount = searchResponse.getHits().getTotalHits();
+				logger.info(String.format("Number of users in ES index : %s", userCount));
+			}
+			for (SearchHit hit : searchResponse.getHits()) {
+				result = hit.getSourceAsMap();
+				resultArray.add(result);
+			}
+			processUserDetails(resultArray, userInfoMap);
+			backupUserInfoMap.putAll(userInfoMap);
+			resultArray.clear();
+
+			index = (int) Math.min(userCount, index + size);
+			if (index == userCount) {
+				isCompleted = true;
+			}
+		} while (!isCompleted);
+		return backupUserInfoMap;
+	}
+
+	/**
+	 * This method is responsible for processing and setting the data in the collection object.
+	 *
+	 * @param userMapList - Contains the data fetched from the elastic search.
+	 * @param userInfoMap - collection object where the data is set after the processing.
+	 */
+	private void processUserDetails(List<Map<String, Object>> userMapList,
+									Map<String, Map<String, Object>> userInfoMap) throws IOException{
+		for (Map<String, Object> user : userMapList) {
+			Map<String, Object> userInfo = new HashMap<>();
+			userInfo.put(Constants.USER_ID, (String) user.get(Constants.USER_ID));
+			userInfo.put(Constants.FIRSTNAME, (String) user.get(Constants.USER_FIRST_NAME));
+			userInfo.put(Constants.ROOT_ORG_ID, (String) user.get(Constants.ROOT_ORG_ID));
+			userInfo.put(Constants.CHANNEL, (String) user.get(Constants.CHANNEL));
+			userInfo.put(Constants.DESIGNATION, (String) user.get(Constants.PROFILE_DETAILS_DESIGNATION));
+			//userInfo.put(Constants.DEPARTMENTNAME, (String) user.get(Constants.EMPLOYMENT_DETAILS_DEPARTMENT_NAME));
+			JsonNode jsonNode = objectMapper.convertValue(user, JsonNode.class);
+			JsonNode primaryEmailNode = jsonNode.at("/profileDetails/personalDetails/primaryEmail");
+			String primaryEmail = primaryEmailNode.asText();
+
+			JsonNode mobileNode = jsonNode.at("/profileDetails/personalDetails/mobile");
+			String mobile = mobileNode.asText();
+			if (StringUtils.isNotBlank(primaryEmail)) {
+				userInfo.put(Constants.EMAIL, primaryEmail);
+			}
+			if (StringUtils.isNotBlank((mobile))) {
+				userInfo.put(Constants.PHONE, mobile);
+			}
+			userInfoMap.put((String)userInfo.get(Constants.USER_ID), userInfo);
+		}
 	}
 }

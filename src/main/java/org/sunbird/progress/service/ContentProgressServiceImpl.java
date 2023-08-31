@@ -1,5 +1,6 @@
 package org.sunbird.progress.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.action.search.SearchResponse;
@@ -22,6 +23,7 @@ import org.sunbird.core.cipher.DecryptServiceImpl;
 import org.sunbird.core.logger.CbExtLogger;
 import org.sunbird.core.producer.Producer;
 import org.sunbird.progress.model.ContentProgressInfo;
+import org.sunbird.user.service.UserUtilityService;
 
 import java.io.IOException;
 import java.util.*;
@@ -44,14 +46,10 @@ public class ContentProgressServiceImpl implements ContentProgressService {
     private CassandraOperation cassandraOperation;
 
     @Autowired
-    CbExtServerProperties serverConfig;
+    private UserUtilityService userUtilityService;
 
     @Autowired
-    IndexerService indexerService;
-
-    @Autowired
-    DecryptServiceImpl decryptService;
-
+    private ObjectMapper objectMapper;
     /**
      * Marking the attendance for offline sessions
      *
@@ -91,30 +89,50 @@ public class ContentProgressServiceImpl implements ContentProgressService {
      * @return - Return the response of success/failure after processing the request.
      */
     @Override
-    public String getUserSessionDetailsAndCourseProgress(String authUserToken, SunbirdApiRequest requestBody) throws IOException {
-        List<String> usersList = new ArrayList<>();
-        ContentProgressInfo contentProgressInfo = new ContentProgressInfo();
-        if (!ObjectUtils.isEmpty(requestBody.getRequest())) {
-            contentProgressInfo = mapper.convertValue(requestBody.getRequest(), ContentProgressInfo.class);
+    public  SBApiResponse getUserSessionDetailsAndCourseProgress(String authUserToken, SunbirdApiRequest requestBody) {
+        SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.USER_SEARCH_CONTENT_RESULT_LIST);
+        try {
+            List<String> usersList = new ArrayList<>();
+            ContentProgressInfo contentProgressInfo = new ContentProgressInfo();
+            if (!ObjectUtils.isEmpty(requestBody.getRequest())) {
+                contentProgressInfo = mapper.convertValue(requestBody.getRequest(), ContentProgressInfo.class);
+            }
+            if (contentProgressInfo.getUserId() != null && contentProgressInfo.getUserId().size() > 0) {
+                usersList.addAll(contentProgressInfo.getUserId());
+            } else {
+                List<Map<String, Object>> enrollmentBatchLookupList = getEnrollmentBatchLookupDetails(contentProgressInfo);
+                enrollmentBatchLookupList.forEach(userEnrollmentBatchDetail -> userEnrollmentBatchDetail.entrySet().stream().filter(entry -> entry.getKey().equalsIgnoreCase(Constants.USER_ID)).forEach(entry -> {
+                    if (entry.getKey().equalsIgnoreCase(Constants.USER_ID)) {
+                        usersList.add(entry.getValue().toString());
+                    }
+                }));
+            }
+            /*final Map<String, Map<String, Object>> contentMaps = prepareProgressDetailsMap(contentProgressInfo.getContentId());*/
+            List<Map<String, Object>> userContentConsumptionList = getUserContentConsumptionDetails(contentProgressInfo, usersList);
+            Map<String, Map<String, Object>> userDetailsList = userUtilityService.getUserDetailsFromES(usersList, Arrays.asList(Constants.USER_FIRST_NAME, Constants.PROFILE_DETAILS_DESIGNATION, Constants.PROFILE_DETAILS_PRIMARY_EMAIL, Constants.CHANNEL, Constants.USER_ID, Constants.EMPLOYMENT_DETAILS_DEPARTMENT_NAME, Constants.PROFILE_DETAILS_PHONE, Constants.ROOT_ORG_ID));
+            userContentConsumptionList.forEach(contentMap -> {
+                //userDetailsList.put("progressDetails", contentMaps.get("progressDetails"));
+                String userId = (String) contentMap.get(Constants.USER_ID);
+                String contentId = (String) contentMap.get(Constants.CONTENT_ID_KEY);
+                contentMap.remove(Constants.USER_ID);
+                Map<String, Object> userMap = userDetailsList.get(userId);
+                if (userMap.containsKey("progressDetails")) {
+                    List<Object> progressDetailsList = (List<Object>) userMap.get("progressDetails");
+                    progressDetailsList.add(contentMap);
+                    userMap.put("progressDetails", progressDetailsList);
+                } else {
+                    List<Map<String, Object>> progressDetails = new ArrayList<Map<String, Object>>();
+                    progressDetails.add(contentMap);
+                    userMap.put("progressDetails", progressDetails);
+                }
+            });
+            response.getResult().put(Constants.COUNT, userDetailsList.size());
+            response.getResult().put(Constants.RESPONSE, userDetailsList.values());
+        } catch (Exception e) {
+            response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+            response.getParams().setStatus(Constants.FAILED);
         }
-        List<Map<String, Object>> enrollmentBatchLookupList = getEnrollmentBatchLookupDetails(contentProgressInfo);
-        enrollmentBatchLookupList.forEach(userEnrollmentBatchDetail ->
-                userEnrollmentBatchDetail.entrySet().stream()
-                        .filter(entry -> entry.getKey().equalsIgnoreCase(Constants.USER_ID))
-                        .forEach(entry -> {
-                            if (entry.getKey().equalsIgnoreCase(Constants.USER_ID)) {
-                                usersList.add(entry.getValue().toString());
-                            }
-                        })
-        );
-
-        List<Map<String, Object>> userContentConsumptionList = getUserContentConsumptionDetails(contentProgressInfo, usersList);
-        Map<String, Map<String, String>> userDetailsList = getUserDetails();
-        userDetailsList.entrySet().stream()
-                .flatMap(a -> a.getValue().entrySet().stream())
-                .forEach(b -> logger.info(b.getKey() + "-" + b.getValue()));
-        userContentConsumptionList.forEach(userContentMap -> userContentMap.forEach((key, value) -> logger.info(key + "--" + value)));
-        return null;
+        return response;
     }
 
     /**
@@ -127,11 +145,14 @@ public class ContentProgressServiceImpl implements ContentProgressService {
     private List<Map<String, Object>> getUserContentConsumptionDetails(ContentProgressInfo contentProgressInfo, List<String> usersList) {
         Map<String, Object> propertyMap;
         propertyMap = new HashMap<>();
-        propertyMap.put(Constants.BATCH_ID, contentProgressInfo.getApplicationId());
+        propertyMap.put(Constants.BATCH_ID, contentProgressInfo.getBatchId());
         propertyMap.put(Constants.COURSE_ID, contentProgressInfo.getCourseId());
         propertyMap.put(Constants.USER_ID, usersList);
+        if(contentProgressInfo.getContentId() != null && contentProgressInfo.getContentId().size() > 0) {
+            propertyMap.put(Constants.CONTENT_ID_KEY, contentProgressInfo.getContentId());
+        }
         return cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD_COURSES,
-                Constants.USER_CONTENT_CONSUMPTION, propertyMap, Arrays.asList(Constants.COURSE_ID, Constants.CONTENT_ID_KEY, Constants.BATCH_ID, Constants.USER_ID, Constants.PROGRESS));
+                Constants.USER_CONTENT_CONSUMPTION, propertyMap, Arrays.asList(Constants.CONTENT_ID_KEY, Constants.USER_ID, Constants.STATUS));
 
     }
 
@@ -144,85 +165,19 @@ public class ContentProgressServiceImpl implements ContentProgressService {
      */
     private List<Map<String, Object>> getEnrollmentBatchLookupDetails(ContentProgressInfo contentProgressInfo) {
         Map<String, Object> propertyMap = new HashMap<>();
-        propertyMap.put(Constants.BATCH_ID, contentProgressInfo.getApplicationId());
+        propertyMap.put(Constants.BATCH_ID, contentProgressInfo.getBatchId());
         return cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD_COURSES,
                 Constants.TABLE_ENROLMENT_BATCH_LOOKUP, propertyMap, Arrays.asList(Constants.BATCH_ID, Constants.USER_ID, Constants.ACTIVE));
     }
 
-    /**
-     * @return - The user details after processing the elastic search query.
-     * @throws IOException - will throw an IO Exception if any occurs.
-     */
-    public Map<String, Map<String, String>> getUserDetails() throws IOException {
-        int index = 0;
-        int size = 500;
-        long userCount = 0L;
-        boolean isCompleted = false;
-        SearchSourceBuilder sourceBuilder = null;
-        List<Map<String, Object>> resultArray = new ArrayList<>();
-        Map<String, Map<String, String>> backupUserInfoMap = new HashMap<>();
-        Map<String, Object> result;
-        Map<String, Map<String, String>> userInfoMap = new HashMap<>();
-        final BoolQueryBuilder finalQuery = QueryBuilders.boolQuery();
-        finalQuery.must(QueryBuilders.termQuery(Constants.STATUS, 1));
-        do {
-            sourceBuilder = new SearchSourceBuilder().query(finalQuery).from(index).size(size);
-            sourceBuilder.fetchSource(serverConfig.getEsUserReportIncludeFields(), new String[]{});
-            SearchResponse searchResponse = indexerService.getEsResult(serverConfig.getSbEsUserProfileIndex(),
-                    serverConfig.getSbEsProfileIndexType(), sourceBuilder, true);
-            if (index == 0) {
-                userCount = searchResponse.getHits().getTotalHits();
-                logger.info(String.format("Number of users in ES index : %s", userCount));
-            }
-            for (SearchHit hit : searchResponse.getHits()) {
-                result = hit.getSourceAsMap();
-                resultArray.add(result);
-            }
-            processUserDetails(resultArray, userInfoMap);
-            backupUserInfoMap.putAll(userInfoMap);
-            resultArray.clear();
-
-            index = (int) Math.min(userCount, index + size);
-            if (index == userCount) {
-                isCompleted = true;
-            }
-        } while (!isCompleted);
-        return backupUserInfoMap;
-    }
-
-    /**
-     * This method is responsible for processing and setting the data in the collection object.
-     *
-     * @param userMapList - Contains the data fetched from the elastic search.
-     * @param userInfoMap - collection object where the data is set after the processing.
-     */
-    private void processUserDetails(List<Map<String, Object>> userMapList,
-                                    Map<String, Map<String, String>> userInfoMap) {
-        for (Map<String, Object> user : userMapList) {
-            Map<String, String> userInfo = new HashMap<>();
-            userInfo.put(Constants.USER_ID, (String) user.get(Constants.USER_ID));
-            userInfo.put(Constants.FIRSTNAME, (String) user.get(Constants.FIRSTNAME));
-            userInfo.put(Constants.ROOT_ORG_ID, (String) user.get(Constants.ROOT_ORG_ID));
-            userInfo.put(Constants.CHANNEL, (String) user.get(Constants.CHANNEL));
-            if (StringUtils.isNotBlank((String) user.get(Constants.EMAIL))) {
-                String value = decryptService.decryptString((String) user.get(Constants.EMAIL));
-                userInfo.put(Constants.EMAIL, value);
-            }
-            if (StringUtils.isNotBlank((String) user.get(Constants.PHONE))) {
-                userInfo.put(Constants.PHONE, decryptService.decryptString((String) user.get(Constants.PHONE)));
-            }
-            String strRoles = "";
-            List<Map<String, Object>> roles = (List<Map<String, Object>>) user.get(Constants.ROLES);
-            for (Map<String, Object> role : roles) {
-                String strRole = (String) role.get(Constants.ROLE);
-                if (StringUtils.isNotBlank(strRoles)) {
-                    strRoles = strRoles.concat(", ").concat(strRole);
-                } else {
-                    strRoles = StringUtils.isBlank(strRole) ? "" : strRole;
-                }
-            }
-            userInfo.put(Constants.ROLES, strRoles);
-            userInfoMap.put(userInfo.get(Constants.USER_ID), userInfo);
+    private Map<String, Map<String, Object>> prepareProgressDetailsMap(List<String> contentIdList) {
+        Map<String, Map<String, Object>> progressDetailsMap = new HashMap<String, Map<String, Object>>();
+        for (String contentId : contentIdList) {
+            Map<String, Object> progressMap = new HashMap<String, Object>();
+            progressMap.put("contentId", contentId);
+            progressMap.put("status", 0);
+            progressDetailsMap.put(contentId, progressMap);
         }
+        return progressDetailsMap;
     }
 }
