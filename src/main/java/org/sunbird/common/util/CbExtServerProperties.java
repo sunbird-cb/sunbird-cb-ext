@@ -482,6 +482,9 @@ public class CbExtServerProperties {
     @Value("${kafka.topic.update.content.progress}")
     private String updateContentProgressKafkaTopic;
 
+	@Value("${sb.es.user.profile.index.type}")
+	private String sbEsProfileIndexType;
+
 	public String getAssessmentSubmitTopic() {
 		return assessmentSubmitTopic;
 	}
@@ -1760,4 +1763,12 @@ public class CbExtServerProperties {
     public void setUpdateContentProgressKafkaTopic(String updateContentProgressKafkaTopic) {
         this.updateContentProgressKafkaTopic = updateContentProgressKafkaTopic;
     }
+
+	public String getSbEsProfileIndexType() {
+		return sbEsProfileIndexType;
+	}
+
+	public void setSbEsProfileIndexType(String sbEsProfileIndexType) {
+		this.sbEsProfileIndexType = sbEsProfileIndexType;
+	}
 }
