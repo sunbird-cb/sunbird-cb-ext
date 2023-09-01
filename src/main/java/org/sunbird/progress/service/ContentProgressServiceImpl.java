@@ -1,33 +1,24 @@
 package org.sunbird.progress.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 import org.sunbird.cassandra.utils.CassandraOperation;
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.model.SunbirdApiRequest;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
-import org.sunbird.common.util.IndexerService;
 import org.sunbird.common.util.ProjectUtil;
-import org.sunbird.core.cipher.DecryptServiceImpl;
+import org.sunbird.core.exception.InvalidDataInputException;
 import org.sunbird.core.logger.CbExtLogger;
 import org.sunbird.core.producer.Producer;
 import org.sunbird.progress.model.ContentProgressInfo;
 import org.sunbird.user.service.UserUtilityService;
 
-import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 
 @Service
@@ -50,6 +41,7 @@ public class ContentProgressServiceImpl implements ContentProgressService {
 
     @Autowired
     private ObjectMapper objectMapper;
+
     /**
      * Marking the attendance for offline sessions
      *
@@ -89,13 +81,14 @@ public class ContentProgressServiceImpl implements ContentProgressService {
      * @return - Return the response of success/failure after processing the request.
      */
     @Override
-    public  SBApiResponse getUserSessionDetailsAndCourseProgress(String authUserToken, SunbirdApiRequest requestBody) {
+    public SBApiResponse getUserSessionDetailsAndCourseProgress(String authUserToken, SunbirdApiRequest requestBody) {
         SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.USER_SEARCH_CONTENT_RESULT_LIST);
         try {
             List<String> usersList = new ArrayList<>();
             ContentProgressInfo contentProgressInfo = new ContentProgressInfo();
             if (!ObjectUtils.isEmpty(requestBody.getRequest())) {
                 contentProgressInfo = mapper.convertValue(requestBody.getRequest(), ContentProgressInfo.class);
+                validateContentProgressInfo(contentProgressInfo);
             }
             if (contentProgressInfo.getUserId() != null && contentProgressInfo.getUserId().size() > 0) {
                 usersList.addAll(contentProgressInfo.getUserId());
@@ -107,27 +100,42 @@ public class ContentProgressServiceImpl implements ContentProgressService {
                     }
                 }));
             }
-            /*final Map<String, Map<String, Object>> contentMaps = prepareProgressDetailsMap(contentProgressInfo.getContentId());*/
+            final Map<String, Map<String, Object>> contentMaps = prepareProgressDetailsMap(contentProgressInfo.getContentId());
             List<Map<String, Object>> userContentConsumptionList = getUserContentConsumptionDetails(contentProgressInfo, usersList);
             Map<String, Map<String, Object>> userDetailsList = userUtilityService.getUserDetailsFromES(usersList, Arrays.asList(Constants.USER_FIRST_NAME, Constants.PROFILE_DETAILS_DESIGNATION, Constants.PROFILE_DETAILS_PRIMARY_EMAIL, Constants.CHANNEL, Constants.USER_ID, Constants.EMPLOYMENT_DETAILS_DEPARTMENT_NAME, Constants.PROFILE_DETAILS_PHONE, Constants.ROOT_ORG_ID));
             userContentConsumptionList.forEach(contentMap -> {
-                //userDetailsList.put("progressDetails", contentMaps.get("progressDetails"));
                 String userId = (String) contentMap.get(Constants.USER_ID);
-                String contentId = (String) contentMap.get(Constants.CONTENT_ID_KEY);
+                String contentId = (String) contentMap.get("contentid");
+                userDetailsList.get(userId).computeIfAbsent("progressDetails", key -> {
+                    return new HashMap<>(contentMaps);
+                });
                 contentMap.remove(Constants.USER_ID);
                 Map<String, Object> userMap = userDetailsList.get(userId);
                 if (userMap.containsKey("progressDetails")) {
-                    List<Object> progressDetailsList = (List<Object>) userMap.get("progressDetails");
-                    progressDetailsList.add(contentMap);
-                    userMap.put("progressDetails", progressDetailsList);
+                    Map<String, Map<String, Object>> progressDetailsMap = (Map<String, Map<String, Object>>) userMap.get("progressDetails");
+                    progressDetailsMap.compute(contentId, (key, existingValue) -> {
+                        return contentMap;
+                    });
                 } else {
                     List<Map<String, Object>> progressDetails = new ArrayList<Map<String, Object>>();
                     progressDetails.add(contentMap);
                     userMap.put("progressDetails", progressDetails);
                 }
             });
+            userDetailsList.forEach((userId, userInformation) -> {
+                if (userInformation.containsKey("progressDetails")) {
+                    Map<String, Object> progressDetails = (Map<String, Object>) userInformation.get("progressDetails");
+                    userInformation.put("progressDetails", new ArrayList<>(progressDetails.values()));
+                } else {
+                    userInformation.put("progressDetails", new ArrayList<>(contentMaps.values()));
+                }
+            });
             response.getResult().put(Constants.COUNT, userDetailsList.size());
             response.getResult().put(Constants.RESPONSE, userDetailsList.values());
+        } catch (InvalidDataInputException exception) {
+            response.getParams().setErrmsg(exception.getMessage());
+            response.setResponseCode(HttpStatus.BAD_REQUEST);
+            response.getParams().setStatus(Constants.FAILED);
         } catch (Exception e) {
             response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
             response.getParams().setStatus(Constants.FAILED);
@@ -148,7 +156,7 @@ public class ContentProgressServiceImpl implements ContentProgressService {
         propertyMap.put(Constants.BATCH_ID, contentProgressInfo.getBatchId());
         propertyMap.put(Constants.COURSE_ID, contentProgressInfo.getCourseId());
         propertyMap.put(Constants.USER_ID, usersList);
-        if(contentProgressInfo.getContentId() != null && contentProgressInfo.getContentId().size() > 0) {
+        if (contentProgressInfo.getContentId() != null && contentProgressInfo.getContentId().size() > 0) {
             propertyMap.put(Constants.CONTENT_ID_KEY, contentProgressInfo.getContentId());
         }
         return cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD_COURSES,
@@ -179,5 +187,19 @@ public class ContentProgressServiceImpl implements ContentProgressService {
             progressDetailsMap.put(contentId, progressMap);
         }
         return progressDetailsMap;
+    }
+
+    private void validateContentProgressInfo(ContentProgressInfo contentProgressInfo) {
+        if (StringUtils.isEmpty(contentProgressInfo.getBatchId())) {
+            throw new InvalidDataInputException(Constants.CONTENT_PROGRESS_BATCH_ID_ERROR_MSG);
+        }
+
+        if (StringUtils.isEmpty(contentProgressInfo.getCourseId())) {
+            throw new InvalidDataInputException(Constants.CONTENT_PROGRESS_COURSE_ID_ERROR_MSG);
+        }
+
+        if (contentProgressInfo.getContentId().isEmpty()) {
+            throw new InvalidDataInputException(Constants.CONTENT_PROGRESS_CONTENT_ID_ERROR_MSG);
+        }
     }
 }
