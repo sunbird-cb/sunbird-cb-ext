@@ -698,6 +698,12 @@ public class Constants {
 	public static final String UPDATE_CONTENT_PROGRESS_ERROR_MSG = "Error in updating the content progress.";
 	public static final String API_UPDATE_CONTENT_PROGRESS = "api.content.progress.ext.update";
 	public static final String TABLE_ENROLMENT_BATCH_LOOKUP = "enrollment_batch_lookup";
+	public static final String EMPLOYMENT_DETAILS_DEPARTMENT_NAME = "employmentDetails.departmentName";
+	public static final String PROFILE_DETAILS_PHONE = "profileDetails.personalDetails.mobile";
+	public static final String USER_SEARCH_CONTENT_RESULT_LIST = "api.user.offline.session.progress";
+	public static final String CONTENT_PROGRESS_BATCH_ID_ERROR_MSG = "batchId is mandatory";
+	public static final String CONTENT_PROGRESS_COURSE_ID_ERROR_MSG = "courseId is mandatory";
+	public static final String CONTENT_PROGRESS_CONTENT_ID_ERROR_MSG = "contentId is mandatory, atleast one is required";
 
 	private Constants() {
 		throw new IllegalStateException("Utility class");

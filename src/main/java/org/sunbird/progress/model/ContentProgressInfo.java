@@ -1,19 +1,34 @@
 package org.sunbird.progress.model;
 
+import javax.validation.constraints.NotNull;
+import java.util.List;
+
 /**
  *
  */
 public class ContentProgressInfo {
-    private String userId;
+    private List<String> userId;
+    @NotNull
+    private List<String> contentId;
+    @NotNull
     private String courseId;
-    private String applicationId;
+    @NotNull
+    private String batchId;
 
-    public String getUserId() {
+    public List<String> getUserId() {
         return userId;
     }
 
-    public void setUserId(String userId) {
+    public void setUserId(List<String> userId) {
         this.userId = userId;
+    }
+
+    public List<String> getContentId() {
+        return contentId;
+    }
+
+    public void setContentId(List<String> contentId) {
+        this.contentId = contentId;
     }
 
     public String getCourseId() {
@@ -24,11 +39,11 @@ public class ContentProgressInfo {
         this.courseId = courseId;
     }
 
-    public String getApplicationId() {
-        return applicationId;
+    public String getBatchId() {
+        return batchId;
     }
 
-    public void setApplicationId(String applicationId) {
-        this.applicationId = applicationId;
+    public void setBatchId(String batchId) {
+        this.batchId = batchId;
     }
 }

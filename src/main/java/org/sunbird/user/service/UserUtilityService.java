@@ -1,5 +1,6 @@
 package org.sunbird.user.service;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -44,4 +45,6 @@ public interface UserUtilityService {
 	String createBulkUploadUser(UserRegistration userRegistration);
 
 	String updateBulkUploadUser(UserRegistration userRegistration);
+
+	Map<String, Map<String, Object>> getUserDetailsFromES(List<String> userIdList, List<String> userFields) throws IOException;
 }

@@ -21,6 +21,11 @@ public class ContentProgressController {
     @Autowired
     private ContentProgressService service;
 
+    /**
+     * @param requestBody   -Request body of the API which needs to be processed.
+     * @param authUserToken - It's authorization token received in request header.
+     * @return - Return the response of success/failure after processing the request.
+     */
     @PostMapping("/v1/ext/update")
     public ResponseEntity<?> updateContentProgress(@RequestBody SunbirdApiRequest requestBody,
                                                    @RequestHeader(Constants.USER_TOKEN) String authUserToken) {
@@ -35,10 +40,10 @@ public class ContentProgressController {
      * @return - Return the response of success/failure after processing the request.
      */
     @GetMapping("/v1/read/getUserDetails")
-    public ResponseEntity<String> getUserSessionDetailsAndCourseProgress(@RequestBody SunbirdApiRequest requestBody,
+    public ResponseEntity<?> getUserSessionDetailsAndCourseProgress(@RequestBody SunbirdApiRequest requestBody,
                                                                          @RequestHeader(Constants.USER_TOKEN) String authUserToken) throws IOException {
 
-        String responseMsg = service.getUserSessionDetailsAndCourseProgress(authUserToken, requestBody);
-        return new ResponseEntity<>(responseMsg, HttpStatus.OK);
+        SBApiResponse response = service.getUserSessionDetailsAndCourseProgress(authUserToken, requestBody);
+        return new ResponseEntity<>(response, response.getResponseCode());
     }
 }
