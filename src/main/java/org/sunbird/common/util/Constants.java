@@ -694,8 +694,9 @@ public class Constants {
 	public static final String PROFILE_APPROVAL_FIELDS_KEY = "profileApprovalFields";
 	public static final String BULK_UPLOAD_VERIFICATION_REGEX = "bulk.upload.tag.verification.regex";
 	public static final String USER_REGISTRATION_GROUP_LIST = "api.user.registration.group.list";
+    public static final String TABLE_ENROLLMENT_BATCH_LOOKUP = "enrollment_batch_lookup";
 
-	private Constants() {
+    private Constants() {
 		throw new IllegalStateException("Utility class");
 	}
 

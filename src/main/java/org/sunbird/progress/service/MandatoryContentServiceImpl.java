@@ -148,7 +148,7 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
 		}
 	}
 
-	public Map<String, Object> getUserProgress(SunbirdApiRequest requestBody, String authUserToken) {
+	public Map<String, Object> getUserProgress(SunbirdApiRequest requestBody, String authUserToken, String rootOrgId, String userChannel) {
 		Map<String, Object> result = new HashMap<>();
 		try {
 			UserProgressRequest requestData = validateGetBatchEnrolment(requestBody);
@@ -159,15 +159,24 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
 			}
 
 			// get all enrolled details
+			List<String> enrollmentIdList = null;
 			List<Map<String, Object>> userEnrolmentList = new ArrayList<>();
 			for (BatchEnrolment request : requestData.getBatchList()) {
 				Map<String, Object> propertyMap = new HashMap<>();
 				propertyMap.put(Constants.BATCH_ID, request.getBatchId());
-				propertyMap.put(Constants.ACTIVE, Boolean.TRUE);
+				//propertyMap.put(Constants.ACTIVE, Boolean.TRUE);
 				if (request.getUserList() != null && !request.getUserList().isEmpty()) {
-					propertyMap.put(Constants.USER_ID_CONSTANT, request.getUserList());
+					enrollmentIdList = request.getUserList();
+				} else{
+					List<Map<String, Object>> usersEnrolledInTheBatch = cassandraOperation.getRecordsByPropertiesWithoutFiltering(Constants.KEYSPACE_SUNBIRD_COURSES,
+							Constants.TABLE_ENROLLMENT_BATCH_LOOKUP,
+							propertyMap,
+							new ArrayList<>(Arrays.asList(Constants.USER_ID, Constants.BATCH_ID,Constants.ACTIVE)));
+					enrollmentIdList = usersEnrolledInTheBatch.stream().filter(obj -> (Boolean) obj.get(Constants.ACTIVE)).map(obj -> (String) obj.get(Constants.USER_ID_CONSTANT)).collect(Collectors.toList());
 				}
-				userEnrolmentList.addAll(cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD_COURSES,
+				propertyMap.put(Constants.USER_ID, enrollmentIdList);
+				propertyMap.put(Constants.COURSE_ID,requestData.getCourseId());
+				userEnrolmentList.addAll(cassandraOperation.getRecordsByPropertiesWithoutFiltering(Constants.KEYSPACE_SUNBIRD_COURSES,
 						Constants.TABLE_USER_ENROLMENT, propertyMap,
 						new ArrayList<>(Arrays.asList(Constants.USER_ID_CONSTANT, Constants.COURSE_ID,
 								Constants.BATCH_ID, Constants.COMPLETION_PERCENTAGE, Constants.PROGRESS,
@@ -178,15 +187,24 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
 				userEnrolmentList = userEnrolmentList.subList(0, 100);
 			}
 
-			// get all user details
-			List<String> enrolledUserId = userEnrolmentList.stream()
-					.map(obj -> (String) obj.get(Constants.USER_ID_CONSTANT)).collect(Collectors.toList());
 			List<String> userFields = new ArrayList<>(Arrays.asList(Constants.USER_ID_CONSTANT, Constants.FIRSTNAME, Constants.PROFILE_DETAILS_PRIMARY_EMAIL, Constants.CHANNEL,
 					Constants.PROFILE_DETAILS_DESIGNATION, Constants.PROFILE_DETAILS_DESIGNATION_OTHER));
-			Map<String, Object> userMap = userUtilService.getUsersDataFromUserIds(enrolledUserId, userFields,
+			Map<String, Object> userMap = userUtilService.getUsersDataFromUserIds(enrollmentIdList, userFields,
 					authUserToken);
 
 			Map<String, Integer> courseLeafCount = new HashMap<>();
+			if (!courseLeafCount.containsKey(requestData.getCourseId())) {
+				Map<String, Object> contentResponse = contentService.searchLiveContent(rootOrgId, requestData.getCourseId(), userChannel);
+				if (!ObjectUtils.isEmpty(contentResponse)) {
+					Map<String, Object> contentResult = (Map<String, Object>) contentResponse.get(Constants.RESULT);
+					if (0 < (Integer) contentResult.get(Constants.COUNT)) {
+						List<Map<String, Object>> contentList = (List<Map<String, Object>>) contentResult
+								.get(Constants.CONTENT);
+						Map<String, Object> content = contentList.get(0);
+						courseLeafCount.put(requestData.getCourseId(), (Integer) content.get(Constants.LEAF_NODES_COUNT));
+					}
+				}
+			}
 			for (Map<String, Object> responseObj : userEnrolmentList) {
 				// set user details
 				if (userMap.containsKey(responseObj.get(Constants.USER_ID_CONSTANT))) {
@@ -195,22 +213,8 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
 					appendUserDetails(responseObj, userObj);
 				}
 				// set completion percentage & status
-				String courseId = (String) responseObj.get(Constants.COURSE_ID);
-				if (!courseLeafCount.containsKey(courseId)) {
-					Map<String, Object> contentResponse = contentService.searchLiveContent(courseId);
-					if (!ObjectUtils.isEmpty(contentResponse)) {
-						Map<String, Object> contentResult = (Map<String, Object>) contentResponse.get(Constants.RESULT);
-						if (0 < (Integer) contentResult.get(Constants.COUNT)) {
-							List<Map<String, Object>> contentList = (List<Map<String, Object>>) contentResult
-									.get(Constants.CONTENT);
-							Map<String, Object> content = contentList.get(0);
-							courseLeafCount.put(courseId, (Integer) content.get(Constants.LEAF_NODES_COUNT));
-						}
-					}
-				}
-				setCourseCompletiondetails(responseObj, courseLeafCount.get(courseId));
+				setCourseCompletiondetails(responseObj, courseLeafCount.get(requestData.getCourseId()));
 			}
-
 			result.put(Constants.STATUS, Constants.SUCCESSFUL);
 			result.put(Constants.RESULT, userEnrolmentList);
 		} catch (Exception ex) {
@@ -226,7 +230,9 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
 			if (!ObjectUtils.isEmpty(requestBody.getRequest())) {
 				userProgressRequest = mapper.convertValue(requestBody.getRequest(), UserProgressRequest.class);
 			}
-
+			if(ObjectUtils.isEmpty(userProgressRequest.getCourseId())){
+				return null;
+			}
 			if (!userProgressRequest.getBatchList().isEmpty()) {
 				for (BatchEnrolment batchEnrolment : userProgressRequest.getBatchList()) {
 					if (ObjectUtils.isEmpty(batchEnrolment.getBatchId())) {
