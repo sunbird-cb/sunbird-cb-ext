@@ -157,14 +157,13 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
 				result.put(Constants.MESSAGE, "check your request params");
 				return result;
 			}
-
+			int courseLeafCount = getLeafCountForTheCourse(rootOrgId, requestData.getCourseId(), userChannel);
 			// get all enrolled details
 			List<String> enrollmentIdList = null;
 			List<Map<String, Object>> userEnrolmentList = new ArrayList<>();
 			for (BatchEnrolment request : requestData.getBatchList()) {
 				Map<String, Object> propertyMap = new HashMap<>();
 				propertyMap.put(Constants.BATCH_ID, request.getBatchId());
-				//propertyMap.put(Constants.ACTIVE, Boolean.TRUE);
 				if (request.getUserList() != null && !request.getUserList().isEmpty()) {
 					enrollmentIdList = request.getUserList();
 				} else{
@@ -181,30 +180,25 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
 						new ArrayList<>(Arrays.asList(Constants.USER_ID_CONSTANT, Constants.COURSE_ID,
 								Constants.BATCH_ID, Constants.COMPLETION_PERCENTAGE, Constants.PROGRESS,
 								Constants.STATUS, Constants.ISSUED_CERTIFICATES))));
+				if(userEnrolmentList.size() > 100)
+					break;
 			}
 			// restricting with only 100 items in the response
 			if (userEnrolmentList.size() > 100) {
 				userEnrolmentList = userEnrolmentList.subList(0, 100);
 			}
 
+			//get id list from userEnrollmentList, in case  request has more than one batch
+			List<String> enrolledUserIdList = userEnrolmentList.stream()
+					.map(obj -> (String) obj.get(Constants.USER_ID_CONSTANT)).collect(Collectors.toList());
+
+			//inside loop iterating batch list
 			List<String> userFields = new ArrayList<>(Arrays.asList(Constants.USER_ID_CONSTANT, Constants.FIRSTNAME, Constants.PROFILE_DETAILS_PRIMARY_EMAIL, Constants.CHANNEL,
 					Constants.PROFILE_DETAILS_DESIGNATION, Constants.PROFILE_DETAILS_DESIGNATION_OTHER));
-			Map<String, Object> userMap = userUtilService.getUsersDataFromUserIds(enrollmentIdList, userFields,
+			Map<String, Object> userMap = userUtilService.getUsersDataFromUserIds(enrolledUserIdList, userFields,
 					authUserToken);
 
-			Map<String, Integer> courseLeafCount = new HashMap<>();
-			if (!courseLeafCount.containsKey(requestData.getCourseId())) {
-				Map<String, Object> contentResponse = contentService.searchLiveContent(rootOrgId, requestData.getCourseId(), userChannel);
-				if (!ObjectUtils.isEmpty(contentResponse)) {
-					Map<String, Object> contentResult = (Map<String, Object>) contentResponse.get(Constants.RESULT);
-					if (0 < (Integer) contentResult.get(Constants.COUNT)) {
-						List<Map<String, Object>> contentList = (List<Map<String, Object>>) contentResult
-								.get(Constants.CONTENT);
-						Map<String, Object> content = contentList.get(0);
-						courseLeafCount.put(requestData.getCourseId(), (Integer) content.get(Constants.LEAF_NODES_COUNT));
-					}
-				}
-			}
+
 			for (Map<String, Object> responseObj : userEnrolmentList) {
 				// set user details
 				if (userMap.containsKey(responseObj.get(Constants.USER_ID_CONSTANT))) {
@@ -213,7 +207,7 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
 					appendUserDetails(responseObj, userObj);
 				}
 				// set completion percentage & status
-				setCourseCompletiondetails(responseObj, courseLeafCount.get(requestData.getCourseId()));
+				setCourseCompletiondetails(responseObj, courseLeafCount);
 			}
 			result.put(Constants.STATUS, Constants.SUCCESSFUL);
 			result.put(Constants.RESULT, userEnrolmentList);
@@ -302,5 +296,20 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
 			responseObj.put(Constants.COMPLETION_PERCENTAGE, 100);
 			responseObj.put(Constants.STATUS, 2);
 		}
+	}
+
+	private int getLeafCountForTheCourse(String rootOrgId, String courseId, String userChannel){
+		int leafCountForTheCOurse = 0;
+		Map<String, Object> contentResponse = contentService.searchLiveContent(rootOrgId, courseId, userChannel);
+		if (!ObjectUtils.isEmpty(contentResponse)) {
+			Map<String, Object> contentResult = (Map<String, Object>) contentResponse.get(Constants.RESULT);
+			if (0 < (Integer) contentResult.get(Constants.COUNT)) {
+				List<Map<String, Object>> contentList = (List<Map<String, Object>>) contentResult
+						.get(Constants.CONTENT);
+				Map<String, Object> content = contentList.get(0);
+				leafCountForTheCOurse = (Integer)content.get(Constants.LEAF_NODES_COUNT);
+			}
+		}
+		return leafCountForTheCOurse;
 	}
 }
