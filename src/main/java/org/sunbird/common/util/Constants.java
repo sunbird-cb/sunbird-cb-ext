@@ -699,6 +699,35 @@ public class Constants {
 	public static final String API_UPDATE_CONTENT_PROGRESS = "api.content.progress.ext.update";
 	public static final String TABLE_ENROLMENT_BATCH_LOOKUP = "enrollment_batch_lookup";
 
+	public static final String END_TIME_KEY = "endTime";
+
+	public static final String SESSION_ID="sessionId";
+
+	public static final String QR_CODE_URL="qrcodeurl";
+
+	public static final String VM="vm";
+
+	public static final String HEADER="header";
+
+	public static final String FOOTER="footer";
+
+	public static final String PDF="pdf";
+
+	public static final String PROGRAM_NAME="programName";
+
+	public static final String EMPTY="";
+
+	public static final String BATCH_SESSION_HEADER="pdf-batch-session-header";
+
+	public static final String BATCH_SESSION_FOOTER="pdf-batch-session-footer";
+
+	public static final String BATCH_SESSION_BODY="pdf-batch-session-body";
+
+	public static final String SESSION="session";
+
+	public static final String TABLE_COURSE_BATCH_ATTRIBUTES="batch_attributes";
+
+	public static final String TABLE_COURSE_SESSION_DETAILS="sessionDetails_v2";
 	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}
