@@ -377,8 +377,8 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 		HashMap<String,HashMap<String,String>> pdfDetails = populatePDFTemplateDetails();
 		HashMap<String,HashMap> pdfParams = populatePDFParams();
 		HashMap propertyMap = new HashMap();
-		propertyMap.put(Constants.COURSE_ID_COLUMN,courseId);
-		propertyMap.put(Constants.BATCH_ID_COLUMN,batchId);
+		propertyMap.put(Constants.COURSE_ID,courseId);
+		propertyMap.put(Constants.BATCH_ID,batchId);
 
 		List<Map<String, Object>> batches = cassandraOperation.getRecordsByProperties(
 				Constants.KEYSPACE_SUNBIRD_COURSES, Constants.TABLE_COURSE_BATCH, propertyMap,
