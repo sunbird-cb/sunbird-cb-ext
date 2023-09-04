@@ -170,16 +170,16 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
 					List<Map<String, Object>> usersEnrolledInTheBatch = cassandraOperation.getRecordsByPropertiesWithoutFiltering(Constants.KEYSPACE_SUNBIRD_COURSES,
 							Constants.TABLE_ENROLLMENT_BATCH_LOOKUP,
 							propertyMap,
-							new ArrayList<>(Arrays.asList(Constants.USER_ID, Constants.BATCH_ID,Constants.ACTIVE)));
+							Arrays.asList(Constants.USER_ID, Constants.BATCH_ID,Constants.ACTIVE));
 					enrollmentIdList = usersEnrolledInTheBatch.stream().filter(obj -> (Boolean) obj.get(Constants.ACTIVE)).map(obj -> (String) obj.get(Constants.USER_ID_CONSTANT)).collect(Collectors.toList());
 				}
 				propertyMap.put(Constants.USER_ID, enrollmentIdList);
 				propertyMap.put(Constants.COURSE_ID,requestData.getCourseId());
 				userEnrolmentList.addAll(cassandraOperation.getRecordsByPropertiesWithoutFiltering(Constants.KEYSPACE_SUNBIRD_COURSES,
 						Constants.TABLE_USER_ENROLMENT, propertyMap,
-						new ArrayList<>(Arrays.asList(Constants.USER_ID_CONSTANT, Constants.COURSE_ID,
+						Arrays.asList(Constants.USER_ID_CONSTANT, Constants.COURSE_ID,
 								Constants.BATCH_ID, Constants.COMPLETION_PERCENTAGE, Constants.PROGRESS,
-								Constants.STATUS, Constants.ISSUED_CERTIFICATES))));
+								Constants.STATUS, Constants.ISSUED_CERTIFICATES)));
 				if(userEnrolmentList.size() > 100)
 					break;
 			}
@@ -193,8 +193,8 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
 					.map(obj -> (String) obj.get(Constants.USER_ID_CONSTANT)).collect(Collectors.toList());
 
 			//inside loop iterating batch list
-			List<String> userFields = new ArrayList<>(Arrays.asList(Constants.USER_ID_CONSTANT, Constants.FIRSTNAME, Constants.PROFILE_DETAILS_PRIMARY_EMAIL, Constants.CHANNEL,
-					Constants.PROFILE_DETAILS_DESIGNATION, Constants.PROFILE_DETAILS_DESIGNATION_OTHER));
+			List<String> userFields = Arrays.asList(Constants.USER_ID_CONSTANT, Constants.FIRSTNAME, Constants.PROFILE_DETAILS_PRIMARY_EMAIL, Constants.CHANNEL,
+					Constants.PROFILE_DETAILS_DESIGNATION, Constants.PROFILE_DETAILS_DESIGNATION_OTHER);
 			Map<String, Object> userMap = userUtilService.getUsersDataFromUserIds(enrolledUserIdList, userFields,
 					authUserToken);
 
