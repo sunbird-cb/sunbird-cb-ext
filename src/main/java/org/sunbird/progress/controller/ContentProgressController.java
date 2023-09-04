@@ -39,7 +39,7 @@ public class ContentProgressController {
      * @param authUserToken - It's authorization token received in request header.
      * @return - Return the response of success/failure after processing the request.
      */
-    @GetMapping("/v1/read/getUserDetails")
+    @PostMapping("/v1/read/getUserDetails")
     public ResponseEntity<?> getUserSessionDetailsAndCourseProgress(@RequestBody SunbirdApiRequest requestBody,
                                                                          @RequestHeader(Constants.USER_TOKEN) String authUserToken) throws IOException {
 
