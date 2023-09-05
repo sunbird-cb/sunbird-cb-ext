@@ -23,6 +23,8 @@ public interface ContentService {
 
 	Map<String, Object> searchLiveContentByContentIds(List<String> contentIds);
 
+	public Map<String, Object> searchLiveContent(String rootOrgId, String contentId, String userChannel);
+
 	public Map<String, Object> searchLiveContent(String rootOrgId, String contentId);
 
 	public Map<String, Object> searchLiveContent(String contentId);
