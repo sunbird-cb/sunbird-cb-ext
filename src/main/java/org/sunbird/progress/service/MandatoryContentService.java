@@ -10,5 +10,5 @@ public interface MandatoryContentService {
 	public MandatoryContentResponse getMandatoryContentStatusForUser(String authUserToken, String rootOrg, String org,
 			String userId);
 
-	public Map<String, Object> getUserProgress(SunbirdApiRequest requestBody, String authUserToken);
+	public Map<String, Object> getUserProgress(SunbirdApiRequest requestBody, String authUserToken, String rootOrgId, String userChannel);
 }
