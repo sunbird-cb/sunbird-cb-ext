@@ -100,15 +100,15 @@ public class ContentProgressServiceImpl implements ContentProgressService {
                     }
                 }));
             }
-            final Map<String, Map<String, Object>> contentMaps = prepareProgressDetailsMap(contentProgressInfo.getContentId());
+            //final Map<String, Map<String, Object>> contentMaps = prepareProgressDetailsMap(contentProgressInfo.getContentId());
             List<Map<String, Object>> userContentConsumptionList = getUserContentConsumptionDetails(contentProgressInfo, usersList);
             Map<String, Map<String, Object>> userDetailsList = userUtilityService.getUserDetailsFromES(usersList, Arrays.asList(Constants.USER_FIRST_NAME, Constants.PROFILE_DETAILS_DESIGNATION, Constants.PROFILE_DETAILS_PRIMARY_EMAIL, Constants.CHANNEL, Constants.USER_ID, Constants.EMPLOYMENT_DETAILS_DEPARTMENT_NAME, Constants.PROFILE_DETAILS_PHONE, Constants.ROOT_ORG_ID));
             userContentConsumptionList.forEach(contentMap -> {
                 String userId = (String) contentMap.get(Constants.USER_ID);
                 String contentId = (String) contentMap.get("contentid");
-                userDetailsList.get(userId).computeIfAbsent("progressDetails", key -> {
+               /* userDetailsList.get(userId).computeIfAbsent("progressDetails", key -> {
                     return new HashMap<>(contentMaps);
-                });
+                });*/
                 contentMap.remove(Constants.USER_ID);
                 Map<String, Object> userMap = userDetailsList.get(userId);
                 if (userMap.containsKey("progressDetails")) {
@@ -117,9 +117,13 @@ public class ContentProgressServiceImpl implements ContentProgressService {
                         return contentMap;
                     });
                 } else {
-                    List<Map<String, Object>> progressDetails = new ArrayList<Map<String, Object>>();
-                    progressDetails.add(contentMap);
-                    userMap.put("progressDetails", progressDetails);
+                    Map<String, Map<String, Object>> progressDetailsMap = new HashMap<String, Map<String, Object>>();
+                    Map<String, Object> progressMap = new HashMap<String, Object>();
+                    progressMap.put("contentId", contentId);
+                    progressMap.put("status", contentMap.get("status"));
+                    progressDetailsMap.put(contentId, progressMap);
+                    userMap.put("progressDetails", progressDetailsMap);
+
                 }
             });
             userDetailsList.forEach((userId, userInformation) -> {
@@ -127,7 +131,7 @@ public class ContentProgressServiceImpl implements ContentProgressService {
                     Map<String, Object> progressDetails = (Map<String, Object>) userInformation.get("progressDetails");
                     userInformation.put("progressDetails", new ArrayList<>(progressDetails.values()));
                 } else {
-                    userInformation.put("progressDetails", new ArrayList<>(contentMaps.values()));
+                    userInformation.put("progressDetails", new ArrayList<>());
                 }
             });
             response.getResult().put(Constants.COUNT, userDetailsList.size());
@@ -175,10 +179,10 @@ public class ContentProgressServiceImpl implements ContentProgressService {
         Map<String, Object> propertyMap = new HashMap<>();
         propertyMap.put(Constants.BATCH_ID, contentProgressInfo.getBatchId());
         return cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD_COURSES,
-                Constants.TABLE_ENROLMENT_BATCH_LOOKUP, propertyMap, Arrays.asList(Constants.BATCH_ID, Constants.USER_ID, Constants.ACTIVE));
+                Constants.TABLE_ENROLMENT_BATCH_LOOKUP, propertyMap, Arrays.asList(Constants.BATCH_ID, Constants.USER_ID));
     }
 
-    private Map<String, Map<String, Object>> prepareProgressDetailsMap(List<String> contentIdList) {
+    /*private Map<String, Map<String, Object>> prepareProgressDetailsMap(List<String> contentIdList) {
         Map<String, Map<String, Object>> progressDetailsMap = new HashMap<String, Map<String, Object>>();
         for (String contentId : contentIdList) {
             Map<String, Object> progressMap = new HashMap<String, Object>();
@@ -187,7 +191,7 @@ public class ContentProgressServiceImpl implements ContentProgressService {
             progressDetailsMap.put(contentId, progressMap);
         }
         return progressDetailsMap;
-    }
+    }*/
 
     private void validateContentProgressInfo(ContentProgressInfo contentProgressInfo) {
         if (StringUtils.isEmpty(contentProgressInfo.getBatchId())) {
