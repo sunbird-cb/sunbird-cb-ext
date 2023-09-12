@@ -452,7 +452,7 @@ public class CohortsServiceImpl implements CohortsService {
 				if (CollectionUtils.isEmpty(userActiveEnrollmentForBatch)) {
 					Map<String, Object> enrollResponse = new HashMap<>();
 					enrollResponse = enrollInCourse(contentId, userUUID, headers, (String) batchDetail.get(Constants.BATCH_ID));
-					if (!ObjectUtils.isEmpty(enrollResponse) && Constants.OK == enrollResponse.get(Constants.RESPONSE_CODE)) {
+					if (!ObjectUtils.isEmpty(enrollResponse) && Constants.OK.equals(enrollResponse.get(Constants.RESPONSE_CODE))) {
 						finalResponse.setResult(enrollResponse);
 						finalResponse.setResponseCode(HttpStatus.OK);
 						isEnrolledWithBatch = true;
