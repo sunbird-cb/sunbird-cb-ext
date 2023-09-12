@@ -20,6 +20,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.sunbird.assessment.repo.CohortUsers;
 import org.sunbird.assessment.repo.UserAssessmentTopPerformerRepository;
+import org.sunbird.cassandra.utils.CassandraOperation;
 import org.sunbird.common.model.*;
 import org.sunbird.common.service.ContentService;
 import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
@@ -52,6 +53,9 @@ public class CohortsServiceImpl implements CohortsService {
 
 	@Autowired
 	CbExtServerProperties cbExtServerProperties;
+
+	@Autowired
+	CassandraOperation cassandraOperation;
 
 	@Override
 	public List<CohortUsers> getTopPerformers(String rootOrg, String contentId, String userId, int count) {
@@ -425,5 +429,61 @@ public class CohortsServiceImpl implements CohortsService {
 			logger.error(e);
 		}
 		return activeUserCollection;
+	}
+
+	@Override
+	public SBApiResponse autoEnrollmentInCourseV2(String authUserToken, String rootOrgId, String rootOrg, String contentId, String userUUID)
+			throws Exception {
+		SBApiResponse finalResponse = ProjectUtil.createDefaultResponse(Constants.API_USER_ENROLMENT);
+		try {
+			List<Map<String, Object>> batchDetails = getCourseBatchDetails(contentId);
+			Map<String, String> headers = new HashMap<>();
+			headers.put("x-authenticated-user-token", authUserToken);
+			headers.put("authorization", cbExtServerProperties.getSbApiKey());
+			headers.put(Constants.X_AUTH_USER_ORG_ID, rootOrgId);
+			if (CollectionUtils.isEmpty(batchDetails))
+				throw new Exception(Constants.BATCH_NOT_AVAILABLE_ERROR_MSG);
+			List<String> batchIdList = batchDetails.stream().map(batchDetail -> (String)batchDetail.get(Constants.BATCH_ID)).collect(Collectors.toList());
+			List<Map<String, Object>> userActiveEnrollmentForBatch = getActiveEnrollmentForUser(batchIdList, userUUID);
+			boolean isEnrolledWithBatch = false;
+			if(userActiveEnrollmentForBatch.size() > 0)
+				throw new Exception(Constants.BATCH_ALREADY_ENROLLED_MSG);
+			for (Map<String, Object> batchDetail : batchDetails) {
+				if (CollectionUtils.isEmpty(userActiveEnrollmentForBatch)) {
+					Map<String, Object> enrollResponse = new HashMap<>();
+					enrollResponse = enrollInCourse(contentId, userUUID, headers, (String) batchDetail.get(Constants.BATCH_ID));
+					if (!ObjectUtils.isEmpty(enrollResponse) && Constants.OK == enrollResponse.get(Constants.RESPONSE_CODE)) {
+						finalResponse.setResult(enrollResponse);
+						finalResponse.setResponseCode(HttpStatus.OK);
+						isEnrolledWithBatch = true;
+						break;
+					}
+				}
+			}
+			if(!isEnrolledWithBatch) {
+				throw new Exception(Constants.BATCH_AUTO_ENROLL_ERROR_MSG);
+			}
+		} catch (Exception e) {
+			logger.error("Failed to auto enrol user. Exception: ", e);
+			finalResponse.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+			finalResponse.getParams().setErrmsg(e.getMessage());
+		}
+		return finalResponse;
+	}
+
+	private List<Map<String, Object>> getCourseBatchDetails(String courseId) {
+		Map<String, Object> propertyMap = new HashMap<>();
+		propertyMap.put(Constants.COURSE_ID, courseId);
+		return cassandraOperation.getRecordsByPropertiesWithoutFiltering(Constants.KEYSPACE_SUNBIRD_COURSES,
+				Constants.TABLE_COURSE_BATCH, propertyMap, Arrays.asList(Constants.BATCH_ID, Constants.STATUS));
+	}
+
+	private List<Map<String, Object>> getActiveEnrollmentForUser(List<String> batchIds, String userId) {
+		Map<String, Object> propertyMap = new HashMap<>();
+		propertyMap.put(Constants.BATCH_ID, batchIds);
+		propertyMap.put(Constants.USER_ID, userId);
+		List<Map<String, Object>> activeEnrollmentForUser = cassandraOperation.getRecordsByPropertiesWithoutFiltering(Constants.KEYSPACE_SUNBIRD_COURSES,
+				Constants.TABLE_ENROLLMENT_BATCH_LOOKUP, propertyMap, Arrays.asList(Constants.BATCH_ID, Constants.USER_ID, Constants.ACTIVE));
+		return activeEnrollmentForUser.stream().filter(enrollmentForUser -> (boolean)enrollmentForUser.get(Constants.ACTIVE)).collect(Collectors.toList());
 	}
 }
