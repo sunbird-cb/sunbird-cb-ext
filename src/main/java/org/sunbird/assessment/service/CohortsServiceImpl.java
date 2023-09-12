@@ -441,32 +441,33 @@ public class CohortsServiceImpl implements CohortsService {
 			headers.put("x-authenticated-user-token", authUserToken);
 			headers.put("authorization", cbExtServerProperties.getSbApiKey());
 			headers.put(Constants.X_AUTH_USER_ORG_ID, rootOrgId);
-			if (CollectionUtils.isEmpty(batchDetails))
-				throw new Exception(Constants.BATCH_NOT_AVAILABLE_ERROR_MSG);
-			List<String> batchIdList = batchDetails.stream().map(batchDetail -> (String)batchDetail.get(Constants.BATCH_ID)).collect(Collectors.toList());
+			if (CollectionUtils.isEmpty(batchDetails)) {
+				ProjectUtil.updateErrorDetails(finalResponse, Constants.BATCH_NOT_AVAILABLE_ERROR_MSG, HttpStatus.BAD_REQUEST);
+				return finalResponse;
+			}
+			List<String> batchIdList = batchDetails.stream().map(batchDetail -> (String) batchDetail.get(Constants.BATCH_ID)).collect(Collectors.toList());
 			List<Map<String, Object>> userActiveEnrollmentForBatch = getActiveEnrollmentForUser(batchIdList, userUUID);
 			boolean isEnrolledWithBatch = false;
-			if(userActiveEnrollmentForBatch.size() > 0)
-				throw new Exception(Constants.BATCH_ALREADY_ENROLLED_MSG);
+			if (userActiveEnrollmentForBatch.size() > 0) {
+				ProjectUtil.updateErrorDetails(finalResponse, Constants.BATCH_ALREADY_ENROLLED_MSG, HttpStatus.BAD_REQUEST);
+				return finalResponse;
+			}
 			for (Map<String, Object> batchDetail : batchDetails) {
-				if (CollectionUtils.isEmpty(userActiveEnrollmentForBatch)) {
-					Map<String, Object> enrollResponse = new HashMap<>();
-					enrollResponse = enrollInCourse(contentId, userUUID, headers, (String) batchDetail.get(Constants.BATCH_ID));
-					if (!ObjectUtils.isEmpty(enrollResponse) && Constants.OK.equals(enrollResponse.get(Constants.RESPONSE_CODE))) {
-						finalResponse.setResult(enrollResponse);
-						finalResponse.setResponseCode(HttpStatus.OK);
-						isEnrolledWithBatch = true;
-						break;
-					}
+				Map<String, Object> enrollResponse = enrollInCourse(contentId, userUUID, headers, (String) batchDetail.get(Constants.BATCH_ID));
+				if (!ObjectUtils.isEmpty(enrollResponse) && Constants.OK.equals(enrollResponse.get(Constants.RESPONSE_CODE))) {
+					finalResponse.setResult(enrollResponse);
+					finalResponse.setResponseCode(HttpStatus.OK);
+					isEnrolledWithBatch = true;
+					break;
 				}
 			}
-			if(!isEnrolledWithBatch) {
-				throw new Exception(Constants.BATCH_AUTO_ENROLL_ERROR_MSG);
+			if (!isEnrolledWithBatch) {
+				ProjectUtil.updateErrorDetails(finalResponse, Constants.BATCH_AUTO_ENROLL_ERROR_MSG, HttpStatus.BAD_REQUEST);
+				return finalResponse;
 			}
 		} catch (Exception e) {
 			logger.error("Failed to auto enrol user. Exception: ", e);
-			finalResponse.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
-			finalResponse.getParams().setErrmsg(e.getMessage());
+			ProjectUtil.updateErrorDetails(finalResponse, e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		return finalResponse;
 	}
