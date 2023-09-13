@@ -460,7 +460,7 @@ public class CohortsServiceImpl implements CohortsService {
 				selectedBatch.setEnrollmentEndDate(null);
 				selectedBatch.setEnrollmentType("open");
 				selectedBatch.setName((String) batchDetail.get(Constants.NAME));
-				selectedBatch.setStartDate(new SimpleDateFormat("yyyy-MM-dd").format(batchDetail.get(Constants.ENROLL_START_DATE)));
+				selectedBatch.setStartDate(new SimpleDateFormat("yyyy-MM-dd").format(batchDetail.get(Constants.START_DATE)));
 				selectedBatch.setStatus((Integer) batchDetail.get(Constants.STATUS));
 				Map<String, Object> enrollResponse = enrollInCourse(contentId, userUUID, headers, (String) batchDetail.get(Constants.BATCH_ID));
 				if (!ObjectUtils.isEmpty(enrollResponse) && Constants.OK.equals(enrollResponse.get(Constants.RESPONSE_CODE))) {
