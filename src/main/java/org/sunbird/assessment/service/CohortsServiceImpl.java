@@ -453,10 +453,18 @@ public class CohortsServiceImpl implements CohortsService {
 				return finalResponse;
 			}
 			for (Map<String, Object> batchDetail : batchDetails) {
+				SunbirdApiBatchResp selectedBatch = new SunbirdApiBatchResp();
+				selectedBatch.setBatchId((String) batchDetail.get(Constants.BATCH_ID));
+				selectedBatch.setEndDate(null);
+				selectedBatch.setCreatedFor(new ArrayList<>());
+				selectedBatch.setEnrollmentEndDate(null);
+				selectedBatch.setEnrollmentType("open");
+				selectedBatch.setName((String) batchDetail.get(Constants.NAME));
+				selectedBatch.setStartDate(new SimpleDateFormat("yyyy-MM-dd").format(batchDetail.get(Constants.ENROLL_START_DATE)));
+				selectedBatch.setStatus((Integer) batchDetail.get(Constants.STATUS));
 				Map<String, Object> enrollResponse = enrollInCourse(contentId, userUUID, headers, (String) batchDetail.get(Constants.BATCH_ID));
 				if (!ObjectUtils.isEmpty(enrollResponse) && Constants.OK.equals(enrollResponse.get(Constants.RESPONSE_CODE))) {
-					finalResponse.setResult(enrollResponse);
-					finalResponse.setResponseCode(HttpStatus.OK);
+					finalResponse = constructAutoEnrollResponse(selectedBatch);
 					isEnrolledWithBatch = true;
 					break;
 				}
@@ -476,7 +484,7 @@ public class CohortsServiceImpl implements CohortsService {
 		Map<String, Object> propertyMap = new HashMap<>();
 		propertyMap.put(Constants.COURSE_ID, courseId);
 		return cassandraOperation.getRecordsByPropertiesWithoutFiltering(Constants.KEYSPACE_SUNBIRD_COURSES,
-				Constants.TABLE_COURSE_BATCH, propertyMap, Arrays.asList(Constants.BATCH_ID, Constants.STATUS));
+				Constants.TABLE_COURSE_BATCH, propertyMap, Arrays.asList(Constants.BATCH_ID, Constants.STATUS, Constants.ENROLL_START_DATE, Constants.NAME));
 	}
 
 	private List<Map<String, Object>> getActiveEnrollmentForUser(List<String> batchIds, String userId) {
@@ -485,6 +493,6 @@ public class CohortsServiceImpl implements CohortsService {
 		propertyMap.put(Constants.USER_ID, userId);
 		List<Map<String, Object>> activeEnrollmentForUser = cassandraOperation.getRecordsByPropertiesWithoutFiltering(Constants.KEYSPACE_SUNBIRD_COURSES,
 				Constants.TABLE_ENROLLMENT_BATCH_LOOKUP, propertyMap, Arrays.asList(Constants.BATCH_ID, Constants.USER_ID, Constants.ACTIVE));
-		return activeEnrollmentForUser.stream().filter(enrollmentForUser -> (boolean)enrollmentForUser.get(Constants.ACTIVE)).collect(Collectors.toList());
+		return activeEnrollmentForUser.stream().filter(enrollmentForUser -> (boolean) enrollmentForUser.get(Constants.ACTIVE)).collect(Collectors.toList());
 	}
 }

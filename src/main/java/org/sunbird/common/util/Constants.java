@@ -697,7 +697,7 @@ public class Constants {
 	public static final String BATCH_ALREADY_ENROLLED_MSG = "Already Enrolled in batches.";
 	public static final String BATCH_AUTO_ENROLL_ERROR_MSG = "Failed to auto enrol user in batch.";
 	public static final String BATCH_NOT_AVAILABLE_ERROR_MSG = "No Batch Available.";
-
+	public static final String ENROLL_START_DATE = "start_date";
 	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}
