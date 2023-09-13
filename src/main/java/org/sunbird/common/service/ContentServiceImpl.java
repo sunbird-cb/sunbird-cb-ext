@@ -331,4 +331,17 @@ public class ContentServiceImpl implements ContentService {
 			logger.error("Failed to get Content details. Exception: ", e);
 		}
 	}
+
+	@Override
+	public Map<String, Object> readContent(String contentId) {
+		StringBuilder url = new StringBuilder();
+		url.append(serverConfig.getContentHost()).append(serverConfig.getContentReadEndPoint()).append("/" + contentId)
+				.append(serverConfig.getContentReadEndPointFields());
+		Map<String, Object> response = (Map<String, Object>) outboundRequestHandlerService.fetchResult(url.toString());
+		if (null != response && Constants.OK.equalsIgnoreCase((String) response.get(Constants.RESPONSE_CODE))) {
+			Map<String, Object> contentResult = (Map<String, Object>) response.get(Constants.RESULT);
+			return (Map<String, Object>) contentResult.get(Constants.CONTENT);
+		}
+		return null;
+	}
 }
