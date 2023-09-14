@@ -470,6 +470,15 @@ public class CbExtServerProperties {
 	@Value("${bulk.upload.tag.verification.regex}")
 	private String bulkUploadTagVerificationRegex;
 
+	@Value("${content.type.auto.enroll.accepted}")
+	private String contentTypeAutoEnrollAccepted;
+
+	@Value("${content-read-endpoint-fields}")
+	private String contentReadEndPointFields;
+
+	@Value("${content-read-endpoint}")
+	private String contentReadEndPoint;
+
 	public String getAssessmentSubmitTopic() {
 		return assessmentSubmitTopic;
 	}
@@ -1715,5 +1724,29 @@ public class CbExtServerProperties {
 
 	public void setBulkUploadTagVerificationRegex(String bulkUploadTagVerificationRegex) {
 		this.bulkUploadTagVerificationRegex = bulkUploadTagVerificationRegex;
+	}
+
+	public List<String> getContentTypeAutoEnrollAccepted() {
+		return Arrays.asList(contentTypeAutoEnrollAccepted.split(",", -1));
+	}
+
+	public void setContentTypeAutoEnrollAccepted(String contentTypeAutoEnrollAccepted) {
+		this.contentTypeAutoEnrollAccepted = contentTypeAutoEnrollAccepted;
+	}
+
+	public String getContentReadEndPointFields() {
+		return contentReadEndPointFields;
+	}
+
+	public void setContentReadEndPointFields(String contentReadEndPointFields) {
+		this.contentReadEndPointFields = contentReadEndPointFields;
+	}
+
+	public String getContentReadEndPoint() {
+		return contentReadEndPoint;
+	}
+
+	public void setContentReadEndPoint(String contentReadEndPoint) {
+		this.contentReadEndPoint = contentReadEndPoint;
 	}
 }
