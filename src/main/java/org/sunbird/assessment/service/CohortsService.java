@@ -12,4 +12,6 @@ public interface CohortsService {
 	List<CohortUsers> getActiveUsers(String xAuthUser, String rootOrgId, String rootOrg, String contentId, String userUUID, int count, Boolean toFilter)
 			throws Exception;
 	SBApiResponse autoEnrollmentInCourse(String authUserToken, String rootOrgId, String rootOrg, String contentId, String userUUID)throws Exception;
+
+	SBApiResponse autoEnrollmentInCourseV2(String authUserToken, String rootOrgId, String rootOrg, String contentId, String userUUID)throws Exception;
 }

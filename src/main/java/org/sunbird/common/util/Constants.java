@@ -693,7 +693,12 @@ public class Constants {
 	public static final String VERIFIED_PROFILE_FIELDS_KEY = "verifiedProfileFields";
 	public static final String PROFILE_APPROVAL_FIELDS_KEY = "profileApprovalFields";
 	public static final String BULK_UPLOAD_VERIFICATION_REGEX = "bulk.upload.tag.verification.regex";
-
+	public static final String TABLE_ENROLLMENT_BATCH_LOOKUP = "enrollment_batch_lookup";
+	public static final String BATCH_ALREADY_ENROLLED_MSG = "Already Enrolled in batches.";
+	public static final String BATCH_AUTO_ENROLL_ERROR_MSG = "Failed to auto enrol user in batch.";
+	public static final String BATCH_NOT_AVAILABLE_ERROR_MSG = "No Batch Available.";
+	public static final String AUTO_ENROLL_PRIMARY_CATEGORY_ERROR_MSG = "Auto enrolment is not allowed for '%s' course.";
+	public static final String CONTENT_NOT_AVAILABLE = "Content Search failed for Content: %s.";
 	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}
