@@ -84,7 +84,7 @@ public class CohortsController {
 		if (authUserToken.contains(" ")) {
 			authUserToken = authUserToken.split(" ")[1];
 		}
-		SBApiResponse response = cohortsServ.autoEnrollmentInCourse(authUserToken, rootOrgId, rootOrg, contentId, userUUID);
+		SBApiResponse response = cohortsServ.autoEnrollmentInCourseV2(authUserToken, rootOrgId, rootOrg, contentId, userUUID);
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
 
@@ -150,7 +150,7 @@ public class CohortsController {
 															@RequestHeader("rootOrg") String rootOrg,
 															@RequestHeader("userUUID") String userUUID)throws Exception {
 
-		SBApiResponse response = cohortsServ.autoEnrollmentInCourse(authUserToken, rootOrgId, rootOrg, contentId, userUUID);
+		SBApiResponse response = cohortsServ.autoEnrollmentInCourseV2(authUserToken, rootOrgId, rootOrg, contentId, userUUID);
 		return new ResponseEntity<>(response, response.getResponseCode());
 
 	}
