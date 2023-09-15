@@ -4,11 +4,7 @@ import java.io.IOException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.util.CbExtServerProperties;
@@ -38,5 +34,13 @@ public class StorageController {
 			throws JsonProcessingException {
 		SBApiResponse deleteResponse = storageService.deleteFile(fileName, serverConfig.getCloudContainerName());
 		return new ResponseEntity<>(deleteResponse, deleteResponse.getResponseCode());
+	}
+
+	@GetMapping("/v1/report/{reportType}/{date}/{orgId}/{fileName}")
+	public ResponseEntity<?> downloadFile(@PathVariable("reportType") String reportType,
+										  @PathVariable("date") String date,
+										  @PathVariable("orgId") String orgId,
+										  @PathVariable("fileName") String fileName) {
+		return storageService.downloadFile(reportType, date, orgId, fileName);
 	}
 }

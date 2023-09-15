@@ -176,16 +176,15 @@ public class ContentServiceImpl implements ContentService {
 		return null;
 	}
 
-	public Map<String, Object> searchLiveContent(String contentId) {
-		return searchLiveContent("", contentId);
-	}
-
-	public Map<String, Object> searchLiveContent(String rootOrgId, String contentId) {
+	public Map<String, Object> searchLiveContent(String rootOrgId, String contentId, String userChannel){
 		Map<String, Object> response = null;
 		HashMap<String, String> headerValues = new HashMap<>();
 		headerValues.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
 		if (StringUtils.isNotEmpty(rootOrgId)) {
 			headerValues.put(Constants.X_AUTH_USER_ORG_ID, rootOrgId);
+		}
+		if (StringUtils.isNotEmpty(userChannel)) {
+			headerValues.put(Constants.X_AUTH_USER_CHANNEL, userChannel);
 		}
 		Map<String, Object> filters = new HashMap<>();
 		filters.put(Constants.PRIMARY_CATEGORY, serverConfig.getContentSearchPrimaryCategoryFilter());
@@ -204,6 +203,14 @@ public class ContentServiceImpl implements ContentService {
 			return response;
 		}
 		return null;
+	}
+
+	public Map<String, Object> searchLiveContent(String contentId) {
+		return searchLiveContent("", contentId);
+	}
+
+	public Map<String, Object> searchLiveContent(String rootOrgId, String contentId) {
+		return searchLiveContent("", contentId, "");
 	}
 
 	public Map<String, Object> getHierarchyResponseMap(String contentId) {

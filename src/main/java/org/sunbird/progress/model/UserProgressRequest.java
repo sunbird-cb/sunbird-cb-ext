@@ -4,6 +4,7 @@ import java.util.List;
 
 public class UserProgressRequest {
 
+	private String courseId;
 	private List<BatchEnrolment> batchList;
 	private int limit;
 	private int offset;
@@ -32,4 +33,11 @@ public class UserProgressRequest {
 		this.offset = offset;
 	}
 
+	public String getCourseId() {
+		return courseId;
+	}
+
+	public void setCourseId(String courseId) {
+		this.courseId = courseId;
+	}
 }

@@ -543,6 +543,9 @@ public class ProfileServiceImpl implements ProfileService {
 					Map<String, Object> personalDetail = (Map<String, Object>) profileData
 							.get(Constants.PERSONAL_DETAILS);
 					responseMap.put(Constants.EMAIL, personalDetail.get(Constants.PRIMARY_EMAIL));
+					if (personalDetail.containsKey(Constants.MOBILE)) {
+						responseMap.put(Constants.PHONE, String.valueOf(personalDetail.get(Constants.MOBILE)));
+					}
 				}
 
 				responseMap.put(Constants.FIRSTNAME, userData.get(Constants.FIRSTNAME));
@@ -886,7 +889,7 @@ public class ProfileServiceImpl implements ProfileService {
 			errList.add(Constants.REQUEST);
 		} else {
 			Map<String, Object> request = (Map<String, Object>) requestObj.get(Constants.REQUEST);
-			List<String> keys = Arrays.asList(Constants.USER_ID, Constants.POSITION, Constants.CHANNEL,
+			List<String> keys = Arrays.asList(Constants.USER_ID, Constants.GROUP, Constants.CHANNEL,
 					Constants.MAP_ID, Constants.ORGANIZATION_TYPE, Constants.ORGANIZATION_SUB_TYPE);
 			for (String key : keys) {
 				if (StringUtils.isBlank((String) request.get(key))) {
@@ -1017,7 +1020,7 @@ public class ProfileServiceImpl implements ProfileService {
 			};
 			existingProfile.put(Constants.PROFESSIONAL_DETAILS, professionalDetails);
 		}
-		professionalDetails.get(0).put(Constants.DESIGNATION, request.get(Constants.POSITION));
+		professionalDetails.get(0).put(Constants.GROUP, request.get(Constants.GROUP));
 		professionalDetails.get(0).put(Constants.ORGANIZATION_TYPE, Constants.GOVERNMENT);
 
 		Map<String, Object> empDetails;
@@ -1186,6 +1189,17 @@ public class ProfileServiceImpl implements ProfileService {
 		Map<String, Object> requestBody = (Map<String, Object>) requestObject.get(Constants.REQUEST);
 		personalDetails.put(Constants.FIRSTNAME.toLowerCase(), requestBody.get(Constants.FIRSTNAME));
 		personalDetails.put(Constants.PRIMARY_EMAIL, requestBody.get(Constants.EMAIL));
+		if (requestBody.containsKey(Constants.PHONE)) {
+			String incomingPhoneValue = "";
+			try {
+				incomingPhoneValue = (String) requestBody.get(Constants.PHONE);
+				long mobileNumber = Long.parseLong(incomingPhoneValue);
+				personalDetails.put(Constants.MOBILE, mobileNumber);
+			} catch (NumberFormatException e) {
+				log.error("Failed to parse mobile number from signup request. Received Phone: " + incomingPhoneValue
+						+ ", Exception: " + e.getMessage(), e);
+			}
+		}
 		profileDetails.put(Constants.PERSONAL_DETAILS, personalDetails);
 
 		Map<String, Object> professionDetailObj = new HashMap<String, Object>();
@@ -1594,5 +1608,19 @@ public class ProfileServiceImpl implements ProfileService {
 			} catch(Exception e1) {
 			}
 		}
+	}
+
+	@Override
+	public SBApiResponse getGroupList() {
+		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.USER_REGISTRATION_GROUP_LIST);
+		List<String> groupList = serverConfig.getBulkUploadGroupValue();
+		if (CollectionUtils.isNotEmpty(groupList)) {
+			response.getResult().put(Constants.COUNT, groupList.size());
+			response.getResult().put(Constants.RESPONSE, groupList);
+		} else {
+			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+			response.getParams().setStatus(Constants.FAILED);
+		}
+		return response;
 	}
 }
