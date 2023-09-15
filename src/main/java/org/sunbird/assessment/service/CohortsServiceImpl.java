@@ -447,17 +447,17 @@ public class CohortsServiceImpl implements CohortsService {
 			}
 			List<Map<String, Object>> batches = (List<Map<String, Object>>) contentResponse.get(Constants.BATCHES);
 			List<SunbirdApiBatchResp> batchDetails = new ArrayList<>();
-			Map<String, String> headers = new HashMap<>();
-			headers.put(Constants.X_AUTH_TOKEN, authUserToken);
-			headers.put(Constants.AUTHORIZATION, cbExtServerProperties.getSbApiKey());
-			headers.put(Constants.X_AUTH_USER_ORG_ID, rootOrgId);
 			ObjectMapper mapper = new ObjectMapper();
-			batchDetails.addAll(batches.stream().map(batchMap -> {try {return mapper.convertValue(batchMap, SunbirdApiBatchResp.class);}
-					catch (IllegalArgumentException e) { return null; }}).filter(sunbirdClass -> sunbirdClass != null).collect(Collectors.toList()));
+			batchDetails.addAll(batches.stream().filter(batch -> (Integer)batch.get(Constants.STATUS) != 2).map(batchMap -> {try {return mapper.convertValue(batchMap, SunbirdApiBatchResp.class);}
+			catch (IllegalArgumentException e) { return null; }}).filter(sunbirdClass -> sunbirdClass != null).collect(Collectors.toList()));
 			if (CollectionUtils.isEmpty(batchDetails)) {
 				ProjectUtil.updateErrorDetails(finalResponse, Constants.BATCH_NOT_AVAILABLE_ERROR_MSG, HttpStatus.BAD_REQUEST);
 				return finalResponse;
 			}
+			Map<String, String> headers = new HashMap<>();
+			headers.put(Constants.X_AUTH_TOKEN, authUserToken);
+			headers.put(Constants.AUTHORIZATION, cbExtServerProperties.getSbApiKey());
+			headers.put(Constants.X_AUTH_USER_ORG_ID, rootOrgId);
 			List<String> batchIdList = batchDetails.stream().map(batchDetail -> batchDetail.getBatchId()).collect(Collectors.toList());
 			List<Map<String, Object>> userActiveEnrollmentForBatch = getActiveEnrollmentForUser(batchIdList, userUUID);
 			boolean isEnrolledWithBatch = false;
