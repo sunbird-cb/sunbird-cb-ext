@@ -21,9 +21,9 @@ import org.sunbird.assessment.repo.AssessmentRepository;
 import org.sunbird.cache.RedisCacheMgr;
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
+import org.sunbird.common.util.AccessTokenValidator;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
-import org.sunbird.common.util.RequestInterceptor;
 import org.sunbird.core.producer.Producer;
 
 import java.util.*;
@@ -59,6 +59,9 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
 
     @Autowired
     ObjectMapper mapper;
+
+    @Autowired
+    AccessTokenValidator accessTokenValidator;
 
     public SBApiResponse readAssessment(String assessmentIdentifier, String token) {
         logger.info("AssessmentServiceV2Impl::readAssessment... Started");
@@ -200,7 +203,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
     }
 
     private String validateAuthTokenAndFetchUserId(String authUserToken) {
-        return RequestInterceptor.fetchUserIdFromAccessToken(authUserToken);
+        return accessTokenValidator.fetchUserIdFromAccessToken(authUserToken);
     }
 
     private String fetchReadHierarchyDetails(Map<String, Object> assessmentAllDetail, String token, String assessmentIdentifier) throws IOException {

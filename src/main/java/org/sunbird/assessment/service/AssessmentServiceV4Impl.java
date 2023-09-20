@@ -28,10 +28,7 @@ import org.springframework.util.ObjectUtils;
 import org.sunbird.assessment.repo.AssessmentRepository;
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
-import org.sunbird.common.util.CbExtServerProperties;
-import org.sunbird.common.util.Constants;
-import org.sunbird.common.util.ProjectUtil;
-import org.sunbird.common.util.RequestInterceptor;
+import org.sunbird.common.util.*;
 import org.sunbird.core.producer.Producer;
 
 import com.beust.jcommander.internal.Lists;
@@ -63,6 +60,9 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
     @Autowired
     AssessmentRepository assessmentRepository;
 
+    @Autowired
+    AccessTokenValidator accessTokenValidator;
+
     @Override
     public SBApiResponse retakeAssessment(String assessmentIdentifier, String token) {
         logger.info("AssessmentServiceV4Impl::retakeAssessment... Started");
@@ -71,7 +71,7 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
         int retakeAttemptsAllowed = 0;
         int retakeAttemptsConsumed = 0;
         try {
-            String userId = RequestInterceptor.fetchUserIdFromAccessToken(token);
+            String userId = accessTokenValidator.fetchUserIdFromAccessToken(token);
             if (StringUtils.isBlank(userId)) {
                 updateErrorDetails(response, Constants.USER_ID_DOESNT_EXIST, HttpStatus.INTERNAL_SERVER_ERROR);
                 return response;
@@ -111,7 +111,7 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
         SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_READ_ASSESSMENT);
         String errMsg = "";
         try {
-            String userId = RequestInterceptor.fetchUserIdFromAccessToken(token);
+            String userId = accessTokenValidator.fetchUserIdFromAccessToken(token);
             if (StringUtils.isBlank(userId)) {
                 updateErrorDetails(response, Constants.USER_ID_DOESNT_EXIST, HttpStatus.INTERNAL_SERVER_ERROR);
                 return response;
@@ -258,7 +258,7 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
     public SBApiResponse readAssessmentResultV4(Map<String, Object> request, String userAuthToken) {
         SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_READ_ASSESSMENT_RESULT);
         try {
-            String userId = RequestInterceptor.fetchUserIdFromAccessToken(userAuthToken);
+            String userId = accessTokenValidator.fetchUserIdFromAccessToken(userAuthToken);
             if (StringUtils.isBlank(userId)) {
                 updateErrorDetails(response, Constants.USER_ID_DOESNT_EXIST, HttpStatus.INTERNAL_SERVER_ERROR);
                 return response;
@@ -303,7 +303,7 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
         logger.info("AssessmentServiceV4Impl::submitAssessmentAsync.. started");
         SBApiResponse outgoingResponse = ProjectUtil.createDefaultResponse(Constants.API_SUBMIT_ASSESSMENT);
         try {
-            String userId = RequestInterceptor.fetchUserIdFromAccessToken(userAuthToken);
+            String userId = accessTokenValidator.fetchUserIdFromAccessToken(userAuthToken);
             if (ObjectUtils.isEmpty(userId)) {
                 updateErrorDetails(outgoingResponse, Constants.USER_ID_DOESNT_EXIST, HttpStatus.BAD_REQUEST);
                 return outgoingResponse;
@@ -610,7 +610,7 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
     private Map<String, String> validateQuestionListAPI(Map<String, Object> requestBody, String authUserToken,
             List<String> identifierList) throws IOException {
         Map<String, String> result = new HashMap<>();
-        String userId = RequestInterceptor.fetchUserIdFromAccessToken(authUserToken);
+        String userId = accessTokenValidator.fetchUserIdFromAccessToken(authUserToken);
         if (StringUtils.isBlank(userId)) {
             result.put(Constants.ERROR_MESSAGE, Constants.USER_ID_DOESNT_EXIST);
             return result;
