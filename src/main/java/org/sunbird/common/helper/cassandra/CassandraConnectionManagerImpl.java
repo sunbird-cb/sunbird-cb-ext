@@ -3,6 +3,7 @@ package org.sunbird.common.helper.cassandra;
 import com.datastax.driver.core.*;
 import com.datastax.driver.core.policies.DefaultRetryPolicy;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Component;
 import org.sunbird.common.exceptions.ProjectCommonException;
 import org.sunbird.common.exceptions.ResponseCode;
 import org.sunbird.common.util.Constants;
@@ -10,22 +11,29 @@ import org.sunbird.common.util.ProjectUtil;
 import org.sunbird.common.util.PropertiesCache;
 import org.sunbird.core.logger.CbExtLogger;
 
+import javax.annotation.PostConstruct;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+@Component("CassandraConnectionManagerImplHelper")
 public class CassandraConnectionManagerImpl implements CassandraConnectionManager {
     private static Cluster cluster;
     private static Map<String, Session> cassandraSessionMap = new ConcurrentHashMap<>(2);
     public static CbExtLogger logger = new CbExtLogger(CassandraConnectionManagerImpl.class.getName());
+    List<String> keyspaces = Arrays.asList(Constants.KEYSPACE_SUNBIRD, Constants.KEYSPACE_SUNBIRD_COURSES);
 
-    public CassandraConnectionManagerImpl() {
+    @PostConstruct
+    private void addPostConstruct() {
         registerShutDownHook();
         createCassandraConnection();
+        for(String keyspace: keyspaces) {
+            getSession(keyspace);
+        }
     }
-
     @Override
 	public Session getSession(String keyspace) {
 		Session session = cassandraSessionMap.get(keyspace);
