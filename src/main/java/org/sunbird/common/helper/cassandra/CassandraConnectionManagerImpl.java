@@ -28,7 +28,6 @@ public class CassandraConnectionManagerImpl implements CassandraConnectionManage
 
     @PostConstruct
     private void addPostConstruct() {
-        logger.info("Calling time++++");
         registerShutDownHook();
         createCassandraConnection();
         for(String keyspace: keyspaces) {
