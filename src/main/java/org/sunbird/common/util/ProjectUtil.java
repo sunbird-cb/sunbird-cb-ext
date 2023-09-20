@@ -155,4 +155,12 @@ public class ProjectUtil {
 	public static Boolean validateExternalSystem(String externalSystem) {
 		return externalSystem.matches("[a-zA-Z ]{0,255}$");
 	}
+
+	public static void updateErrorDetails(SBApiResponse response, String errMsg, HttpStatus responseCode) {
+		response.getParams().setStatus(Constants.FAILED);
+		response.getParams().setErrmsg(errMsg);
+		response.setResponseCode(responseCode);
+
+	}
+
 }

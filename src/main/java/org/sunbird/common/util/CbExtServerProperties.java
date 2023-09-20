@@ -476,14 +476,23 @@ public class CbExtServerProperties {
 	@Value("${report.download.folder.name}")
 	private String reportDownloadFolderName;
 
-    @Value("${progress.api.update.endpoint}")
-    private String progressUpdateEndPoint;
+  @Value("${progress.api.update.endpoint}")
+  private String progressUpdateEndPoint;
 
-    @Value("${kafka.topic.update.content.progress}")
-    private String updateContentProgressKafkaTopic;
+  @Value("${kafka.topic.update.content.progress}")
+  private String updateContentProgressKafkaTopic;
 
 	@Value("${sb.es.user.profile.index.type}")
 	private String sbEsProfileIndexType;
+
+	@Value("${content.type.auto.enroll.accepted}")
+	private String contentTypeAutoEnrollAccepted;
+
+	@Value("${content-read-endpoint-fields}")
+	private String contentReadEndPointFields;
+
+	@Value("${content-read-endpoint}")
+	private String contentReadEndPoint;
 
 	public String getAssessmentSubmitTopic() {
 		return assessmentSubmitTopic;
@@ -1748,21 +1757,21 @@ public class CbExtServerProperties {
 		this.reportDownloadFolderName = reportDownloadFolderName;
 	}
 
-    public String getProgressUpdateEndPoint() {
-        return progressUpdateEndPoint;
-    }
+  public String getProgressUpdateEndPoint() {
+      return progressUpdateEndPoint;
+  }
 
-    public void setProgressUpdateEndPoint(String progressUpdateEndPoint) {
-        this.progressUpdateEndPoint = progressUpdateEndPoint;
-    }
+  public void setProgressUpdateEndPoint(String progressUpdateEndPoint) {
+      this.progressUpdateEndPoint = progressUpdateEndPoint;
+  }
 
-    public String getUpdateContentProgressKafkaTopic() {
-        return updateContentProgressKafkaTopic;
-    }
+  public String getUpdateContentProgressKafkaTopic() {
+      return updateContentProgressKafkaTopic;
+  }
 
-    public void setUpdateContentProgressKafkaTopic(String updateContentProgressKafkaTopic) {
-        this.updateContentProgressKafkaTopic = updateContentProgressKafkaTopic;
-    }
+  public void setUpdateContentProgressKafkaTopic(String updateContentProgressKafkaTopic) {
+      this.updateContentProgressKafkaTopic = updateContentProgressKafkaTopic;
+  }
 
 	public String getSbEsProfileIndexType() {
 		return sbEsProfileIndexType;
@@ -1770,5 +1779,28 @@ public class CbExtServerProperties {
 
 	public void setSbEsProfileIndexType(String sbEsProfileIndexType) {
 		this.sbEsProfileIndexType = sbEsProfileIndexType;
+
+	public List<String> getContentTypeAutoEnrollAccepted() {
+		return Arrays.asList(contentTypeAutoEnrollAccepted.split(",", -1));
+	}
+
+	public void setContentTypeAutoEnrollAccepted(String contentTypeAutoEnrollAccepted) {
+		this.contentTypeAutoEnrollAccepted = contentTypeAutoEnrollAccepted;
+	}
+
+	public String getContentReadEndPointFields() {
+		return contentReadEndPointFields;
+	}
+
+	public void setContentReadEndPointFields(String contentReadEndPointFields) {
+		this.contentReadEndPointFields = contentReadEndPointFields;
+	}
+
+	public String getContentReadEndPoint() {
+		return contentReadEndPoint;
+	}
+
+	public void setContentReadEndPoint(String contentReadEndPoint) {
+		this.contentReadEndPoint = contentReadEndPoint;
 	}
 }

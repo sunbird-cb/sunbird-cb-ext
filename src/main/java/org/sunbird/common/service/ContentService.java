@@ -37,4 +37,6 @@ public interface ContentService {
 
 	public void getLiveContentDetails(List<String> contentIdList, List<String> fields,
 			Map<String, Map<String, String>> contentInfoMap);
+
+	public Map<String, Object> readContent(String contentId);
 }

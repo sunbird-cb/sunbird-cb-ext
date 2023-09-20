@@ -6,17 +6,22 @@ import org.apache.commons.lang3.StringUtils;
 import org.keycloak.common.util.Time;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
-
+@Component
 public class AccessTokenValidator {
+
+    @Autowired
+    KeyManager keyManager;
     private static Logger logger = LoggerFactory.getLogger(AccessTokenValidator.class.getName());
     private static ObjectMapper mapper = new ObjectMapper();
     private static PropertiesCache cache = PropertiesCache.getInstance();
 
-    private static Map<String, Object> validateToken(String token) throws Exception {
+    private Map<String, Object> validateToken(String token) throws Exception {
         try {
             String[] tokenElements = token.split("\\.");
             String header = tokenElements[0];
@@ -30,7 +35,7 @@ public class AccessTokenValidator {
                     CryptoUtil.verifyRSASign(
                             payLoad,
                             decodeFromBase64(signature),
-                            KeyManager.getPublicKey(keyId).getPublicKey(),
+                            keyManager.getPublicKey(keyId).getPublicKey(),
                             Constants.SHA_256_WITH_RSA);
             if (isValid) {
                 Map<String, Object> tokenBody =
@@ -48,7 +53,7 @@ public class AccessTokenValidator {
     }
 
 
-    public static String verifyUserToken(String token) {
+    public String verifyUserToken(String token) {
         String userId = Constants._UNAUTHORIZED;
         try {
             Map<String, Object> payload = validateToken(token);
@@ -65,18 +70,35 @@ public class AccessTokenValidator {
         return userId;
     }
 
-	private static boolean checkIss(String iss) {
+	private boolean checkIss(String iss) {
 		String realmUrl = cache.getProperty(Constants.SSO_URL) + "realms/" + cache.getProperty(Constants.SSO_REALM);
 		if (StringUtils.isBlank(realmUrl))
 			return false;
 		return (realmUrl.equalsIgnoreCase(iss));
 	}
 
-    private static boolean isExpired(Integer expiration) {
+    private boolean isExpired(Integer expiration) {
         return (Time.currentTime() > expiration);
     }
 
-    private static byte[] decodeFromBase64(String data) {
+    private byte[] decodeFromBase64(String data) {
         return Base64Util.decode(data, 11);
+    }
+
+    public String fetchUserIdFromAccessToken(String accessToken) {
+        String clientAccessTokenId = null;
+        if (accessToken != null) {
+            try {
+                clientAccessTokenId = verifyUserToken(accessToken);
+                if (Constants._UNAUTHORIZED.equalsIgnoreCase(clientAccessTokenId)) {
+                    clientAccessTokenId = null;
+                }
+            } catch (Exception ex) {
+                String errMsg = "Exception occurred while fetching the userid from the access token. Exception: " + ex.getMessage();
+                logger.error(errMsg, ex);
+                clientAccessTokenId = null;
+            }
+        }
+        return clientAccessTokenId;
     }
 }

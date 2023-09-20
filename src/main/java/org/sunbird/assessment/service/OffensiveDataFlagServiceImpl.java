@@ -9,9 +9,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 import org.sunbird.cassandra.utils.CassandraOperation;
 import org.sunbird.common.model.SBApiResponse;
+import org.sunbird.common.util.AccessTokenValidator;
 import org.sunbird.common.util.Constants;
 import org.sunbird.common.util.ProjectUtil;
-import org.sunbird.common.util.RequestInterceptor;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -28,10 +28,13 @@ public class OffensiveDataFlagServiceImpl implements OffensiveDataFlagService {
     @Autowired
     CassandraOperation cassandraOperation;
 
+    @Autowired
+    AccessTokenValidator accessTokenValidator;
+
     @Override
     public SBApiResponse createFlag(Map<String, Object> requestBody, String token) {
         String errMsg = "";
-        String userId = RequestInterceptor.fetchUserIdFromAccessToken(token);
+        String userId = accessTokenValidator.fetchUserIdFromAccessToken(token);
         errMsg = validateRequest(requestBody, userId, Constants.ADD);
         SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.ADD_OFFENSIVE_DATA_FLAG);
         if (StringUtils.isEmpty(errMsg)) {
@@ -61,7 +64,7 @@ public class OffensiveDataFlagServiceImpl implements OffensiveDataFlagService {
     public SBApiResponse updateFlag(String token, Map<String, Object> requestBody) {
         String errMsg = "";
         SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.UPDATE_OFFENSIVE_DATA_FLAG);
-        String userId = RequestInterceptor.fetchUserIdFromAccessToken(token);
+        String userId = accessTokenValidator.fetchUserIdFromAccessToken(token);
         errMsg = validateRequest(requestBody, userId, Constants.UPDATE);
         if (StringUtils.isEmpty(errMsg)) {
             try {
@@ -100,7 +103,7 @@ public class OffensiveDataFlagServiceImpl implements OffensiveDataFlagService {
 
     @Override
     public SBApiResponse getFlaggedData(String token) {
-        String userId = RequestInterceptor.fetchUserIdFromAccessToken(token);
+        String userId = accessTokenValidator.fetchUserIdFromAccessToken(token);
         String errMsg = "";
         SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.GET_OFFENSIVE_DATA_FLAG);
         if (userId != null) {

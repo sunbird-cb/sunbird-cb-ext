@@ -694,7 +694,6 @@ public class Constants {
 	public static final String PROFILE_APPROVAL_FIELDS_KEY = "profileApprovalFields";
 	public static final String BULK_UPLOAD_VERIFICATION_REGEX = "bulk.upload.tag.verification.regex";
 	public static final String USER_REGISTRATION_GROUP_LIST = "api.user.registration.group.list";
-    public static final String TABLE_ENROLLMENT_BATCH_LOOKUP = "enrollment_batch_lookup";
 	public static final String UPDATE_CONTENT_PROGRESS_SUCCESS_MSG = "Content progress is updated.";
 	public static final String UPDATE_CONTENT_PROGRESS_ERROR_MSG = "Error in updating the content progress.";
 	public static final String API_UPDATE_CONTENT_PROGRESS = "api.content.progress.ext.update";
@@ -735,7 +734,13 @@ public class Constants {
 	public static final String TABLE_COURSE_BATCH_ATTRIBUTES="batch_attributes";
 
 	public static final String TABLE_COURSE_SESSION_DETAILS="sessionDetails_v2";
-	private Constants() {
+
+	public static final String BATCH_ALREADY_ENROLLED_MSG = "Already Enrolled in batches.";
+	public static final String BATCH_AUTO_ENROLL_ERROR_MSG = "Failed to auto enrol user in batch.";
+	public static final String BATCH_NOT_AVAILABLE_ERROR_MSG = "No Batch Available.";
+	public static final String AUTO_ENROLL_PRIMARY_CATEGORY_ERROR_MSG = "Auto enrolment is not allowed for '%s' course.";
+	public static final String CONTENT_NOT_AVAILABLE = "Content Search failed for Content: %s.";
+  private Constants() {
 		throw new IllegalStateException("Utility class");
 	}
 
