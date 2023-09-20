@@ -1,8 +1,10 @@
 package org.sunbird.workallocation.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.glxn.qrgen.core.image.ImageType;
 import net.glxn.qrgen.javase.QRCode;
+import org.apache.commons.collections.ListUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
@@ -16,6 +18,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
+import org.sunbird.cassandra.utils.CassandraOperation;
+import org.sunbird.common.util.Constants;
 import org.sunbird.core.exception.BadRequestException;
 import org.sunbird.workallocation.model.PdfGeneratorRequest;
 import org.sunbird.workallocation.util.WorkAllocationConstants;
@@ -62,6 +66,8 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 	static final String TEMPLATE_PATH = "templates/";
 
 	private Logger log = LoggerFactory.getLogger(PdfGeneratorServiceImpl.class);
+	@Autowired
+	CassandraOperation cassandraOperation;
 
 	public byte[] generatePdf(PdfGeneratorRequest request) throws Exception {
 		if (StringUtils.isEmpty(request.getTemplateId())) {
@@ -362,4 +368,139 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 		}
 		return pdfFilePath;
 	}
+
+	public  byte[] getBatchSessionQRPdf(String courseId,String batchId) throws IOException {
+		if(StringUtils.isEmpty(courseId) || StringUtils.isEmpty(batchId))
+		{
+			throw new BadRequestException("CourseId & BatchId should be passed !");
+		}
+		HashMap<String,HashMap<String,String>> pdfDetails = populatePDFTemplateDetails();
+		HashMap<String,HashMap> pdfParams = populatePDFParams();
+		HashMap propertyMap = new HashMap();
+		propertyMap.put(Constants.COURSE_ID,courseId);
+		propertyMap.put(Constants.BATCH_ID,batchId);
+
+		List<Map<String, Object>> batches = cassandraOperation.getRecordsByProperties(
+				Constants.KEYSPACE_SUNBIRD_COURSES, Constants.TABLE_COURSE_BATCH, propertyMap,
+				ListUtils.EMPTY_LIST);
+		if(batches == null || batches.isEmpty())
+		{
+			throw new BadRequestException("Batch not exist for the passed CourseId : "+ courseId+ " & BatchId : "+ batchId);
+		}
+		ObjectMapper objectMapper = new ObjectMapper();
+		ArrayList<HashMap<String,Object>> sessionDetails;
+		try {
+			sessionDetails = (ArrayList<HashMap<String,Object>>)objectMapper.readValue((String) batches.get(0).get(Constants.TABLE_COURSE_BATCH_ATTRIBUTES), Map.class).get(Constants.TABLE_COURSE_SESSION_DETAILS);
+		} catch (Exception e) {
+			throw new BadRequestException("Session Details does not exist for the passed CourseId : "+ courseId+ " & BatchId : "+ batchId);
+		}
+		int count = 0;
+		for(HashMap<String,Object> session:sessionDetails )
+		{
+			pdfParams.put(Constants.SESSION+count++,populateSession(session,courseId,batchId));
+		}
+		return generatePdf(pdfDetails,pdfParams);
+	}
+	private HashMap<String,String> populateSession(HashMap<String,Object> sessionData,String courseId,String batchId)
+	{
+		HashMap<String,String> session = new HashMap<>();
+		session.put(Constants.TITLE,(String) sessionData.get(Constants.TITLE));
+		session.put(Constants.START_DATE,(String)sessionData.get(Constants.START_DATE));
+		session.put(Constants.START_TIME_KEY,(String)sessionData.get(Constants.START_TIME_KEY));
+		session.put(Constants.END_TIME_KEY,(String)sessionData.get(Constants.END_TIME_KEY));
+		session.put(Constants.SESSION_ID,(String)sessionData.get(Constants.SESSION_ID));
+		session.put(Constants.COURSE_ID,courseId);
+		session.put(Constants.BATCH_ID,batchId);
+		session.put(Constants.QR_CODE_URL,generateBatchSessionQRCode(courseId,batchId,(String)sessionData.get(Constants.SESSION_ID)));
+		return session;
+	}
+	public String generateBatchSessionQRCode(String courseId,String batchId,String sessionId){
+		String qrCodeBody = Constants.EMPTY;
+		HashMap<String,Object> qrBody = new HashMap<>();
+		 qrBody.put(Constants.COURSE_ID,courseId);
+		 qrBody.put(Constants.BATCH_ID,batchId);
+		 qrBody.put(Constants.SESSION_ID,sessionId);
+		try {
+			qrCodeBody= mapper.writeValueAsString(qrBody);
+		} catch (JsonProcessingException e) {
+			throw new RuntimeException(e);
+		}
+		File qrCodeFile = QRCode.from(qrCodeBody).to(ImageType.PNG).file(sessionId);
+		return qrCodeFile.getAbsolutePath();
+	}
+	public byte[] generatePdf(HashMap<String,HashMap<String,String>> pdfDetails ,HashMap<String,HashMap> params  ) throws IOException {
+		Map<String, String> pdfData = new HashMap<>();
+		for (Map.Entry<String, HashMap<String,String>> pdf : pdfDetails.entrySet()) {
+			String key = pdf.getKey();
+			HashMap<String,String> value = pdf.getValue();
+			String file ="";
+			if(value.get(Constants.BUDGET_DOC_FILE_TYPE).equalsIgnoreCase(Constants.VM))
+				file=	generateHTMLfrmVM(value.get(Constants.BUDGET_DOC_FILE_NAME),params.get(key));
+			else
+				file=	value.get(Constants.BUDGET_DOC_FILE_NAME);
+			switch (key) {
+				case Constants.FOOTER:
+					pdfData.put(UD_HTML_FOOTER_FILE_PATH,file);
+					break;
+				case Constants.HEADER:
+					pdfData.put(UD_HTML_HEADER_FILE_PATH,file);
+					break;
+				default:
+					String body ="";
+					for (Map.Entry<String, HashMap> entry1 : params.entrySet()) {
+						String key1 = entry1.getKey();
+						if (key1.startsWith(Constants.SESSION)) {
+							body=	body+readVm(value.get(Constants.BUDGET_DOC_FILE_NAME)+ Constants.DOT_SEPARATOR+Constants.VM, params.get(key1)) ;
+						}
+					}
+					body= createHTMLFile(key, body);
+					pdfData.put(UD_HTML_FILE_PATH, body);
+					pdfData.put(UD_FILE_NAME, body.replace(HTML, Constants.DOT_SEPARATOR+Constants.PDF));
+					break;
+			}
+		}
+		String pdfFilePath = "";
+		try {
+			pdfFilePath = makePdf(pdfData);
+		} catch (Exception exception) {
+			log.error(EXCEPTION_OCCURRED_WHILE_CREATING_THE_PDF, exception);
+		}
+		File file = new File(pdfFilePath);
+		byte[] bytes = new byte[(int) file.length()];
+		try (FileInputStream fis = new FileInputStream(file)) {
+			fis.read(bytes);
+		}
+		return bytes;
+	}
+	public String generateHTMLfrmVM(String vmFName,HashMap params ) throws IOException {
+		String message = readVm(vmFName+ Constants.DOT_SEPARATOR+Constants.VM, params);
+		return createHTMLFile(vmFName, message);
+	}
+	private HashMap<String,HashMap<String,String>> populatePDFTemplateDetails(){
+		HashMap<String,HashMap<String,String>> pdfDetails = new HashMap<>();
+		HashMap<String,String> headerDetails = new HashMap<>();
+		headerDetails.put(Constants.BUDGET_DOC_FILE_TYPE,Constants.VM);
+		headerDetails.put(Constants.BUDGET_DOC_FILE_NAME,Constants.BATCH_SESSION_HEADER);
+		pdfDetails.put(Constants.HEADER,headerDetails);
+		HashMap<String,String> bodyDetails = new HashMap<>();
+		bodyDetails.put(Constants.BUDGET_DOC_FILE_TYPE,Constants.VM);
+		bodyDetails.put(Constants.BUDGET_DOC_FILE_NAME,Constants.BATCH_SESSION_BODY);
+		pdfDetails.put(Constants.BODY,bodyDetails);
+		HashMap<String,String> footerDetails = new HashMap<>();
+		footerDetails.put(Constants.BUDGET_DOC_FILE_TYPE,Constants.VM);
+		footerDetails.put(Constants.BUDGET_DOC_FILE_NAME,Constants.BATCH_SESSION_FOOTER);
+		pdfDetails.put(Constants.FOOTER,footerDetails);
+		return pdfDetails;
+	}
+	private HashMap<String,HashMap> populatePDFParams() {
+		HashMap<String,HashMap> params = new HashMap<>();
+		HashMap<String,String> headerParams = new HashMap<>();
+		headerParams.put(Constants.PROGRAM_NAME,Constants.EMPTY);
+		params.put(Constants.HEADER,headerParams);
+		HashMap<String,String> footerParams = new HashMap<>();
+		footerParams.put(Constants.PROGRAM_NAME,Constants.EMPTY);
+		params.put(Constants.FOOTER,footerParams);
+		return params;
+	}
+
 }

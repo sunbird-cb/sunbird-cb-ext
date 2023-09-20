@@ -694,13 +694,54 @@ public class Constants {
 	public static final String PROFILE_APPROVAL_FIELDS_KEY = "profileApprovalFields";
 	public static final String BULK_UPLOAD_VERIFICATION_REGEX = "bulk.upload.tag.verification.regex";
 	public static final String USER_REGISTRATION_GROUP_LIST = "api.user.registration.group.list";
-    public static final String TABLE_ENROLLMENT_BATCH_LOOKUP = "enrollment_batch_lookup";
+	public static final String TABLE_ENROLLMENT_BATCH_LOOKUP = "enrollment_batch_lookup";
+	public static final String UPDATE_CONTENT_PROGRESS_SUCCESS_MSG = "Content progress is updated.";
+	public static final String UPDATE_CONTENT_PROGRESS_ERROR_MSG = "Error in updating the content progress.";
+	public static final String API_UPDATE_CONTENT_PROGRESS = "api.content.progress.ext.update";
+	public static final String TABLE_ENROLMENT_BATCH_LOOKUP = "enrollment_batch_lookup";
+	public static final String EMPLOYMENT_DETAILS_DEPARTMENT_NAME = "employmentDetails.departmentName";
+	public static final String PROFILE_DETAILS_PHONE = "profileDetails.personalDetails.mobile";
+	public static final String USER_SEARCH_CONTENT_RESULT_LIST = "api.user.offline.session.progress";
+	public static final String CONTENT_PROGRESS_BATCH_ID_ERROR_MSG = "batchId is mandatory";
+	public static final String CONTENT_PROGRESS_COURSE_ID_ERROR_MSG = "courseId is mandatory";
+	public static final String CONTENT_PROGRESS_CONTENT_ID_ERROR_MSG = "contentId is mandatory, atleast one is required";
+
+	public static final String END_TIME_KEY = "endTime";
+
+	public static final String SESSION_ID="sessionId";
+
+	public static final String QR_CODE_URL="qrcodeurl";
+
+	public static final String VM="vm";
+
+	public static final String HEADER="header";
+
+	public static final String FOOTER="footer";
+
+	public static final String PDF="pdf";
+
+	public static final String PROGRAM_NAME="programName";
+
+	public static final String EMPTY="";
+
+	public static final String BATCH_SESSION_HEADER="pdf-batch-session-header";
+
+	public static final String BATCH_SESSION_FOOTER="pdf-batch-session-footer";
+
+	public static final String BATCH_SESSION_BODY="pdf-batch-session-body";
+
+	public static final String SESSION="session";
+
+	public static final String TABLE_COURSE_BATCH_ATTRIBUTES="batch_attributes";
+
+	public static final String TABLE_COURSE_SESSION_DETAILS="sessionDetails_v2";
+
 	public static final String BATCH_ALREADY_ENROLLED_MSG = "Already Enrolled in batches.";
 	public static final String BATCH_AUTO_ENROLL_ERROR_MSG = "Failed to auto enrol user in batch.";
 	public static final String BATCH_NOT_AVAILABLE_ERROR_MSG = "No Batch Available.";
 	public static final String AUTO_ENROLL_PRIMARY_CATEGORY_ERROR_MSG = "Auto enrolment is not allowed for '%s' course.";
 	public static final String CONTENT_NOT_AVAILABLE = "Content Search failed for Content: %s.";
-    private Constants() {
+  private Constants() {
 		throw new IllegalStateException("Utility class");
 	}
 

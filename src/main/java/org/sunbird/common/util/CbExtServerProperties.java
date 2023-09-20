@@ -476,6 +476,15 @@ public class CbExtServerProperties {
 	@Value("${report.download.folder.name}")
 	private String reportDownloadFolderName;
 
+  @Value("${progress.api.update.endpoint}")
+  private String progressUpdateEndPoint;
+
+  @Value("${kafka.topic.update.content.progress}")
+  private String updateContentProgressKafkaTopic;
+
+	@Value("${sb.es.user.profile.index.type}")
+	private String sbEsProfileIndexType;
+
 	@Value("${content.type.auto.enroll.accepted}")
 	private String contentTypeAutoEnrollAccepted;
 
@@ -1746,6 +1755,30 @@ public class CbExtServerProperties {
 
 	public void setReportDownloadFolderName(String reportDownloadFolderName) {
 		this.reportDownloadFolderName = reportDownloadFolderName;
+	}
+
+  public String getProgressUpdateEndPoint() {
+      return progressUpdateEndPoint;
+  }
+
+  public void setProgressUpdateEndPoint(String progressUpdateEndPoint) {
+      this.progressUpdateEndPoint = progressUpdateEndPoint;
+  }
+
+  public String getUpdateContentProgressKafkaTopic() {
+      return updateContentProgressKafkaTopic;
+  }
+
+  public void setUpdateContentProgressKafkaTopic(String updateContentProgressKafkaTopic) {
+      this.updateContentProgressKafkaTopic = updateContentProgressKafkaTopic;
+  }
+
+	public String getSbEsProfileIndexType() {
+		return sbEsProfileIndexType;
+	}
+
+	public void setSbEsProfileIndexType(String sbEsProfileIndexType) {
+		this.sbEsProfileIndexType = sbEsProfileIndexType;
 	}
 
 	public List<String> getContentTypeAutoEnrollAccepted() {
