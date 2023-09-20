@@ -1779,6 +1779,7 @@ public class CbExtServerProperties {
 
 	public void setSbEsProfileIndexType(String sbEsProfileIndexType) {
 		this.sbEsProfileIndexType = sbEsProfileIndexType;
+	}
 
 	public List<String> getContentTypeAutoEnrollAccepted() {
 		return Arrays.asList(contentTypeAutoEnrollAccepted.split(",", -1));
