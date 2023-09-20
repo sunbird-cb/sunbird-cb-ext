@@ -15,7 +15,12 @@ import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 import org.sunbird.common.model.KeyData;
+
+import javax.annotation.PostConstruct;
+
+@Component
 public class KeyManager {
 
   private static Logger logger = LoggerFactory.getLogger(KeyManager.class.getName());
@@ -23,8 +28,8 @@ public class KeyManager {
 
   private static Map<String, KeyData> keyMap = new HashMap<>();
 
-
-  public static void init() {
+  @PostConstruct
+  public void init() {
     String basePath = propertiesCache.getProperty(Constants.ACCESS_TOKEN_PUBLICKEY_BASEPATH);
     try (Stream<Path> walk = Files.walk(Paths.get(basePath))) {
       List<String> result =
@@ -52,8 +57,7 @@ public class KeyManager {
     }
   }
 
-  public static KeyData getPublicKey(String keyId) {
-    init();
+  public KeyData getPublicKey(String keyId) {
     return keyMap.get(keyId);
   }
 
