@@ -19,6 +19,8 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 import org.sunbird.cassandra.utils.CassandraOperation;
+import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
+import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.core.exception.BadRequestException;
 import org.sunbird.workallocation.model.PdfGeneratorRequest;
@@ -68,6 +70,12 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 	private Logger log = LoggerFactory.getLogger(PdfGeneratorServiceImpl.class);
 	@Autowired
 	CassandraOperation cassandraOperation;
+
+	@Autowired
+	CbExtServerProperties serverProperties;
+
+	@Autowired
+	OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
 
 	public byte[] generatePdf(PdfGeneratorRequest request) throws Exception {
 		if (StringUtils.isEmpty(request.getTemplateId())) {
@@ -369,7 +377,7 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 		return pdfFilePath;
 	}
 
-	public  byte[] getBatchSessionQRPdf(String courseId,String batchId) throws IOException {
+	public  byte[] getBatchSessionQRPdf(String authUserToken,String courseId,String batchId) throws IOException {
 		if(StringUtils.isEmpty(courseId) || StringUtils.isEmpty(batchId))
 		{
 			throw new BadRequestException("CourseId & BatchId should be passed !");
@@ -387,9 +395,18 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 		{
 			throw new BadRequestException("Batch not exist for the passed CourseId : "+ courseId+ " & BatchId : "+ batchId);
 		}
+
+		Map<String, Object> compositeSearchRes = fetchCourseName(authUserToken,courseId);
+		Map<String, Object> compositeSearchResult = (Map<String, Object>) compositeSearchRes.get(Constants.RESULT);
+		List<Map<String, Object>> content = (List<Map<String, Object>>) compositeSearchResult.get(Constants.CONTENT);
+		String blendedProgramName = (String)content.get(0).get(Constants.NAME);
+
 		ObjectMapper objectMapper = new ObjectMapper();
 		ArrayList<HashMap<String,Object>> sessionDetails;
+		String batchName ="";
 		try {
+			Map<String, Object> batch = batches.get(0);
+			batchName = (String)batch.get(Constants.NAME);
 			sessionDetails = (ArrayList<HashMap<String,Object>>)objectMapper.readValue((String) batches.get(0).get(Constants.TABLE_COURSE_BATCH_ATTRIBUTES), Map.class).get(Constants.TABLE_COURSE_SESSION_DETAILS);
 		} catch (Exception e) {
 			throw new BadRequestException("Session Details does not exist for the passed CourseId : "+ courseId+ " & BatchId : "+ batchId);
@@ -397,21 +414,20 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 		int count = 0;
 		for(HashMap<String,Object> session:sessionDetails )
 		{
-			pdfParams.put(Constants.SESSION+count++,populateSession(session,courseId,batchId));
+			pdfParams.put(Constants.SESSION+count++,populateSession(session,blendedProgramName,batchName,batchId));
 		}
 		return generatePdf(pdfDetails,pdfParams);
 	}
-	private HashMap<String,String> populateSession(HashMap<String,Object> sessionData,String courseId,String batchId)
+	private HashMap<String,String> populateSession(HashMap<String,Object> sessionData,String courseName,String batchName,String batchId)
 	{
 		HashMap<String,String> session = new HashMap<>();
-		session.put(Constants.TITLE,(String) sessionData.get(Constants.TITLE));
+		session.put(Constants.BLENDED_PROGRAM_NAME,courseName);
 		session.put(Constants.START_DATE,(String)sessionData.get(Constants.START_DATE));
 		session.put(Constants.START_TIME_KEY,(String)sessionData.get(Constants.START_TIME_KEY));
 		session.put(Constants.END_TIME_KEY,(String)sessionData.get(Constants.END_TIME_KEY));
-		session.put(Constants.SESSION_ID,(String)sessionData.get(Constants.SESSION_ID));
-		session.put(Constants.COURSE_ID,courseId);
-		session.put(Constants.BATCH_ID,batchId);
-		session.put(Constants.QR_CODE_URL,generateBatchSessionQRCode(courseId,batchId,(String)sessionData.get(Constants.SESSION_ID)));
+		session.put(Constants.SESSION_NAME,(String) sessionData.get(Constants.TITLE));
+		session.put(Constants.BATCH_NAME,batchName);
+		session.put(Constants.QR_CODE_URL,generateBatchSessionQRCode(courseName,batchId,(String)sessionData.get(Constants.SESSION_ID)));
 		return session;
 	}
 	public String generateBatchSessionQRCode(String courseId,String batchId,String sessionId){
@@ -502,5 +518,22 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 		params.put(Constants.FOOTER,footerParams);
 		return params;
 	}
-
+	private Map<String, Object> fetchCourseName(String authUserToken,String courseId ){
+		Map<String, String> headers = new HashMap<>();
+		headers.put(Constants.USER_TOKEN, authUserToken);
+		headers.put(Constants.AUTHORIZATION, serverProperties.getSbApiKey());
+		HashMap<String, Object> reqBody = new HashMap<>();
+		HashMap<String, Object> req = new HashMap<>();
+		List<String> fields = new ArrayList<>();
+		fields.add("name");
+		req.put(Constants.FIELDS,fields);
+		Map<String, Object> filters = new HashMap<>();
+		filters.put(Constants.IDENTIFIER, courseId);
+		req.put(Constants.FILTERS, filters);
+		reqBody.put(Constants.REQUEST, req);
+		Map<String, Object> compositeSearchRes = outboundRequestHandlerService.fetchResultUsingPost(
+				serverProperties.getKmBaseHost() + serverProperties.getKmCompositeSearchPath(), reqBody,
+				headers);
+		return compositeSearchRes;
+	}
 }

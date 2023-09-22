@@ -5,11 +5,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.sunbird.workallocation.model.PdfGeneratorRequest;
 import org.sunbird.workallocation.service.PdfGeneratorService;
 
@@ -52,8 +48,8 @@ public class PdfGeneratorController {
 	}
 
 	@GetMapping(value = "/getBatchSessionQRPdf/{courseId}/{batchId}", produces = MediaType.APPLICATION_PDF_VALUE)
-	public ResponseEntity<?> getBatchSessionQRPdf(@PathVariable("courseId") String courseId,@PathVariable("batchId") String batchId) throws IOException {
-		return new ResponseEntity<>(pdfGeneratorService.getBatchSessionQRPdf(courseId,batchId), HttpStatus.OK);
+	public ResponseEntity<?> getBatchSessionQRPdf(@RequestHeader("x-authenticated-user-token") String authUserToken, @PathVariable("courseId") String courseId, @PathVariable("batchId") String batchId) throws IOException {
+		return new ResponseEntity<>(pdfGeneratorService.getBatchSessionQRPdf(authUserToken,courseId,batchId), HttpStatus.OK);
 	}
 
 }

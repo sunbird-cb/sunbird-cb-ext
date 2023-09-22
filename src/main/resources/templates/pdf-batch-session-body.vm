@@ -49,42 +49,31 @@
  <br/>
  <br/>
     <table>
-       <tr>
-                <th>Title</th>
-                <td>$title</td>
+      <tr>
+                <th>Blended Program</th>
+                <td>$blendedProgramName</td>
            </tr>
         <tr>
-            <th>Course</th>
-            <td>$courseId</td>
-       </tr>
-
-        <tr>
             <th>Batch</th>
-            <td>$batchId</td>
-       </tr>
-
-         <tr>
-
-            <th>Session</th>
-            <td>$sessionId</td>
+            <td>$batchName</td>
        </tr>
 
         <tr>
+            <th>Session</th>
+            <td>$sessionName</td>
+       </tr>
 
-            <th>StartDate</th>
+
+        <tr>
+
+            <th>Date</th>
             <td>$startDate</td>
        </tr>
 
        <tr>
 
-            <th>StartTime</th>
-            <td>$startTime</td>
-       </tr>
-
-    <tr>
-
-            <th>EndTime</th>
-            <td>$endTime</td>
+            <th>Time</th>
+            <td>$startTime - $endTime</td>
        </tr>
 
 
