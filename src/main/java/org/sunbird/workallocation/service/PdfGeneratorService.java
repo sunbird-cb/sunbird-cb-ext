@@ -9,5 +9,5 @@ public interface PdfGeneratorService {
     public byte[] generatePdf(String woId) throws Exception;
     public String getPublishedPdfLink(String woId);
     public String generatePdfAndGetFilePath(String woId);
-    public  byte[] getBatchSessionQRPdf(String courseId,String batchId) throws IOException;
+    public  byte[] getBatchSessionQRPdf(String authUserToken,String courseId,String batchId) throws IOException;
 }

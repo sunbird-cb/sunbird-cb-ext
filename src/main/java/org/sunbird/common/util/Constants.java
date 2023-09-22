@@ -741,6 +741,12 @@ public class Constants {
 	public static final String BATCH_NOT_AVAILABLE_ERROR_MSG = "No Batch Available.";
 	public static final String AUTO_ENROLL_PRIMARY_CATEGORY_ERROR_MSG = "Auto enrolment is not allowed for '%s' course.";
 	public static final String CONTENT_NOT_AVAILABLE = "Content Search failed for Content: %s.";
+
+	public static final String BLENDED_PROGRAM_NAME="blendedProgramName";
+
+	public static final String BATCH_NAME="batchName";
+
+	public static final String SESSION_NAME="sessionName";
   private Constants() {
 		throw new IllegalStateException("Utility class");
 	}
