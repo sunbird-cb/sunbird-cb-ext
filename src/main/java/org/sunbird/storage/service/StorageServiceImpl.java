@@ -2,9 +2,11 @@ package org.sunbird.storage.service;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,6 +33,7 @@ import org.sunbird.common.util.Constants;
 
 import org.sunbird.common.util.ProjectUtil;
 import scala.Option;
+import scala.collection.mutable.StringBuilder;
 
 @Service
 public class StorageServiceImpl implements StorageService {
@@ -145,6 +148,7 @@ public class StorageServiceImpl implements StorageService {
 			storageService.download(serverProperties.getReportDownloadContainerName(), objectKey, Constants.LOCAL_BASE_PATH,
 					Option.apply(Boolean.FALSE));
 			Path tmpPath = Paths.get(Constants.LOCAL_BASE_PATH + fileName);
+			printFileDetails(tmpPath);
 			ByteArrayResource resource = new ByteArrayResource(Files.readAllBytes(tmpPath));
 			HttpHeaders headers = new HttpHeaders();
 			headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"");
@@ -175,5 +179,20 @@ public class StorageServiceImpl implements StorageService {
 			}
 		} catch (Exception e) {
 		}
+	}
+
+	private void printFileDetails(Path tmpPath) {
+		try {
+            BasicFileAttributes attributes = Files.readAttributes(tmpPath, BasicFileAttributes.class);
+			StringBuilder strBuilder = new StringBuilder();
+			strBuilder.append("File Name: ").append(tmpPath.getFileName());
+			strBuilder.append(", Last Modified Time: ").append(attributes.lastModifiedTime());
+			strBuilder.append(", File Creation Time: ").append(attributes.creationTime());
+			strBuilder.append(", File Owner: " ).append(Files.getOwner(tmpPath));
+			strBuilder.append(", Last Access Time: ").append(attributes.lastAccessTime());
+			logger.info(strBuilder.toString());
+        } catch (IOException e) {
+            logger.error("Failed to get file details. Exception: ", e);
+        }
 	}
 }
