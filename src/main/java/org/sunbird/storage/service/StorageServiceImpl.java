@@ -161,7 +161,6 @@ public class StorageServiceImpl implements StorageService {
 				logger.info("Unable to fetch fileInfo");
 			}
 			return ResponseEntity.ok()
-					.contentLength(tmpPath.toFile().length())
 					.contentType(MediaType.APPLICATION_JSON)
 					.body(resourceMap);
 		} catch (Exception e) {
