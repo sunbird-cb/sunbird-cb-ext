@@ -2,6 +2,7 @@ package org.sunbird.storage.service;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
 
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
@@ -17,5 +18,5 @@ public interface StorageService {
 
     SBApiResponse downloadFile(String fileName);
 
-	ResponseEntity<Resource> downloadFile(String reportType, String date, String orgId, String fileName);
+	ResponseEntity<Map<String, Object>> downloadFile(String reportType, String date, String orgId, String fileName);
 }

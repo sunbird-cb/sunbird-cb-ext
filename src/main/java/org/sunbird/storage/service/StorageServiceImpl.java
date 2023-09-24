@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import org.sunbird.cloud.storage.BaseStorageService;
+import org.sunbird.cloud.storage.Model;
 import org.sunbird.cloud.storage.factory.StorageConfig;
 import org.sunbird.cloud.storage.factory.StorageServiceFactory;
 import org.sunbird.common.model.SBApiResponse;
@@ -139,20 +140,30 @@ public class StorageServiceImpl implements StorageService {
 	}
 
 	@Override
-	public ResponseEntity<Resource> downloadFile(String reportType, String date, String orgId, String fileName) {
+	public ResponseEntity<Map<String, Object>> downloadFile(String reportType, String date, String orgId, String fileName) {
 		try {
+			Map<String, Object> resourceMap = new HashMap<>();
 			String objectKey = serverProperties.getReportDownloadFolderName() + "/" + reportType + "/" + date + "/" + orgId + "/" + fileName;
 			storageService.download(serverProperties.getReportDownloadContainerName(), objectKey, Constants.LOCAL_BASE_PATH,
 					Option.apply(Boolean.FALSE));
 			Path tmpPath = Paths.get(Constants.LOCAL_BASE_PATH + fileName);
-			ByteArrayResource resource = new ByteArrayResource(Files.readAllBytes(tmpPath));
-			HttpHeaders headers = new HttpHeaders();
-			headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"");
+			//ByteArrayResource resource = new ByteArrayResource();
+			byte[] fileBytes = Files.readAllBytes(tmpPath);
+			/*HttpHeaders headers = new HttpHeaders();
+			headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"");*/
+			resourceMap.put("fileName", fileName);
+			resourceMap.put("Resource", fileBytes);
+			Model.Blob blob = storageService.getObject(serverProperties.getReportDownloadContainerName(), objectKey, Option.apply(Boolean.FALSE));
+			if(blob != null ) {
+				resourceMap.put("lastModified", blob.lastModified());
+				resourceMap.put("fileMetaData", blob.metadata());
+			} else {
+				logger.info("Unable to fetch fileInfo");
+			}
 			return ResponseEntity.ok()
-					.headers(headers)
 					.contentLength(tmpPath.toFile().length())
-					.contentType(MediaType.parseMediaType(MediaType.MULTIPART_FORM_DATA_VALUE))
-					.body(resource);
+					.contentType(MediaType.APPLICATION_JSON)
+					.body(resourceMap);
 		} catch (Exception e) {
 			logger.error("Failed to read the downloaded file: " + fileName + ", Exception: ", e);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
