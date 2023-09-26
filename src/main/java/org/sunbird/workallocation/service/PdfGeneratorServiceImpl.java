@@ -414,6 +414,7 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 		int count = 0;
 		for(HashMap<String,Object> session:sessionDetails )
 		{
+			if(Constants.SESSION_TYPE_OFFLINE.equals(session.get(Constants.SESSION_TYPE)))
 			pdfParams.put(Constants.SESSION+count++,populateSession(session,blendedProgramName,batchName,batchId));
 		}
 		return generatePdf(pdfDetails,pdfParams);
