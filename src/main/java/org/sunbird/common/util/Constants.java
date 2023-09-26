@@ -746,6 +746,10 @@ public class Constants {
 
 	public static final String BATCH_NAME="batchName";
 
+	public static final String SESSION_TYPE="sessionType";
+
+	public static final String SESSION_TYPE_OFFLINE="Offline";
+
 	public static final String SESSION_NAME="sessionName";
   private Constants() {
 		throw new IllegalStateException("Utility class");
