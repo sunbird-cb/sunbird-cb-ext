@@ -485,6 +485,15 @@ public class CbExtServerProperties {
 	@Value("${content-read-endpoint}")
 	private String contentReadEndPoint;
 
+	@Value("${user.registration.welcome.email.signinLink}")
+	private String welcomeEmailSigninLink;
+
+	@Value("${user.registration.welcome.email.discoverLink}")
+	private String welcomeEmailDiscoverLink;
+
+	@Value("${user.registration.welcome.email.meetingLink}")
+	private String welcomeEmailMeetingLink;
+
 	public String getAssessmentSubmitTopic() {
 		return assessmentSubmitTopic;
 	}
@@ -1770,5 +1779,29 @@ public class CbExtServerProperties {
 
 	public void setContentReadEndPoint(String contentReadEndPoint) {
 		this.contentReadEndPoint = contentReadEndPoint;
+	}
+
+	public String getWelcomeEmailSigninLink() {
+		return welcomeEmailSigninLink;
+	}
+
+	public void setWelcomeEmailSigninLink(String welcomeEmailSigninLink) {
+		this.welcomeEmailSigninLink = welcomeEmailSigninLink;
+	}
+
+	public String getWelcomeEmailDiscoverLink() {
+		return welcomeEmailDiscoverLink;
+	}
+
+	public void setWelcomeEmailDiscoverLink(String welcomeEmailDiscoverLink) {
+		this.welcomeEmailDiscoverLink = welcomeEmailDiscoverLink;
+	}
+
+	public String getWelcomeEmailMeetingLink() {
+		return welcomeEmailMeetingLink;
+	}
+
+	public void setWelcomeEmailMeetingLink(String welcomeEmailMeetingLink) {
+		this.welcomeEmailMeetingLink = welcomeEmailMeetingLink;
 	}
 }
