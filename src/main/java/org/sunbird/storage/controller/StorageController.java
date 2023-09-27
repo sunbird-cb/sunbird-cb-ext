@@ -43,4 +43,9 @@ public class StorageController {
 										  @PathVariable("fileName") String fileName) {
 		return storageService.downloadFile(reportType, date, orgId, fileName);
 	}
+
+	@GetMapping("/v1/reportInfo/{orgId}")
+	public ResponseEntity<?> getFileInfo(@PathVariable("orgId") String orgId) {
+		return storageService.getFileInfo(orgId);
+	}
 }

@@ -494,6 +494,9 @@ public class CbExtServerProperties {
 	@Value("${user.registration.welcome.email.meetingLink}")
 	private String welcomeEmailMeetingLink;
 
+	@Value("${report.type.get.file.info}")
+	private String reportTypeGetFileInfo;
+
 	public String getAssessmentSubmitTopic() {
 		return assessmentSubmitTopic;
 	}
@@ -1803,5 +1806,13 @@ public class CbExtServerProperties {
 
 	public void setWelcomeEmailMeetingLink(String welcomeEmailMeetingLink) {
 		this.welcomeEmailMeetingLink = welcomeEmailMeetingLink;
+	}
+
+	public List<String> getReportTypeGetFileInfo() {
+		return Arrays.asList(reportTypeGetFileInfo.split(",", -1));
+	}
+
+	public void setReportTypeGetFileInfo(String reportTypeGetFileInfo) {
+		this.reportTypeGetFileInfo = reportTypeGetFileInfo;
 	}
 }
