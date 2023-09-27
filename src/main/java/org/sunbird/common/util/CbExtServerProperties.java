@@ -493,6 +493,27 @@ public class CbExtServerProperties {
 
 	@Value("${content-read-endpoint}")
 	private String contentReadEndPoint;
+	@Value("${redis.questions.read.timeout}")
+	private Integer redisQuestionsReadTimeOut;
+
+	@Value("${read.assess.questions.from.redis}")
+	private boolean readQuestionsFromRedis;
+
+	public boolean isReadQuestionsFromRedis() {
+		return readQuestionsFromRedis;
+	}
+
+	public void setReadQuestionsFromRedis(boolean readQuestionsFromRedis) {
+		this.readQuestionsFromRedis = readQuestionsFromRedis;
+	}
+
+	public Integer getRedisQuestionsReadTimeOut() {
+		return redisQuestionsReadTimeOut;
+	}
+
+	public void setRedisQuestionsReadTimeOut(Integer redisQuestionsReadTimeOut) {
+		this.redisQuestionsReadTimeOut = redisQuestionsReadTimeOut;
+	}
 
 	public String getAssessmentSubmitTopic() {
 		return assessmentSubmitTopic;
