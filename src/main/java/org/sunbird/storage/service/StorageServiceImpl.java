@@ -212,9 +212,9 @@ public class StorageServiceImpl implements StorageService {
 					if (blob != null) {
 						resourceMap.put("lastModified", blob.lastModified());
 						resourceMap.put("fileMetaData", blob.metadata());
-						logger.info("Unable to fetch fileInfo");
 					} else {
-						resourceMap.put("mssg", "No Report Available");
+						resourceMap.put("msg", "No Report Available");
+						logger.info("Unable to fetch fileInfo");
 					}
 				}
 				reportTypeInfo.put(reportType, resourceMap);
