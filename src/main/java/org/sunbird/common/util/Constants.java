@@ -707,4 +707,5 @@ public class Constants {
 		throw new IllegalStateException("Utility class");
 	}
 
+	public static final String ORG_PRE_APPEND = "mdoid=";
 }

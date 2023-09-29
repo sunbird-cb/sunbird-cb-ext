@@ -199,7 +199,7 @@ public class StorageServiceImpl implements StorageService {
 					}
 				}
 				String fileName = mdoId + ".csv";
-				String objectKey = serverProperties.getReportDownloadFolderName() + "/" + reportType + "/" + todayFormattedDate + "/" + orgId + "/" + fileName;
+				String objectKey = serverProperties.getReportDownloadFolderName() + "/" + reportType + "/" + todayFormattedDate + "/" + Constants.ORG_PRE_APPEND + orgId + "/" + fileName;
 				Model.Blob blob = storageService.getObject(serverProperties.getReportDownloadContainerName(), objectKey, Option.apply(Boolean.FALSE));
 				if (blob != null) {
 					resourceMap.put("lastModified", blob.lastModified());
@@ -207,7 +207,7 @@ public class StorageServiceImpl implements StorageService {
 				} else {
 					LocalDateTime yesterday = now.minusDays(1);
 					String yesterdayFormattedDate = yesterday.format(dateFormat);
-					objectKey = serverProperties.getReportDownloadFolderName() + "/" + reportType + "/" + yesterdayFormattedDate + "/" + orgId + "/" + fileName;
+					objectKey = serverProperties.getReportDownloadFolderName() + "/" + reportType + "/" + yesterdayFormattedDate + "/" + Constants.ORG_PRE_APPEND + orgId + "/" + fileName;
 					blob = storageService.getObject(serverProperties.getReportDownloadContainerName(), objectKey, Option.apply(Boolean.FALSE));
 					if (blob != null) {
 						resourceMap.put("lastModified", blob.lastModified());
