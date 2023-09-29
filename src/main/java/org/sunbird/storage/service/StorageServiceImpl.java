@@ -182,33 +182,43 @@ public class StorageServiceImpl implements StorageService {
 
 	@Override
 	public ResponseEntity<Map<String, Map<String, Object>>> getFileInfo(String orgId) {
-		try {
-			Map<String, Map<String, Object>> reportTypeInfo = new HashMap<>();
-			for (String reportType : serverProperties.getReportTypeGetFileInfo()) {
-				Map<String, Object> resourceMap = new HashMap<>();
-				LocalDateTime now = LocalDateTime.now();
-				DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-				String todayFormattedDate = now.format(dateFormat);
-				String mdoId = "";
-				if (orgId != null && !orgId.isEmpty()) {
+		Map<String, String> reportFileNameMap = new HashMap<String, String>() {{
+			put("user-report", "UserReport.csv");
+			put("user-enrollment-report", "ConsumptionReport.csv");
+			put("course-report", "CBPReport.csv");
+			put("cba-report", "UserAssessmentReport.csv");
+			put("user-assessment-report-cbp", "StandaloneAssessmentReport.csv");
+		}};
+		Map<String, Map<String, Object>> reportTypeInfo = new HashMap<>();
+		for (String reportType : serverProperties.getReportTypeGetFileInfo()) {
+			Map<String, Object> resourceMap = new HashMap<>();
+			LocalDateTime now = LocalDateTime.now();
+			DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+			String todayFormattedDate = now.format(dateFormat);
+			String mdoId = "mdoid=" + orgId;
+				/*if (orgId != null && !orgId.isEmpty()) {
 					if (orgId.contains("=")) {
 						String[] array = orgId.split("=");
 						mdoId = array[1];
 					} else {
 						mdoId = orgId;
 					}
-				}
-				String fileName = mdoId + ".csv";
-				String objectKey = serverProperties.getReportDownloadFolderName() + "/" + reportType + "/" + todayFormattedDate + "/" + orgId + "/" + fileName;
+				}*/
+			String fileName = reportFileNameMap.get(reportType);
+			String objectKey = serverProperties.getReportDownloadFolderName() + "/" + reportType + "/" + todayFormattedDate + "/" + mdoId + "/" + fileName;
+			try {
 				Model.Blob blob = storageService.getObject(serverProperties.getReportDownloadContainerName(), objectKey, Option.apply(Boolean.FALSE));
 				if (blob != null) {
 					resourceMap.put("lastModified", blob.lastModified());
 					resourceMap.put("fileMetaData", blob.metadata());
-				} else {
-					LocalDateTime yesterday = now.minusDays(1);
-					String yesterdayFormattedDate = yesterday.format(dateFormat);
-					objectKey = serverProperties.getReportDownloadFolderName() + "/" + reportType + "/" + yesterdayFormattedDate + "/" + orgId + "/" + fileName;
-					blob = storageService.getObject(serverProperties.getReportDownloadContainerName(), objectKey, Option.apply(Boolean.FALSE));
+				}
+			} catch (Exception e) {
+				logger.error("Failed to read the downloaded file for url: " + objectKey);
+				LocalDateTime yesterday = now.minusDays(1);
+				String yesterdayFormattedDate = yesterday.format(dateFormat);
+				objectKey = serverProperties.getReportDownloadFolderName() + "/" + reportType + "/" + yesterdayFormattedDate + "/" + mdoId + "/" + fileName;
+				try {
+					Model.Blob blob = storageService.getObject(serverProperties.getReportDownloadContainerName(), objectKey, Option.apply(Boolean.FALSE));
 					if (blob != null) {
 						resourceMap.put("lastModified", blob.lastModified());
 						resourceMap.put("fileMetaData", blob.metadata());
@@ -216,16 +226,15 @@ public class StorageServiceImpl implements StorageService {
 						resourceMap.put("msg", "No Report Available");
 						logger.info("Unable to fetch fileInfo");
 					}
+				} catch (Exception ex) {
+					logger.error("Failed to read the downloaded file for url: " + objectKey);
 				}
-				reportTypeInfo.put(reportType, resourceMap);
 			}
-			return ResponseEntity.ok()
-					.contentType(MediaType.APPLICATION_JSON)
-					.body(reportTypeInfo);
-		} catch (Exception e) {
-			logger.error("Failed to read the downloaded file: " + ", Exception: ", e);
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+			reportTypeInfo.put(fileName, resourceMap);
 		}
+		return ResponseEntity.ok()
+				.contentType(MediaType.APPLICATION_JSON)
+				.body(reportTypeInfo);
 
 	}
 }
