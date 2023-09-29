@@ -485,6 +485,18 @@ public class CbExtServerProperties {
 	@Value("${content-read-endpoint}")
 	private String contentReadEndPoint;
 
+	@Value("${user.registration.welcome.email.signinLink}")
+	private String welcomeEmailSigninLink;
+
+	@Value("${user.registration.welcome.email.discoverLink}")
+	private String welcomeEmailDiscoverLink;
+
+	@Value("${user.registration.welcome.email.meetingLink}")
+	private String welcomeEmailMeetingLink;
+
+	@Value("${report.type.get.file.info}")
+	private String reportTypeGetFileInfo;
+
 	public String getAssessmentSubmitTopic() {
 		return assessmentSubmitTopic;
 	}
@@ -1770,5 +1782,37 @@ public class CbExtServerProperties {
 
 	public void setContentReadEndPoint(String contentReadEndPoint) {
 		this.contentReadEndPoint = contentReadEndPoint;
+	}
+
+	public String getWelcomeEmailSigninLink() {
+		return welcomeEmailSigninLink;
+	}
+
+	public void setWelcomeEmailSigninLink(String welcomeEmailSigninLink) {
+		this.welcomeEmailSigninLink = welcomeEmailSigninLink;
+	}
+
+	public String getWelcomeEmailDiscoverLink() {
+		return welcomeEmailDiscoverLink;
+	}
+
+	public void setWelcomeEmailDiscoverLink(String welcomeEmailDiscoverLink) {
+		this.welcomeEmailDiscoverLink = welcomeEmailDiscoverLink;
+	}
+
+	public String getWelcomeEmailMeetingLink() {
+		return welcomeEmailMeetingLink;
+	}
+
+	public void setWelcomeEmailMeetingLink(String welcomeEmailMeetingLink) {
+		this.welcomeEmailMeetingLink = welcomeEmailMeetingLink;
+	}
+
+	public List<String> getReportTypeGetFileInfo() {
+		return Arrays.asList(reportTypeGetFileInfo.split(",", -1));
+	}
+
+	public void setReportTypeGetFileInfo(String reportTypeGetFileInfo) {
+		this.reportTypeGetFileInfo = reportTypeGetFileInfo;
 	}
 }

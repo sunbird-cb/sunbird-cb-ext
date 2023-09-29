@@ -332,12 +332,13 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 				userRegistration.getFirstName());
 		request.put(Constants.REQUEST, requestBody);
 
-		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPost(
+		retValue = getActivationLink(userRegistration);
+		/*Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPost(
 				props.getDiscussionHubHost() + props.getDiscussionHubCreateUserPath(), request,
 				ProjectUtil.getDefaultHeaders());
 		if (Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
 			retValue = getActivationLink(userRegistration);
-		}
+		}*/
 		printMethodExecutionResult("Create NodeBB User", userRegistration.toMininumString(), retValue);
 		return retValue;
 	}
@@ -378,6 +379,9 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		requestBody.put(Constants.SET_PASSWORD_LINK, true);
 		requestBody.put(Constants.SUBJECT, props.getWelcomeEmailSubject());
 		requestBody.put(Constants.WELCOME_MESSAGE, Constants.HELLO);
+		requestBody.put(Constants.SIGNIN_LINK, props.getWelcomeEmailSigninLink());
+		requestBody.put(Constants.DISCOVER_LINK, props.getWelcomeEmailDiscoverLink());
+		requestBody.put(Constants.MEETING_LINK, props.getWelcomeEmailMeetingLink());
 
 		request.put(Constants.REQUEST, requestBody);
 
