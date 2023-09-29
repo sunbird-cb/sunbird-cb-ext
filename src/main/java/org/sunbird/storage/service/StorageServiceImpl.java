@@ -5,6 +5,8 @@ import java.io.FileOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import org.sunbird.cloud.storage.BaseStorageService;
+import org.sunbird.cloud.storage.Model;
 import org.sunbird.cloud.storage.factory.StorageConfig;
 import org.sunbird.cloud.storage.factory.StorageServiceFactory;
 import org.sunbird.common.model.SBApiResponse;
@@ -175,5 +178,54 @@ public class StorageServiceImpl implements StorageService {
 			}
 		} catch (Exception e) {
 		}
+	}
+
+	@Override
+	public ResponseEntity<Map<String, Map<String, Object>>> getFileInfo(String orgId) {
+		try {
+			Map<String, Map<String, Object>> reportTypeInfo = new HashMap<>();
+			for (String reportType : serverProperties.getReportTypeGetFileInfo()) {
+				Map<String, Object> resourceMap = new HashMap<>();
+				LocalDateTime now = LocalDateTime.now();
+				DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+				String todayFormattedDate = now.format(dateFormat);
+				String mdoId = "";
+				if (orgId != null && !orgId.isEmpty()) {
+					if (orgId.contains("=")) {
+						String[] array = orgId.split("=");
+						mdoId = array[1];
+					} else {
+						mdoId = orgId;
+					}
+				}
+				String fileName = mdoId + ".csv";
+				String objectKey = serverProperties.getReportDownloadFolderName() + "/" + reportType + "/" + todayFormattedDate + "/" + orgId + "/" + fileName;
+				Model.Blob blob = storageService.getObject(serverProperties.getReportDownloadContainerName(), objectKey, Option.apply(Boolean.FALSE));
+				if (blob != null) {
+					resourceMap.put("lastModified", blob.lastModified());
+					resourceMap.put("fileMetaData", blob.metadata());
+				} else {
+					LocalDateTime yesterday = now.minusDays(1);
+					String yesterdayFormattedDate = yesterday.format(dateFormat);
+					objectKey = serverProperties.getReportDownloadFolderName() + "/" + reportType + "/" + yesterdayFormattedDate + "/" + orgId + "/" + fileName;
+					blob = storageService.getObject(serverProperties.getReportDownloadContainerName(), objectKey, Option.apply(Boolean.FALSE));
+					if (blob != null) {
+						resourceMap.put("lastModified", blob.lastModified());
+						resourceMap.put("fileMetaData", blob.metadata());
+					} else {
+						resourceMap.put("msg", "No Report Available");
+						logger.info("Unable to fetch fileInfo");
+					}
+				}
+				reportTypeInfo.put(reportType, resourceMap);
+			}
+			return ResponseEntity.ok()
+					.contentType(MediaType.APPLICATION_JSON)
+					.body(reportTypeInfo);
+		} catch (Exception e) {
+			logger.error("Failed to read the downloaded file: " + ", Exception: ", e);
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+		}
+
 	}
 }

@@ -741,6 +741,9 @@ public class Constants {
 	public static final String BATCH_NOT_AVAILABLE_ERROR_MSG = "No Batch Available.";
 	public static final String AUTO_ENROLL_PRIMARY_CATEGORY_ERROR_MSG = "Auto enrolment is not allowed for '%s' course.";
 	public static final String CONTENT_NOT_AVAILABLE = "Content Search failed for Content: %s.";
+	public static final String SIGNIN_LINK = "signinLink";
+	public static final String DISCOVER_LINK = "discoverLink";
+	public static final String MEETING_LINK = "meetingLink";
 
 	public static final String BLENDED_PROGRAM_NAME="blendedProgramName";
 
