@@ -18,6 +18,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
+import javax.annotation.PostConstruct;
 
 @Component
 public class RedisCacheMgr {
@@ -33,6 +34,13 @@ public class RedisCacheMgr {
     private CbExtLogger logger = new CbExtLogger(getClass().getName());
     
     ObjectMapper objectMapper = new ObjectMapper();
+
+    private static int questions_cache_ttl = 84600;
+
+    @PostConstruct
+    public void postConstruct() {
+        this.questions_cache_ttl = cbExtServerProperties.getRedisQuestionsReadTimeOut().intValue();
+    }
 
     public Jedis getJedis() {
         try (Jedis jedis = jedisPool.getResource()) {
@@ -54,7 +62,16 @@ public class RedisCacheMgr {
             logger.error(e);
         }
     }
-
+    public void putInQuestionCache(String key, Object object) {
+        try {
+            String data = objectMapper.writeValueAsString(object);
+            getJedis().set(Constants.REDIS_COMMON_KEY + key, data);
+            getJedis().expire(Constants.REDIS_COMMON_KEY + key, questions_cache_ttl);
+            logger.debug("Cache_key_value " + Constants.REDIS_COMMON_KEY + key + " is saved in redis");
+        } catch (Exception e) {
+            logger.error(e);
+        }
+    }
     public void putStringInCache(String key, String value) {
         try {
             int ttl = cache_ttl;

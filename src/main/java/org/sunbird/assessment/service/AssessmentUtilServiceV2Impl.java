@@ -5,7 +5,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+import java.io.IOException;
+import java.util.stream.Collectors;
+import org.sunbird.cache.RedisCacheMgr;
 import org.apache.commons.collections.MapUtils;
 import org.codehaus.plexus.util.StringUtils;
 import org.slf4j.Logger;
@@ -39,8 +41,11 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 
 	private Logger logger = LoggerFactory.getLogger(AssessmentUtilServiceV2Impl.class);
 
+	@Autowired
+	RedisCacheMgr redisCacheMgr;
+
 	public Map<String, Object> validateQumlAssessment(List<String> originalQuestionList,
-			List<Map<String, Object>> userQuestionList) {
+													  List<Map<String, Object>> userQuestionList,Map<String,Object> questionMap) {
 		try {
 			Integer correct = 0;
 			Integer blank = 0;
@@ -48,7 +53,7 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 			Double result;
 			Integer total = 0;
 			Map<String, Object> resultMap = new HashMap<>();
-			Map<String, Object> answers = getQumlAnswers(originalQuestionList);
+			Map<String, Object> answers = getQumlAnswers(originalQuestionList,questionMap);
 			for (Map<String, Object> question : userQuestionList) {
 				List<String> marked = new ArrayList<>();
 				if (question.containsKey(Constants.QUESTION_TYPE)) {
@@ -112,15 +117,15 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 		return new HashMap<>();
 	}
 
-	private Map<String, Object> getQumlAnswers(List<String> questions) throws Exception {
+	private Map<String, Object> getQumlAnswers(List<String> questions,Map<String,Object> questionMap) throws Exception {
 		Map<String, Object> ret = new HashMap<>();
 
-		Map<String, Map<String, Object>> questionMap = new HashMap<String, Map<String, Object>>();
+		//Map<String, Map<String, Object>> questionMap = new HashMap<String, Map<String, Object>>();
 
 		for (String questionId : questions) {
 			List<String> correctOption = new ArrayList<>();
-			questionMap = fetchQuestionMapDetails(questionId);
-			Map<String, Object> question = questionMap.get(questionId);
+			//questionMap = fetchQuestionMapDetails(questionId);
+			Map<String, Object> question = (Map<String, Object>) questionMap.get(questionId);
 			if (question.containsKey(Constants.QUESTION_TYPE)) {
 				String questionType = ((String) question.get(Constants.QUESTION_TYPE)).toLowerCase();
 				Map<String, Object> editorStateObj = (Map<String, Object>) question.get(Constants.EDITOR_STATE);
@@ -343,4 +348,58 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 				Constants.SUNBIRD_KEY_SPACE_NAME, serverProperties.getAssessmentUserSubmitDataTable(),
 				propertyMap, null);
 	}
+
+
+	public Map<String, Object> readQuestsOfQSet(List<String> questionIds,String assessmentIdentifier) throws IOException {
+		if(!serverProperties.isReadQuestionsFromRedis())
+			readQuestionMap(questionIds);
+		return readQuestsOfQSetFrmCache(assessmentIdentifier);
+	}
+
+	private Map<String, Object> readQuestionMap(List<String> questionIds ){
+		// Read question details for the fetched question IDs
+		List<Map<String, Object>> questionResultsList = readQuestionDetails(questionIds);
+		if(CollectionUtils.isEmpty(questionResultsList)) return  new HashMap<>();
+		// Construct the question map
+		return questionResultsList.stream()
+				.flatMap(questList -> ((List<Map<String, Object>>) ((Map<String, Object>) questList.get(Constants.RESULT)).get(Constants.QUESTIONS)).stream())
+				.collect(Collectors.toMap(question -> (String) question.get(Constants.IDENTIFIER), question -> question));
+	}
+
+	public Map<String, Object> readQuestsOfQSetFrmCache(String assessmentIdentifier) throws IOException {
+		String questStr = redisCacheMgr.getCache(Constants.ASSESSMENT_ID + assessmentIdentifier + Constants.UNDER_SCORE + Constants.QUESTIONS);
+		if (StringUtils.isEmpty(questStr)) {
+			Map<String, Object> questionMap = new HashMap<>();
+			// Read assessment hierarchy from DB
+			Map<String, Object> assessmentData = readAssessmentHierarchyFromDB(assessmentIdentifier);
+			if(CollectionUtils.isEmpty(assessmentData)) return questionMap;
+			List<Map<String, Object>> children = (List<Map<String, Object>>) assessmentData.get(Constants.CHILDREN);
+			if(CollectionUtils.isEmpty(children)) return questionMap;
+			// Fetch recursive question IDs
+			List<String> questionIds = fetchRecursiveQuestionIds(children, new ArrayList<>());
+			if(CollectionUtils.isEmpty(questionIds)) return questionMap;
+			// Construct the question map
+			questionMap = readQuestionMap(questionIds);
+			if (!CollectionUtils.isEmpty(questionMap))
+				redisCacheMgr.putInQuestionCache(Constants.ASSESSMENT_ID + assessmentIdentifier + Constants.UNDER_SCORE + Constants.QUESTIONS, questionMap);
+			return questionMap;
+		} else {
+			return mapper.readValue(questStr, new TypeReference<Map<String, Object>>() {
+			});
+		}
+	}
+
+	private List<String> fetchRecursiveQuestionIds(List<Map<String, Object>> children, List<String> questionIds) {
+		if (CollectionUtils.isEmpty(children))
+			return questionIds;
+		for (Map<String, Object> child : children) {
+			if (Constants.QUESTION_SET.equalsIgnoreCase((String) child.get(Constants.OBJECT_TYPE))) {
+				fetchRecursiveQuestionIds((List<Map<String, Object>>) child.get(Constants.CHILDREN), questionIds);
+			} else {
+				questionIds.add((String) child.get(Constants.IDENTIFIER));
+			}
+		}
+		return questionIds;
+	}
+
 }

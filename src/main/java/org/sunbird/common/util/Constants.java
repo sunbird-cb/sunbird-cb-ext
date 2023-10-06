@@ -753,6 +753,8 @@ public class Constants {
 
 	public static final String SESSION_TYPE_OFFLINE="Offline";
 
+	public static final String UNDER_SCORE="_";
+
 	public static final String SESSION_NAME="sessionName";
   private Constants() {
 		throw new IllegalStateException("Utility class");

@@ -2,10 +2,11 @@ package org.sunbird.assessment.service;
 
 import java.util.List;
 import java.util.Map;
+import java.io.IOException;
 
 public interface AssessmentUtilServiceV2 {
 	public Map<String, Object> validateQumlAssessment(List<String> originalQuestionList,
-			List<Map<String, Object>> userQuestionList);
+													  List<Map<String, Object>> userQuestionList,Map<String,Object> questionMap);
 
 	public String fetchQuestionIdentifierValue(List<String> identifierList, List<Object> questionList, String primaryCategory) throws Exception;
 
@@ -18,4 +19,6 @@ public interface AssessmentUtilServiceV2 {
 	public Map<String, Object> readAssessmentHierarchyFromDB(String assessmentIdentifier);
 
 	public List<Map<String, Object>> readUserSubmittedAssessmentRecords(String userId, String assessmentId);
+
+	public Map<String, Object> readQuestsOfQSet(List<String> questionIds,String assessmentIdentifier) throws IOException;
 }
