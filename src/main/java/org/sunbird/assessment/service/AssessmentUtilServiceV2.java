@@ -20,5 +20,5 @@ public interface AssessmentUtilServiceV2 {
 
 	public List<Map<String, Object>> readUserSubmittedAssessmentRecords(String userId, String assessmentId);
 
-	public Map<String, Object> readQuestsOfQSet(List<String> questionIds,String assessmentIdentifier) throws IOException;
+	public Map<String, Object> readQListfromCache(List<String> questionIds, String assessmentIdentifier) throws IOException;
 }

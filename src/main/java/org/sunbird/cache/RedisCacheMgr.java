@@ -23,7 +23,7 @@ import javax.annotation.PostConstruct;
 @Component
 public class RedisCacheMgr {
 
-    private static final int cache_ttl = 84600;
+    private static int cache_ttl = 84600;
 
     @Autowired
     private JedisPool jedisPool;
@@ -40,14 +40,12 @@ public class RedisCacheMgr {
     @PostConstruct
     public void postConstruct() {
         this.questions_cache_ttl = cbExtServerProperties.getRedisQuestionsReadTimeOut().intValue();
+        if (!StringUtils.isEmpty(cbExtServerProperties.getRedisTimeout())) {
+            cache_ttl = Integer.parseInt(cbExtServerProperties.getRedisTimeout());
+        }
     }
-
-    public void putCache(String key, Object object) {
+    public void putCache(String key, Object object, int ttl) {
         try (Jedis jedis = jedisPool.getResource()) {
-            int ttl = cache_ttl;
-            if (!StringUtils.isEmpty(cbExtServerProperties.getRedisTimeout())) {
-                ttl = Integer.parseInt(cbExtServerProperties.getRedisTimeout());
-            }
             String data = objectMapper.writeValueAsString(object);
             jedis.set(Constants.REDIS_COMMON_KEY + key, data);
             jedis.expire(Constants.REDIS_COMMON_KEY + key, ttl);
@@ -55,6 +53,9 @@ public class RedisCacheMgr {
         } catch (Exception e) {
             logger.error(e);
         }
+    }
+    public void putCache(String key, Object object) {
+        putCache(key,object,cache_ttl);
     }
     public void putInQuestionCache(String key, Object object) {
         try (Jedis jedis = jedisPool.getResource()) {
@@ -66,18 +67,18 @@ public class RedisCacheMgr {
             logger.error(e);
         }
     }
-    public void putStringInCache(String key, String value) {
+    public void putStringInCache(String key, String value,int ttl) {
         try (Jedis jedis = jedisPool.getResource()) {
-            int ttl = cache_ttl;
-            if (!StringUtils.isEmpty(cbExtServerProperties.getRedisTimeout())) {
-                ttl = Integer.parseInt(cbExtServerProperties.getRedisTimeout());
-            }
             jedis.set(Constants.REDIS_COMMON_KEY + key, value);
             jedis.expire(Constants.REDIS_COMMON_KEY + key, ttl);
             logger.debug("Cache_key_value " + Constants.REDIS_COMMON_KEY + key + " is saved in redis");
         } catch (Exception e) {
             logger.error(e);
         }
+    }
+
+    public void putStringInCache(String key, String value) {
+        putStringInCache(key, value, cache_ttl);
     }
 
     public boolean deleteKeyByName(String key) {

@@ -221,7 +221,7 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
             }
 
             String assessmentIdFromRequest = (String) requestBody.get(Constants.ASSESSMENT_ID_KEY);
-            Map<String, Object> questionsMap = assessUtilServ.readQuestsOfQSet(identifierList,assessmentIdFromRequest);
+            Map<String, Object> questionsMap = assessUtilServ.readQListfromCache(identifierList,assessmentIdFromRequest);
             for (String questionId : identifierList) {
                 questionList.add(assessUtilServ.filterQuestionMapDetail((Map<String, Object>) questionsMap.get(questionId),
                         result.get(Constants.PRIMARY_CATEGORY)));
@@ -346,7 +346,7 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
                         case Constants.ASSESSMENT_LEVEL_SCORE_CUTOFF: {
                             result.putAll(createResponseMapWithProperStructure(hierarchySection,
                                     assessUtilServ.validateQumlAssessment(questionsListFromAssessmentHierarchy,
-                                            questionsListFromSubmitRequest,assessUtilServ.readQuestsOfQSet(questionsListFromAssessmentHierarchy,assessmentIdFromRequest))));
+                                            questionsListFromSubmitRequest,assessUtilServ.readQListfromCache(questionsListFromAssessmentHierarchy,assessmentIdFromRequest))));
                             Map<String, Object> finalRes= calculateAssessmentFinalResults(result);
                             outgoingResponse.getResult().putAll(finalRes);
                             outgoingResponse.getResult().put(Constants.PRIMARY_CATEGORY, assessmentPrimaryCategory);
@@ -369,7 +369,7 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
                         case Constants.SECTION_LEVEL_SCORE_CUTOFF: {
                             result.putAll(createResponseMapWithProperStructure(hierarchySection,
                                     assessUtilServ.validateQumlAssessment(questionsListFromAssessmentHierarchy,
-                                            questionsListFromSubmitRequest,assessUtilServ.readQuestsOfQSet(questionsListFromAssessmentHierarchy,assessmentIdFromRequest))));
+                                            questionsListFromSubmitRequest,assessUtilServ.readQListfromCache(questionsListFromAssessmentHierarchy,assessmentIdFromRequest))));
                             sectionLevelsResults.add(result);
                         }
                             break;
@@ -497,7 +497,7 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
                         case Constants.ASSESSMENT_LEVEL_SCORE_CUTOFF: {
                             result.putAll(createResponseMapWithProperStructure(hierarchySection,
                                     assessUtilServ.validateQumlAssessment(questionsListFromAssessmentHierarchy,
-                                            questionsListFromSubmitRequest,assessUtilServ.readQuestsOfQSet(questionsListFromAssessmentHierarchy,assessmentIdFromRequest))));
+                                            questionsListFromSubmitRequest,assessUtilServ.readQListfromCache(questionsListFromAssessmentHierarchy,assessmentIdFromRequest))));
                             Map<String, Object> finalResult = calculateAssessmentFinalResults(result);
                             finalResult.put(Constants.STATUS_IS_IN_PROGRESS, false);
                             writeDataToDatabaseAndTriggerKafkaEvent(submitRequest, userId, questionSetFromAssessment,
@@ -506,7 +506,7 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
                         case Constants.SECTION_LEVEL_SCORE_CUTOFF: {
                             result.putAll(createResponseMapWithProperStructure(hierarchySection,
                                     assessUtilServ.validateQumlAssessment(questionsListFromAssessmentHierarchy,
-                                            questionsListFromSubmitRequest,assessUtilServ.readQuestsOfQSet(questionsListFromAssessmentHierarchy,assessmentIdFromRequest))));
+                                            questionsListFromSubmitRequest,assessUtilServ.readQListfromCache(questionsListFromAssessmentHierarchy,assessmentIdFromRequest))));
                             sectionLevelsResults.add(result);
                         }
                             break;
