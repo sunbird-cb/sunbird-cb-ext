@@ -137,7 +137,7 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
             if (existingDataList.isEmpty()) {
                 logger.info("Assessment read first time for user.");
                 // Add Null check for expectedDuration.throw bad questionSet Assessment Exam
-                if(StringUtils.isEmpty((String)assessmentAllDetail.get(Constants.EXPECTED_DURATION))){
+                if(null == assessmentAllDetail.get(Constants.EXPECTED_DURATION)){
                     errMsg = Constants.ASSESSMENT_INVALID; }
                 else {
                     int expectedDuration = (Integer) assessmentAllDetail.get(Constants.EXPECTED_DURATION);
