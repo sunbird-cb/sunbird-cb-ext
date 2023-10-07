@@ -497,14 +497,14 @@ public class CbExtServerProperties {
 	private Integer redisQuestionsReadTimeOut;
 
 	@Value("${read.assess.questions.from.redis}")
-	private boolean readQuestionsFromRedis;
+	private boolean qListFromCacheEnabled;
 
-	public boolean isReadQuestionsFromRedis() {
-		return readQuestionsFromRedis;
+	public boolean qListFromCacheEnabled() {
+		return qListFromCacheEnabled;
 	}
 
-	public void setReadQuestionsFromRedis(boolean readQuestionsFromRedis) {
-		this.readQuestionsFromRedis = readQuestionsFromRedis;
+	public void setqListFromCacheEnabled(boolean qListFromCacheEnabled) {
+		this.qListFromCacheEnabled = qListFromCacheEnabled;
 	}
 
 	public Integer getRedisQuestionsReadTimeOut() {

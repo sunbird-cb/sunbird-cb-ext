@@ -321,7 +321,7 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 
 	public Map<String, Object> readAssessmentHierarchyFromCache(String assessmentIdentifier) {
 		String questStr = Constants.EMPTY;
-		if(serverProperties.isReadQuestionsFromRedis()) {
+		if(serverProperties.qListFromCacheEnabled()) {
 			 questStr = redisCacheMgr.getCache(Constants.ASSESSMENT_ID + assessmentIdentifier + Constants.UNDER_SCORE + Constants.QUESTION_SET);		
 		}
 		if(StringUtils.isEmpty(questStr)) {
@@ -337,7 +337,7 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 				try {
 					Map<String,Object> questionHierarchy = mapper.readValue(hierarchyStr, new TypeReference<Map<String, Object>>() {
 					});
-					redisCacheMgr.putInQuestionCache(Constants.ASSESSMENT_ID + assessmentIdentifier + Constants.UNDER_SCORE + Constants.QUESTION_SET, questionHierarchy);
+					redisCacheMgr.putCache(Constants.ASSESSMENT_ID + assessmentIdentifier + Constants.UNDER_SCORE + Constants.QUESTION_SET, questionHierarchy,serverProperties.getRedisQuestionsReadTimeOut().intValue());
 					return questionHierarchy;
 				} catch (Exception e) {
 					logger.error("Failed to read hierarchy data. Exception: ", e);
@@ -367,38 +367,39 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 	}
 
 
-	public Map<String, Object> readQuestsOfQSet(List<String> questionIds,String assessmentIdentifier) throws IOException {
-		if(!serverProperties.isReadQuestionsFromRedis())
-			readQuestionMap(questionIds);
-		return readQuestsOfQSetFrmCache(assessmentIdentifier);
+	public Map<String, Object> readQListfromCache(List<String> questionIds, String assessmentIdentifier) throws IOException {
+		if (serverProperties.qListFromCacheEnabled())
+			return qListFromCache(assessmentIdentifier);
+		else
+			return qListFrmAssessService(questionIds);
 	}
 
-	private Map<String, Object> readQuestionMap(List<String> questionIds ){
+	private Map<String, Object> qListFrmAssessService(List<String> questionIds) {
 		// Read question details for the fetched question IDs
 		List<Map<String, Object>> questionResultsList = readQuestionDetails(questionIds);
-		if(CollectionUtils.isEmpty(questionResultsList)) return  new HashMap<>();
+		if (CollectionUtils.isEmpty(questionResultsList)) return new HashMap<>();
 		// Construct the question map
 		return questionResultsList.stream()
 				.flatMap(questList -> ((List<Map<String, Object>>) ((Map<String, Object>) questList.get(Constants.RESULT)).get(Constants.QUESTIONS)).stream())
 				.collect(Collectors.toMap(question -> (String) question.get(Constants.IDENTIFIER), question -> question));
 	}
 
-	public Map<String, Object> readQuestsOfQSetFrmCache(String assessmentIdentifier) throws IOException {
+	public Map<String, Object> qListFromCache(String assessmentIdentifier) throws IOException {
 		String questStr = redisCacheMgr.getCache(Constants.ASSESSMENT_ID + assessmentIdentifier + Constants.UNDER_SCORE + Constants.QUESTIONS);
 		if (StringUtils.isEmpty(questStr)) {
 			Map<String, Object> questionMap = new HashMap<>();
 			// Read assessment hierarchy from DB
 			Map<String, Object> assessmentData = readAssessmentHierarchyFromCache(assessmentIdentifier);
-			if(CollectionUtils.isEmpty(assessmentData)) return questionMap;
+			if (CollectionUtils.isEmpty(assessmentData)) return questionMap;
 			List<Map<String, Object>> children = (List<Map<String, Object>>) assessmentData.get(Constants.CHILDREN);
-			if(CollectionUtils.isEmpty(children)) return questionMap;
+			if (CollectionUtils.isEmpty(children)) return questionMap;
 			// Fetch recursive question IDs
 			List<String> questionIds = fetchRecursiveQuestionIds(children, new ArrayList<>());
-			if(CollectionUtils.isEmpty(questionIds)) return questionMap;
+			if (CollectionUtils.isEmpty(questionIds)) return questionMap;
 			// Construct the question map
-			questionMap = readQuestionMap(questionIds);
+			questionMap = qListFrmAssessService(questionIds);
 			if (!CollectionUtils.isEmpty(questionMap))
-				redisCacheMgr.putInQuestionCache(Constants.ASSESSMENT_ID + assessmentIdentifier + Constants.UNDER_SCORE + Constants.QUESTIONS, questionMap);
+				redisCacheMgr.putCache(Constants.ASSESSMENT_ID + assessmentIdentifier + Constants.UNDER_SCORE + Constants.QUESTIONS, questionMap,serverProperties.getRedisQuestionsReadTimeOut().intValue());
 			return questionMap;
 		} else {
 			return mapper.readValue(questStr, new TypeReference<Map<String, Object>>() {
