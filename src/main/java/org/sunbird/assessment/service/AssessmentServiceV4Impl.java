@@ -347,7 +347,8 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
                             result.putAll(createResponseMapWithProperStructure(hierarchySection,
                                     assessUtilServ.validateQumlAssessment(questionsListFromAssessmentHierarchy,
                                             questionsListFromSubmitRequest,assessUtilServ.readQuestsOfQSet(questionsListFromAssessmentHierarchy,assessmentIdFromRequest))));
-                            outgoingResponse.getResult().putAll(calculateAssessmentFinalResults(result));
+                            Map<String, Object> finalRes= calculateAssessmentFinalResults(result);
+                            outgoingResponse.getResult().putAll(finalRes);
                             outgoingResponse.getResult().put(Constants.PRIMARY_CATEGORY, assessmentPrimaryCategory);
                             if (!Constants.PRACTICE_QUESTION_SET.equalsIgnoreCase(assessmentPrimaryCategory)) {
 
@@ -359,7 +360,7 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
                                             new TypeReference<Map<String, Object>>() {
                                             });
                                 }
-                                writeDataToDatabaseAndTriggerKafkaEvent(submitRequest, userId, questionSetFromAssessment, result,
+                                writeDataToDatabaseAndTriggerKafkaEvent(submitRequest, userId, questionSetFromAssessment, finalRes,
                                         (String) assessmentHierarchy.get(Constants.PRIMARY_CATEGORY));
                             }
 
