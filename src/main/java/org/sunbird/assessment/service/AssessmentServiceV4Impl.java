@@ -78,7 +78,7 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
             }
 
             Map<String, Object> assessmentAllDetail = assessUtilServ
-                    .readAssessmentHierarchyFromDB(assessmentIdentifier);
+                    .readAssessmentHierarchyFromCache(assessmentIdentifier);
             if (MapUtils.isEmpty(assessmentAllDetail)) {
                 updateErrorDetails(response, Constants.ASSESSMENT_HIERARCHY_READ_FAILED,
                         HttpStatus.INTERNAL_SERVER_ERROR);
@@ -118,7 +118,7 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
             }
             logger.info(String.format("ReadAssessment... UserId: %s, AssessmentIdentifier: %s", userId, assessmentIdentifier));
             Map<String, Object> assessmentAllDetail = assessUtilServ
-                    .readAssessmentHierarchyFromDB(assessmentIdentifier);
+                    .readAssessmentHierarchyFromCache(assessmentIdentifier);
             if (MapUtils.isEmpty(assessmentAllDetail)) {
                 updateErrorDetails(response, Constants.ASSESSMENT_HIERARCHY_READ_FAILED,
                         HttpStatus.INTERNAL_SERVER_ERROR);
@@ -136,19 +136,24 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
             Timestamp assessmentStartTime = new Timestamp(new java.util.Date().getTime());
             if (existingDataList.isEmpty()) {
                 logger.info("Assessment read first time for user.");
-                int expectedDuration = (Integer) assessmentAllDetail.get(Constants.EXPECTED_DURATION);
-                Timestamp assessmentEndTime = calculateAssessmentSubmitTime(expectedDuration,
-                        assessmentStartTime, 0);                
-                Map<String, Object> assessmentData = readAssessmentLevelData(assessmentAllDetail);
-                assessmentData.put(Constants.START_TIME, assessmentStartTime.getTime());
-                assessmentData.put(Constants.END_TIME, assessmentEndTime.getTime());
-                response.getResult().put(Constants.QUESTION_SET, assessmentData);
-                Boolean isAssessmentUpdatedToDB = assessmentRepository.addUserAssesmentDataToDB(userId,
-                        assessmentIdentifier, assessmentStartTime, assessmentEndTime,
-                        (Map<String, Object>) (response.getResult().get(Constants.QUESTION_SET)),
-                        Constants.NOT_SUBMITTED);
-                if (Boolean.FALSE.equals(isAssessmentUpdatedToDB)) {
-                    errMsg = Constants.ASSESSMENT_DATA_START_TIME_NOT_UPDATED;
+                // Add Null check for expectedDuration.throw bad questionSet Assessment Exam
+                if(StringUtils.isEmpty((String)assessmentAllDetail.get(Constants.EXPECTED_DURATION))){
+                    errMsg = Constants.ASSESSMENT_INVALID; }
+                else {
+                    int expectedDuration = (Integer) assessmentAllDetail.get(Constants.EXPECTED_DURATION);
+                    Timestamp assessmentEndTime = calculateAssessmentSubmitTime(expectedDuration,
+                            assessmentStartTime, 0);
+                    Map<String, Object> assessmentData = readAssessmentLevelData(assessmentAllDetail);
+                    assessmentData.put(Constants.START_TIME, assessmentStartTime.getTime());
+                    assessmentData.put(Constants.END_TIME, assessmentEndTime.getTime());
+                    response.getResult().put(Constants.QUESTION_SET, assessmentData);
+                    Boolean isAssessmentUpdatedToDB = assessmentRepository.addUserAssesmentDataToDB(userId,
+                            assessmentIdentifier, assessmentStartTime, assessmentEndTime,
+                            (Map<String, Object>) (response.getResult().get(Constants.QUESTION_SET)),
+                            Constants.NOT_SUBMITTED);
+                    if (Boolean.FALSE.equals(isAssessmentUpdatedToDB)) {
+                        errMsg = Constants.ASSESSMENT_DATA_START_TIME_NOT_UPDATED;
+                    }
                 }
             } else {
                 logger.info("Assessment read... user has details... ");
@@ -408,7 +413,7 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
         try {
             String assessmentIdFromRequest = (String) submitRequest.get(Constants.IDENTIFIER);
             Map<String, Object> assessmentHierarchy = assessUtilServ
-                    .readAssessmentHierarchyFromDB(assessmentIdFromRequest);
+                    .readAssessmentHierarchyFromCache(assessmentIdFromRequest);
             if (MapUtils.isEmpty(assessmentHierarchy)) {
                 logger.error(Constants.READ_ASSESSMENT_FAILED, new Exception(Constants.READ_ASSESSMENT_FAILED));
                 return;
@@ -611,7 +616,7 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
         }
 
         Map<String, Object> assessmentAllDetail = assessUtilServ
-                .readAssessmentHierarchyFromDB(assessmentIdFromRequest);
+                .readAssessmentHierarchyFromCache(assessmentIdFromRequest);
         if (MapUtils.isEmpty(assessmentAllDetail)) {
             result.put(Constants.ERROR_MESSAGE, Constants.ASSESSMENT_HIERARCHY_READ_FAILED);
             return result;
@@ -693,7 +698,7 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
             return Constants.INVALID_ASSESSMENT_ID;
         }
         String assessmentIdFromRequest = (String) submitRequest.get(Constants.IDENTIFIER);
-        assessmentHierarchy.putAll(assessUtilServ.readAssessmentHierarchyFromDB(assessmentIdFromRequest));
+        assessmentHierarchy.putAll(assessUtilServ.readAssessmentHierarchyFromCache(assessmentIdFromRequest));
         if (MapUtils.isEmpty(assessmentHierarchy)) {
             return Constants.READ_ASSESSMENT_FAILED;
         }

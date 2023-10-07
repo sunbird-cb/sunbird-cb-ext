@@ -16,7 +16,7 @@ public interface AssessmentUtilServiceV2 {
 
 	public Map<String, Object> getReadHierarchyApiResponse(String assessmentIdentifier, String token);
 
-	public Map<String, Object> readAssessmentHierarchyFromDB(String assessmentIdentifier);
+	public Map<String, Object> readAssessmentHierarchyFromCache(String assessmentIdentifier);
 
 	public List<Map<String, Object>> readUserSubmittedAssessmentRecords(String userId, String assessmentId);
 

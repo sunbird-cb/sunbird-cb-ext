@@ -320,7 +320,12 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 	}
 
 	public Map<String, Object> readAssessmentHierarchyFromDB(String assessmentIdentifier) {
-		Map<String, Object> propertyMap = new HashMap<String, Object>();
+		String questStr = Constants.EMPTY;
+		if(serverProperties.isReadQuestionsFromRedis()) {
+			 questStr = redisCacheMgr.getCache(Constants.ASSESSMENT_ID + assessmentIdentifier + Constants.UNDER_SCORE + Constants.QUESTION_SET);		
+		}
+		if(StringUtils.isEmpty(questStr)) {
+			Map<String, Object> propertyMap = new HashMap<String, Object>();
 		propertyMap.put(Constants.IDENTIFIER, assessmentIdentifier);
 		List<Map<String, Object>> hierarchyList = cassandraOperation.getRecordsByPropertiesWithoutFiltering(
 				serverProperties.getAssessmentHierarchyNameSpace(),
@@ -330,13 +335,25 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 			String hierarchyStr = (String) assessmentEntry.get(Constants.HIERARCHY);
 			if (StringUtils.isNotBlank(hierarchyStr)) {
 				try {
-					return mapper.readValue(hierarchyStr, new TypeReference<Map<String, Object>>() {
+					Map<String,Object> questionHierarchy = mapper.readValue(hierarchyStr, new TypeReference<Map<String, Object>>() {
 					});
+					redisCacheMgr.putInQuestionCache(Constants.ASSESSMENT_ID + assessmentIdentifier + Constants.UNDER_SCORE + Constants.QUESTION_SET, questionHierarchy);
+					return questionHierarchy;
 				} catch (Exception e) {
 					logger.error("Failed to read hierarchy data. Exception: ", e);
 				}
 			}
 		}
+		}
+		else {
+			try {
+				return mapper.readValue(questStr, new TypeReference<Map<String, Object>>() {
+				});
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+		
 		return MapUtils.EMPTY_MAP;
 	}
 
