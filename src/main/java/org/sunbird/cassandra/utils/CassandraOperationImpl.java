@@ -10,9 +10,10 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.sunbird.common.helper.cassandra.CassandraConnectionManager;
-import org.sunbird.common.helper.cassandra.CassandraConnectionMngrFactory;
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.util.Constants;
 
@@ -24,7 +25,10 @@ import java.util.concurrent.TimeUnit;
 public class CassandraOperationImpl implements CassandraOperation {
 
 	private Logger logger = LoggerFactory.getLogger(getClass().getName());
-	protected CassandraConnectionManager connectionManager = CassandraConnectionMngrFactory.getInstance();
+
+	@Autowired
+  	@Qualifier("CassandraConnectionManagerImplHelper")
+  	private static CassandraConnectionManager connectionManager;
 
 	@Override
 	public SBApiResponse insertRecord(String keyspaceName, String tableName, Map<String, Object> request) {
