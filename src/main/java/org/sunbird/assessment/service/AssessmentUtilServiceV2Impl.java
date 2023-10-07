@@ -319,7 +319,7 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 		return new HashMap<>();
 	}
 
-	public Map<String, Object> readAssessmentHierarchyFromDB(String assessmentIdentifier) {
+	public Map<String, Object> readAssessmentHierarchyFromCache(String assessmentIdentifier) {
 		String questStr = Constants.EMPTY;
 		if(serverProperties.isReadQuestionsFromRedis()) {
 			 questStr = redisCacheMgr.getCache(Constants.ASSESSMENT_ID + assessmentIdentifier + Constants.UNDER_SCORE + Constants.QUESTION_SET);		
@@ -388,7 +388,7 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 		if (StringUtils.isEmpty(questStr)) {
 			Map<String, Object> questionMap = new HashMap<>();
 			// Read assessment hierarchy from DB
-			Map<String, Object> assessmentData = readAssessmentHierarchyFromDB(assessmentIdentifier);
+			Map<String, Object> assessmentData = readAssessmentHierarchyFromCache(assessmentIdentifier);
 			if(CollectionUtils.isEmpty(assessmentData)) return questionMap;
 			List<Map<String, Object>> children = (List<Map<String, Object>>) assessmentData.get(Constants.CHILDREN);
 			if(CollectionUtils.isEmpty(children)) return questionMap;
