@@ -27,7 +27,6 @@ public class CassandraOperationImpl implements CassandraOperation {
 	private Logger logger = LoggerFactory.getLogger(getClass().getName());
 
 	@Autowired
-  	@Qualifier("CassandraConnectionManagerImplHelper")
   	private static CassandraConnectionManager connectionManager;
 
 	@Override
