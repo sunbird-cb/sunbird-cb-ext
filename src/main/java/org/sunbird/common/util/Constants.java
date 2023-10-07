@@ -695,6 +695,7 @@ public class Constants {
 	public static final String BULK_UPLOAD_VERIFICATION_REGEX = "bulk.upload.tag.verification.regex";
 	public static final String USER_REGISTRATION_GROUP_LIST = "api.user.registration.group.list";
     public static final String TABLE_ENROLLMENT_BATCH_LOOKUP = "enrollment_batch_lookup";
+	public static final String EMPTY="";
 	public static final String BATCH_ALREADY_ENROLLED_MSG = "Already Enrolled in batches.";
 	public static final String BATCH_AUTO_ENROLL_ERROR_MSG = "Failed to auto enrol user in batch.";
 	public static final String BATCH_NOT_AVAILABLE_ERROR_MSG = "No Batch Available.";
@@ -703,6 +704,8 @@ public class Constants {
 	public static final String SIGNIN_LINK = "signinLink";
 	public static final String DISCOVER_LINK = "discoverLink";
 	public static final String MEETING_LINK = "meetingLink";
+	public static final String UNDER_SCORE="_";
+	public static final String ASSESSMENT_INVALID = "Assessment Data doesn't contain mandatory values of expected duration.";
     private Constants() {
 		throw new IllegalStateException("Utility class");
 	}

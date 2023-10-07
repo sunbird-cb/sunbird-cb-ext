@@ -306,6 +306,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
         List<String> questionsListFromAssessmentHierarchy = new ArrayList<>();
         Map<String, Object> assessmentHierarchy = new HashMap<>();
         errMsg = validateSubmitAssessmentRequest(submitRequest, authUserToken, hierarchySectionList, sectionListFromSubmitRequest, assessmentHierarchy);
+        String assessmentIdFromRequest = (String) submitRequest.get(Constants.IDENTIFIER);
         if (errMsg.isEmpty()) {
             String userId = validateAuthTokenAndFetchUserId(authUserToken);
             String scoreCutOffType = ((String) assessmentHierarchy.get(Constants.SCORE_CUTOFF_TYPE)).toLowerCase();
@@ -359,14 +360,12 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                     Map<String, Object> result = new HashMap<>();
                     switch (scoreCutOffType) {
                         case Constants.ASSESSMENT_LEVEL_SCORE_CUTOFF: {
-                            result.putAll(createResponseMapWithProperStructure(hierarchySection, assessUtilServ.validateQumlAssessment(questionsListFromAssessmentHierarchy, questionsListFromSubmitRequest)));
-                            outgoingResponse.getResult().putAll(calculateAssessmentFinalResults(result));
+                            result.putAll(createResponseMapWithProperStructure(hierarchySection, assessUtilServ.validateQumlAssessment(questionsListFromAssessmentHierarchy, questionsListFromSubmitRequest,assessUtilServ.readQuestsOfQSet(questionsListFromAssessmentHierarchy,assessmentIdFromRequest))));                            outgoingResponse.getResult().putAll(calculateAssessmentFinalResults(result));
                             writeDataToDatabaseAndTriggerKafkaEvent(submitRequest, userId, questionSetFromAssessment, result, (String) assessmentHierarchy.get(Constants.PRIMARY_CATEGORY));
                             return outgoingResponse;
                         }
                         case Constants.SECTION_LEVEL_SCORE_CUTOFF: {
-                            result.putAll(createResponseMapWithProperStructure(hierarchySection, assessUtilServ.validateQumlAssessment(questionsListFromAssessmentHierarchy, questionsListFromSubmitRequest)));
-                            sectionLevelsResults.add(result);
+                            result.putAll(createResponseMapWithProperStructure(hierarchySection, assessUtilServ.validateQumlAssessment(questionsListFromAssessmentHierarchy, questionsListFromSubmitRequest,assessUtilServ.readQuestsOfQSet(questionsListFromAssessmentHierarchy,assessmentIdFromRequest))));                            sectionLevelsResults.add(result);
                         }
                         break;
                         default:
@@ -385,13 +384,11 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                     Map<String, Object> result = new HashMap<>();
                     switch (scoreCutOffType) {
                         case Constants.ASSESSMENT_LEVEL_SCORE_CUTOFF: {
-                            result.putAll(createResponseMapWithProperStructure(hierarchySection, assessUtilServ.validateQumlAssessment(questionsListFromAssessmentHierarchy, questionsListFromSubmitRequest)));
-                            outgoingResponse.getResult().putAll(calculateAssessmentFinalResults(result));
+                            result.putAll(createResponseMapWithProperStructure(hierarchySection, assessUtilServ.validateQumlAssessment(questionsListFromAssessmentHierarchy, questionsListFromSubmitRequest,assessUtilServ.readQuestsOfQSet(questionsListFromAssessmentHierarchy,assessmentIdFromRequest))));                            outgoingResponse.getResult().putAll(calculateAssessmentFinalResults(result));
                             return outgoingResponse;
                         }
                         case Constants.SECTION_LEVEL_SCORE_CUTOFF: {
-                            result.putAll(createResponseMapWithProperStructure(hierarchySection, assessUtilServ.validateQumlAssessment(questionsListFromAssessmentHierarchy, questionsListFromSubmitRequest)));
-                            sectionLevelsResults.add(result);
+                            result.putAll(createResponseMapWithProperStructure(hierarchySection, assessUtilServ.validateQumlAssessment(questionsListFromAssessmentHierarchy, questionsListFromSubmitRequest,assessUtilServ.readQuestsOfQSet(questionsListFromAssessmentHierarchy,assessmentIdFromRequest))));                            sectionLevelsResults.add(result);
                         }
                         break;
                         default:
