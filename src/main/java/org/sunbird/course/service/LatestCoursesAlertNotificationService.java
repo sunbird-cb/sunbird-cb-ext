@@ -20,7 +20,6 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.sunbird.cassandra.utils.CassandraOperation;
-import org.sunbird.common.helper.cassandra.ServiceFactory;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.common.util.NotificationUtil;
@@ -43,8 +42,10 @@ public class LatestCoursesAlertNotificationService {
 	@Autowired
 	NotificationUtil notificationUtil;
 
+	@Autowired
+	CassandraOperation cassandraOperation;
+
 	private static final CbExtLogger logger = new CbExtLogger(LatestCoursesAlertNotificationService.class.getName());
-	private static final CassandraOperation cassandraOperation = ServiceFactory.getInstance();
 
 	public void initiateLatestCourseAlertEmail() {
 		logger.info("LatestCoursesAlertNotificationService:: initiateLatestCourseAlertEmail: Started");
