@@ -104,7 +104,7 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 				blank += answers.size() - userQuestionList.size();
 			}
 			total = correct + blank + inCorrect;
-			resultMap.put(Constants.RESULT, ((correct * 100d) / total));
+			resultMap.put(Constants.RESULT, total == 0 ? 0 : ((correct * 100d) / total));
 			resultMap.put(Constants.INCORRECT, inCorrect);
 			resultMap.put(Constants.BLANK, blank);
 			resultMap.put(Constants.CORRECT, correct);
