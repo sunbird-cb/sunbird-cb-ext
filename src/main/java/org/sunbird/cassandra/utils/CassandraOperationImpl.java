@@ -27,8 +27,7 @@ public class CassandraOperationImpl implements CassandraOperation {
 	private Logger logger = LoggerFactory.getLogger(getClass().getName());
 
 	@Autowired
-  	@Qualifier("CassandraConnectionManagerImplHelper")
-  	private static CassandraConnectionManager connectionManager;
+  	CassandraConnectionManager connectionManager;
 
 	@Override
 	public SBApiResponse insertRecord(String keyspaceName, String tableName, Map<String, Object> request) {
