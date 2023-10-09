@@ -19,6 +19,7 @@ import org.sunbird.progress.model.ContentProgressInfo;
 import org.sunbird.user.service.UserUtilityService;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -178,8 +179,14 @@ public class ContentProgressServiceImpl implements ContentProgressService {
     private List<Map<String, Object>> getEnrollmentBatchLookupDetails(ContentProgressInfo contentProgressInfo) {
         Map<String, Object> propertyMap = new HashMap<>();
         propertyMap.put(Constants.BATCH_ID, contentProgressInfo.getBatchId());
-        return cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD_COURSES,
-                Constants.TABLE_ENROLMENT_BATCH_LOOKUP, propertyMap, Arrays.asList(Constants.BATCH_ID, Constants.USER_ID));
+        List<Map<String, Object>>  list = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD_COURSES,
+                Constants.TABLE_ENROLMENT_BATCH_LOOKUP, propertyMap, Arrays.asList(Constants.BATCH_ID, Constants.USER_ID,Constants.ACTIVE));
+        // Stream to filter and collect only non-null "endDate" maps
+        return list.stream()
+                .filter(item -> {
+                    return item != null && item.containsKey("active") && (boolean) item.get("active") == true;
+                })
+                .collect(Collectors.toList());
     }
 
     /*private Map<String, Map<String, Object>> prepareProgressDetailsMap(List<String> contentIdList) {
