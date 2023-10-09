@@ -753,8 +753,13 @@ public class Constants {
 
 	public static final String SESSION_TYPE_OFFLINE="Offline";
 
+	public static final String UNDER_SCORE="_";
+
 	public static final String SESSION_NAME="sessionName";
-  private Constants() {
+
+	public static final String ASSESSMENT_INVALID = "Assessment Data doesn't contain mandatory values of expected duration.";
+
+	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}
 
