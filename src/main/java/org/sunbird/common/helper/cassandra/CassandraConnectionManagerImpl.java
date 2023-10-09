@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 import org.sunbird.common.exceptions.ProjectCommonException;
 import org.sunbird.common.exceptions.ResponseCode;
 import org.sunbird.common.util.Constants;
-import org.sunbird.common.util.ProjectUtil;
 import org.sunbird.common.util.PropertiesCache;
 import org.sunbird.core.logger.CbExtLogger;
 
@@ -19,7 +18,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-@Component("CassandraConnectionManagerImplHelper")
+@Component
 public class CassandraConnectionManagerImpl implements CassandraConnectionManager {
     private static Cluster cluster;
     private static Map<String, Session> cassandraSessionMap = new ConcurrentHashMap<>(2);
@@ -28,11 +27,13 @@ public class CassandraConnectionManagerImpl implements CassandraConnectionManage
 
     @PostConstruct
     private void addPostConstruct() {
+        logger.info("CassandraConnectionManagerImpl:: Initiating...");
         registerShutDownHook();
         createCassandraConnection();
         for(String keyspace: keyspaces) {
             getSession(keyspace);
         }
+        logger.info("CassandraConnectionManagerImpl:: Initiated.");
     }
     @Override
 	public Session getSession(String keyspace) {
@@ -40,6 +41,7 @@ public class CassandraConnectionManagerImpl implements CassandraConnectionManage
 		if (null != session) {
 			return session;
 		} else {
+            logger.info("CassandraConnectionManagerImpl:: Creating connection for :: " + keyspace);
 			Session session2 = cluster.connect(keyspace);
 			cassandraSessionMap.put(keyspace, session2);
 			return session2;

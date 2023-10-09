@@ -8,7 +8,6 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.sunbird.cassandra.utils.CassandraOperation;
-import org.sunbird.common.helper.cassandra.ServiceFactory;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.common.util.NotificationUtil;
@@ -25,8 +24,10 @@ import java.util.stream.Collectors;
 @Service
 public class CourseReminderNotificationService {
 	private static final CbExtLogger logger = new CbExtLogger(CourseReminderNotificationService.class.getName());
-	private final CassandraOperation cassandraOperation = ServiceFactory.getInstance();
 	private Map<String, CourseDetails> courseIdAndCourseNameMap = new HashMap<>();
+
+	@Autowired
+	CassandraOperation cassandraOperation;
 
 	@Autowired
 	CbExtServerProperties serverProperties;
