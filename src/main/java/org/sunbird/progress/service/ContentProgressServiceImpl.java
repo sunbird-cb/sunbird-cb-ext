@@ -102,7 +102,9 @@ public class ContentProgressServiceImpl implements ContentProgressService {
                 }));
             }
             //final Map<String, Map<String, Object>> contentMaps = prepareProgressDetailsMap(contentProgressInfo.getContentId());
+            logger.info(" Troubleshoot start of the getUserContentConsumptionDetails : 1");
             List<Map<String, Object>> userContentConsumptionList = getUserContentConsumptionDetails(contentProgressInfo, usersList);
+            logger.info(" Troubleshoot End of the getUserContentConsumptionDetails : 1");
             Map<String, Map<String, Object>> userDetailsList = userUtilityService.getUserDetailsFromES(usersList, Arrays.asList(Constants.USER_FIRST_NAME, Constants.PROFILE_DETAILS_DESIGNATION, Constants.PROFILE_DETAILS_PRIMARY_EMAIL, Constants.CHANNEL, Constants.USER_ID, Constants.EMPLOYMENT_DETAILS_DEPARTMENT_NAME, Constants.PROFILE_DETAILS_PHONE, Constants.ROOT_ORG_ID));
             userContentConsumptionList.forEach(contentMap -> {
                 String userId = (String) contentMap.get(Constants.USER_ID);
@@ -138,10 +140,12 @@ public class ContentProgressServiceImpl implements ContentProgressService {
             response.getResult().put(Constants.COUNT, userDetailsList.size());
             response.getResult().put(Constants.RESPONSE, userDetailsList.values());
         } catch (InvalidDataInputException exception) {
+            logger.error("Exception Occurred ",exception);
             response.getParams().setErrmsg(exception.getMessage());
             response.setResponseCode(HttpStatus.BAD_REQUEST);
             response.getParams().setStatus(Constants.FAILED);
         } catch (Exception e) {
+            logger.error("Exception Occurred ",e);
             response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
             response.getParams().setStatus(Constants.FAILED);
         }
