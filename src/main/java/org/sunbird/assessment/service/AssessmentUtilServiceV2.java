@@ -16,9 +16,11 @@ public interface AssessmentUtilServiceV2 {
 
 	public Map<String, Object> getReadHierarchyApiResponse(String assessmentIdentifier, String token);
 
-	public Map<String, Object> readAssessmentHierarchyFromCache(String assessmentIdentifier);
+	public Map<String, Object> readAssessmentHierarchyFromCache(String assessmentIdentifier,boolean editMode,String token);
 
 	public List<Map<String, Object>> readUserSubmittedAssessmentRecords(String userId, String assessmentId);
 
-	public Map<String, Object> readQListfromCache(List<String> questionIds, String assessmentIdentifier) throws IOException;
+	public Map<String, Object> readQListfromCache(List<String> questionIds, String assessmentIdentifier,boolean editMode,String token) throws IOException;
+
+	public Map<String,Object> fetchHierarchyFromAssessServc(String qSetId,String token);
 }
