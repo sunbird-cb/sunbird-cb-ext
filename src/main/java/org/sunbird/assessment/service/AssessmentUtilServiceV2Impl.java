@@ -93,10 +93,14 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 						Collections.sort(answer);
 					if (marked.size() > 1)
 						Collections.sort(marked);
-					if (answer.equals(marked))
+					if (answer.equals(marked)){
+					    question.put("pass",true);
 						correct++;
-					else
+					}
+					else{
+						question.put("pass",false);
 						inCorrect++;
+					}
 				}
 			}
 			// Increment the blank counter for skipped question objects
@@ -109,6 +113,7 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 			resultMap.put(Constants.BLANK, blank);
 			resultMap.put(Constants.CORRECT, correct);
 			resultMap.put(Constants.TOTAL, total);
+			resultMap.put(Constants.CHILDREN,userQuestionList);
 			return resultMap;
 
 		} catch (Exception ex) {
