@@ -31,6 +31,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.client.RestTemplate;
 import org.sunbird.cache.RedisCacheMgr;
+import org.sunbird.cassandra.utils.CassandraOperation;
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.model.SunbirdApiResp;
 import org.sunbird.common.model.SunbirdApiRespContent;
@@ -82,6 +83,9 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 
 	@Autowired
 	ExtendedOrgService extOrgService;
+
+	@Autowired
+	CassandraOperation cassandraOperation;
 
 	@Override
 	public SBApiResponse registerUser(UserRegistrationInfo userRegInfo) {
@@ -380,14 +384,14 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 		Pattern pat = Pattern.compile(emailRegex);
 		if (pat.matcher(email).matches()) {
 			String emailDomain = email.split("@")[1];
-			retValue = serverProperties.getUserRegistrationDomain().contains(emailDomain)
-					|| serverProperties.getUserRegistrationPreApprovedDomainList().contains(emailDomain);
+			retValue = isApprovedDomains(emailDomain, Constants.USER_REGISTRATION_DOMAIN)
+					|| isApprovedDomains(emailDomain, Constants.USER_REGISTRATION_PRE_APPROVED_DOMAIN);
 		}
 		return retValue;
 	}
 
 	private Boolean isPreApprovedDomain(String email) {
-		return serverProperties.getUserRegistrationPreApprovedDomainList().contains(email.split("@")[1]);
+		return isApprovedDomains(email.split("@")[1], Constants.USER_REGISTRATION_PRE_APPROVED_DOMAIN);
 	}
 
 	private UserRegistration getUserRegistrationForRegCode(String registrationCode) {
@@ -499,4 +503,12 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 		userReg.setSbOrgId(userRegInfo.getSbOrgId());
 	}
 
+	private Boolean isApprovedDomains(String emailDomain, String domainType) {
+		Map<String, Object> propertyMap = new HashMap<>();
+		propertyMap.put(Constants.CONTEXT_TYPE, domainType);
+		propertyMap.put(Constants.CONTEXT_NAME, emailDomain);
+		List<Map<String, Object>> listOfDomains = cassandraOperation.getRecordsByPropertiesWithoutFiltering(
+				Constants.KEYSPACE_SUNBIRD, Constants.TABLE_MASTER_DATA, propertyMap, Arrays.asList(Constants.CONTEXT_TYPE, Constants.CONTEXT_NAME));
+		return CollectionUtils.isNotEmpty(listOfDomains);
+	}
 }
