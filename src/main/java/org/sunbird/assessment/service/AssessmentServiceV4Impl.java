@@ -808,6 +808,7 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
             sectionLevelResult.put(Constants.BLANK, resultMap.get(Constants.BLANK));
             sectionLevelResult.put(Constants.CORRECT, resultMap.get(Constants.CORRECT));
             sectionLevelResult.put(Constants.INCORRECT, resultMap.get(Constants.INCORRECT));
+            sectionLevelResult.put(Constants.CHILDREN,resultMap.get(Constants.CHILDREN));
         } else {
             result = 0.0;
             sectionLevelResult.put(Constants.RESULT, result);
