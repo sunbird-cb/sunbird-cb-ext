@@ -737,7 +737,6 @@ public class Constants {
 
 	public static final String TABLE_COURSE_SESSION_DETAILS="sessionDetails_v2";
 
-	public static final String EMPTY="";
 	public static final String BATCH_ALREADY_ENROLLED_MSG = "Already Enrolled in batches.";
 	public static final String BATCH_AUTO_ENROLL_ERROR_MSG = "Failed to auto enrol user in batch.";
 	public static final String BATCH_NOT_AVAILABLE_ERROR_MSG = "No Batch Available.";
@@ -761,6 +760,10 @@ public class Constants {
 	public static final String SESSION_NAME="sessionName";
 
 	public static final String ASSESSMENT_INVALID = "Assessment Data doesn't contain mandatory values of expected duration.";
+
+	public static final String COURSE_NAME = "name";
+
+	public static final String PRESENT = "present";
 
 	private Constants() {
 		throw new IllegalStateException("Utility class");
