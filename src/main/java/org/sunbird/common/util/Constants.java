@@ -760,6 +760,9 @@ public class Constants {
 
 	public static final String ASSESSMENT_INVALID = "Assessment Data doesn't contain mandatory values of expected duration.";
 
+	public static final String USER_REGISTRATION_PRE_APPROVED_DOMAIN = "userRegistrationPreApprovedDomain";
+
+	public static final String USER_REGISTRATION_DOMAIN = "userRegistrationDomain";
 	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}
