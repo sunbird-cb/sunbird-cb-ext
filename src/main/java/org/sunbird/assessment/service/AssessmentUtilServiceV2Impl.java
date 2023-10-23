@@ -85,8 +85,10 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 							break;
 					}
 				}
-				if (CollectionUtils.isEmpty(marked))
+				if (CollectionUtils.isEmpty(marked)){
 					blank++;
+					question.put(Constants.RESULT,Constants.BLANK);
+				}
 				else {
 					List<String> answer = (List<String>) answers.get(question.get(Constants.IDENTIFIER));
 					if (answer.size() > 1)
@@ -94,11 +96,11 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 					if (marked.size() > 1)
 						Collections.sort(marked);
 					if (answer.equals(marked)){
-					    question.put("pass",true);
+					    question.put(Constants.RESULT,Constants.CORRECT);
 						correct++;
 					}
 					else{
-						question.put("pass",false);
+						question.put(Constants.RESULT,Constants.INCORRECT);
 						inCorrect++;
 					}
 				}
