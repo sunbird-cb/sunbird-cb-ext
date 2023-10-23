@@ -499,6 +499,9 @@ public class CbExtServerProperties {
 	@Value("${read.assess.questions.from.redis}")
 	private boolean qListFromCacheEnabled;
 
+	@Value("${mdo.admin.update.users}")
+	private String mdoAdminUpdateUsers;
+
 	public boolean qListFromCacheEnabled() {
 		return qListFromCacheEnabled;
 	}
@@ -1868,5 +1871,13 @@ public class CbExtServerProperties {
 
 	public void setReportTypeGetFileInfo(String reportTypeGetFileInfo) {
 		this.reportTypeGetFileInfo = reportTypeGetFileInfo;
+	}
+
+	public String getMdoAdminUpdateUsers() {
+		return mdoAdminUpdateUsers;
+	}
+
+	public void setMdoAdminUpdateUsers(String mdoAdminUpdateUsers) {
+		this.mdoAdminUpdateUsers = mdoAdminUpdateUsers;
 	}
 }
