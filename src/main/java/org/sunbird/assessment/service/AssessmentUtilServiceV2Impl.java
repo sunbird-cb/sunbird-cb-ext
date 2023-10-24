@@ -326,7 +326,20 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 		return new HashMap<>();
 	}
 
-	public Map<String, Object> readAssessmentHierarchyFromCache(String assessmentIdentifier) {
+	public Map<String,Object> fetchHierarchyFromAssessServc(String qSetId,String token){
+			Map<String, Object> readHierarchyApiResponse = getReadHierarchyApiResponse(qSetId, token);
+			if (!readHierarchyApiResponse.isEmpty())
+				if (ObjectUtils.isEmpty(readHierarchyApiResponse) || !Constants.OK.equalsIgnoreCase((String) readHierarchyApiResponse.get(Constants.RESPONSE_CODE))) {
+					throw new RuntimeException("Internal Server Error");
+				}
+			return ((Map<String, Object>) ((Map<String, Object>) readHierarchyApiResponse.get(Constants.RESULT)).get(Constants.QUESTION_SET));
+	}
+
+	public Map<String, Object> readAssessmentHierarchyFromCache(String assessmentIdentifier,boolean editMode,String token) {
+
+		if(editMode)
+		return fetchHierarchyFromAssessServc(assessmentIdentifier,token);
+
 		String questStr = Constants.EMPTY;
 		if(serverProperties.qListFromCacheEnabled()) {
 			 questStr = redisCacheMgr.getCache(Constants.ASSESSMENT_ID + assessmentIdentifier + Constants.UNDER_SCORE + Constants.QUESTION_SET);		
@@ -374,9 +387,9 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 	}
 
 
-	public Map<String, Object> readQListfromCache(List<String> questionIds, String assessmentIdentifier) throws IOException {
+	public Map<String, Object> readQListfromCache(List<String> questionIds, String assessmentIdentifier,boolean editMode,String token) throws IOException {
 		if (serverProperties.qListFromCacheEnabled())
-			return qListFromCache(assessmentIdentifier);
+			return qListFromCache(assessmentIdentifier,editMode,token);
 		else
 			return qListFrmAssessService(questionIds);
 	}
@@ -391,12 +404,12 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 				.collect(Collectors.toMap(question -> (String) question.get(Constants.IDENTIFIER), question -> question));
 	}
 
-	public Map<String, Object> qListFromCache(String assessmentIdentifier) throws IOException {
+	public Map<String, Object> qListFromCache(String assessmentIdentifier,boolean editMode,String token) throws IOException {
 		String questStr = redisCacheMgr.getCache(Constants.ASSESSMENT_ID + assessmentIdentifier + Constants.UNDER_SCORE + Constants.QUESTIONS);
 		if (StringUtils.isEmpty(questStr)) {
 			Map<String, Object> questionMap = new HashMap<>();
 			// Read assessment hierarchy from DB
-			Map<String, Object> assessmentData = readAssessmentHierarchyFromCache(assessmentIdentifier);
+			Map<String, Object> assessmentData = readAssessmentHierarchyFromCache(assessmentIdentifier,editMode,token);
 			if (CollectionUtils.isEmpty(assessmentData)) return questionMap;
 			List<Map<String, Object>> children = (List<Map<String, Object>>) assessmentData.get(Constants.CHILDREN);
 			if (CollectionUtils.isEmpty(children)) return questionMap;

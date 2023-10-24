@@ -12,7 +12,7 @@ public interface AssessmentServiceV2 {
 	 * @return
 	 * @throws Exception
 	 */
-	public SBApiResponse submitAssessment(Map<String, Object> data, String userEmail) throws Exception;
+	public SBApiResponse submitAssessment(Map<String, Object> data, String userEmail,boolean editMode) throws Exception;
 
 	public SBApiResponse readAssessment(String assessmentIdentifier, String token) throws Exception;
 
