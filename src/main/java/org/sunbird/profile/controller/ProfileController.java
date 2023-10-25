@@ -113,4 +113,13 @@ public class ProfileController {
 		SBApiResponse response = profileService.getGroupList();
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
+	@PostMapping("/user/admin/patch")
+	public ResponseEntity<?> profileMDOAdminUpdate(
+			@RequestHeader(value = Constants.X_AUTH_TOKEN, required = false) String userToken,
+			@RequestHeader(value = Constants.AUTH_TOKEN, required = false) String authToken,
+			@RequestHeader(value = Constants.X_AUTH_USER_ORG_ID, required = false) String rootOrgId,
+			@RequestBody Map<String, Object> request) throws Exception {
+		SBApiResponse response = profileService.profileMDOAdminUpdate(request, userToken, authToken, rootOrgId);
+		return new ResponseEntity<>(response, response.getResponseCode());
+	}
 }

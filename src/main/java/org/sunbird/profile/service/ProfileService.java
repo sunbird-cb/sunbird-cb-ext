@@ -35,4 +35,6 @@ public interface ProfileService {
 	ResponseEntity<Resource> downloadFile(String fileName);
 
 	SBApiResponse getGroupList();
+
+	SBApiResponse profileMDOAdminUpdate(Map<String, Object> request, String XAuthToken, String AuthToken, String rootOrgId) throws Exception;
 }
