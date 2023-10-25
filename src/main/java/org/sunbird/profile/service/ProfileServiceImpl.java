@@ -1643,10 +1643,7 @@ public class ProfileServiceImpl implements ProfileService {
 					adminUpdateMap.put(key, profileDetailsMap.get(key));
 				}
 			}
-			Map<String, Object> updateRequestValue = requestData;
-			updateRequestValue.put(Constants.PROFILE_DETAILS, adminUpdateMap);
-			Map<String, Object> updateRequest = new HashMap<>();
-			updateRequest.put(Constants.REQUEST, updateRequestValue);
+
 
 			Map<String, String> headerValues = new HashMap<>();
 			headerValues.put(Constants.AUTH_TOKEN, authToken);
@@ -1686,18 +1683,16 @@ public class ProfileServiceImpl implements ProfileService {
 							getModifiedPersonalDetails(profileDetailsMap.get(changedObj), requestData);
 						}
 					}
-					if (validateJsonAgainstSchema(existingProfileDetails)) {
-						existingProfileDetails.put(Constants.VERIFIED_KARMAYOGI, true);
-					} else {
-						existingProfileDetails.put(Constants.VERIFIED_KARMAYOGI, false);
-					}
 
 					HashMap<String, String> headerValue = new HashMap<>();
 					headerValues.put(Constants.AUTH_TOKEN, authToken);
 					headerValues.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
 					String updatedUrl = serverConfig.getSbUrl() + serverConfig.getLmsUserUpdatePath();
 					url.append(serverConfig.getSbUrl()).append(serverConfig.getLmsUserUpdatePath());
-
+					Map<String, Object> updateRequestValue = requestData;
+					updateRequestValue.put(Constants.PROFILE_DETAILS, existingProfileDetails);
+					Map<String, Object> updateRequest = new HashMap<>();
+					updateRequest.put(Constants.REQUEST, updateRequestValue);
 					Map<String, Object> updateResponse = outboundRequestHandlerService.fetchResultUsingPatch(updatedUrl, updateRequest, headerValue);
 
 					if (Constants.OK.equalsIgnoreCase((String) updateResponse.get(Constants.RESPONSE_CODE))) {
