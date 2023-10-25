@@ -23,6 +23,15 @@ public class PropertiesConfig {
     @Value("${notify.service.path}")
     private String notifyServicePath;
 
+    @Value("${notify.email.template}")
+    private String notificationEmailTemplate;
+
+    @Value("${notification.support.mail}")
+    private String supportEmail;
+
+    @Value("${notification.mail.body.for.attendance}")
+    private String attendanceNotificationMailBody;
+
     public String getLmsServiceHost() {
         return lmsServiceHost;
     }
@@ -61,5 +70,29 @@ public class PropertiesConfig {
 
     public void setNotifyServicePath(String notifyServicePath) {
         this.notifyServicePath = notifyServicePath;
+    }
+
+    public String getNotificationEmailTemplate() {
+        return notificationEmailTemplate;
+    }
+
+    public void setNotificationEmailTemplate(String notificationEmailTemplate) {
+        this.notificationEmailTemplate = notificationEmailTemplate;
+    }
+
+    public String getSupportEmail() {
+        return supportEmail;
+    }
+
+    public void setSupportEmail(String supportEmail) {
+        this.supportEmail = supportEmail;
+    }
+
+    public String getAttendanceNotificationMailBody() {
+        return attendanceNotificationMailBody;
+    }
+
+    public void setAttendanceNotificationMailBody(String attendanceNotificationMailBody) {
+        this.attendanceNotificationMailBody = attendanceNotificationMailBody;
     }
 }

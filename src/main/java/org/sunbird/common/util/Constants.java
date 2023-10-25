@@ -761,9 +761,17 @@ public class Constants {
 
 	public static final String ASSESSMENT_INVALID = "Assessment Data doesn't contain mandatory values of expected duration.";
 
-	public static final String COURSE_NAME = "name";
+	public static final String PRESENT = "Present";
 
-	public static final String PRESENT = "present";
+	public static final String FROM_EMAIL = "fromEmail";
+
+	public static final String TABLE_EMAIL_TEMPLATE = "email_template";
+
+	public static final String ABSENT = "absent";
+
+	public static final String COURSE_NAME = "courseName";
+
+	public static final String ATTENDANCE_MARKED = "ATTENDANCE MARKED";
 
 	private Constants() {
 		throw new IllegalStateException("Utility class");
