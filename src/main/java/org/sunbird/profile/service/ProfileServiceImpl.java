@@ -1623,4 +1623,142 @@ public class ProfileServiceImpl implements ProfileService {
 		}
 		return response;
 	}
+
+	@Override
+	public SBApiResponse profileMDOAdminUpdate(Map<String, Object> request, String userToken, String authToken, String rootOrgId) throws Exception {
+		SBApiResponse response = new SBApiResponse(Constants.API_PROFILE_UPDATE);
+		try {
+			Map<String, Object> requestData = (Map<String, Object>) request.get(Constants.REQUEST);
+			if (!validateRequest(requestData)) {
+				response.setResponseCode(HttpStatus.BAD_REQUEST);
+				response.getParams().setStatus(Constants.FAILED);
+				return response;
+			}
+			String userId = (String) requestData.get(Constants.USER_ID);
+			Map<String, Object> profileDetailsMap = (Map<String, Object>) requestData.get(Constants.PROFILE_DETAILS);
+			List<String> allowedAdminUpdateFields = adminApprovalFields();
+			Map<String, Object> adminUpdateMap = new HashMap<>();
+			for (String key : profileDetailsMap.keySet()) {
+				if (allowedAdminUpdateFields.contains(key)) {
+					adminUpdateMap.put(key, profileDetailsMap.get(key));
+				}
+			}
+			Map<String, Object> updateRequestValue = requestData;
+			updateRequestValue.put(Constants.PROFILE_DETAILS, adminUpdateMap);
+			Map<String, Object> updateRequest = new HashMap<>();
+			updateRequest.put(Constants.REQUEST, updateRequestValue);
+
+			Map<String, String> headerValues = new HashMap<>();
+			headerValues.put(Constants.AUTH_TOKEN, authToken);
+			headerValues.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
+
+			Map<String, Object> responseMap = userUtilityService.getUsersReadData(userId, StringUtils.EMPTY,
+					StringUtils.EMPTY);
+			Map<String, Object> existingProfileDetails = (Map<String, Object>) responseMap.get(Constants.PROFILE_DETAILS);
+			StringBuilder url = new StringBuilder();
+			if (!profileDetailsMap.isEmpty()) {
+				{
+					List<String> listOfChangedDetails = new ArrayList<>();
+					for (String keys : profileDetailsMap.keySet()) {
+						listOfChangedDetails.add(keys);
+					}
+					for (String changedObj : listOfChangedDetails) {
+						if (profileDetailsMap.get(changedObj) instanceof ArrayList) {
+							existingProfileDetails.put(changedObj, profileDetailsMap.get(changedObj));
+						} else if (profileDetailsMap.get(changedObj) instanceof Boolean) {
+							existingProfileDetails.put(changedObj, profileDetailsMap.get(changedObj));
+						} else {
+							if (existingProfileDetails.containsKey(changedObj)) {
+								Map<String, Object> existingProfileChild = (Map<String, Object>) existingProfileDetails
+										.get(changedObj);
+								Map<String, Object> requestedProfileChild = (Map<String, Object>) profileDetailsMap
+										.get(changedObj);
+								for (String childKey : requestedProfileChild.keySet()) {
+									existingProfileChild.put(childKey, requestedProfileChild.get(childKey));
+								}
+							} else {
+								existingProfileDetails.put(changedObj, profileDetailsMap.get(changedObj));
+							}
+						}
+
+						// Additional Condition for updating personal Details directly to user object
+						if (Constants.PERSONAL_DETAILS.equalsIgnoreCase(changedObj)) {
+							getModifiedPersonalDetails(profileDetailsMap.get(changedObj), requestData);
+						}
+					}
+					if (validateJsonAgainstSchema(existingProfileDetails)) {
+						existingProfileDetails.put(Constants.VERIFIED_KARMAYOGI, true);
+					} else {
+						existingProfileDetails.put(Constants.VERIFIED_KARMAYOGI, false);
+					}
+
+					HashMap<String, String> headerValue = new HashMap<>();
+					headerValues.put(Constants.AUTH_TOKEN, authToken);
+					headerValues.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
+					String updatedUrl = serverConfig.getSbUrl() + serverConfig.getLmsUserUpdatePath();
+					url.append(serverConfig.getSbUrl()).append(serverConfig.getLmsUserUpdatePath());
+
+					Map<String, Object> updateResponse = outboundRequestHandlerService.fetchResultUsingPatch(updatedUrl, updateRequest, headerValue);
+
+					if (Constants.OK.equalsIgnoreCase((String) updateResponse.get(Constants.RESPONSE_CODE))) {
+						response.setResponseCode(HttpStatus.OK);
+						response.getResult().put(Constants.RESPONSE, Constants.SUCCESS);
+						response.getParams().setStatus(Constants.SUCCESS);
+					} else {
+						if (updateResponse != null && Constants.CLIENT_ERROR.equalsIgnoreCase((String) updateResponse.get(Constants.RESPONSE_CODE))) {
+							response.setResponseCode(HttpStatus.BAD_REQUEST);
+						} else {
+							response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+						}
+						response.getParams().setStatus(Constants.FAILED);
+						String errMsg = (String) ((Map<String, Object>) updateResponse.get(Constants.PARAMS)).get(Constants.ERROR_MESSAGE);
+						errMsg = PropertiesCache.getInstance().readCustomError(errMsg);
+						response.getParams().setErrmsg(errMsg);
+						log.error(errMsg, new Exception(errMsg));
+						return response;
+					}
+				}
+			}
+		} catch (Exception e) {
+			log.error("Failed to process profile update. Exception: ", e);
+			response.getParams().setStatus(Constants.FAILED);
+			response.getParams().setErr(e.getMessage());
+			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		return response;
+
+	}
+
+	public List<String> adminApprovalFields() {
+		List<String> adminApprovalFields = (List<String>) dataCacheMgr
+				.getObjectFromCache(serverConfig.getMdoAdminUpdateUsers());
+		if (CollectionUtils.isEmpty(adminApprovalFields)) {
+			Map<String, Object> searchRequest = new HashMap<String, Object>();
+			searchRequest.put(Constants.ID, serverConfig.getMdoAdminUpdateUsers());
+
+			List<Map<String, Object>> existingDataList = cassandraOperation.getRecordsByPropertiesWithoutFiltering(
+					Constants.KEYSPACE_SUNBIRD, Constants.TABLE_SYSTEM_SETTINGS, searchRequest, null);
+			if (CollectionUtils.isNotEmpty(existingDataList)) {
+				Map<String, Object> data = existingDataList.get(0);
+				String strAdminApprovalFields = (String) data.get(Constants.VALUE);
+
+				if (StringUtils.isNotBlank(strAdminApprovalFields)) {
+					String strArray[] = strAdminApprovalFields.split(",", -1);
+					adminApprovalFields = Arrays.asList(strArray);
+					dataCacheMgr.putObjectInCache(serverConfig.getMdoAdminUpdateUsers(), adminApprovalFields);
+					return adminApprovalFields;
+				}
+			}
+
+		} else {
+			return adminApprovalFields;
+		}
+		return new ArrayList<>();
+	}
 }
+
+
+
+
+
+
