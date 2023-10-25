@@ -85,7 +85,7 @@ public class RatingServiceImpl implements RatingService {
                 ratingModelInfo.setRating((Float) ratingData.get(Constants.RATING));
                 ratingModelInfo.setComment(ratingData.get(Constants.COMMENT)!=null ?(String) ratingData.get(Constants.COMMENT) : null);
                 ratingModelInfo.setCommentBy(ratingData.get(Constants.COMMENT_BY)!=null ?(String) ratingData.get(Constants.COMMENT_BY) : null);
-
+                ratingModelInfo.setRecommended(ratingData.get(Constants.RECOMMENDED)!=null ?(String)ratingData.get(Constants.RECOMMENDED): null);
                 if(ratingData.get(Constants.COMMENT_UPDATED_ON)!=null){
                     UUID commentupdatedOn = (UUID) ratingData.get(Constants.COMMENT_UPDATED_ON);
                     Long CommentUpdatedTime = (commentupdatedOn.timestamp() - 0x01b21dd213814000L) / 10000L;
@@ -234,6 +234,9 @@ public class RatingServiceImpl implements RatingService {
                     updateRequest.put(Constants.COMMENT_BY, requestRating.getCommentBy());
                     updateRequest.put(Constants.COMMENT_UPDATED_ON,timeBasedUuid);
                 }
+                if(requestRating.getRecommended()!=null){
+                    updateRequest.put(Constants.RECOMMENDED, requestRating.getRecommended());
+                }
                 Map<String, Object> prevInfo = existingDataList.get(0);
                 cassandraOperation.updateRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_RATINGS, updateRequest,
                         request);
@@ -249,6 +252,7 @@ public class RatingServiceImpl implements RatingService {
                 request.put(Constants.RATING, requestRating.getRating());
                 request.put(Constants.REVIEW, requestRating.getReview());
                 request.put(Constants.UPDATED_ON, timeBasedUuid);
+                request.put(Constants.RECOMMENDED,requestRating.getRecommended());
                 cassandraOperation.insertRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_RATINGS, request);
 
                 ratingMessage = new RatingMessage("ratingAdd", requestRating.getActivityId(), requestRating.getActivityType(),
