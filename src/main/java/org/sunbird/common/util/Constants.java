@@ -171,6 +171,7 @@ public class Constants {
 	public static final String USERID = "id";
 	public static final String COMMENT = "comment";
 	public static final String COMMENT_BY = "commentBy";
+	public static final String RECOMMENDED = "recommended";
 	public static final String COMMENT_UPDATED_ON = "commentUpdatedOn";
 	public static final String CREATED_ON = "createdOn";
 	public static final String RATING = "rating";
