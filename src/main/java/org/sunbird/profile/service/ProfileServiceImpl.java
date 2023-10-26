@@ -169,6 +169,12 @@ public class ProfileServiceImpl implements ProfileService {
 						getModifiedPersonalDetails(profileDetailsMap.get(changedObj), requestData);
 					}
 				}
+				//This field is updated via approval
+				/*if (validateJsonAgainstSchema(updateRequest)) {
+					updateRequest.put(Constants.VERIFIED_KARMAYOGI, true);
+				} else {
+					updateRequest.put(Constants.VERIFIED_KARMAYOGI, false);
+				}*/
 				Map<String, Object> updateRequestValue = requestData;
 				updateRequestValue.put(Constants.PROFILE_DETAILS, existingProfileDetails);
 				Map<String, Object> updateRequest = new HashMap<>();
