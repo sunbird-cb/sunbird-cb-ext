@@ -168,11 +168,12 @@ public class ProfileServiceImpl implements ProfileService {
 						getModifiedPersonalDetails(profileDetailsMap.get(changedObj), requestData);
 					}
 				}
-				if (validateJsonAgainstSchema(existingProfileDetails)) {
+				//This field is updated via approval
+				/*if (validateJsonAgainstSchema(existingProfileDetails)) {
 					existingProfileDetails.put(Constants.VERIFIED_KARMAYOGI, true);
 				} else {
 					existingProfileDetails.put(Constants.VERIFIED_KARMAYOGI, false);
-				}
+				}*/
 				Map<String, Object> updateRequestValue = requestData;
 				updateRequestValue.put(Constants.PROFILE_DETAILS, existingProfileDetails);
 				Map<String, Object> updateRequest = new HashMap<>();
@@ -235,6 +236,18 @@ public class ProfileServiceImpl implements ProfileService {
 								finalTransitionList.add(dataRay);
 							}
 						}
+					} else if (transitionData.get(listTransition) instanceof Boolean) {
+						Boolean transListObject;
+						transListObject = (Boolean) transitionData.get(listTransition);
+						Map<String, Object> updatedTransitionData = new HashMap<>();
+						Map<String, Object> fromValue = new HashMap<>();
+						Map<String, Object> toValue = new HashMap<>();
+						toValue.put(Constants.VERIFIED_KARMAYOGI, transListObject);
+						fromValue.put(Constants.VERIFIED_KARMAYOGI, transListObject);
+						updatedTransitionData.put(Constants.FROM_VALUE, fromValue);
+						updatedTransitionData.put(Constants.TO_VALUE, toValue);
+						updatedTransitionData.put(Constants.FIELD_KEY, listTransition);
+						finalTransitionList.add(updatedTransitionData);
 					} else {
 						Map<String, Object> transListObject = new HashMap<>();
 						transListObject = (Map<String, Object>) transitionData.get(listTransition);
