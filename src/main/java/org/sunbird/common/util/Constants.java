@@ -773,6 +773,8 @@ public class Constants {
 
 	public static final String ATTENDANCE_MARKED = "ATTENDANCE MARKED";
 
+	public static final Object KARMYOGI_BHARAT = "Karmyogi Bharat";
+
 	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}

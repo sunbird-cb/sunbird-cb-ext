@@ -178,7 +178,7 @@ public class UpdateContentProgressConsumer {
         params.put("body", body);
         params.put(Constants.NAME, learnerName);
         params.put(Constants.FROM_EMAIL, configuration.getSupportEmail());
-        params.put(Constants.ORG_NAME, "KarmYogi Bharat");
+        params.put(Constants.ORG_NAME, Constants.KARMYOGI_BHARAT);
         Template template = new Template(constructEmailTemplate(configuration.getNotificationEmailTemplate(), params),configuration.getNotificationEmailTemplate(), params);
         template.setParams(params);
         Config config = new Config();
