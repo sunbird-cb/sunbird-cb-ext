@@ -64,7 +64,7 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
     AccessTokenValidator accessTokenValidator;
 
     @Override
-    public SBApiResponse retakeAssessment(String assessmentIdentifier, String token) {
+    public SBApiResponse retakeAssessment(String assessmentIdentifier, String token,Boolean editMode) {
         logger.info("AssessmentServiceV4Impl::retakeAssessment... Started");
         SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_RETAKE_ASSESSMENT_GET);
         String errMsg = "";
@@ -78,7 +78,7 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
             }
 
             Map<String, Object> assessmentAllDetail = assessUtilServ
-                    .readAssessmentHierarchyFromCache(assessmentIdentifier);
+                    .readAssessmentHierarchyFromCache(assessmentIdentifier,editMode,token);
             if (MapUtils.isEmpty(assessmentAllDetail)) {
                 updateErrorDetails(response, Constants.ASSESSMENT_HIERARCHY_READ_FAILED,
                         HttpStatus.INTERNAL_SERVER_ERROR);
@@ -106,7 +106,7 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
     }
 
     @Override
-    public SBApiResponse readAssessment(String assessmentIdentifier, String token) {
+    public SBApiResponse readAssessment(String assessmentIdentifier, String token,boolean editMode) {
         logger.info("AssessmentServiceV4Impl::readAssessment... Started");
         SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_READ_ASSESSMENT);
         String errMsg = "";
@@ -117,8 +117,17 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
                 return response;
             }
             logger.info(String.format("ReadAssessment... UserId: %s, AssessmentIdentifier: %s", userId, assessmentIdentifier));
-            Map<String, Object> assessmentAllDetail = assessUtilServ
-                    .readAssessmentHierarchyFromCache(assessmentIdentifier);
+
+            Map<String, Object> assessmentAllDetail = null ;
+
+            if(editMode) {
+                assessmentAllDetail = assessUtilServ.fetchHierarchyFromAssessServc(assessmentIdentifier,token);
+            }
+            else {
+                assessmentAllDetail = assessUtilServ
+                        .readAssessmentHierarchyFromCache(assessmentIdentifier,editMode,token);
+            }
+
             if (MapUtils.isEmpty(assessmentAllDetail)) {
                 updateErrorDetails(response, Constants.ASSESSMENT_HIERARCHY_READ_FAILED,
                         HttpStatus.INTERNAL_SERVER_ERROR);
@@ -126,7 +135,7 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
             }
 
             if (Constants.PRACTICE_QUESTION_SET
-                    .equalsIgnoreCase((String) assessmentAllDetail.get(Constants.PRIMARY_CATEGORY))) {
+                    .equalsIgnoreCase((String) assessmentAllDetail.get(Constants.PRIMARY_CATEGORY))||editMode) {
                 response.getResult().put(Constants.QUESTION_SET, readAssessmentLevelData(assessmentAllDetail));
                 return response;
             }
@@ -206,14 +215,14 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
     }
 
     @Override
-    public SBApiResponse readQuestionList(Map<String, Object> requestBody, String authUserToken) {
+    public SBApiResponse readQuestionList(Map<String, Object> requestBody, String authUserToken,boolean editMode) {
         SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_QUESTIONS_LIST);
         String errMsg;
         Map<String, String> result = new HashMap<>();
         try {
             List<String> identifierList = new ArrayList<>();
             List<Object> questionList = new ArrayList<>();
-            result = validateQuestionListAPI(requestBody, authUserToken, identifierList);
+            result = validateQuestionListAPI(requestBody, authUserToken, identifierList,editMode);
             errMsg = result.get(Constants.ERROR_MESSAGE);
             if (StringUtils.isNotBlank(errMsg)) {
                 updateErrorDetails(response, errMsg, HttpStatus.BAD_REQUEST);
@@ -221,7 +230,7 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
             }
 
             String assessmentIdFromRequest = (String) requestBody.get(Constants.ASSESSMENT_ID_KEY);
-            Map<String, Object> questionsMap = assessUtilServ.readQListfromCache(identifierList,assessmentIdFromRequest);
+            Map<String, Object> questionsMap = assessUtilServ.readQListfromCache(identifierList,assessmentIdFromRequest,editMode,authUserToken);
             for (String questionId : identifierList) {
                 questionList.add(assessUtilServ.filterQuestionMapDetail((Map<String, Object>) questionsMap.get(questionId),
                         result.get(Constants.PRIMARY_CATEGORY)));
@@ -290,7 +299,7 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
         return response;
     }
 
-    public SBApiResponse submitAssessmentAsync(Map<String, Object> submitRequest, String userAuthToken) {
+    public SBApiResponse submitAssessmentAsync(Map<String, Object> submitRequest, String userAuthToken,boolean editMode) {
         logger.info("AssessmentServiceV4Impl::submitAssessmentAsync.. started");
         SBApiResponse outgoingResponse = ProjectUtil.createDefaultResponse(Constants.API_SUBMIT_ASSESSMENT);
         try {
@@ -307,7 +316,7 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
             Map<String, Object> existingAssessmentData = new HashMap<>();
 
             errMsg = validateSubmitAssessmentRequest(submitRequest, userId, hierarchySectionList,
-                    sectionListFromSubmitRequest, assessmentHierarchy, existingAssessmentData);
+                    sectionListFromSubmitRequest, assessmentHierarchy, existingAssessmentData,userAuthToken,editMode);
 
             if (StringUtils.isNotBlank(errMsg)) {
                 updateErrorDetails(outgoingResponse, errMsg, HttpStatus.BAD_REQUEST);
@@ -346,11 +355,11 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
                         case Constants.ASSESSMENT_LEVEL_SCORE_CUTOFF: {
                             result.putAll(createResponseMapWithProperStructure(hierarchySection,
                                     assessUtilServ.validateQumlAssessment(questionsListFromAssessmentHierarchy,
-                                            questionsListFromSubmitRequest,assessUtilServ.readQListfromCache(questionsListFromAssessmentHierarchy,assessmentIdFromRequest))));
+                                            questionsListFromSubmitRequest,assessUtilServ.readQListfromCache(questionsListFromAssessmentHierarchy,assessmentIdFromRequest,editMode,userAuthToken))));
                             Map<String, Object> finalRes= calculateAssessmentFinalResults(result);
                             outgoingResponse.getResult().putAll(finalRes);
                             outgoingResponse.getResult().put(Constants.PRIMARY_CATEGORY, assessmentPrimaryCategory);
-                            if (!Constants.PRACTICE_QUESTION_SET.equalsIgnoreCase(assessmentPrimaryCategory)) {
+                            if (!Constants.PRACTICE_QUESTION_SET.equalsIgnoreCase(assessmentPrimaryCategory) && !editMode) {
 
                                 String questionSetFromAssessmentString = (String) existingAssessmentData
                                         .get(Constants.ASSESSMENT_READ_RESPONSE_KEY);
@@ -369,7 +378,7 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
                         case Constants.SECTION_LEVEL_SCORE_CUTOFF: {
                             result.putAll(createResponseMapWithProperStructure(hierarchySection,
                                     assessUtilServ.validateQumlAssessment(questionsListFromAssessmentHierarchy,
-                                            questionsListFromSubmitRequest,assessUtilServ.readQListfromCache(questionsListFromAssessmentHierarchy,assessmentIdFromRequest))));
+                                            questionsListFromSubmitRequest,assessUtilServ.readQListfromCache(questionsListFromAssessmentHierarchy,assessmentIdFromRequest,editMode,userAuthToken))));
                             sectionLevelsResults.add(result);
                         }
                             break;
@@ -383,7 +392,7 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
                     outgoingResponse.getParams().setStatus(Constants.SUCCESS);
                     outgoingResponse.setResponseCode(HttpStatus.OK);
                     outgoingResponse.getResult().put(Constants.PRIMARY_CATEGORY, assessmentPrimaryCategory);
-                    if (!Constants.PRACTICE_QUESTION_SET.equalsIgnoreCase(assessmentPrimaryCategory)) {
+                    if (!Constants.PRACTICE_QUESTION_SET.equalsIgnoreCase(assessmentPrimaryCategory) && !editMode) {
                         String questionSetFromAssessmentString = (String) existingAssessmentData
                                 .get(Constants.ASSESSMENT_READ_RESPONSE_KEY);
                         Map<String,Object> questionSetFromAssessment = null;
@@ -406,7 +415,7 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
         return outgoingResponse;
     }
 
-    public void handleAssessmentSubmitRequest(Map<String, Object> asyncRequest) {
+    public void handleAssessmentSubmitRequest(Map<String, Object> asyncRequest,boolean editMode,String token) {
         String userId = (String) asyncRequest.get(Constants.USER_ID_CONSTANT);
         Map<String, Object> submitRequest = (Map<String, Object>) asyncRequest.get(Constants.REQUEST);
 
@@ -414,7 +423,7 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
         try {
             String assessmentIdFromRequest = (String) submitRequest.get(Constants.IDENTIFIER);
             Map<String, Object> assessmentHierarchy = assessUtilServ
-                    .readAssessmentHierarchyFromCache(assessmentIdFromRequest);
+                    .readAssessmentHierarchyFromCache(assessmentIdFromRequest,editMode,token);
             if (MapUtils.isEmpty(assessmentHierarchy)) {
                 logger.error(Constants.READ_ASSESSMENT_FAILED, new Exception(Constants.READ_ASSESSMENT_FAILED));
                 return;
@@ -497,7 +506,7 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
                         case Constants.ASSESSMENT_LEVEL_SCORE_CUTOFF: {
                             result.putAll(createResponseMapWithProperStructure(hierarchySection,
                                     assessUtilServ.validateQumlAssessment(questionsListFromAssessmentHierarchy,
-                                            questionsListFromSubmitRequest,assessUtilServ.readQListfromCache(questionsListFromAssessmentHierarchy,assessmentIdFromRequest))));
+                                            questionsListFromSubmitRequest,assessUtilServ.readQListfromCache(questionsListFromAssessmentHierarchy,assessmentIdFromRequest,editMode,token))));
                             Map<String, Object> finalResult = calculateAssessmentFinalResults(result);
                             finalResult.put(Constants.STATUS_IS_IN_PROGRESS, false);
                             writeDataToDatabaseAndTriggerKafkaEvent(submitRequest, userId, questionSetFromAssessment,
@@ -506,7 +515,7 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
                         case Constants.SECTION_LEVEL_SCORE_CUTOFF: {
                             result.putAll(createResponseMapWithProperStructure(hierarchySection,
                                     assessUtilServ.validateQumlAssessment(questionsListFromAssessmentHierarchy,
-                                            questionsListFromSubmitRequest,assessUtilServ.readQListfromCache(questionsListFromAssessmentHierarchy,assessmentIdFromRequest))));
+                                            questionsListFromSubmitRequest,assessUtilServ.readQListfromCache(questionsListFromAssessmentHierarchy,assessmentIdFromRequest,editMode,token))));
                             sectionLevelsResults.add(result);
                         }
                             break;
@@ -598,7 +607,7 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
     }
 
     private Map<String, String> validateQuestionListAPI(Map<String, Object> requestBody, String authUserToken,
-            List<String> identifierList) throws IOException {
+            List<String> identifierList,boolean editMode) throws IOException {
         Map<String, String> result = new HashMap<>();
         String userId = accessTokenValidator.fetchUserIdFromAccessToken(authUserToken);
         if (StringUtils.isBlank(userId)) {
@@ -617,14 +626,15 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
         }
 
         Map<String, Object> assessmentAllDetail = assessUtilServ
-                .readAssessmentHierarchyFromCache(assessmentIdFromRequest);
+                .readAssessmentHierarchyFromCache(assessmentIdFromRequest,editMode,authUserToken);
+
         if (MapUtils.isEmpty(assessmentAllDetail)) {
             result.put(Constants.ERROR_MESSAGE, Constants.ASSESSMENT_HIERARCHY_READ_FAILED);
             return result;
         }
         String primaryCategory = (String) assessmentAllDetail.get(Constants.PRIMARY_CATEGORY);
         if (Constants.PRACTICE_QUESTION_SET
-                .equalsIgnoreCase(primaryCategory)) {
+                .equalsIgnoreCase(primaryCategory)||editMode) {
             result.put(Constants.PRIMARY_CATEGORY, primaryCategory);
             result.put(Constants.ERROR_MESSAGE, StringUtils.EMPTY);
             return result;
@@ -693,13 +703,13 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
 
     private String validateSubmitAssessmentRequest(Map<String, Object> submitRequest, String userId,
             List<Map<String, Object>> hierarchySectionList, List<Map<String, Object>> sectionListFromSubmitRequest,
-            Map<String, Object> assessmentHierarchy, Map<String, Object> existingAssessmentData) throws Exception {
+            Map<String, Object> assessmentHierarchy, Map<String, Object> existingAssessmentData,String token,boolean editMode) throws Exception {
         submitRequest.put(Constants.USER_ID, userId);
         if (StringUtils.isEmpty((String) submitRequest.get(Constants.IDENTIFIER))) {
             return Constants.INVALID_ASSESSMENT_ID;
         }
         String assessmentIdFromRequest = (String) submitRequest.get(Constants.IDENTIFIER);
-        assessmentHierarchy.putAll(assessUtilServ.readAssessmentHierarchyFromCache(assessmentIdFromRequest));
+        assessmentHierarchy.putAll(assessUtilServ.readAssessmentHierarchyFromCache(assessmentIdFromRequest,editMode,token));
         if (MapUtils.isEmpty(assessmentHierarchy)) {
             return Constants.READ_ASSESSMENT_FAILED;
         }
@@ -707,7 +717,7 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
         hierarchySectionList.addAll((List<Map<String, Object>>) assessmentHierarchy.get(Constants.CHILDREN));
         sectionListFromSubmitRequest.addAll((List<Map<String, Object>>) submitRequest.get(Constants.CHILDREN));
         if (((String) (assessmentHierarchy.get(Constants.PRIMARY_CATEGORY)))
-                .equalsIgnoreCase(Constants.PRACTICE_QUESTION_SET))
+                .equalsIgnoreCase(Constants.PRACTICE_QUESTION_SET) || editMode)
             return "";
 
         List<Map<String, Object>> existingDataList = assessUtilServ.readUserSubmittedAssessmentRecords(
@@ -808,6 +818,7 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
             sectionLevelResult.put(Constants.BLANK, resultMap.get(Constants.BLANK));
             sectionLevelResult.put(Constants.CORRECT, resultMap.get(Constants.CORRECT));
             sectionLevelResult.put(Constants.INCORRECT, resultMap.get(Constants.INCORRECT));
+            sectionLevelResult.put(Constants.CHILDREN,resultMap.get(Constants.CHILDREN));
         } else {
             result = 0.0;
             sectionLevelResult.put(Constants.RESULT, result);

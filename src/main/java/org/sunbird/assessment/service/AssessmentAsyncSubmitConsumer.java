@@ -28,7 +28,7 @@ public class AssessmentAsyncSubmitConsumer {
         try {
             Map<String, Object> asyncRequest = mapper.readValue(data.value(), new TypeReference<Map<String, Object>>() {
             });
-            assessmentServiceV4.handleAssessmentSubmitRequest(asyncRequest);
+            assessmentServiceV4.handleAssessmentSubmitRequest(asyncRequest,false,null);
         } catch (Exception e) {
             String errMsg = String.format("", e.getMessage());
             LOGGER.error(errMsg, e);
