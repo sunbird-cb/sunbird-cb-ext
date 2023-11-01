@@ -7,7 +7,18 @@ public class RequestRating {
     private Float rating;
     private String review ;
     private String comment;
+
+    public String getRecommended() {
+        return recommended;
+    }
+
+    public void setRecommended(String recommended) {
+        this.recommended = recommended;
+    }
+
     private String commentBy;
+    private String recommended;
+
 
     public String getActivityId() {
         return activityId;

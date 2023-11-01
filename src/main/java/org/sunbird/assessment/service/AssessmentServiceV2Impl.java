@@ -298,7 +298,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
     }
 
     @Override
-    public SBApiResponse submitAssessment(Map<String, Object> submitRequest, String authUserToken) throws IOException {
+    public SBApiResponse submitAssessment(Map<String, Object> submitRequest, String authUserToken,boolean editMode) throws IOException {
         SBApiResponse outgoingResponse = createDefaultResponse(Constants.API_SUBMIT_ASSESSMENT);
         String errMsg;
         List<Map<String, Object>> sectionListFromSubmitRequest = new ArrayList<>();
@@ -360,12 +360,12 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                     Map<String, Object> result = new HashMap<>();
                     switch (scoreCutOffType) {
                         case Constants.ASSESSMENT_LEVEL_SCORE_CUTOFF: {
-                            result.putAll(createResponseMapWithProperStructure(hierarchySection, assessUtilServ.validateQumlAssessment(questionsListFromAssessmentHierarchy, questionsListFromSubmitRequest,assessUtilServ.readQListfromCache(questionsListFromAssessmentHierarchy,assessmentIdFromRequest))));                            outgoingResponse.getResult().putAll(calculateAssessmentFinalResults(result));
+                            result.putAll(createResponseMapWithProperStructure(hierarchySection, assessUtilServ.validateQumlAssessment(questionsListFromAssessmentHierarchy, questionsListFromSubmitRequest,assessUtilServ.readQListfromCache(questionsListFromAssessmentHierarchy,assessmentIdFromRequest,editMode,authUserToken))));                            outgoingResponse.getResult().putAll(calculateAssessmentFinalResults(result));
                             writeDataToDatabaseAndTriggerKafkaEvent(submitRequest, userId, questionSetFromAssessment, result, (String) assessmentHierarchy.get(Constants.PRIMARY_CATEGORY));
                             return outgoingResponse;
                         }
                         case Constants.SECTION_LEVEL_SCORE_CUTOFF: {
-                            result.putAll(createResponseMapWithProperStructure(hierarchySection, assessUtilServ.validateQumlAssessment(questionsListFromAssessmentHierarchy, questionsListFromSubmitRequest,assessUtilServ.readQListfromCache(questionsListFromAssessmentHierarchy,assessmentIdFromRequest))));                            sectionLevelsResults.add(result);
+                            result.putAll(createResponseMapWithProperStructure(hierarchySection, assessUtilServ.validateQumlAssessment(questionsListFromAssessmentHierarchy, questionsListFromSubmitRequest,assessUtilServ.readQListfromCache(questionsListFromAssessmentHierarchy,assessmentIdFromRequest,editMode,authUserToken))));                            sectionLevelsResults.add(result);
                         }
                         break;
                         default:
@@ -384,11 +384,11 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                     Map<String, Object> result = new HashMap<>();
                     switch (scoreCutOffType) {
                         case Constants.ASSESSMENT_LEVEL_SCORE_CUTOFF: {
-                            result.putAll(createResponseMapWithProperStructure(hierarchySection, assessUtilServ.validateQumlAssessment(questionsListFromAssessmentHierarchy, questionsListFromSubmitRequest,assessUtilServ.readQListfromCache(questionsListFromAssessmentHierarchy,assessmentIdFromRequest))));                            outgoingResponse.getResult().putAll(calculateAssessmentFinalResults(result));
+                            result.putAll(createResponseMapWithProperStructure(hierarchySection, assessUtilServ.validateQumlAssessment(questionsListFromAssessmentHierarchy, questionsListFromSubmitRequest,assessUtilServ.readQListfromCache(questionsListFromAssessmentHierarchy,assessmentIdFromRequest,editMode,authUserToken))));                            outgoingResponse.getResult().putAll(calculateAssessmentFinalResults(result));
                             return outgoingResponse;
                         }
                         case Constants.SECTION_LEVEL_SCORE_CUTOFF: {
-                            result.putAll(createResponseMapWithProperStructure(hierarchySection, assessUtilServ.validateQumlAssessment(questionsListFromAssessmentHierarchy, questionsListFromSubmitRequest,assessUtilServ.readQListfromCache(questionsListFromAssessmentHierarchy,assessmentIdFromRequest))));                            sectionLevelsResults.add(result);
+                            result.putAll(createResponseMapWithProperStructure(hierarchySection, assessUtilServ.validateQumlAssessment(questionsListFromAssessmentHierarchy, questionsListFromSubmitRequest,assessUtilServ.readQListfromCache(questionsListFromAssessmentHierarchy,assessmentIdFromRequest,editMode,authUserToken))));                            sectionLevelsResults.add(result);
                         }
                         break;
                         default:

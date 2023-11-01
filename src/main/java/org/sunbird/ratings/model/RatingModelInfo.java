@@ -14,10 +14,20 @@ public class RatingModelInfo {
     private String userId;
     private Timestamp createdOn;
 
+    private String recommended;
+
+    public String getRecommended() {
+        return recommended;
+    }
+
+    public void setRecommended(String recommended) {
+        this.recommended = recommended;
+    }
+
     public RatingModelInfo() {
     }
 
-    public RatingModelInfo(String activityId, Timestamp commentUpdatedOn, String commentBy, String review, Float rating, String comment, Timestamp updatedOn, String activityType, String userId, Timestamp createdOn) {
+    public RatingModelInfo(String activityId, Timestamp commentUpdatedOn, String commentBy, String review, Float rating, String comment, Timestamp updatedOn, String activityType, String userId, Timestamp createdOn,String recommended) {
         this.activityId = activityId;
         this.commentUpdatedOn = commentUpdatedOn;
         this.commentBy = commentBy;
@@ -28,6 +38,7 @@ public class RatingModelInfo {
         this.activityType = activityType;
         this.userId = userId;
         this.createdOn = createdOn;
+        this.recommended = recommended;
     }
 
     public String getActivityId() {

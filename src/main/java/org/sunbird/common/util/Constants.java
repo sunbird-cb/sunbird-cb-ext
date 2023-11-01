@@ -171,6 +171,7 @@ public class Constants {
 	public static final String USERID = "id";
 	public static final String COMMENT = "comment";
 	public static final String COMMENT_BY = "commentBy";
+	public static final String RECOMMENDED = "recommended";
 	public static final String COMMENT_UPDATED_ON = "commentUpdatedOn";
 	public static final String CREATED_ON = "createdOn";
 	public static final String RATING = "rating";
@@ -736,6 +737,7 @@ public class Constants {
 	public static final String TABLE_COURSE_BATCH_ATTRIBUTES="batch_attributes";
 
 	public static final String TABLE_COURSE_SESSION_DETAILS="sessionDetails_v2";
+
 	public static final String BATCH_ALREADY_ENROLLED_MSG = "Already Enrolled in batches.";
 	public static final String BATCH_AUTO_ENROLL_ERROR_MSG = "Failed to auto enrol user in batch.";
 	public static final String BATCH_NOT_AVAILABLE_ERROR_MSG = "No Batch Available.";
@@ -760,6 +762,23 @@ public class Constants {
 
 	public static final String ASSESSMENT_INVALID = "Assessment Data doesn't contain mandatory values of expected duration.";
 
+	public static final String PRESENT = "Present";
+
+	public static final String FROM_EMAIL = "fromEmail";
+
+	public static final String TABLE_EMAIL_TEMPLATE = "email_template";
+
+	public static final String ABSENT = "absent";
+
+	public static final String COURSE_NAME = "courseName";
+
+	public static final String ATTENDANCE_MARKED = "ATTENDANCE MARKED";
+
+	public static final Object KARMYOGI_BHARAT = "Karmyogi Bharat";
+
+	public static final String USER_REGISTRATION_PRE_APPROVED_DOMAIN = "userRegistrationPreApprovedDomain";
+
+	public static final String USER_REGISTRATION_DOMAIN = "userRegistrationDomain";
 	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}
