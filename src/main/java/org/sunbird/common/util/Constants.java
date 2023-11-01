@@ -764,6 +764,20 @@ public class Constants {
 	public static final String USER_REGISTRATION_PRE_APPROVED_DOMAIN = "userRegistrationPreApprovedDomain";
 
 	public static final String USER_REGISTRATION_DOMAIN = "userRegistrationDomain";
+	public static final String PRESENT = "Present";
+
+	public static final String FROM_EMAIL = "fromEmail";
+
+	public static final String TABLE_EMAIL_TEMPLATE = "email_template";
+
+	public static final String ABSENT = "absent";
+
+	public static final String COURSE_NAME = "courseName";
+
+	public static final String ATTENDANCE_MARKED = "ATTENDANCE MARKED";
+
+	public static final Object KARMYOGI_BHARAT = "Karmyogi Bharat";
+
 	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}
