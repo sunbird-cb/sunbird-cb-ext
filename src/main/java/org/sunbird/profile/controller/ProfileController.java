@@ -2,6 +2,8 @@ package org.sunbird.profile.controller;
 
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,6 +24,8 @@ public class ProfileController {
 
 	@Autowired
 	private ProfileService profileService;
+
+	private Logger log = LoggerFactory.getLogger(getClass().getName());
 
 	@PostMapping("/user/patch")
 	public ResponseEntity<?> profileUpdate(
@@ -81,6 +85,8 @@ public class ProfileController {
 			@RequestHeader(Constants.X_AUTH_USER_ORG_ID) String rootOrgId,
 			@RequestHeader(Constants.X_AUTH_USER_CHANNEL) String channel,
 			@RequestHeader(Constants.X_AUTH_USER_ID) String userId) {
+		log.info(String.format("channel name:%s,OrgId:%s",
+				channel, rootOrgId));
 		SBApiResponse uploadResponse = profileService.bulkUpload(multipartFile, rootOrgId, channel, userId);
 		return new ResponseEntity<>(uploadResponse, uploadResponse.getResponseCode());
 	}

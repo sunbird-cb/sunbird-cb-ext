@@ -682,6 +682,8 @@ public class ProfileServiceImpl implements ProfileService {
 	public SBApiResponse bulkUpload(MultipartFile mFile, String orgId, String channel, String userId) {
 		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_USER_BULK_UPLOAD);
 		try {
+			log.info(String.format("channel name:%s,OrgId:%s",
+					channel, orgId));
 			SBApiResponse uploadResponse = storageService.uploadFile(mFile, serverConfig.getBulkUploadContainerName());
 			if (!HttpStatus.OK.equals(uploadResponse.getResponseCode())) {
 				setErrorData(response, String.format("Failed to upload file. Error: %s",
