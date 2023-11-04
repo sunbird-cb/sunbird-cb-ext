@@ -74,14 +74,21 @@ public class UpdateContentProgressConsumer {
             UpdateContentProgressRequest contentProgressRequest = mapper.readValue(data.value(), UpdateContentProgressRequest.class);
             logger.info("Received message:: " + contentProgressRequest);
             List<Object> requestList = (List<Object>) contentProgressRequest.getRequestBody().getRequest();
+            Map<String,Object> firstEntry = ((HashMap<String, Object>)requestList.get(0));
+            Map<String, Object> content = (Map<String, Object>) ((List<Object>) firstEntry.get("contents")).get(0);
+            Map<String, String> mailNotificationDetails = getMailNotificationDetails(content);
             for(Object request: requestList) {
+                Map<String, Object> learnerInfo = (HashMap<String, Object>)request;
+                String userId = (String) learnerInfo.get(Constants.USER_ID);
+                mailNotificationDetails.put(Constants.USER_ID, userId);
                 req = new HashMap<>();
                 req.put("request", request);
                 Map<String, Object> response = outboundReqService.fetchResultUsingPatch(
                         cbExtServerProperties.getCourseServiceHost() + cbExtServerProperties.getProgressUpdateEndPoint(),
                         req, contentProgressRequest.getHeadersValues());
                 if (response.get("responseCode").equals("OK")) {
-                    logger.info("Content progress is updated for resource::" + request);
+                    logger.info("Content progress is updated for resource::" + request + "Mail Notification Details for the User is::" + mailNotificationDetails);
+                    sendNotificationToLearner(mailNotificationDetails);
                 }
             }
         } catch (Exception ex) {
@@ -169,13 +176,13 @@ public class UpdateContentProgressConsumer {
             attendance = Constants.ABSENT;
         }
 
-        String body = configuration.getAttendanceNotificationMailBody().replace(SESSION_TAG, "<b>" + mailNotificationDetails.get(Constants.SESSION_NAME) + "</b>")
-                .replace(BLENDED_PROGRAM_TAG, "<b>" + mailNotificationDetails.get(Constants.COURSE_NAME) + "</b>")
-                .replace(SESSION_DATE_TAG, "<b>" + mailNotificationDetails.get(Constants.START_DATE) + "</b>")
-                .replace(SESSION_START_TIME, "<b>" + mailNotificationDetails.get(Constants.START_TIME) + "</b>")
-                .replace(SESSOION_END_TIME, "<b>" + mailNotificationDetails.get(Constants.END_TIME)+ "</b>")
-                .replace(ATTENDANCE_TAG, "<b>" + attendance + "</b>");
-
+        String body = configuration.getAttendanceNotificationMailBody().replace(SESSION_TAG,  mailNotificationDetails.get(Constants.SESSION_NAME))
+                .replace(BLENDED_PROGRAM_TAG,  mailNotificationDetails.get(Constants.COURSE_NAME))
+                .replace(SESSION_DATE_TAG, mailNotificationDetails.get(Constants.START_DATE))
+                .replace(SESSION_START_TIME, mailNotificationDetails.get(Constants.START_TIME))
+                .replace(SESSOION_END_TIME, mailNotificationDetails.get(Constants.END_TIME))
+                .replace(ATTENDANCE_TAG, attendance);
+        logger.info("Mail Body for the mail notification is : " + body);
         params.put("body", body);
         params.put(Constants.NAME, learnerName);
         params.put(Constants.FROM_EMAIL, configuration.getSupportEmail());
@@ -220,6 +227,7 @@ public class UpdateContentProgressConsumer {
                     }
                 }
             }
+            logger.info("User Details Successfully fetched: " + record);
             return record;
         } catch (Exception e) {
             logger.error("Exception while fetching user setails : ",e);
@@ -243,7 +251,8 @@ public class UpdateContentProgressConsumer {
         StringBuilder builder = new StringBuilder();
         builder.append(configuration.getNotifyServiceHost()).append(configuration.getNotifyServicePath());
         try {
-            outboundReqService.fetchResultUsingPost(builder.toString(), request, null);
+            Map<String, Object> response = outboundReqService.fetchResultUsingPost(builder.toString(), request, null);
+            logger.info("The email notification is successfully sent, response is: " + response);
         } catch (Exception e) {
             logger.error("Exception while posting the data in notification service: ", e);
         }
