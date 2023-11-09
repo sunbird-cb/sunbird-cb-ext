@@ -20,7 +20,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.util.Constants;
 import org.sunbird.profile.service.ProfileService;
-import org.sunbird.workallocation.service.EnrichmentService;
 
 @RestController
 public class ProfileController {
