@@ -159,4 +159,13 @@ public class RedisCacheMgr {
         }
         return result;
     }
+    public Map<String,String> hgetAll(String key,int index) {
+        try (Jedis jedis = jedisPool.getResource()) {
+            jedis.select(index);
+            return jedis.hgetAll(key);
+        } catch (Exception e) {
+            logger.error(e);
+            return null;
+        }
+    }
 }

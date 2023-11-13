@@ -1,0 +1,92 @@
+package org.sunbird.trending.controller;
+
+import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.sunbird.cache.RedisCacheMgr;
+import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
+import org.sunbird.common.util.CbExtServerProperties;
+import org.sunbird.common.util.Constants;
+import org.sunbird.core.exception.InvalidDataInputException;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import static org.sunbird.common.util.Constants.*;
+@Service
+public class TrendingServiceImpl implements TrendingService {
+
+    @Autowired
+    CbExtServerProperties serverProperties;
+
+    @Autowired
+    OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
+
+    @Autowired
+    RedisCacheMgr redisCacheMgr;
+
+    public Map<String, Object> trendingSearch(Map<String, Object> requestBody, String token) throws Exception {
+
+        // Read req params
+        HashMap<String, Object> request = (HashMap<String, Object>) requestBody.get(Constants.REQUEST);
+        HashMap<String, Object> filter = ((HashMap<String, Object>) request.get(Constants.FILTERS));
+        ArrayList<String> primaryCategoryList = ((ArrayList<String>) (filter).get(Constants.PRIMARY_CATEGORY));
+        String org = ((String) (filter).get(Constants.ORGANISATION));
+        int limit = Optional.ofNullable(request.get(Constants.LIMIT)).map(l -> (Integer) l).orElse(0);
+
+        // Fetch trending Ids for requested type of courses
+        Map<String, String> trendingCoursesAndPrograms = redisCacheMgr.hgetAll(TRENDING_COURSES_REDIS_KEY, serverProperties.getRedisInsightIndex());
+        //Holding all ids against it's respective type course,program or certification
+        Map<String, List<String>> typeList = primaryCategoryList.stream()
+                .collect(Collectors.toMap(type -> type, type -> fetchIds(trendingCoursesAndPrograms.get(org + COLON + type), limit, type)));
+        // all ids to fetch results
+        List<String> searchIds = typeList.values().stream().flatMap(List::stream).collect(Collectors.toList());
+        // Search content from Composite Search
+        Map<String, Object> compositeSearchRes = compositeSearch(searchIds, token);
+
+        //Map resulted content from Composite Search , Map those in category wise on sorted order as received from redis
+        Map<String, Object> resultMap = (Map<String, Object>) compositeSearchRes.get(RESULT);
+        List<Map<String, Object>> contentList = (List<Map<String, Object>>) resultMap.get(CONTENT);
+        Map<String, Object> contentMap = contentList.stream()
+                .collect(Collectors.toMap(content -> (String) content.get(IDENTIFIER), Function.identity()));
+        Map<String, List<Object>> resultContentMap = typeList.entrySet().stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        entry -> entry.getValue().stream().map(contentMap::get).collect(Collectors.toList())
+                ));
+
+        resultMap.remove(CONTENT);
+        resultMap.remove(COUNT);
+        resultMap.putAll(resultContentMap);
+        return compositeSearchRes;
+    }
+
+    public List<String> fetchIds(String idStr, int limit, String type) {
+        String[] idArray = Optional.ofNullable(idStr).filter(StringUtils::isNotBlank).map(str -> str.split(COMMA)).orElse(null);
+        if (idArray == null || idArray.length == 0) {
+            throw new InvalidDataInputException(TREND_SEARCH_NO_RESULT_ERROR_MESG.replace("{0}", type));
+        }
+        List<String> idList = Arrays.asList(idArray);
+        if (idList.size() > limit) {
+            idList = idList.subList(0, limit);
+        }
+        return idList;
+    }
+
+    public Map<String, Object> compositeSearch(List<String> searchIds, String token) {
+        // Headers for Search API
+        Map<String, String> headers = new HashMap<>();
+        headers.put(USER_TOKEN, token);
+        headers.put(AUTHORIZATION, serverProperties.getSbApiKey());
+        // Search Req Body forming
+        HashMap<String, Object> searchBody = new HashMap<>();
+        HashMap<String, Object> searchReq = new HashMap<>();
+        Map<String, Object> filters = new HashMap<>();
+        filters.put(IDENTIFIER, searchIds);
+        searchReq.put(FILTERS, filters);
+        searchBody.put(REQUEST, searchReq);
+        return outboundRequestHandlerService.fetchResultUsingPost(
+                serverProperties.getKmBaseHost() + serverProperties.getKmCompositeSearchPath(), searchBody,
+                headers);
+    }
+}

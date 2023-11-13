@@ -778,6 +778,47 @@ public class Constants {
 
 	public static final Object KARMYOGI_BHARAT = "Karmyogi Bharat";
 
+	public static final String COLON =":";
+
+	public static final String TRENDING_COURSES_REDIS_KEY="lhp_trending";
+	public static final String ORGANISATION = "organisation";
+	public static final int NUM_WEEKS = 4;
+
+	public static final String INSIGHTS_LEARNING_HOURS_REDIS_KEY="lhp_learningHours";
+
+	public static final String INSIGHTS_CERTIFICATIONS_REDIS_KEY="lhp_certifications";
+
+	public static final String INSIGHTS_TYPE_CERTIFICATE ="certification";
+	public static final String INSIGHTS_TYPE_LEARNING_HOURS ="learning-hours";
+
+	public static final String WEEKLY_CLAPS ="weekly-claps";
+	public static final String NUDGES ="nudges";
+	public static final String LABEL ="label";
+
+	public static final String GROWTH = "growth";
+
+	public static final String POSITIVE="positive";
+	public static final String NEGATIVE="negative";
+
+	public static final String YESTERDAY="yesterday";
+
+	public static final String TODAY ="today";
+
+	public static final String WEEK ="week";
+
+	public static final String ACHIEVED ="achieved";
+
+	public static final String API_USER_INSIGHTS="api.user.insights";
+
+
+	public static final String COURSES="courses";
+
+	public static final String PROGRAMS="programs";
+
+	public static final String CERTIFICATIONS="certifications";
+
+	public static final String TREND_SEARCH_NO_RESULT_ERROR_MESG = "Doesn't have any trending {0} for the requested organization";
+
 	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}

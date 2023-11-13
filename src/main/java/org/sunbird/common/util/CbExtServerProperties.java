@@ -530,6 +530,17 @@ public class CbExtServerProperties {
 	@Value("${report.type.get.file.info}")
 	private String reportTypeGetFileInfo;
 
+	@Value("${redis.insights.index}")
+	private int redisInsightIndex;
+
+	public int getRedisInsightIndex() {
+		return redisInsightIndex;
+	}
+
+	public void setRedisInsightIndex(int redisInsightIndex) {
+		this.redisInsightIndex = redisInsightIndex;
+	}
+
 	public String getAssessmentSubmitTopic() {
 		return assessmentSubmitTopic;
 	}
