@@ -46,7 +46,7 @@ public class InsightsServiceImpl implements InsightsService {
         populateIfNudgeExist(lhpLearningHours, nudges, INSIGHTS_TYPE_LEARNING_HOURS,organizations,labelsLearningHours);
         populateIfNudgeExist(lhpCertifications, nudges, INSIGHTS_TYPE_CERTIFICATE,organizations,labelsCertificates);
         HashMap<String, Object> responseMap = new HashMap<>();
-        responseMap.put(WEEKLY_CLAPS, populateIfClapsExist(userId).get(0) );
+        responseMap.put(WEEKLY_CLAPS, populateIfClapsExist(userId) );
         responseMap.put(NUDGES, nudges);
         SBApiResponse response = ProjectUtil.createDefaultResponse(API_USER_INSIGHTS);
         response.getResult().put(RESPONSE, responseMap);
@@ -61,7 +61,7 @@ public class InsightsServiceImpl implements InsightsService {
         }
         return  keys;
     }
-    private List<Map<String, Object>> populateIfClapsExist(String userId) {
+    private Map<String, Object> populateIfClapsExist(String userId) {
         Map<String, Object> userRequest = new HashMap<>();
         userRequest.put(LEARNER_STATUS_USER_ID, userId);
         List<String> fields = new ArrayList<>();
@@ -74,17 +74,18 @@ public class InsightsServiceImpl implements InsightsService {
         List<Map<String, Object>>  result=  cassandraOperation.getRecordsByProperties(KEYSPACE_SUNBIRD,
                 LEARNER_STATS, userRequest, fields);
         LocalDate[]  dates = populateDate();
-        if(result != null & result.size() > 0) {
+        if(result != null && result.size() > 0) {
             result.get(0).put("startDate", dates[0]);
             result.get(0).put("endDate", dates[1]);
+            return result.get(0);
         }
-        return result;
+        return new HashMap<>();
     }
     public void populateIfNudgeExist(List<String> data, ArrayList<Object> nudges, String type, List<String> organizations,String labels[]) {
         for (int i = 0, j = 0; i < data.size(); i += 2, j++) {
            // String label = data.get(i);
-            double yesterday = StringUtils.isNotBlank(data.get(i + 1)) ? Double.parseDouble(data.get(i + 1)) : 0.0;
-            double today = StringUtils.isNotBlank(data.get(i + 2)) ? Double.parseDouble(data.get(i + 2)) : 0.0;
+            double yesterday = StringUtils.isNotBlank(data.get(i)) ? Double.parseDouble(data.get(i)) : 0.0;
+            double today = StringUtils.isNotBlank(data.get(i+1)) ? Double.parseDouble(data.get(i+1)) : 0.0;
             double change;
             if (yesterday != 0.0 || today != 0.0) {
                 if (yesterday != 0.0) {
