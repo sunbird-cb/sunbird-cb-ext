@@ -29,11 +29,11 @@ public class InsightsServiceImpl implements InsightsService {
     CassandraOperation cassandraOperation;
 
     @Autowired
-    PropertiesConfig propertiesConfig;
+    CbExtServerProperties extServerProperties;
 
     public SBApiResponse insights(Map<String, Object> requestBody,String userId) throws Exception {
-        String [] labelsCertificates = {propertiesConfig.getInsightsLabelCertificatesYourDepartment(),propertiesConfig.getInsightsLabelCertificatesAcross()} ;
-        String [] labelsLearningHours = {propertiesConfig.getInsightsLabelLearningHoursYourDepartment(),propertiesConfig.getInsightsLabelLearningHoursAcross()} ;
+        String [] labelsCertificates = {extServerProperties.getInsightsLabelCertificatesYourDepartment(),extServerProperties.getInsightsLabelCertificatesAcross()} ;
+        String [] labelsLearningHours = {extServerProperties.getInsightsLabelLearningHoursYourDepartment(),extServerProperties.getInsightsLabelLearningHoursAcross()} ;
 
         HashMap<String, Object> request = (HashMap<String, Object>) requestBody.get(REQUEST);
         HashMap<String, Object> filter = ((HashMap<String, Object>) request.get(FILTERS));

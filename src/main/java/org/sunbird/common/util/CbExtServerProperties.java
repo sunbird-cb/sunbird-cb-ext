@@ -533,6 +533,49 @@ public class CbExtServerProperties {
 	@Value("${redis.insights.index}")
 	private int redisInsightIndex;
 
+
+	public String getInsightsLabelCertificatesAcross() {
+		return insightsLabelCertificatesAcross;
+	}
+
+	public void setInsightsLabelCertificatesAcross(String insightsLabelCertificatesAcross) {
+		this.insightsLabelCertificatesAcross = insightsLabelCertificatesAcross;
+	}
+
+	public String getInsightsLabelLearningHoursAcross() {
+		return insightsLabelLearningHoursAcross;
+	}
+
+	public void setInsightsLabelLearningHoursAcross(String insightsLabelLearningHoursAcross) {
+		this.insightsLabelLearningHoursAcross = insightsLabelLearningHoursAcross;
+	}
+
+	public String getInsightsLabelCertificatesYourDepartment() {
+		return insightsLabelCertificatesYourDepartment;
+	}
+
+	public void setInsightsLabelCertificatesYourDepartment(String insightsLabelCertificatesYourDepartment) {
+		this.insightsLabelCertificatesYourDepartment = insightsLabelCertificatesYourDepartment;
+	}
+
+	public String getInsightsLabelLearningHoursYourDepartment() {
+		return insightsLabelLearningHoursYourDepartment;
+	}
+
+	public void setInsightsLabelLearningHoursYourDepartment(String insightsLabelLearningHoursYourDepartment) {
+		this.insightsLabelLearningHoursYourDepartment = insightsLabelLearningHoursYourDepartment;
+	}
+
+	@Value("${insights.label.certificates.across}")
+	private String insightsLabelCertificatesAcross;
+	@Value("${insights.label.learning.hours.across}")
+	private String insightsLabelLearningHoursAcross;
+	@Value("${insights.label.certificates.your.department}")
+	private String insightsLabelCertificatesYourDepartment;
+	@Value("${insights.label.learning.hours.your.department}")
+	private String insightsLabelLearningHoursYourDepartment;
+
+
 	public int getRedisInsightIndex() {
 		return redisInsightIndex;
 	}
