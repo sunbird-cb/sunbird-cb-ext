@@ -16,4 +16,6 @@ public interface RatingService {
     public SBApiResponse ratingLookUp(LookupRequest request);
 
     public SBApiResponse readRatings(Map<String, Object> request);
+
+    public SBApiResponse updateRatingsMetaData();
 }

@@ -502,6 +502,12 @@ public class CbExtServerProperties {
 	@Value("${mdo.admin.update.users}")
 	private String mdoAdminUpdateUsers;
 
+	@Value("${learning_service_base_url}")
+	private String learningServiceBaseUrl;
+
+	@Value("${system.content.update.url}")
+	private String systemUpdateAPI;
+
 	public boolean qListFromCacheEnabled() {
 		return qListFromCacheEnabled;
 	}
@@ -1890,5 +1896,21 @@ public class CbExtServerProperties {
 
 	public void setMdoAdminUpdateUsers(String mdoAdminUpdateUsers) {
 		this.mdoAdminUpdateUsers = mdoAdminUpdateUsers;
+	}
+
+	public String getLearningServiceBaseUrl() {
+		return learningServiceBaseUrl;
+	}
+
+	public void setLearningServiceBaseUrl(String learningServiceBaseUrl) {
+		this.learningServiceBaseUrl = learningServiceBaseUrl;
+	}
+
+	public String getSystemUpdateAPI() {
+		return systemUpdateAPI;
+	}
+
+	public void setSystemUpdateAPI(String systemUpdateAPI) {
+		this.systemUpdateAPI = systemUpdateAPI;
 	}
 }

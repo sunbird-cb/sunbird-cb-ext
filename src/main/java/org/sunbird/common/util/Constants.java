@@ -827,6 +827,16 @@ public class Constants {
 
 	public static final String LEARNER_STATS = "learner_stats";
 	public static final String LEARNER_STATUS_USER_ID="userid";
+
+	public static final String VERSION_KEY = "versionKey";
+	public static final String AVG_RATING = "avgRating";
+	public static final String TOTAL_NO_OF_RATING = "totalNoOfRating";
+	public static final String COUNT_ONE_STAR_RATING = "countOf1StarRating";
+	public static final String COUNT_TWO_STAR_RATING = "countOf2StarRating";
+	public static final String COUNT_THREE_STAR_RATING = "countOf3StarRating";
+	public static final String COUNT_FOUR_STAR_RATING = "countOf4StarRating";
+	public static final String COUNT_FIVE_STAR_RATING = "countOf5StarRating";
+	public static final String TOTAL_NUMBER_UPDATED_COUNT = "totalNumberOfUpdatedContent";
 	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}
