@@ -98,7 +98,7 @@ public class InsightsServiceImpl implements InsightsService {
             HashMap<String, Object> nudge = new HashMap<>();
             nudge.put(PROGRESS, change);
             nudge.put(GROWTH, change > 0 ? POSITIVE : NEGATIVE);
-            nudge.put(LABEL, organizations.get(j).equals("across") ?labels[1] :labels[0]);
+            nudge.put(LABEL, organizations.get(j).equals("across") ?labels[1].replace("{0}",String.valueOf(today)) :labels[0].replace("{0}",String.valueOf(today)));
             nudge.put(ORG, organizations.get(j));
             nudge.put(TYPE, type);
             nudges.add(nudge);
