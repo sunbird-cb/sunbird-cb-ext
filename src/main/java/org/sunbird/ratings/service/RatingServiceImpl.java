@@ -1,12 +1,9 @@
 package org.sunbird.ratings.service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
@@ -19,6 +16,9 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.sunbird.cassandra.utils.CassandraOperation;
 import org.sunbird.common.model.SBApiResponse;
+import org.sunbird.common.service.ContentService;
+import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
+import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.common.util.ProjectUtil;
 import org.sunbird.core.logger.CbExtLogger;
@@ -56,6 +56,15 @@ public class RatingServiceImpl implements RatingService {
 
     @Value("${kafka.topics.parent.rating.event}")
     public String updateRatingTopicName;
+
+    @Autowired
+    ContentService contentService;
+
+    @Autowired
+    OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
+
+    @Autowired
+    CbExtServerProperties serverConfig;
 
     @Override
     public SBApiResponse getRatings(String activityId, String activityType, String userId) {
@@ -508,4 +517,63 @@ public class RatingServiceImpl implements RatingService {
         response.setResponseCode(responseCode);
     }
 
+    public SBApiResponse updateRatingsMetaData() {
+        SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_RATINGS_CONTENT_META_UPDATE);
+        try {
+            Map<String, Object> request = new HashMap<>();
+            long startTime = System.currentTimeMillis();
+            List<Map<String, Object>> existingDataList = cassandraOperation.getRecordsByPropertiesWithoutFiltering(
+                    Constants.KEYSPACE_SUNBIRD,
+                    Constants.TABLE_RATINGS_SUMMARY, request, Arrays.asList(Constants.ACTIVITY_ID, Constants.TOTALNUMBEROFRATINGS, Constants.SUMOFTOTALRATINGS,
+                            Constants.TOTALCOUNT1STARS, Constants.TOTALCOUNT2STARS, Constants.TOTALCOUNT3STARS, Constants.TOTALCOUNT4STARS, Constants.TOTALCOUNT5STARS));
+
+            int totalNumberOfUpdatedContent = 0;
+            int totalNumberOfErrorContent = 0;
+            for (Map<String, Object> ratingSummary : existingDataList) {
+                String contentId = (String) ratingSummary.get(Constants.ACTIVITY_ID);
+                logger.info("Start Update Content Elastic for contentId: " + contentId);
+                Map<String, Object> contentResponse = contentService.readContent(contentId);
+                if (!ObjectUtils.isEmpty(contentResponse)) {
+                    String versionKey = (String) contentResponse.get(Constants.VERSION_KEY);
+                    Map<String, Object> updateRatingValues = new HashMap<>();
+                    updateRatingValues.put(Constants.VERSION_KEY, versionKey);
+                    Float totalNumberOfRating = (Float) ratingSummary.get(Constants.TOTALNUMBEROFRATINGS);
+                    Float sumOfTotalRating = (Float) ratingSummary.get(Constants.SUMOFTOTALRATINGS);
+                    BigDecimal result = BigDecimal.valueOf(sumOfTotalRating).divide(BigDecimal.valueOf(totalNumberOfRating), 1, RoundingMode.HALF_UP);
+                    updateRatingValues.put(Constants.AVG_RATING, result.floatValue());
+                    updateRatingValues.put(Constants.TOTAL_NO_OF_RATING, totalNumberOfRating.intValue());
+                    updateRatingValues.put(Constants.COUNT_ONE_STAR_RATING, ((Float) ratingSummary.get(Constants.TOTALCOUNT1STARS)).intValue());
+                    updateRatingValues.put(Constants.COUNT_TWO_STAR_RATING, ((Float) ratingSummary.get(Constants.TOTALCOUNT2STARS)).intValue());
+                    updateRatingValues.put(Constants.COUNT_THREE_STAR_RATING, ((Float) ratingSummary.get(Constants.TOTALCOUNT3STARS)).intValue());
+                    updateRatingValues.put(Constants.COUNT_FOUR_STAR_RATING, ((Float) ratingSummary.get(Constants.TOTALCOUNT4STARS)).intValue());
+                    updateRatingValues.put(Constants.COUNT_FIVE_STAR_RATING, ((Float) ratingSummary.get(Constants.TOTALCOUNT5STARS)).intValue());
+
+                    Map<String, Object> contentRequest = new HashMap<>();
+                    contentRequest.put(Constants.CONTENT, updateRatingValues);
+                    Map<String, Object> updateContent = new HashMap<>();
+                    updateContent.put(Constants.REQUEST, contentRequest);
+                    Map<String, Object> updateReadData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPatch(
+                            serverConfig.getLearningServiceBaseUrl() + serverConfig.getSystemUpdateAPI() + contentId, updateContent,
+                            ProjectUtil.getDefaultHeaders());
+                    if (Constants.OK.equalsIgnoreCase((String) updateReadData.get(Constants.RESPONSE_CODE))) {
+                        totalNumberOfUpdatedContent = totalNumberOfUpdatedContent + 1;
+                    } else {
+                        totalNumberOfErrorContent = totalNumberOfErrorContent + 1;
+                    }
+                } else {
+                    totalNumberOfErrorContent = totalNumberOfErrorContent + 1;
+                }
+            }
+            logger.info("Update End at time in ms: " + (System.currentTimeMillis() - startTime));
+            response.setResponseCode(HttpStatus.OK);
+            response.getResult().put(Constants.TOTAL_NUMBER_UPDATED_COUNT, totalNumberOfUpdatedContent);
+            response.getResult().put(Constants.TOTAL_NUMBER_ERROR_COUNT, totalNumberOfErrorContent);
+            response.getParams().setStatus(Constants.SUCCESS);
+        } catch (Exception e) {
+            logger.error("updateRatingTopicName", e);
+            response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+            response.getResult().put(Constants.ERROR_MESSAGE, e.getMessage());
+        }
+        return response;
+    }
 }
