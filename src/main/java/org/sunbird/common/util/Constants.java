@@ -819,8 +819,18 @@ public class Constants {
 
 	public static final String TREND_SEARCH_NO_RESULT_ERROR_MESG = "Doesn't have any trending {0} for the requested organization";
 
+	public static final String TOTAL_CLAPS="total_claps";
+	public static final String W1 ="w1";
+	public static final String W2 ="w2";
+	public static final String W3= "w3";
+	public static final String W4 ="w4";
+
+	public static final String LEARNER_STATS = "learner_stats";
+	public static final String LEARNER_STATUS_USER_ID="userid";
 	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}
+
+
 
 }

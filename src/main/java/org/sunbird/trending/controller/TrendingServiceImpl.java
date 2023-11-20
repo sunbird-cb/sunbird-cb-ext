@@ -26,25 +26,24 @@ public class TrendingServiceImpl implements TrendingService {
     RedisCacheMgr redisCacheMgr;
 
     public Map<String, Object> trendingSearch(Map<String, Object> requestBody, String token) throws Exception {
-
         // Read req params
         HashMap<String, Object> request = (HashMap<String, Object>) requestBody.get(Constants.REQUEST);
         HashMap<String, Object> filter = ((HashMap<String, Object>) request.get(Constants.FILTERS));
         ArrayList<String> primaryCategoryList = ((ArrayList<String>) (filter).get(Constants.PRIMARY_CATEGORY));
         String org = ((String) (filter).get(Constants.ORGANISATION));
         int limit = Optional.ofNullable(request.get(Constants.LIMIT)).map(l -> (Integer) l).orElse(0);
-
+        List<String> fieldList = primaryCategoryList.stream()
+                .map(type -> org + COLON + type)
+                .collect(Collectors.toList());
+        String[] fieldsArray = fieldList.toArray(new String[fieldList.size()]);
         // Fetch trending Ids for requested type of courses
-        Map<String, String> trendingCoursesAndPrograms = redisCacheMgr.hgetAll(TRENDING_COURSES_REDIS_KEY, serverProperties.getRedisInsightIndex());
-        //Holding all ids against it's respective type course,program or certification
-        Map<String, List<String>> typeList = primaryCategoryList.stream()
-                .collect(Collectors.toMap(type -> type, type -> fetchIds(trendingCoursesAndPrograms.get(org + COLON + type), limit, type)));
-        // all ids to fetch results
+        List<String> trendingCoursesAndPrograms = redisCacheMgr.hget(TRENDING_COURSES_REDIS_KEY, serverProperties.getRedisInsightIndex(),fieldsArray);
+        Map<String, List<String>> typeList = new HashMap<>();
+        for(int i=0;i<fieldsArray.length;i++){
+            typeList.put(primaryCategoryList.get(i),fetchIds(trendingCoursesAndPrograms.get(i), limit, fieldList.get(i)));
+        }
         List<String> searchIds = typeList.values().stream().flatMap(List::stream).collect(Collectors.toList());
-        // Search content from Composite Search
         Map<String, Object> compositeSearchRes = compositeSearch(searchIds, token);
-
-        //Map resulted content from Composite Search , Map those in category wise on sorted order as received from redis
         Map<String, Object> resultMap = (Map<String, Object>) compositeSearchRes.get(RESULT);
         List<Map<String, Object>> contentList = (List<Map<String, Object>>) resultMap.get(CONTENT);
         Map<String, Object> contentMap = contentList.stream()
@@ -54,13 +53,11 @@ public class TrendingServiceImpl implements TrendingService {
                         Map.Entry::getKey,
                         entry -> entry.getValue().stream().map(contentMap::get).collect(Collectors.toList())
                 ));
-
         resultMap.remove(CONTENT);
         resultMap.remove(COUNT);
         resultMap.putAll(resultContentMap);
         return compositeSearchRes;
     }
-
     public List<String> fetchIds(String idStr, int limit, String type) {
         String[] idArray = Optional.ofNullable(idStr).filter(StringUtils::isNotBlank).map(str -> str.split(COMMA)).orElse(null);
         if (idArray == null || idArray.length == 0) {
@@ -72,7 +69,6 @@ public class TrendingServiceImpl implements TrendingService {
         }
         return idList;
     }
-
     public Map<String, Object> compositeSearch(List<String> searchIds, String token) {
         // Headers for Search API
         Map<String, String> headers = new HashMap<>();
