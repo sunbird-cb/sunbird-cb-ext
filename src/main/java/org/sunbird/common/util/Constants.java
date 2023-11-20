@@ -837,6 +837,8 @@ public class Constants {
 	public static final String COUNT_FOUR_STAR_RATING = "countOf4StarRating";
 	public static final String COUNT_FIVE_STAR_RATING = "countOf5StarRating";
 	public static final String TOTAL_NUMBER_UPDATED_COUNT = "totalNumberOfUpdatedContent";
+	public static final String TOTAL_NUMBER_ERROR_COUNT = "totalNumberOfErrorContent";
+	public static final String API_RATINGS_CONTENT_META_UPDATE = "api.ratings.content.meta.update";
 	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}

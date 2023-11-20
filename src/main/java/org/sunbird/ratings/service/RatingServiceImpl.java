@@ -518,25 +518,24 @@ public class RatingServiceImpl implements RatingService {
     }
 
     public SBApiResponse updateRatingsMetaData() {
-        SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_RATINGS_READ);
+        SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_RATINGS_CONTENT_META_UPDATE);
         try {
             Map<String, Object> request = new HashMap<>();
-
+            long startTime = System.currentTimeMillis();
             List<Map<String, Object>> existingDataList = cassandraOperation.getRecordsByPropertiesWithoutFiltering(
                     Constants.KEYSPACE_SUNBIRD,
                     Constants.TABLE_RATINGS_SUMMARY, request, Arrays.asList(Constants.ACTIVITY_ID, Constants.TOTALNUMBEROFRATINGS, Constants.SUMOFTOTALRATINGS,
                             Constants.TOTALCOUNT1STARS, Constants.TOTALCOUNT2STARS, Constants.TOTALCOUNT3STARS, Constants.TOTALCOUNT4STARS, Constants.TOTALCOUNT5STARS));
 
             int totalNumberOfUpdatedContent = 0;
+            int totalNumberOfErrorContent = 0;
             for (Map<String, Object> ratingSummary : existingDataList) {
-                long startTime = System.currentTimeMillis();
                 String contentId = (String) ratingSummary.get(Constants.ACTIVITY_ID);
                 logger.info("Start Update Content Elastic for contentId: " + contentId);
                 Map<String, Object> contentResponse = contentService.readContent(contentId);
                 if (!ObjectUtils.isEmpty(contentResponse)) {
                     String versionKey = (String) contentResponse.get(Constants.VERSION_KEY);
                     Map<String, Object> updateRatingValues = new HashMap<>();
-                    ;
                     updateRatingValues.put(Constants.VERSION_KEY, versionKey);
                     Float totalNumberOfRating = (Float) ratingSummary.get(Constants.TOTALNUMBEROFRATINGS);
                     Float sumOfTotalRating = (Float) ratingSummary.get(Constants.SUMOFTOTALRATINGS);
@@ -558,13 +557,17 @@ public class RatingServiceImpl implements RatingService {
                             ProjectUtil.getDefaultHeaders());
                     if (Constants.OK.equalsIgnoreCase((String) updateReadData.get(Constants.RESPONSE_CODE))) {
                         totalNumberOfUpdatedContent = totalNumberOfUpdatedContent + 1;
+                    } else {
+                        totalNumberOfErrorContent = totalNumberOfErrorContent + 1;
                     }
-
-                    logger.info("Update End at time in ms: " + (System.currentTimeMillis() - startTime));
+                } else {
+                    totalNumberOfErrorContent = totalNumberOfErrorContent + 1;
                 }
             }
+            logger.info("Update End at time in ms: " + (System.currentTimeMillis() - startTime));
             response.setResponseCode(HttpStatus.OK);
             response.getResult().put(Constants.TOTAL_NUMBER_UPDATED_COUNT, totalNumberOfUpdatedContent);
+            response.getResult().put(Constants.TOTAL_NUMBER_ERROR_COUNT, totalNumberOfErrorContent);
             response.getParams().setStatus(Constants.SUCCESS);
         } catch (Exception e) {
             logger.error("updateRatingTopicName", e);
