@@ -18,4 +18,6 @@ public interface RatingService {
     public SBApiResponse readRatings(Map<String, Object> request);
 
     public SBApiResponse updateRatingsMetaData();
+
+    public SBApiResponse updateContentMetaData();
 }
