@@ -839,6 +839,10 @@ public class Constants {
 	public static final String TOTAL_NUMBER_UPDATED_COUNT = "totalNumberOfUpdatedContent";
 	public static final String TOTAL_NUMBER_ERROR_COUNT = "totalNumberOfErrorContent";
 	public static final String API_RATINGS_CONTENT_META_UPDATE = "api.ratings.content.meta.update";
+	public static final String API_CONTENT_META_UPDATE = "api.content.meta.update";
+	public static final String REDIS_COURSE_MOST_ENROLLED_TAG = "lhp_mostEnrolledTag";
+	public static final String ADDITIONAL_TAGS = "additionalTags";
+	public static final String MOST_ENROLLED = "mostEnrolled";
 	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}

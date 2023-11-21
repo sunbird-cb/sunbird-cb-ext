@@ -62,5 +62,11 @@ public class RatingsController {
         SBApiResponse response = ratingService.updateRatingsMetaData();
         return new ResponseEntity<>(response, response.getResponseCode());
     }
+
+    @PostMapping("/v1/content/meta/update")
+    public ResponseEntity<?> updateContentMetaData() {
+        SBApiResponse response = ratingService.updateContentMetaData();
+        return new ResponseEntity<>(response, response.getResponseCode());
+    }
 }
 
