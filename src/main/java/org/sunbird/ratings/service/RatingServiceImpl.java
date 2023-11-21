@@ -592,35 +592,18 @@ public class RatingServiceImpl implements RatingService {
             int totalNumberOfUpdatedContent = 0;
             int totalNumberOfErrorContent = 0;
 
-            if (oldCourse != null) {
-                Map<String, Object> resultContentData = (Map<String, Object>) oldCourse.get(Constants.RESULT);
-                List<Map<String, Object>> contentDataList = (List<Map<String, Object>>) resultContentData.get(Constants.CONTENT);
-                List<String> contentListIds = contentDataList.stream().map(map -> (String) map.get(Constants.IDENTIFIER)).filter(value -> value != null).collect(Collectors.toList());
-                List<String> latestCourseList = Arrays.asList(latestCourseString.split(","));
-                for (String contentId : latestCourseList) {
-                    if (!contentListIds.contains(contentId)) {
-                        logger.info("Start Update Content Elastic for contentId: " + contentId);
-                        Map<String, Object> contentResponse = contentService.readContent(contentId);
-                        //Adding the Content value to metaData for most Enrolled by checking through Redish
-                        if (!ObjectUtils.isEmpty(contentResponse)) {
-                            if (contentUpdate(contentResponse, contentId, false)) {
-                                totalNumberOfUpdatedContent = totalNumberOfErrorContent + 1;
-                            } else {
-                                totalNumberOfErrorContent = totalNumberOfErrorContent + 1;
-                            }
-                        } else {
-                            totalNumberOfErrorContent = totalNumberOfErrorContent + 1;
-                        }
-                    }
-                }
-                contentListIds.removeAll(latestCourseList);
-                for (String removeContentId : contentListIds) {
-                    logger.info("Start Update Content Elastic for Remove mostEnrolled Tags contentId: " + removeContentId);
-                    Map<String, Object> contentResponse = contentService.readContent(removeContentId);
-                    //Remove the Content value to metaData for most Enrolled
+            Map<String, Object> resultContentData = (Map<String, Object>) oldCourse.get(Constants.RESULT);
+            List<Map<String, Object>> contentDataList = (List<Map<String, Object>>) resultContentData.get(Constants.CONTENT);
+            List<String> contentListIds = contentDataList.stream().map(map -> (String) map.get(Constants.IDENTIFIER)).filter(value -> value != null).collect(Collectors.toList());
+            List<String> latestCourseList = Arrays.asList(latestCourseString.split(","));
+            for (String contentId : latestCourseList) {
+                if (!contentListIds.contains(contentId)) {
+                    logger.info("Start Update Content Elastic for contentId: " + contentId);
+                    Map<String, Object> contentResponse = contentService.readContent(contentId);
+                    //Adding the Content value to metaData for most Enrolled by checking through Redish
                     if (!ObjectUtils.isEmpty(contentResponse)) {
-                        if (contentUpdate(contentResponse, removeContentId, true)) {
-                            totalNumberOfUpdatedContent = totalNumberOfUpdatedContent + 1;
+                        if (updateAdditionalTag(contentResponse, Constants.MOST_ENROLLED, false)) {
+                            totalNumberOfUpdatedContent = totalNumberOfErrorContent + 1;
                         } else {
                             totalNumberOfErrorContent = totalNumberOfErrorContent + 1;
                         }
@@ -628,12 +611,27 @@ public class RatingServiceImpl implements RatingService {
                         totalNumberOfErrorContent = totalNumberOfErrorContent + 1;
                     }
                 }
-                logger.info("Update End at time in ms: " + (System.currentTimeMillis() - startTime));
-                response.setResponseCode(HttpStatus.OK);
-                response.getResult().put(Constants.TOTAL_NUMBER_UPDATED_COUNT, totalNumberOfUpdatedContent);
-                response.getResult().put(Constants.TOTAL_NUMBER_ERROR_COUNT, totalNumberOfErrorContent);
-                response.getParams().setStatus(Constants.SUCCESS);
             }
+            contentListIds.removeAll(latestCourseList);
+            for (String removeContentId : contentListIds) {
+                logger.info("Start Update Content Elastic for Remove mostEnrolled Tags contentId: " + removeContentId);
+                Map<String, Object> contentResponse = contentService.readContent(removeContentId);
+                //Remove the Content value to metaData for most Enrolled
+                if (!ObjectUtils.isEmpty(contentResponse)) {
+                    if (updateAdditionalTag(contentResponse, Constants.MOST_ENROLLED, true)) {
+                        totalNumberOfUpdatedContent = totalNumberOfUpdatedContent + 1;
+                    } else {
+                        totalNumberOfErrorContent = totalNumberOfErrorContent + 1;
+                    }
+                } else {
+                    totalNumberOfErrorContent = totalNumberOfErrorContent + 1;
+                }
+            }
+            logger.info("Update End at time in ms: " + (System.currentTimeMillis() - startTime));
+            response.setResponseCode(HttpStatus.OK);
+            response.getResult().put(Constants.TOTAL_NUMBER_UPDATED_COUNT, totalNumberOfUpdatedContent);
+            response.getResult().put(Constants.TOTAL_NUMBER_ERROR_COUNT, totalNumberOfErrorContent);
+            response.getParams().setStatus(Constants.SUCCESS);
         } catch (Exception e) {
             logger.error("updateContentTopicName", e);
             response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -642,17 +640,20 @@ public class RatingServiceImpl implements RatingService {
         return response;
     }
 
-    private boolean contentUpdate(Map<String, Object> contentResponse, String contentId, boolean isRemove) {
+    private boolean updateAdditionalTag(Map<String, Object> contentResponse, String tag, boolean isRemove) {
         try {
             String versionKey = (String) contentResponse.get(Constants.VERSION_KEY);
+            String contentId = (String) contentResponse.get(Constants.IDENTIFIER);
             List<String> additionalTags = (List<String>) contentResponse.get(Constants.ADDITIONAL_TAGS);
             if (additionalTags == null) {
                 additionalTags = new ArrayList<>();
             }
             if (isRemove) {
-                additionalTags.remove(Constants.MOST_ENROLLED);
+                if(additionalTags.size() == 0)
+                    return false;
+                additionalTags.remove(tag);
             } else {
-                additionalTags.add(Constants.MOST_ENROLLED);
+                additionalTags.add(tag);
             }
             Map<String, Object> updatedValues = new HashMap<>();
             updatedValues.put(Constants.VERSION_KEY, versionKey);

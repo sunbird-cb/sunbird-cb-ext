@@ -371,7 +371,7 @@ public class ContentServiceImpl implements ContentService {
 		if (null != response && Constants.OK.equalsIgnoreCase((String) response.get(Constants.RESPONSE_CODE))) {
 			return response;
 		}
-		return null;
+		return new HashMap<>();
 	}
 
 }
