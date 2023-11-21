@@ -530,6 +530,17 @@ public class CbExtServerProperties {
 	@Value("${report.type.get.file.info}")
 	private String reportTypeGetFileInfo;
 
+	@Value("${sb.otp.generate.path}")
+	private String sbOTPGeneratePath;
+
+	public String getSbOTPGeneratePath() {
+		return sbOTPGeneratePath;
+	}
+
+	public void setSbOTPGeneratePath(String sbOTPGeneratePath) {
+		this.sbOTPGeneratePath = sbOTPGeneratePath;
+	}
+
 	public String getAssessmentSubmitTopic() {
 		return assessmentSubmitTopic;
 	}

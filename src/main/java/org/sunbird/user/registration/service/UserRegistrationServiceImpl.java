@@ -3,14 +3,7 @@ package org.sunbird.user.registration.service;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Pattern;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -201,6 +194,42 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 		return response;
 	}
 
+	public SBApiResponse generateOTP(Map<String, Object> otpRequests, String userToken, String authToken) {
+		SBApiResponse response = createDefaultResponse(Constants.USER_GENERATE_OTP);
+		String errMsg = validateOTPPayload(otpRequests);
+		if (StringUtils.isBlank(errMsg)) {
+			try {
+				String url = serverProperties.getSbUrl() + serverProperties.getSbOTPGeneratePath();
+				Map<String, String> headers = new HashMap();
+				headers.put(Constants.AUTH_TOKEN, authToken);
+				headers.put(Constants.X_AUTH_TOKEN, userToken);
+				headers.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
+
+				Map<String, Object> apiResponse = outboundRequestHandlerService.fetchResultUsingPost(url, otpRequests,
+						headers);
+				if (Constants.OK.equalsIgnoreCase((String) apiResponse.get(Constants.RESPONSE_CODE))) {
+					response.setResponseCode(HttpStatus.OK);
+					response.setVer("v1");
+					response.setParams(new SunbirdApiRespParam());
+					response.getParams().setStatus(Constants.SUCCESS.toUpperCase());
+					response.getParams().setResmsgid(UUID.randomUUID().toString());
+					response.getParams().setMsgid(UUID.randomUUID().toString());
+					response.setResult(new HashMap<>());
+					response.getResult().put(Constants.RESPONSE, Constants.SUCCESS.toUpperCase());
+				}
+			} catch (Exception e) {
+				LOGGER.error(String.format("Exception in %s : %s", "generateOTP", e.getMessage()), e);
+				errMsg = "Failed to process message. Exception: " + e.getMessage();
+			}
+		}
+		if (StringUtils.isNotBlank(errMsg)) {
+			response.getParams().setStatus(Constants.FAILED);
+			response.getParams().setErrmsg(errMsg);
+			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		return response;
+	}
+
 	public void initiateCreateUserFlow(String registrationCode) {
 		try {
 			/**
@@ -310,6 +339,29 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 		if (StringUtils.isNotBlank(userRegInfo.getGroup()) && !serverProperties.getBulkUploadGroupValue().contains(userRegInfo.getGroup())) {
 			str.setLength(0);
 			str.append("Invalid Group : Group can be only among one of these ").append(serverProperties.getBulkUploadGroupValue());
+		}
+		return str.toString();
+	}
+
+	private String validateOTPPayload(Map<String,Object> otpRequest) {
+		StringBuffer str = new StringBuffer();
+		Map<String,Object> request = (Map<String, Object>) otpRequest.get("request");
+		List<String> errList = new ArrayList<String>();
+		if (ObjectUtils.isEmpty(request.get(Constants.KEY))) {
+			errList.add(Constants.KEY);
+		}
+		if (ObjectUtils.isEmpty(Constants.TYPE)) {
+			errList.add(Constants.TYPE);
+		}
+		if (!errList.isEmpty()) {
+			str.append("Failed to Register User Details. Missing Params - [").append(errList.toString()).append("]");
+		}
+		// email Validation
+		if (request.get(Constants.TYPE).equals(Constants.EMAIL)) {
+			if (!isApprovedDomains(((String)request.get(Constants.KEY)).split("@")[1], Constants.USER_REGISTRATION_PRE_APPROVED_DOMAIN)) {
+				str.setLength(0);
+				str.append("Invalid email id, Please use government email id");
+			}
 		}
 		return str.toString();
 	}

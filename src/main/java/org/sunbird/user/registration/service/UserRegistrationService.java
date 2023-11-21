@@ -2,6 +2,7 @@ package org.sunbird.user.registration.service;
 
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.user.registration.model.UserRegistrationInfo;
+import java.util.Map;
 
 /**
  * Service class which provides CURD operation for User Registration.
@@ -44,4 +45,7 @@ public interface UserRegistrationService {
 	 * @param registrationCode - User Registration Code
 	 */
 	public void initiateCreateUserFlow(String registrationCode);
+
+	public SBApiResponse generateOTP(Map<String,Object> otpRequests, String userToken, String authToken);
+
 }

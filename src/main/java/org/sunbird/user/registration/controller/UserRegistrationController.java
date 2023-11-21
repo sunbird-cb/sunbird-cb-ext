@@ -2,14 +2,12 @@ package org.sunbird.user.registration.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.sunbird.common.model.SBApiResponse;
+import org.sunbird.common.util.Constants;
 import org.sunbird.user.registration.model.UserRegistrationInfo;
 import org.sunbird.user.registration.service.UserRegistrationService;
+import java.util.Map;
 
 /**
  * Provides REST APIs creating and updating the User Registration
@@ -38,6 +36,14 @@ public class UserRegistrationController {
 	@GetMapping("/user/registration/v1/getDeptDetails")
 	public ResponseEntity<SBApiResponse> getDeptDetails() throws Exception {
 		SBApiResponse response = userRegService.getDeptDetails();
+		return new ResponseEntity<>(response, response.getResponseCode());
+	}
+
+	@PostMapping("/user/otp/v1/generate")
+	public ResponseEntity<SBApiResponse> generateOTP(@RequestBody Map<String, Object> otpRequests,
+			@RequestHeader(Constants.X_AUTH_TOKEN) String userToken,
+			@RequestHeader(Constants.AUTH_TOKEN) String authToken) throws Exception {
+		SBApiResponse response = userRegService.generateOTP(otpRequests,userToken,authToken);
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
 }
