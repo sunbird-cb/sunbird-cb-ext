@@ -23,6 +23,7 @@ import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.common.util.ProjectUtil;
+import org.sunbird.core.exception.BadRequestException;
 import org.sunbird.core.logger.CbExtLogger;
 import org.sunbird.core.producer.Producer;
 import org.sunbird.ratings.exception.ValidationException;
@@ -583,26 +584,28 @@ public class RatingServiceImpl implements RatingService {
     }
 
     @Override
-    public SBApiResponse updateContentMetaData() {
+    public SBApiResponse updateAdditionalTag(String tag) {
         SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_CONTENT_META_UPDATE);
         try {
-            String latestCourseString = redisCacheMgr.getCache(Constants.REDIS_COURSE_MOST_ENROLLED_TAG, serverConfig.getRedisInsightIndex());
-            Map<String, Object> oldCourse = contentService.searchContent();
+            List<String> latestCourseList = getCourseListFromRedish(tag);
+            Map<String, Object> oldCourse = contentService.searchContent(tag);
             long startTime = System.currentTimeMillis();
             int totalNumberOfUpdatedContent = 0;
             int totalNumberOfErrorContent = 0;
 
             Map<String, Object> resultContentData = (Map<String, Object>) oldCourse.get(Constants.RESULT);
             List<Map<String, Object>> contentDataList = (List<Map<String, Object>>) resultContentData.get(Constants.CONTENT);
-            List<String> contentListIds = contentDataList.stream().map(map -> (String) map.get(Constants.IDENTIFIER)).filter(value -> value != null).collect(Collectors.toList());
-            List<String> latestCourseList = Arrays.asList(latestCourseString.split(","));
+            List<String> contentListIds = new ArrayList<>();
+            if(contentDataList != null) {
+                contentListIds = contentDataList.stream().map(map -> (String) map.get(Constants.IDENTIFIER)).filter(value -> value != null).collect(Collectors.toList());
+            }
             for (String contentId : latestCourseList) {
                 if (!contentListIds.contains(contentId)) {
                     logger.info("Start Update Content Elastic for contentId: " + contentId);
                     Map<String, Object> contentResponse = contentService.readContent(contentId);
                     //Adding the Content value to metaData for most Enrolled by checking through Redish
                     if (!ObjectUtils.isEmpty(contentResponse)) {
-                        if (updateAdditionalTag(contentResponse, Constants.MOST_ENROLLED, false)) {
+                        if (updateAdditionalTag(contentResponse, tag, false)) {
                             totalNumberOfUpdatedContent = totalNumberOfErrorContent + 1;
                         } else {
                             totalNumberOfErrorContent = totalNumberOfErrorContent + 1;
@@ -618,7 +621,7 @@ public class RatingServiceImpl implements RatingService {
                 Map<String, Object> contentResponse = contentService.readContent(removeContentId);
                 //Remove the Content value to metaData for most Enrolled
                 if (!ObjectUtils.isEmpty(contentResponse)) {
-                    if (updateAdditionalTag(contentResponse, Constants.MOST_ENROLLED, true)) {
+                    if (updateAdditionalTag(contentResponse, tag, true)) {
                         totalNumberOfUpdatedContent = totalNumberOfUpdatedContent + 1;
                     } else {
                         totalNumberOfErrorContent = totalNumberOfErrorContent + 1;
@@ -673,5 +676,24 @@ public class RatingServiceImpl implements RatingService {
             logger.error(e);
             return false;
         }
+    }
+
+    private List<String> getCourseListFromRedish(String tag) {
+        if (Constants.MOST_ENROLLED.equalsIgnoreCase(tag)) {
+            String latestCourseString = redisCacheMgr.getCache(Constants.REDIS_COURSE_MOST_ENROLLED_TAG, serverConfig.getRedisInsightIndex());
+            return Arrays.asList(latestCourseString.split(","));
+        } else if (Constants.MOST_TRENDING.equalsIgnoreCase(tag)) {
+            List<String> fieldsValue = new ArrayList<>();
+            fieldsValue.add("across:courses");
+            fieldsValue.add("across:programs");
+            List<String> latestTrendingCourseListRedis = redisCacheMgr.hget(Constants.REDIS_COURSE_MOST_TRENDING_TAG, serverConfig.getRedisInsightIndex(), fieldsValue.toArray(new String[0]));
+            List<String> latestTrendingCourseList = new ArrayList<>();
+            if (latestTrendingCourseListRedis.size() == 2) {
+                latestTrendingCourseList.addAll(Arrays.asList(latestTrendingCourseListRedis.get(0).split(",")));
+                latestTrendingCourseList.addAll(Arrays.asList(latestTrendingCourseListRedis.get(1).split(",")));
+            }
+            return latestTrendingCourseList.stream().filter(value -> !value.contains("_rc")).collect(Collectors.toList());
+        }
+        throw new BadRequestException("Please provide a valid Tag");
     }
 }

@@ -352,7 +352,7 @@ public class ContentServiceImpl implements ContentService {
 		return null;
 	}
 
-	public Map<String, Object> searchContent(){
+	public Map<String, Object> searchContent(String tag){
 		Map<String, Object> response = null;
 		HashMap<String, String> headerValues = new HashMap<>();
 		headerValues.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
@@ -360,7 +360,7 @@ public class ContentServiceImpl implements ContentService {
 		Map<String, Object> filters = new HashMap<>();
 		filters.put(Constants.PRIMARY_CATEGORY, serverConfig.getContentSearchPrimaryCategoryFilter());
 		filters.put(Constants.STATUS, Arrays.asList(Constants.LIVE));
-		filters.put(Constants.ADDITIONAL_TAGS, Arrays.asList(Constants.MOST_ENROLLED));
+		filters.put(Constants.ADDITIONAL_TAGS, Arrays.asList(tag));
 		Map<String, Object> contentRequestValue = new HashMap<>();
 		contentRequestValue.put(Constants.FILTERS, filters);
 		contentRequestValue.put(Constants.FIELDS, Arrays.asList(Constants.IDENTIFIER));
