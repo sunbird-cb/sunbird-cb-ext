@@ -770,7 +770,7 @@ public class Constants {
 
 	public static final String TABLE_EMAIL_TEMPLATE = "email_template";
 
-	public static final String ABSENT = "absent";
+	public static final String ABSENT = "Absent";
 
 	public static final String COURSE_NAME = "courseName";
 
