@@ -19,5 +19,5 @@ public interface RatingService {
 
     public SBApiResponse updateRatingsMetaData();
 
-    public SBApiResponse updateContentMetaData();
+    public SBApiResponse updateAdditionalTag(String tag);
 }

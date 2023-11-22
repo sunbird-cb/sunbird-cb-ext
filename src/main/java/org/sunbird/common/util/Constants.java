@@ -843,6 +843,8 @@ public class Constants {
 	public static final String REDIS_COURSE_MOST_ENROLLED_TAG = "lhp_mostEnrolledTag";
 	public static final String ADDITIONAL_TAGS = "additionalTags";
 	public static final String MOST_ENROLLED = "mostEnrolled";
+	public static final String MOST_TRENDING = "mostTrending";
+	public static final String REDIS_COURSE_MOST_TRENDING_TAG = "lhp_trending";
 	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}
