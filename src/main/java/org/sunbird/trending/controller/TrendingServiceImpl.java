@@ -4,9 +4,11 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.sunbird.cache.RedisCacheMgr;
+import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
+import org.sunbird.common.util.ProjectUtil;
 import org.sunbird.core.exception.InvalidDataInputException;
 import java.util.*;
 import java.util.function.Function;
@@ -26,7 +28,9 @@ public class TrendingServiceImpl implements TrendingService {
     RedisCacheMgr redisCacheMgr;
 
     public Map<String, Object> trendingSearch(Map<String, Object> requestBody, String token) throws Exception {
+
         // Read req params
+        SBApiResponse response = ProjectUtil.createDefaultResponse(API_USER_INSIGHTS);
         HashMap<String, Object> request = (HashMap<String, Object>) requestBody.get(Constants.REQUEST);
         HashMap<String, Object> filter = ((HashMap<String, Object>) request.get(Constants.FILTERS));
         ArrayList<String> primaryCategoryList = ((ArrayList<String>) (filter).get(Constants.PRIMARY_CATEGORY));
@@ -43,9 +47,15 @@ public class TrendingServiceImpl implements TrendingService {
             typeList.put(primaryCategoryList.get(i),fetchIds(trendingCoursesAndPrograms.get(i), limit, fieldList.get(i)));
         }
         List<String> searchIds = typeList.values().stream().flatMap(List::stream).collect(Collectors.toList());
-        Map<String, Object> compositeSearchRes = compositeSearch(searchIds, token);
-        Map<String, Object> resultMap = (Map<String, Object>) compositeSearchRes.get(RESULT);
-        List<Map<String, Object>> contentList = (List<Map<String, Object>>) resultMap.get(CONTENT);
+        Map<String, Object> compositeSearchRes = new HashMap<>();
+        List<Map<String, Object>> contentList = new ArrayList<>();
+        Map<String, Object> resultMap = new HashMap<>();
+        if(searchIds != null && searchIds.size() > 0) {
+             compositeSearchRes = compositeSearch(searchIds, token);
+            resultMap = (Map<String, Object>) compositeSearchRes.get(RESULT);
+            contentList = (List<Map<String, Object>>) resultMap.get(CONTENT);
+        }
+
         Map<String, Object> contentMap = contentList.stream()
                 .collect(Collectors.toMap(content -> (String) content.get(IDENTIFIER), Function.identity()));
         Map<String, List<Object>> resultContentMap = typeList.entrySet().stream()
@@ -55,13 +65,13 @@ public class TrendingServiceImpl implements TrendingService {
                 ));
         resultMap.remove(CONTENT);
         resultMap.remove(COUNT);
-        resultMap.putAll(resultContentMap);
-        return compositeSearchRes;
+        response.getResult().put(RESPONSE, resultContentMap);
+        return response.getResult();
     }
     public List<String> fetchIds(String idStr, int limit, String type) {
         String[] idArray = Optional.ofNullable(idStr).filter(StringUtils::isNotBlank).map(str -> str.split(COMMA)).orElse(null);
         if (idArray == null || idArray.length == 0) {
-            throw new InvalidDataInputException(TREND_SEARCH_NO_RESULT_ERROR_MESG.replace("{0}", type));
+            return new ArrayList<>();
         }
         List<String> idList = Arrays.asList(idArray);
         if (idList.size() > limit) {
