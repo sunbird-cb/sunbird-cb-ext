@@ -46,6 +46,6 @@ public interface UserRegistrationService {
 	 */
 	public void initiateCreateUserFlow(String registrationCode);
 
-	public SBApiResponse generateOTP(Map<String,Object> otpRequests, String userToken, String authToken);
+	public SBApiResponse generateOTP(Map<String,Object> otpRequests);
 
 }

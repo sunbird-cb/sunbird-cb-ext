@@ -40,10 +40,8 @@ public class UserRegistrationController {
 	}
 
 	@PostMapping("/user/otp/v1/generate")
-	public ResponseEntity<SBApiResponse> generateOTP(@RequestBody Map<String, Object> otpRequests,
-			@RequestHeader(Constants.X_AUTH_TOKEN) String userToken,
-			@RequestHeader(Constants.AUTH_TOKEN) String authToken) throws Exception {
-		SBApiResponse response = userRegService.generateOTP(otpRequests,userToken,authToken);
+	public ResponseEntity<SBApiResponse> generateOTP(@RequestBody Map<String, Object> otpRequests) throws Exception {
+		SBApiResponse response = userRegService.generateOTP(otpRequests);
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
 }

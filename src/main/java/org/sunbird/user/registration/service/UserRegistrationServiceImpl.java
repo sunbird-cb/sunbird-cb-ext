@@ -194,28 +194,25 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 		return response;
 	}
 
-	public SBApiResponse generateOTP(Map<String, Object> otpRequests, String userToken, String authToken) {
+	public SBApiResponse generateOTP(Map<String, Object> otpRequests) {
 		SBApiResponse response = createDefaultResponse(Constants.USER_GENERATE_OTP);
 		String errMsg = validateOTPPayload(otpRequests);
 		if (StringUtils.isBlank(errMsg)) {
 			try {
 				String url = serverProperties.getSbUrl() + serverProperties.getSbOTPGeneratePath();
 				Map<String, String> headers = new HashMap();
-				headers.put(Constants.AUTH_TOKEN, authToken);
-				headers.put(Constants.X_AUTH_TOKEN, userToken);
 				headers.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
-
 				Map<String, Object> apiResponse = outboundRequestHandlerService.fetchResultUsingPost(url, otpRequests,
 						headers);
 				if (Constants.OK.equalsIgnoreCase((String) apiResponse.get(Constants.RESPONSE_CODE))) {
-					response.setResponseCode(HttpStatus.OK);
 					response.setVer("v1");
-					response.setParams(new SunbirdApiRespParam());
 					response.getParams().setStatus(Constants.SUCCESS.toUpperCase());
 					response.getParams().setResmsgid(UUID.randomUUID().toString());
 					response.getParams().setMsgid(UUID.randomUUID().toString());
 					response.setResult(new HashMap<>());
 					response.getResult().put(Constants.RESPONSE, Constants.SUCCESS.toUpperCase());
+				} else {
+					errMsg = (String) ((Map<String, Object>)apiResponse.get(Constants.PARAMS)).get(Constants.ERROR_MESSAGE);
 				}
 			} catch (Exception e) {
 				LOGGER.error(String.format("Exception in %s : %s", "generateOTP", e.getMessage()), e);
@@ -327,7 +324,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 			str.append("Failed to Register User Details. Missing Params - [").append(errList.toString()).append("]");
 		}
 		// email Validation
-		if (StringUtils.isNotBlank(userRegInfo.getEmail()) && !emailValidation(userRegInfo.getEmail())) {
+		if (StringUtils.isNotBlank(userRegInfo.getEmail()) && !emailValidation(userRegInfo.getEmail(), true)) {
 			str.setLength(0);
 			str.append("Invalid email id");
 		}
@@ -354,14 +351,17 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 			errList.add(Constants.TYPE);
 		}
 		if (!errList.isEmpty()) {
-			str.append("Failed to Register User Details. Missing Params - [").append(errList.toString()).append("]");
+			str.append("Failed to Generate OTP. Missing Params - [").append(errList.toString()).append("]");
 		}
 		// email Validation
 		if (request.get(Constants.TYPE).equals(Constants.EMAIL)) {
-			if (!isApprovedDomains(((String)request.get(Constants.KEY)).split("@")[1], Constants.USER_REGISTRATION_PRE_APPROVED_DOMAIN)) {
-				str.setLength(0);
-				str.append("Invalid email id, Please use government email id");
-			}
+			if (emailValidation((String) request.get(Constants.KEY), false)) {
+				if (!isApprovedDomains(((String) request.get(Constants.KEY)).split("@")[1], Constants.USER_REGISTRATION_PRE_APPROVED_DOMAIN) && !isApprovedDomains(((String) request.get(Constants.KEY)).split("@")[1], Constants.USER_REGISTRATION_DOMAIN)) {
+					str.setLength(0);
+					str.append("Invalid email id, Please use government email id");
+				}
+			} else
+				str.append("Invalid email id");
 		}
 		return str.toString();
 	}
@@ -429,15 +429,18 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 	 * @param email String
 	 * @return Boolean
 	 */
-	public Boolean emailValidation(String email) {
+	public Boolean emailValidation(String email, Boolean isDomainValidation) {
 		String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\." + "[a-zA-Z0-9_+&*-]+)*@" + "(?:[a-zA-Z0-9-]+\\.)+[a-z"
 				+ "A-Z]{2,7}$";
 		Boolean retValue = Boolean.FALSE;
 		Pattern pat = Pattern.compile(emailRegex);
 		if (pat.matcher(email).matches()) {
 			String emailDomain = email.split("@")[1];
-			retValue = isApprovedDomains(emailDomain, Constants.USER_REGISTRATION_DOMAIN)
-					|| isApprovedDomains(emailDomain, Constants.USER_REGISTRATION_PRE_APPROVED_DOMAIN);
+			if (isDomainValidation){
+				retValue = isApprovedDomains(emailDomain, Constants.USER_REGISTRATION_DOMAIN)
+						|| isApprovedDomains(emailDomain, Constants.USER_REGISTRATION_PRE_APPROVED_DOMAIN);
+			} else
+				retValue = true;
 		}
 		return retValue;
 	}
