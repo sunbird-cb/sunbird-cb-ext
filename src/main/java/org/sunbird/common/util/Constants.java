@@ -845,6 +845,8 @@ public class Constants {
 	public static final String MOST_ENROLLED = "mostEnrolled";
 	public static final String MOST_TRENDING = "mostTrending";
 	public static final String REDIS_COURSE_MOST_TRENDING_TAG = "lhp_trending";
+	public static final String ACROSS_COURSES = "across:courses";
+	public static final String ACROSS_PROGRAMS = "across:programs";
 	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}

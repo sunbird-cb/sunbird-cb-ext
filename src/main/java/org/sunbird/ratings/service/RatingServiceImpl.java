@@ -587,7 +587,7 @@ public class RatingServiceImpl implements RatingService {
     public SBApiResponse updateAdditionalTag(String tag) {
         SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_CONTENT_META_UPDATE);
         try {
-            List<String> latestCourseList = getCourseListFromRedish(tag);
+            List<String> latestCourseList = getCourseListFromRedis(tag);
             Map<String, Object> oldCourse = contentService.searchContent(tag);
             long startTime = System.currentTimeMillis();
             int totalNumberOfUpdatedContent = 0;
@@ -678,21 +678,18 @@ public class RatingServiceImpl implements RatingService {
         }
     }
 
-    private List<String> getCourseListFromRedish(String tag) {
+    private List<String> getCourseListFromRedis(String tag) {
         if (Constants.MOST_ENROLLED.equalsIgnoreCase(tag)) {
             String latestCourseString = redisCacheMgr.getCache(Constants.REDIS_COURSE_MOST_ENROLLED_TAG, serverConfig.getRedisInsightIndex());
             return Arrays.asList(latestCourseString.split(","));
         } else if (Constants.MOST_TRENDING.equalsIgnoreCase(tag)) {
-            List<String> fieldsValue = new ArrayList<>();
-            fieldsValue.add("across:courses");
-            fieldsValue.add("across:programs");
-            List<String> latestTrendingCourseListRedis = redisCacheMgr.hget(Constants.REDIS_COURSE_MOST_TRENDING_TAG, serverConfig.getRedisInsightIndex(), fieldsValue.toArray(new String[0]));
+            List<String> latestTrendingCourseListRedis = redisCacheMgr.hget(Constants.REDIS_COURSE_MOST_TRENDING_TAG, serverConfig.getRedisInsightIndex(), Constants.ACROSS_COURSES, Constants.ACROSS_PROGRAMS);
             List<String> latestTrendingCourseList = new ArrayList<>();
-            if (latestTrendingCourseListRedis.size() == 2) {
+            if (latestTrendingCourseListRedis != null && latestTrendingCourseListRedis.size() == 2) {
                 latestTrendingCourseList.addAll(Arrays.asList(latestTrendingCourseListRedis.get(0).split(",")));
                 latestTrendingCourseList.addAll(Arrays.asList(latestTrendingCourseListRedis.get(1).split(",")));
             }
-            return latestTrendingCourseList.stream().filter(value -> !value.contains("_rc")).collect(Collectors.toList());
+            return latestTrendingCourseList;
         }
         throw new BadRequestException("Please provide a valid Tag");
     }
