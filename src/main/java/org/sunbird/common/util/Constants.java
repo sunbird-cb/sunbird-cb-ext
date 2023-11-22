@@ -827,6 +827,26 @@ public class Constants {
 
 	public static final String LEARNER_STATS = "learner_stats";
 	public static final String LEARNER_STATUS_USER_ID="userid";
+
+	public static final String VERSION_KEY = "versionKey";
+	public static final String AVG_RATING = "avgRating";
+	public static final String TOTAL_NO_OF_RATING = "totalNoOfRating";
+	public static final String COUNT_ONE_STAR_RATING = "countOf1StarRating";
+	public static final String COUNT_TWO_STAR_RATING = "countOf2StarRating";
+	public static final String COUNT_THREE_STAR_RATING = "countOf3StarRating";
+	public static final String COUNT_FOUR_STAR_RATING = "countOf4StarRating";
+	public static final String COUNT_FIVE_STAR_RATING = "countOf5StarRating";
+	public static final String TOTAL_NUMBER_UPDATED_COUNT = "totalNumberOfUpdatedContent";
+	public static final String TOTAL_NUMBER_ERROR_COUNT = "totalNumberOfErrorContent";
+	public static final String API_RATINGS_CONTENT_META_UPDATE = "api.ratings.content.meta.update";
+	public static final String API_CONTENT_META_UPDATE = "api.content.meta.update";
+	public static final String REDIS_COURSE_MOST_ENROLLED_TAG = "lhp_mostEnrolledTag";
+	public static final String ADDITIONAL_TAGS = "additionalTags";
+	public static final String MOST_ENROLLED = "mostEnrolled";
+	public static final String MOST_TRENDING = "mostTrending";
+	public static final String REDIS_COURSE_MOST_TRENDING_TAG = "lhp_trending";
+	public static final String ACROSS_COURSES = "across:courses";
+	public static final String ACROSS_PROGRAMS = "across:programs";
 	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}
