@@ -606,7 +606,7 @@ public class RatingServiceImpl implements RatingService {
                     //Adding the Content value to metaData for most Enrolled by checking through Redish
                     if (!ObjectUtils.isEmpty(contentResponse)) {
                         if (updateAdditionalTag(contentResponse, tag, false)) {
-                            totalNumberOfUpdatedContent = totalNumberOfErrorContent + 1;
+                            totalNumberOfUpdatedContent = totalNumberOfUpdatedContent + 1;
                         } else {
                             totalNumberOfErrorContent = totalNumberOfErrorContent + 1;
                         }
@@ -637,6 +637,7 @@ public class RatingServiceImpl implements RatingService {
             response.getParams().setStatus(Constants.SUCCESS);
         } catch (Exception e) {
             logger.error("updateContentTopicName", e);
+            response.getParams().setStatus(Constants.CLIENT_ERROR);
             response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
             response.getResult().put(Constants.ERROR_MESSAGE, e.getMessage());
         }
@@ -652,10 +653,12 @@ public class RatingServiceImpl implements RatingService {
                 additionalTags = new ArrayList<>();
             }
             if (isRemove) {
-                if(additionalTags.size() == 0)
+                if (additionalTags.size() == 0)
                     return false;
                 additionalTags.remove(tag);
             } else {
+                if (additionalTags.contains(tag))
+                    return false;
                 additionalTags.add(tag);
             }
             Map<String, Object> updatedValues = new HashMap<>();
