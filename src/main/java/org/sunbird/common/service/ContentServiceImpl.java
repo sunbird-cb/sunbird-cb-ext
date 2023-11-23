@@ -2,6 +2,7 @@ package org.sunbird.common.service;
 
 import java.util.*;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.codehaus.plexus.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -341,9 +342,17 @@ public class ContentServiceImpl implements ContentService {
 
 	@Override
 	public Map<String, Object> readContent(String contentId) {
+		return readContent(contentId, Collections.emptyList());
+	}
+
+	@Override
+	public Map<String, Object> readContent(String contentId, List<String> fields) {
 		StringBuilder url = new StringBuilder();
 		url.append(serverConfig.getContentHost()).append(serverConfig.getContentReadEndPoint()).append("/" + contentId)
 				.append(serverConfig.getContentReadEndPointFields());
+		if (CollectionUtils.isNotEmpty(fields)) {
+			url.append("?fields=").append(fields);
+		}
 		Map<String, Object> response = (Map<String, Object>) outboundRequestHandlerService.fetchResult(url.toString());
 		if (null != response && Constants.OK.equalsIgnoreCase((String) response.get(Constants.RESPONSE_CODE))) {
 			Map<String, Object> contentResult = (Map<String, Object>) response.get(Constants.RESULT);

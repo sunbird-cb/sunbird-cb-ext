@@ -538,7 +538,8 @@ public class RatingServiceImpl implements RatingService {
             for (Map<String, Object> ratingSummary : existingDataList) {
                 String contentId = (String) ratingSummary.get(Constants.ACTIVITY_ID);
                 logger.info("Start Update Content Elastic for contentId: " + contentId);
-                Map<String, Object> contentResponse = contentService.readContent(contentId);
+                List<String> fields = Arrays.asList(Constants.VERSION_KEY, Constants.IDENTIFIER, Constants.ADDITIONAL_TAGS);
+                Map<String, Object> contentResponse = contentService.readContent(contentId, fields);
                 if (!ObjectUtils.isEmpty(contentResponse)) {
                     String versionKey = (String) contentResponse.get(Constants.VERSION_KEY);
                     Map<String, Object> updateRatingValues = new HashMap<>();
@@ -593,6 +594,7 @@ public class RatingServiceImpl implements RatingService {
             int totalNumberOfUpdatedContent = 0;
             int totalNumberOfErrorContent = 0;
 
+            List<String> fields = Arrays.asList(Constants.VERSION_KEY, Constants.IDENTIFIER, Constants.ADDITIONAL_TAGS);
             List<String> contentListIds = new ArrayList<>();
             if(contentDataList != null) {
                 contentListIds = contentDataList.stream().map(map -> (String) map.get(Constants.IDENTIFIER)).filter(value -> value != null).collect(Collectors.toList());
@@ -600,7 +602,7 @@ public class RatingServiceImpl implements RatingService {
             for (String contentId : latestCourseList) {
                 if (!contentListIds.contains(contentId)) {
                     logger.info("Start Update Content Elastic for contentId: " + contentId);
-                    Map<String, Object> contentResponse = contentService.readContent(contentId);
+                    Map<String, Object> contentResponse = contentService.readContent(contentId, fields);
                     //Adding the Content value to metaData for most Enrolled by checking through Redish
                     if (!ObjectUtils.isEmpty(contentResponse)) {
                         if (updateAdditionalTag(contentResponse, tag, false)) {
@@ -616,7 +618,7 @@ public class RatingServiceImpl implements RatingService {
             contentListIds.removeAll(latestCourseList);
             for (String removeContentId : contentListIds) {
                 logger.info("Start Update Content Elastic for Remove mostEnrolled Tags contentId: " + removeContentId);
-                Map<String, Object> contentResponse = contentService.readContent(removeContentId);
+                Map<String, Object> contentResponse = contentService.readContent(removeContentId, fields);
                 //Remove the Content value to metaData for most Enrolled
                 if (!ObjectUtils.isEmpty(contentResponse)) {
                     if (updateAdditionalTag(contentResponse, tag, true)) {
