@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.user.registration.model.UserRegistrationInfo;
 import org.sunbird.user.registration.service.UserRegistrationService;
+import java.util.Map;
 
 /**
  * Provides REST APIs creating and updating the User Registration
@@ -38,6 +39,12 @@ public class UserRegistrationController {
 	@GetMapping("/user/registration/v1/getDeptDetails")
 	public ResponseEntity<SBApiResponse> getDeptDetails() throws Exception {
 		SBApiResponse response = userRegService.getDeptDetails();
+		return new ResponseEntity<>(response, response.getResponseCode());
+	}
+
+	@PostMapping("/user/otp/v1/generate")
+	public ResponseEntity<SBApiResponse> generateOTP(@RequestBody Map<String, Object> otpRequests) throws Exception {
+		SBApiResponse response = userRegService.generateOTP(otpRequests);
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
 }
