@@ -3,14 +3,7 @@ package org.sunbird.user.registration.service;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Pattern;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -201,6 +194,39 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 		return response;
 	}
 
+	public SBApiResponse generateOTP(Map<String, Object> otpRequests) {
+		SBApiResponse response = createDefaultResponse(Constants.USER_GENERATE_OTP);
+		String errMsg = validateOTPPayload(otpRequests);
+		if (StringUtils.isBlank(errMsg)) {
+			try {
+				String url = serverProperties.getSbUrl() + serverProperties.getSbOTPGeneratePath();
+				Map<String, String> headers = new HashMap();
+				headers.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
+				Map<String, Object> apiResponse = outboundRequestHandlerService.fetchResultUsingPost(url, otpRequests,
+						headers);
+				if (Constants.OK.equalsIgnoreCase((String) apiResponse.get(Constants.RESPONSE_CODE))) {
+					response.setVer("v1");
+					response.getParams().setStatus(Constants.SUCCESS.toUpperCase());
+					response.getParams().setResmsgid(UUID.randomUUID().toString());
+					response.getParams().setMsgid(UUID.randomUUID().toString());
+					response.setResult(new HashMap<>());
+					response.getResult().put(Constants.RESPONSE, Constants.SUCCESS.toUpperCase());
+				} else {
+					errMsg = (String) ((Map<String, Object>)apiResponse.get(Constants.PARAMS)).get(Constants.ERROR_MESSAGE);
+				}
+			} catch (Exception e) {
+				LOGGER.error(String.format("Exception in %s : %s", "generateOTP", e.getMessage()), e);
+				errMsg = "Failed to process message. Exception: " + e.getMessage();
+			}
+		}
+		if (StringUtils.isNotBlank(errMsg)) {
+			response.getParams().setStatus(Constants.FAILED);
+			response.getParams().setErrmsg(errMsg);
+			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		return response;
+	}
+
 	public void initiateCreateUserFlow(String registrationCode) {
 		try {
 			/**
@@ -298,9 +324,12 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 			str.append("Failed to Register User Details. Missing Params - [").append(errList.toString()).append("]");
 		}
 		// email Validation
-		if (StringUtils.isNotBlank(userRegInfo.getEmail()) && !emailValidation(userRegInfo.getEmail())) {
-			str.setLength(0);
-			str.append("Invalid email id");
+		if (StringUtils.isNotBlank(userRegInfo.getEmail())) {
+			String validateErr = emailValidation(userRegInfo.getEmail());
+			if (StringUtils.isNotBlank(validateErr)){
+				str.setLength(0);
+				str.append(validateErr);
+			}
 		}
 		if(StringUtils.isNotBlank(userRegInfo.getPhone()) && !ProjectUtil.validateContactPattern(userRegInfo.getPhone())) {
 			str.setLength(0);
@@ -311,6 +340,29 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 			str.setLength(0);
 			str.append("Invalid Group : Group can be only among one of these ").append(serverProperties.getBulkUploadGroupValue());
 		}
+		return str.toString();
+	}
+
+	private String validateOTPPayload(Map<String,Object> otpRequest) {
+		StringBuffer str = new StringBuffer();
+		Map<String,Object> request = (Map<String, Object>) otpRequest.get("request");
+		List<String> errList = new ArrayList<String>();
+		if (ObjectUtils.isEmpty(request.get(Constants.KEY))) {
+			errList.add(Constants.KEY);
+		}
+		if (ObjectUtils.isEmpty(Constants.TYPE)) {
+			errList.add(Constants.TYPE);
+		}
+		if (!errList.isEmpty()) {
+			str.append("Failed to Generate OTP. Missing Params - [").append(errList.toString()).append("]");
+		}
+		// email Validation
+		if (request.get(Constants.TYPE).equals(Constants.EMAIL)) {
+			String validateErr = emailValidation((String) request.get(Constants.KEY));
+				if (StringUtils.isNotBlank(validateErr)){
+					str.append(validateErr);
+				}
+			}
 		return str.toString();
 	}
 
@@ -377,17 +429,22 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 	 * @param email String
 	 * @return Boolean
 	 */
-	public Boolean emailValidation(String email) {
+	public String emailValidation(String email) {
+		StringBuffer str = new StringBuffer();
 		String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\." + "[a-zA-Z0-9_+&*-]+)*@" + "(?:[a-zA-Z0-9-]+\\.)+[a-z"
 				+ "A-Z]{2,7}$";
-		Boolean retValue = Boolean.FALSE;
 		Pattern pat = Pattern.compile(emailRegex);
 		if (pat.matcher(email).matches()) {
 			String emailDomain = email.split("@")[1];
-			retValue = isApprovedDomains(emailDomain, Constants.USER_REGISTRATION_DOMAIN)
+			Boolean retValue = isApprovedDomains(emailDomain, Constants.USER_REGISTRATION_DOMAIN)
 					|| isApprovedDomains(emailDomain, Constants.USER_REGISTRATION_PRE_APPROVED_DOMAIN);
+			if (!retValue) {
+				str.append("Invalid Email domain, Please use government email id");
+			}
+		} else {
+			str.append("Invalid Email id");
 		}
-		return retValue;
+		return str.toString();
 	}
 
 	private Boolean isPreApprovedDomain(String email) {
