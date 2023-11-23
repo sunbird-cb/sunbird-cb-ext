@@ -810,6 +810,7 @@ public class Constants {
 
 	public static final String API_USER_INSIGHTS="api.user.insights";
 
+	public static final String API_TRENDING_SEARCH="api.trending.search";
 
 	public static final String COURSES="courses";
 

@@ -30,11 +30,11 @@ public class TrendingServiceImpl implements TrendingService {
     public Map<String, Object> trendingSearch(Map<String, Object> requestBody, String token) throws Exception {
 
         // Read req params
-        SBApiResponse response = ProjectUtil.createDefaultResponse(API_USER_INSIGHTS);
-        HashMap<String, Object> request = (HashMap<String, Object>) requestBody.get(Constants.REQUEST);
-        HashMap<String, Object> filter = ((HashMap<String, Object>) request.get(Constants.FILTERS));
-        ArrayList<String> primaryCategoryList = ((ArrayList<String>) (filter).get(Constants.PRIMARY_CATEGORY));
-        String org = ((String) (filter).get(Constants.ORGANISATION));
+        SBApiResponse response = ProjectUtil.createDefaultResponse(API_TRENDING_SEARCH);
+        HashMap<String, Object> request = (HashMap<String, Object>) requestBody.get(Constants.REQUEST) ==null ? new HashMap<>() : (HashMap<String, Object>) requestBody.get(Constants.REQUEST);
+        HashMap<String, Object> filter = ((HashMap<String, Object>) request.get(Constants.FILTERS)) ==null ? new HashMap<>() : ((HashMap<String, Object>) request.get(Constants.FILTERS));
+        ArrayList<String> primaryCategoryList = ((ArrayList<String>) (filter).get(Constants.PRIMARY_CATEGORY)) == null ?  new ArrayList<>() : ((ArrayList<String>) (filter).get(Constants.PRIMARY_CATEGORY));
+        String org = ((String) (filter).get(Constants.ORGANISATION)) == null ? "" : ((String) (filter).get(Constants.ORGANISATION))  ;
         int limit = Optional.ofNullable(request.get(Constants.LIMIT)).map(l -> (Integer) l).orElse(0);
         List<String> fieldList = primaryCategoryList.stream()
                 .map(type -> org + COLON + type)
@@ -42,20 +42,24 @@ public class TrendingServiceImpl implements TrendingService {
         String[] fieldsArray = fieldList.toArray(new String[fieldList.size()]);
         // Fetch trending Ids for requested type of courses
         List<String> trendingCoursesAndPrograms = redisCacheMgr.hget(TRENDING_COURSES_REDIS_KEY, serverProperties.getRedisInsightIndex(),fieldsArray);
+         if(trendingCoursesAndPrograms == null)
+             trendingCoursesAndPrograms = new ArrayList<>();
         Map<String, List<String>> typeList = new HashMap<>();
         for(int i=0;i<fieldsArray.length;i++){
+            if(primaryCategoryList.size() > i && trendingCoursesAndPrograms.size() > 1 )
             typeList.put(primaryCategoryList.get(i),fetchIds(trendingCoursesAndPrograms.get(i), limit, fieldList.get(i)));
         }
         List<String> searchIds = typeList.values().stream().flatMap(List::stream).collect(Collectors.toList());
-        Map<String, Object> compositeSearchRes = new HashMap<>();
+        Map<String, Object> compositeSearchRes ;
         List<Map<String, Object>> contentList = new ArrayList<>();
         Map<String, Object> resultMap = new HashMap<>();
         if(searchIds != null && searchIds.size() > 0) {
              compositeSearchRes = compositeSearch(searchIds, token);
-            resultMap = (Map<String, Object>) compositeSearchRes.get(RESULT);
-            contentList = (List<Map<String, Object>>) resultMap.get(CONTENT);
+             if(null == compositeSearchRes)
+                 compositeSearchRes = new HashMap<>();
+            resultMap =   (Map<String, Object>) compositeSearchRes.get(RESULT) ==null ? new HashMap<>() :  (Map<String, Object>) compositeSearchRes.get(RESULT) ;
+            contentList = (List<Map<String, Object>>) resultMap.get(CONTENT) ==null ? new ArrayList<>() :  (List<Map<String, Object>>) resultMap.get(CONTENT);
         }
-
         Map<String, Object> contentMap = contentList.stream()
                 .collect(Collectors.toMap(content -> (String) content.get(IDENTIFIER), Function.identity()));
         Map<String, List<Object>> resultContentMap = typeList.entrySet().stream()
@@ -65,8 +69,8 @@ public class TrendingServiceImpl implements TrendingService {
                 ));
         resultMap.remove(CONTENT);
         resultMap.remove(COUNT);
-        response.getResult().put(RESPONSE, resultContentMap);
-        return response.getResult();
+        resultMap.put(RESPONSE, resultContentMap);
+        return resultMap;
     }
     public List<String> fetchIds(String idStr, int limit, String type) {
         String[] idArray = Optional.ofNullable(idStr).filter(StringUtils::isNotBlank).map(str -> str.split(COMMA)).orElse(null);

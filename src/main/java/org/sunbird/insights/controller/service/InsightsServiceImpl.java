@@ -34,15 +34,18 @@ public class InsightsServiceImpl implements InsightsService {
     public SBApiResponse insights(Map<String, Object> requestBody,String userId) throws Exception {
         String [] labelsCertificates = {extServerProperties.getInsightsLabelCertificatesYourDepartment(),extServerProperties.getInsightsLabelCertificatesAcross()} ;
         String [] labelsLearningHours = {extServerProperties.getInsightsLabelLearningHoursYourDepartment(),extServerProperties.getInsightsLabelLearningHoursAcross()} ;
-
-        HashMap<String, Object> request = (HashMap<String, Object>) requestBody.get(REQUEST);
-        HashMap<String, Object> filter = ((HashMap<String, Object>) request.get(FILTERS));
-        ArrayList<String> organizations = (ArrayList<String>) (filter.get(ORGANISATIONS));
+        HashMap<String, Object> request = (HashMap<String, Object>) requestBody.get(REQUEST) == null ? new HashMap<>() : (HashMap<String, Object>) requestBody.get(REQUEST);
+        HashMap<String, Object> filter = ((HashMap<String, Object>) request.get(FILTERS)) == null ? new HashMap<>() : ((HashMap<String, Object>) request.get(FILTERS));
+        ArrayList<String> organizations = (ArrayList<String>) (filter.get(ORGANISATIONS)) ==null ? new ArrayList<>() : (ArrayList<String>) (filter.get(ORGANISATIONS));
         ArrayList<String> keys = nudgeKeys(organizations);
         String[] fieldsArray = keys.toArray(new String[keys.size()]);
         ArrayList<Object> nudges = new ArrayList<>();
         List<String> lhpLearningHours =  redisCacheMgr.hget(INSIGHTS_LEARNING_HOURS_REDIS_KEY, serverProperties.getRedisInsightIndex(),fieldsArray);
         List<String> lhpCertifications = redisCacheMgr.hget(INSIGHTS_CERTIFICATIONS_REDIS_KEY, serverProperties.getRedisInsightIndex(),fieldsArray);
+        if(lhpLearningHours == null)
+            lhpLearningHours = new ArrayList<>();
+        if(lhpCertifications ==null)
+            lhpCertifications = new ArrayList<>();
         populateIfNudgeExist(lhpLearningHours, nudges, INSIGHTS_TYPE_LEARNING_HOURS,organizations,labelsLearningHours);
         populateIfNudgeExist(lhpCertifications, nudges, INSIGHTS_TYPE_CERTIFICATE,organizations,labelsCertificates);
         HashMap<String, Object> responseMap = new HashMap<>();
@@ -74,12 +77,17 @@ public class InsightsServiceImpl implements InsightsService {
         List<Map<String, Object>>  result=  cassandraOperation.getRecordsByProperties(KEYSPACE_SUNBIRD,
                 LEARNER_STATS, userRequest, fields);
         LocalDate[]  dates = populateDate();
-        if(result != null && result.size() > 0) {
+        if (result ==null || result.size() < 1) {
+            result = new ArrayList<>();
+            HashMap m = new HashMap();
+            result.add(m);
+        }
+
             result.get(0).put("startDate", dates[0]);
             result.get(0).put("endDate", dates[1]);
             return result.get(0);
-        }
-        return new HashMap<>();
+
+
     }
     public void populateIfNudgeExist(List<String> data, ArrayList<Object> nudges, String type, List<String> organizations,String labels[]) {
         for (int i = 0, j = 0; i < data.size(); i += 2, j++) {
@@ -99,8 +107,10 @@ public class InsightsServiceImpl implements InsightsService {
             HashMap<String, Object> nudge = new HashMap<>();
             nudge.put(PROGRESS, change);
             nudge.put(GROWTH, change > 0 ? POSITIVE : NEGATIVE);
-            nudge.put(LABEL, organizations.get(j).equals("across") ?labels[1].replace("{0}",String.valueOf(today)) :labels[0].replace("{0}",String.valueOf(today)));
-            nudge.put(ORG, organizations.get(j));
+            if(organizations.size() > j) {
+                nudge.put(LABEL, organizations.get(j).equals("across") ? labels[1].replace("{0}", String.valueOf(today)) : labels[0].replace("{0}", String.valueOf(today)));
+                nudge.put(ORG, organizations.get(j));
+            }
             nudge.put(TYPE, type);
             nudges.add(nudge);
         }
