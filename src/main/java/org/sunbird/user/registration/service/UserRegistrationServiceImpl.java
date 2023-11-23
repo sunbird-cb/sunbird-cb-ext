@@ -324,9 +324,12 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 			str.append("Failed to Register User Details. Missing Params - [").append(errList.toString()).append("]");
 		}
 		// email Validation
-		if (StringUtils.isNotBlank(userRegInfo.getEmail()) && !emailValidation(userRegInfo.getEmail(), true)) {
-			str.setLength(0);
-			str.append("Invalid email id");
+		if (StringUtils.isNotBlank(userRegInfo.getEmail())) {
+			String validateErr = emailValidation(userRegInfo.getEmail());
+			if (!StringUtils.isBlank(validateErr)){
+				str.setLength(0);
+				str.append(validateErr);
+			}
 		}
 		if(StringUtils.isNotBlank(userRegInfo.getPhone()) && !ProjectUtil.validateContactPattern(userRegInfo.getPhone())) {
 			str.setLength(0);
@@ -355,14 +358,11 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 		}
 		// email Validation
 		if (request.get(Constants.TYPE).equals(Constants.EMAIL)) {
-			if (emailValidation((String) request.get(Constants.KEY), false)) {
-				if (!isApprovedDomains(((String) request.get(Constants.KEY)).split("@")[1], Constants.USER_REGISTRATION_PRE_APPROVED_DOMAIN) && !isApprovedDomains(((String) request.get(Constants.KEY)).split("@")[1], Constants.USER_REGISTRATION_DOMAIN)) {
-					str.setLength(0);
-					str.append("Invalid email id, Please use government email id");
+			String validateErr = emailValidation((String) request.get(Constants.KEY));
+				if (!StringUtils.isBlank(validateErr)){
+					str.append(validateErr);
 				}
-			} else
-				str.append("Invalid email id");
-		}
+			}
 		return str.toString();
 	}
 
@@ -429,20 +429,23 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 	 * @param email String
 	 * @return Boolean
 	 */
-	public Boolean emailValidation(String email, Boolean isDomainValidation) {
+	public String emailValidation(String email) {
+		StringBuffer str = new StringBuffer();
 		String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\." + "[a-zA-Z0-9_+&*-]+)*@" + "(?:[a-zA-Z0-9-]+\\.)+[a-z"
 				+ "A-Z]{2,7}$";
 		Boolean retValue = Boolean.FALSE;
 		Pattern pat = Pattern.compile(emailRegex);
 		if (pat.matcher(email).matches()) {
 			String emailDomain = email.split("@")[1];
-			if (isDomainValidation){
 				retValue = isApprovedDomains(emailDomain, Constants.USER_REGISTRATION_DOMAIN)
 						|| isApprovedDomains(emailDomain, Constants.USER_REGISTRATION_PRE_APPROVED_DOMAIN);
-			} else
-				retValue = true;
+				if (!retValue){
+					str.append("Invalid Email domain, Please use government email id");
+				}
+		} else {
+			str.append("Invalid Email id");
 		}
-		return retValue;
+		return str.toString();
 	}
 
 	private Boolean isPreApprovedDomain(String email) {
