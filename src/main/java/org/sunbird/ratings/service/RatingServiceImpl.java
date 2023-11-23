@@ -588,13 +588,11 @@ public class RatingServiceImpl implements RatingService {
         SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_CONTENT_META_UPDATE);
         try {
             List<String> latestCourseList = getCourseListFromRedis(tag);
-            Map<String, Object> oldCourse = contentService.searchContent(tag);
+            List<Map<String, Object>> contentDataList = contentService.searchContent(tag);
             long startTime = System.currentTimeMillis();
             int totalNumberOfUpdatedContent = 0;
             int totalNumberOfErrorContent = 0;
 
-            Map<String, Object> resultContentData = (Map<String, Object>) oldCourse.get(Constants.RESULT);
-            List<Map<String, Object>> contentDataList = (List<Map<String, Object>>) resultContentData.get(Constants.CONTENT);
             List<String> contentListIds = new ArrayList<>();
             if(contentDataList != null) {
                 contentListIds = contentDataList.stream().map(map -> (String) map.get(Constants.IDENTIFIER)).filter(value -> value != null).collect(Collectors.toList());
@@ -692,7 +690,7 @@ public class RatingServiceImpl implements RatingService {
                 latestTrendingCourseList.addAll(Arrays.asList(latestTrendingCourseListRedis.get(0).split(",")));
                 latestTrendingCourseList.addAll(Arrays.asList(latestTrendingCourseListRedis.get(1).split(",")));
             }
-            return latestTrendingCourseList;
+            return latestTrendingCourseList.stream().filter(courseId -> !courseId.contains("_rc")).collect(Collectors.toList());
         }
         throw new BadRequestException("Please provide a valid Tag");
     }
