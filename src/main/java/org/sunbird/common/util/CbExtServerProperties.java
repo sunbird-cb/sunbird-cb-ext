@@ -493,6 +493,7 @@ public class CbExtServerProperties {
 
 	@Value("${content-read-endpoint}")
 	private String contentReadEndPoint;
+  
 	@Value("${redis.questions.read.timeout}")
 	private Integer redisQuestionsReadTimeOut;
 
@@ -501,6 +502,45 @@ public class CbExtServerProperties {
 
 	@Value("${mdo.admin.update.users}")
 	private String mdoAdminUpdateUsers;
+
+	@Value("${learning_service_base_url}")
+	private String learningServiceBaseUrl;
+
+	@Value("${system.content.update.url}")
+	private String systemUpdateAPI;
+
+	@Value(("${limit_for_search}"))
+	private String limitForSearch;
+  
+  @Value("${user.registration.welcome.email.signinLink}")
+	private String welcomeEmailSigninLink;
+
+	@Value("${user.registration.welcome.email.discoverLink}")
+	private String welcomeEmailDiscoverLink;
+
+	@Value("${user.registration.welcome.email.meetingLink}")
+	private String welcomeEmailMeetingLink;
+
+	@Value("${report.type.get.file.info}")
+	private String reportTypeGetFileInfo;
+  
+  @Value("${redis.insights.index}")
+	private int redisInsightIndex;
+  
+  @Value("${insights.label.certificates.across}")
+	private String insightsLabelCertificatesAcross;
+  
+	@Value("${insights.label.learning.hours.across}")
+	private String insightsLabelLearningHoursAcross;
+  
+	@Value("${insights.label.certificates.your.department}")
+	private String insightsLabelCertificatesYourDepartment;
+  
+	@Value("${insights.label.learning.hours.your.department}")
+	private String insightsLabelLearningHoursYourDepartment;
+  
+  @Value("${sb.otp.generate.path}")
+	private String sbOTPGeneratePath;
 
 	public boolean qListFromCacheEnabled() {
 		return qListFromCacheEnabled;
@@ -518,20 +558,45 @@ public class CbExtServerProperties {
 		this.redisQuestionsReadTimeOut = redisQuestionsReadTimeOut;
 	}
 
-	@Value("${user.registration.welcome.email.signinLink}")
-	private String welcomeEmailSigninLink;
+	public String getInsightsLabelCertificatesAcross() {
+		return insightsLabelCertificatesAcross;
+	}
 
-	@Value("${user.registration.welcome.email.discoverLink}")
-	private String welcomeEmailDiscoverLink;
+	public void setInsightsLabelCertificatesAcross(String insightsLabelCertificatesAcross) {
+		this.insightsLabelCertificatesAcross = insightsLabelCertificatesAcross;
+	}
 
-	@Value("${user.registration.welcome.email.meetingLink}")
-	private String welcomeEmailMeetingLink;
+	public String getInsightsLabelLearningHoursAcross() {
+		return insightsLabelLearningHoursAcross;
+	}
 
-	@Value("${report.type.get.file.info}")
-	private String reportTypeGetFileInfo;
+	public void setInsightsLabelLearningHoursAcross(String insightsLabelLearningHoursAcross) {
+		this.insightsLabelLearningHoursAcross = insightsLabelLearningHoursAcross;
+	}
 
-	@Value("${sb.otp.generate.path}")
-	private String sbOTPGeneratePath;
+	public String getInsightsLabelCertificatesYourDepartment() {
+		return insightsLabelCertificatesYourDepartment;
+	}
+
+	public void setInsightsLabelCertificatesYourDepartment(String insightsLabelCertificatesYourDepartment) {
+		this.insightsLabelCertificatesYourDepartment = insightsLabelCertificatesYourDepartment;
+	}
+
+	public String getInsightsLabelLearningHoursYourDepartment() {
+		return insightsLabelLearningHoursYourDepartment;
+	}
+
+	public void setInsightsLabelLearningHoursYourDepartment(String insightsLabelLearningHoursYourDepartment) {
+		this.insightsLabelLearningHoursYourDepartment = insightsLabelLearningHoursYourDepartment;
+	}
+
+	public int getRedisInsightIndex() {
+		return redisInsightIndex;
+	}
+
+	public void setRedisInsightIndex(int redisInsightIndex) {
+		this.redisInsightIndex = redisInsightIndex;
+  }	
 
 	public String getSbOTPGeneratePath() {
 		return sbOTPGeneratePath;
@@ -1890,5 +1955,29 @@ public class CbExtServerProperties {
 
 	public void setMdoAdminUpdateUsers(String mdoAdminUpdateUsers) {
 		this.mdoAdminUpdateUsers = mdoAdminUpdateUsers;
+	}
+
+	public String getLearningServiceBaseUrl() {
+		return learningServiceBaseUrl;
+	}
+
+	public void setLearningServiceBaseUrl(String learningServiceBaseUrl) {
+		this.learningServiceBaseUrl = learningServiceBaseUrl;
+	}
+
+	public String getSystemUpdateAPI() {
+		return systemUpdateAPI;
+	}
+
+	public void setSystemUpdateAPI(String systemUpdateAPI) {
+		this.systemUpdateAPI = systemUpdateAPI;
+	}
+
+	public String getLimitForSearch() {
+		return limitForSearch;
+	}
+
+	public void setLimitForSearch(String limitForSearch) {
+		this.limitForSearch = limitForSearch;
 	}
 }
