@@ -352,26 +352,41 @@ public class ContentServiceImpl implements ContentService {
 		return null;
 	}
 
-	public Map<String, Object> searchContent(String tag){
-		Map<String, Object> response = null;
-		HashMap<String, String> headerValues = new HashMap<>();
+	public List<Map<String, Object>> searchContent(String tag) {
+		Map<String, String> headerValues = new HashMap<>();
 		headerValues.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
 
 		Map<String, Object> filters = new HashMap<>();
-		filters.put(Constants.PRIMARY_CATEGORY, serverConfig.getContentSearchPrimaryCategoryFilter());
 		filters.put(Constants.STATUS, Arrays.asList(Constants.LIVE));
 		filters.put(Constants.ADDITIONAL_TAGS, Arrays.asList(tag));
 		Map<String, Object> contentRequestValue = new HashMap<>();
 		contentRequestValue.put(Constants.FILTERS, filters);
 		contentRequestValue.put(Constants.FIELDS, Arrays.asList(Constants.IDENTIFIER));
+		contentRequestValue.put(Constants.LIMIT, serverConfig.getLimitForSearch());
 		Map<String, Object> contentRequest = new HashMap<>();
 		contentRequest.put(Constants.REQUEST, contentRequestValue);
-		response = outboundRequestHandlerService.fetchResultUsingPost(
-				serverConfig.getKmBaseHost() + serverConfig.getKmBaseContentSearch(), contentRequest, headerValues);
-		if (null != response && Constants.OK.equalsIgnoreCase((String) response.get(Constants.RESPONSE_CODE))) {
-			return response;
-		}
-		return new HashMap<>();
+		List<Map<String, Object>> contentList = new ArrayList<>();
+		int count = 0;
+		do {
+			contentRequestValue.put(Constants.OFFSET, contentList.size());
+			Map<String, Object> contentDataMap = populateSearchData(contentRequest, headerValues);
+			count = ((Integer) contentDataMap.get(Constants.COUNT)).intValue();
+			List<Map<String, Object>> contentDataList = (List<Map<String, Object>>) contentDataMap.get(Constants.CONTENT);
+			if (contentDataList != null) {
+				contentList.addAll(contentDataList);
+			}
+		} while (count > contentList.size());
+
+		return contentList;
 	}
 
+	private Map<String, Object> populateSearchData(Map<String, Object> contentRequest, Map<String, String> headerValues) {
+		Map<String, Object> resultContentData = new HashMap<>();
+		Map<String, Object> response = outboundRequestHandlerService.fetchResultUsingPost(
+				serverConfig.getKmBaseHost() + serverConfig.getKmBaseContentSearch(), contentRequest, headerValues);
+		if (null != response && Constants.OK.equalsIgnoreCase((String) response.get(Constants.RESPONSE_CODE))) {
+			resultContentData = (Map<String, Object>) response.get(Constants.RESULT);
+		}
+		return resultContentData;
+	}
 }

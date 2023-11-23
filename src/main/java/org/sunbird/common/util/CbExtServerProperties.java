@@ -508,6 +508,9 @@ public class CbExtServerProperties {
 	@Value("${system.content.update.url}")
 	private String systemUpdateAPI;
 
+	@Value(("${limit_for_search}"))
+	private String limitForSearch;
+
 	public boolean qListFromCacheEnabled() {
 		return qListFromCacheEnabled;
 	}
@@ -1955,5 +1958,13 @@ public class CbExtServerProperties {
 
 	public void setSystemUpdateAPI(String systemUpdateAPI) {
 		this.systemUpdateAPI = systemUpdateAPI;
+	}
+
+	public String getLimitForSearch() {
+		return limitForSearch;
+	}
+
+	public void setLimitForSearch(String limitForSearch) {
+		this.limitForSearch = limitForSearch;
 	}
 }

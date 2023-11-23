@@ -588,13 +588,11 @@ public class RatingServiceImpl implements RatingService {
         SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_CONTENT_META_UPDATE);
         try {
             List<String> latestCourseList = getCourseListFromRedis(tag);
-            Map<String, Object> oldCourse = contentService.searchContent(tag);
+            List<Map<String, Object>> contentDataList = contentService.searchContent(tag);
             long startTime = System.currentTimeMillis();
             int totalNumberOfUpdatedContent = 0;
             int totalNumberOfErrorContent = 0;
 
-            Map<String, Object> resultContentData = (Map<String, Object>) oldCourse.get(Constants.RESULT);
-            List<Map<String, Object>> contentDataList = (List<Map<String, Object>>) resultContentData.get(Constants.CONTENT);
             List<String> contentListIds = new ArrayList<>();
             if(contentDataList != null) {
                 contentListIds = contentDataList.stream().map(map -> (String) map.get(Constants.IDENTIFIER)).filter(value -> value != null).collect(Collectors.toList());
@@ -606,7 +604,7 @@ public class RatingServiceImpl implements RatingService {
                     //Adding the Content value to metaData for most Enrolled by checking through Redish
                     if (!ObjectUtils.isEmpty(contentResponse)) {
                         if (updateAdditionalTag(contentResponse, tag, false)) {
-                            totalNumberOfUpdatedContent = totalNumberOfErrorContent + 1;
+                            totalNumberOfUpdatedContent = totalNumberOfUpdatedContent + 1;
                         } else {
                             totalNumberOfErrorContent = totalNumberOfErrorContent + 1;
                         }
@@ -637,6 +635,7 @@ public class RatingServiceImpl implements RatingService {
             response.getParams().setStatus(Constants.SUCCESS);
         } catch (Exception e) {
             logger.error("updateContentTopicName", e);
+            response.getParams().setStatus(Constants.CLIENT_ERROR);
             response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
             response.getResult().put(Constants.ERROR_MESSAGE, e.getMessage());
         }
@@ -652,10 +651,12 @@ public class RatingServiceImpl implements RatingService {
                 additionalTags = new ArrayList<>();
             }
             if (isRemove) {
-                if(additionalTags.size() == 0)
+                if (additionalTags.size() == 0)
                     return false;
                 additionalTags.remove(tag);
             } else {
+                if (additionalTags.contains(tag))
+                    return true;
                 additionalTags.add(tag);
             }
             Map<String, Object> updatedValues = new HashMap<>();
@@ -689,7 +690,7 @@ public class RatingServiceImpl implements RatingService {
                 latestTrendingCourseList.addAll(Arrays.asList(latestTrendingCourseListRedis.get(0).split(",")));
                 latestTrendingCourseList.addAll(Arrays.asList(latestTrendingCourseListRedis.get(1).split(",")));
             }
-            return latestTrendingCourseList;
+            return latestTrendingCourseList.stream().filter(courseId -> !courseId.contains("_rc")).collect(Collectors.toList());
         }
         throw new BadRequestException("Please provide a valid Tag");
     }
