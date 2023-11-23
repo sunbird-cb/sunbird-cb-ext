@@ -46,7 +46,7 @@ public class TrendingServiceImpl implements TrendingService {
              trendingCoursesAndPrograms = new ArrayList<>();
         Map<String, List<String>> typeList = new HashMap<>();
         for(int i=0;i<fieldsArray.length;i++){
-            if(primaryCategoryList.size() > i && trendingCoursesAndPrograms.size() > 1 )
+            if(primaryCategoryList.size() > i && trendingCoursesAndPrograms.size() > 0 )
             typeList.put(primaryCategoryList.get(i),fetchIds(trendingCoursesAndPrograms.get(i), limit, fieldList.get(i)));
         }
         List<String> searchIds = typeList.values().stream().flatMap(List::stream).collect(Collectors.toList());
