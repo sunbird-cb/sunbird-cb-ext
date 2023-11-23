@@ -499,6 +499,17 @@ public class CbExtServerProperties {
 	@Value("${read.assess.questions.from.redis}")
 	private boolean qListFromCacheEnabled;
 
+	@Value("${sb.otp.generate.path}")
+	private String sbOTPGeneratePath;
+
+	public String getSbOTPGeneratePath() {
+		return sbOTPGeneratePath;
+	}
+
+	public void setSbOTPGeneratePath(String sbOTPGeneratePath) {
+		this.sbOTPGeneratePath = sbOTPGeneratePath;
+	}
+
 	public boolean qListFromCacheEnabled() {
 		return qListFromCacheEnabled;
 	}
