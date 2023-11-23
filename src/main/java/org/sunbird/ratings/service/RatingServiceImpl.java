@@ -658,7 +658,7 @@ public class RatingServiceImpl implements RatingService {
                 additionalTags.remove(tag);
             } else {
                 if (additionalTags.contains(tag))
-                    return false;
+                    return true;
                 additionalTags.add(tag);
             }
             Map<String, Object> updatedValues = new HashMap<>();
