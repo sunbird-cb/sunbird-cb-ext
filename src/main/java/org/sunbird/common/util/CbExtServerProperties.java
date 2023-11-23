@@ -493,6 +493,7 @@ public class CbExtServerProperties {
 
 	@Value("${content-read-endpoint}")
 	private String contentReadEndPoint;
+  
 	@Value("${redis.questions.read.timeout}")
 	private Integer redisQuestionsReadTimeOut;
 
@@ -510,6 +511,36 @@ public class CbExtServerProperties {
 
 	@Value(("${limit_for_search}"))
 	private String limitForSearch;
+  
+  @Value("${user.registration.welcome.email.signinLink}")
+	private String welcomeEmailSigninLink;
+
+	@Value("${user.registration.welcome.email.discoverLink}")
+	private String welcomeEmailDiscoverLink;
+
+	@Value("${user.registration.welcome.email.meetingLink}")
+	private String welcomeEmailMeetingLink;
+
+	@Value("${report.type.get.file.info}")
+	private String reportTypeGetFileInfo;
+  
+  @Value("${redis.insights.index}")
+	private int redisInsightIndex;
+  
+  @Value("${insights.label.certificates.across}")
+	private String insightsLabelCertificatesAcross;
+  
+	@Value("${insights.label.learning.hours.across}")
+	private String insightsLabelLearningHoursAcross;
+  
+	@Value("${insights.label.certificates.your.department}")
+	private String insightsLabelCertificatesYourDepartment;
+  
+	@Value("${insights.label.learning.hours.your.department}")
+	private String insightsLabelLearningHoursYourDepartment;
+  
+  @Value("${sb.otp.generate.path}")
+	private String sbOTPGeneratePath;
 
 	public boolean qListFromCacheEnabled() {
 		return qListFromCacheEnabled;
@@ -526,22 +557,6 @@ public class CbExtServerProperties {
 	public void setRedisQuestionsReadTimeOut(Integer redisQuestionsReadTimeOut) {
 		this.redisQuestionsReadTimeOut = redisQuestionsReadTimeOut;
 	}
-
-	@Value("${user.registration.welcome.email.signinLink}")
-	private String welcomeEmailSigninLink;
-
-	@Value("${user.registration.welcome.email.discoverLink}")
-	private String welcomeEmailDiscoverLink;
-
-	@Value("${user.registration.welcome.email.meetingLink}")
-	private String welcomeEmailMeetingLink;
-
-	@Value("${report.type.get.file.info}")
-	private String reportTypeGetFileInfo;
-
-	@Value("${redis.insights.index}")
-	private int redisInsightIndex;
-
 
 	public String getInsightsLabelCertificatesAcross() {
 		return insightsLabelCertificatesAcross;
@@ -575,22 +590,20 @@ public class CbExtServerProperties {
 		this.insightsLabelLearningHoursYourDepartment = insightsLabelLearningHoursYourDepartment;
 	}
 
-	@Value("${insights.label.certificates.across}")
-	private String insightsLabelCertificatesAcross;
-	@Value("${insights.label.learning.hours.across}")
-	private String insightsLabelLearningHoursAcross;
-	@Value("${insights.label.certificates.your.department}")
-	private String insightsLabelCertificatesYourDepartment;
-	@Value("${insights.label.learning.hours.your.department}")
-	private String insightsLabelLearningHoursYourDepartment;
-
-
 	public int getRedisInsightIndex() {
 		return redisInsightIndex;
 	}
 
 	public void setRedisInsightIndex(int redisInsightIndex) {
 		this.redisInsightIndex = redisInsightIndex;
+  }	
+
+	public String getSbOTPGeneratePath() {
+		return sbOTPGeneratePath;
+	}
+
+	public void setSbOTPGeneratePath(String sbOTPGeneratePath) {
+		this.sbOTPGeneratePath = sbOTPGeneratePath;
 	}
 
 	public String getAssessmentSubmitTopic() {

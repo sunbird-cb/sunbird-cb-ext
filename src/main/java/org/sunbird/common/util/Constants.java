@@ -407,6 +407,7 @@ public class Constants {
 	public static final String SUNBIRD_SSO_USERNAME = "sunbird_sso_username";
 	public static final String DURATION = "duration";
 	public static final String USER_REGISTRATION_REGISTER_API = "api.user.registration.register";
+	public static final String USER_GENERATE_OTP = "api.otp.generate";
 	public static final String USER_REGISTRATION_UPDATE_API = "api.user.registration.update";
 	public static final String USER_REGISTRATION_RETRIEVE_API = "api.user.registration.retrieve";
 	public static final String ORG_ONBOARDING_PROFILE_RETRIEVE_API = "api.org.onboarding.retrieve";
