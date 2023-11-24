@@ -107,4 +107,8 @@ public interface CassandraOperation {
 
 	public Map<String, Object> getRecordsByPropertiesWithoutFiltering(String keyspaceName, String tableName,
 			Map<String, Object> propertyMap, List<String> fields, String key);
+
+	List<Map<String, Object>> getRecordsByPropertiesWithoutFiltering(String keyspaceName, String tableName,
+			 Map<String, Object> propertyMap, List<String> fields, Integer limit);
+
 }
