@@ -170,7 +170,7 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
 					List<Map<String, Object>> usersEnrolledInTheBatch = cassandraOperation.getRecordsByPropertiesWithoutFiltering(Constants.KEYSPACE_SUNBIRD_COURSES,
 							Constants.TABLE_ENROLLMENT_BATCH_LOOKUP,
 							propertyMap,
-							Arrays.asList(Constants.USER_ID, Constants.BATCH_ID,Constants.ACTIVE));
+							Arrays.asList(Constants.USER_ID, Constants.BATCH_ID,Constants.ACTIVE), cbExtServerProperties.getCassandraQueryLimit());
 					enrollmentIdList = usersEnrolledInTheBatch.stream().filter(obj -> (Boolean) obj.get(Constants.ACTIVE)).map(obj -> (String) obj.get(Constants.USER_ID_CONSTANT)).collect(Collectors.toList());
 				}
 				propertyMap.put(Constants.USER_ID, enrollmentIdList);
@@ -179,7 +179,7 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
 						Constants.TABLE_USER_ENROLMENT, propertyMap,
 						Arrays.asList(Constants.USER_ID_CONSTANT, Constants.COURSE_ID,
 								Constants.BATCH_ID, Constants.COMPLETION_PERCENTAGE, Constants.PROGRESS,
-								Constants.STATUS, Constants.ISSUED_CERTIFICATES)));
+								Constants.STATUS, Constants.ISSUED_CERTIFICATES), cbExtServerProperties.getCassandraQueryLimit()));
 				if(userEnrolmentList.size() > 100)
 					break;
 			}
