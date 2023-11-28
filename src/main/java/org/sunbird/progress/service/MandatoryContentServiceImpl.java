@@ -180,12 +180,12 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
 						Arrays.asList(Constants.USER_ID_CONSTANT, Constants.COURSE_ID,
 								Constants.BATCH_ID, Constants.COMPLETION_PERCENTAGE, Constants.PROGRESS,
 								Constants.STATUS, Constants.ISSUED_CERTIFICATES), cbExtServerProperties.getCassandraQueryLimit()));
-				if(userEnrolmentList.size() > 100)
+				if(userEnrolmentList.size() > 250)
 					break;
 			}
 			// restricting with only 100 items in the response
-			if (userEnrolmentList.size() > 100) {
-				userEnrolmentList = userEnrolmentList.subList(0, 100);
+			if (userEnrolmentList.size() > 250) {
+				userEnrolmentList = userEnrolmentList.subList(0, 250);
 			}
 
 			//get id list from userEnrollmentList, in case  request has more than one batch
