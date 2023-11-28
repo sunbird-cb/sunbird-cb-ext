@@ -403,4 +403,21 @@ public class CassandraOperationImpl implements CassandraOperation {
 		}
 		return response;
 	}
+
+	public List<Map<String, Object>> getRecordsByPropertiesWithoutFiltering(String keyspaceName, String tableName,
+			Map<String, Object> propertyMap, List<String> fields, Integer limit) {
+		Select selectQuery = null;
+		List<Map<String, Object>> response = new ArrayList<>();
+		try {
+			selectQuery = processQueryWithoutFiltering(keyspaceName, tableName, propertyMap, fields);
+			if (limit != null)
+				selectQuery.limit(limit);
+			ResultSet results = connectionManager.getSession(keyspaceName).execute(selectQuery);
+			response = CassandraUtil.createResponse(results);
+
+		} catch (Exception e) {
+			logger.error(Constants.EXCEPTION_MSG_FETCH + tableName + " : " + e.getMessage(), e);
+		}
+		return response;
+	}
 }

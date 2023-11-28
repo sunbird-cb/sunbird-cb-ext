@@ -541,6 +541,17 @@ public class CbExtServerProperties {
 		this.sbOTPGeneratePath = sbOTPGeneratePath;
 	}
 
+	@Value("${cassandra.query.limit}")
+	private Integer cassandraQueryLimit;
+
+	public Integer getCassandraQueryLimit() {
+		return cassandraQueryLimit;
+	}
+
+	public void setCassandraQueryLimit(Integer cassandraQueryLimit) {
+		this.cassandraQueryLimit = cassandraQueryLimit;
+	}
+
 	public String getAssessmentSubmitTopic() {
 		return assessmentSubmitTopic;
 	}
