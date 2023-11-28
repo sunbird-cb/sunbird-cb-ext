@@ -103,6 +103,9 @@ public class ProfileServiceImpl implements ProfileService {
 	@Autowired
 	DataCacheMgr dataCacheMgr;
 
+	@Autowired
+    AccessTokenValidator accessTokenValidator;
+
 	private Logger log = LoggerFactory.getLogger(getClass().getName());
 
 	@Override
@@ -118,6 +121,13 @@ public class ProfileServiceImpl implements ProfileService {
 			}
 
 			String userId = (String) requestData.get(Constants.USER_ID);
+			String userIdFromToken = accessTokenValidator.fetchUserIdFromAccessToken(userToken);
+			if (!userId.equalsIgnoreCase(userIdFromToken)) {
+				response.setResponseCode(HttpStatus.BAD_REQUEST);
+				response.getParams().setStatus(Constants.FAILED);
+				response.getParams().setErrmsg("Invalid UserId in the request");
+				return response;
+			}
 			Map<String, Object> profileDetailsMap = (Map<String, Object>) requestData.get(Constants.PROFILE_DETAILS);
 			List<String> approvalFieldList = approvalFields();
 			String newDeptName = checkDepartment(profileDetailsMap);
@@ -137,6 +147,7 @@ public class ProfileServiceImpl implements ProfileService {
 			HashMap<String, String> headerValues = new HashMap<>();
 			headerValues.put(Constants.AUTH_TOKEN, authToken);
 			headerValues.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
+			headerValues.put(Constants.X_AUTH_TOKEN, userToken);
 			Map<String, Object> workflowResponse = new HashMap<>();
 			Map<String, Object> updateResponse = new HashMap<>();
 			if (!profileDetailsMap.isEmpty()) {
@@ -290,6 +301,9 @@ public class ProfileServiceImpl implements ProfileService {
 				url.append(serverConfig.getWfServiceHost()).append(serverConfig.getWfServiceTransitionPath());
 				headerValues.put(Constants.ROOT_ORG_CONSTANT, Constants.IGOT);
 				headerValues.put(Constants.ORG_CONSTANT, Constants.DOPT);
+				if (headerValues.containsKey(Constants.X_AUTH_TOKEN)) {
+					headerValues.remove(Constants.X_AUTH_TOKEN);
+				}
 				workflowResponse = outboundRequestHandlerService.fetchResultUsingPost(
 						serverConfig.getWfServiceHost() + serverConfig.getWfServiceTransitionPath(), transitionRequests,
 						headerValues);
