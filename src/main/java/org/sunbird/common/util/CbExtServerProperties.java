@@ -533,23 +533,23 @@ public class CbExtServerProperties {
 	@Value("${sb.otp.generate.path}")
 	private String sbOTPGeneratePath;
 
+	@Value("${batch.enrolment.return.size}")
+	private Integer batchEnrolmentReturnSize;
+
+	public Integer getBatchEnrolmentReturnSize() {
+		return batchEnrolmentReturnSize;
+	}
+
+	public void setBatchEnrolmentReturnSize(Integer batchEnrolmentReturnSize) {
+		this.batchEnrolmentReturnSize = batchEnrolmentReturnSize;
+	}
+
 	public String getSbOTPGeneratePath() {
 		return sbOTPGeneratePath;
 	}
 
 	public void setSbOTPGeneratePath(String sbOTPGeneratePath) {
 		this.sbOTPGeneratePath = sbOTPGeneratePath;
-	}
-
-	@Value("${cassandra.query.limit}")
-	private Integer cassandraQueryLimit;
-
-	public Integer getCassandraQueryLimit() {
-		return cassandraQueryLimit;
-	}
-
-	public void setCassandraQueryLimit(Integer cassandraQueryLimit) {
-		this.cassandraQueryLimit = cassandraQueryLimit;
 	}
 
 	public String getAssessmentSubmitTopic() {
