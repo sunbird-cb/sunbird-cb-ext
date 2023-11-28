@@ -143,7 +143,6 @@ public class ProfileServiceImpl implements ProfileService {
 			String deptName = (String) responseMap.get(Constants.CHANNEL);
 			Map<String, Object> existingProfileDetails = (Map<String, Object>) responseMap
 					.get(Constants.PROFILE_DETAILS);
-			StringBuilder url = new StringBuilder();
 			HashMap<String, String> headerValues = new HashMap<>();
 			headerValues.put(Constants.AUTH_TOKEN, authToken);
 			headerValues.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
@@ -189,7 +188,6 @@ public class ProfileServiceImpl implements ProfileService {
 				updateRequestValue.put(Constants.PROFILE_DETAILS, existingProfileDetails);
 				Map<String, Object> updateRequest = new HashMap<>();
 				updateRequest.put(Constants.REQUEST, updateRequestValue);
-				url.append(serverConfig.getSbUrl()).append(serverConfig.getLmsUserUpdatePath());
 				updateResponse = outboundRequestHandlerService.fetchResultUsingPatch(
 						serverConfig.getSbUrl() + serverConfig.getLmsUserUpdatePath(), updateRequest, headerValues);
 				if (Constants.OK.equalsIgnoreCase((String) updateResponse.get(Constants.RESPONSE_CODE))) {
@@ -297,8 +295,6 @@ public class ProfileServiceImpl implements ProfileService {
 					transitionRequests.put(Constants.DEPT_NAME, deptName);
 				}
 				transitionRequests.put(Constants.UPDATE_FIELD_VALUES, finalTransitionList);
-				url = new StringBuilder();
-				url.append(serverConfig.getWfServiceHost()).append(serverConfig.getWfServiceTransitionPath());
 				headerValues.put(Constants.ROOT_ORG_CONSTANT, Constants.IGOT);
 				headerValues.put(Constants.ORG_CONSTANT, Constants.DOPT);
 				if (headerValues.containsKey(Constants.X_AUTH_TOKEN)) {
@@ -1075,7 +1071,7 @@ public class ProfileServiceImpl implements ProfileService {
 		updateRequest.put(Constants.REQUEST, updateReqBody);
 
 		Map<String, Object> updateResponse = outboundRequestHandlerService.fetchResultUsingPatch(
-				serverConfig.getSbUrl() + serverConfig.getLmsUserUpdatePath(), updateRequest, MapUtils.EMPTY_MAP);
+				serverConfig.getSbUrl() + serverConfig.getLmsUserUpdatePrivatePath(), updateRequest, MapUtils.EMPTY_MAP);
 		if (!updateResponse.get(Constants.RESPONSE_CODE).equals(Constants.OK)) {
 			Map<String, Object> params = (Map<String, Object>) updateResponse.get(Constants.PARAMS);
 			errMsg = String.format("Failed to update user profile. Error: %s", params.get("errmsg"));
@@ -1241,7 +1237,7 @@ public class ProfileServiceImpl implements ProfileService {
 		updateRequestBody.put(Constants.PROFILE_DETAILS, profileDetails);
 		updateRequest.put(Constants.REQUEST, updateRequestBody);
 		Map<String, Object> updateReadData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPatch(
-				serverConfig.getSbUrl() + serverConfig.getLmsUserUpdatePath(), updateRequest,
+				serverConfig.getSbUrl() + serverConfig.getLmsUserUpdatePrivatePath(), updateRequest,
 				ProjectUtil.getDefaultHeaders());
 		if (Constants.OK.equalsIgnoreCase((String) updateReadData.get(Constants.RESPONSE_CODE))) {
 			Map<String, Object> roleMap = new HashMap<>();
@@ -1679,7 +1675,6 @@ public class ProfileServiceImpl implements ProfileService {
 			Map<String, Object> responseMap = userUtilityService.getUsersReadData(userId, StringUtils.EMPTY,
 					StringUtils.EMPTY);
 			Map<String, Object> existingProfileDetails = (Map<String, Object>) responseMap.get(Constants.PROFILE_DETAILS);
-			StringBuilder url = new StringBuilder();
 			if (!profileDetailsMap.isEmpty()) {
 				{
 					List<String> listOfChangedDetails = new ArrayList<>();
@@ -1714,8 +1709,7 @@ public class ProfileServiceImpl implements ProfileService {
 					HashMap<String, String> headerValue = new HashMap<>();
 					headerValues.put(Constants.AUTH_TOKEN, authToken);
 					headerValues.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
-					String updatedUrl = serverConfig.getSbUrl() + serverConfig.getLmsUserUpdatePath();
-					url.append(serverConfig.getSbUrl()).append(serverConfig.getLmsUserUpdatePath());
+					String updatedUrl = serverConfig.getSbUrl() + serverConfig.getLmsUserUpdatePrivatePath();
 					Map<String, Object> updateRequestValue = requestData;
 					updateRequestValue.put(Constants.PROFILE_DETAILS, existingProfileDetails);
 					Map<String, Object> updateRequest = new HashMap<>();

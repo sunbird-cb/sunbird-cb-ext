@@ -23,8 +23,8 @@ public class CbExtServerProperties {
 	@Value("${lms.system.settings.path}")
 	private String lmsSystemSettingsPath;
 
-	@Value("${lms.user.update.path}")
-	private String lmsUserUpdatePath;
+	@Value("${lms.user.update.private.path}")
+	private String lmsUserUpdatePrivatePath;
 
 	@Value("${lms.user.read.path}")
 	private String lmsUserReadPath;
@@ -476,11 +476,11 @@ public class CbExtServerProperties {
 	@Value("${report.download.folder.name}")
 	private String reportDownloadFolderName;
 
-  @Value("${progress.api.update.endpoint}")
-  private String progressUpdateEndPoint;
+	@Value("${progress.api.update.endpoint}")
+	private String progressUpdateEndPoint;
 
-  @Value("${kafka.topic.update.content.progress}")
-  private String updateContentProgressKafkaTopic;
+	@Value("${kafka.topic.update.content.progress}")
+	private String updateContentProgressKafkaTopic;
 
 	@Value("${sb.es.user.profile.index.type}")
 	private String sbEsProfileIndexType;
@@ -535,6 +535,9 @@ public class CbExtServerProperties {
 
 	@Value("${batch.enrolment.return.size}")
 	private Integer batchEnrolmentReturnSize;
+
+	@Value("${lms.user.update.path}")
+	private String lmsUserUpdatePath;
 
 	public Integer getBatchEnrolmentReturnSize() {
 		return batchEnrolmentReturnSize;
@@ -596,12 +599,12 @@ public class CbExtServerProperties {
 		this.wfServiceTransitionPath = wfServiceTransitionPath;
 	}
 
-	public String getLmsUserUpdatePath() {
-		return lmsUserUpdatePath;
+	public String getLmsUserUpdatePrivatePath() {
+		return lmsUserUpdatePrivatePath;
 	}
 
-	public void setLmsUserUpdatePath(String lmsUserUpdatePath) {
-		this.lmsUserUpdatePath = lmsUserUpdatePath;
+	public void setLmsUserUpdatePrivatePath(String lmsUserUpdatePrivatePath) {
+		this.lmsUserUpdatePrivatePath = lmsUserUpdatePrivatePath;
 	}
 
 	public String getLmsSystemSettingsPath() {
@@ -1901,5 +1904,13 @@ public class CbExtServerProperties {
 
 	public void setMdoAdminUpdateUsers(String mdoAdminUpdateUsers) {
 		this.mdoAdminUpdateUsers = mdoAdminUpdateUsers;
+	}
+
+	public String getLmsUserUpdatePath() {
+		return lmsUserUpdatePath;
+	}
+
+	public void setLmsUserUpdatePath(String lmsUserUpdatePath) {
+		this.lmsUserUpdatePath = lmsUserUpdatePath;
 	}
 }
