@@ -65,7 +65,14 @@ public class ProfileController {
 
 	@GetMapping("/user/v1/autocomplete/{searchTerm}")
 	public ResponseEntity<?> userAutoComplete(@PathVariable("searchTerm") String searchTerm) {
-		SBApiResponse response = profileService.userAutoComplete(searchTerm);
+		SBApiResponse response = profileService.userAutoComplete(searchTerm, null);
+		return new ResponseEntity<>(response, response.getResponseCode());
+	}
+
+	@GetMapping("/user/v1/mdo/autocomplete/{searchTerm}")
+	public ResponseEntity<?> userMdoAutoComplete(@PathVariable("searchTerm") String searchTerm,
+												 @RequestHeader(Constants.X_AUTH_USER_ORG_ID) String rootOrgId) {
+		SBApiResponse response = profileService.userAutoComplete(searchTerm, rootOrgId);
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
 

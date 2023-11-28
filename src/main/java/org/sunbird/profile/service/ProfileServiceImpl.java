@@ -578,7 +578,7 @@ public class ProfileServiceImpl implements ProfileService {
 	}
 
 	@Override
-	public SBApiResponse userAutoComplete(String searchTerm) {
+	public SBApiResponse userAutoComplete(String searchTerm, String rootOrgId) {
 		SBApiResponse response = new SBApiResponse();
 		response.setResponseCode(HttpStatus.BAD_REQUEST);
 		response.getParams().setStatus(Constants.FAILED);
@@ -590,7 +590,7 @@ public class ProfileServiceImpl implements ProfileService {
 		response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
 		Map<String, Object> resultResp = new HashMap<>();
 		try {
-			List<Map<String, Object>> userData = getUserSearchData(searchTerm);
+			List<Map<String, Object>> userData = getUserSearchData(searchTerm, rootOrgId);
 			resultResp.put(Constants.CONTENT, userData);
 			resultResp.put(Constants.COUNT, userData.size());
 			response.setResponseCode(HttpStatus.OK);
@@ -1167,7 +1167,7 @@ public class ProfileServiceImpl implements ProfileService {
 		return errMsg;
 	}
 
-	public List<Map<String, Object>> getUserSearchData(String searchTerm) throws Exception {
+	public List<Map<String, Object>> getUserSearchData(String searchTerm, String rootOrgId) throws Exception {
 		List<Map<String, Object>> resultArray = new ArrayList<>();
 		Map<String, Object> result;
 		final BoolQueryBuilder query = QueryBuilders.boolQuery();
@@ -1176,6 +1176,9 @@ public class ProfileServiceImpl implements ProfileService {
 		}
 
 		final BoolQueryBuilder finalQuery = QueryBuilders.boolQuery();
+		if(StringUtils.isNotEmpty(rootOrgId)){
+			finalQuery.must(QueryBuilders.termQuery(Constants.ROOT_ORG_ID,rootOrgId));
+		}
 		finalQuery.must(QueryBuilders.termQuery(Constants.STATUS, 1)).must(query);
 		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder().query(finalQuery);
 		sourceBuilder.fetchSource(serverConfig.getEsAutoCompleteIncludeFields(), new String[] {});
