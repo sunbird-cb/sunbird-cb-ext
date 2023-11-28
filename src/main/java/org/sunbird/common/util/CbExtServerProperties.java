@@ -598,6 +598,17 @@ public class CbExtServerProperties {
 		this.redisInsightIndex = redisInsightIndex;
   }	
 
+	@Value("${batch.enrolment.return.size}")
+	private Integer batchEnrolmentReturnSize;
+
+	public Integer getBatchEnrolmentReturnSize() {
+		return batchEnrolmentReturnSize;
+	}
+
+	public void setBatchEnrolmentReturnSize(Integer batchEnrolmentReturnSize) {
+		this.batchEnrolmentReturnSize = batchEnrolmentReturnSize;
+	}
+
 	public String getSbOTPGeneratePath() {
 		return sbOTPGeneratePath;
 	}

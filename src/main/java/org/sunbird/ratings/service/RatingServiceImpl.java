@@ -340,7 +340,7 @@ public class RatingServiceImpl implements RatingService {
                 fields.add(Constants.USERID);
                 fields.add(Constants.FIRSTNAME);
 
-                Map<String, Object> existingUserList = cassandraOperation.getRecordsByPropertiesWithoutFiltering(Constants.KEYSPACE_SUNBIRD,
+                Map<String, Object> existingUserList = cassandraOperation.getRecordsByPropertiesByKey(Constants.KEYSPACE_SUNBIRD,
                         Constants.TABLE_USER, userRequest, fields, Constants.ID);
 
                 for (String user : listOfUserId) {
