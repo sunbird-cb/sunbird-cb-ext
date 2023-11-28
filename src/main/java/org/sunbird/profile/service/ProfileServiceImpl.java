@@ -103,6 +103,9 @@ public class ProfileServiceImpl implements ProfileService {
 	@Autowired
 	DataCacheMgr dataCacheMgr;
 
+	@Autowired
+    AccessTokenValidator accessTokenValidator;
+
 	private Logger log = LoggerFactory.getLogger(getClass().getName());
 
 	@Override
@@ -118,6 +121,13 @@ public class ProfileServiceImpl implements ProfileService {
 			}
 
 			String userId = (String) requestData.get(Constants.USER_ID);
+			String userIdFromToken = accessTokenValidator.fetchUserIdFromAccessToken(userToken);
+			if (!userId.equalsIgnoreCase(userIdFromToken)) {
+				response.setResponseCode(HttpStatus.BAD_REQUEST);
+				response.getParams().setStatus(Constants.FAILED);
+				response.getParams().setErrmsg("Invalid UserId in the request");
+				return response;
+			}
 			Map<String, Object> profileDetailsMap = (Map<String, Object>) requestData.get(Constants.PROFILE_DETAILS);
 			List<String> approvalFieldList = approvalFields();
 			String newDeptName = checkDepartment(profileDetailsMap);
@@ -133,10 +143,10 @@ public class ProfileServiceImpl implements ProfileService {
 			String deptName = (String) responseMap.get(Constants.CHANNEL);
 			Map<String, Object> existingProfileDetails = (Map<String, Object>) responseMap
 					.get(Constants.PROFILE_DETAILS);
-			StringBuilder url = new StringBuilder();
 			HashMap<String, String> headerValues = new HashMap<>();
 			headerValues.put(Constants.AUTH_TOKEN, authToken);
 			headerValues.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
+			headerValues.put(Constants.X_AUTH_TOKEN, userToken);
 			Map<String, Object> workflowResponse = new HashMap<>();
 			Map<String, Object> updateResponse = new HashMap<>();
 			if (!profileDetailsMap.isEmpty()) {
@@ -178,7 +188,6 @@ public class ProfileServiceImpl implements ProfileService {
 				updateRequestValue.put(Constants.PROFILE_DETAILS, existingProfileDetails);
 				Map<String, Object> updateRequest = new HashMap<>();
 				updateRequest.put(Constants.REQUEST, updateRequestValue);
-				url.append(serverConfig.getSbUrl()).append(serverConfig.getLmsUserUpdatePath());
 				updateResponse = outboundRequestHandlerService.fetchResultUsingPatch(
 						serverConfig.getSbUrl() + serverConfig.getLmsUserUpdatePath(), updateRequest, headerValues);
 				if (Constants.OK.equalsIgnoreCase((String) updateResponse.get(Constants.RESPONSE_CODE))) {
@@ -286,10 +295,11 @@ public class ProfileServiceImpl implements ProfileService {
 					transitionRequests.put(Constants.DEPT_NAME, deptName);
 				}
 				transitionRequests.put(Constants.UPDATE_FIELD_VALUES, finalTransitionList);
-				url = new StringBuilder();
-				url.append(serverConfig.getWfServiceHost()).append(serverConfig.getWfServiceTransitionPath());
 				headerValues.put(Constants.ROOT_ORG_CONSTANT, Constants.IGOT);
 				headerValues.put(Constants.ORG_CONSTANT, Constants.DOPT);
+				if (headerValues.containsKey(Constants.X_AUTH_TOKEN)) {
+					headerValues.remove(Constants.X_AUTH_TOKEN);
+				}
 				workflowResponse = outboundRequestHandlerService.fetchResultUsingPost(
 						serverConfig.getWfServiceHost() + serverConfig.getWfServiceTransitionPath(), transitionRequests,
 						headerValues);
@@ -1061,7 +1071,7 @@ public class ProfileServiceImpl implements ProfileService {
 		updateRequest.put(Constants.REQUEST, updateReqBody);
 
 		Map<String, Object> updateResponse = outboundRequestHandlerService.fetchResultUsingPatch(
-				serverConfig.getSbUrl() + serverConfig.getLmsUserUpdatePath(), updateRequest, MapUtils.EMPTY_MAP);
+				serverConfig.getSbUrl() + serverConfig.getLmsUserUpdatePrivatePath(), updateRequest, MapUtils.EMPTY_MAP);
 		if (!updateResponse.get(Constants.RESPONSE_CODE).equals(Constants.OK)) {
 			Map<String, Object> params = (Map<String, Object>) updateResponse.get(Constants.PARAMS);
 			errMsg = String.format("Failed to update user profile. Error: %s", params.get("errmsg"));
@@ -1227,7 +1237,7 @@ public class ProfileServiceImpl implements ProfileService {
 		updateRequestBody.put(Constants.PROFILE_DETAILS, profileDetails);
 		updateRequest.put(Constants.REQUEST, updateRequestBody);
 		Map<String, Object> updateReadData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPatch(
-				serverConfig.getSbUrl() + serverConfig.getLmsUserUpdatePath(), updateRequest,
+				serverConfig.getSbUrl() + serverConfig.getLmsUserUpdatePrivatePath(), updateRequest,
 				ProjectUtil.getDefaultHeaders());
 		if (Constants.OK.equalsIgnoreCase((String) updateReadData.get(Constants.RESPONSE_CODE))) {
 			Map<String, Object> roleMap = new HashMap<>();
@@ -1665,7 +1675,6 @@ public class ProfileServiceImpl implements ProfileService {
 			Map<String, Object> responseMap = userUtilityService.getUsersReadData(userId, StringUtils.EMPTY,
 					StringUtils.EMPTY);
 			Map<String, Object> existingProfileDetails = (Map<String, Object>) responseMap.get(Constants.PROFILE_DETAILS);
-			StringBuilder url = new StringBuilder();
 			if (!profileDetailsMap.isEmpty()) {
 				{
 					List<String> listOfChangedDetails = new ArrayList<>();
@@ -1700,8 +1709,7 @@ public class ProfileServiceImpl implements ProfileService {
 					HashMap<String, String> headerValue = new HashMap<>();
 					headerValues.put(Constants.AUTH_TOKEN, authToken);
 					headerValues.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
-					String updatedUrl = serverConfig.getSbUrl() + serverConfig.getLmsUserUpdatePath();
-					url.append(serverConfig.getSbUrl()).append(serverConfig.getLmsUserUpdatePath());
+					String updatedUrl = serverConfig.getSbUrl() + serverConfig.getLmsUserUpdatePrivatePath();
 					Map<String, Object> updateRequestValue = requestData;
 					updateRequestValue.put(Constants.PROFILE_DETAILS, existingProfileDetails);
 					Map<String, Object> updateRequest = new HashMap<>();
