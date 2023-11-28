@@ -541,7 +541,8 @@ public class CbExtServerProperties {
   
   @Value("${sb.otp.generate.path}")
 	private String sbOTPGeneratePath;
-
+  @Value("{cloud.profile.image.container.name}")
+  private String cloudProfileImageContainerName;
 	public boolean qListFromCacheEnabled() {
 		return qListFromCacheEnabled;
 	}
@@ -1980,4 +1981,9 @@ public class CbExtServerProperties {
 	public void setLimitForSearch(String limitForSearch) {
 		this.limitForSearch = limitForSearch;
 	}
+
+	public String getCloudProfileImageContainerName() { return cloudProfileImageContainerName; }
+
+	public void setCloudProfileImageContainerName(String cloudProfileImageContainerName) {
+		this.cloudProfileImageContainerName = cloudProfileImageContainerName; }
 }

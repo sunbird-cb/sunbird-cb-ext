@@ -2,6 +2,7 @@ package org.sunbird.storage.service;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -57,7 +58,10 @@ public class StorageServiceImpl implements StorageService {
 	}
 
 	@Override
-	public SBApiResponse uploadFile(MultipartFile mFile, String containerName) {
+	public SBApiResponse uploadFile(MultipartFile mFile, String cloudFolderName) throws IOException {
+		return uploadFile(mFile, cloudFolderName, serverProperties.getCloudContainerName());
+	}
+	public SBApiResponse uploadFile(MultipartFile mFile, String cloudFolderName, String containerName) throws IOException {
 		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_FILE_UPLOAD);
 		File file = null;
 		try {
@@ -66,7 +70,7 @@ public class StorageServiceImpl implements StorageService {
 			FileOutputStream fos = new FileOutputStream(file);
 			fos.write(mFile.getBytes());
 			fos.close();
-			return uploadFile(file, containerName);
+			return uploadFile(file, cloudFolderName,containerName);
 		} catch (Exception e) {
 			logger.error("Failed to upload file. Exception: ", e);
 			response.getParams().setStatus(Constants.FAILED);
@@ -81,11 +85,11 @@ public class StorageServiceImpl implements StorageService {
 	}
 
 	@Override
-	public SBApiResponse uploadFile(File file, String containerName) {
+	public SBApiResponse uploadFile(File file, String cloudFolderName, String containerName) {
 		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_FILE_UPLOAD);
 		try {
-			String objectKey = containerName + "/" + file.getName();
-			String url = storageService.upload(serverProperties.getCloudContainerName(), file.getAbsolutePath(),
+			String objectKey = cloudFolderName + "/" + file.getName();
+			String url = storageService.upload(containerName, file.getAbsolutePath(),
 					objectKey, Option.apply(false), Option.apply(1), Option.apply(5), Option.empty());
 			Map<String, String> uploadedFile = new HashMap<>();
 			uploadedFile.put(Constants.NAME, file.getName());
