@@ -545,6 +545,9 @@ public class CbExtServerProperties {
 	@Value("${lms.user.update.path}")
 	private String lmsUserUpdatePath;
 
+    @Value("{cloud.profile.image.container.name}")
+    private String cloudProfileImageContainerName;
+
 	public boolean qListFromCacheEnabled() {
 		return qListFromCacheEnabled;
 	}
@@ -2002,4 +2005,9 @@ public class CbExtServerProperties {
 	public void setLmsUserUpdatePath(String lmsUserUpdatePath) {
 		this.lmsUserUpdatePath = lmsUserUpdatePath;
 	}
+
+	public String getCloudProfileImageContainerName() { return cloudProfileImageContainerName; }
+
+	public void setCloudProfileImageContainerName(String cloudProfileImageContainerName) {
+		this.cloudProfileImageContainerName = cloudProfileImageContainerName; }
 }

@@ -48,4 +48,11 @@ public class StorageController {
 	public ResponseEntity<?> getFileInfo(@PathVariable("orgId") String orgId) {
 		return storageService.getFileInfo(orgId);
 	}
+
+	@PostMapping("{cloudFolderName}/profilePhotoUpload")
+	public ResponseEntity<?> profileUpload(@PathVariable("cloudFolderName") String cloudFolderName,@RequestParam(value = "file", required = true) MultipartFile multipartFile)
+			throws IOException {
+		SBApiResponse uploadResponse = storageService.uploadFile(multipartFile, cloudFolderName, serverConfig.getCloudProfileImageContainerName());
+		return new ResponseEntity<>(uploadResponse, uploadResponse.getResponseCode());
+	}
 }
