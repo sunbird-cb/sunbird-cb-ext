@@ -33,7 +33,7 @@ public class TrendingServiceImpl implements TrendingService {
         SBApiResponse response = ProjectUtil.createDefaultResponse(API_TRENDING_SEARCH);
         HashMap<String, Object> request = (HashMap<String, Object>) requestBody.get(Constants.REQUEST) ==null ? new HashMap<>() : (HashMap<String, Object>) requestBody.get(Constants.REQUEST);
         HashMap<String, Object> filter = ((HashMap<String, Object>) request.get(Constants.FILTERS)) ==null ? new HashMap<>() : ((HashMap<String, Object>) request.get(Constants.FILTERS));
-        ArrayList<String> primaryCategoryList = ((ArrayList<String>) (filter).get(Constants.PRIMARY_CATEGORY)) == null ?  new ArrayList<>() : ((ArrayList<String>) (filter).get(Constants.PRIMARY_CATEGORY));
+        ArrayList<String> primaryCategoryList = ((ArrayList<String>) (filter).get(Constants.CONTEXT_TYPE)) == null ?  new ArrayList<>() : ((ArrayList<String>) (filter).get(Constants.PRIMARY_CATEGORY));
         String org = ((String) (filter).get(Constants.ORGANISATION)) == null ? "" : ((String) (filter).get(Constants.ORGANISATION))  ;
         int limit = Optional.ofNullable(request.get(Constants.LIMIT)).map(l -> (Integer) l).orElse(0);
         List<String> fieldList = primaryCategoryList.stream()

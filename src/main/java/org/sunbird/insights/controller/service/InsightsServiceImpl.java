@@ -10,6 +10,8 @@ import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.ProjectUtil;
 import org.sunbird.core.config.PropertiesConfig;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
@@ -105,9 +107,13 @@ public class InsightsServiceImpl implements InsightsService {
                 change = 0.0;
             }
             HashMap<String, Object> nudge = new HashMap<>();
-            nudge.put(PROGRESS, change);
+            nudge.put(PROGRESS, roundToTwoDecimals(change));
             nudge.put(GROWTH, change > 0 ? POSITIVE : NEGATIVE);
             if(organizations.size() > j) {
+                if(type.equals(INSIGHTS_TYPE_CERTIFICATE))
+                today = Math.ceil(today);
+                else
+                today = roundToTwoDecimals(today);
                 nudge.put(LABEL, organizations.get(j).equals("across") ? labels[1].replace("{0}", String.valueOf(today)) : labels[0].replace("{0}", String.valueOf(today)));
                 nudge.put(ORG, organizations.get(j));
             }
@@ -124,5 +130,10 @@ public class InsightsServiceImpl implements InsightsService {
         local[0] = startDate;
         local[1] = endDate;
         return local;
+    }
+    public static double roundToTwoDecimals(double value) {
+        BigDecimal bd = new BigDecimal(value);
+        bd = bd.setScale(2, RoundingMode.HALF_UP);
+        return bd.doubleValue();
     }
 }
