@@ -9,8 +9,7 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.*;
 import org.elasticsearch.rest.RestStatus;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
@@ -1171,14 +1170,23 @@ public class ProfileServiceImpl implements ProfileService {
 		List<Map<String, Object>> resultArray = new ArrayList<>();
 		Map<String, Object> result;
 		final BoolQueryBuilder query = QueryBuilders.boolQuery();
-		for (String field : serverConfig.getEsAutoCompleteSearchFields()) {
-			query.should(QueryBuilders.matchPhrasePrefixQuery(field, searchTerm));
-		}
 		final BoolQueryBuilder finalQuery = QueryBuilders.boolQuery();
 		if(StringUtils.isNotEmpty(rootOrgId)){
-			finalQuery.must(QueryBuilders.termQuery(Constants.ROOT_ORG_ID, rootOrgId));
+			searchTerm = searchTerm.toLowerCase();
+			MatchQueryBuilder matchQueryRootOrgId = QueryBuilders.matchQuery(Constants.ROOT_ORG_ID_RAW, rootOrgId);
+			for (String field : serverConfig.getEsAutoCompleteSearchFields()) {
+				query.should(new WildcardQueryBuilder(field, "*" + searchTerm + "*"));
+			}
+			TermQueryBuilder termQueryStatus = QueryBuilders.termQuery(Constants.STATUS_RAW, 1);
+			finalQuery.must(matchQueryRootOrgId);
+			finalQuery.must(query);
+			finalQuery.must(termQueryStatus);
+		} else{
+			for (String field : serverConfig.getEsAutoCompleteSearchFields()) {
+				query.should(QueryBuilders.matchPhrasePrefixQuery(field, searchTerm));
+			}
+			finalQuery.must(QueryBuilders.termQuery(Constants.STATUS, 1)).must(query);
 		}
-		finalQuery.must(QueryBuilders.termQuery(Constants.STATUS, 1)).must(query);
 		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder().query(finalQuery);
 		sourceBuilder.fetchSource(serverConfig.getEsAutoCompleteIncludeFields(), new String[] {});
 		SearchResponse searchResponse = indexerService.getEsResult(serverConfig.getSbEsUserProfileIndex(),

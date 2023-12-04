@@ -779,6 +779,10 @@ public class Constants {
 
 	public static final Object KARMYOGI_BHARAT = "Karmyogi Bharat";
 
+	public static final String ROOT_ORG_ID_RAW = "rootOrgId.raw";
+
+	public static final String STATUS_RAW = "status.raw";
+
 	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}
