@@ -538,6 +538,7 @@ public class RatingServiceImpl implements RatingService {
             for (Map<String, Object> ratingSummary : existingDataList) {
                 String contentId = (String) ratingSummary.get(Constants.ACTIVITY_ID);
                 logger.info("Start Update Content Elastic for contentId: " + contentId);
+
                 List<String> fields = Arrays.asList(Constants.VERSION_KEY, Constants.IDENTIFIER, Constants.ADDITIONAL_TAGS);
                 Map<String, Object> contentResponse = contentService.readContent(contentId, fields);
                 if (!ObjectUtils.isEmpty(contentResponse)) {
@@ -589,10 +590,12 @@ public class RatingServiceImpl implements RatingService {
         SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_CONTENT_META_UPDATE);
         try {
             List<String> latestCourseList = getCourseListFromRedis(tag);
+
             List<Map<String, Object>> contentDataList = contentService.searchContent(tag);
             long startTime = System.currentTimeMillis();
             int totalNumberOfUpdatedContent = 0;
             int totalNumberOfErrorContent = 0;
+
 
             List<String> fields = Arrays.asList(Constants.VERSION_KEY, Constants.IDENTIFIER, Constants.ADDITIONAL_TAGS);
             List<String> contentListIds = new ArrayList<>();
@@ -602,6 +605,7 @@ public class RatingServiceImpl implements RatingService {
             for (String contentId : latestCourseList) {
                 if (!contentListIds.contains(contentId)) {
                     logger.info("Start Update Content Elastic for contentId: " + contentId);
+
                     Map<String, Object> contentResponse = contentService.readContent(contentId, fields);
                     //Adding the Content value to metaData for most Enrolled by checking through Redish
                     if (!ObjectUtils.isEmpty(contentResponse)) {
@@ -618,6 +622,7 @@ public class RatingServiceImpl implements RatingService {
             contentListIds.removeAll(latestCourseList);
             for (String removeContentId : contentListIds) {
                 logger.info("Start Update Content Elastic for Remove mostEnrolled Tags contentId: " + removeContentId);
+
                 Map<String, Object> contentResponse = contentService.readContent(removeContentId, fields);
                 //Remove the Content value to metaData for most Enrolled
                 if (!ObjectUtils.isEmpty(contentResponse)) {
@@ -637,6 +642,7 @@ public class RatingServiceImpl implements RatingService {
             response.getParams().setStatus(Constants.SUCCESS);
         } catch (Exception e) {
             logger.error("updateContentTopicName", e);
+
             response.getParams().setStatus(Constants.CLIENT_ERROR);
             response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
             response.getResult().put(Constants.ERROR_MESSAGE, e.getMessage());
@@ -653,6 +659,7 @@ public class RatingServiceImpl implements RatingService {
                 additionalTags = new ArrayList<>();
             }
             if (isRemove) {
+
                 if (additionalTags.size() == 0)
                     return false;
                 additionalTags.remove(tag);
@@ -692,6 +699,7 @@ public class RatingServiceImpl implements RatingService {
                 latestTrendingCourseList.addAll(Arrays.asList(latestTrendingCourseListRedis.get(0).split(",")));
                 latestTrendingCourseList.addAll(Arrays.asList(latestTrendingCourseListRedis.get(1).split(",")));
             }
+
             return latestTrendingCourseList.stream().filter(courseId -> !courseId.contains("_rc")).collect(Collectors.toList());
         }
         throw new BadRequestException("Please provide a valid Tag");

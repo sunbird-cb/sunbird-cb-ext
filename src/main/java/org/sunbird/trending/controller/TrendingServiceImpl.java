@@ -9,6 +9,7 @@ import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.common.util.ProjectUtil;
+
 import org.sunbird.core.exception.InvalidDataInputException;
 import java.util.*;
 import java.util.function.Function;
@@ -33,7 +34,8 @@ public class TrendingServiceImpl implements TrendingService {
         SBApiResponse response = ProjectUtil.createDefaultResponse(API_TRENDING_SEARCH);
         HashMap<String, Object> request = (HashMap<String, Object>) requestBody.get(Constants.REQUEST) ==null ? new HashMap<>() : (HashMap<String, Object>) requestBody.get(Constants.REQUEST);
         HashMap<String, Object> filter = ((HashMap<String, Object>) request.get(Constants.FILTERS)) ==null ? new HashMap<>() : ((HashMap<String, Object>) request.get(Constants.FILTERS));
-        ArrayList<String> primaryCategoryList = ((ArrayList<String>) (filter).get(Constants.PRIMARY_CATEGORY)) == null ?  new ArrayList<>() : ((ArrayList<String>) (filter).get(Constants.PRIMARY_CATEGORY));
+        ArrayList<String> primaryCategoryList = ((ArrayList<String>) (filter).get(Constants.CONTEXT_TYPE)) == null ?  new ArrayList<>() : ((ArrayList<String>) (filter).get(Constants.PRIMARY_CATEGORY));
+
         String org = ((String) (filter).get(Constants.ORGANISATION)) == null ? "" : ((String) (filter).get(Constants.ORGANISATION))  ;
         int limit = Optional.ofNullable(request.get(Constants.LIMIT)).map(l -> (Integer) l).orElse(0);
         List<String> fieldList = primaryCategoryList.stream()
@@ -65,7 +67,8 @@ public class TrendingServiceImpl implements TrendingService {
         Map<String, List<Object>> resultContentMap = typeList.entrySet().stream()
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
-                        entry -> entry.getValue().stream().map(contentMap::get).collect(Collectors.toList())
+                        entry -> entry.getValue().stream().map(contentMap::get).filter(value -> value != null).collect(Collectors.toList())
+
                 ));
         resultMap.remove(CONTENT);
         resultMap.remove(COUNT);

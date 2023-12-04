@@ -361,6 +361,7 @@ public class ContentServiceImpl implements ContentService {
 		return null;
 	}
 
+
 	public List<Map<String, Object>> searchContent(String tag) {
 		Map<String, String> headerValues = new HashMap<>();
 		headerValues.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
