@@ -108,13 +108,15 @@ public class InsightsServiceImpl implements InsightsService {
             HashMap<String, Object> nudge = new HashMap<>();
             nudge.put(PROGRESS, roundToTwoDecimals(change));
             nudge.put(GROWTH, change > 0 ? POSITIVE : NEGATIVE);
-            if(organizations.size() > j) {
-                if(type.equals(INSIGHTS_TYPE_CERTIFICATE))
-                today = Math.ceil(today);
-                else
-                today = roundToTwoDecimals(today);
 
-                nudge.put(LABEL, organizations.get(j).equals("across") ? labels[1].replace("{0}", String.valueOf(today)) : labels[0].replace("{0}", String.valueOf(today)));
+            if(organizations.size() > j) {
+                String replacer = "";
+                if(type.equals(INSIGHTS_TYPE_CERTIFICATE))
+                    replacer = String.valueOf ((int)Math.round(today));
+                else
+                    replacer =  String.valueOf (roundToTwoDecimals(today));
+
+                nudge.put(LABEL, organizations.get(j).equals("across") ? labels[1].replace("{0}",replacer) : labels[0].replace("{0}", replacer));
                 nudge.put(ORG, organizations.get(j));
             }
             nudge.put(TYPE, type);
