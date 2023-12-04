@@ -41,4 +41,7 @@ public interface ContentService {
 	public Map<String, Object> readContent(String contentId);
 
 	public Map<String, Object> searchContent(String tag);
+
+	public Map<String, Object> readContent(String contentId, List<String> fields);
+
 }

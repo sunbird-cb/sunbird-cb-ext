@@ -10,6 +10,7 @@ import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.ProjectUtil;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
@@ -112,6 +113,7 @@ public class InsightsServiceImpl implements InsightsService {
                 today = Math.ceil(today);
                 else
                 today = roundToTwoDecimals(today);
+
                 nudge.put(LABEL, organizations.get(j).equals("across") ? labels[1].replace("{0}", String.valueOf(today)) : labels[0].replace("{0}", String.valueOf(today)));
                 nudge.put(ORG, organizations.get(j));
             }
@@ -134,4 +136,5 @@ public class InsightsServiceImpl implements InsightsService {
         bd = bd.setScale(2, RoundingMode.HALF_UP);
         return bd.doubleValue();
     }
+
 }

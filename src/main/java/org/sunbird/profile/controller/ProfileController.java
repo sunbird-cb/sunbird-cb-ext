@@ -1,7 +1,11 @@
 package org.sunbird.profile.controller;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,9 +27,11 @@ public class ProfileController {
 	@Autowired
 	private ProfileService profileService;
 
+	private Logger log = LoggerFactory.getLogger(getClass().getName());
+
 	@PostMapping("/user/patch")
 	public ResponseEntity<?> profileUpdate(
-			@RequestHeader(value = Constants.X_AUTH_TOKEN, required = false) String userToken,
+			@RequestHeader(value = Constants.X_AUTH_TOKEN, required = true) String userToken,
 			@RequestHeader(value = Constants.AUTH_TOKEN, required = false) String authToken,
 			@RequestHeader(value = Constants.X_AUTH_USER_ORG_ID, required = false) String rootOrgId,
 			@RequestBody Map<String, Object> request) throws Exception {
@@ -80,8 +86,10 @@ public class ProfileController {
 	public ResponseEntity<?> bulkUpload(@RequestParam(value = "file", required = true) MultipartFile multipartFile,
 			@RequestHeader(Constants.X_AUTH_USER_ORG_ID) String rootOrgId,
 			@RequestHeader(Constants.X_AUTH_USER_CHANNEL) String channel,
-			@RequestHeader(Constants.X_AUTH_USER_ID) String userId) {
-		SBApiResponse uploadResponse = profileService.bulkUpload(multipartFile, rootOrgId, channel, userId);
+			@RequestHeader(Constants.X_AUTH_USER_ID) String userId) throws UnsupportedEncodingException {
+		log.info(String.format("bulkupload channel name:%s,OrgId:%s",
+				URLDecoder.decode(channel, "UTF-8"), rootOrgId));
+		SBApiResponse uploadResponse = profileService.bulkUpload(multipartFile, rootOrgId, URLDecoder.decode(channel, "UTF-8"), userId);
 		return new ResponseEntity<>(uploadResponse, uploadResponse.getResponseCode());
 	}
 

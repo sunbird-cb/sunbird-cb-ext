@@ -170,7 +170,7 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
 					List<Map<String, Object>> usersEnrolledInTheBatch = cassandraOperation.getRecordsByPropertiesWithoutFiltering(Constants.KEYSPACE_SUNBIRD_COURSES,
 							Constants.TABLE_ENROLLMENT_BATCH_LOOKUP,
 							propertyMap,
-							Arrays.asList(Constants.USER_ID, Constants.BATCH_ID,Constants.ACTIVE));
+							Arrays.asList(Constants.USER_ID, Constants.BATCH_ID,Constants.ACTIVE), cbExtServerProperties.getBatchEnrolmentReturnSize());
 					enrollmentIdList = usersEnrolledInTheBatch.stream().filter(obj -> (Boolean) obj.get(Constants.ACTIVE)).map(obj -> (String) obj.get(Constants.USER_ID_CONSTANT)).collect(Collectors.toList());
 				}
 				propertyMap.put(Constants.USER_ID, enrollmentIdList);
@@ -179,13 +179,13 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
 						Constants.TABLE_USER_ENROLMENT, propertyMap,
 						Arrays.asList(Constants.USER_ID_CONSTANT, Constants.COURSE_ID,
 								Constants.BATCH_ID, Constants.COMPLETION_PERCENTAGE, Constants.PROGRESS,
-								Constants.STATUS, Constants.ISSUED_CERTIFICATES)));
-				if(userEnrolmentList.size() > 100)
+								Constants.STATUS, Constants.ISSUED_CERTIFICATES), cbExtServerProperties.getBatchEnrolmentReturnSize()));
+				if(userEnrolmentList.size() > cbExtServerProperties.getBatchEnrolmentReturnSize())
 					break;
 			}
 			// restricting with only 100 items in the response
-			if (userEnrolmentList.size() > 100) {
-				userEnrolmentList = userEnrolmentList.subList(0, 100);
+			if (userEnrolmentList.size() > cbExtServerProperties.getBatchEnrolmentReturnSize()) {
+				userEnrolmentList = userEnrolmentList.subList(0, cbExtServerProperties.getBatchEnrolmentReturnSize());
 			}
 
 			//get id list from userEnrollmentList, in case  request has more than one batch

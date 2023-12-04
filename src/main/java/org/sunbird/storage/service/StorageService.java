@@ -12,7 +12,7 @@ import org.sunbird.common.model.SBApiResponse;
 public interface StorageService {
 	public SBApiResponse uploadFile(MultipartFile file, String containerName) throws IOException;
 
-	SBApiResponse uploadFile(File file, String containerName);
+	SBApiResponse uploadFile(File file, String cloudFolderName, String containerName);
 
 	public SBApiResponse deleteFile(String fileName, String containerName);
 
@@ -21,4 +21,5 @@ public interface StorageService {
 	ResponseEntity<Resource> downloadFile(String reportType, String date, String orgId, String fileName);
 
 	ResponseEntity<Map<String, Map<String, Object>>> getFileInfo(String orgId);
+	public SBApiResponse uploadFile(MultipartFile file, String cloudFolderName, String containerName) throws IOException;
 }

@@ -9,6 +9,8 @@ import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.common.util.ProjectUtil;
+
+import org.sunbird.core.exception.InvalidDataInputException;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -27,11 +29,13 @@ public class TrendingServiceImpl implements TrendingService {
     RedisCacheMgr redisCacheMgr;
 
     public Map<String, Object> trendingSearch(Map<String, Object> requestBody, String token) throws Exception {
+
         // Read req params
         SBApiResponse response = ProjectUtil.createDefaultResponse(API_TRENDING_SEARCH);
         HashMap<String, Object> request = (HashMap<String, Object>) requestBody.get(Constants.REQUEST) ==null ? new HashMap<>() : (HashMap<String, Object>) requestBody.get(Constants.REQUEST);
         HashMap<String, Object> filter = ((HashMap<String, Object>) request.get(Constants.FILTERS)) ==null ? new HashMap<>() : ((HashMap<String, Object>) request.get(Constants.FILTERS));
         ArrayList<String> primaryCategoryList = ((ArrayList<String>) (filter).get(Constants.CONTEXT_TYPE)) == null ?  new ArrayList<>() : ((ArrayList<String>) (filter).get(Constants.PRIMARY_CATEGORY));
+
         String org = ((String) (filter).get(Constants.ORGANISATION)) == null ? "" : ((String) (filter).get(Constants.ORGANISATION))  ;
         int limit = Optional.ofNullable(request.get(Constants.LIMIT)).map(l -> (Integer) l).orElse(0);
         List<String> fieldList = primaryCategoryList.stream()
@@ -64,6 +68,7 @@ public class TrendingServiceImpl implements TrendingService {
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
                         entry -> entry.getValue().stream().map(contentMap::get).filter(value -> value != null).collect(Collectors.toList())
+
                 ));
         resultMap.remove(CONTENT);
         resultMap.remove(COUNT);
