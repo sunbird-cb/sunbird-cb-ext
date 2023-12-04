@@ -439,7 +439,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 			Boolean retValue = isApprovedDomains(emailDomain, Constants.USER_REGISTRATION_DOMAIN)
 					|| isApprovedDomains(emailDomain, Constants.USER_REGISTRATION_PRE_APPROVED_DOMAIN);
 			if (!retValue) {
-				str.append("Invalid Email domain, Please use government email id");
+				str.append("Email domain of this email address is not approved. Please use Request for help.");
 			}
 		} else {
 			str.append("Invalid Email id");
