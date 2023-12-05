@@ -194,6 +194,28 @@ public class CbExtServerProperties {
 	@Value("${redis.port}")
 	private String redisPort;
 
+	public String getRedisDataHostName() {
+		return redisDataHostName;
+	}
+
+	public void setRedisDataHostName(String redisDataHostName) {
+		this.redisDataHostName = redisDataHostName;
+	}
+
+	public String getRedisDataPort() {
+		return redisDataPort;
+	}
+
+	public void setRedisDataPort(String redisDataPort) {
+		this.redisDataPort = redisDataPort;
+	}
+
+	@Value("${redis.data.host.name}")
+	private String redisDataHostName;
+
+	@Value("${redis.data.port}")
+	private String redisDataPort;
+
 	@Value("${redis.timeout}")
 	private String redisTimeout;
 
