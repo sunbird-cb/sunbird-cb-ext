@@ -192,6 +192,8 @@ public class StorageServiceImpl implements StorageService {
 			put("course-report", "CBPReport.csv");
 			put("cba-report", "UserAssessmentReport.csv");
 			put("user-assessment-report-cbp", "StandaloneAssessmentReport.csv");
+			put("blended-program-report-mdo", "BlendedProgramReport.csv");
+			put("blended-program-report-cbp", "BlendedProgramReport.csv");
 		}};
 		Map<String, Map<String, Object>> reportTypeInfo = new HashMap<>();
 		for (String reportType : serverProperties.getReportTypeGetFileInfo()) {
