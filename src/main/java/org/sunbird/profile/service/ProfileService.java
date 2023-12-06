@@ -18,7 +18,9 @@ public interface ProfileService {
 
 	SBApiResponse userBasicProfileUpdate(Map<String, Object> request);
 
-	SBApiResponse userAutoComplete(String searchTerm, String rootOrgId);
+	SBApiResponse userAutoComplete(String searchTerm);
+
+	SBApiResponse userAdminAutoComplete(String searchTerm, String rootOrgId);
 
 	SBApiResponse migrateUser(Map<String, Object> request, String userToken, String authToken);
 
