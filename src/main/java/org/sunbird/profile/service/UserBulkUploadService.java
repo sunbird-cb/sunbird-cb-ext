@@ -315,7 +315,7 @@ public class UserBulkUploadService {
         FileOutputStream fileOut = new FileOutputStream(file);
         wb.write(fileOut);
         fileOut.close();
-        SBApiResponse uploadResponse = storageService.uploadFile(file, serverProperties.getBulkUploadContainerName());
+        SBApiResponse uploadResponse = storageService.uploadFile(file, serverProperties.getBulkUploadContainerName(),serverProperties.getCloudContainerName());
         if (!HttpStatus.OK.equals(uploadResponse.getResponseCode())) {
             logger.info(String.format("Failed to upload file. Error: %s",
                     uploadResponse.getParams().getErrmsg()));

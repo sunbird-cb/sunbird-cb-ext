@@ -6,11 +6,7 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.ratings.model.LookupRequest;
 import org.sunbird.ratings.model.RequestRating;
@@ -54,6 +50,18 @@ public class RatingsController {
     @PostMapping("/ratings/v2/read")
     public ResponseEntity<?> readRating(@RequestBody Map<String, Object> request) {
         SBApiResponse response = ratingService.readRatings(request);
+        return new ResponseEntity<>(response, response.getResponseCode());
+    }
+
+    @PostMapping("/ratings/meta/update")
+    public ResponseEntity<?> updateRatingsMetaData() {
+        SBApiResponse response = ratingService.updateRatingsMetaData();
+        return new ResponseEntity<>(response, response.getResponseCode());
+    }
+
+    @PostMapping("/update/v1/content/additionaltag")
+    public ResponseEntity<?> updateAdditionalTag(@RequestParam("tag") String tag) {
+        SBApiResponse response = ratingService.updateAdditionalTag(tag);
         return new ResponseEntity<>(response, response.getResponseCode());
     }
 }

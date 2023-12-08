@@ -347,10 +347,19 @@ public class CassandraOperationImpl implements CassandraOperation {
 	 */
 	public List<Map<String, Object>> getRecordsByPropertiesWithoutFiltering(String keyspaceName, String tableName,
 			Map<String, Object> propertyMap, List<String> fields) {
+		return getRecordsByPropertiesWithoutFiltering(keyspaceName, tableName, propertyMap, fields, null);
+	}
+
+	@Override
+	public List<Map<String, Object>> getRecordsByPropertiesWithoutFiltering(String keyspaceName, String tableName,
+			Map<String, Object> propertyMap, List<String> fields, Integer limit) {
 		Select selectQuery = null;
 		List<Map<String, Object>> response = new ArrayList<>();
 		try {
 			selectQuery = processQueryWithoutFiltering(keyspaceName, tableName, propertyMap, fields);
+			if (limit != null) {
+				selectQuery = selectQuery.limit(limit);
+			}
 			ResultSet results = connectionManager.getSession(keyspaceName).execute(selectQuery);
 			response = CassandraUtil.createResponse(results);
 
@@ -390,7 +399,7 @@ public class CassandraOperationImpl implements CassandraOperation {
 		return selectQuery;
 	}
 
-	public Map<String, Object> getRecordsByPropertiesWithoutFiltering(String keyspaceName, String tableName,
+	public Map<String, Object> getRecordsByPropertiesByKey(String keyspaceName, String tableName,
 			Map<String, Object> propertyMap, List<String> fields, String key) {
 		Select selectQuery = null;
 		Map<String, Object> response = new HashMap<>();

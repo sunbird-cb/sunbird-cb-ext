@@ -29,6 +29,9 @@ public class RedisCacheMgr {
     private JedisPool jedisPool;
 
     @Autowired
+    private JedisPool jedisDataPopulationPool;
+
+    @Autowired
     CbExtServerProperties cbExtServerProperties;
 
     private CbExtLogger logger = new CbExtLogger(getClass().getName());
@@ -159,4 +162,26 @@ public class RedisCacheMgr {
         }
         return result;
     }
+    public List<String> hget(String key,int index,String... fields) {
+        try (Jedis jedis = jedisDataPopulationPool.getResource()) {
+            jedis.select(index);
+            return jedis.hmget(key,fields);
+        } catch (Exception e) {
+            logger.error(e);
+            return null;
+        }
+    }
+
+    public String getCache(String key, Integer index) {
+        try (Jedis jedis = jedisPool.getResource()) {
+            if (index != null) {
+                jedis.select(index);
+            }
+            return jedis.get(key);
+        } catch (Exception e) {
+            logger.error(e);
+            return null;
+        }
+    }
+
 }

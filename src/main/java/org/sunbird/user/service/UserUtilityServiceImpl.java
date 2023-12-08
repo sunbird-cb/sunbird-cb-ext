@@ -307,7 +307,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		requestBody.put(Constants.PROFILE_DETAILS, profileDetails);
 		request.put(Constants.REQUEST, requestBody);
 		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPatch(
-				props.getSbUrl() + props.getLmsUserUpdatePath(), request, ProjectUtil.getDefaultHeaders());
+				props.getSbUrl() + props.getLmsUserUpdatePrivatePath(), request, ProjectUtil.getDefaultHeaders());
 		if (Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
 			retValue = assignRole(userRegistration.getSbOrgId(), userRegistration.getUserId(),
 					userRegistration.toMininumString());
@@ -657,7 +657,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		requestBody.put(Constants.PROFILE_DETAILS, profileDetails);
 		request.put(Constants.REQUEST, requestBody);
 		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPatch(
-				props.getSbUrl() + props.getLmsUserUpdatePath(), request, ProjectUtil.getDefaultHeaders());
+				props.getSbUrl() + props.getLmsUserUpdatePrivatePath(), request, ProjectUtil.getDefaultHeaders());
 		if (readData != null && !Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
 			Map<String, Object> params = (Map<String, Object>) readData.get(Constants.PARAMS);
 			if (!MapUtils.isEmpty(params)) {

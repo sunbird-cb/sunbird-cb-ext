@@ -783,8 +783,81 @@ public class Constants {
 
 	public static final String STATUS_RAW = "status.raw";
 
+	public static final String COLON =":";
+
+	public static final String TRENDING_COURSES_REDIS_KEY="lhp_trending";
+	public static final String ORGANISATION = "organisation";
+	public static final int NUM_WEEKS = 4;
+
+	public static final String INSIGHTS_LEARNING_HOURS_REDIS_KEY="lhp_learningHours";
+
+	public static final String INSIGHTS_CERTIFICATIONS_REDIS_KEY="lhp_certifications";
+
+	public static final String INSIGHTS_TYPE_CERTIFICATE ="certification";
+	public static final String INSIGHTS_TYPE_LEARNING_HOURS ="learning-hours";
+
+	public static final String WEEKLY_CLAPS ="weekly-claps";
+	public static final String NUDGES ="nudges";
+	public static final String LABEL ="label";
+
+	public static final String GROWTH = "growth";
+
+	public static final String POSITIVE="positive";
+	public static final String NEGATIVE="negative";
+
+	public static final String YESTERDAY="yesterday";
+
+	public static final String TODAY ="today";
+
+	public static final String WEEK ="week";
+
+	public static final String ACHIEVED ="achieved";
+
+	public static final String API_USER_INSIGHTS="api.user.insights";
+
+	public static final String API_TRENDING_SEARCH="api.trending.search";
+
+	public static final String COURSES="courses";
+
+	public static final String PROGRAMS="programs";
+
+	public static final String CERTIFICATIONS="certifications";
+
+	public static final String TREND_SEARCH_NO_RESULT_ERROR_MESG = "Doesn't have any trending {0} for the requested organization";
+
+	public static final String TOTAL_CLAPS="total_claps";
+	public static final String W1 ="w1";
+	public static final String W2 ="w2";
+	public static final String W3= "w3";
+	public static final String W4 ="w4";
+
+	public static final String LEARNER_STATS = "learner_stats";
+	public static final String LEARNER_STATUS_USER_ID="userid";
+
+	public static final String VERSION_KEY = "versionKey";
+	public static final String AVG_RATING = "avgRating";
+	public static final String TOTAL_NO_OF_RATING = "totalNoOfRating";
+	public static final String COUNT_ONE_STAR_RATING = "countOf1StarRating";
+	public static final String COUNT_TWO_STAR_RATING = "countOf2StarRating";
+	public static final String COUNT_THREE_STAR_RATING = "countOf3StarRating";
+	public static final String COUNT_FOUR_STAR_RATING = "countOf4StarRating";
+	public static final String COUNT_FIVE_STAR_RATING = "countOf5StarRating";
+	public static final String TOTAL_NUMBER_UPDATED_COUNT = "totalNumberOfUpdatedContent";
+	public static final String TOTAL_NUMBER_ERROR_COUNT = "totalNumberOfErrorContent";
+	public static final String API_RATINGS_CONTENT_META_UPDATE = "api.ratings.content.meta.update";
+	public static final String API_CONTENT_META_UPDATE = "api.content.meta.update";
+	public static final String REDIS_COURSE_MOST_ENROLLED_TAG = "lhp_mostEnrolledTag";
+	public static final String ADDITIONAL_TAGS = "additionalTags";
+	public static final String MOST_ENROLLED = "mostEnrolled";
+	public static final String MOST_TRENDING = "mostTrending";
+	public static final String REDIS_COURSE_MOST_TRENDING_TAG = "lhp_trending";
+	public static final String ACROSS_COURSES = "across:courses";
+	public static final String ACROSS_PROGRAMS = "across:programs";
+
 	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}
+
+
 
 }

@@ -1,13 +1,11 @@
 package org.sunbird.ratings.service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.kafka.common.KafkaException;
@@ -17,10 +15,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
+import org.sunbird.cache.RedisCacheMgr;
 import org.sunbird.cassandra.utils.CassandraOperation;
 import org.sunbird.common.model.SBApiResponse;
+import org.sunbird.common.service.ContentService;
+import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
+import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.common.util.ProjectUtil;
+import org.sunbird.core.exception.BadRequestException;
 import org.sunbird.core.logger.CbExtLogger;
 import org.sunbird.core.producer.Producer;
 import org.sunbird.ratings.exception.ValidationException;
@@ -56,6 +59,18 @@ public class RatingServiceImpl implements RatingService {
 
     @Value("${kafka.topics.parent.rating.event}")
     public String updateRatingTopicName;
+
+    @Autowired
+    ContentService contentService;
+
+    @Autowired
+    OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
+
+    @Autowired
+    CbExtServerProperties serverConfig;
+
+    @Autowired
+    RedisCacheMgr redisCacheMgr;
 
     @Override
     public SBApiResponse getRatings(String activityId, String activityType, String userId) {
@@ -325,7 +340,7 @@ public class RatingServiceImpl implements RatingService {
                 fields.add(Constants.USERID);
                 fields.add(Constants.FIRSTNAME);
 
-                Map<String, Object> existingUserList = cassandraOperation.getRecordsByPropertiesWithoutFiltering(Constants.KEYSPACE_SUNBIRD,
+                Map<String, Object> existingUserList = cassandraOperation.getRecordsByPropertiesByKey(Constants.KEYSPACE_SUNBIRD,
                         Constants.TABLE_USER, userRequest, fields, Constants.ID);
 
                 for (String user : listOfUserId) {
@@ -508,4 +523,185 @@ public class RatingServiceImpl implements RatingService {
         response.setResponseCode(responseCode);
     }
 
+    public SBApiResponse updateRatingsMetaData() {
+        SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_RATINGS_CONTENT_META_UPDATE);
+        try {
+            Map<String, Object> request = new HashMap<>();
+            long startTime = System.currentTimeMillis();
+            List<Map<String, Object>> existingDataList = cassandraOperation.getRecordsByPropertiesWithoutFiltering(
+                    Constants.KEYSPACE_SUNBIRD,
+                    Constants.TABLE_RATINGS_SUMMARY, request, Arrays.asList(Constants.ACTIVITY_ID, Constants.TOTALNUMBEROFRATINGS, Constants.SUMOFTOTALRATINGS,
+                            Constants.TOTALCOUNT1STARS, Constants.TOTALCOUNT2STARS, Constants.TOTALCOUNT3STARS, Constants.TOTALCOUNT4STARS, Constants.TOTALCOUNT5STARS));
+
+            int totalNumberOfUpdatedContent = 0;
+            int totalNumberOfErrorContent = 0;
+            for (Map<String, Object> ratingSummary : existingDataList) {
+                String contentId = (String) ratingSummary.get(Constants.ACTIVITY_ID);
+                logger.info("Start Update Content Elastic for contentId: " + contentId);
+
+                List<String> fields = Arrays.asList(Constants.VERSION_KEY, Constants.IDENTIFIER, Constants.ADDITIONAL_TAGS);
+                Map<String, Object> contentResponse = contentService.readContent(contentId, fields);
+                if (!ObjectUtils.isEmpty(contentResponse)) {
+                    String versionKey = (String) contentResponse.get(Constants.VERSION_KEY);
+                    Map<String, Object> updateRatingValues = new HashMap<>();
+                    updateRatingValues.put(Constants.VERSION_KEY, versionKey);
+                    Float totalNumberOfRating = (Float) ratingSummary.get(Constants.TOTALNUMBEROFRATINGS);
+                    Float sumOfTotalRating = (Float) ratingSummary.get(Constants.SUMOFTOTALRATINGS);
+                    BigDecimal result = BigDecimal.valueOf(sumOfTotalRating).divide(BigDecimal.valueOf(totalNumberOfRating), 1, RoundingMode.HALF_UP);
+                    updateRatingValues.put(Constants.AVG_RATING, result.floatValue());
+                    updateRatingValues.put(Constants.TOTAL_NO_OF_RATING, totalNumberOfRating.intValue());
+                    updateRatingValues.put(Constants.COUNT_ONE_STAR_RATING, ((Float) ratingSummary.get(Constants.TOTALCOUNT1STARS)).intValue());
+                    updateRatingValues.put(Constants.COUNT_TWO_STAR_RATING, ((Float) ratingSummary.get(Constants.TOTALCOUNT2STARS)).intValue());
+                    updateRatingValues.put(Constants.COUNT_THREE_STAR_RATING, ((Float) ratingSummary.get(Constants.TOTALCOUNT3STARS)).intValue());
+                    updateRatingValues.put(Constants.COUNT_FOUR_STAR_RATING, ((Float) ratingSummary.get(Constants.TOTALCOUNT4STARS)).intValue());
+                    updateRatingValues.put(Constants.COUNT_FIVE_STAR_RATING, ((Float) ratingSummary.get(Constants.TOTALCOUNT5STARS)).intValue());
+
+                    Map<String, Object> contentRequest = new HashMap<>();
+                    contentRequest.put(Constants.CONTENT, updateRatingValues);
+                    Map<String, Object> updateContent = new HashMap<>();
+                    updateContent.put(Constants.REQUEST, contentRequest);
+                    Map<String, Object> updateReadData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPatch(
+                            serverConfig.getLearningServiceBaseUrl() + serverConfig.getSystemUpdateAPI() + contentId, updateContent,
+                            ProjectUtil.getDefaultHeaders());
+                    if (Constants.OK.equalsIgnoreCase((String) updateReadData.get(Constants.RESPONSE_CODE))) {
+                        totalNumberOfUpdatedContent = totalNumberOfUpdatedContent + 1;
+                    } else {
+                        totalNumberOfErrorContent = totalNumberOfErrorContent + 1;
+                    }
+                } else {
+                    totalNumberOfErrorContent = totalNumberOfErrorContent + 1;
+                }
+            }
+            logger.info("Update End at time in ms: " + (System.currentTimeMillis() - startTime));
+            response.setResponseCode(HttpStatus.OK);
+            response.getResult().put(Constants.TOTAL_NUMBER_UPDATED_COUNT, totalNumberOfUpdatedContent);
+            response.getResult().put(Constants.TOTAL_NUMBER_ERROR_COUNT, totalNumberOfErrorContent);
+            response.getParams().setStatus(Constants.SUCCESS);
+        } catch (Exception e) {
+            logger.error("updateRatingTopicName", e);
+            response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+            response.getResult().put(Constants.ERROR_MESSAGE, e.getMessage());
+        }
+        return response;
+    }
+
+    @Override
+    public SBApiResponse updateAdditionalTag(String tag) {
+        SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_CONTENT_META_UPDATE);
+        try {
+            List<String> latestCourseList = getCourseListFromRedis(tag);
+
+            List<Map<String, Object>> contentDataList = contentService.searchContent(tag);
+            long startTime = System.currentTimeMillis();
+            int totalNumberOfUpdatedContent = 0;
+            int totalNumberOfErrorContent = 0;
+
+
+            List<String> fields = Arrays.asList(Constants.VERSION_KEY, Constants.IDENTIFIER, Constants.ADDITIONAL_TAGS);
+            List<String> contentListIds = new ArrayList<>();
+            if(contentDataList != null) {
+                contentListIds = contentDataList.stream().map(map -> (String) map.get(Constants.IDENTIFIER)).filter(value -> value != null).collect(Collectors.toList());
+            }
+            for (String contentId : latestCourseList) {
+                if (!contentListIds.contains(contentId)) {
+                    logger.info("Start Update Content Elastic for contentId: " + contentId);
+
+                    Map<String, Object> contentResponse = contentService.readContent(contentId, fields);
+                    //Adding the Content value to metaData for most Enrolled by checking through Redish
+                    if (!ObjectUtils.isEmpty(contentResponse)) {
+                        if (updateAdditionalTag(contentResponse, tag, false)) {
+                            totalNumberOfUpdatedContent = totalNumberOfUpdatedContent + 1;
+                        } else {
+                            totalNumberOfErrorContent = totalNumberOfErrorContent + 1;
+                        }
+                    } else {
+                        totalNumberOfErrorContent = totalNumberOfErrorContent + 1;
+                    }
+                }
+            }
+            contentListIds.removeAll(latestCourseList);
+            for (String removeContentId : contentListIds) {
+                logger.info("Start Update Content Elastic for Remove mostEnrolled Tags contentId: " + removeContentId);
+
+                Map<String, Object> contentResponse = contentService.readContent(removeContentId, fields);
+                //Remove the Content value to metaData for most Enrolled
+                if (!ObjectUtils.isEmpty(contentResponse)) {
+                    if (updateAdditionalTag(contentResponse, tag, true)) {
+                        totalNumberOfUpdatedContent = totalNumberOfUpdatedContent + 1;
+                    } else {
+                        totalNumberOfErrorContent = totalNumberOfErrorContent + 1;
+                    }
+                } else {
+                    totalNumberOfErrorContent = totalNumberOfErrorContent + 1;
+                }
+            }
+            logger.info("Update End at time in ms: " + (System.currentTimeMillis() - startTime));
+            response.setResponseCode(HttpStatus.OK);
+            response.getResult().put(Constants.TOTAL_NUMBER_UPDATED_COUNT, totalNumberOfUpdatedContent);
+            response.getResult().put(Constants.TOTAL_NUMBER_ERROR_COUNT, totalNumberOfErrorContent);
+            response.getParams().setStatus(Constants.SUCCESS);
+        } catch (Exception e) {
+            logger.error("updateContentTopicName", e);
+
+            response.getParams().setStatus(Constants.CLIENT_ERROR);
+            response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+            response.getResult().put(Constants.ERROR_MESSAGE, e.getMessage());
+        }
+        return response;
+    }
+
+    private boolean updateAdditionalTag(Map<String, Object> contentResponse, String tag, boolean isRemove) {
+        try {
+            String versionKey = (String) contentResponse.get(Constants.VERSION_KEY);
+            String contentId = (String) contentResponse.get(Constants.IDENTIFIER);
+            List<String> additionalTags = (List<String>) contentResponse.get(Constants.ADDITIONAL_TAGS);
+            if (additionalTags == null) {
+                additionalTags = new ArrayList<>();
+            }
+            if (isRemove) {
+
+                if (additionalTags.size() == 0)
+                    return false;
+                additionalTags.remove(tag);
+            } else {
+                if (additionalTags.contains(tag))
+                    return true;
+                additionalTags.add(tag);
+            }
+            Map<String, Object> updatedValues = new HashMap<>();
+            updatedValues.put(Constants.VERSION_KEY, versionKey);
+            updatedValues.put(Constants.ADDITIONAL_TAGS, additionalTags);
+            Map<String, Object> contentRequest = new HashMap<>();
+            contentRequest.put(Constants.CONTENT, updatedValues);
+            Map<String, Object> updateContent = new HashMap<>();
+            updateContent.put(Constants.REQUEST, contentRequest);
+            Map<String, Object> updateReadData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPatch(serverConfig.getLearningServiceBaseUrl()
+                    + serverConfig.getSystemUpdateAPI() + contentId, updateContent, ProjectUtil.getDefaultHeaders());
+            if (Constants.OK.equalsIgnoreCase((String) updateReadData.get(Constants.RESPONSE_CODE))) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (Exception e) {
+            logger.error(e);
+            return false;
+        }
+    }
+
+    private List<String> getCourseListFromRedis(String tag) {
+        if (Constants.MOST_ENROLLED.equalsIgnoreCase(tag)) {
+            String latestCourseString = redisCacheMgr.getCache(Constants.REDIS_COURSE_MOST_ENROLLED_TAG, serverConfig.getRedisInsightIndex());
+            return Arrays.asList(latestCourseString.split(","));
+        } else if (Constants.MOST_TRENDING.equalsIgnoreCase(tag)) {
+            List<String> latestTrendingCourseListRedis = redisCacheMgr.hget(Constants.REDIS_COURSE_MOST_TRENDING_TAG, serverConfig.getRedisInsightIndex(), Constants.ACROSS_COURSES, Constants.ACROSS_PROGRAMS);
+            List<String> latestTrendingCourseList = new ArrayList<>();
+            if (latestTrendingCourseListRedis != null && latestTrendingCourseListRedis.size() == 2) {
+                latestTrendingCourseList.addAll(Arrays.asList(latestTrendingCourseListRedis.get(0).split(",")));
+                latestTrendingCourseList.addAll(Arrays.asList(latestTrendingCourseListRedis.get(1).split(",")));
+            }
+
+            return latestTrendingCourseList.stream().filter(courseId -> !courseId.contains("_rc")).collect(Collectors.toList());
+        }
+        throw new BadRequestException("Please provide a valid Tag");
+    }
 }

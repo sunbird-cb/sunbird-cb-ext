@@ -23,8 +23,8 @@ public class CbExtServerProperties {
 	@Value("${lms.system.settings.path}")
 	private String lmsSystemSettingsPath;
 
-	@Value("${lms.user.update.path}")
-	private String lmsUserUpdatePath;
+	@Value("${lms.user.update.private.path}")
+	private String lmsUserUpdatePrivatePath;
 
 	@Value("${lms.user.read.path}")
 	private String lmsUserReadPath;
@@ -193,6 +193,28 @@ public class CbExtServerProperties {
 
 	@Value("${redis.port}")
 	private String redisPort;
+
+	public String getRedisDataHostName() {
+		return redisDataHostName;
+	}
+
+	public void setRedisDataHostName(String redisDataHostName) {
+		this.redisDataHostName = redisDataHostName;
+	}
+
+	public String getRedisDataPort() {
+		return redisDataPort;
+	}
+
+	public void setRedisDataPort(String redisDataPort) {
+		this.redisDataPort = redisDataPort;
+	}
+
+	@Value("${redis.data.host.name}")
+	private String redisDataHostName;
+
+	@Value("${redis.data.port}")
+	private String redisDataPort;
 
 	@Value("${redis.timeout}")
 	private String redisTimeout;
@@ -476,11 +498,11 @@ public class CbExtServerProperties {
 	@Value("${report.download.folder.name}")
 	private String reportDownloadFolderName;
 
-  @Value("${progress.api.update.endpoint}")
-  private String progressUpdateEndPoint;
+	@Value("${progress.api.update.endpoint}")
+	private String progressUpdateEndPoint;
 
-  @Value("${kafka.topic.update.content.progress}")
-  private String updateContentProgressKafkaTopic;
+	@Value("${kafka.topic.update.content.progress}")
+	private String updateContentProgressKafkaTopic;
 
 	@Value("${sb.es.user.profile.index.type}")
 	private String sbEsProfileIndexType;
@@ -493,6 +515,7 @@ public class CbExtServerProperties {
 
 	@Value("${content-read-endpoint}")
 	private String contentReadEndPoint;
+  
 	@Value("${redis.questions.read.timeout}")
 	private Integer redisQuestionsReadTimeOut;
 
@@ -501,6 +524,51 @@ public class CbExtServerProperties {
 
 	@Value("${mdo.admin.update.users}")
 	private String mdoAdminUpdateUsers;
+
+	@Value("${learning_service_base_url}")
+	private String learningServiceBaseUrl;
+
+	@Value("${system.content.update.url}")
+	private String systemUpdateAPI;
+
+	@Value(("${limit_for_search}"))
+	private String limitForSearch;
+  
+  	@Value("${user.registration.welcome.email.signinLink}")
+	private String welcomeEmailSigninLink;
+
+	@Value("${user.registration.welcome.email.discoverLink}")
+	private String welcomeEmailDiscoverLink;
+
+	@Value("${user.registration.welcome.email.meetingLink}")
+	private String welcomeEmailMeetingLink;
+
+	@Value("${report.type.get.file.info}")
+	private String reportTypeGetFileInfo;
+  
+  	@Value("${redis.insights.index}")
+	private int redisInsightIndex;
+  
+  	@Value("${insights.label.certificates.across}")
+	private String insightsLabelCertificatesAcross;
+  
+	@Value("${insights.label.learning.hours.across}")
+	private String insightsLabelLearningHoursAcross;
+  
+	@Value("${insights.label.certificates.your.department}")
+	private String insightsLabelCertificatesYourDepartment;
+  
+	@Value("${insights.label.learning.hours.your.department}")
+	private String insightsLabelLearningHoursYourDepartment;
+  
+  	@Value("${sb.otp.generate.path}")
+	private String sbOTPGeneratePath;
+
+	@Value("${lms.user.update.path}")
+	private String lmsUserUpdatePath;
+
+  @Value("${cloud.profile.image.container.name}")
+  private String cloudProfileImageContainerName;
 
 	public boolean qListFromCacheEnabled() {
 		return qListFromCacheEnabled;
@@ -518,20 +586,17 @@ public class CbExtServerProperties {
 		this.redisQuestionsReadTimeOut = redisQuestionsReadTimeOut;
 	}
 
-	@Value("${user.registration.welcome.email.signinLink}")
-	private String welcomeEmailSigninLink;
 
-	@Value("${user.registration.welcome.email.discoverLink}")
-	private String welcomeEmailDiscoverLink;
+	@Value("${batch.enrolment.return.size}")
+	private Integer batchEnrolmentReturnSize;
 
-	@Value("${user.registration.welcome.email.meetingLink}")
-	private String welcomeEmailMeetingLink;
+	public Integer getBatchEnrolmentReturnSize() {
+		return batchEnrolmentReturnSize;
+	}
 
-	@Value("${report.type.get.file.info}")
-	private String reportTypeGetFileInfo;
-
-	@Value("${sb.otp.generate.path}")
-	private String sbOTPGeneratePath;
+	public void setBatchEnrolmentReturnSize(Integer batchEnrolmentReturnSize) {
+		this.batchEnrolmentReturnSize = batchEnrolmentReturnSize;
+	}
 
 	public String getSbOTPGeneratePath() {
 		return sbOTPGeneratePath;
@@ -539,6 +604,46 @@ public class CbExtServerProperties {
 
 	public void setSbOTPGeneratePath(String sbOTPGeneratePath) {
 		this.sbOTPGeneratePath = sbOTPGeneratePath;
+	}
+
+	public String getInsightsLabelCertificatesAcross() {
+		return insightsLabelCertificatesAcross;
+	}
+
+	public void setInsightsLabelCertificatesAcross(String insightsLabelCertificatesAcross) {
+		this.insightsLabelCertificatesAcross = insightsLabelCertificatesAcross;
+	}
+
+	public String getInsightsLabelLearningHoursAcross() {
+		return insightsLabelLearningHoursAcross;
+	}
+
+	public void setInsightsLabelLearningHoursAcross(String insightsLabelLearningHoursAcross) {
+		this.insightsLabelLearningHoursAcross = insightsLabelLearningHoursAcross;
+	}
+
+	public String getInsightsLabelCertificatesYourDepartment() {
+		return insightsLabelCertificatesYourDepartment;
+	}
+
+	public void setInsightsLabelCertificatesYourDepartment(String insightsLabelCertificatesYourDepartment) {
+		this.insightsLabelCertificatesYourDepartment = insightsLabelCertificatesYourDepartment;
+	}
+
+	public String getInsightsLabelLearningHoursYourDepartment() {
+		return insightsLabelLearningHoursYourDepartment;
+	}
+
+	public void setInsightsLabelLearningHoursYourDepartment(String insightsLabelLearningHoursYourDepartment) {
+		this.insightsLabelLearningHoursYourDepartment = insightsLabelLearningHoursYourDepartment;
+	}
+
+	public int getRedisInsightIndex() {
+		return redisInsightIndex;
+	}
+
+	public void setRedisInsightIndex(int redisInsightIndex) {
+		this.redisInsightIndex = redisInsightIndex;
 	}
 
 	public String getAssessmentSubmitTopic() {
@@ -585,12 +690,12 @@ public class CbExtServerProperties {
 		this.wfServiceTransitionPath = wfServiceTransitionPath;
 	}
 
-	public String getLmsUserUpdatePath() {
-		return lmsUserUpdatePath;
+	public String getLmsUserUpdatePrivatePath() {
+		return lmsUserUpdatePrivatePath;
 	}
 
-	public void setLmsUserUpdatePath(String lmsUserUpdatePath) {
-		this.lmsUserUpdatePath = lmsUserUpdatePath;
+	public void setLmsUserUpdatePrivatePath(String lmsUserUpdatePrivatePath) {
+		this.lmsUserUpdatePrivatePath = lmsUserUpdatePrivatePath;
 	}
 
 	public String getLmsSystemSettingsPath() {
@@ -1891,4 +1996,42 @@ public class CbExtServerProperties {
 	public void setMdoAdminUpdateUsers(String mdoAdminUpdateUsers) {
 		this.mdoAdminUpdateUsers = mdoAdminUpdateUsers;
 	}
+
+	public String getLearningServiceBaseUrl() {
+		return learningServiceBaseUrl;
+	}
+
+	public void setLearningServiceBaseUrl(String learningServiceBaseUrl) {
+		this.learningServiceBaseUrl = learningServiceBaseUrl;
+	}
+
+	public String getSystemUpdateAPI() {
+		return systemUpdateAPI;
+	}
+
+	public void setSystemUpdateAPI(String systemUpdateAPI) {
+		this.systemUpdateAPI = systemUpdateAPI;
+	}
+
+
+	public String getLimitForSearch() {
+		return limitForSearch;
+	}
+
+	public void setLimitForSearch(String limitForSearch) {
+		this.limitForSearch = limitForSearch;
+	}
+
+	public String getLmsUserUpdatePath() {
+		return lmsUserUpdatePath;
+	}
+
+	public void setLmsUserUpdatePath(String lmsUserUpdatePath) {
+		this.lmsUserUpdatePath = lmsUserUpdatePath;
+	}
+
+	public String getCloudProfileImageContainerName() { return cloudProfileImageContainerName; }
+
+	public void setCloudProfileImageContainerName(String cloudProfileImageContainerName) {
+		this.cloudProfileImageContainerName = cloudProfileImageContainerName; }
 }
