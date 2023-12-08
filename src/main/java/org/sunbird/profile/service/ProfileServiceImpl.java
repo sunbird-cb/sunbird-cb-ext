@@ -9,8 +9,7 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.*;
 import org.elasticsearch.rest.RestStatus;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
@@ -612,6 +611,30 @@ public class ProfileServiceImpl implements ProfileService {
 		return response;
 	}
 
+	@Override
+	public SBApiResponse userAdminAutoComplete(String searchTerm,String rooOrgId) {
+		SBApiResponse response = new SBApiResponse();
+		response.setResponseCode(HttpStatus.BAD_REQUEST);
+		response.getParams().setStatus(Constants.FAILED);
+		if (StringUtils.isEmpty(searchTerm) || StringUtils.isEmpty(rooOrgId)) {
+			response.getParams().setErrmsg("Invalid Search Term or Root Org Id");
+			return response;
+		}
+		response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+		Map<String, Object> resultResp = new HashMap<>();
+		try {
+			List<Map<String, Object>> userData = getAdminUserSearchData(searchTerm, rooOrgId);
+			resultResp.put(Constants.CONTENT, userData);
+			resultResp.put(Constants.COUNT, userData.size());
+			response.setResponseCode(HttpStatus.OK);
+			response.getParams().setStatus(Constants.SUCCESS);
+			response.put(Constants.RESPONSE, resultResp);
+		} catch (Exception e) {
+			response.getParams().setErrmsg("Failed to get user details from ES. Exception: " + e.getMessage());
+		}
+		return response;
+	}
+
 	public SBApiResponse userBasicProfileUpdate(Map<String, Object> request) {
 		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_USER_BASIC_PROFILE_UPDATE);
 		String errMsg = validateBasicProfilePayload(request);
@@ -1181,14 +1204,38 @@ public class ProfileServiceImpl implements ProfileService {
 		List<Map<String, Object>> resultArray = new ArrayList<>();
 		Map<String, Object> result;
 		final BoolQueryBuilder query = QueryBuilders.boolQuery();
+		final BoolQueryBuilder finalQuery = QueryBuilders.boolQuery();
 		for (String field : serverConfig.getEsAutoCompleteSearchFields()) {
 			query.should(QueryBuilders.matchPhrasePrefixQuery(field, searchTerm));
 		}
-
-		final BoolQueryBuilder finalQuery = QueryBuilders.boolQuery();
-		finalQuery.must(QueryBuilders.termQuery(Constants.STATUS, 1)).must(query);
+		finalQuery.must(QueryBuilders.termQuery(Constants.STATUS_RAW, 1)).must(query);
 		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder().query(finalQuery);
-		sourceBuilder.fetchSource(serverConfig.getEsAutoCompleteIncludeFields(), new String[] {});
+		sourceBuilder.fetchSource(serverConfig.getEsAutoCompleteIncludeFields(), new String[]{});
+		SearchResponse searchResponse = indexerService.getEsResult(serverConfig.getSbEsUserProfileIndex(),
+				serverConfig.getEsProfileIndexType(), sourceBuilder, true);
+		for (SearchHit hit : searchResponse.getHits()) {
+			result = hit.getSourceAsMap();
+			resultArray.add(result);
+		}
+		return resultArray;
+	}
+
+	public List<Map<String, Object>> getAdminUserSearchData(String searchTerm, String rootOrgId) throws Exception {
+		List<Map<String, Object>> resultArray = new ArrayList<>();
+		Map<String, Object> result;
+		final BoolQueryBuilder nestedQuery = QueryBuilders.boolQuery();
+		final BoolQueryBuilder finalQuery = QueryBuilders.boolQuery();
+		searchTerm = searchTerm.toLowerCase();
+		MatchQueryBuilder matchQueryRootOrgId = QueryBuilders.matchQuery(Constants.ROOT_ORG_ID_RAW, rootOrgId);
+		for (String field : serverConfig.getEsAutoCompleteSearchFields()) {
+			nestedQuery.should(new WildcardQueryBuilder(field, "*" + searchTerm + "*"));
+		}
+		TermQueryBuilder termQueryStatus = QueryBuilders.termQuery(Constants.STATUS_RAW, 1);
+		finalQuery.must(matchQueryRootOrgId);
+		finalQuery.must(nestedQuery);
+		finalQuery.must(termQueryStatus);
+		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder().query(finalQuery);
+		sourceBuilder.fetchSource(serverConfig.getEsAutoCompleteIncludeFields(), new String[]{});
 		SearchResponse searchResponse = indexerService.getEsResult(serverConfig.getSbEsUserProfileIndex(),
 				serverConfig.getEsProfileIndexType(), sourceBuilder, true);
 		for (SearchHit hit : searchResponse.getHits()) {
