@@ -1,0 +1,14 @@
+package org.sunbird.cbp.service;
+
+import org.sunbird.cbp.model.dto.CbPlanDto;
+import org.sunbird.common.model.SBApiResponse;
+import org.sunbird.common.model.SunbirdApiRequest;
+
+public interface CbPlanService {
+    SBApiResponse createCbPlan(SunbirdApiRequest request, String userOrgId, String token);
+
+    SBApiResponse updateCbPlan(SunbirdApiRequest request, String userOrgId, String token);
+
+    SBApiResponse publishCbPlan(SunbirdApiRequest request, String userOrgId, String token);
+
+}
