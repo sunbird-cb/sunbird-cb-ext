@@ -173,7 +173,7 @@ public class RedisCacheMgr {
     }
 
     public String getCache(String key, Integer index) {
-        try (Jedis jedis = jedisPool.getResource()) {
+        try (Jedis jedis = jedisDataPopulationPool.getResource()) {
             if (index != null) {
                 jedis.select(index);
             }
