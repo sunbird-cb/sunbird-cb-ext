@@ -855,7 +855,19 @@ public class Constants {
 	public static final String CREATED_AT = "createdAt";
 	public static final String DRAFT_DATA = "draftData";
 	public static final String TABLE_CB_PLAN = "test_cb_plan";
+
+	public static final String CB_CONTENT_LIST = "contentList";
+	public static final String CB_CONTENT_TYPE = "contentType";
+	public static final String CB_ASSIGNMENT_TYPE = "assignmentType";
+	public static final	String CB_CREATED_AT	= "createdAt";
+	public static final	String CB_ASSIGNMENT_TYPE_INFO = "assignmentTypeInfo";
+	public static final String UPDATED_AT = "updatedAt";
+	public static final	String CB_PUBLISHED_BY	= "publishedBy";
+	public static final String CB_PUBLISHED_AT = "publishedAt";
+	public static final String CB_PLAN_ID = "cb_plan_id";
+	public static final String CB_ASSIGNMENT_TYPE_INFO_KEY = "assignmentTypeInfoKey";
 	public static final String TABLE_CB_PLAN_LOOKUP = "test_cb_plan_lookup";
+	public static final String CB_IS_ACTIVE = "isActive";
 	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}
