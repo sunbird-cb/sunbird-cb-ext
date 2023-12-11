@@ -184,4 +184,16 @@ public class RedisCacheMgr {
         }
     }
 
+    public String getCacheFromDataRedish(String key, Integer index) {
+        try (Jedis jedis = jedisDataPopulationPool.getResource()) {
+            if (index != null) {
+                jedis.select(index);
+            }
+            return jedis.get(key);
+        } catch (Exception e) {
+            logger.error(e);
+            return null;
+        }
+    }
+
 }

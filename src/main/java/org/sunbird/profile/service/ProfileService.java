@@ -20,6 +20,8 @@ public interface ProfileService {
 
 	SBApiResponse userAutoComplete(String searchTerm);
 
+	SBApiResponse userAdminAutoComplete(String searchTerm, String rootOrgId);
+
 	SBApiResponse migrateUser(Map<String, Object> request, String userToken, String authToken);
 
 	SBApiResponse userSignup(Map<String, Object> request);
