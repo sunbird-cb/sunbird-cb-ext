@@ -690,7 +690,7 @@ public class RatingServiceImpl implements RatingService {
 
     private List<String> getCourseListFromRedis(String tag) {
         if (Constants.MOST_ENROLLED.equalsIgnoreCase(tag)) {
-            String latestCourseString = redisCacheMgr.getCache(Constants.REDIS_COURSE_MOST_ENROLLED_TAG, serverConfig.getRedisInsightIndex());
+            String latestCourseString = redisCacheMgr.getCacheFromDataRedish(Constants.REDIS_COURSE_MOST_ENROLLED_TAG, serverConfig.getRedisInsightIndex());
             return Arrays.asList(latestCourseString.split(","));
         } else if (Constants.MOST_TRENDING.equalsIgnoreCase(tag)) {
             List<String> latestTrendingCourseListRedis = redisCacheMgr.hget(Constants.REDIS_COURSE_MOST_TRENDING_TAG, serverConfig.getRedisInsightIndex(), Constants.ACROSS_COURSES, Constants.ACROSS_PROGRAMS);
