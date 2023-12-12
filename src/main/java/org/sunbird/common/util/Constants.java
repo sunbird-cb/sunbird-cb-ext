@@ -858,7 +858,7 @@ public class Constants {
 	public static final String API_CB_PLAN_PUBLISH = "api.cb.plan.v1.publish";
 	public static final String CREATED_AT = "createdAt";
 	public static final String DRAFT_DATA = "draftData";
-	public static final String TABLE_CB_PLAN = "test_cb_plan";
+	public static final String TABLE_CB_PLAN = "cb_plan";
 
 	public static final String CB_CONTENT_LIST = "contentList";
 	public static final String CB_CONTENT_TYPE = "contentType";
@@ -870,7 +870,7 @@ public class Constants {
 	public static final String CB_PUBLISHED_AT = "publishedAt";
 	public static final String CB_PLAN_ID = "cb_plan_id";
 	public static final String CB_ASSIGNMENT_TYPE_INFO_KEY = "assignmentTypeInfoKey";
-	public static final String TABLE_CB_PLAN_LOOKUP = "test_cb_plan_lookup";
+	public static final String TABLE_CB_PLAN_LOOKUP = "cb_plan_lookup";
 	public static final String CB_IS_ACTIVE = "isActive";
 	private Constants() {
 		throw new IllegalStateException("Utility class");
