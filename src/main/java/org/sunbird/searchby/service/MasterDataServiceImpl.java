@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
+import org.sunbird.cache.RedisCacheMgr;
 import org.sunbird.cassandra.utils.CassandraOperation;
 import org.sunbird.common.model.FracApiResponse;
 import org.sunbird.common.model.SBApiResponse;
@@ -36,6 +37,8 @@ public class MasterDataServiceImpl implements MasterDataService {
     OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
     @Autowired
     CassandraOperation cassandraOperation;
+    @Autowired
+    RedisCacheMgr redisCacheMgr;
 
     @Override
 	public FracApiResponse getListPositions() {
@@ -310,4 +313,26 @@ public class MasterDataServiceImpl implements MasterDataService {
 			logger.info("Failed to get position info from FRAC API");
 		}
 	}
+
+    public SBApiResponse getDeptPositions(String userOrgId) {
+        SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_V2_READ_DEPT_POSITION);
+        if (userOrgId == null || userOrgId.isEmpty()) {
+            String errMsg = "X-AUTH Org-Id is Empty";
+            logger.info(errMsg);
+            response.getParams().setStatus(Constants.FAILED);
+            response.getParams().setErrmsg(errMsg);
+            response.setResponseCode(HttpStatus.BAD_REQUEST);
+        } else {
+            List<String> deptDetails = Optional.ofNullable(redisCacheMgr.hget(Constants.ORG_DESIGNATION, cbExtServerProperties.getRedisInsightIndex(), userOrgId))
+                    .filter(list -> !list.isEmpty())
+                    .orElse(new ArrayList<>());
+
+            Map<String, Object> responseData = new HashMap<>();
+
+            responseData.put("count", deptDetails.size());
+            responseData.put("content", deptDetails);
+            response.getResult().put("response", responseData);
+        }
+        return response;
+    }
 }
