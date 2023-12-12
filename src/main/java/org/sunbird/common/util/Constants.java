@@ -853,7 +853,25 @@ public class Constants {
 	public static final String REDIS_COURSE_MOST_TRENDING_TAG = "lhp_trending";
 	public static final String ACROSS_COURSES = "across:courses";
 	public static final String ACROSS_PROGRAMS = "across:programs";
+	public static final String API_CB_PLAN_CREATE = "api.cb.plan.v1.create";
+	public static final String API_CB_PLAN_UPDATE = "api.cb.plan.v1.update";
+	public static final String API_CB_PLAN_PUBLISH = "api.cb.plan.v1.publish";
+	public static final String CREATED_AT = "createdAt";
+	public static final String DRAFT_DATA = "draftData";
+	public static final String TABLE_CB_PLAN = "cb_plan";
 
+	public static final String CB_CONTENT_LIST = "contentList";
+	public static final String CB_CONTENT_TYPE = "contentType";
+	public static final String CB_ASSIGNMENT_TYPE = "assignmentType";
+	public static final	String CB_CREATED_AT	= "createdAt";
+	public static final	String CB_ASSIGNMENT_TYPE_INFO = "assignmentTypeInfo";
+	public static final String UPDATED_AT = "updatedAt";
+	public static final	String CB_PUBLISHED_BY	= "publishedBy";
+	public static final String CB_PUBLISHED_AT = "publishedAt";
+	public static final String CB_PLAN_ID = "cb_plan_id";
+	public static final String CB_ASSIGNMENT_TYPE_INFO_KEY = "assignmentTypeInfoKey";
+	public static final String TABLE_CB_PLAN_LOOKUP = "cb_plan_lookup";
+	public static final String CB_IS_ACTIVE = "isActive";
 	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}
