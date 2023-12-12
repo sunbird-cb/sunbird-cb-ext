@@ -159,6 +159,12 @@ public class CbPlanServiceImpl implements CbPlanService {
 
             if (CollectionUtils.isNotEmpty(cbPlanMap)) {
                 Map<String, Object> cbPlan = cbPlanMap.get(0);
+                if (Constants.LIVE.equalsIgnoreCase((String) cbPlan.get(Constants.STATUS))) {
+                    response.getParams().setStatus(Constants.FAILED);
+                    response.getParams().setErrmsg("CbPlan is already published for ID: " + cbPlanId);
+                    response.setResponseCode(HttpStatus.BAD_REQUEST);
+                    return response;
+                }
                 CbPlanDto cbPlanDto = mapper.readValue((String) cbPlan.get(Constants.DRAFT_DATA), CbPlanDto.class);
                 updateCbPlanData(cbPlan, cbPlanDto);
                 cbPlan.put(Constants.CB_PUBLISHED_BY, userId);
