@@ -33,22 +33,26 @@ public class InsightsServiceImpl implements InsightsService {
     CbExtServerProperties extServerProperties;
 
     public SBApiResponse insights(Map<String, Object> requestBody,String userId) throws Exception {
-        String [] labelsCertificates = {extServerProperties.getInsightsLabelCertificatesYourDepartment(),extServerProperties.getInsightsLabelCertificatesAcross()} ;
+        String [] labelsCertificates = {extServerProperties.getInsightsLabelCertificatesAcross(),extServerProperties.getInsightsLabelCertificatesYourDepartment()} ;
         String [] labelsLearningHours = {extServerProperties.getInsightsLabelLearningHoursYourDepartment(),extServerProperties.getInsightsLabelLearningHoursAcross()} ;
         HashMap<String, Object> request = (HashMap<String, Object>) requestBody.get(REQUEST) == null ? new HashMap<>() : (HashMap<String, Object>) requestBody.get(REQUEST);
         HashMap<String, Object> filter = ((HashMap<String, Object>) request.get(FILTERS)) == null ? new HashMap<>() : ((HashMap<String, Object>) request.get(FILTERS));
         ArrayList<String> organizations = (ArrayList<String>) (filter.get(ORGANISATIONS)) ==null ? new ArrayList<>() : (ArrayList<String>) (filter.get(ORGANISATIONS));
         ArrayList<String> keys = nudgeKeys(organizations);
         String[] fieldsArray = keys.toArray(new String[keys.size()]);
+        ArrayList<String> certificateOrgs= new ArrayList<>();
+        certificateOrgs.add("across");
+        ArrayList<String> certificate_keys = nudgeKeys(certificateOrgs);
+        String[] fieldsArray_certificates = certificate_keys.toArray(new String[certificate_keys.size()]);
         ArrayList<Object> nudges = new ArrayList<>();
         List<String> lhpLearningHours =  redisCacheMgr.hget(INSIGHTS_LEARNING_HOURS_REDIS_KEY, serverProperties.getRedisInsightIndex(),fieldsArray);
-        List<String> lhpCertifications = redisCacheMgr.hget(INSIGHTS_CERTIFICATIONS_REDIS_KEY, serverProperties.getRedisInsightIndex(),fieldsArray);
+        List<String> lhpCertifications = redisCacheMgr.hget(INSIGHTS_CERTIFICATIONS_REDIS_KEY, serverProperties.getRedisInsightIndex(),fieldsArray_certificates);
         if(lhpLearningHours == null)
             lhpLearningHours = new ArrayList<>();
         if(lhpCertifications ==null)
             lhpCertifications = new ArrayList<>();
         populateIfNudgeExist(lhpLearningHours, nudges, INSIGHTS_TYPE_LEARNING_HOURS,organizations,labelsLearningHours);
-        populateIfNudgeExist(lhpCertifications, nudges, INSIGHTS_TYPE_CERTIFICATE,organizations,labelsCertificates);
+        populateIfNudgeExist(lhpCertifications, nudges, INSIGHTS_TYPE_CERTIFICATE,Arrays.asList(fieldsArray_certificates),labelsCertificates);
         HashMap<String, Object> responseMap = new HashMap<>();
         responseMap.put(WEEKLY_CLAPS, populateIfClapsExist(userId) );
         responseMap.put(NUDGES, nudges);
