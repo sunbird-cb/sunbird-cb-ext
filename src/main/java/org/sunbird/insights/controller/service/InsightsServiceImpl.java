@@ -49,7 +49,7 @@ public class InsightsServiceImpl implements InsightsService {
         if(lhpCertifications ==null)
             lhpCertifications = new ArrayList<>();
         populateIfNudgeExist(lhpLearningHours, nudges, INSIGHTS_TYPE_LEARNING_HOURS,organizations,labelsLearningHours);
-        populateIfNudgeExist(lhpCertifications, nudges, INSIGHTS_TYPE_CERTIFICATE,organizations,labelsCertificates);
+        populateIfNudgeExist(lhpCertifications, nudges, INSIGHTS_TYPE_CERTIFICATE,Arrays.asList(fieldsArray_certificates),labelsCertificates);
         HashMap<String, Object> responseMap = new HashMap<>();
         responseMap.put(WEEKLY_CLAPS, populateIfClapsExist(userId) );
         responseMap.put(NUDGES, nudges);
