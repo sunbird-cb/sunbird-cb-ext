@@ -33,7 +33,7 @@ public class InsightsServiceImpl implements InsightsService {
     CbExtServerProperties extServerProperties;
 
     public SBApiResponse insights(Map<String, Object> requestBody,String userId) throws Exception {
-        String [] labelsCertificates = {extServerProperties.getInsightsLabelCertificatesYourDepartment(),extServerProperties.getInsightsLabelCertificatesAcross()} ;
+        String [] labelsCertificates = {extServerProperties.getInsightsLabelCertificatesAcross(),extServerProperties.getInsightsLabelCertificatesYourDepartment()} ;
         String [] labelsLearningHours = {extServerProperties.getInsightsLabelLearningHoursYourDepartment(),extServerProperties.getInsightsLabelLearningHoursAcross()} ;
         HashMap<String, Object> request = (HashMap<String, Object>) requestBody.get(REQUEST) == null ? new HashMap<>() : (HashMap<String, Object>) requestBody.get(REQUEST);
         HashMap<String, Object> filter = ((HashMap<String, Object>) request.get(FILTERS)) == null ? new HashMap<>() : ((HashMap<String, Object>) request.get(FILTERS));
