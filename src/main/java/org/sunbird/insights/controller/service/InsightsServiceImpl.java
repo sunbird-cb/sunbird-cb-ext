@@ -40,6 +40,7 @@ public class InsightsServiceImpl implements InsightsService {
         ArrayList<String> organizations = (ArrayList<String>) (filter.get(ORGANISATIONS)) ==null ? new ArrayList<>() : (ArrayList<String>) (filter.get(ORGANISATIONS));
         ArrayList<String> keys = nudgeKeys(organizations);
         String[] fieldsArray = keys.toArray(new String[keys.size()]);
+        String[] fieldsArray_certificates = {"across"};
         ArrayList<Object> nudges = new ArrayList<>();
         List<String> lhpLearningHours =  redisCacheMgr.hget(INSIGHTS_LEARNING_HOURS_REDIS_KEY, serverProperties.getRedisInsightIndex(),fieldsArray);
         List<String> lhpCertifications = redisCacheMgr.hget(INSIGHTS_CERTIFICATIONS_REDIS_KEY, serverProperties.getRedisInsightIndex(),fieldsArray);
