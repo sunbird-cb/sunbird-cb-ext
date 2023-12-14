@@ -109,17 +109,26 @@ public class CbPlanServiceImpl implements CbPlanService {
                 Map<String, Object> cbPlanInfo = new HashMap<>();
                 cbPlanInfo.put(Constants.ID, cbPlanId);
                 cbPlanInfo.put(Constants.ORG_ID, userOrgId);
-                List<String> allowedFieldForUpdate = Arrays.asList(Constants.NAME, Constants.CB_ASSIGNMENT_TYPE_INFO, Constants.END_DATE, Constants.ID);
-                long keyNotAllowedCount = updatedCbPlan.keySet().stream().filter(key -> !allowedFieldForUpdate.contains(key)).count();
-                if (keyNotAllowedCount > 0) {
-                    response.getParams().setStatus(Constants.FAILED);
-                    response.getParams().setErrmsg("Allowed Field for update cbPlan are: " + Constants.NAME + ", " + Constants.CB_ASSIGNMENT_TYPE_INFO + ", " + Constants.END_DATE);
-                    response.setResponseCode(HttpStatus.BAD_REQUEST);
-                }
                 List<Map<String, Object>> cbPlanMapInfo = cassandraOperation.getRecordsByPropertiesWithoutFiltering(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_CB_PLAN, cbPlanInfo, null);
                 if (CollectionUtils.isNotEmpty(cbPlanMapInfo)) {
+                    Map<String, Object> cbPlanInfoMap = cbPlanMapInfo.get(0);
+                    String draftInfo = null;
+                    if (Constants.LIVE.equalsIgnoreCase((String) cbPlanInfoMap.get(Constants.STATUS)) && cbPlanInfoMap.get(Constants.CB_PUBLISHED_BY) != null) {
+                        //check when the cbPlan is published, need to check only few field need to be modified.
+                        List<String> allowedFieldForUpdate = Arrays.asList(Constants.NAME, Constants.CB_ASSIGNMENT_TYPE_INFO, Constants.END_DATE, Constants.ID);
+                        long keyNotAllowedCount = updatedCbPlan.keySet().stream().filter(key -> !allowedFieldForUpdate.contains(key)).count();
+                        if (keyNotAllowedCount > 0) {
+                            response.getParams().setStatus(Constants.FAILED);
+                            response.getParams().setErrmsg("Allowed Field for update cbPlan are: " + Constants.NAME + ", " + Constants.CB_ASSIGNMENT_TYPE_INFO + ", " + Constants.END_DATE);
+                            response.setResponseCode(HttpStatus.BAD_REQUEST);
+                            return response;
+                        }
+                    } else {
+                        draftInfo = updateDraftInfo(updatedCbPlan, cbPlanMapInfo.get(0));
+                    }
                     Map<String, Object> updatedCbPlanData = new HashMap<>();
-                    updatedCbPlanData.put(Constants.DRAFT_DATA, mapper.writeValueAsString(updatedCbPlan));
+                    draftInfo = mapper.writeValueAsString(updatedCbPlan);
+                    updatedCbPlanData.put(Constants.DRAFT_DATA, draftInfo);
                     updatedCbPlanData.put(Constants.UPDATED_BY, userId);
                     updatedCbPlanData.put(Constants.UPDATED_AT, new Date());
 
@@ -384,11 +393,9 @@ public class CbPlanServiceImpl implements CbPlanService {
             enrichData.put(Constants.END_DATE, cbPlanDto.getEndDate());
             enrichData.put(Constants.CB_ASSIGNMENT_TYPE_INFO, cbPlanDto.getAssignmentTypeInfo());
         }
-
-        Map<String, Object> createByInfo = userUtilityService.getUsersReadData((String) cbPlan.get(Constants.CREATED_BY), StringUtils.EMPTY,
-                StringUtils.EMPTY);
+        Map<String, Map<String, String>> userInfoMap = new HashMap<>();
         enrichData.put(Constants.ID, cbPlan.get(Constants.ID));
-        enrichData.put(Constants.CREATED_BY, createByInfo.get(Constants.FIRSTNAME));
+
         enrichData.put(Constants.CREATED_AT, cbPlan.get(Constants.CREATED_AT));
         enrichData.put(Constants.CB_PUBLISHED_AT, cbPlan.get(Constants.CB_PUBLISHED_AT));
         enrichData.put(Constants.STATUS, cbPlan.get(Constants.STATUS));
@@ -398,11 +405,11 @@ public class CbPlanServiceImpl implements CbPlanService {
             List<Map<String, String>> enrichUserInfoMapDraft = new ArrayList<>();
             List<String> allUserInfo = new ArrayList<>();
             allUserInfo.addAll(assignmentTypeInfo);
+            allUserInfo.add((String) cbPlan.get(Constants.CREATED_BY));
             if (CollectionUtils.isNotEmpty(userDraftAssignmentTypeInfoForLive)) {
                 allUserInfo.addAll(userDraftAssignmentTypeInfoForLive);
             }
 
-            Map<String, Map<String, String>> userInfoMap = new HashMap<>();
             userUtilityService.getUserDetailsFromDB(allUserInfo, Arrays.asList(Constants.FIRSTNAME, Constants.USER_ID),
                     userInfoMap);
             for (String userId : assignmentTypeInfo) {
@@ -414,12 +421,17 @@ public class CbPlanServiceImpl implements CbPlanService {
                 enrichUserInfoMapDraft.add(userInfoMap.get(draftUserId));
             }
             if (CollectionUtils.isNotEmpty(enrichUserInfoMapDraft)) {
-                Map<String, Object> draft = (Map<String, Object>)enrichData.get(Constants.DRAFT_DATA);
+                Map<String, Object> draft = (Map<String, Object>) enrichData.get(Constants.DRAFT_DATA);
                 draft.put(Constants.USER_DETAILS, enrichUserInfoMapDraft);
                 draft.remove(Constants.CB_ASSIGNMENT_TYPE_INFO);
                 enrichData.put(Constants.DRAFT_DATA, draft);
             }
+        } else {
+            userUtilityService.getUserDetailsFromDB(Arrays.asList((String) cbPlan.get(Constants.CREATED_BY)), Arrays.asList(Constants.FIRSTNAME, Constants.USER_ID),
+                    userInfoMap);
         }
+
+        enrichData.put(Constants.CREATED_BY, userInfoMap.get((String) cbPlan.get(Constants.CREATED_BY)).get(Constants.FIRSTNAME));
         List<Map<String, Object>> enrichContentInfoMap = new ArrayList<>();
         for (String contentId : contentTypeInfo) {
             List<String> fields = Arrays.asList(Constants.NAME, Constants.AVG_RATING, Constants.COMPETENCIES_V5, Constants.DESCRIPTION);
