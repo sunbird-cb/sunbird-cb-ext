@@ -885,6 +885,12 @@ public class Constants {
 	public static final String COMPETENCIES_V3 = "competencies_v3";
 
 	public static final String COURSE_LIST = "courseList";
+
+	public static final String CB_ALL_USERS_TYPE = "allUsers";
+
+	public static final String CB_CUSTOM_TYPE = "custom";
+
+	public static final String CB_DESIGNATION_TYPE = "designation";
 	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}
