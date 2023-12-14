@@ -872,6 +872,10 @@ public class Constants {
 	public static final String CB_ASSIGNMENT_TYPE_INFO_KEY = "assignmentTypeInfoKey";
 	public static final String TABLE_CB_PLAN_LOOKUP = "cb_plan_lookup";
 	public static final String CB_IS_ACTIVE = "isActive";
+	public static final String API_V2_READ_DEPT_POSITION="v2.read.dept.position";
+	public static final String API_VERSION_2 = "2.0";
+	public static final String DEPT_KEY="dept_key";
+	public static final String ORG_DESIGNATION ="org_designations";
 	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}
