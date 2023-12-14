@@ -11,6 +11,8 @@ public class DataCacheMgr {
 
     private Map<String, Object> objCacheMap = new HashMap<String, Object>();
 
+    private Map<String, Map<String, Object>> contentCacheMap = new HashMap<String, Map<String, Object>>();
+
     public void putStringInCache(String key, String value) {
         strCacheMap.put(key, value);
     }
@@ -29,6 +31,17 @@ public class DataCacheMgr {
     public Object getObjectFromCache(String key) {
         if (objCacheMap.containsKey(key)) {
             return objCacheMap.get(key);
+        }
+        return null;
+    }
+
+    public void putContentInCache(String key, Map<String, Object> value) {
+        contentCacheMap.put(key, value);
+    }
+
+    public Map<String, Object> getContentFromCache(String key) {
+        if (contentCacheMap.containsKey(key)) {
+            return contentCacheMap.get(key);
         }
         return null;
     }

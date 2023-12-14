@@ -11,10 +11,11 @@ import org.sunbird.common.util.Constants;
 import org.sunbird.searchby.service.MasterDataServiceImpl;
 
 @RestController
-@RequestMapping("/masterdata/v2")
+@RequestMapping("/masterData/v2")
 public class MasterDataControllerV2 {
     @Autowired
     private MasterDataServiceImpl masterDataService;
+
     @GetMapping("/deptPosition")
     public ResponseEntity<?> getDeptPositionsList(@RequestHeader(Constants.X_AUTH_USER_ORG_ID) String userOrgId) {
         SBApiResponse response = masterDataService.getDeptPositions(userOrgId);

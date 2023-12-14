@@ -323,15 +323,20 @@ public class MasterDataServiceImpl implements MasterDataService {
             response.getParams().setErrmsg(errMsg);
             response.setResponseCode(HttpStatus.BAD_REQUEST);
         } else {
-            List<String> deptDetails = Optional.ofNullable(redisCacheMgr.hget(Constants.ORG_DESIGNATION, cbExtServerProperties.getRedisInsightIndex(), userOrgId))
-                    .filter(list -> !list.isEmpty())
-                    .orElse(new ArrayList<>());
+            List<String> deptDetails = redisCacheMgr.hget(Constants.ORG_DESIGNATION,
+                            cbExtServerProperties.getRedisInsightIndex(), userOrgId);
+            if (!CollectionUtils.isEmpty(deptDetails) && StringUtils.isNotBlank(deptDetails.get(0))) {
+                String deptPosition = deptDetails.get(0);
+                deptDetails = Arrays.asList(deptPosition.split(","));
+            } else {
+                deptDetails = Collections.emptyList();
+            }
 
             Map<String, Object> responseData = new HashMap<>();
 
-            responseData.put("count", deptDetails.size());
-            responseData.put("content", deptDetails);
-            response.getResult().put("response", responseData);
+            responseData.put(Constants.COUNT, deptDetails.size());
+            responseData.put(Constants.CONTENT, deptDetails);
+            response.getResult().put(Constants.RESPONSE, responseData);
         }
         return response;
     }

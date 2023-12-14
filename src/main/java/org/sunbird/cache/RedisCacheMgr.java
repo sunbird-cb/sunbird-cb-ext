@@ -162,10 +162,11 @@ public class RedisCacheMgr {
         }
         return result;
     }
-    public List<String> hget(String key,int index,String... fields) {
+    
+    public List<String> hget(String key, int index, String... fields) {
         try (Jedis jedis = jedisDataPopulationPool.getResource()) {
             jedis.select(index);
-            return jedis.hmget(key,fields);
+            return jedis.hmget(key, fields);
         } catch (Exception e) {
             logger.error(e);
             return null;
