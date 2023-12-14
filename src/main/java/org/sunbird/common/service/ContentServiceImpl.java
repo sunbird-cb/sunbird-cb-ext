@@ -439,6 +439,7 @@ public class ContentServiceImpl implements ContentService {
 								responseData.put(field, contentData.get(field));
 							}
 						}
+						dataCacheMgr.putContentInCache(contentId, responseData);
 					}
 				} catch (Exception e) {
 					logger.error("Failed to parse content info from redis. Exception: " + e.getMessage(), e);
