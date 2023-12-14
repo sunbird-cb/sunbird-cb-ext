@@ -26,6 +26,8 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -194,8 +196,17 @@ public class CbPlanServiceImpl implements CbPlanService {
                     Map<String, Object> cbPlanDtoMap = mapper.readValue((String) cbPlan.get(Constants.DRAFT_DATA), new TypeReference<Map<String, Object>>() {
                     });
                     cbPlan.put(Constants.NAME, cbPlanDtoMap.getOrDefault(Constants.NAME, publishCbPlan.get(Constants.NAME)));
-                    cbPlan.put(Constants.CB_ASSIGNMENT_TYPE_INFO_KEY, cbPlanDtoMap.getOrDefault(Constants.CB_ASSIGNMENT_TYPE_INFO_KEY, publishCbPlan.get(Constants.CB_ASSIGNMENT_TYPE_INFO_KEY)));
-                    cbPlan.put(Constants.END_DATE, cbPlanDtoMap.getOrDefault(Constants.END_DATE, publishCbPlan.get(Constants.END_DATE)));
+                    cbPlan.put(Constants.CB_ASSIGNMENT_TYPE_INFO, cbPlanDtoMap.getOrDefault(Constants.CB_ASSIGNMENT_TYPE_INFO, publishCbPlan.get(Constants.CB_ASSIGNMENT_TYPE_INFO)));
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+                    Date endDate = null;
+                    try {
+                        endDate = dateFormat.parse(String.valueOf(cbPlanDtoMap.getOrDefault(Constants.END_DATE, publishCbPlan.get(Constants.END_DATE))));
+                    } catch (ParseException e) {
+                        e.printStackTrace(); // Handle the exception appropriately
+                    }
+                    cbPlan.put(Constants.END_DATE, endDate);
+                    cbPlan.put(Constants.DRAFT_DATA, null);
                 }
 
                 cbPlan.put(Constants.CB_PUBLISHED_BY, userId);
@@ -340,6 +351,8 @@ public class CbPlanServiceImpl implements CbPlanService {
         Map<String, Object> enrichData = new HashMap<>();
         List<String> assignmentTypeInfo = new ArrayList<>();
         List<String> contentTypeInfo = new ArrayList<>();
+        List<String> userDraftAssignmentTypeInfoForLive = new ArrayList<>();
+        String assignmentType = (String) cbPlan.get(Constants.CB_ASSIGNMENT_TYPE);
         if (StringUtils.isBlank((String) cbPlan.get(Constants.DRAFT_DATA)) ||
                 (StringUtils.isNotBlank((String) cbPlan.get(Constants.DRAFT_DATA)) && Constants.LIVE.equalsIgnoreCase((String) cbPlan.get(Constants.STATUS)))) {
             enrichData.put(Constants.NAME, cbPlan.get(Constants.NAME));
@@ -348,11 +361,18 @@ public class CbPlanServiceImpl implements CbPlanService {
             enrichData.put(Constants.CB_CONTENT_TYPE, cbPlan.get(Constants.CB_CONTENT_TYPE));
             contentTypeInfo = (List<String>) cbPlan.get(Constants.CB_CONTENT_LIST);
             enrichData.put(Constants.END_DATE, cbPlan.get(Constants.END_DATE));
+            if (!Constants.CB_CUSTOM_TYPE.equalsIgnoreCase(assignmentType)) {
+                enrichData.put(Constants.CB_ASSIGNMENT_TYPE_INFO, cbPlan.get(Constants.CB_ASSIGNMENT_TYPE_INFO));
+            }
             if (StringUtils.isNotBlank((String) cbPlan.get(Constants.DRAFT_DATA))) {
                 Map<String, Object> cbPlanDtoMap = mapper.readValue((String) cbPlan.get(Constants.DRAFT_DATA), new TypeReference<Map<String, Object>>() {
                 });
-                enrichData.put(Constants.DRAFT_DATA, cbPlanDtoMap);
 
+                if (cbPlanDtoMap.get(Constants.CB_ASSIGNMENT_TYPE_INFO) != null && Constants.CB_CUSTOM_TYPE.equalsIgnoreCase(assignmentType)) {
+                    userDraftAssignmentTypeInfoForLive.addAll((List<String>) cbPlanDtoMap.get(Constants.CB_ASSIGNMENT_TYPE_INFO));
+                }
+                cbPlanDtoMap.remove(Constants.ID);
+                enrichData.put(Constants.DRAFT_DATA, cbPlanDtoMap);
             }
         } else if (StringUtils.isNotBlank((String) cbPlan.get(Constants.DRAFT_DATA)) && Constants.DRAFT.equalsIgnoreCase((String) cbPlan.get(Constants.STATUS))) {
             CbPlanDto cbPlanDto = mapper.readValue((String) cbPlan.get(Constants.DRAFT_DATA), CbPlanDto.class);
@@ -362,6 +382,7 @@ public class CbPlanServiceImpl implements CbPlanService {
             enrichData.put(Constants.CB_CONTENT_TYPE, cbPlanDto.getContentType());
             contentTypeInfo = cbPlanDto.getContentList();
             enrichData.put(Constants.END_DATE, cbPlanDto.getEndDate());
+            enrichData.put(Constants.CB_ASSIGNMENT_TYPE_INFO, cbPlanDto.getAssignmentTypeInfo());
         }
 
         Map<String, Object> createByInfo = userUtilityService.getUsersReadData((String) cbPlan.get(Constants.CREATED_BY), StringUtils.EMPTY,
@@ -371,27 +392,41 @@ public class CbPlanServiceImpl implements CbPlanService {
         enrichData.put(Constants.CREATED_AT, cbPlan.get(Constants.CREATED_AT));
         enrichData.put(Constants.CB_PUBLISHED_AT, cbPlan.get(Constants.CB_PUBLISHED_AT));
         enrichData.put(Constants.STATUS, cbPlan.get(Constants.STATUS));
-        String assignmentType = (String) cbPlan.get(Constants.CB_ASSIGNMENT_TYPE);
 
         if (Constants.CB_CUSTOM_TYPE.equalsIgnoreCase(assignmentType)) {
-            List<Map<String, Object>> enrichUserInfoMap = new ArrayList<>();
+            List<Map<String, String>> enrichUserInfoMap = new ArrayList<>();
+            List<Map<String, String>> enrichUserInfoMapDraft = new ArrayList<>();
+            List<String> allUserInfo = new ArrayList<>();
+            allUserInfo.addAll(assignmentTypeInfo);
+            if (CollectionUtils.isNotEmpty(userDraftAssignmentTypeInfoForLive)) {
+                allUserInfo.addAll(userDraftAssignmentTypeInfoForLive);
+            }
+
+            Map<String, Map<String, String>> userInfoMap = new HashMap<>();
+            userUtilityService.getUserDetailsFromDB(allUserInfo, Arrays.asList(Constants.FIRSTNAME, Constants.USER_ID),
+                    userInfoMap);
             for (String userId : assignmentTypeInfo) {
-                Map<String, Object> responseMap = userUtilityService.getUsersReadData(userId, StringUtils.EMPTY,
-                        StringUtils.EMPTY);
-                Map<String, Object> userInfoMap = new HashMap<>();
-                userInfoMap.put(Constants.FIRSTNAME, responseMap.get(Constants.FIRSTNAME));
-                userInfoMap.put(Constants.USER_ID, responseMap.get(Constants.IDENTIFIER));
-                enrichUserInfoMap.add(userInfoMap);
+                enrichUserInfoMap.add(userInfoMap.get(userId));
             }
             enrichData.put(Constants.USER_DETAILS, enrichUserInfoMap);
+
+            for (String draftUserId : userDraftAssignmentTypeInfoForLive) {
+                enrichUserInfoMapDraft.add(userInfoMap.get(draftUserId));
+            }
+            if (CollectionUtils.isNotEmpty(enrichUserInfoMapDraft)) {
+                Map<String, Object> draft = (Map<String, Object>)enrichData.get(Constants.DRAFT_DATA);
+                draft.put(Constants.USER_DETAILS, enrichUserInfoMapDraft);
+                draft.remove(Constants.CB_ASSIGNMENT_TYPE_INFO);
+                enrichData.put(Constants.DRAFT_DATA, draft);
+            }
         }
         List<Map<String, Object>> enrichContentInfoMap = new ArrayList<>();
         for (String contentId : contentTypeInfo) {
-            List<String> fields = Arrays.asList(Constants.NAME, Constants.AVG_RATING, Constants.COMPETENCIES_V5, Constants.COMPETENCIES_V3, Constants.DESCRIPTION);
-            Map<String, Object> contentResponse = contentService.readContent(contentId, fields);
+            List<String> fields = Arrays.asList(Constants.NAME, Constants.AVG_RATING, Constants.COMPETENCIES_V5, Constants.DESCRIPTION);
+            Map<String, Object> contentResponse = contentService.readContentFromCache(contentId, fields);
             Map<String, Object> enrichContentMap = new HashMap<>();
             enrichContentMap.put(Constants.NAME, contentResponse.get(Constants.NAME));
-            enrichContentMap.put(Constants.COMPETENCIES_V3, contentResponse.get(Constants.COMPETENCIES_V3));
+            //enrichContentMap.put(Constants.COMPETENCIES_V3, contentResponse.get(Constants.COMPETENCIES_V3));
             enrichContentMap.put(Constants.COMPETENCIES_V5, contentResponse.get(Constants.COMPETENCIES_V5));
             enrichContentMap.put(Constants.AVG_RATING, contentResponse.get(Constants.AVG_RATING));
             enrichContentMap.put(Constants.IDENTIFIER, contentResponse.get(Constants.IDENTIFIER));
@@ -405,8 +440,7 @@ public class CbPlanServiceImpl implements CbPlanService {
     }
 
     private String validateAuthTokenAndFetchUserId(String authUserToken) {
-        return "fb0b3a03-d050-4b75-86ec-0354331a6b22";
-        //return accessTokenValidator.fetchUserIdFromAccessToken(authUserToken);
+        return accessTokenValidator.fetchUserIdFromAccessToken(authUserToken);
     }
 
     private List<String> validateCbPlanRequest(CbPlanDto cbPlanDto) {
