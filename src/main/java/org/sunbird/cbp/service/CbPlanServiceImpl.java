@@ -2,25 +2,32 @@ package org.sunbird.cbp.service;
 
 import com.datastax.driver.core.utils.UUIDs;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.sunbird.cassandra.utils.CassandraOperation;
+import org.sunbird.cbp.model.CbPlan;
 import org.sunbird.cbp.model.dto.CbPlanDto;
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.model.SunbirdApiRequest;
+import org.sunbird.common.service.ContentService;
 import org.sunbird.common.util.AccessTokenValidator;
 import org.sunbird.common.util.Constants;
 import org.sunbird.common.util.ProjectUtil;
+import org.sunbird.user.service.UserUtilityService;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -32,6 +39,12 @@ public class CbPlanServiceImpl implements CbPlanService {
 
     @Autowired
     CassandraOperation cassandraOperation;
+
+    @Autowired
+    UserUtilityService userUtilityService;
+
+    @Autowired
+    ContentService contentService;
 
     ObjectMapper mapper = new ObjectMapper();
 
@@ -96,14 +109,19 @@ public class CbPlanServiceImpl implements CbPlanService {
                 Map<String, Object> cbPlanInfo = new HashMap<>();
                 cbPlanInfo.put(Constants.ID, cbPlanId);
                 cbPlanInfo.put(Constants.ORG_ID, userOrgId);
+                List<String> allowedFieldForUpdate = Arrays.asList(Constants.NAME, Constants.CB_ASSIGNMENT_TYPE_INFO, Constants.END_DATE, Constants.ID);
+                long keyNotAllowedCount = updatedCbPlan.keySet().stream().filter(key -> !allowedFieldForUpdate.contains(key)).count();
+                if (keyNotAllowedCount > 0) {
+                    response.getParams().setStatus(Constants.FAILED);
+                    response.getParams().setErrmsg("Allowed Field for update cbPlan are: " + Constants.NAME + ", " + Constants.CB_ASSIGNMENT_TYPE_INFO + ", " + Constants.END_DATE);
+                    response.setResponseCode(HttpStatus.BAD_REQUEST);
+                }
                 List<Map<String, Object>> cbPlanMapInfo = cassandraOperation.getRecordsByPropertiesWithoutFiltering(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_CB_PLAN, cbPlanInfo, null);
                 if (CollectionUtils.isNotEmpty(cbPlanMapInfo)) {
-                    String draftInfo = updateDraftInfo(updatedCbPlan, cbPlanMapInfo.get(0));
                     Map<String, Object> updatedCbPlanData = new HashMap<>();
-                    updatedCbPlanData.put(Constants.DRAFT_DATA, draftInfo);
+                    updatedCbPlanData.put(Constants.DRAFT_DATA, mapper.writeValueAsString(updatedCbPlan));
                     updatedCbPlanData.put(Constants.UPDATED_BY, userId);
                     updatedCbPlanData.put(Constants.UPDATED_AT, new Date());
-                    updatedCbPlanData.put(Constants.STATUS, Constants.DRAFT);
 
                     Map<String, Object> resp = cassandraOperation.updateRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_CB_PLAN, updatedCbPlanData, cbPlanInfo);
                     if (resp.get(Constants.RESPONSE).equals(Constants.SUCCESS)) {
@@ -159,18 +177,43 @@ public class CbPlanServiceImpl implements CbPlanService {
 
             if (CollectionUtils.isNotEmpty(cbPlanMap)) {
                 Map<String, Object> cbPlan = cbPlanMap.get(0);
-                if (Constants.LIVE.equalsIgnoreCase((String) cbPlan.get(Constants.STATUS))) {
+                Map<String, Object> publishCbPlan = new HashMap<>();
+                publishCbPlan.putAll(cbPlan);
+                if ((Constants.LIVE.equalsIgnoreCase((String) cbPlan.get(Constants.STATUS)) && cbPlan.get(Constants.DRAFT_DATA) == null) || Constants.CB_RETIRE.equalsIgnoreCase((String) cbPlan.get(Constants.STATUS))) {
                     response.getParams().setStatus(Constants.FAILED);
-                    response.getParams().setErrmsg("CbPlan is already published for ID: " + cbPlanId);
+                    String errMsg = "CbPlan is already published for ID: " + cbPlanId;
+                    if (Constants.CB_RETIRE.equalsIgnoreCase((String) cbPlan.get(Constants.STATUS))) {
+                        errMsg = "CbPlan is already retired for ID: " + cbPlanId;
+                    }
+                    response.getParams().setErrmsg(errMsg);
                     response.setResponseCode(HttpStatus.BAD_REQUEST);
                     return response;
                 }
-                CbPlanDto cbPlanDto = mapper.readValue((String) cbPlan.get(Constants.DRAFT_DATA), CbPlanDto.class);
-                updateCbPlanData(cbPlan, cbPlanDto);
+                if (Constants.DRAFT.equalsIgnoreCase((String) cbPlan.get(Constants.STATUS))) {
+                    CbPlanDto cbPlanDto = mapper.readValue((String) cbPlan.get(Constants.DRAFT_DATA), CbPlanDto.class);
+                    updateCbPlanData(cbPlan, cbPlanDto);
+                } else {
+                    Map<String, Object> cbPlanDtoMap = mapper.readValue((String) cbPlan.get(Constants.DRAFT_DATA), new TypeReference<Map<String, Object>>() {
+                    });
+                    cbPlan.put(Constants.NAME, cbPlanDtoMap.getOrDefault(Constants.NAME, publishCbPlan.get(Constants.NAME)));
+                    cbPlan.put(Constants.CB_ASSIGNMENT_TYPE_INFO, cbPlanDtoMap.getOrDefault(Constants.CB_ASSIGNMENT_TYPE_INFO, publishCbPlan.get(Constants.CB_ASSIGNMENT_TYPE_INFO)));
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+                    Date endDate = null;
+                    try {
+                        endDate = dateFormat.parse(String.valueOf(cbPlanDtoMap.getOrDefault(Constants.END_DATE, publishCbPlan.get(Constants.END_DATE))));
+                    } catch (ParseException e) {
+                        e.printStackTrace(); // Handle the exception appropriately
+                    }
+                    cbPlan.put(Constants.END_DATE, endDate);
+                    cbPlan.put(Constants.DRAFT_DATA, null);
+                }
+
                 cbPlan.put(Constants.CB_PUBLISHED_BY, userId);
                 if (StringUtils.isNoneBlank(comment)) {
                     cbPlan.put(Constants.COMMENT, comment);
                 }
+                CbPlan cbPlanDto = mapper.convertValue(cbPlan, CbPlan.class);
                 cbPlan.remove(Constants.ID);
                 cbPlan.remove(Constants.ORG_ID);
                 cbPlan.put(Constants.CB_PUBLISHED_AT, new Date());
@@ -197,8 +240,206 @@ public class CbPlanServiceImpl implements CbPlanService {
         return response;
     }
 
+    @Override
+    public SBApiResponse retireCbPlan(SunbirdApiRequest request, String userOrgId, String authUserToken) {
+        SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_CB_PLAN_RETIRE);
+        Map<String, Object> requestData = (Map<String, Object>) request.getRequest();
+        try {
+            String userId = validateAuthTokenAndFetchUserId(authUserToken);
+            if (StringUtils.isBlank(userId)) {
+                response.getParams().setStatus(Constants.FAILED);
+                response.getParams().setErrmsg(Constants.USER_ID_DOESNT_EXIST);
+                response.setResponseCode(HttpStatus.BAD_REQUEST);
+                return response;
+            }
+            UUID cbPlanId = UUID.fromString((String) requestData.get(Constants.ID));
+            String comment = (String) requestData.get(Constants.COMMENT);
+            if (cbPlanId == null) {
+                response.getParams().setStatus(Constants.FAILED);
+                response.getParams().setErrmsg("CbPlanId is missing.");
+                response.setResponseCode(HttpStatus.BAD_REQUEST);
+                return response;
+            }
+            Map<String, Object> cbPlanInfo = new HashMap<>();
+            cbPlanInfo.put(Constants.ID, cbPlanId);
+            cbPlanInfo.put(Constants.ORG_ID, userOrgId);
+            List<Map<String, Object>> cbPlanMap = cassandraOperation.getRecordsByPropertiesWithoutFiltering(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_CB_PLAN, cbPlanInfo, null);
+
+            if (CollectionUtils.isNotEmpty(cbPlanMap)) {
+                Map<String, Object> cbPlan = cbPlanMap.get(0);
+                if (Constants.CB_RETIRE.equalsIgnoreCase((String) cbPlan.get(Constants.STATUS))) {
+                    response.getParams().setStatus(Constants.FAILED);
+                    response.getParams().setErrmsg("CbPlan is already archived for ID: " + cbPlanId);
+                    response.setResponseCode(HttpStatus.BAD_REQUEST);
+                    return response;
+                }
+
+                cbPlan.put(Constants.UPDATED_AT, new Date());
+                cbPlan.put(Constants.UPDATED_BY, userId);
+                cbPlan.put(Constants.STATUS, Constants.CB_RETIRE);
+                if (StringUtils.isNoneBlank(comment)) {
+                    cbPlan.put(Constants.COMMENT, comment);
+                }
+                cbPlan.remove(Constants.ID);
+                cbPlan.remove(Constants.ORG_ID);
+                cbPlan.put(Constants.CB_PUBLISHED_AT, new Date());
+                Map<String, Object> resp = cassandraOperation.updateRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_CB_PLAN, cbPlan, cbPlanInfo);
+                if (resp.get(Constants.RESPONSE).equals(Constants.SUCCESS)) {
+                    updateCbPlanLookupInfoForRetire(userOrgId, cbPlanId);
+                    response.getResult().put(Constants.STATUS, Constants.UPDATED);
+                    response.getResult().put(Constants.MESSAGE, "Archived cbPlan for cbPlanId: " + cbPlanId);
+                } else {
+                    response.getParams().setStatus(Constants.FAILED);
+                    response.getParams().setErrmsg((String) resp.get(Constants.ERROR_MESSAGE) + "for cbPlanId: " + cbPlanId);
+                    response.setResponseCode(HttpStatus.BAD_REQUEST);
+                }
+            } else {
+                response.getParams().setStatus(Constants.FAILED);
+                response.getParams().setErrmsg("CbPlan is not exist for ID: " + cbPlanId);
+                response.setResponseCode(HttpStatus.BAD_REQUEST);
+            }
+        } catch (Exception e) {
+            response.getParams().setStatus(Constants.FAILED);
+            response.getParams().setErrmsg(e.getMessage());
+            response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return response;
+    }
+
+    @Override
+    public SBApiResponse readCbPlan(String cbPlanId, String userOrgId, String authUserToken) {
+        SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_CB_PLAN_READ_BY_ID);
+        try {
+            String userId = validateAuthTokenAndFetchUserId(authUserToken);
+            if (StringUtils.isBlank(userId)) {
+                response.getParams().setStatus(Constants.FAILED);
+                response.getParams().setErrmsg(Constants.USER_ID_DOESNT_EXIST);
+                response.setResponseCode(HttpStatus.BAD_REQUEST);
+                return response;
+            }
+            UUID cbPlanUUID = UUID.fromString(cbPlanId);
+            if (cbPlanId == null) {
+                response.getParams().setStatus(Constants.FAILED);
+                response.getParams().setErrmsg("CbPlanId is missing.");
+                response.setResponseCode(HttpStatus.BAD_REQUEST);
+                return response;
+            }
+            Map<String, Object> cbPlanInfo = new HashMap<>();
+            cbPlanInfo.put(Constants.ID, cbPlanUUID);
+            cbPlanInfo.put(Constants.ORG_ID, userOrgId);
+            List<Map<String, Object>> cbPlanMap = cassandraOperation.getRecordsByPropertiesWithoutFiltering(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_CB_PLAN, cbPlanInfo, null);
+
+            if (CollectionUtils.isNotEmpty(cbPlanMap)) {
+                Map<String, Object> cbPlan = cbPlanMap.get(0);
+                Map<String, Object> enrichData = populateReadData(cbPlan);
+                response.getResult().put(Constants.CONTENT, enrichData);
+            } else {
+                response.getParams().setStatus(Constants.FAILED);
+                response.getParams().setErrmsg("CbPlan is not exist for ID: " + cbPlanId);
+                response.setResponseCode(HttpStatus.BAD_REQUEST);
+            }
+        } catch (Exception e) {
+            response.getParams().setStatus(Constants.FAILED);
+            response.getParams().setErrmsg(e.getMessage());
+            response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return response;
+
+    }
+
+    private Map<String, Object> populateReadData(Map<String, Object> cbPlan) throws IOException {
+        Map<String, Object> enrichData = new HashMap<>();
+        List<String> assignmentTypeInfo = new ArrayList<>();
+        List<String> contentTypeInfo = new ArrayList<>();
+        List<String> userDraftAssignmentTypeInfoForLive = new ArrayList<>();
+        String assignmentType = (String) cbPlan.get(Constants.CB_ASSIGNMENT_TYPE);
+        if (StringUtils.isBlank((String) cbPlan.get(Constants.DRAFT_DATA)) ||
+                (StringUtils.isNotBlank((String) cbPlan.get(Constants.DRAFT_DATA)) && Constants.LIVE.equalsIgnoreCase((String) cbPlan.get(Constants.STATUS)))) {
+            enrichData.put(Constants.NAME, cbPlan.get(Constants.NAME));
+            enrichData.put(Constants.CB_ASSIGNMENT_TYPE, cbPlan.get(Constants.CB_ASSIGNMENT_TYPE));
+            assignmentTypeInfo = (List<String>) cbPlan.get(Constants.CB_ASSIGNMENT_TYPE_INFO);
+            enrichData.put(Constants.CB_CONTENT_TYPE, cbPlan.get(Constants.CB_CONTENT_TYPE));
+            contentTypeInfo = (List<String>) cbPlan.get(Constants.CB_CONTENT_LIST);
+            enrichData.put(Constants.END_DATE, cbPlan.get(Constants.END_DATE));
+            if (!Constants.CB_CUSTOM_TYPE.equalsIgnoreCase(assignmentType)) {
+                enrichData.put(Constants.CB_ASSIGNMENT_TYPE_INFO, cbPlan.get(Constants.CB_ASSIGNMENT_TYPE_INFO));
+            }
+            if (StringUtils.isNotBlank((String) cbPlan.get(Constants.DRAFT_DATA))) {
+                Map<String, Object> cbPlanDtoMap = mapper.readValue((String) cbPlan.get(Constants.DRAFT_DATA), new TypeReference<Map<String, Object>>() {
+                });
+
+                if (cbPlanDtoMap.get(Constants.CB_ASSIGNMENT_TYPE_INFO) != null && Constants.CB_CUSTOM_TYPE.equalsIgnoreCase(assignmentType)) {
+                    userDraftAssignmentTypeInfoForLive.addAll((List<String>) cbPlanDtoMap.get(Constants.CB_ASSIGNMENT_TYPE_INFO));
+                }
+                cbPlanDtoMap.remove(Constants.ID);
+                enrichData.put(Constants.DRAFT_DATA, cbPlanDtoMap);
+            }
+        } else if (StringUtils.isNotBlank((String) cbPlan.get(Constants.DRAFT_DATA)) && Constants.DRAFT.equalsIgnoreCase((String) cbPlan.get(Constants.STATUS))) {
+            CbPlanDto cbPlanDto = mapper.readValue((String) cbPlan.get(Constants.DRAFT_DATA), CbPlanDto.class);
+            enrichData.put(Constants.NAME, cbPlanDto.getName());
+            enrichData.put(Constants.CB_ASSIGNMENT_TYPE, cbPlanDto.getAssignmentType());
+            assignmentTypeInfo = cbPlanDto.getAssignmentTypeInfo();
+            enrichData.put(Constants.CB_CONTENT_TYPE, cbPlanDto.getContentType());
+            contentTypeInfo = cbPlanDto.getContentList();
+            enrichData.put(Constants.END_DATE, cbPlanDto.getEndDate());
+            enrichData.put(Constants.CB_ASSIGNMENT_TYPE_INFO, cbPlanDto.getAssignmentTypeInfo());
+        }
+
+        Map<String, Object> createByInfo = userUtilityService.getUsersReadData((String) cbPlan.get(Constants.CREATED_BY), StringUtils.EMPTY,
+                StringUtils.EMPTY);
+        enrichData.put(Constants.ID, cbPlan.get(Constants.ID));
+        enrichData.put(Constants.CREATED_BY, createByInfo.get(Constants.FIRSTNAME));
+        enrichData.put(Constants.CREATED_AT, cbPlan.get(Constants.CREATED_AT));
+        enrichData.put(Constants.CB_PUBLISHED_AT, cbPlan.get(Constants.CB_PUBLISHED_AT));
+        enrichData.put(Constants.STATUS, cbPlan.get(Constants.STATUS));
+
+        if (Constants.CB_CUSTOM_TYPE.equalsIgnoreCase(assignmentType)) {
+            List<Map<String, String>> enrichUserInfoMap = new ArrayList<>();
+            List<Map<String, String>> enrichUserInfoMapDraft = new ArrayList<>();
+            List<String> allUserInfo = new ArrayList<>();
+            allUserInfo.addAll(assignmentTypeInfo);
+            if (CollectionUtils.isNotEmpty(userDraftAssignmentTypeInfoForLive)) {
+                allUserInfo.addAll(userDraftAssignmentTypeInfoForLive);
+            }
+
+            Map<String, Map<String, String>> userInfoMap = new HashMap<>();
+            userUtilityService.getUserDetailsFromDB(allUserInfo, Arrays.asList(Constants.FIRSTNAME, Constants.USER_ID),
+                    userInfoMap);
+            for (String userId : assignmentTypeInfo) {
+                enrichUserInfoMap.add(userInfoMap.get(userId));
+            }
+            enrichData.put(Constants.USER_DETAILS, enrichUserInfoMap);
+
+            for (String draftUserId : userDraftAssignmentTypeInfoForLive) {
+                enrichUserInfoMapDraft.add(userInfoMap.get(draftUserId));
+            }
+            if (CollectionUtils.isNotEmpty(enrichUserInfoMapDraft)) {
+                Map<String, Object> draft = (Map<String, Object>)enrichData.get(Constants.DRAFT_DATA);
+                draft.put(Constants.USER_DETAILS, enrichUserInfoMapDraft);
+                draft.remove(Constants.CB_ASSIGNMENT_TYPE_INFO);
+                enrichData.put(Constants.DRAFT_DATA, draft);
+            }
+        }
+        List<Map<String, Object>> enrichContentInfoMap = new ArrayList<>();
+        for (String contentId : contentTypeInfo) {
+            List<String> fields = Arrays.asList(Constants.NAME, Constants.AVG_RATING, Constants.COMPETENCIES_V5, Constants.DESCRIPTION);
+            Map<String, Object> contentResponse = contentService.readContentFromCache(contentId, fields);
+            Map<String, Object> enrichContentMap = new HashMap<>();
+            enrichContentMap.put(Constants.NAME, contentResponse.get(Constants.NAME));
+            //enrichContentMap.put(Constants.COMPETENCIES_V3, contentResponse.get(Constants.COMPETENCIES_V3));
+            enrichContentMap.put(Constants.COMPETENCIES_V5, contentResponse.get(Constants.COMPETENCIES_V5));
+            enrichContentMap.put(Constants.AVG_RATING, contentResponse.get(Constants.AVG_RATING));
+            enrichContentMap.put(Constants.IDENTIFIER, contentResponse.get(Constants.IDENTIFIER));
+            enrichContentMap.put(Constants.DESCRIPTION, contentResponse.get(Constants.DESCRIPTION));
+            enrichContentInfoMap.add(enrichContentMap);
+        }
+        if (CollectionUtils.isNotEmpty(enrichContentInfoMap)) {
+            enrichData.put(Constants.COURSE_LIST, enrichContentInfoMap);
+        }
+        return enrichData;
+    }
+
     private String validateAuthTokenAndFetchUserId(String authUserToken) {
-        //return "fb0b3a03-d050-4b75-86ec-0354331a6b22";
         return accessTokenValidator.fetchUserIdFromAccessToken(authUserToken);
     }
 
@@ -231,7 +472,7 @@ public class CbPlanServiceImpl implements CbPlanService {
         cbPlan.put(Constants.STATUS, Constants.LIVE);
     }
 
-    private boolean updateCbPlanLookupInfo(CbPlanDto planDto, String orgId, UUID cbPlanId) {
+    private boolean updateCbPlanLookupInfo(CbPlan planDto, String orgId, UUID cbPlanId) {
         Map<String, Object> cbPlanInfo = new HashMap<>();
         cbPlanInfo.put(Constants.CB_PLAN_ID, cbPlanId);
         cbPlanInfo.put(Constants.ORG_ID, orgId);
@@ -283,7 +524,6 @@ public class CbPlanServiceImpl implements CbPlanService {
     }
 
     private String updateDraftInfo(Map<String, Object> updatedCbPlan, Map<String, Object> cbPlan) throws IOException {
-        String updatedDraftInfo = "";
         Map<String, Object> draftInfo = new HashMap<>();
         if (StringUtils.isBlank((String) cbPlan.get(Constants.DRAFT_DATA))) {
             draftInfo.put(Constants.NAME, updatedCbPlan.getOrDefault(Constants.NAME, cbPlan.get(Constants.NAME)));
@@ -302,5 +542,32 @@ public class CbPlanServiceImpl implements CbPlanService {
             draftInfo.put(Constants.END_DATE, updatedCbPlan.getOrDefault(Constants.END_DATE, cbPlanDto.getEndDate()));
         }
         return mapper.writeValueAsString(draftInfo);
+    }
+
+    private boolean updateCbPlanLookupInfoForRetire(String orgId, UUID cbPlanId) {
+        Map<String, Object> cbPlanInfo = new HashMap<>();
+        cbPlanInfo.put(Constants.CB_PLAN_ID, cbPlanId);
+        cbPlanInfo.put(Constants.ORG_ID, orgId);
+        boolean isUpdatedLookup = false;
+        List<Map<String, Object>> cbPlanMap = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_CB_PLAN_LOOKUP, cbPlanInfo, null);
+        if (CollectionUtils.isNotEmpty(cbPlanMap)) {
+            List<String> assignmentKeyInfoList = cbPlanMap.stream().map(c -> (String) c.get(Constants.CB_ASSIGNMENT_TYPE_INFO_KEY)).collect(Collectors.toList());
+            for (String assignmentTypeInfo : assignmentKeyInfoList) {
+                Map<String, Object> compositeKey = new HashMap<>();
+                compositeKey.put(Constants.ORG_ID, orgId);
+                compositeKey.put(Constants.CB_PLAN_ID, cbPlanId);
+                compositeKey.put(Constants.CB_ASSIGNMENT_TYPE_INFO_KEY, assignmentTypeInfo);
+
+                Map<String, Object> lookupInfoUpdated = new HashMap<>();
+                lookupInfoUpdated.put(Constants.CB_IS_ACTIVE, false);
+                Map<String, Object> resp = cassandraOperation.updateRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_CB_PLAN_LOOKUP, lookupInfoUpdated, compositeKey);
+                if (resp.get(Constants.RESPONSE).equals(Constants.SUCCESS)) {
+                    isUpdatedLookup = true;
+                } else {
+                    isUpdatedLookup = false;
+                }
+            }
+        }
+        return isUpdatedLookup;
     }
 }

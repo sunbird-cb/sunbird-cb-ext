@@ -43,4 +43,24 @@ public class CbPlanController {
         SBApiResponse response = cbPlanService.publishCbPlan(request, userOrgId, token);
         return new ResponseEntity<>(response, response.getResponseCode());
     }
+
+    @DeleteMapping("/v1/archive")
+    public ResponseEntity<SBApiResponse> retireCbPlan(
+            @RequestBody SunbirdApiRequest request,
+            @RequestHeader(Constants.X_AUTH_TOKEN) String token,
+            @RequestHeader(Constants.X_AUTH_USER_ORG_ID)String userOrgId) throws Exception {
+
+        SBApiResponse response = cbPlanService.retireCbPlan(request, userOrgId, token);
+        return new ResponseEntity<>(response, response.getResponseCode());
+    }
+
+    @GetMapping("/v1/read/{cbPlanId}")
+    public ResponseEntity<SBApiResponse> readCbPlan(
+            @PathVariable("cbPlanId") String cbPlanId,
+            @RequestHeader(Constants.X_AUTH_TOKEN) String token,
+            @RequestHeader(Constants.X_AUTH_USER_ORG_ID)String userOrgId) throws Exception {
+
+        SBApiResponse response = cbPlanService.readCbPlan(cbPlanId, userOrgId, token);
+        return new ResponseEntity<>(response, response.getResponseCode());
+    }
 }
