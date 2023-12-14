@@ -197,6 +197,43 @@ public class CbPlanServiceImpl implements CbPlanService {
         return response;
     }
 
+    @Override
+    public SBApiResponse getCBPPlanForUser(String userOrgId, String authUserToken){
+        SBApiResponse response = new SBApiResponse();
+        String userId = validateAuthTokenAndFetchUserId(authUserToken);
+        List<String> fields = Arrays.asList(Constants.PROFILE_DETAILS, Constants.ROOT_ORG_ID);
+        Map<String, Object> propertiesMap = new HashMap<>();
+        propertiesMap.put(Constants.ID, userId);
+        List<Map<String, Object>> userDetailsResult = cassandraOperation.getRecordsByProperties(Constants.SUNBIRD_KEY_SPACE_NAME,
+                Constants.USER, propertiesMap, fields);
+        Map<String, Object> userDetails = userDetailsResult.get(0);
+        Map<String, Object> profileDetails = (Map<String, Object>) userDetails.get(Constants.PROFILE_DETAILS);
+        Map<String, String> professonalDetails = (Map<String, String>) profileDetails.get(Constants.PROFESSIONAL_DETAILS);
+        String userDesignation = professonalDetails.get(Constants.DESIGNATION);
+
+        propertiesMap.clear();
+        fields.clear();
+        List<String> designationList = Arrays.asList(userId,"allUser");
+        if(null != userDesignation){
+            designationList.add(userDesignation);
+        }
+        propertiesMap.put(Constants.ORG_ID, userOrgId);
+        propertiesMap.put(Constants.CB_ASSIGNMENT_TYPE_INFO_KEY, designationList);
+        List<Map<String, Object>> cbplanResult = cassandraOperation.getRecordsByProperties(Constants.SUNBIRD_KEY_SPACE_NAME,
+                Constants.TABLE_CB_PLAN_LOOKUP, propertiesMap, fields);
+
+        List<String> courseList = new ArrayList<>();
+
+        for(Map<String, Object> cbPlan : cbplanResult){
+            String[] courses = (String[]) cbPlan.get(Constants.CB_CONTENT_LIST);
+            courseList.addAll(Arrays.asList(courses));
+        }
+
+        Map<String, Object> result = new HashMap<>();
+        result.put(Constants.COUNT, courseList.size());
+        return response;
+    }
+
     private String validateAuthTokenAndFetchUserId(String authUserToken) {
         //return "fb0b3a03-d050-4b75-86ec-0354331a6b22";
         return accessTokenValidator.fetchUserIdFromAccessToken(authUserToken);
