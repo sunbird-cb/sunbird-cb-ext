@@ -606,7 +606,6 @@ public class CbPlanServiceImpl implements CbPlanService {
     }
 
     private String updateDraftInfo(Map<String, Object> updatedCbPlan, Map<String, Object> cbPlan) throws IOException {
-        String updatedDraftInfo = "";
         Map<String, Object> draftInfo = new HashMap<>();
         if (StringUtils.isBlank((String) cbPlan.get(Constants.DRAFT_DATA))) {
             draftInfo.put(Constants.NAME, updatedCbPlan.getOrDefault(Constants.NAME, cbPlan.get(Constants.NAME)));
