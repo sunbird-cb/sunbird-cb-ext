@@ -856,6 +856,8 @@ public class Constants {
 	public static final String API_CB_PLAN_CREATE = "api.cb.plan.v1.create";
 	public static final String API_CB_PLAN_UPDATE = "api.cb.plan.v1.update";
 	public static final String API_CB_PLAN_PUBLISH = "api.cb.plan.v1.publish";
+	public static final String API_CB_PLAN_READ_BY_ID = "api.cb.plan.v1.read.byId";
+	public static final String API_CB_PLAN_RETIRE = "api.cb.plan.v1.retire";
 	public static final String CREATED_AT = "createdAt";
 	public static final String DRAFT_DATA = "draftData";
 	public static final String TABLE_CB_PLAN = "cb_plan";
@@ -876,10 +878,22 @@ public class Constants {
 	public static final String API_VERSION_2 = "2.0";
 	public static final String DEPT_KEY="dept_key";
 	public static final String ORG_DESIGNATION ="org_designations";
+	public static final String CB_RETIRE = "RETIRE";
+	public static final String USER_DETAILS = "userDetails";
+	public static final String COMPETENCIES_V5 = "competencies_v5";
+
+	public static final String COMPETENCIES_V3 = "competencies_v3";
+
+	public static final String COURSE_LIST = "courseList";
+
+	public static final String CB_ALL_USERS_TYPE = "allUsers";
+
+	public static final String CB_CUSTOM_TYPE = "custom";
+
+	public static final String CB_DESIGNATION_TYPE = "designation";
 	public static final String CBP_PLAN_USER_LIST_API ="api.cbplan.user.list";
 	public static final String USER_TYPE = "userType";
 	public static final String CB_PLAN_ID_KEY = "cbPlanId";
-	public static final String COURSE_LIST = "courseList";
 	public static final String ALL_USER = "allUser";
 	private Constants() {
 		throw new IllegalStateException("Utility class");
