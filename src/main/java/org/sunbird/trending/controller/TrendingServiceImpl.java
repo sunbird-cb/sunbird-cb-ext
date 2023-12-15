@@ -51,7 +51,11 @@ public class TrendingServiceImpl implements TrendingService {
             if(primaryCategoryList.size() > i && trendingCoursesAndPrograms.size() > 0 )
             typeList.put(primaryCategoryList.get(i),fetchIds(trendingCoursesAndPrograms.get(i), limit, fieldList.get(i)));
         }
-        List<String> searchIds = typeList.values().stream().flatMap(List::stream).collect(Collectors.toList());
+        List<String> searchIds = typeList.values()
+                .stream()
+                .flatMap(List::stream)
+                .distinct() // Ensure unique values
+                .collect(Collectors.toList());
         Map<String, Object> compositeSearchRes ;
         List<Map<String, Object>> contentList = new ArrayList<>();
         Map<String, Object> resultMap = new HashMap<>();
