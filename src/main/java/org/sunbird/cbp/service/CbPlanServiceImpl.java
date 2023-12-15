@@ -446,7 +446,7 @@ public class CbPlanServiceImpl implements CbPlanService {
             enrichContentInfoMap.add(enrichContentMap);
         }
         if (CollectionUtils.isNotEmpty(enrichContentInfoMap)) {
-            enrichData.put(Constants.COURSE_LIST, enrichContentInfoMap);
+            enrichData.put(Constants.CONTENT_LIST, enrichContentInfoMap);
         }
         return enrichData;
     }
