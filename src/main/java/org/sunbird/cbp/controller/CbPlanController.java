@@ -49,7 +49,7 @@ public class CbPlanController {
             @RequestHeader(Constants.X_AUTH_TOKEN) String token,
             @RequestHeader(Constants.X_AUTH_USER_ORG_ID)String userOrgId) throws Exception {
 
-        SBApiResponse response = cbPlanService.getCBPPlanForUser(userOrgId, token);
+        SBApiResponse response = cbPlanService.getCBPlanListForUser(userOrgId, token);
         return new ResponseEntity<>(response, response.getResponseCode());
     }
 }

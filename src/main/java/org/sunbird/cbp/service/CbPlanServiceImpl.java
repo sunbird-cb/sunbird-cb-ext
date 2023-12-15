@@ -3,6 +3,8 @@ package org.sunbird.cbp.service;
 import com.datastax.driver.core.utils.UUIDs;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,10 +14,11 @@ import org.sunbird.cassandra.utils.CassandraOperation;
 import org.sunbird.cbp.model.dto.CbPlanDto;
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.model.SunbirdApiRequest;
+import org.sunbird.common.service.ContentServiceImpl;
 import org.sunbird.common.util.AccessTokenValidator;
 import org.sunbird.common.util.Constants;
 import org.sunbird.common.util.ProjectUtil;
-
+import org.sunbird.core.logger.CbExtLogger;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
@@ -27,11 +30,16 @@ import java.util.stream.Collectors;
 @Service
 public class CbPlanServiceImpl implements CbPlanService {
 
+    private static final CbExtLogger logger = new CbExtLogger(CbPlanService.class.getName());
+
     @Autowired
     AccessTokenValidator accessTokenValidator;
 
     @Autowired
     CassandraOperation cassandraOperation;
+
+    @Autowired
+    ContentServiceImpl contentService;
 
     ObjectMapper mapper = new ObjectMapper();
 
@@ -198,44 +206,71 @@ public class CbPlanServiceImpl implements CbPlanService {
     }
 
     @Override
-    public SBApiResponse getCBPPlanForUser(String userOrgId, String authUserToken){
-        SBApiResponse response = new SBApiResponse();
-        String userId = validateAuthTokenAndFetchUserId(authUserToken);
-        List<String> fields = Arrays.asList(Constants.PROFILE_DETAILS, Constants.ROOT_ORG_ID);
-        Map<String, Object> propertiesMap = new HashMap<>();
-        propertiesMap.put(Constants.ID, userId);
-        List<Map<String, Object>> userDetailsResult = cassandraOperation.getRecordsByProperties(Constants.SUNBIRD_KEY_SPACE_NAME,
-                Constants.USER, propertiesMap, fields);
-        Map<String, Object> userDetails = userDetailsResult.get(0);
-        Map<String, Object> profileDetails = (Map<String, Object>) userDetails.get(Constants.PROFILE_DETAILS);
-        Map<String, String> professonalDetails = (Map<String, String>) profileDetails.get(Constants.PROFESSIONAL_DETAILS);
-        String userDesignation = professonalDetails.get(Constants.DESIGNATION);
-
-        propertiesMap.clear();
-        fields.clear();
-        List<String> designationList = Arrays.asList(userId,"allUser");
-        if(null != userDesignation){
-            designationList.add(userDesignation);
+    public SBApiResponse getCBPlanListForUser(String userOrgId, String authUserToken){
+        SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.CBP_PLAN_USER_LIST_API);
+        try{
+            String userId = validateAuthTokenAndFetchUserId(authUserToken);
+            logger.info("UserId of the User : " + userId + "User org ID : " + userOrgId);
+            List<String> fields = Arrays.asList(Constants.PROFILE_DETAILS, Constants.ROOT_ORG_ID);
+            Map<String, Object> propertiesMap = new HashMap<>();
+            propertiesMap.put(Constants.ID, userId);
+            List<Map<String, Object>> userDetailsResult = cassandraOperation.getRecordsByProperties(Constants.SUNBIRD_KEY_SPACE_NAME,
+                    Constants.USER, propertiesMap, fields);
+            Map<String, Object> userDetails = userDetailsResult.get(0);
+            String profileDetails = (String) userDetails.get(Constants.PROFILE_DETAILS_KEY);
+            Map<String, Object> professonalDetails = new Gson().fromJson(profileDetails, new TypeToken<Map<String, Object>>() {}.getType());
+            String userDesignation = (String) professonalDetails.get(Constants.DESIGNATION);
+            propertiesMap.clear();
+            List<String> assignmentTypeInfoKeyQueryList = Arrays.asList(userId,Constants.ALL_USER);
+            if(null != userDesignation){
+                logger.info("User Designation : " + userDesignation);
+                assignmentTypeInfoKeyQueryList.add(userDesignation);
+            }
+            propertiesMap.put(Constants.ORG_ID, userOrgId);
+            propertiesMap.put(Constants.CB_ASSIGNMENT_TYPE_INFO_KEY, assignmentTypeInfoKeyQueryList);
+            List<Map<String, Object>> cbplanResult = cassandraOperation.getRecordsByProperties(Constants.SUNBIRD_KEY_SPACE_NAME,
+                    Constants.TABLE_CB_PLAN_LOOKUP, propertiesMap, new ArrayList<>());
+            if(CollectionUtils.isEmpty(cbplanResult)){
+                response.getParams().setStatus(Constants.FAILED);
+                response.getParams().setErrmsg("CB Plan does not exist for the user");
+                response.setResponseCode(HttpStatus.BAD_REQUEST);
+            }
+            List<Map<String, Object>> resultMap = new ArrayList<>();
+            for(Map<String, Object> cbPlan : cbplanResult){
+                Map<String, Object> cbPlanDetails = new HashMap<>();
+                cbPlanDetails.put(Constants.ID,cbPlan.get(Constants.CB_PLAN_ID_KEY));
+                cbPlanDetails.put(Constants.NAME,"");
+                cbPlanDetails.put(Constants.DESCRIPTION, "");
+                cbPlanDetails.put(Constants.USER_TYPE, cbPlan.get(Constants.CB_ASSIGNMENT_TYPE));
+                cbPlanDetails.put(Constants.END_DATE, cbPlan.get(Constants.END_DATE));
+                cbPlanDetails.put(Constants.STATUS, "");
+                cbPlanDetails.put(Constants.CREATED_BY, "");
+                cbPlanDetails.put(Constants.CREATED_AT, "");
+                List<String> courses = (List<String>) cbPlan.get(Constants.CB_CONTENT_LIST);
+                List<String> courseFields = new ArrayList<>();
+                //Required Fields to be added later if required
+                List<Map<String, Object>> courseList = new ArrayList<>();
+                for(String courseId : courses){
+                    Map<String, Object> contentDetails = contentService.readContentFromCache(courseId, courseFields);
+                    courseList.add(contentDetails);
+                }
+                cbPlanDetails.put(Constants.COURSE_LIST, courseList);
+                resultMap.add(cbPlanDetails);
+            }
+            logger.info("Number of CB Plan Available for the user is " + resultMap.size());
+            Map<String, Object> result = new HashMap<>();
+            result.put(Constants.COUNT, resultMap.size());
+            result.put(Constants.CONTENT, resultMap);
+            response.setResult(result);
+        }catch (Exception e){
+            response.getParams().setStatus(Constants.FAILED);
+            response.getParams().setErrmsg(e.getMessage());
+            response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        propertiesMap.put(Constants.ORG_ID, userOrgId);
-        propertiesMap.put(Constants.CB_ASSIGNMENT_TYPE_INFO_KEY, designationList);
-        List<Map<String, Object>> cbplanResult = cassandraOperation.getRecordsByProperties(Constants.SUNBIRD_KEY_SPACE_NAME,
-                Constants.TABLE_CB_PLAN_LOOKUP, propertiesMap, fields);
-
-        List<String> courseList = new ArrayList<>();
-
-        for(Map<String, Object> cbPlan : cbplanResult){
-            String[] courses = (String[]) cbPlan.get(Constants.CB_CONTENT_LIST);
-            courseList.addAll(Arrays.asList(courses));
-        }
-
-        Map<String, Object> result = new HashMap<>();
-        result.put(Constants.COUNT, courseList.size());
         return response;
     }
 
     private String validateAuthTokenAndFetchUserId(String authUserToken) {
-        //return "fb0b3a03-d050-4b75-86ec-0354331a6b22";
         return accessTokenValidator.fetchUserIdFromAccessToken(authUserToken);
     }
 

@@ -876,6 +876,11 @@ public class Constants {
 	public static final String API_VERSION_2 = "2.0";
 	public static final String DEPT_KEY="dept_key";
 	public static final String ORG_DESIGNATION ="org_designations";
+	public static final String CBP_PLAN_USER_LIST_API ="api.cbplan.user.list";
+	public static final String USER_TYPE = "userType";
+	public static final String CB_PLAN_ID_KEY = "cbPlanId";
+	public static final String COURSE_LIST = "courseList";
+	public static final String ALL_USER = "allUser";
 	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}
