@@ -410,7 +410,7 @@ public class CbPlanServiceImpl implements CbPlanService {
                     Map<String, Object> contentDetails = contentService.readContentFromCache(courseId, courseFields);
                     courseList.add(contentDetails);
                 }
-                cbPlanDetails.put(Constants.COURSE_LIST, courseList);
+                cbPlanDetails.put(Constants.CB_CONTENT_LIST, courseList);
                 resultMap.add(cbPlanDetails);
             }
             logger.info("Number of CB Plan Available for the user is " + resultMap.size());
