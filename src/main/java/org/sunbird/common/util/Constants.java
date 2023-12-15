@@ -891,6 +891,9 @@ public class Constants {
 	public static final String CB_CUSTOM_TYPE = "custom";
 
 	public static final String CB_DESIGNATION_TYPE = "designation";
+
+	public static final String API_CB_PLAN_LIST = "api.cbplan.list";
+
 	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}

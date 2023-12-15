@@ -3,6 +3,7 @@ package org.sunbird.common.model;
 import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 
@@ -19,7 +20,7 @@ public class SBApiResponse {
 	public SBApiResponse() {
 		this.ver = "v1";
 		this.ts = new Timestamp(System.currentTimeMillis()).toString();
-		this.params = new SunbirdApiRespParam();
+		this.params = new SunbirdApiRespParam(UUID.randomUUID().toString());
 	}
 	
 	public SBApiResponse(String id) {

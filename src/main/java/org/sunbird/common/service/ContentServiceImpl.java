@@ -423,7 +423,7 @@ public class ContentServiceImpl implements ContentService {
 		if (MapUtils.isEmpty(responseData) || responseData.size() < fields.size()) {
 			// DataCacheMgr doesn't have data OR contains less content fields.
 			// Let's read again
-			String contentString = redisCacheMgr.getCache(contentId);
+			String contentString = redisCacheMgr.getContentFromCache(contentId);
 			if (StringUtils.isBlank(contentString)) {
 				// Tried reading from Redis - but redis didn't have data for some reason.
 				// Or connection failed ??

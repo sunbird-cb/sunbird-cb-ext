@@ -1,8 +1,5 @@
 package org.sunbird.cbp.model;
 
-import org.springframework.data.cassandra.core.mapping.Column;
-import org.springframework.data.cassandra.core.mapping.Table;
-
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;

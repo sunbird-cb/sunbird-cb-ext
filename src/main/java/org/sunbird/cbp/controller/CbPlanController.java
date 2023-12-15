@@ -12,14 +12,14 @@ import org.sunbird.common.util.Constants;
 @RequestMapping("cbplan")
 public class CbPlanController {
 
-   @Autowired
+    @Autowired
     private CbPlanService cbPlanService;
 
     @PostMapping("/v1/create")
     public ResponseEntity<SBApiResponse> createCbPlan(
             @RequestBody SunbirdApiRequest request,
             @RequestHeader(Constants.X_AUTH_TOKEN) String token,
-            @RequestHeader(Constants.X_AUTH_USER_ORG_ID)String userOrgId) throws Exception {
+            @RequestHeader(Constants.X_AUTH_USER_ORG_ID) String userOrgId) throws Exception {
 
         SBApiResponse response = cbPlanService.createCbPlan(request, userOrgId, token);
         return new ResponseEntity<>(response, response.getResponseCode());
@@ -29,16 +29,17 @@ public class CbPlanController {
     public ResponseEntity<SBApiResponse> updateCbPlan(
             @RequestBody SunbirdApiRequest request,
             @RequestHeader(Constants.X_AUTH_TOKEN) String token,
-            @RequestHeader(Constants.X_AUTH_USER_ORG_ID)String userOrgId) throws Exception {
+            @RequestHeader(Constants.X_AUTH_USER_ORG_ID) String userOrgId) throws Exception {
 
         SBApiResponse response = cbPlanService.updateCbPlan(request, userOrgId, token);
         return new ResponseEntity<>(response, response.getResponseCode());
     }
+
     @PostMapping("/v1/publish")
     public ResponseEntity<SBApiResponse> publishCbPlan(
             @RequestBody SunbirdApiRequest request,
             @RequestHeader(Constants.X_AUTH_TOKEN) String token,
-            @RequestHeader(Constants.X_AUTH_USER_ORG_ID)String userOrgId) throws Exception {
+            @RequestHeader(Constants.X_AUTH_USER_ORG_ID) String userOrgId) throws Exception {
 
         SBApiResponse response = cbPlanService.publishCbPlan(request, userOrgId, token);
         return new ResponseEntity<>(response, response.getResponseCode());
@@ -48,7 +49,7 @@ public class CbPlanController {
     public ResponseEntity<SBApiResponse> retireCbPlan(
             @RequestBody SunbirdApiRequest request,
             @RequestHeader(Constants.X_AUTH_TOKEN) String token,
-            @RequestHeader(Constants.X_AUTH_USER_ORG_ID)String userOrgId) throws Exception {
+            @RequestHeader(Constants.X_AUTH_USER_ORG_ID) String userOrgId) throws Exception {
 
         SBApiResponse response = cbPlanService.retireCbPlan(request, userOrgId, token);
         return new ResponseEntity<>(response, response.getResponseCode());
@@ -58,9 +59,18 @@ public class CbPlanController {
     public ResponseEntity<SBApiResponse> readCbPlan(
             @PathVariable("cbPlanId") String cbPlanId,
             @RequestHeader(Constants.X_AUTH_TOKEN) String token,
-            @RequestHeader(Constants.X_AUTH_USER_ORG_ID)String userOrgId) throws Exception {
+            @RequestHeader(Constants.X_AUTH_USER_ORG_ID) String userOrgId) throws Exception {
 
         SBApiResponse response = cbPlanService.readCbPlan(cbPlanId, userOrgId, token);
+        return new ResponseEntity<>(response, response.getResponseCode());
+    }
+
+    @PostMapping("/v1/list")
+    public ResponseEntity<SBApiResponse> listCBPlan(
+        @RequestBody SunbirdApiRequest request,
+        @RequestHeader(Constants.X_AUTH_TOKEN) String token, 
+        @RequestHeader(Constants.X_AUTH_USER_ORG_ID) String userOrgId) {
+        SBApiResponse response = cbPlanService.listCbPlan(request, userOrgId, token);
         return new ResponseEntity<>(response, response.getResponseCode());
     }
 }
