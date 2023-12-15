@@ -197,4 +197,12 @@ public class RedisCacheMgr {
         }
     }
 
+    public String getContentFromCache(String key) {
+        try (Jedis jedis = jedisPool.getResource()) {
+            return jedis.get(key);
+        } catch (Exception e) {
+            logger.error(e);
+            return null;
+        }
+    }
 }

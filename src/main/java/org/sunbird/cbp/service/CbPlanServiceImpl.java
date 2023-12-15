@@ -4,15 +4,36 @@ import com.datastax.driver.core.utils.UUIDs;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
+
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.sunbird.cassandra.utils.CassandraOperation;
 import org.sunbird.cbp.model.CbPlan;
+import org.sunbird.cbp.model.CbPlanSearch;
 import org.sunbird.cbp.model.dto.CbPlanDto;
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.model.SunbirdApiRequest;
@@ -20,23 +41,13 @@ import org.sunbird.common.service.ContentService;
 import org.sunbird.common.util.AccessTokenValidator;
 import org.sunbird.common.util.Constants;
 import org.sunbird.common.util.ProjectUtil;
-import org.sunbird.core.logger.CbExtLogger;
 import org.sunbird.user.service.UserUtilityService;
 
-import javax.validation.ConstraintViolation;
-import javax.validation.Validation;
-import javax.validation.Validator;
-import javax.validation.ValidatorFactory;
-import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class CbPlanServiceImpl implements CbPlanService {
 
-    private static final CbExtLogger logger = new CbExtLogger(CbPlanService.class.getName());
+    private Logger logger = LoggerFactory.getLogger(getClass().getName());
 
     @Autowired
     AccessTokenValidator accessTokenValidator;
@@ -113,17 +124,23 @@ public class CbPlanServiceImpl implements CbPlanService {
                 Map<String, Object> cbPlanInfo = new HashMap<>();
                 cbPlanInfo.put(Constants.ID, cbPlanId);
                 cbPlanInfo.put(Constants.ORG_ID, userOrgId);
-                List<Map<String, Object>> cbPlanMapInfo = cassandraOperation.getRecordsByPropertiesWithoutFiltering(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_CB_PLAN, cbPlanInfo, null);
+                List<Map<String, Object>> cbPlanMapInfo = cassandraOperation.getRecordsByPropertiesWithoutFiltering(
+                        Constants.KEYSPACE_SUNBIRD, Constants.TABLE_CB_PLAN, cbPlanInfo, null);
                 if (CollectionUtils.isNotEmpty(cbPlanMapInfo)) {
                     Map<String, Object> cbPlanInfoMap = cbPlanMapInfo.get(0);
                     String draftInfo = null;
-                    if (Constants.LIVE.equalsIgnoreCase((String) cbPlanInfoMap.get(Constants.STATUS)) && cbPlanInfoMap.get(Constants.CB_PUBLISHED_BY) != null) {
-                        //check when the cbPlan is published, need to check only few field need to be modified.
-                        List<String> allowedFieldForUpdate = Arrays.asList(Constants.NAME, Constants.CB_ASSIGNMENT_TYPE_INFO, Constants.END_DATE, Constants.ID);
-                        long keyNotAllowedCount = updatedCbPlan.keySet().stream().filter(key -> !allowedFieldForUpdate.contains(key)).count();
+                    if (Constants.LIVE.equalsIgnoreCase((String) cbPlanInfoMap.get(Constants.STATUS))
+                            && cbPlanInfoMap.get(Constants.CB_PUBLISHED_BY) != null) {
+                        // check when the cbPlan is published, need to check only few field need to be
+                        // modified.
+                        List<String> allowedFieldForUpdate = Arrays.asList(Constants.NAME,
+                                Constants.CB_ASSIGNMENT_TYPE_INFO, Constants.END_DATE, Constants.ID);
+                        long keyNotAllowedCount = updatedCbPlan.keySet().stream()
+                                .filter(key -> !allowedFieldForUpdate.contains(key)).count();
                         if (keyNotAllowedCount > 0) {
                             response.getParams().setStatus(Constants.FAILED);
-                            response.getParams().setErrmsg("Allowed Field for update cbPlan are: " + Constants.NAME + ", " + Constants.CB_ASSIGNMENT_TYPE_INFO + ", " + Constants.END_DATE);
+                            response.getParams().setErrmsg("Allowed Field for update cbPlan are: " + Constants.NAME
+                                    + ", " + Constants.CB_ASSIGNMENT_TYPE_INFO + ", " + Constants.END_DATE);
                             response.setResponseCode(HttpStatus.BAD_REQUEST);
                             return response;
                         }
@@ -136,13 +153,15 @@ public class CbPlanServiceImpl implements CbPlanService {
                     updatedCbPlanData.put(Constants.UPDATED_BY, userId);
                     updatedCbPlanData.put(Constants.UPDATED_AT, new Date());
 
-                    Map<String, Object> resp = cassandraOperation.updateRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_CB_PLAN, updatedCbPlanData, cbPlanInfo);
+                    Map<String, Object> resp = cassandraOperation.updateRecord(Constants.KEYSPACE_SUNBIRD,
+                            Constants.TABLE_CB_PLAN, updatedCbPlanData, cbPlanInfo);
                     if (resp.get(Constants.RESPONSE).equals(Constants.SUCCESS)) {
                         response.getResult().put(Constants.STATUS, Constants.UPDATED);
                         response.getResult().put(Constants.MESSAGE, "updated cbPlan for cbPlanId: " + cbPlanId);
                     } else {
                         response.getParams().setStatus(Constants.FAILED);
-                        response.getParams().setErrmsg((String) resp.get(Constants.ERROR_MESSAGE) + "for cbPlanId: " + cbPlanId);
+                        response.getParams()
+                                .setErrmsg((String) resp.get(Constants.ERROR_MESSAGE) + "for cbPlanId: " + cbPlanId);
                         response.setResponseCode(HttpStatus.BAD_REQUEST);
                     }
                 } else {
@@ -186,13 +205,16 @@ public class CbPlanServiceImpl implements CbPlanService {
             Map<String, Object> cbPlanInfo = new HashMap<>();
             cbPlanInfo.put(Constants.ID, cbPlanId);
             cbPlanInfo.put(Constants.ORG_ID, userOrgId);
-            List<Map<String, Object>> cbPlanMap = cassandraOperation.getRecordsByPropertiesWithoutFiltering(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_CB_PLAN, cbPlanInfo, null);
+            List<Map<String, Object>> cbPlanMap = cassandraOperation.getRecordsByPropertiesWithoutFiltering(
+                    Constants.KEYSPACE_SUNBIRD, Constants.TABLE_CB_PLAN, cbPlanInfo, null);
 
             if (CollectionUtils.isNotEmpty(cbPlanMap)) {
                 Map<String, Object> cbPlan = cbPlanMap.get(0);
                 Map<String, Object> publishCbPlan = new HashMap<>();
                 publishCbPlan.putAll(cbPlan);
-                if ((Constants.LIVE.equalsIgnoreCase((String) cbPlan.get(Constants.STATUS)) && cbPlan.get(Constants.DRAFT_DATA) == null) || Constants.CB_RETIRE.equalsIgnoreCase((String) cbPlan.get(Constants.STATUS))) {
+                if ((Constants.LIVE.equalsIgnoreCase((String) cbPlan.get(Constants.STATUS))
+                        && cbPlan.get(Constants.DRAFT_DATA) == null)
+                        || Constants.CB_RETIRE.equalsIgnoreCase((String) cbPlan.get(Constants.STATUS))) {
                     response.getParams().setStatus(Constants.FAILED);
                     String errMsg = "CbPlan is already published for ID: " + cbPlanId;
                     if (Constants.CB_RETIRE.equalsIgnoreCase((String) cbPlan.get(Constants.STATUS))) {
@@ -206,15 +228,19 @@ public class CbPlanServiceImpl implements CbPlanService {
                     CbPlanDto cbPlanDto = mapper.readValue((String) cbPlan.get(Constants.DRAFT_DATA), CbPlanDto.class);
                     updateCbPlanData(cbPlan, cbPlanDto);
                 } else {
-                    Map<String, Object> cbPlanDtoMap = mapper.readValue((String) cbPlan.get(Constants.DRAFT_DATA), new TypeReference<Map<String, Object>>() {
-                    });
-                    cbPlan.put(Constants.NAME, cbPlanDtoMap.getOrDefault(Constants.NAME, publishCbPlan.get(Constants.NAME)));
-                    cbPlan.put(Constants.CB_ASSIGNMENT_TYPE_INFO, cbPlanDtoMap.getOrDefault(Constants.CB_ASSIGNMENT_TYPE_INFO, publishCbPlan.get(Constants.CB_ASSIGNMENT_TYPE_INFO)));
+                    Map<String, Object> cbPlanDtoMap = mapper.readValue((String) cbPlan.get(Constants.DRAFT_DATA),
+                            new TypeReference<Map<String, Object>>() {
+                            });
+                    cbPlan.put(Constants.NAME,
+                            cbPlanDtoMap.getOrDefault(Constants.NAME, publishCbPlan.get(Constants.NAME)));
+                    cbPlan.put(Constants.CB_ASSIGNMENT_TYPE_INFO, cbPlanDtoMap.getOrDefault(
+                            Constants.CB_ASSIGNMENT_TYPE_INFO, publishCbPlan.get(Constants.CB_ASSIGNMENT_TYPE_INFO)));
                     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
                     Date endDate = null;
                     try {
-                        endDate = dateFormat.parse(String.valueOf(cbPlanDtoMap.getOrDefault(Constants.END_DATE, publishCbPlan.get(Constants.END_DATE))));
+                        endDate = dateFormat.parse(String.valueOf(
+                                cbPlanDtoMap.getOrDefault(Constants.END_DATE, publishCbPlan.get(Constants.END_DATE))));
                     } catch (ParseException e) {
                         e.printStackTrace(); // Handle the exception appropriately
                     }
@@ -230,14 +256,16 @@ public class CbPlanServiceImpl implements CbPlanService {
                 cbPlan.remove(Constants.ID);
                 cbPlan.remove(Constants.ORG_ID);
                 cbPlan.put(Constants.CB_PUBLISHED_AT, new Date());
-                Map<String, Object> resp = cassandraOperation.updateRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_CB_PLAN, cbPlan, cbPlanInfo);
+                Map<String, Object> resp = cassandraOperation.updateRecord(Constants.KEYSPACE_SUNBIRD,
+                        Constants.TABLE_CB_PLAN, cbPlan, cbPlanInfo);
                 if (resp.get(Constants.RESPONSE).equals(Constants.SUCCESS)) {
                     updateCbPlanLookupInfo(cbPlanDto, userOrgId, cbPlanId);
                     response.getResult().put(Constants.STATUS, Constants.UPDATED);
                     response.getResult().put(Constants.MESSAGE, "Published cbPlan for cbPlanId: " + cbPlanId);
                 } else {
                     response.getParams().setStatus(Constants.FAILED);
-                    response.getParams().setErrmsg((String) resp.get(Constants.ERROR_MESSAGE) + "for cbPlanId: " + cbPlanId);
+                    response.getParams()
+                            .setErrmsg((String) resp.get(Constants.ERROR_MESSAGE) + "for cbPlanId: " + cbPlanId);
                     response.setResponseCode(HttpStatus.BAD_REQUEST);
                 }
             } else {
@@ -252,7 +280,6 @@ public class CbPlanServiceImpl implements CbPlanService {
         }
         return response;
     }
-
 
     @Override
     public SBApiResponse retireCbPlan(SunbirdApiRequest request, String userOrgId, String authUserToken) {
@@ -277,7 +304,8 @@ public class CbPlanServiceImpl implements CbPlanService {
             Map<String, Object> cbPlanInfo = new HashMap<>();
             cbPlanInfo.put(Constants.ID, cbPlanId);
             cbPlanInfo.put(Constants.ORG_ID, userOrgId);
-            List<Map<String, Object>> cbPlanMap = cassandraOperation.getRecordsByPropertiesWithoutFiltering(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_CB_PLAN, cbPlanInfo, null);
+            List<Map<String, Object>> cbPlanMap = cassandraOperation.getRecordsByPropertiesWithoutFiltering(
+                    Constants.KEYSPACE_SUNBIRD, Constants.TABLE_CB_PLAN, cbPlanInfo, null);
 
             if (CollectionUtils.isNotEmpty(cbPlanMap)) {
                 Map<String, Object> cbPlan = cbPlanMap.get(0);
@@ -297,14 +325,16 @@ public class CbPlanServiceImpl implements CbPlanService {
                 cbPlan.remove(Constants.ID);
                 cbPlan.remove(Constants.ORG_ID);
                 cbPlan.put(Constants.CB_PUBLISHED_AT, new Date());
-                Map<String, Object> resp = cassandraOperation.updateRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_CB_PLAN, cbPlan, cbPlanInfo);
+                Map<String, Object> resp = cassandraOperation.updateRecord(Constants.KEYSPACE_SUNBIRD,
+                        Constants.TABLE_CB_PLAN, cbPlan, cbPlanInfo);
                 if (resp.get(Constants.RESPONSE).equals(Constants.SUCCESS)) {
                     updateCbPlanLookupInfoForRetire(userOrgId, cbPlanId);
                     response.getResult().put(Constants.STATUS, Constants.UPDATED);
                     response.getResult().put(Constants.MESSAGE, "Archived cbPlan for cbPlanId: " + cbPlanId);
                 } else {
                     response.getParams().setStatus(Constants.FAILED);
-                    response.getParams().setErrmsg((String) resp.get(Constants.ERROR_MESSAGE) + "for cbPlanId: " + cbPlanId);
+                    response.getParams()
+                            .setErrmsg((String) resp.get(Constants.ERROR_MESSAGE) + "for cbPlanId: " + cbPlanId);
                     response.setResponseCode(HttpStatus.BAD_REQUEST);
                 }
             } else {
@@ -341,7 +371,8 @@ public class CbPlanServiceImpl implements CbPlanService {
             Map<String, Object> cbPlanInfo = new HashMap<>();
             cbPlanInfo.put(Constants.ID, cbPlanUUID);
             cbPlanInfo.put(Constants.ORG_ID, userOrgId);
-            List<Map<String, Object>> cbPlanMap = cassandraOperation.getRecordsByPropertiesWithoutFiltering(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_CB_PLAN, cbPlanInfo, null);
+            List<Map<String, Object>> cbPlanMap = cassandraOperation.getRecordsByPropertiesWithoutFiltering(
+                    Constants.KEYSPACE_SUNBIRD, Constants.TABLE_CB_PLAN, cbPlanInfo, null);
 
             if (CollectionUtils.isNotEmpty(cbPlanMap)) {
                 Map<String, Object> cbPlan = cbPlanMap.get(0);
@@ -453,7 +484,8 @@ public class CbPlanServiceImpl implements CbPlanService {
         List<String> userDraftAssignmentTypeInfoForLive = new ArrayList<>();
         String assignmentType = (String) cbPlan.get(Constants.CB_ASSIGNMENT_TYPE);
         if (StringUtils.isBlank((String) cbPlan.get(Constants.DRAFT_DATA)) ||
-                (StringUtils.isNotBlank((String) cbPlan.get(Constants.DRAFT_DATA)) && Constants.LIVE.equalsIgnoreCase((String) cbPlan.get(Constants.STATUS)))) {
+                (StringUtils.isNotBlank((String) cbPlan.get(Constants.DRAFT_DATA))
+                        && Constants.LIVE.equalsIgnoreCase((String) cbPlan.get(Constants.STATUS)))) {
             enrichData.put(Constants.NAME, cbPlan.get(Constants.NAME));
             enrichData.put(Constants.CB_ASSIGNMENT_TYPE, cbPlan.get(Constants.CB_ASSIGNMENT_TYPE));
             assignmentTypeInfo = (List<String>) cbPlan.get(Constants.CB_ASSIGNMENT_TYPE_INFO);
@@ -464,16 +496,20 @@ public class CbPlanServiceImpl implements CbPlanService {
                 enrichData.put(Constants.CB_ASSIGNMENT_TYPE_INFO, cbPlan.get(Constants.CB_ASSIGNMENT_TYPE_INFO));
             }
             if (StringUtils.isNotBlank((String) cbPlan.get(Constants.DRAFT_DATA))) {
-                Map<String, Object> cbPlanDtoMap = mapper.readValue((String) cbPlan.get(Constants.DRAFT_DATA), new TypeReference<Map<String, Object>>() {
-                });
+                Map<String, Object> cbPlanDtoMap = mapper.readValue((String) cbPlan.get(Constants.DRAFT_DATA),
+                        new TypeReference<Map<String, Object>>() {
+                        });
 
-                if (cbPlanDtoMap.get(Constants.CB_ASSIGNMENT_TYPE_INFO) != null && Constants.CB_CUSTOM_TYPE.equalsIgnoreCase(assignmentType)) {
-                    userDraftAssignmentTypeInfoForLive.addAll((List<String>) cbPlanDtoMap.get(Constants.CB_ASSIGNMENT_TYPE_INFO));
+                if (cbPlanDtoMap.get(Constants.CB_ASSIGNMENT_TYPE_INFO) != null
+                        && Constants.CB_CUSTOM_TYPE.equalsIgnoreCase(assignmentType)) {
+                    userDraftAssignmentTypeInfoForLive
+                            .addAll((List<String>) cbPlanDtoMap.get(Constants.CB_ASSIGNMENT_TYPE_INFO));
                 }
                 cbPlanDtoMap.remove(Constants.ID);
                 enrichData.put(Constants.DRAFT_DATA, cbPlanDtoMap);
             }
-        } else if (StringUtils.isNotBlank((String) cbPlan.get(Constants.DRAFT_DATA)) && Constants.DRAFT.equalsIgnoreCase((String) cbPlan.get(Constants.STATUS))) {
+        } else if (StringUtils.isNotBlank((String) cbPlan.get(Constants.DRAFT_DATA))
+                && Constants.DRAFT.equalsIgnoreCase((String) cbPlan.get(Constants.STATUS))) {
             CbPlanDto cbPlanDto = mapper.readValue((String) cbPlan.get(Constants.DRAFT_DATA), CbPlanDto.class);
             enrichData.put(Constants.NAME, cbPlanDto.getName());
             enrichData.put(Constants.CB_ASSIGNMENT_TYPE, cbPlanDto.getAssignmentType());
@@ -517,18 +553,22 @@ public class CbPlanServiceImpl implements CbPlanService {
                 enrichData.put(Constants.DRAFT_DATA, draft);
             }
         } else {
-            userUtilityService.getUserDetailsFromDB(Arrays.asList((String) cbPlan.get(Constants.CREATED_BY)), Arrays.asList(Constants.FIRSTNAME, Constants.USER_ID),
+            userUtilityService.getUserDetailsFromDB(Arrays.asList((String) cbPlan.get(Constants.CREATED_BY)),
+                    Arrays.asList(Constants.FIRSTNAME, Constants.USER_ID),
                     userInfoMap);
         }
 
-        enrichData.put(Constants.CREATED_BY, userInfoMap.get((String) cbPlan.get(Constants.CREATED_BY)).get(Constants.FIRSTNAME));
+        enrichData.put(Constants.CREATED_BY,
+                userInfoMap.get((String) cbPlan.get(Constants.CREATED_BY)).get(Constants.FIRSTNAME));
         List<Map<String, Object>> enrichContentInfoMap = new ArrayList<>();
         for (String contentId : contentTypeInfo) {
-            List<String> fields = Arrays.asList(Constants.NAME, Constants.AVG_RATING, Constants.COMPETENCIES_V5, Constants.DESCRIPTION);
+            List<String> fields = Arrays.asList(Constants.NAME, Constants.AVG_RATING, Constants.COMPETENCIES_V5,
+                    Constants.DESCRIPTION);
             Map<String, Object> contentResponse = contentService.readContentFromCache(contentId, fields);
             Map<String, Object> enrichContentMap = new HashMap<>();
             enrichContentMap.put(Constants.NAME, contentResponse.get(Constants.NAME));
-            //enrichContentMap.put(Constants.COMPETENCIES_V3, contentResponse.get(Constants.COMPETENCIES_V3));
+            // enrichContentMap.put(Constants.COMPETENCIES_V3,
+            // contentResponse.get(Constants.COMPETENCIES_V3));
             enrichContentMap.put(Constants.COMPETENCIES_V5, contentResponse.get(Constants.COMPETENCIES_V5));
             enrichContentMap.put(Constants.AVG_RATING, contentResponse.get(Constants.AVG_RATING));
             enrichContentMap.put(Constants.IDENTIFIER, contentResponse.get(Constants.IDENTIFIER));
@@ -536,14 +576,13 @@ public class CbPlanServiceImpl implements CbPlanService {
             enrichContentInfoMap.add(enrichContentMap);
         }
         if (CollectionUtils.isNotEmpty(enrichContentInfoMap)) {
-            enrichData.put(Constants.COURSE_LIST, enrichContentInfoMap);
+            enrichData.put(Constants.CONTENT_LIST, enrichContentInfoMap);
         }
         return enrichData;
     }
 
     private String validateAuthTokenAndFetchUserId(String authUserToken) {
-        return "5084a2bc-364d-4106-ae74-74700a759769";
-        //return accessTokenValidator.fetchUserIdFromAccessToken(authUserToken);
+        return accessTokenValidator.fetchUserIdFromAccessToken(authUserToken);
     }
 
     private List<String> validateCbPlanRequest(CbPlanDto cbPlanDto) {
@@ -580,13 +619,18 @@ public class CbPlanServiceImpl implements CbPlanService {
         cbPlanInfo.put(Constants.CB_PLAN_ID, cbPlanId);
         cbPlanInfo.put(Constants.ORG_ID, orgId);
         boolean isUpdatedLookup = false;
-        List<Map<String, Object>> cbPlanMap = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_CB_PLAN_LOOKUP, cbPlanInfo, null);
+        List<Map<String, Object>> cbPlanMap = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
+                Constants.TABLE_CB_PLAN_LOOKUP, cbPlanInfo, null);
         List<String> cbPlanInfoInsertAssignmentKey = new ArrayList<>();
         List<String> cbPlanInfoRemoveAssignmentKey = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(cbPlanMap)) {
-            List<String> assignmentKeyInfoList = cbPlanMap.stream().map(c -> (String) c.get(Constants.CB_ASSIGNMENT_TYPE_INFO_KEY)).collect(Collectors.toList());
-            cbPlanInfoInsertAssignmentKey = planDto.getAssignmentTypeInfo().stream().filter(assignmentKeyInfo -> !assignmentKeyInfoList.contains(assignmentKeyInfo)).collect(Collectors.toList());
-            cbPlanInfoRemoveAssignmentKey = assignmentKeyInfoList.stream().filter(key -> !planDto.getAssignmentTypeInfo().contains(key)).collect(Collectors.toList());
+            List<String> assignmentKeyInfoList = cbPlanMap.stream()
+                    .map(c -> (String) c.get(Constants.CB_ASSIGNMENT_TYPE_INFO_KEY)).collect(Collectors.toList());
+            cbPlanInfoInsertAssignmentKey = planDto.getAssignmentTypeInfo().stream()
+                    .filter(assignmentKeyInfo -> !assignmentKeyInfoList.contains(assignmentKeyInfo))
+                    .collect(Collectors.toList());
+            cbPlanInfoRemoveAssignmentKey = assignmentKeyInfoList.stream()
+                    .filter(key -> !planDto.getAssignmentTypeInfo().contains(key)).collect(Collectors.toList());
         } else {
             cbPlanInfoInsertAssignmentKey = planDto.getAssignmentTypeInfo();
         }
@@ -600,7 +644,8 @@ public class CbPlanServiceImpl implements CbPlanService {
             lookupInfo.put(Constants.CB_CONTENT_LIST, planDto.getContentList());
             lookupInfo.put(Constants.END_DATE, planDto.getEndDate());
             lookupInfo.put(Constants.CB_IS_ACTIVE, true);
-            SBApiResponse resp = cassandraOperation.insertRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_CB_PLAN_LOOKUP, lookupInfo);
+            SBApiResponse resp = cassandraOperation.insertRecord(Constants.KEYSPACE_SUNBIRD,
+                    Constants.TABLE_CB_PLAN_LOOKUP, lookupInfo);
             if (!resp.get(Constants.RESPONSE).equals(Constants.SUCCESS)) {
                 isUpdatedLookup = false;
             } else {
@@ -616,7 +661,8 @@ public class CbPlanServiceImpl implements CbPlanService {
 
             Map<String, Object> lookupInfoUpdated = new HashMap<>();
             lookupInfoUpdated.put(Constants.CB_IS_ACTIVE, false);
-            Map<String, Object> resp = cassandraOperation.updateRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_CB_PLAN_LOOKUP, lookupInfoUpdated, compositeKey);
+            Map<String, Object> resp = cassandraOperation.updateRecord(Constants.KEYSPACE_SUNBIRD,
+                    Constants.TABLE_CB_PLAN_LOOKUP, lookupInfoUpdated, compositeKey);
             if (resp.get(Constants.RESPONSE).equals(Constants.SUCCESS)) {
                 isUpdatedLookup = true;
             } else {
@@ -630,18 +676,27 @@ public class CbPlanServiceImpl implements CbPlanService {
         Map<String, Object> draftInfo = new HashMap<>();
         if (StringUtils.isBlank((String) cbPlan.get(Constants.DRAFT_DATA))) {
             draftInfo.put(Constants.NAME, updatedCbPlan.getOrDefault(Constants.NAME, cbPlan.get(Constants.NAME)));
-            draftInfo.put(Constants.CB_ASSIGNMENT_TYPE, updatedCbPlan.getOrDefault(Constants.CB_ASSIGNMENT_TYPE, cbPlan.get(Constants.CB_ASSIGNMENT_TYPE)));
-            draftInfo.put(Constants.CB_ASSIGNMENT_TYPE_INFO, updatedCbPlan.getOrDefault(Constants.CB_ASSIGNMENT_TYPE_INFO, cbPlan.get(Constants.CB_ASSIGNMENT_TYPE_INFO)));
-            draftInfo.put(Constants.CB_CONTENT_TYPE, updatedCbPlan.getOrDefault(Constants.CB_CONTENT_TYPE, cbPlan.get(Constants.CB_CONTENT_TYPE)));
-            draftInfo.put(Constants.CB_CONTENT_LIST, updatedCbPlan.getOrDefault(Constants.CB_CONTENT_LIST, cbPlan.get(Constants.CB_CONTENT_LIST)));
-            draftInfo.put(Constants.END_DATE, updatedCbPlan.getOrDefault(Constants.END_DATE, cbPlan.get(Constants.END_DATE)));
+            draftInfo.put(Constants.CB_ASSIGNMENT_TYPE,
+                    updatedCbPlan.getOrDefault(Constants.CB_ASSIGNMENT_TYPE, cbPlan.get(Constants.CB_ASSIGNMENT_TYPE)));
+            draftInfo.put(Constants.CB_ASSIGNMENT_TYPE_INFO, updatedCbPlan
+                    .getOrDefault(Constants.CB_ASSIGNMENT_TYPE_INFO, cbPlan.get(Constants.CB_ASSIGNMENT_TYPE_INFO)));
+            draftInfo.put(Constants.CB_CONTENT_TYPE,
+                    updatedCbPlan.getOrDefault(Constants.CB_CONTENT_TYPE, cbPlan.get(Constants.CB_CONTENT_TYPE)));
+            draftInfo.put(Constants.CB_CONTENT_LIST,
+                    updatedCbPlan.getOrDefault(Constants.CB_CONTENT_LIST, cbPlan.get(Constants.CB_CONTENT_LIST)));
+            draftInfo.put(Constants.END_DATE,
+                    updatedCbPlan.getOrDefault(Constants.END_DATE, cbPlan.get(Constants.END_DATE)));
         } else {
             CbPlanDto cbPlanDto = mapper.readValue((String) cbPlan.get(Constants.DRAFT_DATA), CbPlanDto.class);
             draftInfo.put(Constants.NAME, updatedCbPlan.getOrDefault(Constants.NAME, cbPlanDto.getName()));
-            draftInfo.put(Constants.CB_ASSIGNMENT_TYPE, updatedCbPlan.getOrDefault(Constants.CB_ASSIGNMENT_TYPE, cbPlanDto.getAssignmentType()));
-            draftInfo.put(Constants.CB_ASSIGNMENT_TYPE_INFO, updatedCbPlan.getOrDefault(Constants.CB_ASSIGNMENT_TYPE_INFO, cbPlanDto.getAssignmentTypeInfo()));
-            draftInfo.put(Constants.CB_CONTENT_TYPE, updatedCbPlan.getOrDefault(Constants.CB_CONTENT_TYPE, cbPlanDto.getContentType()));
-            draftInfo.put(Constants.CB_CONTENT_LIST, updatedCbPlan.getOrDefault(Constants.CB_CONTENT_LIST, cbPlanDto.getContentList()));
+            draftInfo.put(Constants.CB_ASSIGNMENT_TYPE,
+                    updatedCbPlan.getOrDefault(Constants.CB_ASSIGNMENT_TYPE, cbPlanDto.getAssignmentType()));
+            draftInfo.put(Constants.CB_ASSIGNMENT_TYPE_INFO,
+                    updatedCbPlan.getOrDefault(Constants.CB_ASSIGNMENT_TYPE_INFO, cbPlanDto.getAssignmentTypeInfo()));
+            draftInfo.put(Constants.CB_CONTENT_TYPE,
+                    updatedCbPlan.getOrDefault(Constants.CB_CONTENT_TYPE, cbPlanDto.getContentType()));
+            draftInfo.put(Constants.CB_CONTENT_LIST,
+                    updatedCbPlan.getOrDefault(Constants.CB_CONTENT_LIST, cbPlanDto.getContentList()));
             draftInfo.put(Constants.END_DATE, updatedCbPlan.getOrDefault(Constants.END_DATE, cbPlanDto.getEndDate()));
         }
         return mapper.writeValueAsString(draftInfo);
@@ -652,9 +707,11 @@ public class CbPlanServiceImpl implements CbPlanService {
         cbPlanInfo.put(Constants.CB_PLAN_ID, cbPlanId);
         cbPlanInfo.put(Constants.ORG_ID, orgId);
         boolean isUpdatedLookup = false;
-        List<Map<String, Object>> cbPlanMap = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_CB_PLAN_LOOKUP, cbPlanInfo, null);
+        List<Map<String, Object>> cbPlanMap = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
+                Constants.TABLE_CB_PLAN_LOOKUP, cbPlanInfo, null);
         if (CollectionUtils.isNotEmpty(cbPlanMap)) {
-            List<String> assignmentKeyInfoList = cbPlanMap.stream().map(c -> (String) c.get(Constants.CB_ASSIGNMENT_TYPE_INFO_KEY)).collect(Collectors.toList());
+            List<String> assignmentKeyInfoList = cbPlanMap.stream()
+                    .map(c -> (String) c.get(Constants.CB_ASSIGNMENT_TYPE_INFO_KEY)).collect(Collectors.toList());
             for (String assignmentTypeInfo : assignmentKeyInfoList) {
                 Map<String, Object> compositeKey = new HashMap<>();
                 compositeKey.put(Constants.ORG_ID, orgId);
@@ -663,7 +720,8 @@ public class CbPlanServiceImpl implements CbPlanService {
 
                 Map<String, Object> lookupInfoUpdated = new HashMap<>();
                 lookupInfoUpdated.put(Constants.CB_IS_ACTIVE, false);
-                Map<String, Object> resp = cassandraOperation.updateRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_CB_PLAN_LOOKUP, lookupInfoUpdated, compositeKey);
+                Map<String, Object> resp = cassandraOperation.updateRecord(Constants.KEYSPACE_SUNBIRD,
+                        Constants.TABLE_CB_PLAN_LOOKUP, lookupInfoUpdated, compositeKey);
                 if (resp.get(Constants.RESPONSE).equals(Constants.SUCCESS)) {
                     isUpdatedLookup = true;
                 } else {
@@ -672,5 +730,137 @@ public class CbPlanServiceImpl implements CbPlanService {
             }
         }
         return isUpdatedLookup;
+    }
+
+    @Override
+    public SBApiResponse listCbPlan(SunbirdApiRequest request, String userOrgId, String token) {
+        SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_CB_PLAN_LIST);
+
+        try {
+            CbPlanSearch searchReq = mapper.convertValue(request.getRequest(), CbPlanSearch.class);
+            String errMsg = validateListAPI(userOrgId, request, searchReq);
+
+            if (StringUtils.isNotBlank(errMsg)) {
+                response.getParams().setErrmsg(errMsg);
+                response.getParams().setStatus(Constants.FAILED);
+                response.setResponseCode(HttpStatus.BAD_REQUEST);
+                return response;
+            }
+
+            Map<String, Object> cbPlanPrimaryKey = new HashMap<String, Object>();
+            cbPlanPrimaryKey.put(Constants.ORG_ID, userOrgId);
+            List<String> fields = Arrays.asList(Constants.ORG_ID, Constants.ID, Constants.NAME,
+                    Constants.CB_CONTENT_TYPE,
+                    Constants.CB_CONTENT_LIST, Constants.CB_ASSIGNMENT_TYPE, Constants.CB_ASSIGNMENT_TYPE_INFO,
+                    Constants.END_DATE, Constants.STATUS, Constants.CREATED_BY, Constants.CREATED_AT);
+
+            List<Map<String, Object>> cbPlanList = cassandraOperation.getRecordsByPropertiesWithoutFiltering(
+                    Constants.KEYSPACE_SUNBIRD, Constants.TABLE_CB_PLAN, cbPlanPrimaryKey, fields);
+            if (CollectionUtils.isEmpty(cbPlanList)) {
+                response.getResult().put(Constants.COUNT, 0);
+                response.getResult().put(Constants.CONTENT, Collections.emptyList());
+                return response;
+            }
+
+            // Lets get the object which match the given status
+            List<Map<String, Object>> filteredCbPlanList = cbPlanList.stream()
+                    .filter(map -> map.containsKey(Constants.STATUS)
+                            && map.get(Constants.STATUS).equals(searchReq.getFilters().get(Constants.STATUS)))
+                    .collect(Collectors.toList());
+
+            if (searchReq.getFilters().containsKey(Constants.CB_ASSIGNMENT_TYPE)) {
+                filteredCbPlanList = filteredCbPlanList.stream()
+                        .filter(map -> map.containsKey(Constants.CB_ASSIGNMENT_TYPE)
+                                && map.get(Constants.CB_ASSIGNMENT_TYPE)
+                                        .equals(searchReq.getFilters().get(Constants.CB_ASSIGNMENT_TYPE)))
+                        .collect(Collectors.toList());
+            }
+
+            if (searchReq.getFilters().containsKey(Constants.CB_CONTENT_TYPE)) {
+                filteredCbPlanList = filteredCbPlanList.stream()
+                        .filter(map -> map.containsKey(Constants.CB_CONTENT_TYPE)
+                                && map.get(Constants.CB_CONTENT_TYPE)
+                                        .equals(searchReq.getFilters().get(Constants.CB_CONTENT_TYPE)))
+                        .collect(Collectors.toList());
+            }
+
+            if (searchReq.getLimit() != null && filteredCbPlanList.size() > searchReq.getLimit()) {
+                filteredCbPlanList = filteredCbPlanList.subList(0, searchReq.getLimit());
+            }
+
+            Set<String> uniqueCourses = filteredCbPlanList.stream()
+                    .flatMap(map -> ((List<String>) map.getOrDefault(Constants.CB_CONTENT_LIST, new ArrayList<>()))
+                            .stream())
+                    .collect(Collectors.toSet());
+
+            Map<String, Map<String, Object>> courseInfoMap = new HashMap<String, Map<String, Object>>();
+            for (String courseId : uniqueCourses) {
+                Map<String, Object> courseInfo = contentService.readContentFromCache(courseId, Collections.emptyList());
+                if (MapUtils.isNotEmpty(courseInfo)) {
+                    courseInfoMap.put(courseId, courseInfo);
+                }
+            }
+
+            for (Map<String, Object> cbPlan : filteredCbPlanList) {
+                List<String> courseIdList = (List<String>) cbPlan.get(Constants.CB_CONTENT_LIST);
+                List<Map<String, Object>> courseMapList = new ArrayList<Map<String, Object>>();
+                for (String courseId : courseIdList) {
+                    if (courseInfoMap.containsKey(courseId)) {
+                        courseMapList.add(courseInfoMap.get(courseId));
+                    } else {
+                        // logger.error("");
+                    }
+                }
+                cbPlan.put(Constants.CB_CONTENT_LIST, courseMapList);
+            }
+
+            response.getResult().put(Constants.COUNT, filteredCbPlanList.size());
+            response.getResult().put(Constants.CONTENT, filteredCbPlanList);
+        } catch (Exception e) {
+            logger.error("Failed to list CB Plan for OrgId: " + userOrgId, e);
+            response.getParams().setErrmsg(e.getMessage());
+            response.getParams().setStatus(Constants.FAILED);
+            response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return response;
+    }
+
+    private String validateListAPI(String orgId, SunbirdApiRequest request, CbPlanSearch searchReq) {
+        String errMsg = "";
+        // List request Validation.
+        if (StringUtils.isBlank(orgId)) {
+            errMsg = "OrgId is missing";
+            return errMsg;
+        }
+        if (request.getRequest() == null) {
+            errMsg = "Request object is missing";
+            return errMsg;
+        }
+
+        if (searchReq.getFilters() == null) {
+            errMsg = "Request object is missing filters";
+            return errMsg;
+        }
+
+        String status = (String) searchReq.getFilters().get(Constants.STATUS);
+        if (StringUtils.isBlank(status)) {
+            errMsg = "Filter object must contain status attribute";
+            return errMsg;
+        }
+
+        String contentType, assignmentType;
+        contentType = (String) searchReq.getFilters().get(Constants.CONTENT_TYPE);
+        assignmentType = (String) searchReq.getFilters().get(Constants.CB_ASSIGNMENT_TYPE);
+
+        // Will remove the filters if one of the value is blank
+        if (StringUtils.isBlank(contentType)) {
+            searchReq.getFilters().remove(Constants.CONTENT_TYPE);
+        }
+
+        if (StringUtils.isBlank(assignmentType)) {
+            searchReq.getFilters().remove(assignmentType);
+        }
+
+        return errMsg;
     }
 }

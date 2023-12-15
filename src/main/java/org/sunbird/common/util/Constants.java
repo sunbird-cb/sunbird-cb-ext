@@ -884,7 +884,7 @@ public class Constants {
 
 	public static final String COMPETENCIES_V3 = "competencies_v3";
 
-	public static final String COURSE_LIST = "courseList";
+	public static final String CONTENT_LIST = "contentList";
 
 	public static final String CB_ALL_USERS_TYPE = "allUsers";
 
@@ -895,6 +895,9 @@ public class Constants {
 	public static final String USER_TYPE = "userType";
 	public static final String CB_PLAN_ID_KEY = "cbPlanId";
 	public static final String ALL_USER = "allUser";
+
+	public static final String API_CB_PLAN_LIST = "api.cbplan.list";
+
 	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}

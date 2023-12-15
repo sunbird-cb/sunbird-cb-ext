@@ -15,6 +15,8 @@ public interface CbPlanService {
 
     SBApiResponse readCbPlan(String cbPlanId, String userOrgId, String token);
 
+    SBApiResponse listCbPlan(SunbirdApiRequest request, String userOrgId, String token);
+
     SBApiResponse getCBPlanListForUser(String userOrgId, String token);
 
 }
