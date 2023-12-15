@@ -884,7 +884,7 @@ public class Constants {
 
 	public static final String COMPETENCIES_V3 = "competencies_v3";
 
-	public static final String COURSE_LIST = "courseList";
+	public static final String CONTENT_LIST = "contentList";
 
 	public static final String CB_ALL_USERS_TYPE = "allUsers";
 
