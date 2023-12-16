@@ -1,5 +1,9 @@
 package org.sunbird.cbp.service;
 
+import com.datastax.driver.core.utils.UUIDs;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -39,10 +43,6 @@ import org.sunbird.common.util.Constants;
 import org.sunbird.common.util.ProjectUtil;
 import org.sunbird.user.service.UserUtilityService;
 
-import com.datastax.driver.core.utils.UUIDs;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class CbPlanServiceImpl implements CbPlanService {
@@ -390,6 +390,91 @@ public class CbPlanServiceImpl implements CbPlanService {
         }
         return response;
 
+    }
+
+    @Override
+    public SBApiResponse getCBPlanListForUser(String userOrgId, String authUserToken) {
+        SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.CBP_PLAN_USER_LIST_API);
+        try {
+            String userId = validateAuthTokenAndFetchUserId(authUserToken);
+            logger.info("UserId of the User : " + userId + "User org ID : " + userOrgId);
+            List<String> fields = Arrays.asList(Constants.PROFILE_DETAILS, Constants.ROOT_ORG_ID);
+            Map<String, Object> propertiesMap = new HashMap<>();
+            propertiesMap.put(Constants.ID, userId);
+            List<Map<String, Object>> userDetailsResult = cassandraOperation.getRecordsByPropertiesWithoutFiltering(Constants.SUNBIRD_KEY_SPACE_NAME,
+                    Constants.USER, propertiesMap, fields);
+            if (CollectionUtils.isEmpty(userDetailsResult)) {
+                response.getParams().setStatus(Constants.SUCCESSFUL);
+                response.getParams().setErrmsg("User Does not Exist");
+                response.setResponseCode(HttpStatus.OK);
+                return response;
+            }
+            Map<String, Object> userDetails = userDetailsResult.get(0);
+            String profileDetails = (String) userDetails.get(Constants.PROFILE_DETAILS_KEY);
+            String userDesignation = "";
+            Map<String, Object> profileDetailsMap = null;
+            List<Map<String, Object>> professionalDetails = null;
+            if (StringUtils.isNotEmpty(profileDetails)) {
+                profileDetailsMap = mapper.readValue(profileDetails, new TypeReference<HashMap<String, Object>>() {
+                });
+            }
+            if (null != profileDetailsMap) {
+                professionalDetails = (List<Map<String, Object>>) profileDetailsMap.get(Constants.PROFESSIONAL_DETAILS);
+            }
+            if (CollectionUtils.isNotEmpty(professionalDetails)) {
+                userDesignation = (String) professionalDetails.get(0).get(Constants.DESIGNATION);
+            }
+            List<String> assignmentTypeInfoKeyQueryList = Arrays.asList(userId, Constants.ALL_USER);
+            if (StringUtils.isNotEmpty(userDesignation)) {
+                logger.info("User Designation : " + userDesignation);
+                assignmentTypeInfoKeyQueryList.add(userDesignation);
+            }
+            propertiesMap.clear();
+            propertiesMap.put(Constants.ORG_ID, userOrgId);
+            propertiesMap.put(Constants.CB_ASSIGNMENT_TYPE_INFO_KEY, assignmentTypeInfoKeyQueryList);
+            List<Map<String, Object>> cbplanResult = cassandraOperation.getRecordsByPropertiesWithoutFiltering(Constants.SUNBIRD_KEY_SPACE_NAME,
+                    Constants.TABLE_CB_PLAN_LOOKUP, propertiesMap, new ArrayList<>());
+            if (CollectionUtils.isEmpty(cbplanResult)) {
+                response.getParams().setStatus(Constants.SUCCESSFUL);
+                response.getParams().setErrmsg("CB Plan does not exist for the user");
+                response.setResponseCode(HttpStatus.OK);
+                return response;
+            }
+            List<Map<String, Object>> resultMap = new ArrayList<>();
+            Map<String, Object> courseDetailsMap = new HashMap<>();
+            for (Map<String, Object> cbPlan : cbplanResult) {
+                Map<String, Object> cbPlanDetails = new HashMap<>();
+                cbPlanDetails.put(Constants.ID, cbPlan.get(Constants.CB_PLAN_ID_KEY));
+                cbPlanDetails.put(Constants.USER_TYPE, cbPlan.get(Constants.CB_ASSIGNMENT_TYPE));
+                cbPlanDetails.put(Constants.END_DATE, cbPlan.get(Constants.END_DATE));
+                List<String> courses = (List<String>) cbPlan.get(Constants.CB_CONTENT_LIST);
+                List<String> courseFields = new ArrayList<>();
+                //Required Fields to be added later if required
+                List<Map<String, Object>> courseList = new ArrayList<>();
+                for (String courseId : courses) {
+                    Map<String, Object> contentDetails = null;
+                    if (!courseDetailsMap.containsKey(courseId)) {
+                        contentDetails = contentService.readContentFromCache(courseId, courseFields);
+                        courseDetailsMap.put(courseId, contentDetails);
+                    } else {
+                        contentDetails = (Map<String, Object>) courseDetailsMap.get(courseId);
+                    }
+                    courseList.add(contentDetails);
+                }
+                cbPlanDetails.put(Constants.CB_CONTENT_LIST, courseList);
+                resultMap.add(cbPlanDetails);
+            }
+            logger.info("Number of CB Plan Available for the user is " + resultMap.size());
+            Map<String, Object> result = new HashMap<>();
+            result.put(Constants.COUNT, resultMap.size());
+            result.put(Constants.CONTENT, resultMap);
+            response.setResult(result);
+        } catch (Exception e) {
+            response.getParams().setStatus(Constants.FAILED);
+            response.getParams().setErrmsg(e.getMessage());
+            response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return response;
     }
 
     private Map<String, Object> populateReadData(Map<String, Object> cbPlan) throws IOException {

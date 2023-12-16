@@ -891,6 +891,10 @@ public class Constants {
 	public static final String CB_CUSTOM_TYPE = "custom";
 
 	public static final String CB_DESIGNATION_TYPE = "designation";
+	public static final String CBP_PLAN_USER_LIST_API ="api.cbplan.user.list";
+	public static final String USER_TYPE = "userType";
+	public static final String CB_PLAN_ID_KEY = "cbPlanId";
+	public static final String ALL_USER = "allUser";
 
 	public static final String API_CB_PLAN_LIST = "api.cbplan.list";
 

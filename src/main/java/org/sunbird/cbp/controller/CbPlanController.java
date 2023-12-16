@@ -68,9 +68,18 @@ public class CbPlanController {
     @PostMapping("/v1/list")
     public ResponseEntity<SBApiResponse> listCBPlan(
         @RequestBody SunbirdApiRequest request,
-        @RequestHeader(Constants.X_AUTH_TOKEN) String token, 
+        @RequestHeader(Constants.X_AUTH_TOKEN) String token,
         @RequestHeader(Constants.X_AUTH_USER_ORG_ID) String userOrgId) {
         SBApiResponse response = cbPlanService.listCbPlan(request, userOrgId, token);
+        return new ResponseEntity<>(response, response.getResponseCode());
+    }
+
+    @GetMapping("/v1/user/list")
+    public ResponseEntity<SBApiResponse> getCBPlanListForUser(
+            @RequestHeader(Constants.X_AUTH_TOKEN) String token,
+            @RequestHeader(Constants.X_AUTH_USER_ORG_ID)String userOrgId) throws Exception {
+
+        SBApiResponse response = cbPlanService.getCBPlanListForUser(userOrgId, token);
         return new ResponseEntity<>(response, response.getResponseCode());
     }
 }
