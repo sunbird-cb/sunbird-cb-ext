@@ -1,9 +1,5 @@
 package org.sunbird.cbp.service;
 
-import com.datastax.driver.core.utils.UUIDs;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -43,6 +39,10 @@ import org.sunbird.common.util.Constants;
 import org.sunbird.common.util.ProjectUtil;
 import org.sunbird.user.service.UserUtilityService;
 
+import com.datastax.driver.core.utils.UUIDs;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class CbPlanServiceImpl implements CbPlanService {
@@ -401,12 +401,12 @@ public class CbPlanServiceImpl implements CbPlanService {
             List<String> fields = Arrays.asList(Constants.PROFILE_DETAILS, Constants.ROOT_ORG_ID);
             Map<String, Object> propertiesMap = new HashMap<>();
             propertiesMap.put(Constants.ID, userId);
-            List<Map<String, Object>> userDetailsResult = cassandraOperation.getRecordsByPropertiesWithoutFiltering(Constants.SUNBIRD_KEY_SPACE_NAME,
-                    Constants.USER, propertiesMap, fields);
+            List<Map<String, Object>> userDetailsResult = cassandraOperation.getRecordsByPropertiesWithoutFiltering(
+                    Constants.SUNBIRD_KEY_SPACE_NAME, Constants.USER, propertiesMap, fields);
             if (CollectionUtils.isEmpty(userDetailsResult)) {
-                response.getParams().setStatus(Constants.SUCCESSFUL);
+                response.getParams().setStatus(Constants.FAILED);
                 response.getParams().setErrmsg("User Does not Exist");
-                response.setResponseCode(HttpStatus.OK);
+                response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
                 return response;
             }
             Map<String, Object> userDetails = userDetailsResult.get(0);
@@ -418,7 +418,7 @@ public class CbPlanServiceImpl implements CbPlanService {
                 profileDetailsMap = mapper.readValue(profileDetails, new TypeReference<HashMap<String, Object>>() {
                 });
             }
-            if (null != profileDetailsMap) {
+            if (MapUtils.isNotEmpty(profileDetailsMap)) {
                 professionalDetails = (List<Map<String, Object>>) profileDetailsMap.get(Constants.PROFESSIONAL_DETAILS);
             }
             if (CollectionUtils.isNotEmpty(professionalDetails)) {
@@ -432,8 +432,8 @@ public class CbPlanServiceImpl implements CbPlanService {
             propertiesMap.clear();
             propertiesMap.put(Constants.ORG_ID, userOrgId);
             propertiesMap.put(Constants.CB_ASSIGNMENT_TYPE_INFO_KEY, assignmentTypeInfoKeyQueryList);
-            List<Map<String, Object>> cbplanResult = cassandraOperation.getRecordsByPropertiesWithoutFiltering(Constants.SUNBIRD_KEY_SPACE_NAME,
-                    Constants.TABLE_CB_PLAN_LOOKUP, propertiesMap, new ArrayList<>());
+            List<Map<String, Object>> cbplanResult = cassandraOperation.getRecordsByPropertiesWithoutFiltering(
+                    Constants.SUNBIRD_KEY_SPACE_NAME, Constants.TABLE_CB_PLAN_LOOKUP, propertiesMap, new ArrayList<>());
             if (CollectionUtils.isEmpty(cbplanResult)) {
                 response.getParams().setStatus(Constants.SUCCESSFUL);
                 response.getParams().setErrmsg("CB Plan does not exist for the user");
@@ -449,7 +449,7 @@ public class CbPlanServiceImpl implements CbPlanService {
                 cbPlanDetails.put(Constants.END_DATE, cbPlan.get(Constants.END_DATE));
                 List<String> courses = (List<String>) cbPlan.get(Constants.CB_CONTENT_LIST);
                 List<String> courseFields = new ArrayList<>();
-                //Required Fields to be added later if required
+                // Required Fields to be added later if required
                 List<Map<String, Object>> courseList = new ArrayList<>();
                 for (String courseId : courses) {
                     Map<String, Object> contentDetails = null;
@@ -465,11 +465,10 @@ public class CbPlanServiceImpl implements CbPlanService {
                 resultMap.add(cbPlanDetails);
             }
             logger.info("Number of CB Plan Available for the user is " + resultMap.size());
-            Map<String, Object> result = new HashMap<>();
-            result.put(Constants.COUNT, resultMap.size());
-            result.put(Constants.CONTENT, resultMap);
-            response.setResult(result);
+            response.getResult().put(Constants.COUNT, resultMap.size());
+            response.getResult().put(Constants.CONTENT, resultMap);
         } catch (Exception e) {
+            logger.error("Failed to lookup for user cb plan details. Exception: " + e.getMessage(), e);
             response.getParams().setStatus(Constants.FAILED);
             response.getParams().setErrmsg(e.getMessage());
             response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -754,9 +753,9 @@ public class CbPlanServiceImpl implements CbPlanService {
             Map<String, Object> cbPlanPrimaryKey = new HashMap<String, Object>();
             cbPlanPrimaryKey.put(Constants.ORG_ID, userOrgId);
             List<String> fields = Arrays.asList(Constants.ORG_ID, Constants.ID, Constants.NAME,
-                    Constants.CB_CONTENT_TYPE,
-                    Constants.CB_CONTENT_LIST, Constants.CB_ASSIGNMENT_TYPE, Constants.CB_ASSIGNMENT_TYPE_INFO,
-                    Constants.END_DATE, Constants.STATUS, Constants.CREATED_BY, Constants.CREATED_AT);
+                    Constants.CB_CONTENT_TYPE, Constants.CB_CONTENT_LIST, Constants.CB_ASSIGNMENT_TYPE,
+                    Constants.CB_ASSIGNMENT_TYPE_INFO, Constants.END_DATE, Constants.STATUS, Constants.CREATED_BY,
+                    Constants.CREATED_AT, Constants.DRAFT_DATA);
 
             List<Map<String, Object>> cbPlanList = cassandraOperation.getRecordsByPropertiesWithoutFiltering(
                     Constants.KEYSPACE_SUNBIRD, Constants.TABLE_CB_PLAN, cbPlanPrimaryKey, fields);
@@ -766,56 +765,93 @@ public class CbPlanServiceImpl implements CbPlanService {
                 return response;
             }
 
-            // Lets get the object which match the given status
-            List<Map<String, Object>> filteredCbPlanList = cbPlanList.stream()
-                    .filter(map -> map.containsKey(Constants.STATUS)
-                            && map.get(Constants.STATUS).equals(searchReq.getFilters().get(Constants.STATUS)))
-                    .collect(Collectors.toList());
-
-            if (searchReq.getFilters().containsKey(Constants.CB_ASSIGNMENT_TYPE)) {
-                filteredCbPlanList = filteredCbPlanList.stream()
-                        .filter(map -> map.containsKey(Constants.CB_ASSIGNMENT_TYPE)
-                                && map.get(Constants.CB_ASSIGNMENT_TYPE)
-                                .equals(searchReq.getFilters().get(Constants.CB_ASSIGNMENT_TYPE)))
-                        .collect(Collectors.toList());
-            }
-
-            if (searchReq.getFilters().containsKey(Constants.CB_CONTENT_TYPE)) {
-                filteredCbPlanList = filteredCbPlanList.stream()
-                        .filter(map -> map.containsKey(Constants.CB_CONTENT_TYPE)
-                                && map.get(Constants.CB_CONTENT_TYPE)
-                                .equals(searchReq.getFilters().get(Constants.CB_CONTENT_TYPE)))
-                        .collect(Collectors.toList());
-            }
-
-            if (searchReq.getLimit() != null && filteredCbPlanList.size() > searchReq.getLimit()) {
-                filteredCbPlanList = filteredCbPlanList.subList(0, searchReq.getLimit());
-            }
-
-            Set<String> uniqueCourses = filteredCbPlanList.stream()
-                    .flatMap(map -> ((List<String>) map.getOrDefault(Constants.CB_CONTENT_LIST, new ArrayList<>()))
-                            .stream())
-                    .collect(Collectors.toSet());
-
             Map<String, Map<String, Object>> courseInfoMap = new HashMap<String, Map<String, Object>>();
-            for (String courseId : uniqueCourses) {
-                Map<String, Object> courseInfo = contentService.readContentFromCache(courseId, Collections.emptyList());
-                if (MapUtils.isNotEmpty(courseInfo)) {
-                    courseInfoMap.put(courseId, courseInfo);
+            Map<String, Map<String, String>> userInfoMap = new HashMap<String, Map<String, String>>();
+            List<Map<String, Object>> filteredCbPlanList = new ArrayList<Map<String, Object>>();
+            for (Map<String, Object> cbPlan : cbPlanList) {
+                String status = (String) cbPlan.get(Constants.STATUS);
+                if (StringUtils.isBlank(status)) {
+                    logger.error(String.format("Status value is null for CB Plan. OrgId : %s, Id: %s", userOrgId,
+                            cbPlan.get(Constants.ID)));
+                    continue;
                 }
-            }
 
-            for (Map<String, Object> cbPlan : filteredCbPlanList) {
-                List<String> courseIdList = (List<String>) cbPlan.get(Constants.CB_CONTENT_LIST);
+                if (Constants.CB_RETIRE.equalsIgnoreCase(status)
+                        || !status.equalsIgnoreCase((String) searchReq.getFilters().get(Constants.STATUS))) {
+                    continue;
+                }
+
+                if (status.equalsIgnoreCase(Constants.DRAFT)) {
+                    // If the status is draft, then details needs to be retrieved from draft
+                    CbPlanDto draftDto = mapper.readValue((String) cbPlan.get(Constants.DRAFT_DATA), CbPlanDto.class);
+                    cbPlan.put(Constants.NAME, draftDto.getName());
+                    cbPlan.put(Constants.CB_ASSIGNMENT_TYPE, draftDto.getAssignmentType());
+                    cbPlan.put(Constants.CB_CONTENT_TYPE, draftDto.getContentType());
+                    cbPlan.put(Constants.END_DATE, draftDto.getEndDate());
+                    cbPlan.put(Constants.CB_ASSIGNMENT_TYPE_INFO, draftDto.getAssignmentTypeInfo());
+                    cbPlan.remove(Constants.DRAFT);
+                }
+
+                // these values could be null if plan is draft. set to empty string if so;
+                String assignmentType = (String) cbPlan.get(Constants.CB_ASSIGNMENT_TYPE);
+                assignmentType = (assignmentType == null) ? "" : assignmentType;
+                String contentType = (String) cbPlan.get(Constants.CB_CONTENT_TYPE);
+                contentType = (contentType == null) ? "" : contentType;
+
+                if (searchReq.getFilters().containsKey(Constants.CB_ASSIGNMENT_TYPE)) {
+                    if (!assignmentType
+                            .equalsIgnoreCase((String) searchReq.getFilters().get(Constants.CB_ASSIGNMENT_TYPE))) {
+                        continue;
+                    }
+                }
+
+                if (searchReq.getFilters().containsKey(Constants.CB_CONTENT_TYPE)) {
+                    if (!contentType.equalsIgnoreCase((String) searchReq.getFilters().get(Constants.CB_CONTENT_TYPE))) {
+                        continue;
+                    }
+                }
+
+                // enrich course information
+                List<String> contentIdList = (List<String>) cbPlan.get(Constants.CB_CONTENT_LIST);
                 List<Map<String, Object>> courseMapList = new ArrayList<Map<String, Object>>();
-                for (String courseId : courseIdList) {
-                    if (courseInfoMap.containsKey(courseId)) {
-                        courseMapList.add(courseInfoMap.get(courseId));
+                for (String contentId : contentIdList) {
+                    if (courseInfoMap.containsKey(contentId)) {
+                        courseMapList.add(courseInfoMap.get(contentId));
                     } else {
-                        // logger.error("");
+                        Map<String, Object> courseInfo = contentService.readContentFromCache(contentId,
+                                Collections.emptyList());
+                        courseInfoMap.put(contentId, courseInfo);
                     }
                 }
                 cbPlan.put(Constants.CB_CONTENT_LIST, courseMapList);
+
+                // enrich user Information
+                if (Constants.CB_CUSTOM_TYPE.equalsIgnoreCase(assignmentType)) {
+                    List<String> userIdList = (List<String>) cbPlan.get(Constants.CB_ASSIGNMENT_TYPE_INFO);
+                    userUtilityService.getUserDetailsFromDB(userIdList,
+                            Arrays.asList(Constants.FIRSTNAME, Constants.USER_ID),
+                            userInfoMap);
+                    List<Map<String, String>> enrichUserInfoList = new ArrayList<>();
+                    for (String userId : userIdList) {
+                        if (!userId.equals((String) cbPlan.get(Constants.CREATED_BY))) {
+                            enrichUserInfoList.add(userInfoMap.get(userId));
+                        }
+                    }
+                    cbPlan.put(Constants.USER_DETAILS, enrichUserInfoList);
+
+                } else if (Constants.CB_DESIGNATION_TYPE.equalsIgnoreCase(assignmentType)) {
+                    cbPlan.put(Constants.USER_DETAILS, (List<String>) cbPlan.get(Constants.CB_ASSIGNMENT_TYPE_INFO));
+                }
+
+                userUtilityService.getUserDetailsFromDB(Arrays.asList((String) cbPlan.get(Constants.CREATED_BY)),
+                        Arrays.asList(Constants.FIRSTNAME, Constants.USER_ID),
+                        userInfoMap);
+                cbPlan.put(Constants.CREATED_BY_NAME,
+                        userInfoMap.get((String) cbPlan.get(Constants.CREATED_BY)).get(Constants.FIRSTNAME));
+                cbPlan.remove(Constants.CB_ASSIGNMENT_TYPE_INFO);
+                cbPlan.put(Constants.USER_TYPE, assignmentType);
+                cbPlan.remove(Constants.CB_ASSIGNMENT_TYPE);
+                filteredCbPlanList.add(cbPlan);
             }
 
             response.getResult().put(Constants.COUNT, filteredCbPlanList.size());

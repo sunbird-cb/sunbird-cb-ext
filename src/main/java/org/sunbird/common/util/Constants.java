@@ -886,9 +886,9 @@ public class Constants {
 
 	public static final String CONTENT_LIST = "contentList";
 
-	public static final String CB_ALL_USERS_TYPE = "allUsers";
+	public static final String CB_ALL_USERS_TYPE = "allUser";
 
-	public static final String CB_CUSTOM_TYPE = "custom";
+	public static final String CB_CUSTOM_TYPE = "customUser";
 
 	public static final String CB_DESIGNATION_TYPE = "designation";
 	public static final String CBP_PLAN_USER_LIST_API ="api.cbplan.user.list";
@@ -898,6 +898,7 @@ public class Constants {
 	public static final String API_CB_PLAN_LIST = "api.cbplan.list";
 	public static final String COURSE_APP_ICON = "appIcon";
 	public static final String CREATOR_LOGO = "creatorLogo";
+	public static final String CREATED_BY_NAME = "createdByName";
 
 	private Constants() {
 		throw new IllegalStateException("Utility class");
