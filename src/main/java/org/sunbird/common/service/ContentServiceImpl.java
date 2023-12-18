@@ -415,6 +415,8 @@ public class ContentServiceImpl implements ContentService {
 	public Map<String, Object> readContentFromCache(String contentId, List<String> fields) {
 		if (CollectionUtils.isEmpty(fields)) {
 			fields = serverConfig.getDefaultContentProperties();
+		} else {
+			fields.addAll(serverConfig.getDefaultContentProperties());
 		}
 		Map<String, Object> responseData = null;
 
