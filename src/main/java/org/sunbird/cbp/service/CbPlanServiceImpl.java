@@ -562,9 +562,7 @@ public class CbPlanServiceImpl implements CbPlanService {
                 userInfoMap.get((String) cbPlan.get(Constants.CREATED_BY)).get(Constants.FIRSTNAME));
         List<Map<String, Object>> enrichContentInfoMap = new ArrayList<>();
         for (String contentId : contentTypeInfo) {
-            List<String> fields = Arrays.asList(Constants.NAME, Constants.AVG_RATING, Constants.COMPETENCIES_V5,
-                    Constants.DESCRIPTION, Constants.CONTENT_TYPE_KEY, Constants.DURATION, Constants.COURSE_APP_ICON, Constants.POSTER_IMAGE, Constants.ORGANISATION, Constants.CREATOR_LOGO);
-            Map<String, Object> contentResponse = contentService.readContentFromCache(contentId, new ArrayList<>(fields));
+            Map<String, Object> contentResponse = contentService.readContentFromCache(contentId, null);
             Map<String, Object> enrichContentMap = new HashMap<>();
             enrichContentMap.put(Constants.NAME, contentResponse.get(Constants.NAME));
             enrichContentMap.put(Constants.COMPETENCIES_V5, contentResponse.get(Constants.COMPETENCIES_V5));
