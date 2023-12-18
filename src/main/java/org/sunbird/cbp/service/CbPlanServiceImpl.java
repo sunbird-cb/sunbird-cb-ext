@@ -354,13 +354,6 @@ public class CbPlanServiceImpl implements CbPlanService {
     public SBApiResponse readCbPlan(String cbPlanId, String userOrgId, String authUserToken) {
         SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_CB_PLAN_READ_BY_ID);
         try {
-            String userId = validateAuthTokenAndFetchUserId(authUserToken);
-            if (StringUtils.isBlank(userId)) {
-                response.getParams().setStatus(Constants.FAILED);
-                response.getParams().setErrmsg(Constants.USER_ID_DOESNT_EXIST);
-                response.setResponseCode(HttpStatus.BAD_REQUEST);
-                return response;
-            }
             UUID cbPlanUUID = UUID.fromString(cbPlanId);
             if (cbPlanId == null) {
                 response.getParams().setStatus(Constants.FAILED);
