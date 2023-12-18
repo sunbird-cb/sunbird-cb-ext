@@ -588,8 +588,7 @@ public class CbPlanServiceImpl implements CbPlanService {
     }
 
     private String validateAuthTokenAndFetchUserId(String authUserToken) {
-        return "fb0b3a03-d050-4b75-86ec-0354331a6b22";
-        //return accessTokenValidator.fetchUserIdFromAccessToken(authUserToken);
+        return accessTokenValidator.fetchUserIdFromAccessToken(authUserToken);
     }
 
     private List<String> validateCbPlanRequest(CbPlanDto cbPlanDto) {
