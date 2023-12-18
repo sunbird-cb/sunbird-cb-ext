@@ -745,4 +745,22 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 			userInfoMap.put((String)userInfo.get(Constants.USER_ID), userInfo);
 		}
 	}
+
+	@Override
+	public Map<String, Object> getUsersDataFromLookup(String email, String authToken) {
+		Map<String, String> header = new HashMap<>();
+		if (StringUtils.isNotEmpty(authToken)) {
+			header.put(Constants.AUTH_TOKEN, authToken);
+		}
+		Map<String, Object> request = new HashMap<>();
+		Map<String, Object> requestBody = new HashMap<String, Object>();
+		requestBody.put(Constants.KEY, Constants.EMAIL);
+		requestBody.put(Constants.VALUE, email);
+		request.put(Constants.REQUEST, requestBody);
+		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPost(
+				props.getSbUrl() + props.getLmsUserLookupPath(), request, ProjectUtil.getDefaultHeaders());
+		Map<String, Object> result = (Map<String, Object>) readData.get(Constants.RESULT);
+		List<Map<String, Object>> responseMap = (List<Map<String, Object>>) result.get(Constants.RESPONSE);
+		return responseMap.get(0);
+	}
 }
