@@ -895,8 +895,9 @@ public class Constants {
 	public static final String USER_TYPE = "userType";
 	public static final String CB_PLAN_ID_KEY = "cbPlanId";
 	public static final String ALL_USER = "allUser";
-
 	public static final String API_CB_PLAN_LIST = "api.cbplan.list";
+	public static final String COURSE_APP_ICON = "appIcon";
+	public static final String CREATOR_LOGO = "creatorLogo";
 
 	private Constants() {
 		throw new IllegalStateException("Utility class");

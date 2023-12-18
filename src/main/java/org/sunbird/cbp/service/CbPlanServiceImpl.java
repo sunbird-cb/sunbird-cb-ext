@@ -562,17 +562,21 @@ public class CbPlanServiceImpl implements CbPlanService {
                 userInfoMap.get((String) cbPlan.get(Constants.CREATED_BY)).get(Constants.FIRSTNAME));
         List<Map<String, Object>> enrichContentInfoMap = new ArrayList<>();
         for (String contentId : contentTypeInfo) {
-            List<String> fields = Arrays.asList(Constants.NAME, Constants.AVG_RATING, Constants.COMPETENCIES_V5,
-                    Constants.DESCRIPTION);
-            Map<String, Object> contentResponse = contentService.readContentFromCache(contentId, fields);
+            Map<String, Object> contentResponse = contentService.readContentFromCache(contentId, null);
             Map<String, Object> enrichContentMap = new HashMap<>();
             enrichContentMap.put(Constants.NAME, contentResponse.get(Constants.NAME));
-            // enrichContentMap.put(Constants.COMPETENCIES_V3,
-            // contentResponse.get(Constants.COMPETENCIES_V3));
             enrichContentMap.put(Constants.COMPETENCIES_V5, contentResponse.get(Constants.COMPETENCIES_V5));
             enrichContentMap.put(Constants.AVG_RATING, contentResponse.get(Constants.AVG_RATING));
             enrichContentMap.put(Constants.IDENTIFIER, contentResponse.get(Constants.IDENTIFIER));
             enrichContentMap.put(Constants.DESCRIPTION, contentResponse.get(Constants.DESCRIPTION));
+            enrichContentMap.put(Constants.ADDITIONAL_TAGS, contentResponse.get(Constants.ADDITIONAL_TAGS));
+            enrichContentMap.put(Constants.CONTENT_TYPE_KEY, contentResponse.get(Constants.CONTENT_TYPE_KEY));
+            enrichContentMap.put(Constants.PRIMARY_CATEGORY, contentResponse.get(Constants.PRIMARY_CATEGORY));
+            enrichContentMap.put(Constants.DURATION, contentResponse.get(Constants.DURATION));
+            enrichContentMap.put(Constants.COURSE_APP_ICON, contentResponse.get(Constants.COURSE_APP_ICON));
+            enrichContentMap.put(Constants.POSTER_IMAGE, contentResponse.get(Constants.POSTER_IMAGE));
+            enrichContentMap.put(Constants.ORGANISATION, contentResponse.get(Constants.ORGANISATION));
+            enrichContentMap.put(Constants.CREATOR_LOGO, contentResponse.get(Constants.CREATOR_LOGO));
             enrichContentInfoMap.add(enrichContentMap);
         }
         if (CollectionUtils.isNotEmpty(enrichContentInfoMap)) {
@@ -772,7 +776,7 @@ public class CbPlanServiceImpl implements CbPlanService {
                 filteredCbPlanList = filteredCbPlanList.stream()
                         .filter(map -> map.containsKey(Constants.CB_ASSIGNMENT_TYPE)
                                 && map.get(Constants.CB_ASSIGNMENT_TYPE)
-                                        .equals(searchReq.getFilters().get(Constants.CB_ASSIGNMENT_TYPE)))
+                                .equals(searchReq.getFilters().get(Constants.CB_ASSIGNMENT_TYPE)))
                         .collect(Collectors.toList());
             }
 
@@ -780,7 +784,7 @@ public class CbPlanServiceImpl implements CbPlanService {
                 filteredCbPlanList = filteredCbPlanList.stream()
                         .filter(map -> map.containsKey(Constants.CB_CONTENT_TYPE)
                                 && map.get(Constants.CB_CONTENT_TYPE)
-                                        .equals(searchReq.getFilters().get(Constants.CB_CONTENT_TYPE)))
+                                .equals(searchReq.getFilters().get(Constants.CB_CONTENT_TYPE)))
                         .collect(Collectors.toList());
             }
 
