@@ -899,8 +899,9 @@ public class Constants {
 	public static final String COURSE_APP_ICON = "appIcon";
 	public static final String CREATOR_LOGO = "creatorLogo";
 	public static final String CREATED_BY_NAME = "createdByName";
+    public static final String USER_KARMA_POINTS ="user_karma_points";
 
-	private Constants() {
+    private Constants() {
 		throw new IllegalStateException("Utility class");
 	}
 

@@ -62,8 +62,22 @@ public class TrendingServiceImpl implements TrendingService {
             resultMap =   (Map<String, Object>) compositeSearchRes.get(RESULT) ==null ? new HashMap<>() :  (Map<String, Object>) compositeSearchRes.get(RESULT) ;
             contentList = (List<Map<String, Object>>) resultMap.get(CONTENT) ==null ? new ArrayList<>() :  (List<Map<String, Object>>) resultMap.get(CONTENT);
         }
-        Map<String, Object> contentMap = contentList.stream()
-                .collect(Collectors.toMap(content -> (String) content.get(IDENTIFIER), Function.identity()));
+        Map<String, Object> contentMap = new HashMap<>();
+        Iterator<Map<String, Object>> iterator = contentList.iterator();
+        while (iterator.hasNext()) {
+            Map<String, Object> content = iterator.next();
+            String key = (String) content.get(IDENTIFIER);
+            // Check for duplicates before putting into the map
+            if (!contentMap.containsKey(key)) {
+                contentMap.put(key, content);
+            } else {
+                // Handle the case when there are duplicate keys
+                // In this example, we are simply choosing the existing one
+                // You might want to adapt this logic based on your requirements
+                // For example, merge properties or choose the one with specific criteria
+            }
+        }
+
         Map<String, List<Object>> resultContentMap = typeList.entrySet().stream()
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
