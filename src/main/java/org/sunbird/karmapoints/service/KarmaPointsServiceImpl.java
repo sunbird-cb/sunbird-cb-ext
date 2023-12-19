@@ -7,9 +7,7 @@ import org.springframework.stereotype.Service;
 import org.sunbird.cassandra.utils.CassandraOperation;
 import org.sunbird.common.util.Constants;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class KarmaPointsServiceImpl implements KarmaPointsService {
@@ -18,14 +16,15 @@ public class KarmaPointsServiceImpl implements KarmaPointsService {
     private Logger logger = LoggerFactory.getLogger(getClass().getName());
 
     @Override
-    public Map<String, Object> fetchKarmaPointsData(String userOrgId) {
+    public Map<String, Object> fetchKarmaPointsData(String UserId) {
         Map<String, Object> resultMap = new HashMap<>();
         Map<String, Object> propertyMap = new HashMap<>();
-        List<Map<String, Object>> dptList = cassandraOperation.getRecordsByPropertiesWithoutFiltering(
-                Constants.KEYSPACE_SUNBIRD, Constants.USER_KARMA_POINTS, propertyMap, null);
-        resultMap.put("kpList", dptList);
+        propertyMap.put(Constants.KARMA_POINTS_USER_ID, UserId);
+        Map<String, Object> result = cassandraOperation.getRecordsByPropertiesWithPagination(
+                Constants.KEYSPACE_SUNBIRD, Constants.USER_KARMA_POINTS, propertyMap, new ArrayList<>(), 10, null, "context_id");
+
+        resultMap.put("kpList", result);
 
         return resultMap;
-
     }
 }

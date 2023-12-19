@@ -16,8 +16,8 @@ public class KarmaPointsController {
     private KarmaPointsService karmaPointsService;
 
     @PostMapping("/v1/karmapoints/read")
-    public ResponseEntity<Map<String, Object>> fetchKarmaPointsData(@RequestHeader("x-authenticated-user-orgid") String userOrgId) throws Exception {
-        Map<String, Object> karmaPointsDataMap = karmaPointsService.fetchKarmaPointsData(userOrgId);
+    public ResponseEntity<Map<String, Object>> fetchKarmaPointsData(@RequestHeader("x-authenticated-user-orgid") String userOrgId, @RequestHeader("x-authenticated-userid") String UserId) throws Exception {
+        Map<String, Object> karmaPointsDataMap = karmaPointsService.fetchKarmaPointsData(UserId);
         return new ResponseEntity<>(karmaPointsDataMap, HttpStatus.OK);
     }
 }
