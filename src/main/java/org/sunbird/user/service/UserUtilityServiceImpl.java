@@ -28,6 +28,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.client.RestTemplate;
 import org.sunbird.cassandra.utils.CassandraOperation;
 import org.sunbird.common.model.SearchUserApiContent;
@@ -759,8 +760,15 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		request.put(Constants.REQUEST, requestBody);
 		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPost(
 				props.getSbUrl() + props.getLmsUserLookupPath(), request, ProjectUtil.getDefaultHeaders());
-		Map<String, Object> result = (Map<String, Object>) readData.get(Constants.RESULT);
-		List<Map<String, Object>> responseMap = (List<Map<String, Object>>) result.get(Constants.RESPONSE);
-		return responseMap.get(0);
+		if (readData != null && Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
+			Map<String, Object> result = (Map<String, Object>) readData.get(Constants.RESULT);
+			if (!ObjectUtils.isEmpty(result)) {
+				List<Map<String, Object>> responseMap = (List<Map<String, Object>>) result.get(Constants.RESPONSE);
+				if (!CollectionUtils.isEmpty(responseMap)) {
+					return responseMap.get(0);
+				}
+			}
+		}
+		return new HashMap<>();
 	}
 }

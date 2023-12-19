@@ -1804,6 +1804,7 @@ public class ProfileServiceImpl implements ProfileService {
 				response.getParams().setStatus(Constants.FAILED);
 				return response;
 			}
+			String userIdFromToken = accessTokenValidator.fetchUserIdFromAccessToken(authToken);
 			String email = (String)requestBody.get(Constants.EMAIL);
 			Map<String, Object> userLookupInfo = userUtilityService.getUsersDataFromLookup(email, authToken);
 			if (ObjectUtils.isEmpty(userLookupInfo)) {
@@ -1825,17 +1826,38 @@ public class ProfileServiceImpl implements ProfileService {
 						});
 					}
 					Map<String, Object> additionalProperties = (Map<String, Object>)profileDetailsMap.get(Constants.ADDITIONAL_PROPERTIES);
+					if (ObjectUtils.isEmpty(additionalProperties)) {
+						additionalProperties = new HashMap<>();
+					}
 					additionalProperties.put(Constants.EXTERNAL_SYSTEM, requestBody.get(Constants.EXTERNAL_SYSTEM));
 					additionalProperties.put(Constants.EXTERNAL_SYSTEM_ID, requestBody.get(Constants.EXTERNAL_SYSTEM_ID));
 					profileDetailsMap.put(Constants.ADDITIONAL_PROPERTIES, additionalProperties);
 					Map<String, Object> compositeKey = new HashMap<>();
-					compositeKey.put(Constants.USER_ID, userId);
+					compositeKey.put(Constants.ID, userId);
 
 					Map<String, Object> userInfoUpdated = new HashMap<>();
 					userInfoUpdated.put(Constants.PROFILE_DETAILS_KEY, mapper.writeValueAsString(profileDetailsMap));
+					userInfoUpdated.put(Constants.UPDATED_BY, userIdFromToken);
+					userInfoUpdated.put(Constants.UPDATED_DATE, ProjectUtil.getFormattedDate());
 					Map<String, Object> resp = cassandraOperation.updateRecord(Constants.KEYSPACE_SUNBIRD,
 							Constants.TABLE_USER, userInfoUpdated, compositeKey);
-					//Need to add Sync Data sync API
+					if (resp.get(Constants.RESPONSE).equals(Constants.SUCCESS)) {
+						String errMsg = syncUserData(userId);
+						if (StringUtils.isEmpty(errMsg)) {
+							response.setResponseCode(HttpStatus.OK);
+							response.getResult().put(Constants.RESPONSE, Constants.SUCCESS);
+							response.getParams().setStatus(Constants.SUCCESS);
+							return response;
+						} else {
+							response.getParams().setStatus(Constants.FAILED);
+							response.getParams().setErr(errMsg);
+							response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+						}
+					} else {
+						response.getParams().setStatus(Constants.FAILED);
+						response.getParams().setErr((String) resp.get(Constants.ERROR_MESSAGE));
+						response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+					}
 				}
 			}
 		} catch (Exception e) {
