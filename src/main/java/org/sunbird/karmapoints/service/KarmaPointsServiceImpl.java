@@ -20,9 +20,10 @@ public class KarmaPointsServiceImpl implements KarmaPointsService {
         Map<String, Object> resultMap = new HashMap<>();
         Map<String, Object> propertyMap = new HashMap<>();
         propertyMap.put(Constants.KARMA_POINTS_USER_ID, UserId);
+        logger.info("karma points userid :"+ UserId);
         Map<String, Object> result = cassandraOperation.getRecordsByPropertiesWithPagination(
-                Constants.KEYSPACE_SUNBIRD, Constants.USER_KARMA_POINTS, propertyMap, new ArrayList<>(), 10, null, "context_id");
-
+                Constants.KEYSPACE_SUNBIRD, Constants.USER_KARMA_POINTS, propertyMap, new ArrayList<>(), 10, null, Constants.CONTEXT_ID);
+        logger.info("karma points request body recieved"+ result);
         resultMap.put("kpList", result);
 
         return resultMap;
