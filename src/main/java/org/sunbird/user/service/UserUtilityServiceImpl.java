@@ -28,6 +28,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.client.RestTemplate;
 import org.sunbird.cassandra.utils.CassandraOperation;
 import org.sunbird.common.model.SearchUserApiContent;
@@ -744,5 +745,30 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 			}
 			userInfoMap.put((String)userInfo.get(Constants.USER_ID), userInfo);
 		}
+	}
+
+	@Override
+	public Map<String, Object> getUsersDataFromLookup(String email, String authToken) {
+		Map<String, String> header = new HashMap<>();
+		if (StringUtils.isNotEmpty(authToken)) {
+			header.put(Constants.AUTH_TOKEN, authToken);
+		}
+		Map<String, Object> request = new HashMap<>();
+		Map<String, Object> requestBody = new HashMap<String, Object>();
+		requestBody.put(Constants.KEY, Constants.EMAIL);
+		requestBody.put(Constants.VALUE, email);
+		request.put(Constants.REQUEST, requestBody);
+		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPost(
+				props.getSbUrl() + props.getLmsUserLookupPath(), request, ProjectUtil.getDefaultHeaders());
+		if (readData != null && Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
+			Map<String, Object> result = (Map<String, Object>) readData.get(Constants.RESULT);
+			if (!ObjectUtils.isEmpty(result)) {
+				List<Map<String, Object>> responseMap = (List<Map<String, Object>>) result.get(Constants.RESPONSE);
+				if (!CollectionUtils.isEmpty(responseMap)) {
+					return responseMap.get(0);
+				}
+			}
+		}
+		return new HashMap<>();
 	}
 }
