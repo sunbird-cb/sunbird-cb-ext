@@ -901,6 +901,7 @@ public class Constants {
 	public static final String CREATED_BY_NAME = "createdByName";
     public static final String USER_KARMA_POINTS ="user_karma_points";
 	public static final String KARMA_POINTS_USER_ID = "userid";
+    public static final String CONTEXT_ID ="context_id";
 
     private Constants() {
 		throw new IllegalStateException("Utility class");
