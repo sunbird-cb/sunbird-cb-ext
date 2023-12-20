@@ -19,7 +19,7 @@ public class HallOfFameController {
     private HallOfFameService hallOfFameService;
 
     @PostMapping("/v1/halloffame/read")
-    public ResponseEntity<Map<String, Object>> fetchHallOfFameData(@RequestHeader("x-authenticated-user-orgid") String userOrgId) throws Exception {
+    public ResponseEntity<Map<String, Object>> fetchHallOfFameData() {
         Map<String, Object> hallOfFameDataMap = hallOfFameService.fetchHallOfFameData();
         return new ResponseEntity<>(hallOfFameDataMap, HttpStatus.OK);
     }
