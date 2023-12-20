@@ -361,7 +361,8 @@ public class ContentServiceImpl implements ContentService {
 		url.append(serverConfig.getContentHost()).append(serverConfig.getContentReadEndPoint()).append("/" + contentId)
 				.append(serverConfig.getContentReadEndPointFields());
 		if (CollectionUtils.isNotEmpty(fields)) {
-			url.append("?fields=").append(fields);
+			StringBuffer stringBuffer = new StringBuffer(String.join(",", fields));
+			url.append(",").append(stringBuffer);
 		}
 		Map<String, Object> response = (Map<String, Object>) outboundRequestHandlerService.fetchResult(url.toString());
 		if (null != response && Constants.OK.equalsIgnoreCase((String) response.get(Constants.RESPONSE_CODE))) {
@@ -422,7 +423,7 @@ public class ContentServiceImpl implements ContentService {
 		if (MapUtils.isEmpty(responseData) || responseData.size() < fields.size()) {
 			// DataCacheMgr doesn't have data OR contains less content fields.
 			// Let's read again
-			String contentString = redisCacheMgr.getCache(contentId);
+			String contentString = redisCacheMgr.getContentFromCache(contentId);
 			if (StringUtils.isBlank(contentString)) {
 				// Tried reading from Redis - but redis didn't have data for some reason.
 				// Or connection failed ??

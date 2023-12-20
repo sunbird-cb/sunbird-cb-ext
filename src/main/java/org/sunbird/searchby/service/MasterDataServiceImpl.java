@@ -323,19 +323,27 @@ public class MasterDataServiceImpl implements MasterDataService {
             response.getParams().setErrmsg(errMsg);
             response.setResponseCode(HttpStatus.BAD_REQUEST);
         } else {
-            List<String> deptDetails = redisCacheMgr.hget(Constants.ORG_DESIGNATION,
-                            cbExtServerProperties.getRedisInsightIndex(), userOrgId);
-            if (!CollectionUtils.isEmpty(deptDetails) && StringUtils.isNotBlank(deptDetails.get(0))) {
-                String deptPosition = deptDetails.get(0);
-                deptDetails = Arrays.asList(deptPosition.split(","));
+            List<String> deptPositionList = redisCacheMgr.hget(Constants.ORG_DESIGNATION,
+                    cbExtServerProperties.getRedisInsightIndex(), userOrgId);
+            if (!CollectionUtils.isEmpty(deptPositionList) && StringUtils.isNotBlank(deptPositionList.get(0))) {
+                String deptPosition = deptPositionList.get(0);
+                deptPositionList = Arrays.asList(deptPosition.split(","));
             } else {
-                deptDetails = Collections.emptyList();
+                deptPositionList = Collections.emptyList();
+            }
+            List<Map<String, String>> resultList = new ArrayList<>();
+            for (String position : deptPositionList) {
+                if (StringUtils.isNotBlank(position)) {
+                    Map<String, String> map = new HashMap<>();
+                    map.put("name", position);
+                    resultList.add(map);
+                }
             }
 
             Map<String, Object> responseData = new HashMap<>();
 
-            responseData.put(Constants.COUNT, deptDetails.size());
-            responseData.put(Constants.CONTENT, deptDetails);
+            responseData.put(Constants.COUNT, resultList.size());
+            responseData.put(Constants.CONTENT, resultList);
             response.getResult().put(Constants.RESPONSE, responseData);
         }
         return response;

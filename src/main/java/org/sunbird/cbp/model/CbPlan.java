@@ -1,12 +1,5 @@
 package org.sunbird.cbp.model;
 
-import com.datastax.driver.core.utils.UUIDs;
-import org.springframework.data.cassandra.core.cql.PrimaryKeyType;
-import org.springframework.data.cassandra.core.mapping.PrimaryKeyColumn;
-import org.springframework.data.cassandra.core.mapping.Table;
-
-import javax.validation.constraints.NotNull;
-import org.springframework.data.cassandra.core.mapping.Column;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
