@@ -137,4 +137,12 @@ public class ProfileController {
 		SBApiResponse response = profileService.profileMDOAdminUpdate(request, userToken, authToken, rootOrgId);
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
+
+	@PostMapping("/user/v1/profile/externalsystem/update")
+	public ResponseEntity<?> profileExternalSystemUpdate(
+			@RequestHeader(value = Constants.X_AUTH_TOKEN, required = false) String userToken,
+			@RequestBody Map<String, Object> request) {
+		SBApiResponse response = profileService.profileExternalSystemUpdate(request, userToken);
+		return new ResponseEntity<>(response, response.getResponseCode());
+	}
 }
