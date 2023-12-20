@@ -854,6 +854,10 @@ public class Constants {
 	public static final String ACROSS_COURSES = "across:courses";
 	public static final String ACROSS_PROGRAMS = "across:programs";
 	public static final String API_PROFILE_EXTERNAL_SYSTEM_UPDATE = "api.profile.external.system.update";
+  public static final String ACBP_KEY = "acbp";
+	public static final String ALL_USER_KEY = "allusers";
+	public static final String CBP_MANUAL_COURSES_REDIS_KEY = "cbp_manual";
+	public static final String CBP_MANUAL_COURSES_END_DATE = "cbPlanEndDate";
 
 	private Constants() {
 		throw new IllegalStateException("Utility class");
