@@ -70,6 +70,7 @@ public class CbPlanServiceImpl implements CbPlanService {
             Map<String, Object> requestMap = new HashMap<>();
             requestMap.put(Constants.CREATED_BY, userId);
             requestMap.put(Constants.CREATED_AT, new Date());
+            requestMap.put(Constants.UPDATED_AT, new Date());
             requestMap.put(Constants.ORG_ID, userOrgId);
             UUID cbPlanId = UUIDs.timeBased();
             requestMap.put(Constants.ID, cbPlanId);
@@ -248,6 +249,7 @@ public class CbPlanServiceImpl implements CbPlanService {
                 cbPlan.remove(Constants.ID);
                 cbPlan.remove(Constants.ORG_ID);
                 cbPlan.put(Constants.CB_PUBLISHED_AT, new Date());
+                cbPlan.put(Constants.UPDATED_AT, new Date());
                 Map<String, Object> resp = cassandraOperation.updateRecord(Constants.KEYSPACE_SUNBIRD,
                         Constants.TABLE_CB_PLAN, cbPlan, cbPlanInfo);
                 if (resp.get(Constants.RESPONSE).equals(Constants.SUCCESS)) {
@@ -836,19 +838,10 @@ public class CbPlanServiceImpl implements CbPlanService {
                 cbPlan.remove(Constants.CB_ASSIGNMENT_TYPE_INFO);
                 cbPlan.put(Constants.USER_TYPE, assignmentType);
                 cbPlan.remove(Constants.CB_ASSIGNMENT_TYPE);
-                if (Constants.DRAFT.equalsIgnoreCase((String) cbPlan.get(Constants.STATUS))
-                        && cbPlan.get(Constants.CB_PUBLISHED_BY) == null) {
-                    cbPlan.put(Constants.UPDATED_AT, cbPlan.get(Constants.CREATED_AT));
-                }
                 filteredCbPlanList.add(cbPlan);
             }
-            if (Constants.LIVE.equalsIgnoreCase((String)searchReq.getFilters().get(Constants.STATUS))) {
-                filteredCbPlanList = filteredCbPlanList.stream().sorted(Comparator.comparing(entry -> (Date)entry.get(Constants.CB_PUBLISHED_AT), Comparator.reverseOrder()))
-                        .collect(Collectors.toList());
-            } else if (Constants.DRAFT.equalsIgnoreCase((String)searchReq.getFilters().get(Constants.STATUS)) || Constants.CB_RETIRE.equalsIgnoreCase((String)searchReq.getFilters().get(Constants.STATUS))){
-                filteredCbPlanList = filteredCbPlanList.stream().sorted(Comparator.comparing(entry -> (Date)entry.get(Constants.UPDATED_AT), Comparator.reverseOrder()))
-                        .collect(Collectors.toList());
-            }
+            filteredCbPlanList = filteredCbPlanList.stream().sorted(Comparator.comparing(entry -> (Date) entry.get(Constants.UPDATED_AT), Comparator.reverseOrder()))
+                    .collect(Collectors.toList());
 
             response.getResult().put(Constants.COUNT, filteredCbPlanList.size());
             response.getResult().put(Constants.CONTENT, filteredCbPlanList);
