@@ -905,10 +905,9 @@ public class Constants {
     public static final String MDO_ID ="mdo_id";
     public static final String MONTH = "month";
     public static final String MDO_KARMA_POINTS="mdo_karma_points";
+
 	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}
-
-
 
 }
