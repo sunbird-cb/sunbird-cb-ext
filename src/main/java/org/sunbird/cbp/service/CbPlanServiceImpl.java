@@ -3,15 +3,7 @@ package org.sunbird.cbp.service;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import javax.validation.ConstraintViolation;
@@ -748,7 +740,7 @@ public class CbPlanServiceImpl implements CbPlanService {
             List<String> fields = Arrays.asList(Constants.ORG_ID, Constants.ID, Constants.NAME,
                     Constants.CB_CONTENT_TYPE, Constants.CB_CONTENT_LIST, Constants.CB_ASSIGNMENT_TYPE,
                     Constants.CB_ASSIGNMENT_TYPE_INFO, Constants.END_DATE, Constants.STATUS, Constants.CREATED_BY,
-                    Constants.CREATED_AT, Constants.DRAFT_DATA);
+                    Constants.CREATED_AT, Constants.DRAFT_DATA, Constants.UPDATED_AT, Constants.CB_PUBLISHED_AT);
 
             List<Map<String, Object>> cbPlanList = cassandraOperation.getRecordsByPropertiesWithoutFiltering(
                     Constants.KEYSPACE_SUNBIRD, Constants.TABLE_CB_PLAN, cbPlanPrimaryKey, fields);
@@ -782,7 +774,8 @@ public class CbPlanServiceImpl implements CbPlanService {
                     cbPlan.put(Constants.CB_CONTENT_TYPE, draftDto.getContentType());
                     cbPlan.put(Constants.END_DATE, draftDto.getEndDate());
                     cbPlan.put(Constants.CB_ASSIGNMENT_TYPE_INFO, draftDto.getAssignmentTypeInfo());
-                    cbPlan.remove(Constants.DRAFT);
+                    cbPlan.put(Constants.CB_CONTENT_LIST, draftDto.getContentList());
+                    cbPlan.remove(Constants.DRAFT_DATA);
                 }
 
                 // these values could be null if plan is draft. set to empty string if so;
@@ -808,13 +801,12 @@ public class CbPlanServiceImpl implements CbPlanService {
                 List<String> contentIdList = (List<String>) cbPlan.get(Constants.CB_CONTENT_LIST);
                 List<Map<String, Object>> courseMapList = new ArrayList<Map<String, Object>>();
                 for (String contentId : contentIdList) {
-                    if (courseInfoMap.containsKey(contentId)) {
-                        courseMapList.add(courseInfoMap.get(contentId));
-                    } else {
+                    if (!courseInfoMap.containsKey(contentId)) {
                         Map<String, Object> courseInfo = contentService.readContentFromCache(contentId,
                                 Collections.emptyList());
                         courseInfoMap.put(contentId, courseInfo);
                     }
+                    courseMapList.add(courseInfoMap.get(contentId));
                 }
                 cbPlan.put(Constants.CB_CONTENT_LIST, courseMapList);
 
@@ -844,7 +836,18 @@ public class CbPlanServiceImpl implements CbPlanService {
                 cbPlan.remove(Constants.CB_ASSIGNMENT_TYPE_INFO);
                 cbPlan.put(Constants.USER_TYPE, assignmentType);
                 cbPlan.remove(Constants.CB_ASSIGNMENT_TYPE);
+                if (Constants.DRAFT.equalsIgnoreCase((String) cbPlan.get(Constants.STATUS))
+                        && cbPlan.get(Constants.CB_PUBLISHED_BY) == null) {
+                    cbPlan.put(Constants.UPDATED_AT, cbPlan.get(Constants.CREATED_AT));
+                }
                 filteredCbPlanList.add(cbPlan);
+            }
+            if (Constants.LIVE.equalsIgnoreCase((String)searchReq.getFilters().get(Constants.STATUS))) {
+                filteredCbPlanList = filteredCbPlanList.stream().sorted(Comparator.comparing(entry -> (Date)entry.get(Constants.CB_PUBLISHED_AT), Comparator.reverseOrder()))
+                        .collect(Collectors.toList());
+            } else if (Constants.DRAFT.equalsIgnoreCase((String)searchReq.getFilters().get(Constants.STATUS)) || Constants.CB_RETIRE.equalsIgnoreCase((String)searchReq.getFilters().get(Constants.STATUS))){
+                filteredCbPlanList = filteredCbPlanList.stream().sorted(Comparator.comparing(entry -> (Date)entry.get(Constants.UPDATED_AT), Comparator.reverseOrder()))
+                        .collect(Collectors.toList());
             }
 
             response.getResult().put(Constants.COUNT, filteredCbPlanList.size());
