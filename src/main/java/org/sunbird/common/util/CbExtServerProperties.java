@@ -567,8 +567,8 @@ public class CbExtServerProperties {
 	@Value("${lms.user.update.path}")
 	private String lmsUserUpdatePath;
 
-  @Value("${cloud.profile.image.container.name}")
-  private String cloudProfileImageContainerName;
+  	@Value("${cloud.profile.image.container.name}")
+  	private String cloudProfileImageContainerName;
 
 	public boolean qListFromCacheEnabled() {
 		return qListFromCacheEnabled;
@@ -589,6 +589,9 @@ public class CbExtServerProperties {
 
 	@Value("${batch.enrolment.return.size}")
 	private Integer batchEnrolmentReturnSize;
+
+	@Value("${cbplan.manual.end.date}")
+	private String cbPlanEndDate;
 
 	public Integer getBatchEnrolmentReturnSize() {
 		return batchEnrolmentReturnSize;
@@ -2034,4 +2037,12 @@ public class CbExtServerProperties {
 
 	public void setCloudProfileImageContainerName(String cloudProfileImageContainerName) {
 		this.cloudProfileImageContainerName = cloudProfileImageContainerName; }
+
+	public String getCbPlanEndDate() {
+		return cbPlanEndDate;
+	}
+
+	public void setCbPlanEndDate(String cbPlanEndDate) {
+		this.cbPlanEndDate = cbPlanEndDate;
+	}
 }

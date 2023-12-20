@@ -853,6 +853,11 @@ public class Constants {
 	public static final String REDIS_COURSE_MOST_TRENDING_TAG = "lhp_trending";
 	public static final String ACROSS_COURSES = "across:courses";
 	public static final String ACROSS_PROGRAMS = "across:programs";
+	public static final String ACBP_KEY = "acbp";
+	public static final String ALL_USER_KEY = "allusers";
+	public static final String CBP_MANUAL_COURSES_REDIS_KEY = "cbp_manual";
+	public static final String CBP_MANUAL_COURSES_END_DATE = "cbPlanEndDate";
+
 
 	private Constants() {
 		throw new IllegalStateException("Utility class");
