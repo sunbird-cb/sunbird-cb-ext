@@ -1810,7 +1810,7 @@ public class ProfileServiceImpl implements ProfileService {
 			if (ObjectUtils.isEmpty(userLookupInfo)) {
 				response.getParams().setStatus(Constants.FAILED);
 				response.getParams().setErr("Not able to find user with email: " + email);
-				response.setResponseCode(HttpStatus.BAD_REQUEST);
+				response.setResponseCode(HttpStatus.NOT_FOUND);
 				return response;
 			}
 			String userId = (String)userLookupInfo.get(Constants.ID);
