@@ -876,6 +876,9 @@ public class Constants {
 	public static final String API_VERSION_2 = "2.0";
 	public static final String DEPT_KEY="dept_key";
 	public static final String ORG_DESIGNATION ="org_designations";
+	public static final String MDO_ID ="mdo_id";
+	public static final String MONTH = "month";
+	public static final String MDO_KARMA_POINTS="mdo_karma_points";
 	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}

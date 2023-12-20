@@ -3,128 +3,100 @@ package org.sunbird.halloffame.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.MapType;
 import com.fasterxml.jackson.databind.type.TypeFactory;
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.sunbird.cassandra.utils.CassandraOperation;
+import org.sunbird.common.util.Constants;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author mahesh.vakkund
  */
 @Service
 public class HallOfFameServiceImpl implements HallOfFameService {
+    @Autowired
+    private CassandraOperation cassandraOperation;
 
     private Logger logger = LoggerFactory.getLogger(getClass().getName());
 
     @Override
     public Map<String, Object> fetchHallOfFameData() {
         Map<String, Object> resultMap = new HashMap<>();
-        String jsonString = "{\n" +
-                "    \"Title\": \"october 2023\",\n" +
-                "    \"mdoList\": [\n" +
-                "        {\n" +
-                "            \"rank\": \"1\",\n" +
-                "            \"karmaPoints\": \"100\",\n" +
-                "            \"deptName\": \"Finance\",\n" +
-                "            \"deptId\": \"1234\",\n" +
-                "            \"deptLogo\": \"Finance Logo\",\n" +
-                "            \"progress\": \"5\",\n" +
-                "            \"negtiveOrPositive\": \"positive\"\n" +
-                "        },\n" +
-                "        {\n" +
-                "            \"rank\": \"2\",\n" +
-                "            \"karmaPoints\": \"90\",\n" +
-                "            \"deptName\": \"Finance\",\n" +
-                "            \"deptId\": \"1234\",\n" +
-                "            \"deptLogo\": \"Finance Logo\",\n" +
-                "            \"progress\": \"4\",\n" +
-                "            \"negtiveOrPositive\": \"positive\"\n" +
-                "        },\n" +
-                "        {\n" +
-                "            \"rank\": \"3\",\n" +
-                "            \"karmaPoints\": \"80\",\n" +
-                "            \"deptName\": \"Finance\",\n" +
-                "            \"deptId\": \"1234\",\n" +
-                "            \"deptLogo\": \"Finance Logo\",\n" +
-                "            \"progress\": \"3\",\n" +
-                "            \"negtiveOrPositive\": \"positive\"\n" +
-                "        },\n" +
-                "        {\n" +
-                "            \"rank\": \"4\",\n" +
-                "            \"karmaPoints\": \"70\",\n" +
-                "            \"deptName\": \"Railways\",\n" +
-                "            \"deptId\": \"1235\",\n" +
-                "            \"deptLogo\": \"Railways Logo\",\n" +
-                "            \"progress\": \"2\",\n" +
-                "            \"negtiveOrPositive\": \"negative\"\n" +
-                "        },\n" +
-                "        {\n" +
-                "            \"rank\": \"5\",\n" +
-                "            \"karmaPoints\": \"60\",\n" +
-                "            \"deptName\": \"Railways\",\n" +
-                "            \"deptId\": \"1235\",\n" +
-                "            \"deptLogo\": \"Railways Logo\",\n" +
-                "            \"progress\": \"1\",\n" +
-                "            \"negtiveOrPositive\": \"negative\"\n" +
-                "        },\n" +
-                "        {\n" +
-                "            \"rank\": \"6\",\n" +
-                "            \"karmaPoints\": \"50\",\n" +
-                "            \"deptName\": \"Railways\",\n" +
-                "            \"deptId\": \"1235\",\n" +
-                "            \"deptLogo\": \"Railways Logo\",\n" +
-                "            \"progress\": \"5\",\n" +
-                "            \"negtiveOrPositive\": \"positive\"\n" +
-                "        },\n" +
-                "        {\n" +
-                "            \"rank\": \"7\",\n" +
-                "            \"karmaPoints\": \"40\",\n" +
-                "            \"deptName\": \"Telecom\",\n" +
-                "            \"deptId\": \"1236\",\n" +
-                "            \"deptLogo\": \"Telecom Logo\",\n" +
-                "            \"progress\": \"4\",\n" +
-                "            \"negtiveOrPositive\": \"positive\"\n" +
-                "        },\n" +
-                "        {\n" +
-                "            \"rank\": \"8\",\n" +
-                "            \"karmaPoints\": \"30\",\n" +
-                "            \"deptName\": \"Telecom\",\n" +
-                "            \"deptId\": \"1236\",\n" +
-                "            \"deptLogo\": \"Telecom Logo\",\n" +
-                "            \"progress\": \"3\",\n" +
-                "            \"negtiveOrPositive\": \"positive\"\n" +
-                "        },\n" +
-                "        {\n" +
-                "            \"rank\": \"9\",\n" +
-                "            \"karmaPoints\": \"20\",\n" +
-                "            \"deptName\": \"Telecom\",\n" +
-                "            \"deptId\": \"1236\",\n" +
-                "            \"deptLogo\": \"Telecom Logo\",\n" +
-                "            \"progress\": \"2\",\n" +
-                "            \"negtiveOrPositive\": \"negative\"\n" +
-                "        },\n" +
-                "        {\n" +
-                "            \"rank\": \"10\",\n" +
-                "            \"karmaPoints\": \"10\",\n" +
-                "            \"deptName\": \"Postal\",\n" +
-                "            \"deptId\": \"1237\",\n" +
-                "            \"deptLogo\": \"Finance Logo\",\n" +
-                "            \"progress\": \"1\",\n" +
-                "            \"negtiveOrPositive\": \"negative\"\n" +
-                "        }\n" +
-                "    ]\n" +
-                "}";
-        try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            TypeFactory typeFactory = objectMapper.getTypeFactory();
-            MapType mapType = typeFactory.constructMapType(HashMap.class, String.class, Object.class);
-            resultMap = objectMapper.readValue(jsonString, mapType);
-        } catch (IOException e) {
-            logger.info("Error occured while fetching the data for Hall of fame: " + e.getMessage());
+
+        LocalDate currentDate = LocalDate.now();
+        int monthValue = currentDate.getMonthValue();
+        int yearValue = currentDate.getYear();
+        int lastMonth = (monthValue - 1);
+        int previousToLastMonth = (monthValue - 2);
+        String formattedDate = currentDate.format(DateTimeFormatter.ofPattern("MMMM yyyy"));
+
+        List<Map<String, Object>> dptList = cassandraOperation.getRecordsByPropertiesWithoutFiltering(
+                Constants.KEYSPACE_SUNBIRD, Constants.MDO_KARMA_POINTS, null, null);
+
+        List<Map<String, Object>> lastToPreviousMonthList = new ArrayList<>();
+        List<Map<String, Object>> lastMonthList = new ArrayList<>();
+
+        for (Map<String, Object> record : dptList) {
+            int month = (int) record.get("month");
+            int year = (int) record.get("year");
+
+            if (month == previousToLastMonth && year == yearValue) {
+                lastToPreviousMonthList.add(record);
+            } else if (month == lastMonth && year == yearValue) {
+                lastMonthList.add(record);
+            }
         }
+        List<Map<String, Object>> lastMonthWithRankList = processRankBasedOnKpPoints(lastMonthList);
+        List<Map<String, Object>> lastToPreviousMonthWithRankList = processRankBasedOnKpPoints(lastToPreviousMonthList);
+
+        for (Map<String, Object> lastMonthWithRank : lastMonthWithRankList) {
+            String pvOrgId = (String) lastMonthWithRank.get("org_id");
+            int pvRank = (int) lastMonthWithRank.get("rank");
+            long pvKpPoints = (long) lastMonthWithRank.get("total_kp");
+
+            for (Map<String, Object> lastToPreviousMonthWithRank : lastToPreviousMonthWithRankList) {
+                String lastToPvOrgId = (String) lastToPreviousMonthWithRank.get("org_id");
+                int lastToPvRank = (int) lastToPreviousMonthWithRank.get("rank");
+                long lastToPvKpPoints = (long) lastToPreviousMonthWithRank.get("total_kp");
+                if (pvOrgId.equals(lastToPvOrgId)) {
+                    if (pvRank >= lastToPvRank) {
+                        lastMonthWithRank.put("negtiveOrPositive", "negative");
+                    } else {
+                        lastMonthWithRank.put("negtiveOrPositive", "positive");
+                    }
+                    lastMonthWithRank.put("progress", Math.abs(pvRank - lastToPvRank));
+                }
+            }
+        }
+
+        resultMap.put("title", formattedDate);
+        resultMap.put("mdoList", lastMonthWithRankList);
         return resultMap;
+    }
+
+    public static List<Map<String, Object>> processRankBasedOnKpPoints(List<Map<String, Object>> dptList) {
+        List<Map<String, Object>> dptListWithRanks = dptList.stream()
+                .sorted(Comparator.comparing(map -> (Long) map.get("total_kp"), Comparator.reverseOrder()))
+                .collect(Collectors.toList());
+
+        Integer rank = 1;
+        Long currentTotalKp = (Long) dptListWithRanks.get(0).get("total_kp");
+        for (Map<String, Object> map : dptListWithRanks) {
+            Long totalKp = (Long) map.get("total_kp");
+            if (!totalKp.equals(currentTotalKp)) {
+                rank++;
+                currentTotalKp = totalKp;
+            }
+            map.put("rank", rank);
+        }
+        return dptListWithRanks;
     }
 }
