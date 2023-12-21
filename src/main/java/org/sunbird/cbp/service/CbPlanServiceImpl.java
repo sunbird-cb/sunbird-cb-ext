@@ -27,6 +27,7 @@ import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.model.SunbirdApiRequest;
 import org.sunbird.common.service.ContentService;
 import org.sunbird.common.util.AccessTokenValidator;
+import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.common.util.ProjectUtil;
 import org.sunbird.user.service.UserUtilityService;
@@ -52,6 +53,9 @@ public class CbPlanServiceImpl implements CbPlanService {
 
     @Autowired
     ContentService contentService;
+
+    @Autowired
+    CbExtServerProperties serverProperties;
 
     ObjectMapper mapper = new ObjectMapper();
 
@@ -101,7 +105,7 @@ public class CbPlanServiceImpl implements CbPlanService {
     }
 
     @Override
-    public SBApiResponse updateCbPlan(SunbirdApiRequest request, String userOrgId, String authUserToken) {
+    public SBApiResponse updateCbPlan(SunbirdApiRequest request, String userOrgId, String authUserToken, List<String> userRoles) {
         SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_CB_PLAN_UPDATE);
         try {
             String userId = validateAuthTokenAndFetchUserId(authUserToken);
@@ -121,6 +125,13 @@ public class CbPlanServiceImpl implements CbPlanService {
                         Constants.KEYSPACE_SUNBIRD, Constants.TABLE_CB_PLAN, cbPlanInfo, null);
                 if (CollectionUtils.isNotEmpty(cbPlanMapInfo)) {
                     Map<String, Object> cbPlanInfoMap = cbPlanMapInfo.get(0);
+                    if (!(userId.equals(cbPlanInfoMap.get(Constants.CREATED_BY)) ||
+                            serverProperties.getCbPlanUpdatePublishAuthorizedRoles().stream().anyMatch(roles -> CollectionUtils.isNotEmpty(userRoles) && userRoles.contains(roles)))) {
+                        response.getParams().setStatus(Constants.FAILED);
+                        response.getParams().setErrmsg("Not Authorized to update cbp Plan");
+                        response.setResponseCode(HttpStatus.BAD_REQUEST);
+                        return response;
+                    }
                     String draftInfo = null;
                     if (Constants.LIVE.equalsIgnoreCase((String) cbPlanInfoMap.get(Constants.STATUS))
                             && cbPlanInfoMap.get(Constants.CB_PUBLISHED_BY) != null) {
@@ -176,7 +187,7 @@ public class CbPlanServiceImpl implements CbPlanService {
     }
 
     @Override
-    public SBApiResponse publishCbPlan(SunbirdApiRequest request, String userOrgId, String authUserToken) {
+    public SBApiResponse publishCbPlan(SunbirdApiRequest request, String userOrgId, String authUserToken, List<String> userRoles) {
         SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_CB_PLAN_PUBLISH);
         Map<String, Object> requestData = (Map<String, Object>) request.getRequest();
         try {
@@ -203,6 +214,13 @@ public class CbPlanServiceImpl implements CbPlanService {
 
             if (CollectionUtils.isNotEmpty(cbPlanMap)) {
                 Map<String, Object> cbPlan = cbPlanMap.get(0);
+                if (!(userId.equals(cbPlan.get(Constants.CREATED_BY)) ||
+                        serverProperties.getCbPlanUpdatePublishAuthorizedRoles().stream().anyMatch(roles -> CollectionUtils.isNotEmpty(userRoles) && userRoles.contains(roles)))) {
+                    response.getParams().setStatus(Constants.FAILED);
+                    response.getParams().setErrmsg("Not Authorized to publish cbp Plan");
+                    response.setResponseCode(HttpStatus.BAD_REQUEST);
+                    return response;
+                }
                 Map<String, Object> publishCbPlan = new HashMap<>();
                 publishCbPlan.putAll(cbPlan);
                 if ((Constants.LIVE.equalsIgnoreCase((String) cbPlan.get(Constants.STATUS))
@@ -276,7 +294,7 @@ public class CbPlanServiceImpl implements CbPlanService {
     }
 
     @Override
-    public SBApiResponse retireCbPlan(SunbirdApiRequest request, String userOrgId, String authUserToken) {
+    public SBApiResponse retireCbPlan(SunbirdApiRequest request, String userOrgId, String authUserToken, List<String> userRoles) {
         SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_CB_PLAN_RETIRE);
         Map<String, Object> requestData = (Map<String, Object>) request.getRequest();
         try {
@@ -303,6 +321,13 @@ public class CbPlanServiceImpl implements CbPlanService {
 
             if (CollectionUtils.isNotEmpty(cbPlanMap)) {
                 Map<String, Object> cbPlan = cbPlanMap.get(0);
+                if (!(userId.equals(cbPlan.get(Constants.CREATED_BY)) ||
+                        serverProperties.getCbPlanUpdatePublishAuthorizedRoles().stream().anyMatch(roles -> CollectionUtils.isNotEmpty(userRoles) && userRoles.contains(roles)))) {
+                    response.getParams().setStatus(Constants.FAILED);
+                    response.getParams().setErrmsg("Not Authorized to delete cbp Plan");
+                    response.setResponseCode(HttpStatus.BAD_REQUEST);
+                    return response;
+                }
                 if (Constants.CB_RETIRE.equalsIgnoreCase((String) cbPlan.get(Constants.STATUS))) {
                     response.getParams().setStatus(Constants.FAILED);
                     response.getParams().setErrmsg("CbPlan is already archived for ID: " + cbPlanId);
