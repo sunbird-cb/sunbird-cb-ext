@@ -516,6 +516,7 @@ public class CbExtServerProperties {
 	@Value("${content-read-endpoint}")
 	private String contentReadEndPoint;
 
+
 	@Value("${redis.questions.read.timeout}")
 	private Integer redisQuestionsReadTimeOut;
 
@@ -570,11 +571,17 @@ public class CbExtServerProperties {
 	@Value("${cloud.profile.image.container.name}")
 	private String cloudProfileImageContainerName;
 
+	@Value("${sb.service.user.lookup.path}")
+	private String lmsUserLookupPath;
+
 	@Value("${batch.enrolment.return.size}")
 	private Integer batchEnrolmentReturnSize;
 
 	@Value("${default.content.properties}")
 	private String defaultContentProperties;
+
+	@Value("${cbplan.manual.end.date}")
+	private String cbPlanEndDate;
 
 	public boolean qListFromCacheEnabled() {
 		return qListFromCacheEnabled;
@@ -590,9 +597,7 @@ public class CbExtServerProperties {
 
 	public void setRedisQuestionsReadTimeOut(Integer redisQuestionsReadTimeOut) {
 		this.redisQuestionsReadTimeOut = redisQuestionsReadTimeOut;
-	}
-
-	
+	}	
 
 	public Integer getBatchEnrolmentReturnSize() {
 		return batchEnrolmentReturnSize;
@@ -2048,4 +2053,20 @@ public class CbExtServerProperties {
 	public void setDefaultContentProperties(String defaultContentProperties) {
 		this.defaultContentProperties = defaultContentProperties;
 	}
+
+	public String getLmsUserLookupPath() {
+		return lmsUserLookupPath;
+	}
+
+	public void setLmsUserLookupPath(String lmsUserLookupPath) {
+		this.lmsUserLookupPath = lmsUserLookupPath;
+	}
+  
+  public String getCbPlanEndDate() {
+		return cbPlanEndDate;
+	}
+
+	public void setCbPlanEndDate(String cbPlanEndDate) {
+		this.cbPlanEndDate = cbPlanEndDate;
+  }
 }

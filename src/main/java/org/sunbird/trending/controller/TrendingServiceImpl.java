@@ -1,6 +1,9 @@
 package org.sunbird.trending.controller;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.sunbird.cache.RedisCacheMgr;
@@ -10,9 +13,8 @@ import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.common.util.ProjectUtil;
 
-import org.sunbird.core.exception.InvalidDataInputException;
+import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.sunbird.common.util.Constants.*;
@@ -28,29 +30,73 @@ public class TrendingServiceImpl implements TrendingService {
     @Autowired
     RedisCacheMgr redisCacheMgr;
 
+    private Logger logger = LoggerFactory.getLogger(getClass().getName());
+
     public Map<String, Object> trendingSearch(Map<String, Object> requestBody, String token) throws Exception {
 
         // Read req params
         SBApiResponse response = ProjectUtil.createDefaultResponse(API_TRENDING_SEARCH);
         HashMap<String, Object> request = (HashMap<String, Object>) requestBody.get(Constants.REQUEST) ==null ? new HashMap<>() : (HashMap<String, Object>) requestBody.get(Constants.REQUEST);
         HashMap<String, Object> filter = ((HashMap<String, Object>) request.get(Constants.FILTERS)) ==null ? new HashMap<>() : ((HashMap<String, Object>) request.get(Constants.FILTERS));
-        ArrayList<String> primaryCategoryList = ((ArrayList<String>) (filter).get(CONTEXT_TYPE)) == null ?  new ArrayList<>() : ((ArrayList<String>) (filter).get(CONTEXT_TYPE));
+        ArrayList<String> contextTypeList = ((ArrayList<String>) (filter).get(CONTEXT_TYPE)) == null ?  new ArrayList<>() : ((ArrayList<String>) (filter).get(CONTEXT_TYPE));
 
         String org = ((String) (filter).get(Constants.ORGANISATION)) == null ? "" : ((String) (filter).get(Constants.ORGANISATION))  ;
+        String designation = ((String) filter.get(Constants.DESIGNATION));
+        String redisKey = TRENDING_COURSES_REDIS_KEY;
+        Map<String, String> redisKeyNameMap = new HashMap<String, String>();
+        if (StringUtils.isBlank(designation)) {
+            designation = "";
+        } else {
+            designation = designation.toLowerCase();
+        }
+
+        boolean isAcbpEnabled = false;
+        List<String> updatedContextTypeList = new ArrayList<String>();
+        for (String contextType : contextTypeList) {
+            if (Constants.ACBP_KEY.equalsIgnoreCase(contextType)) {
+                isAcbpEnabled = true;
+                redisKey = CBP_MANUAL_COURSES_REDIS_KEY;
+                redisKeyNameMap.put(org + COLON + Constants.ACBP_KEY + COLON + Constants.ALL_USER_KEY, contextType);
+                if (StringUtils.isNotBlank(designation)) {
+                    redisKeyNameMap.put(org + COLON + Constants.ACBP_KEY + COLON + designation, contextType);
+                }
+            } else {
+                updatedContextTypeList.add(contextType);
+                redisKeyNameMap.put(org + COLON + contextType, contextType);
+            }
+        }
+        
         int limit = Optional.ofNullable(request.get(Constants.LIMIT)).map(l -> (Integer) l).orElse(0);
-        List<String> fieldList = primaryCategoryList.stream()
+        /*List<String> fieldList = updatedContextTypeList.stream()
                 .map(type -> org + COLON + type)
                 .collect(Collectors.toList());
+        
         String[] fieldsArray = fieldList.toArray(new String[fieldList.size()]);
+        */
+        String[] newFieldsArray = redisKeyNameMap.keySet().toArray(new String[0]);
         // Fetch trending Ids for requested type of courses
-        List<String> trendingCoursesAndPrograms = redisCacheMgr.hget(TRENDING_COURSES_REDIS_KEY, serverProperties.getRedisInsightIndex(),fieldsArray);
-         if(trendingCoursesAndPrograms == null)
-             trendingCoursesAndPrograms = new ArrayList<>();
+        List<String> trendingCoursesAndPrograms = redisCacheMgr.hget(redisKey, serverProperties.getRedisInsightIndex(),newFieldsArray);
         Map<String, List<String>> typeList = new HashMap<>();
-        for(int i=0;i<fieldsArray.length;i++){
-            if(primaryCategoryList.size() > i && trendingCoursesAndPrograms.size() > 0 )
-            typeList.put(primaryCategoryList.get(i),fetchIds(trendingCoursesAndPrograms.get(i), limit, fieldList.get(i)));
+        if  (CollectionUtils.isNotEmpty(trendingCoursesAndPrograms)) {
+            for (int i = 0; i < newFieldsArray.length; i++) {
+                String nameValue = redisKeyNameMap.get(newFieldsArray[i]);
+                if (typeList.containsKey(nameValue)) {
+                    List<String> existingList = typeList.get(nameValue);
+                    List<String> newList = fetchIds(trendingCoursesAndPrograms.get(i), limit, newFieldsArray[i]); 
+                    existingList.addAll(newList);
+                } else {
+                    typeList.put(nameValue, fetchIds(trendingCoursesAndPrograms.get(i), limit, newFieldsArray[i]));
+                }
+            }
         }
+
+        /* if(trendingCoursesAndPrograms == null)
+             trendingCoursesAndPrograms = new ArrayList<>();
+       
+        for(int i=0;i<fieldsArray.length;i++){
+            if(updatedContextTypeList.size() > i && trendingCoursesAndPrograms.size() > 0 )
+            typeList.put(updatedContextTypeList.get(i),fetchIds(trendingCoursesAndPrograms.get(i), limit, fieldList.get(i)));
+        } */
         List<String> searchIds = typeList.values().stream().flatMap(List::stream).collect(Collectors.toList());
         Map<String, Object> compositeSearchRes ;
         List<Map<String, Object>> contentList = new ArrayList<>();
@@ -69,6 +115,9 @@ public class TrendingServiceImpl implements TrendingService {
             String key = (String) content.get(IDENTIFIER);
             // Check for duplicates before putting into the map
             if (!contentMap.containsKey(key)) {
+                if (isAcbpEnabled) {
+                    content.put(CBP_MANUAL_COURSES_END_DATE, getEndDateFormat());
+                }
                 contentMap.put(key, content);
             } else {
                 // Handle the case when there are duplicate keys
@@ -77,7 +126,6 @@ public class TrendingServiceImpl implements TrendingService {
                 // For example, merge properties or choose the one with specific criteria
             }
         }
-
         Map<String, List<Object>> resultContentMap = typeList.entrySet().stream()
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
@@ -94,7 +142,7 @@ public class TrendingServiceImpl implements TrendingService {
         if (idArray == null || idArray.length == 0) {
             return new ArrayList<>();
         }
-        List<String> idList = Arrays.asList(idArray);
+        List<String> idList = new ArrayList<>(Arrays.asList(idArray));
         if (idList.size() > limit) {
             idList = idList.subList(0, limit);
         }
@@ -115,5 +163,18 @@ public class TrendingServiceImpl implements TrendingService {
         return outboundRequestHandlerService.fetchResultUsingPost(
                 serverProperties.getKmBaseHost() + serverProperties.getKmCompositeSearchPath(), searchBody,
                 headers);
+    }
+    
+    private String getEndDateFormat() {
+        try {
+            SimpleDateFormat inputFormat = new SimpleDateFormat("dd/MM/yyyy");
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+        
+            Date inputDate = inputFormat.parse(serverProperties.getCbPlanEndDate());
+            return dateFormat.format(inputDate);
+        } catch (Exception e) {
+            logger.error("Failed to get end date.", e);
+        }
+        return "";
     }
 }
