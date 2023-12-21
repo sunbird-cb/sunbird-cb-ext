@@ -194,6 +194,9 @@ public class CbExtServerProperties {
 	@Value("${redis.port}")
 	private String redisPort;
 
+	@Value("${cb-plan.update.publish.authorized.roles}")
+	private String cbPlanUpdatePublishAuthorizedRoles;
+
 	public String getRedisDataHostName() {
 		return redisDataHostName;
 	}
@@ -2069,4 +2072,12 @@ public class CbExtServerProperties {
 	public void setCbPlanEndDate(String cbPlanEndDate) {
 		this.cbPlanEndDate = cbPlanEndDate;
   }
+
+	public List<String> getCbPlanUpdatePublishAuthorizedRoles() {
+		return Arrays.asList(cbPlanUpdatePublishAuthorizedRoles.split(",", -1));
+	}
+
+	public void setCbPlanUpdatePublishAuthorizedRoles(String cbPlanUpdatePublishAuthorizedRoles) {
+		this.cbPlanUpdatePublishAuthorizedRoles = cbPlanUpdatePublishAuthorizedRoles;
+	}
 }
