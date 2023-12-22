@@ -1,9 +1,5 @@
 package org.sunbird.halloffame.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.type.MapType;
-import com.fasterxml.jackson.databind.type.TypeFactory;
-import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +7,6 @@ import org.springframework.stereotype.Service;
 import org.sunbird.cassandra.utils.CassandraOperation;
 import org.sunbird.common.util.Constants;
 
-import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -34,8 +29,17 @@ public class HallOfFameServiceImpl implements HallOfFameService {
         LocalDate currentDate = LocalDate.now();
         int monthValue = currentDate.getMonthValue();
         int yearValue = currentDate.getYear();
-        int lastMonth = (monthValue - 1);
-        int previousToLastMonth = (monthValue - 2);
+
+        int lastMonth = monthValue - 1;
+        int previousToLastMonth = monthValue - 2;
+        if (lastMonth == 0) {
+            lastMonth = 12;
+            yearValue--;
+        }
+        if (previousToLastMonth <= 0) {
+            previousToLastMonth += 12;
+            yearValue--;
+        }
         String formattedDate = currentDate.format(DateTimeFormatter.ofPattern("MMMM yyyy"));
 
         List<Map<String, Object>> dptList = cassandraOperation.getRecordsByPropertiesWithoutFiltering(
@@ -45,8 +49,8 @@ public class HallOfFameServiceImpl implements HallOfFameService {
         List<Map<String, Object>> lastMonthList = new ArrayList<>();
 
         for (Map<String, Object> record : dptList) {
-            int month = (int) record.get("month");
-            int year = (int) record.get("year");
+            int month = (int) record.get(Constants.MONTH);
+            int year = (int) record.get(Constants.YEAR);
 
             if (month == previousToLastMonth && year == yearValue) {
                 lastToPreviousMonthList.add(record);
@@ -54,49 +58,50 @@ public class HallOfFameServiceImpl implements HallOfFameService {
                 lastMonthList.add(record);
             }
         }
-        List<Map<String, Object>> lastMonthWithRankList = processRankBasedOnKpPoints(lastMonthList);
-        List<Map<String, Object>> lastToPreviousMonthWithRankList = processRankBasedOnKpPoints(lastToPreviousMonthList);
 
-        for (Map<String, Object> lastMonthWithRank : lastMonthWithRankList) {
-            String pvOrgId = (String) lastMonthWithRank.get("org_id");
-            int pvRank = (int) lastMonthWithRank.get("rank");
-            long pvKpPoints = (long) lastMonthWithRank.get("total_kp");
+        Map<String, Map<String, Object>> lastMonthWithRankList = processRankBasedOnKpPoints(lastMonthList);
+        Map<String, Map<String, Object>> lastToPreviousMonthWithRankList = processRankBasedOnKpPoints(lastToPreviousMonthList);
+        List<Map<String, Object>> trialmapList = lastMonthWithRankList.values().stream()
+                .map(lastMonthWithRank -> {
+                    String pvOrgId = (String) lastMonthWithRank.get(Constants.ORGID);
+                    int pvRank = (int) lastMonthWithRank.get(Constants.RANK);
 
-            for (Map<String, Object> lastToPreviousMonthWithRank : lastToPreviousMonthWithRankList) {
-                String lastToPvOrgId = (String) lastToPreviousMonthWithRank.get("org_id");
-                int lastToPvRank = (int) lastToPreviousMonthWithRank.get("rank");
-                long lastToPvKpPoints = (long) lastToPreviousMonthWithRank.get("total_kp");
-                if (pvOrgId.equals(lastToPvOrgId)) {
-                    if (pvRank >= lastToPvRank) {
-                        lastMonthWithRank.put("negtiveOrPositive", "negative");
-                    } else {
-                        lastMonthWithRank.put("negtiveOrPositive", "positive");
-                    }
-                    lastMonthWithRank.put("progress", Math.abs(pvRank - lastToPvRank));
-                }
-            }
-        }
+                    Map<String, Object> trialmap = new HashMap<>(lastMonthWithRank);
 
-        resultMap.put("title", formattedDate);
-        resultMap.put("mdoList", lastMonthWithRankList);
+                    lastToPreviousMonthWithRankList.getOrDefault(pvOrgId, Collections.emptyMap()).forEach((key, value) -> {
+                        if (Constants.RANK.equals(key)) {
+                            int lastToPvRank = (int) value;
+                            trialmap.put(Constants.NEGATIVE_OR_POSITIVE, (pvRank >= lastToPvRank) ? Constants.NEGATIVE : Constants.POSITIVE);
+                            trialmap.put(Constants.PROGRESS, Math.abs(pvRank - lastToPvRank));
+                        }
+                    });
+                    return trialmap;
+                })
+                .collect(Collectors.toList());
+
+        resultMap.put(Constants.TITLE, formattedDate);
+        resultMap.put(Constants.MDO_LIST, trialmapList);
         return resultMap;
     }
 
-    public static List<Map<String, Object>> processRankBasedOnKpPoints(List<Map<String, Object>> dptList) {
-        List<Map<String, Object>> dptListWithRanks = dptList.stream()
-                .sorted(Comparator.comparing(map -> (Long) map.get("total_kp"), Comparator.reverseOrder()))
-                .collect(Collectors.toList());
+    public static Map<String, Map<String, Object>> processRankBasedOnKpPoints(List<Map<String, Object>> dptList) {
+        List<Map<String, Object>> dptListWithRanks = new ArrayList<>(dptList);
+        Collections.sort(dptListWithRanks, Comparator.comparing(map -> (Long) map.get(Constants.TOTAL_KP), Comparator.reverseOrder()));
+
+        Map<String, Map<String, Object>> resultMap = dptListWithRanks.stream()
+                .collect(Collectors.toMap(map -> (String) map.get(Constants.ORGID), map -> map));
 
         Integer rank = 1;
-        Long currentTotalKp = (Long) dptListWithRanks.get(0).get("total_kp");
+        Long currentTotalKp = (Long) dptListWithRanks.get(0).get(Constants.TOTAL_KP);
+
         for (Map<String, Object> map : dptListWithRanks) {
-            Long totalKp = (Long) map.get("total_kp");
+            Long totalKp = (Long) map.get(Constants.TOTAL_KP);
             if (!totalKp.equals(currentTotalKp)) {
                 rank++;
                 currentTotalKp = totalKp;
             }
-            map.put("rank", rank);
+            resultMap.get(map.get(Constants.ORGID)).put(Constants.RANK, rank);
         }
-        return dptListWithRanks;
+        return resultMap;
     }
 }
