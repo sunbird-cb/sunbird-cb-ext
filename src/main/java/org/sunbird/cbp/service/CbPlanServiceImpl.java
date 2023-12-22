@@ -97,6 +97,7 @@ public class CbPlanServiceImpl implements CbPlanService {
                 response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
             }
         } catch (Exception e) {
+            logger.error("Failed to Create CB Plan for OrgId: " + userOrgId, e);
             response.getParams().setStatus(Constants.FAILED);
             response.getParams().setErrmsg(e.getMessage());
             response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -179,6 +180,7 @@ public class CbPlanServiceImpl implements CbPlanService {
                 response.setResponseCode(HttpStatus.BAD_REQUEST);
             }
         } catch (Exception e) {
+            logger.error("Failed to Update CB Plan for OrgId: " + userOrgId, e);
             response.getParams().setStatus(Constants.FAILED);
             response.getParams().setErrmsg(e.getMessage());
             response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -286,6 +288,7 @@ public class CbPlanServiceImpl implements CbPlanService {
                 response.setResponseCode(HttpStatus.BAD_REQUEST);
             }
         } catch (Exception e) {
+            logger.error("Failed to Publish CB Plan for OrgId: " + userOrgId, e);
             response.getParams().setStatus(Constants.FAILED);
             response.getParams().setErrmsg(e.getMessage());
             response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -362,6 +365,7 @@ public class CbPlanServiceImpl implements CbPlanService {
                 response.setResponseCode(HttpStatus.BAD_REQUEST);
             }
         } catch (Exception e) {
+            logger.error("Failed to Retire CB Plan for OrgId: " + userOrgId, e);
             response.getParams().setStatus(Constants.FAILED);
             response.getParams().setErrmsg(e.getMessage());
             response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -396,6 +400,7 @@ public class CbPlanServiceImpl implements CbPlanService {
                 response.setResponseCode(HttpStatus.BAD_REQUEST);
             }
         } catch (Exception e) {
+            logger.error("Failed to Read CB Plan for OrgId: " + userOrgId + "for CB PlanId: " + cbPlanId, e);
             response.getParams().setStatus(Constants.FAILED);
             response.getParams().setErrmsg(e.getMessage());
             response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -436,7 +441,7 @@ public class CbPlanServiceImpl implements CbPlanService {
             if (CollectionUtils.isNotEmpty(professionalDetails)) {
                 userDesignation = (String) professionalDetails.get(0).get(Constants.DESIGNATION);
             }
-            List<String> assignmentTypeInfoKeyQueryList = Arrays.asList(userId, Constants.ALL_USER);
+            List<String> assignmentTypeInfoKeyQueryList = new ArrayList<>(Arrays.asList(userId, Constants.ALL_USER));
             if (StringUtils.isNotEmpty(userDesignation)) {
                 logger.info("User Designation : " + userDesignation);
                 assignmentTypeInfoKeyQueryList.add(userDesignation);
