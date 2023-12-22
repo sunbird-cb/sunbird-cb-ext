@@ -1796,7 +1796,7 @@ public class ProfileServiceImpl implements ProfileService {
 
 	@Override
 	public SBApiResponse profileExternalSystemUpdate(Map<String, Object> request, String authToken) {
-		SBApiResponse response = new SBApiResponse(Constants.API_PROFILE_EXTERNAL_SYSTEM_UPDATE);
+		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_PROFILE_EXTERNAL_SYSTEM_UPDATE);
 		try {
 			Map<String, Object> requestBody = (Map<String, Object>) request.get(Constants.REQUEST);
 			if (!validateSystemUpdateRequest(requestBody)) {
