@@ -937,7 +937,7 @@ public class CbPlanServiceImpl implements CbPlanService {
         return errMsg;
     }
 
-    private String getDesignationForUser(String profileDetails) {
+    private String getDesignationForUser(String profileDetails, String userId) {
         String userDesignation = "";
         try {
             Map<String, Object> profileDetailsMap = null;
@@ -953,7 +953,7 @@ public class CbPlanServiceImpl implements CbPlanService {
                 userDesignation = (String) professionalDetails.get(0).get(Constants.DESIGNATION);
             }
         } catch (Exception e) {
-            logger.error("Not able to read the profile Details", e);
+            logger.error("Not able to read the profile Details for userId: " + userId, e);
         }
         return userDesignation;
     }
@@ -962,7 +962,7 @@ public class CbPlanServiceImpl implements CbPlanService {
         for (Map.Entry userEntry : userInfoMap.entrySet()) {
             Map<String, String> userInfo = (Map<String, String>) userEntry.getValue();
             String profileDetails = userInfo.get(Constants.PROFILE_DETAILS_KEY);
-            String userDesignation = getDesignationForUser(profileDetails);
+            String userDesignation = getDesignationForUser(profileDetails, (String)userEntry.getKey());
             userInfo.put(Constants.DESIGNATION, userDesignation);
             userInfo.remove(Constants.PROFILE_DETAILS_KEY);
         }
