@@ -47,4 +47,6 @@ public interface UserUtilityService {
 	String updateBulkUploadUser(UserRegistration userRegistration);
 
 	Map<String, Map<String, Object>> getUserDetailsFromES(List<String> userIdList, List<String> userFields) throws IOException;
+
+	Map<String, Object> getUsersDataFromLookup(String email, String authToken);
 }

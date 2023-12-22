@@ -1,5 +1,7 @@
 package org.sunbird.common.util;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -164,4 +166,13 @@ public class ProjectUtil {
 
 	}
 
+	public static SimpleDateFormat getDateFormatter() {
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSSZ");
+		simpleDateFormat.setLenient(false);
+		return simpleDateFormat;
+	}
+
+	public static String getFormattedDate() {
+		return getDateFormatter().format(new Date());
+	}
 }
