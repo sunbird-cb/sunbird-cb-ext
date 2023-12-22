@@ -576,6 +576,9 @@ public class CbExtServerProperties {
 	@Value("${default.content.properties}")
 	private String defaultContentProperties;
 
+	@Value("${karma.points.limit}")
+	private int KarmaPointsLimit;
+
 	public boolean qListFromCacheEnabled() {
 		return qListFromCacheEnabled;
 	}
@@ -2047,5 +2050,13 @@ public class CbExtServerProperties {
 
 	public void setDefaultContentProperties(String defaultContentProperties) {
 		this.defaultContentProperties = defaultContentProperties;
+	}
+
+	public int getKarmaPointsLimit() {
+		return KarmaPointsLimit;
+	}
+
+	public void setKarmaPointsLimit(int karmaPointsLimit) {
+		KarmaPointsLimit = karmaPointsLimit;
 	}
 }
