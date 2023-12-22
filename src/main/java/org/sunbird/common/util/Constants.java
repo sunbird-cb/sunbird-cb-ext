@@ -905,12 +905,12 @@ public class Constants {
     public static final String MDO_ID ="mdo_id";
     public static final String MONTH = "month";
     public static final String MDO_KARMA_POINTS="mdo_karma_points";
-	public static final String NEGATIVE_OR_POSITIVE ="negativeOrPositive";
-	public static final String ORGID="org_id";
-	public static final String RANK ="rank";
-	public static final String YEAR ="year";
-	public static final String TOTAL_KP ="total_kp";
-	public static final String MDO_LIST="mdoList";
+    public static final String NEGATIVE_OR_POSITIVE ="negativeOrPositive";
+    public static final String ORGID="org_id";
+    public static final String RANK ="rank";
+    public static final String YEAR ="year";
+    public static final String TOTAL_KP ="total_kp";
+    public static final String MDO_LIST="mdoList";
 
 	private Constants() {
 		throw new IllegalStateException("Utility class");
