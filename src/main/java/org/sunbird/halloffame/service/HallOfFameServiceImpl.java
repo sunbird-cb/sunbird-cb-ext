@@ -27,19 +27,14 @@ public class HallOfFameServiceImpl implements HallOfFameService {
         Map<String, Object> resultMap = new HashMap<>();
 
         LocalDate currentDate = LocalDate.now();
-        int monthValue = currentDate.getMonthValue();
-        int yearValue = currentDate.getYear();
+        LocalDate lastMonthDate = LocalDate.now().minusMonths(1);
+        LocalDate lastToPreviousMonthDate = LocalDate.now().minusMonths(2);
+        int lastMonthValue = lastMonthDate.getMonthValue();
+        int YearValue = lastMonthDate.getYear();
 
-        int lastMonth = monthValue - 1;
-        int previousToLastMonth = monthValue - 2;
-        if (lastMonth == 0) {
-            lastMonth = 12;
-            yearValue--;
-        }
-        if (previousToLastMonth <= 0) {
-            previousToLastMonth += 12;
-            yearValue--;
-        }
+        int previousToLastMonth = lastToPreviousMonthDate.getMonthValue();
+        int previousToLastMonthsYear = lastToPreviousMonthDate.getYear();
+
         String formattedDate = currentDate.format(DateTimeFormatter.ofPattern("MMMM yyyy"));
 
         List<Map<String, Object>> dptList = cassandraOperation.getRecordsByPropertiesWithoutFiltering(
@@ -52,9 +47,9 @@ public class HallOfFameServiceImpl implements HallOfFameService {
             int month = (int) record.get(Constants.MONTH);
             int year = (int) record.get(Constants.YEAR);
 
-            if (month == previousToLastMonth && year == yearValue) {
+            if (month == previousToLastMonth && year == previousToLastMonthsYear) {
                 lastToPreviousMonthList.add(record);
-            } else if (month == lastMonth && year == yearValue) {
+            } else if (month == lastMonthValue && year == YearValue) {
                 lastMonthList.add(record);
             }
         }
