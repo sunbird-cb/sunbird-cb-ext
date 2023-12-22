@@ -89,9 +89,17 @@ public class CbPlanServiceImpl implements CbPlanService {
             try {
                 requestMap.put(Constants.DRAFT_DATA, mapper.writeValueAsString(cbPlanDto));
                 requestMap.put(Constants.STATUS, Constants.DRAFT);
-                cassandraOperation.insertRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_CB_PLAN, requestMap);
-                response.getResult().put(Constants.ID, cbPlanId);
+                SBApiResponse resp = cassandraOperation.insertRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_CB_PLAN, requestMap);
+                if (!resp.get(Constants.RESPONSE).equals(Constants.SUCCESS)) {
+                    response.getParams().setStatus(Constants.FAILED);
+                    response.getParams().setErrmsg("Failed to Create CB Plan for OrgId: " + userOrgId + " message: " + resp.getParams().getErrmsg());
+                    response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+                } else {
+                    response.getResult().put(Constants.STATUS, Constants.CREATED);
+                    response.getResult().put(Constants.ID, cbPlanId);
+                }
             } catch (JsonProcessingException e) {
+                logger.error("Failed to Create CB Plan for OrgId: " + userOrgId, e);
                 response.getParams().setStatus(Constants.FAILED);
                 response.getParams().setErrmsg(e.getMessage());
                 response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -532,6 +540,7 @@ public class CbPlanServiceImpl implements CbPlanService {
             assignmentTypeInfo = cbPlanDto.getAssignmentTypeInfo();
             enrichData.put(Constants.CB_CONTENT_TYPE, cbPlanDto.getContentType());
             contentTypeInfo = cbPlanDto.getContentList();
+            assignmentType = cbPlanDto.getAssignmentType();
             enrichData.put(Constants.END_DATE, cbPlanDto.getEndDate());
             enrichData.put(Constants.CB_ASSIGNMENT_TYPE_INFO, cbPlanDto.getAssignmentTypeInfo());
         }
@@ -552,8 +561,9 @@ public class CbPlanServiceImpl implements CbPlanService {
                 allUserInfo.addAll(userDraftAssignmentTypeInfoForLive);
             }
 
-            userUtilityService.getUserDetailsFromDB(allUserInfo, Arrays.asList(Constants.FIRSTNAME, Constants.USER_ID),
+            userUtilityService.getUserDetailsFromDB(allUserInfo, Arrays.asList(Constants.FIRSTNAME, Constants.USER_ID, Constants.PROFILE_DETAILS_KEY),
                     userInfoMap);
+            enrichUserInfo(userInfoMap);
             for (String userId : assignmentTypeInfo) {
                 enrichUserInfoMap.add(userInfoMap.get(userId));
             }
@@ -572,10 +582,12 @@ public class CbPlanServiceImpl implements CbPlanService {
             userUtilityService.getUserDetailsFromDB(Arrays.asList((String) cbPlan.get(Constants.CREATED_BY)),
                     Arrays.asList(Constants.FIRSTNAME, Constants.USER_ID),
                     userInfoMap);
+            enrichUserInfo(userInfoMap);
         }
 
-        enrichData.put(Constants.CREATED_BY,
+        enrichData.put(Constants.CREATED_BY_NAME,
                 userInfoMap.get((String) cbPlan.get(Constants.CREATED_BY)).get(Constants.FIRSTNAME));
+        enrichData.put(Constants.CREATED_BY, cbPlan.get(Constants.CREATED_BY));
         List<Map<String, Object>> enrichContentInfoMap = new ArrayList<>();
         for (String contentId : contentTypeInfo) {
             Map<String, Object> contentResponse = contentService.readContentFromCache(contentId, null);
@@ -846,8 +858,9 @@ public class CbPlanServiceImpl implements CbPlanService {
                 if (Constants.CB_CUSTOM_TYPE.equalsIgnoreCase(assignmentType)) {
                     List<String> userIdList = (List<String>) cbPlan.get(Constants.CB_ASSIGNMENT_TYPE_INFO);
                     userUtilityService.getUserDetailsFromDB(userIdList,
-                            Arrays.asList(Constants.FIRSTNAME, Constants.USER_ID),
+                            Arrays.asList(Constants.FIRSTNAME, Constants.USER_ID, Constants.PROFILE_DETAILS_KEY),
                             userInfoMap);
+                    enrichUserInfo(userInfoMap);
                     List<Map<String, String>> enrichUserInfoList = new ArrayList<>();
                     for (String userId : userIdList) {
                         if (!userId.equals((String) cbPlan.get(Constants.CREATED_BY))) {
@@ -861,8 +874,9 @@ public class CbPlanServiceImpl implements CbPlanService {
                 }
 
                 userUtilityService.getUserDetailsFromDB(Arrays.asList((String) cbPlan.get(Constants.CREATED_BY)),
-                        Arrays.asList(Constants.FIRSTNAME, Constants.USER_ID),
+                        Arrays.asList(Constants.FIRSTNAME, Constants.USER_ID, Constants.PROFILE_DETAILS_KEY),
                         userInfoMap);
+                enrichUserInfo(userInfoMap);
                 cbPlan.put(Constants.CREATED_BY_NAME,
                         userInfoMap.get((String) cbPlan.get(Constants.CREATED_BY)).get(Constants.FIRSTNAME));
                 cbPlan.remove(Constants.CB_ASSIGNMENT_TYPE_INFO);
@@ -921,5 +935,32 @@ public class CbPlanServiceImpl implements CbPlanService {
         }
 
         return errMsg;
+    }
+
+    private String getDesignationForUser(String profileDetails) throws IOException {
+        String userDesignation = "";
+        Map<String, Object> profileDetailsMap = null;
+        List<Map<String, Object>> professionalDetails = null;
+        if (StringUtils.isNotEmpty(profileDetails)) {
+            profileDetailsMap = mapper.readValue(profileDetails, new TypeReference<HashMap<String, Object>>() {
+            });
+        }
+        if (MapUtils.isNotEmpty(profileDetailsMap)) {
+            professionalDetails = (List<Map<String, Object>>) profileDetailsMap.get(Constants.PROFESSIONAL_DETAILS);
+        }
+        if (CollectionUtils.isNotEmpty(professionalDetails)) {
+            userDesignation = (String) professionalDetails.get(0).get(Constants.DESIGNATION);
+        }
+        return userDesignation;
+    }
+
+    private void enrichUserInfo(Map<String, Map<String, String>> userInfoMap) throws IOException {
+        for (Map.Entry userEntry: userInfoMap.entrySet()) {
+            Map<String, String> userInfo = (Map<String, String>)userEntry.getValue();
+            String profileDetails = userInfo.get(Constants.PROFILE_DETAILS_KEY);
+            String userDesignation = getDesignationForUser(profileDetails);
+            userInfo.put(Constants.DESIGNATION, userDesignation);
+            userInfo.remove(Constants.PROFILE_DETAILS_KEY);
+        }
     }
 }
