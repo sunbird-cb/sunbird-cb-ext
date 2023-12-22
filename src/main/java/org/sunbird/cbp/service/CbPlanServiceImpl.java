@@ -27,6 +27,7 @@ import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.model.SunbirdApiRequest;
 import org.sunbird.common.service.ContentService;
 import org.sunbird.common.util.AccessTokenValidator;
+import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.common.util.ProjectUtil;
 import org.sunbird.user.service.UserUtilityService;
@@ -53,6 +54,9 @@ public class CbPlanServiceImpl implements CbPlanService {
     @Autowired
     ContentService contentService;
 
+    @Autowired
+    CbExtServerProperties serverProperties;
+
     ObjectMapper mapper = new ObjectMapper();
 
     @Override
@@ -70,6 +74,7 @@ public class CbPlanServiceImpl implements CbPlanService {
             Map<String, Object> requestMap = new HashMap<>();
             requestMap.put(Constants.CREATED_BY, userId);
             requestMap.put(Constants.CREATED_AT, new Date());
+            requestMap.put(Constants.UPDATED_AT, new Date());
             requestMap.put(Constants.ORG_ID, userOrgId);
             UUID cbPlanId = UUIDs.timeBased();
             requestMap.put(Constants.ID, cbPlanId);
@@ -100,7 +105,7 @@ public class CbPlanServiceImpl implements CbPlanService {
     }
 
     @Override
-    public SBApiResponse updateCbPlan(SunbirdApiRequest request, String userOrgId, String authUserToken) {
+    public SBApiResponse updateCbPlan(SunbirdApiRequest request, String userOrgId, String authUserToken, List<String> userRoles) {
         SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_CB_PLAN_UPDATE);
         try {
             String userId = validateAuthTokenAndFetchUserId(authUserToken);
@@ -120,6 +125,13 @@ public class CbPlanServiceImpl implements CbPlanService {
                         Constants.KEYSPACE_SUNBIRD, Constants.TABLE_CB_PLAN, cbPlanInfo, null);
                 if (CollectionUtils.isNotEmpty(cbPlanMapInfo)) {
                     Map<String, Object> cbPlanInfoMap = cbPlanMapInfo.get(0);
+                    if (!(userId.equals(cbPlanInfoMap.get(Constants.CREATED_BY)) ||
+                            serverProperties.getCbPlanUpdatePublishAuthorizedRoles().stream().anyMatch(roles -> CollectionUtils.isNotEmpty(userRoles) && userRoles.contains(roles)))) {
+                        response.getParams().setStatus(Constants.FAILED);
+                        response.getParams().setErrmsg("Not Authorized to update cbp Plan");
+                        response.setResponseCode(HttpStatus.BAD_REQUEST);
+                        return response;
+                    }
                     String draftInfo = null;
                     if (Constants.LIVE.equalsIgnoreCase((String) cbPlanInfoMap.get(Constants.STATUS))
                             && cbPlanInfoMap.get(Constants.CB_PUBLISHED_BY) != null) {
@@ -175,7 +187,7 @@ public class CbPlanServiceImpl implements CbPlanService {
     }
 
     @Override
-    public SBApiResponse publishCbPlan(SunbirdApiRequest request, String userOrgId, String authUserToken) {
+    public SBApiResponse publishCbPlan(SunbirdApiRequest request, String userOrgId, String authUserToken, List<String> userRoles) {
         SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_CB_PLAN_PUBLISH);
         Map<String, Object> requestData = (Map<String, Object>) request.getRequest();
         try {
@@ -202,6 +214,13 @@ public class CbPlanServiceImpl implements CbPlanService {
 
             if (CollectionUtils.isNotEmpty(cbPlanMap)) {
                 Map<String, Object> cbPlan = cbPlanMap.get(0);
+                if (!(userId.equals(cbPlan.get(Constants.CREATED_BY)) ||
+                        serverProperties.getCbPlanUpdatePublishAuthorizedRoles().stream().anyMatch(roles -> CollectionUtils.isNotEmpty(userRoles) && userRoles.contains(roles)))) {
+                    response.getParams().setStatus(Constants.FAILED);
+                    response.getParams().setErrmsg("Not Authorized to publish cbp Plan");
+                    response.setResponseCode(HttpStatus.BAD_REQUEST);
+                    return response;
+                }
                 Map<String, Object> publishCbPlan = new HashMap<>();
                 publishCbPlan.putAll(cbPlan);
                 if ((Constants.LIVE.equalsIgnoreCase((String) cbPlan.get(Constants.STATUS))
@@ -248,6 +267,7 @@ public class CbPlanServiceImpl implements CbPlanService {
                 cbPlan.remove(Constants.ID);
                 cbPlan.remove(Constants.ORG_ID);
                 cbPlan.put(Constants.CB_PUBLISHED_AT, new Date());
+                cbPlan.put(Constants.UPDATED_AT, new Date());
                 Map<String, Object> resp = cassandraOperation.updateRecord(Constants.KEYSPACE_SUNBIRD,
                         Constants.TABLE_CB_PLAN, cbPlan, cbPlanInfo);
                 if (resp.get(Constants.RESPONSE).equals(Constants.SUCCESS)) {
@@ -274,7 +294,7 @@ public class CbPlanServiceImpl implements CbPlanService {
     }
 
     @Override
-    public SBApiResponse retireCbPlan(SunbirdApiRequest request, String userOrgId, String authUserToken) {
+    public SBApiResponse retireCbPlan(SunbirdApiRequest request, String userOrgId, String authUserToken, List<String> userRoles) {
         SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_CB_PLAN_RETIRE);
         Map<String, Object> requestData = (Map<String, Object>) request.getRequest();
         try {
@@ -301,6 +321,13 @@ public class CbPlanServiceImpl implements CbPlanService {
 
             if (CollectionUtils.isNotEmpty(cbPlanMap)) {
                 Map<String, Object> cbPlan = cbPlanMap.get(0);
+                if (!(userId.equals(cbPlan.get(Constants.CREATED_BY)) ||
+                        serverProperties.getCbPlanUpdatePublishAuthorizedRoles().stream().anyMatch(roles -> CollectionUtils.isNotEmpty(userRoles) && userRoles.contains(roles)))) {
+                    response.getParams().setStatus(Constants.FAILED);
+                    response.getParams().setErrmsg("Not Authorized to delete cbp Plan");
+                    response.setResponseCode(HttpStatus.BAD_REQUEST);
+                    return response;
+                }
                 if (Constants.CB_RETIRE.equalsIgnoreCase((String) cbPlan.get(Constants.STATUS))) {
                     response.getParams().setStatus(Constants.FAILED);
                     response.getParams().setErrmsg("CbPlan is already archived for ID: " + cbPlanId);
@@ -836,19 +863,10 @@ public class CbPlanServiceImpl implements CbPlanService {
                 cbPlan.remove(Constants.CB_ASSIGNMENT_TYPE_INFO);
                 cbPlan.put(Constants.USER_TYPE, assignmentType);
                 cbPlan.remove(Constants.CB_ASSIGNMENT_TYPE);
-                if (Constants.DRAFT.equalsIgnoreCase((String) cbPlan.get(Constants.STATUS))
-                        && cbPlan.get(Constants.CB_PUBLISHED_BY) == null) {
-                    cbPlan.put(Constants.UPDATED_AT, cbPlan.get(Constants.CREATED_AT));
-                }
                 filteredCbPlanList.add(cbPlan);
             }
-            if (Constants.LIVE.equalsIgnoreCase((String)searchReq.getFilters().get(Constants.STATUS))) {
-                filteredCbPlanList = filteredCbPlanList.stream().sorted(Comparator.comparing(entry -> (Date)entry.get(Constants.CB_PUBLISHED_AT), Comparator.reverseOrder()))
-                        .collect(Collectors.toList());
-            } else if (Constants.DRAFT.equalsIgnoreCase((String)searchReq.getFilters().get(Constants.STATUS)) || Constants.CB_RETIRE.equalsIgnoreCase((String)searchReq.getFilters().get(Constants.STATUS))){
-                filteredCbPlanList = filteredCbPlanList.stream().sorted(Comparator.comparing(entry -> (Date)entry.get(Constants.UPDATED_AT), Comparator.reverseOrder()))
-                        .collect(Collectors.toList());
-            }
+            filteredCbPlanList = filteredCbPlanList.stream().sorted(Comparator.comparing(entry -> (Date) entry.get(Constants.UPDATED_AT), Comparator.reverseOrder()))
+                    .collect(Collectors.toList());
 
             response.getResult().put(Constants.COUNT, filteredCbPlanList.size());
             response.getResult().put(Constants.CONTENT, filteredCbPlanList);

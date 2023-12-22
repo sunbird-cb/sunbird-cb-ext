@@ -853,6 +853,11 @@ public class Constants {
 	public static final String REDIS_COURSE_MOST_TRENDING_TAG = "lhp_trending";
 	public static final String ACROSS_COURSES = "across:courses";
 	public static final String ACROSS_PROGRAMS = "across:programs";
+	public static final String API_PROFILE_EXTERNAL_SYSTEM_UPDATE = "api.profile.external.system.update";
+    public static final String ACBP_KEY = "acbp";
+	public static final String ALL_USER_KEY = "allusers";
+	public static final String CBP_MANUAL_COURSES_REDIS_KEY = "cbp_manual";
+	public static final String CBP_MANUAL_COURSES_END_DATE = "cbPlanEndDate";
 	public static final String API_CB_PLAN_CREATE = "api.cb.plan.v1.create";
 	public static final String API_CB_PLAN_UPDATE = "api.cb.plan.v1.update";
 	public static final String API_CB_PLAN_PUBLISH = "api.cb.plan.v1.publish";
@@ -902,6 +907,7 @@ public class Constants {
     public static final String USER_KARMA_POINTS ="user_karma_points";
 	public static final String KARMA_POINTS_USER_ID = "userid";
     public static final String CONTEXT_ID ="context_id";
+	public static final String X_AUTH_USER_ROLES = "x-authenticated-user-roles";
     public static final String MDO_ID ="mdo_id";
     public static final String MONTH = "month";
     public static final String MDO_KARMA_POINTS="mdo_karma_points";
@@ -912,8 +918,10 @@ public class Constants {
     public static final String TOTAL_KP ="total_kp";
     public static final String MDO_LIST="mdoList";
 
-	private Constants() {
+    private Constants() {
 		throw new IllegalStateException("Utility class");
 	}
+
+
 
 }
