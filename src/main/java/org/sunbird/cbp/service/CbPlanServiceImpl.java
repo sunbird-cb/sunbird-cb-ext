@@ -90,13 +90,13 @@ public class CbPlanServiceImpl implements CbPlanService {
                 requestMap.put(Constants.DRAFT_DATA, mapper.writeValueAsString(cbPlanDto));
                 requestMap.put(Constants.STATUS, Constants.DRAFT);
                 SBApiResponse resp = cassandraOperation.insertRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_CB_PLAN, requestMap);
-                if (!resp.get(Constants.RESPONSE).equals(Constants.SUCCESS)) {
+                if (Constants.SUCCESS.equals(resp.get(Constants.RESPONSE))) {
+                    response.getResult().put(Constants.STATUS, Constants.CREATED);
+                    response.getResult().put(Constants.ID, cbPlanId);
+                } else {
                     response.getParams().setStatus(Constants.FAILED);
                     response.getParams().setErrmsg("Failed to Create CB Plan for OrgId: " + userOrgId + " message: " + resp.getParams().getErrmsg());
                     response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
-                } else {
-                    response.getResult().put(Constants.STATUS, Constants.CREATED);
-                    response.getResult().put(Constants.ID, cbPlanId);
                 }
             } catch (JsonProcessingException e) {
                 logger.error("Failed to Create CB Plan for OrgId: " + userOrgId, e);
@@ -937,26 +937,30 @@ public class CbPlanServiceImpl implements CbPlanService {
         return errMsg;
     }
 
-    private String getDesignationForUser(String profileDetails) throws IOException {
+    private String getDesignationForUser(String profileDetails) {
         String userDesignation = "";
-        Map<String, Object> profileDetailsMap = null;
-        List<Map<String, Object>> professionalDetails = null;
-        if (StringUtils.isNotEmpty(profileDetails)) {
-            profileDetailsMap = mapper.readValue(profileDetails, new TypeReference<HashMap<String, Object>>() {
-            });
-        }
-        if (MapUtils.isNotEmpty(profileDetailsMap)) {
-            professionalDetails = (List<Map<String, Object>>) profileDetailsMap.get(Constants.PROFESSIONAL_DETAILS);
-        }
-        if (CollectionUtils.isNotEmpty(professionalDetails)) {
-            userDesignation = (String) professionalDetails.get(0).get(Constants.DESIGNATION);
+        try {
+            Map<String, Object> profileDetailsMap = null;
+            List<Map<String, Object>> professionalDetails = null;
+            if (StringUtils.isNotEmpty(profileDetails)) {
+                profileDetailsMap = mapper.readValue(profileDetails, new TypeReference<HashMap<String, Object>>() {
+                });
+            }
+            if (MapUtils.isNotEmpty(profileDetailsMap)) {
+                professionalDetails = (List<Map<String, Object>>) profileDetailsMap.get(Constants.PROFESSIONAL_DETAILS);
+            }
+            if (CollectionUtils.isNotEmpty(professionalDetails)) {
+                userDesignation = (String) professionalDetails.get(0).get(Constants.DESIGNATION);
+            }
+        } catch (Exception e) {
+            logger.error("Not able to read the profile Details", e);
         }
         return userDesignation;
     }
 
-    private void enrichUserInfo(Map<String, Map<String, String>> userInfoMap) throws IOException {
-        for (Map.Entry userEntry: userInfoMap.entrySet()) {
-            Map<String, String> userInfo = (Map<String, String>)userEntry.getValue();
+    private void enrichUserInfo(Map<String, Map<String, String>> userInfoMap) {
+        for (Map.Entry userEntry : userInfoMap.entrySet()) {
+            Map<String, String> userInfo = (Map<String, String>) userEntry.getValue();
             String profileDetails = userInfo.get(Constants.PROFILE_DETAILS_KEY);
             String userDesignation = getDesignationForUser(profileDetails);
             userInfo.put(Constants.DESIGNATION, userDesignation);
