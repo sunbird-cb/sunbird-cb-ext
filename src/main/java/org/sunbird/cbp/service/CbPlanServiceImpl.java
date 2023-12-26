@@ -962,7 +962,8 @@ public class CbPlanServiceImpl implements CbPlanService {
         for (Map.Entry userEntry : userInfoMap.entrySet()) {
             Map<String, String> userInfo = (Map<String, String>) userEntry.getValue();
             String profileDetails = userInfo.get(Constants.PROFILE_DETAILS_KEY);
-            String userDesignation = getDesignationForUser(profileDetails, (String)userEntry.getKey());
+            String userDesignation = userInfo.get(Constants.DESIGNATION) != null ? userInfo.get(Constants.DESIGNATION) :
+                    getDesignationForUser(profileDetails, (String) userEntry.getKey());
             userInfo.put(Constants.DESIGNATION, userDesignation);
             userInfo.remove(Constants.PROFILE_DETAILS_KEY);
         }
