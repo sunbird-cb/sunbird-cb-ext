@@ -1,5 +1,6 @@
 package org.sunbird.progress.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -24,6 +25,7 @@ import org.sunbird.core.config.PropertiesConfig;
 import org.sunbird.core.logger.CbExtLogger;
 import org.sunbird.progress.model.UpdateContentProgressRequest;
 
+import java.io.IOException;
 import java.io.StringWriter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -134,12 +136,17 @@ public class UpdateContentProgressConsumer {
 
             propertiesMap.clear();
             propertiesMap.put(Constants.IDENTIFIER, courseId);
-            List<Map<String, Object>> coursesDataList = cassandraOperation.getRecordsByProperties(Constants.DEV_HIERARCHY_STORE,
+            List<Map<String, Object>> coursesDataList = cassandraOperation.getRecordsByProperties(configuration.getHeirarchyStoreKeyspaceName(),
                     Constants.CONTENT_HIERARCHY,
                     propertiesMap,
                     Arrays.asList(Constants.IDENTIFIER, Constants.HIERARCHY));
-            Map<String, Object> hierarchy = new Gson().fromJson((String) coursesDataList.get(0).get("hierarchy"), new TypeToken<HashMap<String, Object>>(){}.getType());
-            courseName = (String) hierarchy.get(Constants.NAME);
+            Map<String, Object> hierarchy = null;
+            try {
+                hierarchy = mapper.readValue((String) coursesDataList.get(0).get("hierarchy"), new TypeReference<HashMap<String, Object>>() {});
+                courseName = (String) hierarchy.get(Constants.NAME);
+            } catch (IOException e) {
+                logger.error(e);
+            }
         }
         Map<String, String> mailNotificationDetails = new HashMap<>();
         mailNotificationDetails.put(Constants.STATUS, status+"");

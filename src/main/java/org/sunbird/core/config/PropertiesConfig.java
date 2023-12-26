@@ -32,6 +32,9 @@ public class PropertiesConfig {
     @Value("${notification.mail.body.for.attendance}")
     private String attendanceNotificationMailBody;
 
+    @Value("${heirarchy.store.keyspace.name}")
+    private String heirarchyStoreKeyspaceName;
+
     public String getLmsServiceHost() {
         return lmsServiceHost;
     }
@@ -94,5 +97,13 @@ public class PropertiesConfig {
 
     public void setAttendanceNotificationMailBody(String attendanceNotificationMailBody) {
         this.attendanceNotificationMailBody = attendanceNotificationMailBody;
+    }
+
+    public String getHeirarchyStoreKeyspaceName() {
+        return heirarchyStoreKeyspaceName;
+    }
+
+    public void setHeirarchyStoreKeyspaceName(String heirarchyStoreKeyspaceName) {
+        this.heirarchyStoreKeyspaceName = heirarchyStoreKeyspaceName;
     }
 }

@@ -11,6 +11,7 @@ import org.sunbird.cassandra.utils.CassandraOperation;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.common.util.NotificationUtil;
+import org.sunbird.core.config.PropertiesConfig;
 import org.sunbird.core.logger.CbExtLogger;
 import org.sunbird.course.model.CourseDetails;
 import org.sunbird.course.model.IncompleteCourses;
@@ -34,6 +35,9 @@ public class CourseReminderNotificationService {
 
 	@Autowired
 	NotificationUtil notificationUtil;
+
+	@Autowired
+	PropertiesConfig configuration;
 
 	public void initiateCourseReminderEmail() {
 		logger.info("CourseReminderNotificationService:: initiateCourseReminderEmail: Started");
@@ -111,7 +115,7 @@ public class CourseReminderNotificationService {
 		Map<String, Object> propertyMap = new HashMap<>();
 		propertyMap.put(Constants.IDENTIFIER, courseIds.stream().collect(Collectors.toList()));
 		List<Map<String, Object>> coursesDataList = cassandraOperation.getRecordsByProperties(
-				Constants.DEV_HIERARCHY_STORE, Constants.CONTENT_HIERARCHY, propertyMap,
+				configuration.getHeirarchyStoreKeyspaceName(), Constants.CONTENT_HIERARCHY, propertyMap,
 				Arrays.asList(Constants.IDENTIFIER, Constants.HIERARCHY));
 		for (Map<String, Object> courseData : coursesDataList) {
 			if (courseData.get(Constants.IDENTIFIER) != null && courseData.get(Constants.HIERARCHY) != null

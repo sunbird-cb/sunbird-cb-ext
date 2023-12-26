@@ -328,7 +328,6 @@ public class Constants {
 	public static final String OPTIONS = "options";
 	public static final String USER_ASSESS_REQ = "user_assess_req_";
 	public static final String HIERARCHY = "hierarchy";
-	public static final String DEV_HIERARCHY_STORE = "dev_hierarchy_store";
 	public static final String CONTENT_HIERARCHY = "content_hierarchy";
 	public static final String BATCH_ID_COLUMN = "batchid";
 	public static final String COURSE_ID_COLUMN = "courseid";
