@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.util.CbExtServerProperties;
+import org.sunbird.common.util.Constants;
 import org.sunbird.storage.service.StorageService;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -40,8 +41,9 @@ public class StorageController {
 	public ResponseEntity<?> downloadFile(@PathVariable("reportType") String reportType,
 										  @PathVariable("date") String date,
 										  @PathVariable("orgId") String orgId,
+										  @RequestHeader(Constants.X_AUTH_TOKEN) String userToken,
 										  @PathVariable("fileName") String fileName) {
-		return storageService.downloadFile(reportType, date, orgId, fileName);
+		return storageService.downloadFile(reportType, date, orgId, fileName, userToken);
 	}
 
 	@GetMapping("/v1/reportInfo/{orgId}")

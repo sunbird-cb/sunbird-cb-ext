@@ -8,11 +8,13 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,10 +32,12 @@ import org.sunbird.cloud.storage.Model;
 import org.sunbird.cloud.storage.factory.StorageConfig;
 import org.sunbird.cloud.storage.factory.StorageServiceFactory;
 import org.sunbird.common.model.SBApiResponse;
+import org.sunbird.common.util.AccessTokenValidator;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 
 import org.sunbird.common.util.ProjectUtil;
+import org.sunbird.user.service.UserUtilityService;
 import scala.Option;
 
 @Service
@@ -47,6 +51,12 @@ public class StorageServiceImpl implements StorageService {
 
 	@Autowired
 	private CbExtServerProperties serverProperties;
+
+	@Autowired
+	private AccessTokenValidator accessTokenValidator;
+
+	@Autowired
+	private UserUtilityService userUtilityService;
 
 	@PostConstruct
 	public void init() {
@@ -146,8 +156,24 @@ public class StorageServiceImpl implements StorageService {
 	}
 
 	@Override
-	public ResponseEntity<Resource> downloadFile(String reportType, String date, String orgId, String fileName) {
+	public ResponseEntity<Resource> downloadFile(String reportType, String date, String orgId, String fileName, String userToken) {
 		try {
+			String userId = accessTokenValidator.fetchUserIdFromAccessToken(userToken);
+			if (StringUtils.isEmpty(userId)) {
+				logger.error("Failed to get UserId for orgId: " + orgId);
+				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+			}
+			Map<String, Map<String, String>> userInfoMap = new HashMap<>();
+			userUtilityService.getUserDetailsFromDB(Arrays.asList(userId), Arrays.asList(Constants.USER_ID, Constants.ROOT_ORG_ID), userInfoMap);
+			if (userInfoMap == null) {
+				logger.error("Failed to get UserInfo from cassandra for userId: " + userId);
+				return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+			}
+			String rootOrgId = userInfoMap.get(userId).get(Constants.ROOT_ORG_ID);
+			if(!rootOrgId.equalsIgnoreCase(orgId)) {
+				logger.error("User is not authorized to download the file for other org: " + rootOrgId + ", request orgId " + orgId);
+				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+			}
 			String objectKey = serverProperties.getReportDownloadFolderName() + "/" + reportType + "/" + date + "/" + orgId + "/" + fileName;
 			storageService.download(serverProperties.getReportDownloadContainerName(), objectKey, Constants.LOCAL_BASE_PATH,
 					Option.apply(Boolean.FALSE));
