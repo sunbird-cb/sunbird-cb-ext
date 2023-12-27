@@ -3,10 +3,13 @@ package org.sunbird.common.service;
 import java.util.*;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.codehaus.plexus.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
+import org.sunbird.cache.DataCacheMgr;
+import org.sunbird.cache.RedisCacheMgr;
 import org.sunbird.common.model.SunbirdApiHierarchyResultBatch;
 import org.sunbird.common.model.SunbirdApiResp;
 import org.sunbird.common.model.SunbirdApiUserCourseListResp;
@@ -14,6 +17,7 @@ import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.core.logger.CbExtLogger;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import static java.util.Objects.nonNull;
@@ -31,6 +35,12 @@ public class ContentServiceImpl implements ContentService {
 
 	@Autowired
 	private ObjectMapper mapper;
+
+	@Autowired
+	RedisCacheMgr redisCacheMgr;
+
+	@Autowired
+	DataCacheMgr dataCacheMgr;
 
 	public SunbirdApiResp getHeirarchyResponse(String contentId) {
 		StringBuilder url = new StringBuilder();
@@ -177,7 +187,7 @@ public class ContentServiceImpl implements ContentService {
 		return null;
 	}
 
-	public Map<String, Object> searchLiveContent(String rootOrgId, String contentId, String userChannel){
+	public Map<String, Object> searchLiveContent(String rootOrgId, String contentId, String userChannel) {
 		Map<String, Object> response = null;
 		HashMap<String, String> headerValues = new HashMap<>();
 		headerValues.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
@@ -351,7 +361,8 @@ public class ContentServiceImpl implements ContentService {
 		url.append(serverConfig.getContentHost()).append(serverConfig.getContentReadEndPoint()).append("/" + contentId)
 				.append(serverConfig.getContentReadEndPointFields());
 		if (CollectionUtils.isNotEmpty(fields)) {
-			url.append("?fields=").append(fields);
+			StringBuffer stringBuffer = new StringBuffer(String.join(",", fields));
+			url.append(",").append(stringBuffer);
 		}
 		Map<String, Object> response = (Map<String, Object>) outboundRequestHandlerService.fetchResult(url.toString());
 		if (null != response && Constants.OK.equalsIgnoreCase((String) response.get(Constants.RESPONSE_CODE))) {
@@ -360,7 +371,6 @@ public class ContentServiceImpl implements ContentService {
 		}
 		return null;
 	}
-
 
 	public List<Map<String, Object>> searchContent(String tag) {
 		Map<String, String> headerValues = new HashMap<>();
@@ -381,7 +391,8 @@ public class ContentServiceImpl implements ContentService {
 			contentRequestValue.put(Constants.OFFSET, contentList.size());
 			Map<String, Object> contentDataMap = populateSearchData(contentRequest, headerValues);
 			count = ((Integer) contentDataMap.get(Constants.COUNT)).intValue();
-			List<Map<String, Object>> contentDataList = (List<Map<String, Object>>) contentDataMap.get(Constants.CONTENT);
+			List<Map<String, Object>> contentDataList = (List<Map<String, Object>>) contentDataMap
+					.get(Constants.CONTENT);
 			if (contentDataList != null) {
 				contentList.addAll(contentDataList);
 			}
@@ -390,7 +401,8 @@ public class ContentServiceImpl implements ContentService {
 		return contentList;
 	}
 
-	private Map<String, Object> populateSearchData(Map<String, Object> contentRequest, Map<String, String> headerValues) {
+	private Map<String, Object> populateSearchData(Map<String, Object> contentRequest,
+			Map<String, String> headerValues) {
 		Map<String, Object> resultContentData = new HashMap<>();
 		Map<String, Object> response = outboundRequestHandlerService.fetchResultUsingPost(
 				serverConfig.getKmBaseHost() + serverConfig.getKmBaseContentSearch(), contentRequest, headerValues);
@@ -398,5 +410,48 @@ public class ContentServiceImpl implements ContentService {
 			resultContentData = (Map<String, Object>) response.get(Constants.RESULT);
 		}
 		return resultContentData;
+	}
+
+	public Map<String, Object> readContentFromCache(String contentId, List<String> fields) {
+		if (CollectionUtils.isEmpty(fields)) {
+			fields = serverConfig.getDefaultContentProperties();
+		}
+		Map<String, Object> responseData = null;
+
+		responseData = dataCacheMgr.getContentFromCache(contentId);
+
+		if (MapUtils.isEmpty(responseData) || responseData.size() < fields.size()) {
+			// DataCacheMgr doesn't have data OR contains less content fields.
+			// Let's read again
+			String contentString = redisCacheMgr.getContentFromCache(contentId);
+			if (StringUtils.isBlank(contentString)) {
+				// Tried reading from Redis - but redis didn't have data for some reason.
+				// Or connection failed ??
+				responseData = readContent(contentId, fields);
+			} else {
+				try {
+					responseData = new HashMap<String, Object>();
+					Map<String, Object> contentData = mapper.readValue(contentString,
+							new TypeReference<Map<String, Object>>() {
+							});
+					if (MapUtils.isNotEmpty(contentData)) {
+						for (String field : fields) {
+							if (contentData.containsKey(field)) {
+								responseData.put(field, contentData.get(field));
+							}
+						}
+						dataCacheMgr.putContentInCache(contentId, responseData);
+					}
+				} catch (Exception e) {
+					logger.error("Failed to parse content info from redis. Exception: " + e.getMessage(), e);
+					responseData = readContent(contentId);
+				}
+			}
+		} else {
+			// We are going to send the data read from which might have more fields.
+			// This is fine for now.
+		}
+		
+		return responseData;
 	}
 }

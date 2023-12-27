@@ -481,15 +481,14 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 	public void getUserDetailsFromDB(List<String> userIds, List<String> fields,
 									 Map<String, Map<String, String>> userInfoMap) {
 		Map<String, Object> propertyMap = new HashMap<>();
-		propertyMap.put(Constants.STATUS, 1);
-
+		
 		try {
 			for (int i = 0; i < userIds.size(); i += 10) {
 				List<String> userList = userIds.subList(i, Math.min(userIds.size(), i + 10));
 				propertyMap.put(Constants.ID, userList);
 
 				List<Map<String, Object>> userInfoList = cassandraOperation
-						.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_USER, propertyMap, fields);
+						.getRecordsByPropertiesWithoutFiltering(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_USER, propertyMap, fields);
 				for (Map<String, Object> user : userInfoList) {
 					Map<String, String> userMap = new HashMap<String, String>();
 					String userId = (String) user.get(Constants.USER_ID);

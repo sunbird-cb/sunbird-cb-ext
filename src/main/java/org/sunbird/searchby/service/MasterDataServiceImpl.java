@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
+import org.sunbird.cache.RedisCacheMgr;
 import org.sunbird.cassandra.utils.CassandraOperation;
 import org.sunbird.common.model.FracApiResponse;
 import org.sunbird.common.model.SBApiResponse;
@@ -36,6 +37,8 @@ public class MasterDataServiceImpl implements MasterDataService {
     OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
     @Autowired
     CassandraOperation cassandraOperation;
+    @Autowired
+    RedisCacheMgr redisCacheMgr;
 
     @Override
 	public FracApiResponse getListPositions() {
@@ -310,4 +313,39 @@ public class MasterDataServiceImpl implements MasterDataService {
 			logger.info("Failed to get position info from FRAC API");
 		}
 	}
+
+    public SBApiResponse getDeptPositions(String userOrgId) {
+        SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_V2_READ_DEPT_POSITION);
+        if (userOrgId == null || userOrgId.isEmpty()) {
+            String errMsg = "X-AUTH Org-Id is Empty";
+            logger.info(errMsg);
+            response.getParams().setStatus(Constants.FAILED);
+            response.getParams().setErrmsg(errMsg);
+            response.setResponseCode(HttpStatus.BAD_REQUEST);
+        } else {
+            List<String> deptPositionList = redisCacheMgr.hget(Constants.ORG_DESIGNATION,
+                    cbExtServerProperties.getRedisInsightIndex(), userOrgId);
+            if (!CollectionUtils.isEmpty(deptPositionList) && StringUtils.isNotBlank(deptPositionList.get(0))) {
+                String deptPosition = deptPositionList.get(0);
+                deptPositionList = Arrays.asList(deptPosition.split(","));
+            } else {
+                deptPositionList = Collections.emptyList();
+            }
+            List<Map<String, String>> resultList = new ArrayList<>();
+            for (String position : deptPositionList) {
+                if (StringUtils.isNotBlank(position)) {
+                    Map<String, String> map = new HashMap<>();
+                    map.put("name", position);
+                    resultList.add(map);
+                }
+            }
+
+            Map<String, Object> responseData = new HashMap<>();
+
+            responseData.put(Constants.COUNT, resultList.size());
+            responseData.put(Constants.CONTENT, resultList);
+            response.getResult().put(Constants.RESPONSE, responseData);
+        }
+        return response;
+    }
 }

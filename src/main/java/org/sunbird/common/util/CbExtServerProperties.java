@@ -194,6 +194,9 @@ public class CbExtServerProperties {
 	@Value("${redis.port}")
 	private String redisPort;
 
+	@Value("${cb-plan.update.publish.authorized.roles}")
+	private String cbPlanUpdatePublishAuthorizedRoles;
+
 	public String getRedisDataHostName() {
 		return redisDataHostName;
 	}
@@ -446,7 +449,7 @@ public class CbExtServerProperties {
 
 	@Value("${course.url}")
 	private String courseLinkUrl;
-	
+
 	@Value("${es.user.report.include.fields}")
 	private String esUserReportIncludeFields;
 
@@ -516,6 +519,7 @@ public class CbExtServerProperties {
 	@Value("${content-read-endpoint}")
 	private String contentReadEndPoint;
 
+
 	@Value("${redis.questions.read.timeout}")
 	private Integer redisQuestionsReadTimeOut;
 
@@ -534,7 +538,7 @@ public class CbExtServerProperties {
 	@Value(("${limit_for_search}"))
 	private String limitForSearch;
 
-  	@Value("${user.registration.welcome.email.signinLink}")
+	@Value("${user.registration.welcome.email.signinLink}")
 	private String welcomeEmailSigninLink;
 
 	@Value("${user.registration.welcome.email.discoverLink}")
@@ -545,33 +549,42 @@ public class CbExtServerProperties {
 
 	@Value("${report.type.get.file.info}")
 	private String reportTypeGetFileInfo;
-  
-  	@Value("${redis.insights.index}")
+
+	@Value("${redis.insights.index}")
 	private int redisInsightIndex;
-  
-  	@Value("${insights.label.certificates.across}")
+
+	@Value("${insights.label.certificates.across}")
 	private String insightsLabelCertificatesAcross;
-  
+
 	@Value("${insights.label.learning.hours.across}")
 	private String insightsLabelLearningHoursAcross;
-  
+
 	@Value("${insights.label.certificates.your.department}")
 	private String insightsLabelCertificatesYourDepartment;
-  
+
 	@Value("${insights.label.learning.hours.your.department}")
 	private String insightsLabelLearningHoursYourDepartment;
-  
-  	@Value("${sb.otp.generate.path}")
+
+	@Value("${sb.otp.generate.path}")
 	private String sbOTPGeneratePath;
 
 	@Value("${lms.user.update.path}")
 	private String lmsUserUpdatePath;
 
-  	@Value("${cloud.profile.image.container.name}")
-  	private String cloudProfileImageContainerName;
+	@Value("${cloud.profile.image.container.name}")
+	private String cloudProfileImageContainerName;
 
 	@Value("${sb.service.user.lookup.path}")
 	private String lmsUserLookupPath;
+
+	@Value("${batch.enrolment.return.size}")
+	private Integer batchEnrolmentReturnSize;
+
+	@Value("${default.content.properties}")
+	private String defaultContentProperties;
+
+	@Value("${cbplan.manual.end.date}")
+	private String cbPlanEndDate;
 
 	public boolean qListFromCacheEnabled() {
 		return qListFromCacheEnabled;
@@ -587,14 +600,7 @@ public class CbExtServerProperties {
 
 	public void setRedisQuestionsReadTimeOut(Integer redisQuestionsReadTimeOut) {
 		this.redisQuestionsReadTimeOut = redisQuestionsReadTimeOut;
-	}
-
-
-	@Value("${batch.enrolment.return.size}")
-	private Integer batchEnrolmentReturnSize;
-
-	@Value("${cbplan.manual.end.date}")
-	private String cbPlanEndDate;
+	}	
 
 	public Integer getBatchEnrolmentReturnSize() {
 		return batchEnrolmentReturnSize;
@@ -1915,21 +1921,21 @@ public class CbExtServerProperties {
 		this.reportDownloadFolderName = reportDownloadFolderName;
 	}
 
-  public String getProgressUpdateEndPoint() {
-      return progressUpdateEndPoint;
-  }
+	public String getProgressUpdateEndPoint() {
+		return progressUpdateEndPoint;
+	}
 
-  public void setProgressUpdateEndPoint(String progressUpdateEndPoint) {
-      this.progressUpdateEndPoint = progressUpdateEndPoint;
-  }
+	public void setProgressUpdateEndPoint(String progressUpdateEndPoint) {
+		this.progressUpdateEndPoint = progressUpdateEndPoint;
+	}
 
-  public String getUpdateContentProgressKafkaTopic() {
-      return updateContentProgressKafkaTopic;
-  }
+	public String getUpdateContentProgressKafkaTopic() {
+		return updateContentProgressKafkaTopic;
+	}
 
-  public void setUpdateContentProgressKafkaTopic(String updateContentProgressKafkaTopic) {
-      this.updateContentProgressKafkaTopic = updateContentProgressKafkaTopic;
-  }
+	public void setUpdateContentProgressKafkaTopic(String updateContentProgressKafkaTopic) {
+		this.updateContentProgressKafkaTopic = updateContentProgressKafkaTopic;
+	}
 
 	public String getSbEsProfileIndexType() {
 		return sbEsProfileIndexType;
@@ -2019,7 +2025,6 @@ public class CbExtServerProperties {
 		this.systemUpdateAPI = systemUpdateAPI;
 	}
 
-
 	public String getLimitForSearch() {
 		return limitForSearch;
 	}
@@ -2036,10 +2041,21 @@ public class CbExtServerProperties {
 		this.lmsUserUpdatePath = lmsUserUpdatePath;
 	}
 
-	public String getCloudProfileImageContainerName() { return cloudProfileImageContainerName; }
+	public String getCloudProfileImageContainerName() {
+		return cloudProfileImageContainerName;
+	}
 
 	public void setCloudProfileImageContainerName(String cloudProfileImageContainerName) {
-		this.cloudProfileImageContainerName = cloudProfileImageContainerName; }
+		this.cloudProfileImageContainerName = cloudProfileImageContainerName;
+	}
+
+	public List<String> getDefaultContentProperties() {
+		return Arrays.asList(defaultContentProperties.split(",", -1));
+	}
+
+	public void setDefaultContentProperties(String defaultContentProperties) {
+		this.defaultContentProperties = defaultContentProperties;
+	}
 
 	public String getLmsUserLookupPath() {
 		return lmsUserLookupPath;
@@ -2056,4 +2072,12 @@ public class CbExtServerProperties {
 	public void setCbPlanEndDate(String cbPlanEndDate) {
 		this.cbPlanEndDate = cbPlanEndDate;
   }
+
+	public List<String> getCbPlanUpdatePublishAuthorizedRoles() {
+		return Arrays.asList(cbPlanUpdatePublishAuthorizedRoles.split(",", -1));
+	}
+
+	public void setCbPlanUpdatePublishAuthorizedRoles(String cbPlanUpdatePublishAuthorizedRoles) {
+		this.cbPlanUpdatePublishAuthorizedRoles = cbPlanUpdatePublishAuthorizedRoles;
+	}
 }

@@ -888,7 +888,7 @@ public class ProfileServiceImpl implements ProfileService {
 		SBApiResponse response = new SBApiResponse();
 		response.setId(api);
 		response.setVer(Constants.API_VERSION_1);
-		response.setParams(new SunbirdApiRespParam());
+		response.setParams(new SunbirdApiRespParam(UUID.randomUUID().toString()));
 		response.getParams().setStatus(Constants.SUCCESS);
 		response.setResponseCode(HttpStatus.OK);
 		response.setTs(DateTime.now().toString());
@@ -1796,7 +1796,7 @@ public class ProfileServiceImpl implements ProfileService {
 
 	@Override
 	public SBApiResponse profileExternalSystemUpdate(Map<String, Object> request, String authToken) {
-		SBApiResponse response = new SBApiResponse(Constants.API_PROFILE_EXTERNAL_SYSTEM_UPDATE);
+		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_PROFILE_EXTERNAL_SYSTEM_UPDATE);
 		try {
 			Map<String, Object> requestBody = (Map<String, Object>) request.get(Constants.REQUEST);
 			if (!validateSystemUpdateRequest(requestBody)) {
