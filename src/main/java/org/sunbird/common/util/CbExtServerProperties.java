@@ -586,6 +586,9 @@ public class CbExtServerProperties {
 	@Value("${cbplan.manual.end.date}")
 	private String cbPlanEndDate;
 
+	@Value("${karma.points.limit}")
+	private int KarmaPointsLimit;
+
 	public boolean qListFromCacheEnabled() {
 		return qListFromCacheEnabled;
 	}
@@ -600,7 +603,7 @@ public class CbExtServerProperties {
 
 	public void setRedisQuestionsReadTimeOut(Integer redisQuestionsReadTimeOut) {
 		this.redisQuestionsReadTimeOut = redisQuestionsReadTimeOut;
-	}	
+	}
 
 	public Integer getBatchEnrolmentReturnSize() {
 		return batchEnrolmentReturnSize;
@@ -2064,7 +2067,7 @@ public class CbExtServerProperties {
 	public void setLmsUserLookupPath(String lmsUserLookupPath) {
 		this.lmsUserLookupPath = lmsUserLookupPath;
 	}
-  
+
   public String getCbPlanEndDate() {
 		return cbPlanEndDate;
 	}
@@ -2079,5 +2082,13 @@ public class CbExtServerProperties {
 
 	public void setCbPlanUpdatePublishAuthorizedRoles(String cbPlanUpdatePublishAuthorizedRoles) {
 		this.cbPlanUpdatePublishAuthorizedRoles = cbPlanUpdatePublishAuthorizedRoles;
+	}
+
+	public int getKarmaPointsLimit() {
+		return KarmaPointsLimit;
+	}
+
+	public void setKarmaPointsLimit(int karmaPointsLimit) {
+		KarmaPointsLimit = karmaPointsLimit;
 	}
 }
