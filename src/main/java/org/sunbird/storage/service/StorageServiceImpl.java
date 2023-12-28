@@ -14,6 +14,7 @@ import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -165,12 +166,12 @@ public class StorageServiceImpl implements StorageService {
 			}
 			Map<String, Map<String, String>> userInfoMap = new HashMap<>();
 			userUtilityService.getUserDetailsFromDB(Arrays.asList(userId), Arrays.asList(Constants.USER_ID, Constants.ROOT_ORG_ID), userInfoMap);
-			if (userInfoMap == null) {
+			if (MapUtils.isEmpty(userInfoMap)) {
 				logger.error("Failed to get UserInfo from cassandra for userId: " + userId);
 				return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 			}
 			String rootOrgId = userInfoMap.get(userId).get(Constants.ROOT_ORG_ID);
-			if(!rootOrgId.equalsIgnoreCase(orgId)) {
+			if (!rootOrgId.equalsIgnoreCase(orgId)) {
 				logger.error("User is not authorized to download the file for other org: " + rootOrgId + ", request orgId " + orgId);
 				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 			}
