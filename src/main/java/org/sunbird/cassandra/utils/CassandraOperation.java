@@ -112,5 +112,5 @@ public interface CassandraOperation {
 			Map<String, Object> propertyMap, List<String> fields, String key);
 
 	public List<Map<String, Object>> getKarmaPointsRecordsByPropertiesWithPaginationList(String keyspaceName, String tableName,
-            Map<String, Object> propertyMap, List<String> fields, int limit, String updatedOn, String key);
+            Map<String, Object> propertyMap, List<String> fields, int limit, Date updatedOn, String key);
 	}

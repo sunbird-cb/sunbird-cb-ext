@@ -415,15 +415,13 @@ public class CassandraOperationImpl implements CassandraOperation {
 
 	@Override
 	public List<Map<String, Object>> getKarmaPointsRecordsByPropertiesWithPaginationList(String keyspaceName, String tableName,
-																						 Map<String, Object> propertyMap, List<String> fields, int limit, String updatedOn, String key) {
+																						 Map<String, Object> propertyMap, List<String> fields, int limit, Date updatedOn, String key) {
 		Select selectQuery = null;
 		List<Map<String, Object>> response = new ArrayList<>();
 		try {
 			selectQuery = processQueryWithoutFiltering(keyspaceName, tableName, propertyMap, fields);
 			selectQuery.limit(limit);
-			if (!StringUtils.isEmpty(updatedOn)) {
-				selectQuery.where(QueryBuilder.lt("credit_date", UUID.fromString(updatedOn)));
-			}
+			selectQuery.where(QueryBuilder.lt(Constants.CREDIT_DATE, updatedOn));
 			ResultSet results = connectionManager.getSession(keyspaceName).execute(selectQuery);
 			response = CassandraUtil.createResponse(results);
 		} catch (Exception e) {

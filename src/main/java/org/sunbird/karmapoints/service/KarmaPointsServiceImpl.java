@@ -1,6 +1,5 @@
 package org.sunbird.karmapoints.service;
 
-import com.datastax.driver.core.utils.UUIDs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +9,7 @@ import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.karmapoints.model.KarmaPointsRequest;
 
+import java.time.*;
 import java.util.*;
 
 @Service
@@ -25,23 +25,21 @@ public class KarmaPointsServiceImpl implements KarmaPointsService {
         Map<String, Object> resultMap = new HashMap<>();
         Map<String, Object> propertyMap = new HashMap<>();
         propertyMap.put(Constants.KARMA_POINTS_USER_ID, userId);
-        String uuid;
+        Date formattedDateTime = new Date(request.getOffset());
         int limit;
-        if (request.getOffset() != null) {
-            uuid = request.getOffset();
-        } else {
-            uuid = String.valueOf(UUIDs.timeBased());
-        }
-
         if (request.getLimit() != 0) {
             limit = request.getLimit();
         } else {
             limit = serverProperties.getKarmaPointsLimit();
         }
-        List<Map<String, Object>> result = cassandraOperation.getKarmaPointsRecordsByPropertiesWithPaginationList(
-                Constants.KEYSPACE_SUNBIRD, Constants.USER_KARMA_POINTS, propertyMap, new ArrayList<>(), limit, uuid, Constants.CONTEXT_ID);
-        resultMap.put(Constants.KARMA_POINTS_LIST, result);
 
+        if (request.getOffset() == 0L) {
+            LocalDate currentDate = LocalDate.now();
+            formattedDateTime = Date.from(currentDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+        }
+        List<Map<String, Object>> result = cassandraOperation.getKarmaPointsRecordsByPropertiesWithPaginationList(
+                Constants.KEYSPACE_SUNBIRD, Constants.USER_KARMA_POINTS, propertyMap, new ArrayList<>(), limit, formattedDateTime, Constants.CONTEXT_ID);
+        resultMap.put(Constants.KARMA_POINTS_LIST, result);
         return resultMap;
     }
 

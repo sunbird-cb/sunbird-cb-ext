@@ -3,7 +3,7 @@ package org.sunbird.karmapoints.model;
 public class KarmaPointsRequest {
 
     private int limit;
-    private String offset;
+    private long offset;
 
     public int getLimit() {
         return limit;
@@ -13,11 +13,11 @@ public class KarmaPointsRequest {
         this.limit = limit;
     }
 
-    public String getOffset() {
+    public long getOffset() {
         return offset;
     }
 
-    public void setOffset(String offset) {
+    public void setOffset(Long offset) {
         this.offset = offset;
     }
 }

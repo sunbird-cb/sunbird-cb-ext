@@ -905,7 +905,6 @@ public class Constants {
 	public static final String CREATOR_LOGO = "creatorLogo";
 	public static final String CREATED_BY_NAME = "createdByName";
     public static final String USER_KARMA_POINTS ="user_karma_points";
-    public static final String USER_KARMA_POINTS = "user_karma_points";
 	public static final String KARMA_POINTS_USER_ID = "userid";
     public static final String CONTEXT_ID ="context_id";
 	public static final String X_AUTH_USER_ROLES = "x-authenticated-user-roles";
@@ -918,10 +917,10 @@ public class Constants {
     public static final String YEAR ="year";
     public static final String TOTAL_KP ="total_kp";
     public static final String MDO_LIST="mdoList";
-    public static final String CONTEXT_ID = "context_id";
 	public static final String KARMA_POINTS_LIST = "kpList";
+	public static final String CREDIT_DATE = "credit_date";
 
-    private Constants() {
+	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}
 
