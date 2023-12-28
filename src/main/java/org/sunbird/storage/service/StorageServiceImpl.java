@@ -171,6 +171,11 @@ public class StorageServiceImpl implements StorageService {
 				return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 			}
 			String rootOrgId = userInfoMap.get(userId).get(Constants.ROOT_ORG_ID);
+			if (StringUtils.isNotEmpty(orgId)) {
+				if (orgId.contains("=")) {
+					rootOrgId = "mdoid=" + rootOrgId;
+				}
+			}
 			if (!rootOrgId.equalsIgnoreCase(orgId)) {
 				logger.error("User is not authorized to download the file for other org: " + rootOrgId + ", request orgId " + orgId);
 				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
