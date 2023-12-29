@@ -40,6 +40,10 @@ public class KarmaPointsServiceImpl implements KarmaPointsService {
         List<Map<String, Object>> result = cassandraOperation.getKarmaPointsRecordsByPropertiesWithPaginationList(
                 Constants.KEYSPACE_SUNBIRD, Constants.USER_KARMA_POINTS, propertyMap, new ArrayList<>(), limit, formattedDateTime, Constants.CONTEXT_ID);
         resultMap.put(Constants.KARMA_POINTS_LIST, result);
+
+        int count = result.size();
+        resultMap.put("count", count);
+
         result.forEach(record -> {
             long dateAsLong = record.entrySet().stream()
                     .filter(entry -> Constants.CREDIT_DATE.equals(entry.getKey()))
