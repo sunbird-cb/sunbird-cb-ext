@@ -41,8 +41,10 @@ public class KarmaPointsServiceImpl implements KarmaPointsService {
                 Constants.KEYSPACE_SUNBIRD, Constants.USER_KARMA_POINTS, propertyMap, new ArrayList<>(), limit, formattedDateTime, Constants.CONTEXT_ID);
         resultMap.put(Constants.KARMA_POINTS_LIST, result);
 
-        int count = result.size();
-        resultMap.put("count", count);
+        long count = cassandraOperation.getRecordCountWithUserId(Constants.KEYSPACE_SUNBIRD, Constants.USER_KARMA_POINTS, userId);
+        resultMap.put(Constants.KARMA_POINTS_LIST, result);
+
+        resultMap.put(Constants.COUNT, count);
 
         result.forEach(record -> {
             long dateAsLong = record.entrySet().stream()
