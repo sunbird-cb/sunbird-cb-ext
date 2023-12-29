@@ -916,8 +916,10 @@ public class Constants {
     public static final String YEAR ="year";
     public static final String TOTAL_KP ="total_kp";
     public static final String MDO_LIST="mdoList";
+	public static final String KARMA_POINTS_LIST = "kpList";
+	public static final String CREDIT_DATE = "credit_date";
 
-    private Constants() {
+	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}
 
