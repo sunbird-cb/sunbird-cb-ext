@@ -429,6 +429,17 @@ public class CassandraOperationImpl implements CassandraOperation {
 		}
 		return response;
 	}
+	public Long getRecordCountWithUserId(String keyspace, String tableName, String userId) {
+		try {
+			Where selectQuery = QueryBuilder.select().countAll().from(keyspace, tableName)
+					.where(QueryBuilder.eq(Constants.USER_ID, userId));
+			Row row = connectionManager.getSession(keyspace).execute(selectQuery).one();
+			return row.getLong(0);
+		} catch (Exception e) {
+			logger.error(Constants.EXCEPTION_MSG_FETCH + tableName + " : " + e.getMessage(), e);
+			throw e;
+		}
+	}
 
 }
 
