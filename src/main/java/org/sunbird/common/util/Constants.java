@@ -917,7 +917,24 @@ public class Constants {
     public static final String TOTAL_KP ="total_kp";
     public static final String MDO_LIST="mdoList";
 	public static final String KARMA_POINTS_LIST = "kpList";
-	public static final String CREDIT_DATE = "credit_date";
+	public static final String DB_COLUMN_CREDIT_DATE = "credit_date";
+	public static final String DB_CLOUMN_CONTEXT_TYPE="context_type";
+
+	public static final String DB_COLUMN_CONTEXT_ID = "context_id";
+
+	public static final String DB_COLUMN_OPERATION_TYPE = "operation_type";
+
+	public static final String COURSE_COMPLETION = "COURSE_COMPLETION";
+
+	public static final String CONTEXT_ID_CAMEL ="contextId";
+
+	public static final String CONTEXT_TYPE_CAMEL= "contextType";
+
+	public static final String DB_COLUMN_USER_KARMA_POINTS_KEY = "user_karma_points_key";
+
+
+	public static final String TABLE_KARMA_POINTS_LOOK_UP ="user_karma_points_credit_lookup";
+	public static final String TABLE_KARMA_POINTS ="user_karma_points";
 
 	private Constants() {
 		throw new IllegalStateException("Utility class");

@@ -87,4 +87,13 @@ public class CbPlanController {
         SBApiResponse response = cbPlanService.getCBPlanListForUser(userOrgId, token);
         return new ResponseEntity<>(response, response.getResponseCode());
     }
+
+    @GetMapping("/v1/private/user/list")
+    public ResponseEntity<SBApiResponse> getPrivateCBPlanListForUser(
+            @RequestHeader(Constants.X_AUTH_USER_ID) String userId,
+            @RequestHeader(Constants.X_AUTH_USER_ORG_ID)String userOrgId) throws Exception {
+
+        SBApiResponse response = cbPlanService.getCBPlanListForUser(userOrgId, userId,true);
+        return new ResponseEntity<>(response, response.getResponseCode());
+    }
 }

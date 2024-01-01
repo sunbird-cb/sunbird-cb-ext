@@ -417,11 +417,19 @@ public class CbPlanServiceImpl implements CbPlanService {
 
     }
 
-    @Override
     public SBApiResponse getCBPlanListForUser(String userOrgId, String authUserToken) {
+        return getCBPlanListForUser( userOrgId,  authUserToken, false);
+    }
+
+        @Override
+    public SBApiResponse getCBPlanListForUser(String userOrgId, String authUserToken,boolean isPrivate) {
         SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.CBP_PLAN_USER_LIST_API);
         try {
-            String userId = validateAuthTokenAndFetchUserId(authUserToken);
+            String userId = "";
+            if(isPrivate)
+             userId = authUserToken;
+            else
+             userId = validateAuthTokenAndFetchUserId(authUserToken);
             logger.info("UserId of the User : " + userId + "User org ID : " + userOrgId);
             List<String> fields = Arrays.asList(Constants.PROFILE_DETAILS, Constants.ROOT_ORG_ID);
             Map<String, Object> propertiesMap = new HashMap<>();
