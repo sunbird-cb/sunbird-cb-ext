@@ -11,7 +11,6 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.sunbird.common.helper.cassandra.CassandraConnectionManager;
 import org.sunbird.common.model.SBApiResponse;
@@ -324,8 +323,8 @@ public class CassandraOperationImpl implements CassandraOperation {
 					key = entry.getKey();
 					values.add(entry.getValue());
 				}
+				selectQuery.and(QueryBuilder.in(key, values.toArray()));
 			}
-			selectQuery.and(QueryBuilder.in(key, values.toArray()));
 			ResultSet results = connectionManager.getSession(keyspaceName).execute(selectQuery);
 			response = CassandraUtil.createResponse(results);
 		} catch (Exception e) {
@@ -421,13 +420,24 @@ public class CassandraOperationImpl implements CassandraOperation {
 		try {
 			selectQuery = processQueryWithoutFiltering(keyspaceName, tableName, propertyMap, fields);
 			selectQuery.limit(limit);
-			selectQuery.where(QueryBuilder.lt(Constants.CREDIT_DATE, updatedOn));
+			selectQuery.where(QueryBuilder.lt(Constants.DB_COLUMN_CREDIT_DATE, updatedOn));
 			ResultSet results = connectionManager.getSession(keyspaceName).execute(selectQuery);
 			response = CassandraUtil.createResponse(results);
 		} catch (Exception e) {
 			logger.error(Constants.EXCEPTION_MSG_FETCH + tableName + " : " + e.getMessage(), e);
 		}
 		return response;
+	}
+	public Long getRecordCountWithUserId(String keyspace, String tableName, String userId) {
+		try {
+			Where selectQuery = QueryBuilder.select().countAll().from(keyspace, tableName)
+					.where(QueryBuilder.eq(Constants.USER_ID, userId));
+			Row row = connectionManager.getSession(keyspace).execute(selectQuery).one();
+			return row.getLong(0);
+		} catch (Exception e) {
+			logger.error(Constants.EXCEPTION_MSG_FETCH + tableName + " : " + e.getMessage(), e);
+			throw e;
+		}
 	}
 
 }

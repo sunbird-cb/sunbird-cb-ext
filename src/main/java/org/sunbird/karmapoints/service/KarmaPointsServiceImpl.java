@@ -40,16 +40,45 @@ public class KarmaPointsServiceImpl implements KarmaPointsService {
         List<Map<String, Object>> result = cassandraOperation.getKarmaPointsRecordsByPropertiesWithPaginationList(
                 Constants.KEYSPACE_SUNBIRD, Constants.USER_KARMA_POINTS, propertyMap, new ArrayList<>(), limit, formattedDateTime, Constants.CONTEXT_ID);
         resultMap.put(Constants.KARMA_POINTS_LIST, result);
+
+        long count = cassandraOperation.getRecordCountWithUserId(Constants.KEYSPACE_SUNBIRD, Constants.USER_KARMA_POINTS, userId);
+        resultMap.put(Constants.KARMA_POINTS_LIST, result);
+
+        resultMap.put(Constants.COUNT, count);
+
         result.forEach(record -> {
             long dateAsLong = record.entrySet().stream()
-                    .filter(entry -> Constants.CREDIT_DATE.equals(entry.getKey()))
+                    .filter(entry -> Constants.DB_COLUMN_CREDIT_DATE.equals(entry.getKey()))
                     .map(entry -> ((Date) entry.getValue()).getTime())
                     .findFirst()
                     .orElse(0L);
 
-            record.put(Constants.CREDIT_DATE, dateAsLong);
+            record.put(Constants.DB_COLUMN_CREDIT_DATE, dateAsLong);
         });
         return resultMap;
     }
 
+    public Map<String, Object> fetchKarmaPointsUserCourse(String userId, Map<String, Object> requestBody) {
+        Map<String, Object> req = (HashMap<String,Object>)requestBody.get("request");
+        Map<String, Object> filters = (HashMap<String,Object>)req.get("filters");
+        String cntxtId = (String) filters.get(Constants.CONTEXT_ID_CAMEL);
+        String cntxType = (String) filters.get(Constants.CONTEXT_TYPE_CAMEL);
+        Map<String, Object> resultMap = new HashMap<>();
+        Map<String, Object> propertyMap = new HashMap<>();
+        String key = userId +"_"+cntxType+"_"+ cntxtId;
+        propertyMap.put(Constants.DB_COLUMN_USER_KARMA_POINTS_KEY, key);
+        Map<String, Object> userCourseKpList = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
+                Constants.TABLE_KARMA_POINTS_LOOK_UP, propertyMap, null, Constants.DB_COLUMN_USER_KARMA_POINTS_KEY);
+        long credit_date = ((Date)((Map<String, Object>)userCourseKpList.get(key)).get(Constants.DB_COLUMN_CREDIT_DATE)).getTime();
+        Map<String, Object> whereMap = new HashMap<>();
+        whereMap.put(Constants.KARMA_POINTS_USER_ID, userId);
+        whereMap.put(Constants.DB_COLUMN_CREDIT_DATE, credit_date);
+        whereMap.put(Constants.DB_CLOUMN_CONTEXT_TYPE, cntxType);
+        whereMap.put(Constants.DB_COLUMN_CONTEXT_ID, cntxtId);
+        whereMap.put(Constants.DB_COLUMN_OPERATION_TYPE, Constants.COURSE_COMPLETION);
+        Map<String, Object> userKpList = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
+                Constants.TABLE_KARMA_POINTS, whereMap, null, Constants.USER_ID_CONSTANT);
+        resultMap.put(Constants.KARMA_POINTS_LIST, userKpList);
+        return resultMap;
+    }
 }

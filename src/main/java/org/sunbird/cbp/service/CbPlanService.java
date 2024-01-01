@@ -21,4 +21,7 @@ public interface CbPlanService {
 
     SBApiResponse getCBPlanListForUser(String userOrgId, String token);
 
-}
+     SBApiResponse getCBPlanListForUser(String userOrgId, String authUserToken,boolean isPrivate);
+
+
+    }
