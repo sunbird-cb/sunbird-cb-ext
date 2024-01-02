@@ -896,6 +896,7 @@ public class Constants {
 
 	public static final String CB_DESIGNATION_TYPE = "designation";
 	public static final String CBP_PLAN_USER_LIST_API ="api.cbplan.user.list";
+	public static final String CBP_PLAN_CONTENT_REQUEST_API ="api.cbplan.content.request";
 	public static final String USER_TYPE = "userType";
 	public static final String CB_PLAN_ID_KEY = "cbPlanId";
 	public static final String ALL_USER = "allUser";
@@ -935,6 +936,10 @@ public class Constants {
 
 	public static final String TABLE_KARMA_POINTS_LOOK_UP ="user_karma_points_credit_lookup";
 	public static final String TABLE_KARMA_POINTS ="user_karma_points";
+    public static final String COMPETENCY_INFO = "competencyInfo";
+	public static final Object REQUESTED = "REQUESTED";
+	public static final String PROVIDER_ORG_ID = "providerOrgId";
+	public static final String CB_CONTENT_REQUEST_TABLE = "cb_content_request";
 
 	private Constants() {
 		throw new IllegalStateException("Utility class");

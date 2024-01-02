@@ -509,6 +509,37 @@ public class CbPlanServiceImpl implements CbPlanService {
         return response;
     }
 
+    public SBApiResponse requestCbplanConten(SunbirdApiRequest request, String userOrgId, String token){
+        SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.CBP_PLAN_CONTENT_REQUEST_API);
+        Map<String, Object> contentRequest = (Map<String, Object>) request.getRequest();
+        List<Map<String, Object>> competency = (List<Map<String, Object>>) contentRequest.get(Constants.COMPETENCY);
+        List<String> providersOrgId = (List<String>) contentRequest.get("providerList");
+        String description = (String) contentRequest.get(Constants.DESCRIPTION);
+        try{
+            String userId = validateAuthTokenAndFetchUserId(token);
+            Map<String, String> mdoInfo = userUtilityService.getUserDetails(Collections.singletonList(userId), new ArrayList<>()).get(userId);
+            String mdoOrgId = mdoInfo.get(Constants.ROOT_ORG_ID);
+            String competencyJsonString = mapper.writeValueAsString(competency);
+
+            Map<String, Object> propertiesMap = new HashMap<>();
+            propertiesMap.put(Constants.ORG_ID, mdoOrgId);
+            propertiesMap.put(Constants.ID, UUID.randomUUID().toString());
+            propertiesMap.put(Constants.COMPETENCY_INFO , Collections.singletonList(competencyJsonString));
+            propertiesMap.put(Constants.STATUS, Constants.REQUESTED);
+            propertiesMap.put(Constants.PROVIDER_ORG_ID, providersOrgId);
+            propertiesMap.put(Constants.DESCRIPTION, description);
+            propertiesMap.put(Constants.CREATED_AT, new Date());
+            propertiesMap.put(Constants.CREATED_BY, userId);
+            SBApiResponse dbResponse = cassandraOperation.insertRecord(Constants.SUNBIRD_KEY_SPACE_NAME, Constants.CB_CONTENT_REQUEST_TABLE, propertiesMap);
+        } catch(Exception e){
+            logger.error("Failed to send request for a content for cbplam. Exception: " + e.getMessage(), e);
+            response.getParams().setStatus(Constants.FAILED);
+            response.getParams().setErrmsg(e.getMessage());
+            response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return response;
+    }
+
     private Map<String, Object> populateReadData(Map<String, Object> cbPlan) throws IOException {
         Map<String, Object> enrichData = new HashMap<>();
         List<String> assignmentTypeInfo = new ArrayList<>();
