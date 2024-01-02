@@ -588,6 +588,8 @@ public class CbExtServerProperties {
 
 	@Value("${karma.points.limit}")
 	private int KarmaPointsLimit;
+	@Value("${kafka.topics.claim.acbp.karma.points}")
+	private String claimKarmaPointsTopic;
 
 	public boolean qListFromCacheEnabled() {
 		return qListFromCacheEnabled;
@@ -2090,5 +2092,13 @@ public class CbExtServerProperties {
 
 	public void setKarmaPointsLimit(int karmaPointsLimit) {
 		KarmaPointsLimit = karmaPointsLimit;
+	}
+
+	public String getClaimKarmaPointsTopic() {
+		return claimKarmaPointsTopic;
+	}
+
+	public void setClaimKarmaPointsTopic(String claimKarmaPointsTopic) {
+		this.claimKarmaPointsTopic = claimKarmaPointsTopic;
 	}
 }

@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 import org.sunbird.cassandra.utils.CassandraOperation;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
+import org.sunbird.core.producer.Producer;
+import org.sunbird.karmapoints.model.ClaimKarmaPointsRequest;
 import org.sunbird.karmapoints.model.KarmaPointsRequest;
 
 import java.time.*;
@@ -18,6 +20,8 @@ public class KarmaPointsServiceImpl implements KarmaPointsService {
     private CassandraOperation cassandraOperation;
     @Autowired
     CbExtServerProperties serverProperties;
+    @Autowired
+    Producer kafkaProducer;
     private Logger logger = LoggerFactory.getLogger(getClass().getName());
 
     @Override
@@ -82,5 +86,14 @@ public class KarmaPointsServiceImpl implements KarmaPointsService {
                 Constants.TABLE_KARMA_POINTS, whereMap, null, Constants.USER_ID_CONSTANT);
         resultMap.put(Constants.KARMA_POINTS_LIST, userKpList);
         return resultMap;
+    }
+    public void claimKarmaPoints(ClaimKarmaPointsRequest request) {
+        Map<String, Object> karmaPointsDataMap = new HashMap<>();
+        Map<String, Object> edata = new HashMap<>();
+        edata.put(Constants.USER_ID, request.getUserId());
+        edata.put(Constants.COURSE_ID, request.getCourseId());
+        karmaPointsDataMap.put("edata",edata);
+        kafkaProducer.push(serverProperties.getClaimKarmaPointsTopic(), karmaPointsDataMap);
+        logger.info("UserID and CourseId successfully Published to : " + serverProperties.getClaimKarmaPointsTopic());
     }
 }

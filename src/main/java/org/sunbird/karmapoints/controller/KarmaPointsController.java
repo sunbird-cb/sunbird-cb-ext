@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
+import org.sunbird.karmapoints.model.ClaimKarmaPointsRequest;
 import org.sunbird.karmapoints.model.KarmaPointsRequest;
 import org.sunbird.karmapoints.service.KarmaPointsService;
 
@@ -27,8 +28,14 @@ public class KarmaPointsController {
 
     @PostMapping("/v1/user/course/karmapoints/read")
     public ResponseEntity<Map<String, Object>> readCourseKp(@RequestBody Map<String, Object> requestBody,
-                                                                    @RequestHeader("x-authenticated-userid") String userId) throws Exception {
+                                                            @RequestHeader("x-authenticated-userid") String userId) throws Exception {
         Map<String, Object> karmaPointsDataMap = karmaPointsService.fetchKarmaPointsUserCourse(userId, requestBody);
         return new ResponseEntity<>(karmaPointsDataMap, HttpStatus.OK);
+    }
+
+    @PostMapping("/v1/claimkarmapoints")
+    public ResponseEntity<Map<String, Object>> claimACBPKarmaPoints(@RequestBody ClaimKarmaPointsRequest request) throws Exception {
+        karmaPointsService.claimKarmaPoints(request);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }
