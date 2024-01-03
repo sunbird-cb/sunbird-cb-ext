@@ -524,8 +524,8 @@ public class CbPlanServiceImpl implements CbPlanService {
             Map<String, Object> propertiesMap = new HashMap<>();
             propertiesMap.put(Constants.ORG_ID, mdoOrgId);
             propertiesMap.put(Constants.ID, UUID.randomUUID().toString());
-            propertiesMap.put(Constants.COMPETENCY_INFO , Collections.singletonList(competencyJsonString));
-            propertiesMap.put(Constants.STATUS, Constants.REQUESTED);
+            propertiesMap.put(Constants.COMPETENCY_INFO , competencyJsonString);
+            propertiesMap.put(Constants.STATUS, Constants.STATUS_IN_PROGRESS);
             propertiesMap.put(Constants.PROVIDER_ORG_ID, providersOrgId);
             propertiesMap.put(Constants.DESCRIPTION, description);
             propertiesMap.put(Constants.CREATED_AT, new Date());
