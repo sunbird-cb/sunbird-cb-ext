@@ -548,7 +548,7 @@ public class CbPlanServiceImpl implements CbPlanService {
             propertiesMap.put(Constants.DESCRIPTION, description);
             propertiesMap.put(Constants.CREATED_AT, new Date());
             propertiesMap.put(Constants.CREATED_BY, userId);
-            SBApiResponse dbResponse = cassandraOperation.insertRecord(Constants.SUNBIRD_KEY_SPACE_NAME, Constants.CB_CONTENT_REQUEST_TABLE, propertiesMap);
+            cassandraOperation.insertRecord(Constants.SUNBIRD_KEY_SPACE_NAME, Constants.CB_CONTENT_REQUEST_TABLE, propertiesMap);
         } catch(Exception e){
             logger.error("Failed to send request for a content for cbplam. Exception: " + e.getMessage(), e);
             response.getParams().setStatus(Constants.FAILED);
