@@ -82,9 +82,12 @@ public class KarmaPointsServiceImpl implements KarmaPointsService {
         whereMap.put(Constants.DB_CLOUMN_CONTEXT_TYPE, cntxType);
         whereMap.put(Constants.DB_COLUMN_CONTEXT_ID, cntxtId);
         whereMap.put(Constants.DB_COLUMN_OPERATION_TYPE, Constants.COURSE_COMPLETION);
-        Map<String, Object> userKpList = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
-                Constants.TABLE_KARMA_POINTS, whereMap, null, Constants.USER_ID_CONSTANT);
-        resultMap.put(Constants.KARMA_POINTS_LIST, userKpList);
+        List<Map<String, Object>> userKpList = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
+                Constants.TABLE_KARMA_POINTS, whereMap, null);
+        Map<String, Object>  result = new HashMap<>();
+        if(userKpList !=null && !userKpList.isEmpty())
+            result = userKpList.get(0);
+        resultMap.put(Constants.KARMA_POINTS_LIST, result);
         return resultMap;
     }
     public void claimKarmaPoints(ClaimKarmaPointsRequest request) {
