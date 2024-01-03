@@ -515,20 +515,16 @@ public class CbPlanServiceImpl implements CbPlanService {
         Map<String, Object> competency = (Map<String, Object>) contentRequest.get(Constants.COMPETENCY);
         List<String> providersOrgId = (List<String>) contentRequest.get("providerList");
         String description = (String) contentRequest.get(Constants.DESCRIPTION);
-        boolean hasError = false;
         try {
             String userId = validateAuthTokenAndFetchUserId(token);
-            hasError = validateRequestCbplanPayload(userId, competency, providersOrgId, response);
-            if(hasError)
+            if (validateRequestCbplanPayload(userId, competency, providersOrgId, response))
                 return response;
             Map<String, String> mdoInfo = userUtilityService.getUserDetails(Collections.singletonList(userId), new ArrayList<>()).get(userId);
-            String mdoOrgId = mdoInfo.get(Constants.ROOT_ORG_ID);
-            String competencyJsonString = mapper.writeValueAsString(competency);
 
             Map<String, Object> propertiesMap = new HashMap<>();
-            propertiesMap.put(Constants.ORG_ID, mdoOrgId);
+            propertiesMap.put(Constants.ORG_ID, mdoInfo.get(Constants.ROOT_ORG_ID));
             propertiesMap.put(Constants.ID, UUID.randomUUID().toString());
-            propertiesMap.put(Constants.COMPETENCY_INFO, competencyJsonString);
+            propertiesMap.put(Constants.COMPETENCY_INFO, mapper.writeValueAsString(competency));
             propertiesMap.put(Constants.STATUS, Constants.STATUS_IN_PROGRESS);
             propertiesMap.put(Constants.PROVIDER_ORG_ID, providersOrgId);
             propertiesMap.put(Constants.DESCRIPTION, description);
@@ -1013,18 +1009,17 @@ public class CbPlanServiceImpl implements CbPlanService {
     }
 
     private boolean validateRequestCbplanPayload(String userId, Map<String, Object> competency, List<String> providersOrgId, SBApiResponse response) {
+        StringBuilder exceptionMessage = new StringBuilder();
         response.getParams().setStatus(Constants.FAILED);
         response.setResponseCode(HttpStatus.BAD_REQUEST);
-        if (StringUtils.isEmpty(userId)) {
-            response.getParams().setErrmsg(Constants.USER_ID_DOESNT_EXIST);
-            return true;
-        }
-        if (competency == null || competency.isEmpty()) {
-            response.getParams().setErrmsg(Constants.COMPETENCY_DETAILS_MISSING);
-            return true;
-        }
-        if (CollectionUtils.isEmpty(providersOrgId)) {
-            response.getParams().setErrmsg(Constants.ORG_ID_MISSING);
+        if (StringUtils.isEmpty(userId))
+            exceptionMessage.append(Constants.USER_ID_DOESNT_EXIST);
+        if (competency == null || competency.isEmpty())
+            exceptionMessage.append(" " + Constants.COMPETENCY_DETAILS_MISSING);
+        if (CollectionUtils.isEmpty(providersOrgId))
+            exceptionMessage.append(" " + Constants.ORG_ID_MISSING);
+        if (StringUtils.isNotEmpty(exceptionMessage)) {
+            response.getParams().setErrmsg(exceptionMessage.toString());
             return true;
         }
         return false;
