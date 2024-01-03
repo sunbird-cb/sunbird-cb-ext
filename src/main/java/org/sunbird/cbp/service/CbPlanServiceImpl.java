@@ -512,11 +512,29 @@ public class CbPlanServiceImpl implements CbPlanService {
     public SBApiResponse requestCbplanConten(SunbirdApiRequest request, String userOrgId, String token){
         SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.CBP_PLAN_CONTENT_REQUEST_API);
         Map<String, Object> contentRequest = (Map<String, Object>) request.getRequest();
-        List<Map<String, Object>> competency = (List<Map<String, Object>>) contentRequest.get(Constants.COMPETENCY);
+        Map<String, Object> competency = (Map<String, Object>) contentRequest.get(Constants.COMPETENCY);
         List<String> providersOrgId = (List<String>) contentRequest.get("providerList");
         String description = (String) contentRequest.get(Constants.DESCRIPTION);
         try{
             String userId = validateAuthTokenAndFetchUserId(token);
+            if(StringUtils.isBlank(userId)){
+                response.getParams().setStatus(Constants.FAILED);
+                response.getParams().setErrmsg(Constants.USER_ID_DOESNT_EXIST);
+                response.setResponseCode(HttpStatus.BAD_REQUEST);
+                return response;
+            }
+            if(competency == null || competency.isEmpty()){
+                response.getParams().setStatus(Constants.FAILED);
+                response.getParams().setErrmsg(Constants.ORG_ID_MISSING);
+                response.setResponseCode(HttpStatus.BAD_REQUEST);
+                return response;
+            }
+            if(CollectionUtils.isEmpty(providersOrgId)){
+                response.getParams().setStatus(Constants.FAILED);
+                response.getParams().setErrmsg(Constants.COMPETENCY_DETAILS_MISSING);
+                response.setResponseCode(HttpStatus.BAD_REQUEST);
+                return response;
+            }
             Map<String, String> mdoInfo = userUtilityService.getUserDetails(Collections.singletonList(userId), new ArrayList<>()).get(userId);
             String mdoOrgId = mdoInfo.get(Constants.ROOT_ORG_ID);
             String competencyJsonString = mapper.writeValueAsString(competency);
