@@ -509,32 +509,18 @@ public class CbPlanServiceImpl implements CbPlanService {
         return response;
     }
 
-    public SBApiResponse requestCbplanConten(SunbirdApiRequest request, String userOrgId, String token){
+    public SBApiResponse requestCbplanConten(SunbirdApiRequest request, String userOrgId, String token) {
         SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.CBP_PLAN_CONTENT_REQUEST_API);
         Map<String, Object> contentRequest = (Map<String, Object>) request.getRequest();
         Map<String, Object> competency = (Map<String, Object>) contentRequest.get(Constants.COMPETENCY);
         List<String> providersOrgId = (List<String>) contentRequest.get("providerList");
         String description = (String) contentRequest.get(Constants.DESCRIPTION);
-        try{
+        boolean hasError = false;
+        try {
             String userId = validateAuthTokenAndFetchUserId(token);
-            if(StringUtils.isBlank(userId)){
-                response.getParams().setStatus(Constants.FAILED);
-                response.getParams().setErrmsg(Constants.USER_ID_DOESNT_EXIST);
-                response.setResponseCode(HttpStatus.BAD_REQUEST);
+            hasError = validateRequestCbplanPayload(userId, competency, providersOrgId, response);
+            if(hasError)
                 return response;
-            }
-            if(competency == null || competency.isEmpty()){
-                response.getParams().setStatus(Constants.FAILED);
-                response.getParams().setErrmsg(Constants.ORG_ID_MISSING);
-                response.setResponseCode(HttpStatus.BAD_REQUEST);
-                return response;
-            }
-            if(CollectionUtils.isEmpty(providersOrgId)){
-                response.getParams().setStatus(Constants.FAILED);
-                response.getParams().setErrmsg(Constants.COMPETENCY_DETAILS_MISSING);
-                response.setResponseCode(HttpStatus.BAD_REQUEST);
-                return response;
-            }
             Map<String, String> mdoInfo = userUtilityService.getUserDetails(Collections.singletonList(userId), new ArrayList<>()).get(userId);
             String mdoOrgId = mdoInfo.get(Constants.ROOT_ORG_ID);
             String competencyJsonString = mapper.writeValueAsString(competency);
@@ -542,14 +528,14 @@ public class CbPlanServiceImpl implements CbPlanService {
             Map<String, Object> propertiesMap = new HashMap<>();
             propertiesMap.put(Constants.ORG_ID, mdoOrgId);
             propertiesMap.put(Constants.ID, UUID.randomUUID().toString());
-            propertiesMap.put(Constants.COMPETENCY_INFO , competencyJsonString);
+            propertiesMap.put(Constants.COMPETENCY_INFO, competencyJsonString);
             propertiesMap.put(Constants.STATUS, Constants.STATUS_IN_PROGRESS);
             propertiesMap.put(Constants.PROVIDER_ORG_ID, providersOrgId);
             propertiesMap.put(Constants.DESCRIPTION, description);
             propertiesMap.put(Constants.CREATED_AT, new Date());
             propertiesMap.put(Constants.CREATED_BY, userId);
             cassandraOperation.insertRecord(Constants.SUNBIRD_KEY_SPACE_NAME, Constants.CB_CONTENT_REQUEST_TABLE, propertiesMap);
-        } catch(Exception e){
+        } catch (Exception e) {
             logger.error("Failed to send request for a content for cbplam. Exception: " + e.getMessage(), e);
             response.getParams().setStatus(Constants.FAILED);
             response.getParams().setErrmsg(e.getMessage());
@@ -1024,5 +1010,23 @@ public class CbPlanServiceImpl implements CbPlanService {
             userInfo.put(Constants.DESIGNATION, userDesignation);
             userInfo.remove(Constants.PROFILE_DETAILS_KEY);
         }
+    }
+
+    private boolean validateRequestCbplanPayload(String userId, Map<String, Object> competency, List<String> providersOrgId, SBApiResponse response) {
+        response.getParams().setStatus(Constants.FAILED);
+        response.setResponseCode(HttpStatus.BAD_REQUEST);
+        if (StringUtils.isEmpty(userId)) {
+            response.getParams().setErrmsg(Constants.USER_ID_DOESNT_EXIST);
+            return true;
+        }
+        if (competency == null || competency.isEmpty()) {
+            response.getParams().setErrmsg(Constants.COMPETENCY_DETAILS_MISSING);
+            return true;
+        }
+        if (CollectionUtils.isEmpty(providersOrgId)) {
+            response.getParams().setErrmsg(Constants.ORG_ID_MISSING);
+            return true;
+        }
+        return false;
     }
 }

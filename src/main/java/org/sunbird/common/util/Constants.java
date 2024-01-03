@@ -937,10 +937,9 @@ public class Constants {
 	public static final String TABLE_KARMA_POINTS_LOOK_UP ="user_karma_points_credit_lookup";
 	public static final String TABLE_KARMA_POINTS ="user_karma_points";
     public static final String COMPETENCY_INFO = "competencyInfo";
-	public static final Object REQUESTED = "REQUESTED";
 	public static final String PROVIDER_ORG_ID = "providerOrgId";
 	public static final String CB_CONTENT_REQUEST_TABLE = "cb_content_request";
-	public static final String ORG_ID_MISSING = "Root Org Id missing, please send the org Id for content request";
+	public static final String ORG_ID_MISSING = "Root Org Ids missing, please send the org Ids for content request";
 	public static final String COMPETENCY_DETAILS_MISSING = "Competency details missing for content request";
 
 	private Constants() {
