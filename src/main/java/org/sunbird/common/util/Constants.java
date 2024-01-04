@@ -914,7 +914,7 @@ public class Constants {
     public static final String ORGID="org_id";
     public static final String RANK ="rank";
     public static final String YEAR ="year";
-    public static final String TOTAL_KP ="total_kp";
+    public static final String AVERAGE_KP ="average_kp";
     public static final String MDO_LIST="mdoList";
 	public static final String KARMA_POINTS_LIST = "kpList";
 	public static final String DB_COLUMN_CREDIT_DATE = "credit_date";
