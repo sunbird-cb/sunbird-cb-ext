@@ -115,6 +115,15 @@ public class HallOfFameServiceImpl implements HallOfFameService {
             }
             resultMap.get(map.get(Constants.ORGID)).put(Constants.RANK, rank);
         }
+
+        resultMap = resultMap.entrySet()
+                .stream()
+                .sorted(Comparator
+                        .comparing((Map.Entry<String, Map<String, Object>> entry) -> (Float) entry.getValue().get("average_kp"))
+                        .thenComparing(entry -> (Date) entry.getValue().get("latest_credit_date")))
+                .collect(LinkedHashMap::new, (map, entry) -> map.put(entry.getKey(), entry.getValue()), LinkedHashMap::putAll);
+
+
         return resultMap;
     }
 }
