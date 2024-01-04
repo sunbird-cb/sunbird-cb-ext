@@ -69,7 +69,7 @@ public class KarmaPointsServiceImpl implements KarmaPointsService {
         String cntxType = (String) filters.get(Constants.CONTEXT_TYPE_CAMEL);
         Map<String, Object> resultMap = new HashMap<>();
         Map<String, Object> propertyMap = new HashMap<>();
-        String key = userId +"_"+cntxType+"_"+ cntxtId;
+        String key = userId +"|"+cntxType+"|"+ cntxtId;
         propertyMap.put(Constants.DB_COLUMN_USER_KARMA_POINTS_KEY, key);
         Map<String, Object> userCourseKpList = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
                 Constants.TABLE_KARMA_POINTS_LOOK_UP, propertyMap, null, Constants.DB_COLUMN_USER_KARMA_POINTS_KEY);
@@ -98,5 +98,9 @@ public class KarmaPointsServiceImpl implements KarmaPointsService {
         karmaPointsDataMap.put("edata",edata);
         kafkaProducer.push(serverProperties.getClaimKarmaPointsTopic(), karmaPointsDataMap);
         logger.info("UserID and CourseId successfully Published to : " + serverProperties.getClaimKarmaPointsTopic());
+    }
+
+    public void fetchKarmaPoints(){
+
     }
 }
