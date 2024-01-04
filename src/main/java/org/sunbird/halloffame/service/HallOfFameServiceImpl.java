@@ -119,10 +119,10 @@ public class HallOfFameServiceImpl implements HallOfFameService {
         resultMap = resultMap.entrySet()
                 .stream()
                 .sorted(Comparator
-                        .comparing((Map.Entry<String, Map<String, Object>> entry) -> (Float) entry.getValue().get("average_kp"))
+                        .comparing((Map.Entry<String, Map<String, Object>> entry) -> (Integer) entry.getValue().get("rank"))
+                        .thenComparing(entry -> (Float) entry.getValue().get("average_kp"))
                         .thenComparing(entry -> (Date) entry.getValue().get("latest_credit_date")))
                 .collect(LinkedHashMap::new, (map, entry) -> map.put(entry.getKey(), entry.getValue()), LinkedHashMap::putAll);
-
 
         return resultMap;
     }
