@@ -100,7 +100,16 @@ public class KarmaPointsServiceImpl implements KarmaPointsService {
         logger.info("UserID and CourseId successfully Published to : " + serverProperties.getClaimKarmaPointsTopic());
     }
 
-    public void fetchKarmaPoints(){
-
+    public Map<String, Object> userTotalKarmaPoints(String userId){
+        Map<String, Object> whereMap = new HashMap<>();
+        whereMap.put(Constants.KARMA_POINTS_USER_ID, userId);
+        List<Map<String, Object>> userKpList = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
+                Constants.TABLE_USER_KARMA_POINTS_SUMMARY, whereMap, null);
+        Map<String, Object> resultMap = new HashMap<>();
+        Map<String, Object>  result = new HashMap<>();
+        if(userKpList !=null && !userKpList.isEmpty())
+            result = userKpList.get(0);
+        resultMap.put(Constants.KARMA_POINTS_LIST, result);
+        return resultMap;
     }
 }

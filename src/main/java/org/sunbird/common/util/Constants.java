@@ -936,6 +936,8 @@ public class Constants {
 	public static final String TABLE_KARMA_POINTS_LOOK_UP ="user_karma_points_credit_lookup";
 	public static final String TABLE_KARMA_POINTS ="user_karma_points";
 
+	public static final String TABLE_USER_KARMA_POINTS_SUMMARY ="user_karma_points_summary";
+
 	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}
