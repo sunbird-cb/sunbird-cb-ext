@@ -915,7 +915,7 @@ public class Constants {
     public static final String ORGID="org_id";
     public static final String RANK ="rank";
     public static final String YEAR ="year";
-    public static final String TOTAL_KP ="total_kp";
+    public static final String AVERAGE_KP ="average_kp";
     public static final String MDO_LIST="mdoList";
 
     private Constants() {
