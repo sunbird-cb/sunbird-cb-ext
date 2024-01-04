@@ -96,4 +96,14 @@ public class CbPlanController {
         SBApiResponse response = cbPlanService.getCBPlanListForUser(userOrgId, userId,true);
         return new ResponseEntity<>(response, response.getResponseCode());
     }
+
+    @PostMapping("/v1/admin/requestcontent")
+    public ResponseEntity<SBApiResponse> requestCbplanContent(
+            @RequestBody SunbirdApiRequest request,
+            @RequestHeader(Constants.X_AUTH_TOKEN) String token,
+            @RequestHeader(Constants.X_AUTH_USER_ORG_ID)String userOrgId){
+
+        SBApiResponse response = cbPlanService.requestCbplanConten(request, token, userOrgId);
+        return new ResponseEntity<>(response, response.getResponseCode());
+    }
 }
