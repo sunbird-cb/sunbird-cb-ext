@@ -18,8 +18,12 @@ public interface StorageService {
 
     SBApiResponse downloadFile(String fileName);
 
-	ResponseEntity<Resource> downloadFile(String reportType, String date, String orgId, String fileName);
+	ResponseEntity<Resource> downloadFile(String reportType, String date, String orgId, String fileName, String userToken);
 
 	ResponseEntity<Map<String, Map<String, Object>>> getFileInfo(String orgId);
 	public SBApiResponse uploadFile(MultipartFile file, String cloudFolderName, String containerName) throws IOException;
+
+	ResponseEntity<?> downloadFile(String reportType, String date, String fileName, String userToken);
+
+	ResponseEntity<?> getFileInfoSpv(String userToken);
 }
