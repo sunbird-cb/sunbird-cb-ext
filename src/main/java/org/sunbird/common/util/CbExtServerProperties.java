@@ -3,6 +3,7 @@ package org.sunbird.common.util;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.codehaus.plexus.util.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -590,6 +591,18 @@ public class CbExtServerProperties {
 	private int KarmaPointsLimit;
 	@Value("${kafka.topics.claim.acbp.karma.points}")
 	private String claimKarmaPointsTopic;
+
+	@Value("#{${report.property.map}}")
+	private Map<String, String> reportMap;
+
+	@Value("${spv_admin_channel_name}")
+	private String spvChannelName;
+
+	@Value("#{${spv.report.property.map}}")
+	private Map<String, String> spvReportMap;
+
+	@Value("${spv_sub_folder_name}")
+	private String spvSubFolderName;
 
 	public boolean qListFromCacheEnabled() {
 		return qListFromCacheEnabled;
@@ -2100,5 +2113,37 @@ public class CbExtServerProperties {
 
 	public void setClaimKarmaPointsTopic(String claimKarmaPointsTopic) {
 		this.claimKarmaPointsTopic = claimKarmaPointsTopic;
+	}
+
+	public Map<String, String> getReportMap() {
+		return reportMap;
+	}
+
+	public void setReportMap(Map<String, String> reportMap) {
+		this.reportMap = reportMap;
+	}
+
+	public String getSpvChannelName() {
+		return spvChannelName;
+	}
+
+	public void setSpvChannelName(String spvChannelName) {
+		this.spvChannelName = spvChannelName;
+	}
+
+	public Map<String, String> getSpvReportMap() {
+		return spvReportMap;
+	}
+
+	public void setSpvReportMap(Map<String, String> spvReportMap) {
+		this.spvReportMap = spvReportMap;
+	}
+
+	public String getSpvSubFolderName() {
+		return spvSubFolderName;
+	}
+
+	public void setSpvSubFolderName(String spvSubFolderName) {
+		this.spvSubFolderName = spvSubFolderName;
 	}
 }

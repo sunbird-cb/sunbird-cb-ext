@@ -22,4 +22,8 @@ public interface StorageService {
 
 	ResponseEntity<Map<String, Map<String, Object>>> getFileInfo(String orgId);
 	public SBApiResponse uploadFile(MultipartFile file, String cloudFolderName, String containerName) throws IOException;
+
+	ResponseEntity<?> downloadFile(String reportType, String date, String fileName, String userToken);
+
+	ResponseEntity<?> getFileInfoSpv(String userToken);
 }

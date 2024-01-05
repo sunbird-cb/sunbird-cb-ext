@@ -57,4 +57,17 @@ public class StorageController {
 		SBApiResponse uploadResponse = storageService.uploadFile(multipartFile, cloudFolderName, serverConfig.getCloudProfileImageContainerName());
 		return new ResponseEntity<>(uploadResponse, uploadResponse.getResponseCode());
 	}
+
+	@GetMapping("/v1/spvReport/{reportType}/{date}/{fileName}")
+	public ResponseEntity<?> downloadFileSPV(@PathVariable("reportType") String reportType,
+										  @PathVariable("date") String date,
+										  @RequestHeader(Constants.X_AUTH_TOKEN) String userToken,
+										  @PathVariable("fileName") String fileName) {
+		return storageService.downloadFile(reportType, date, fileName, userToken);
+	}
+
+	@GetMapping("/v1/spvReportInfo")
+	public ResponseEntity<?> getFileInfoSPV(@RequestHeader(Constants.X_AUTH_TOKEN) String userToken) {
+		return storageService.getFileInfoSpv(userToken);
+	}
 }
