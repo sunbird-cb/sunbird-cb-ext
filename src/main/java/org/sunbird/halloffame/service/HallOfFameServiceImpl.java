@@ -123,7 +123,10 @@ public class HallOfFameServiceImpl implements HallOfFameService {
                         .thenComparing(entry -> (Float) entry.getValue().get("average_kp"))
                         .thenComparing(entry -> (Date) entry.getValue().get("latest_credit_date")))
                 .collect(LinkedHashMap::new, (map, entry) -> map.put(entry.getKey(), entry.getValue()), LinkedHashMap::putAll);
-
+        int newRank = 1;
+        for (Map<String, Object> entryValue : resultMap.values()) {
+            entryValue.put("rank", newRank++);
+        }
         return resultMap;
     }
 }
