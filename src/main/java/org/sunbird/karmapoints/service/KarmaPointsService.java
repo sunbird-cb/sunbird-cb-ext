@@ -9,5 +9,6 @@ public interface KarmaPointsService {
    public Map<String, Object> fetchKarmaPointsData(String userId, KarmaPointsRequest request) ;
    public Map<String, Object> fetchKarmaPointsUserCourse(String userId, Map<String, Object> requestBody) ;
    public void claimKarmaPoints(ClaimKarmaPointsRequest request);
+   public Map<String, Object> userTotalKarmaPoints(String userId);
 
 }

@@ -54,6 +54,22 @@ public class HallOfFameServiceImpl implements HallOfFameService {
             }
         }
 
+        if (lastToPreviousMonthList.isEmpty() && !lastMonthList.isEmpty() ){
+            resultMap.put(Constants.TITLE, formattedDate);
+            Map<String, Map<String, Object>> monthWithRankList = processRankBasedOnKpPoints(lastMonthList);
+
+            List<Map<String, Object>> trialmapList = monthWithRankList.values().stream()
+                    .map(map -> {
+                        Map<String, Object> hashMap = new HashMap<>(map);
+                        hashMap.put(Constants.PROGRESS, 0);
+                        hashMap.put(Constants.NEGATIVE_OR_POSITIVE, 0);
+                        return hashMap;
+                    })
+                    .collect(Collectors.toList());
+            resultMap.put(Constants.MDO_LIST, trialmapList);
+            return resultMap;
+        }
+
         Map<String, Map<String, Object>> lastMonthWithRankList = processRankBasedOnKpPoints(lastMonthList);
         Map<String, Map<String, Object>> lastToPreviousMonthWithRankList = processRankBasedOnKpPoints(lastToPreviousMonthList);
         List<Map<String, Object>> trialmapList = lastMonthWithRankList.values().stream()
@@ -80,23 +96,34 @@ public class HallOfFameServiceImpl implements HallOfFameService {
     }
 
     public static Map<String, Map<String, Object>> processRankBasedOnKpPoints(List<Map<String, Object>> dptList) {
-        List<Map<String, Object>> dptListWithRanks = new ArrayList<>(dptList);
-        Collections.sort(dptListWithRanks, Comparator.comparing(map -> (Long) map.get(Constants.TOTAL_KP), Comparator.reverseOrder()));
+        List<Map<String, Object>> dptListWithRanks = dptList.stream()
+                .filter(map -> map.get(Constants.AVERAGE_KP) != null)
+                .sorted(Comparator.comparing(map -> (Float) map.get(Constants.AVERAGE_KP), Comparator.reverseOrder()))
+                .collect(Collectors.toList());
 
         Map<String, Map<String, Object>> resultMap = dptListWithRanks.stream()
                 .collect(Collectors.toMap(map -> (String) map.get(Constants.ORGID), map -> map));
 
         Integer rank = 1;
-        Long currentTotalKp = (Long) dptListWithRanks.get(0).get(Constants.TOTAL_KP);
+        Float currentAvegareKp = (Float) dptListWithRanks.get(0).get(Constants.AVERAGE_KP);
 
         for (Map<String, Object> map : dptListWithRanks) {
-            Long totalKp = (Long) map.get(Constants.TOTAL_KP);
-            if (!totalKp.equals(currentTotalKp)) {
+            Float averageKp = (Float) map.get(Constants.AVERAGE_KP);
+            if (!averageKp.equals(currentAvegareKp)) {
                 rank++;
-                currentTotalKp = totalKp;
+                currentAvegareKp = averageKp;
             }
             resultMap.get(map.get(Constants.ORGID)).put(Constants.RANK, rank);
         }
+
+        resultMap = resultMap.entrySet()
+                .stream()
+                .sorted(Comparator
+                        .comparing((Map.Entry<String, Map<String, Object>> entry) -> (Integer) entry.getValue().get("rank"))
+                        .thenComparing(entry -> (Float) entry.getValue().get("average_kp"))
+                        .thenComparing(entry -> (Date) entry.getValue().get("latest_credit_date")))
+                .collect(LinkedHashMap::new, (map, entry) -> map.put(entry.getKey(), entry.getValue()), LinkedHashMap::putAll);
+
         return resultMap;
     }
 }
