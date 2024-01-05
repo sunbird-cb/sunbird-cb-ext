@@ -518,7 +518,7 @@ public class CbPlanServiceImpl implements CbPlanService {
         String description = (String) contentRequest.get(Constants.DESCRIPTION);
         try {
             String userId = validateAuthTokenAndFetchUserId(token);
-            if (validateRequestCbplanPayload(userId, competency, providersOrgId, response))
+            if (!validateRequestCbplanPayload(userId, competency, providersOrgId, response))
                 return response;
             Map<String, String> mdoInfo = userUtilityService.getUserDetails(Collections.singletonList(userId), new ArrayList<>()).get(userId);
 
@@ -1009,8 +1009,6 @@ public class CbPlanServiceImpl implements CbPlanService {
 
     private boolean validateRequestCbplanPayload(String userId, Map<String, Object> competency, List<String> providersOrgId, SBApiResponse response) {
         StringBuilder exceptionMessage = new StringBuilder();
-        response.getParams().setStatus(Constants.FAILED);
-        response.setResponseCode(HttpStatus.BAD_REQUEST);
         if (StringUtils.isEmpty(userId))
             exceptionMessage.append(Constants.USER_ID_DOESNT_EXIST);
         if (competency == null || competency.isEmpty())
@@ -1018,9 +1016,11 @@ public class CbPlanServiceImpl implements CbPlanService {
         if (CollectionUtils.isEmpty(providersOrgId))
             exceptionMessage.append(" " + Constants.ORG_ID_MISSING);
         if (StringUtils.isNotEmpty(exceptionMessage)) {
+            response.getParams().setStatus(Constants.FAILED);
+            response.setResponseCode(HttpStatus.BAD_REQUEST);
             response.getParams().setErrmsg(exceptionMessage.toString());
-            return true;
+            return false;
         }
-        return false;
+        return true;
     }
 }
