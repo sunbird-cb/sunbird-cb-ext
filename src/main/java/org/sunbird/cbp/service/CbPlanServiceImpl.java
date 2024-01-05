@@ -422,14 +422,14 @@ public class CbPlanServiceImpl implements CbPlanService {
     }
 
     @Override
-    public SBApiResponse getCBPlanListForUser(String userOrgId, String authUserToken, boolean isPrivate) {
+    public SBApiResponse getCBPlanListForUser(String userOrgId, String authTokenOrUserId, boolean isPrivate) {
         SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.CBP_PLAN_USER_LIST_API);
         try {
             String userId = "";
             if (isPrivate)
-                userId = authUserToken;
+                userId = authTokenOrUserId;
             else
-                userId = validateAuthTokenAndFetchUserId(authUserToken);
+                userId = validateAuthTokenAndFetchUserId(authTokenOrUserId);
             logger.info("UserId of the User : " + userId + "User org ID : " + userOrgId);
             List<String> fields = Arrays.asList(Constants.PROFILE_DETAILS, Constants.ROOT_ORG_ID);
             Map<String, Object> propertiesMap = new HashMap<>();
@@ -482,14 +482,19 @@ public class CbPlanServiceImpl implements CbPlanService {
                 cbPlanDetails.put(Constants.USER_TYPE, cbPlan.get(Constants.CB_ASSIGNMENT_TYPE));
                 cbPlanDetails.put(Constants.END_DATE, cbPlan.get(Constants.END_DATE));
                 List<String> courses = (List<String>) cbPlan.get(Constants.CB_CONTENT_LIST);
-                List<String> courseFields = new ArrayList<>();
                 // Required Fields to be added later if required
                 List<Map<String, Object>> courseList = new ArrayList<>();
                 for (String courseId : courses) {
                     Map<String, Object> contentDetails = null;
                     if (!courseDetailsMap.containsKey(courseId)) {
-                        contentDetails = contentService.readContentFromCache(courseId, courseFields);
-                        courseDetailsMap.put(courseId, contentDetails);
+                        contentDetails = contentService.readContentFromCache(courseId, null);
+                        if (MapUtils.isNotEmpty(contentDetails)) {
+                            if (Constants.LIVE.equalsIgnoreCase((String) contentDetails.get(Constants.STATUS))) {
+                                courseDetailsMap.put(courseId, contentDetails);
+                            }
+                        } else {
+                            logger.error("Failed to read course details for Id: " + courseId);
+                        }
                     } else {
                         contentDetails = (Map<String, Object>) courseDetailsMap.get(courseId);
                     }
@@ -510,7 +515,7 @@ public class CbPlanServiceImpl implements CbPlanService {
         return response;
     }
 
-    public SBApiResponse requestCbplanConten(SunbirdApiRequest request, String userOrgId, String token) {
+    public SBApiResponse requestCbplanConten(SunbirdApiRequest request, String token, String userOrgId) {
         SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.CBP_PLAN_CONTENT_REQUEST_API);
         Map<String, Object> contentRequest = (Map<String, Object>) request.getRequest();
         Map<String, Object> competency = (Map<String, Object>) contentRequest.get(Constants.COMPETENCY);
