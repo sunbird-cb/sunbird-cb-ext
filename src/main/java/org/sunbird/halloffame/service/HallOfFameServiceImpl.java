@@ -25,36 +25,38 @@ public class HallOfFameServiceImpl implements HallOfFameService {
     @Override
     public Map<String, Object> fetchHallOfFameData() {
         Map<String, Object> resultMap = new HashMap<>();
-
         LocalDate currentDate = LocalDate.now();
         LocalDate lastMonthDate = LocalDate.now().minusMonths(1);
         LocalDate lastToPreviousMonthDate = LocalDate.now().minusMonths(2);
         int lastMonthValue = lastMonthDate.getMonthValue();
-        int YearValue = lastMonthDate.getYear();
-
+        int lastMonthYearValue = lastMonthDate.getYear();
         int previousToLastMonth = lastToPreviousMonthDate.getMonthValue();
-        int previousToLastMonthsYear = lastToPreviousMonthDate.getYear();
+        int previousToLastMonthsYearValue = lastToPreviousMonthDate.getYear();
 
         String formattedDate = currentDate.format(DateTimeFormatter.ofPattern("MMMM yyyy"));
+        Map<String, Object> propertymap = new HashMap<>();
+        List<Object> monthList = Arrays.asList(lastMonthValue, previousToLastMonth);
+        propertymap.put(Constants.MONTH, monthList);
+        List<Object> yearList = Arrays.asList(lastMonthYearValue, previousToLastMonthsYearValue);
+        propertymap.put(Constants.YEAR, yearList);
 
         List<Map<String, Object>> dptList = cassandraOperation.getRecordsByPropertiesWithoutFiltering(
-                Constants.KEYSPACE_SUNBIRD, Constants.MDO_KARMA_POINTS, null, null);
+                Constants.KEYSPACE_SUNBIRD, Constants.MDO_KARMA_POINTS, propertymap, null);
 
         List<Map<String, Object>> lastToPreviousMonthList = new ArrayList<>();
         List<Map<String, Object>> lastMonthList = new ArrayList<>();
 
-        for (Map<String, Object> record : dptList) {
-            int month = (int) record.get(Constants.MONTH);
-            int year = (int) record.get(Constants.YEAR);
+        lastToPreviousMonthList = dptList.stream()
+                .filter(record -> (int) record.get(Constants.MONTH) == previousToLastMonth
+                        && (int) record.get(Constants.YEAR) == previousToLastMonthsYearValue)
+                .collect(Collectors.toList());
 
-            if (month == previousToLastMonth && year == previousToLastMonthsYear) {
-                lastToPreviousMonthList.add(record);
-            } else if (month == lastMonthValue && year == YearValue) {
-                lastMonthList.add(record);
-            }
-        }
+        lastMonthList = dptList.stream()
+                .filter(record -> (int) record.get(Constants.MONTH) == lastMonthValue
+                        && (int) record.get(Constants.YEAR) == lastMonthYearValue)
+                .collect(Collectors.toList());
 
-        if (lastToPreviousMonthList.isEmpty() && !lastMonthList.isEmpty() ){
+        if (lastToPreviousMonthList.isEmpty() && !lastMonthList.isEmpty()) {
             resultMap.put(Constants.TITLE, formattedDate);
             Map<String, Map<String, Object>> monthWithRankList = processRankBasedOnKpPoints(lastMonthList);
 
@@ -62,12 +64,36 @@ public class HallOfFameServiceImpl implements HallOfFameService {
                     .map(map -> {
                         Map<String, Object> hashMap = new HashMap<>(map);
                         hashMap.put(Constants.PROGRESS, 0);
-                        hashMap.put(Constants.NEGATIVE_OR_POSITIVE, 0);
+                        hashMap.put(Constants.NEGATIVE_OR_POSITIVE, Constants.POSITIVE);
                         return hashMap;
                     })
                     .collect(Collectors.toList());
             resultMap.put(Constants.MDO_LIST, trialmapList);
             return resultMap;
+        }
+        if (lastMonthList.isEmpty()) {
+            int pvsToLastMonth = LocalDate.now().minusMonths(2).getMonthValue();
+            int pvsToLastMonthsYear = LocalDate.now().minusMonths(2).getYear();
+            int previousToLastTwoMonths = LocalDate.now().minusMonths(3).getMonthValue();
+            int previousToLastTwoMonthsYear = LocalDate.now().minusMonths(3).getYear();
+            Map<String, Object> propertyMap = new HashMap<>();
+            List<Object> monthlist = Arrays.asList(pvsToLastMonth, previousToLastTwoMonths);
+            propertyMap.put(Constants.MONTH, monthlist);
+            List<Object> yearLst = Arrays.asList(pvsToLastMonthsYear, previousToLastTwoMonthsYear);
+            propertyMap.put(Constants.YEAR, yearLst);
+
+            lastToPreviousMonthList.clear();
+            lastMonthList.clear();
+            List<Map<String, Object>> dpList = cassandraOperation.getRecordsByPropertiesWithoutFiltering(
+                    Constants.KEYSPACE_SUNBIRD, Constants.MDO_KARMA_POINTS, propertyMap, null);
+            lastToPreviousMonthList = dpList.stream()
+                    .filter(record -> ((int) record.get(Constants.MONTH)) == previousToLastTwoMonths
+                            && ((int) record.get(Constants.YEAR)) == previousToLastTwoMonthsYear)
+                    .collect(Collectors.toList());
+            lastMonthList = dpList.stream()
+                    .filter(record -> ((int) record.get(Constants.MONTH)) == pvsToLastMonth
+                            && ((int) record.get(Constants.YEAR)) == pvsToLastMonthsYear)
+                    .collect(Collectors.toList());
         }
 
         Map<String, Map<String, Object>> lastMonthWithRankList = processRankBasedOnKpPoints(lastMonthList);
@@ -76,20 +102,23 @@ public class HallOfFameServiceImpl implements HallOfFameService {
                 .map(lastMonthWithRank -> {
                     String pvOrgId = (String) lastMonthWithRank.get(Constants.ORGID);
                     int pvRank = (int) lastMonthWithRank.get(Constants.RANK);
-
                     Map<String, Object> trialmap = new HashMap<>(lastMonthWithRank);
-
-                    lastToPreviousMonthWithRankList.getOrDefault(pvOrgId, Collections.emptyMap()).forEach((key, value) -> {
-                        if (Constants.RANK.equals(key)) {
-                            int lastToPvRank = (int) value;
-                            trialmap.put(Constants.NEGATIVE_OR_POSITIVE, (pvRank >= lastToPvRank) ? Constants.NEGATIVE : Constants.POSITIVE);
-                            trialmap.put(Constants.PROGRESS, Math.abs(pvRank - lastToPvRank));
-                        }
-                    });
+                    Map<String, Object> lastToPreviousData = lastToPreviousMonthWithRankList.getOrDefault(pvOrgId, Collections.emptyMap());
+                    if (lastToPreviousData.isEmpty()) {
+                        trialmap.put(Constants.NEGATIVE_OR_POSITIVE, Constants.POSITIVE);
+                        trialmap.put(Constants.PROGRESS, "0");
+                    } else {
+                        lastToPreviousData.forEach((key, value) -> {
+                            if (Constants.RANK.equals(key)) {
+                                int lastToPvRank = (int) value;
+                                trialmap.put(Constants.NEGATIVE_OR_POSITIVE, (pvRank > lastToPvRank) ? Constants.NEGATIVE : Constants.POSITIVE);
+                                trialmap.put(Constants.PROGRESS, Math.abs(pvRank - lastToPvRank));
+                            }
+                        });
+                    }
                     return trialmap;
                 })
                 .collect(Collectors.toList());
-
         resultMap.put(Constants.TITLE, formattedDate);
         resultMap.put(Constants.MDO_LIST, trialmapList);
         return resultMap;
