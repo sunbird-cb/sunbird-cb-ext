@@ -62,7 +62,7 @@ public class HallOfFameServiceImpl implements HallOfFameService {
                     .map(map -> {
                         Map<String, Object> hashMap = new HashMap<>(map);
                         hashMap.put(Constants.PROGRESS, 0);
-                        hashMap.put(Constants.NEGATIVE_OR_POSITIVE, 0);
+                        hashMap.put(Constants.NEGATIVE_OR_POSITIVE, Constants.POSITIVE);
                         return hashMap;
                     })
                     .collect(Collectors.toList());
@@ -82,7 +82,7 @@ public class HallOfFameServiceImpl implements HallOfFameService {
                     lastToPreviousMonthWithRankList.getOrDefault(pvOrgId, Collections.emptyMap()).forEach((key, value) -> {
                         if (Constants.RANK.equals(key)) {
                             int lastToPvRank = (int) value;
-                            trialmap.put(Constants.NEGATIVE_OR_POSITIVE, (pvRank >= lastToPvRank) ? Constants.NEGATIVE : Constants.POSITIVE);
+                            trialmap.put(Constants.NEGATIVE_OR_POSITIVE, (pvRank > lastToPvRank) ? Constants.NEGATIVE : Constants.POSITIVE);
                             trialmap.put(Constants.PROGRESS, Math.abs(pvRank - lastToPvRank));
                         }
                     });
