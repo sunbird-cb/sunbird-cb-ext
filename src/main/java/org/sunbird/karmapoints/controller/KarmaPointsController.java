@@ -38,4 +38,10 @@ public class KarmaPointsController {
         karmaPointsService.claimKarmaPoints(request);
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+    @PostMapping("/v1/user/totalkarmapoints")
+    public ResponseEntity<Map<String, Object>> totalKarmaPoints(@RequestHeader("x-authenticated-userid") String userId){
+        Map<String, Object> karmaPointsDataMap = karmaPointsService.userTotalKarmaPoints(userId);
+        return new ResponseEntity<>(karmaPointsDataMap, HttpStatus.OK);
+    }
 }

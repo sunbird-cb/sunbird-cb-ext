@@ -899,7 +899,7 @@ public class Constants {
 	public static final String CBP_PLAN_CONTENT_REQUEST_API ="api.cbplan.content.request";
 	public static final String USER_TYPE = "userType";
 	public static final String CB_PLAN_ID_KEY = "cbPlanId";
-	public static final String ALL_USER = "allUser";
+	public static final String ALL_USER = "AllUser";
 	public static final String API_CB_PLAN_LIST = "api.cbplan.list";
 	public static final String COURSE_APP_ICON = "appIcon";
 	public static final String CREATOR_LOGO = "creatorLogo";
@@ -941,6 +941,8 @@ public class Constants {
 	public static final String CB_CONTENT_REQUEST_TABLE = "cb_content_request";
 	public static final String ORG_ID_MISSING = "Root Org Ids missing, please send the org Ids for content request";
 	public static final String COMPETENCY_DETAILS_MISSING = "Competency details missing for content request";
+
+	public static final String TABLE_USER_KARMA_POINTS_SUMMARY ="user_karma_points_summary";
 
 	private Constants() {
 		throw new IllegalStateException("Utility class");

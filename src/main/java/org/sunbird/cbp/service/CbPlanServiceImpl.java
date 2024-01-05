@@ -418,18 +418,18 @@ public class CbPlanServiceImpl implements CbPlanService {
     }
 
     public SBApiResponse getCBPlanListForUser(String userOrgId, String authUserToken) {
-        return getCBPlanListForUser( userOrgId,  authUserToken, false);
+        return getCBPlanListForUser(userOrgId, authUserToken, false);
     }
 
-        @Override
-    public SBApiResponse getCBPlanListForUser(String userOrgId, String authUserToken,boolean isPrivate) {
+    @Override
+    public SBApiResponse getCBPlanListForUser(String userOrgId, String authUserToken, boolean isPrivate) {
         SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.CBP_PLAN_USER_LIST_API);
         try {
             String userId = "";
-            if(isPrivate)
-             userId = authUserToken;
+            if (isPrivate)
+                userId = authUserToken;
             else
-             userId = validateAuthTokenAndFetchUserId(authUserToken);
+                userId = validateAuthTokenAndFetchUserId(authUserToken);
             logger.info("UserId of the User : " + userId + "User org ID : " + userOrgId);
             List<String> fields = Arrays.asList(Constants.PROFILE_DETAILS, Constants.ROOT_ORG_ID);
             Map<String, Object> propertiesMap = new HashMap<>();
@@ -475,6 +475,7 @@ public class CbPlanServiceImpl implements CbPlanService {
             }
             List<Map<String, Object>> resultMap = new ArrayList<>();
             Map<String, Object> courseDetailsMap = new HashMap<>();
+            cbplanResult = cbplanResult.stream().filter(userCbPlan -> (Boolean)userCbPlan.get(Constants.CB_IS_ACTIVE) == true).collect(Collectors.toList());
             for (Map<String, Object> cbPlan : cbplanResult) {
                 Map<String, Object> cbPlanDetails = new HashMap<>();
                 cbPlanDetails.put(Constants.ID, cbPlan.get(Constants.CB_PLAN_ID_KEY));
@@ -902,9 +903,7 @@ public class CbPlanServiceImpl implements CbPlanService {
                     enrichUserInfo(userInfoMap);
                     List<Map<String, String>> enrichUserInfoList = new ArrayList<>();
                     for (String userId : userIdList) {
-                        if (!userId.equals((String) cbPlan.get(Constants.CREATED_BY))) {
-                            enrichUserInfoList.add(userInfoMap.get(userId));
-                        }
+                        enrichUserInfoList.add(userInfoMap.get(userId));
                     }
                     cbPlan.put(Constants.USER_DETAILS, enrichUserInfoList);
 
