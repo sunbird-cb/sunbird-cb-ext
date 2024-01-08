@@ -193,11 +193,10 @@ public class MasterDataServiceImpl implements MasterDataService {
         try {
             String[] contextTypes = cbExtServerProperties.getContextTypes();
             List<Map<String, Object>> listProperty = new ArrayList<>();
-            for (String contextType : contextTypes) {
-                Map<String, Object> properties = new HashMap<>();
-                properties.put(Constants.CONTEXT_TYPE.toLowerCase(), contextType);
-                listProperty.add(properties);
-            }
+            Map<String, Object> properties = new HashMap<>();
+            properties.put(Constants.CONTEXT_TYPE.toLowerCase(), Arrays.asList(contextTypes));
+            listProperty.add(properties);
+
             List<Map<String, Object>> listOfMasterData = cassandraOperation.getRecordsWithInClause(Constants.KEYSPACE_SUNBIRD,
                     Constants.TABLE_MASTER_DATA, listProperty, new ArrayList<>());
             if (CollectionUtils.isEmpty(listOfMasterData)) {

@@ -25,5 +25,5 @@ public interface StorageService {
 
 	ResponseEntity<?> downloadFile(String reportType, String date, String fileName, String userToken);
 
-	ResponseEntity<?> getFileInfoSpv(String userToken);
+	ResponseEntity<?> getFileInfoSpv(String userToken, String date);
 }

@@ -316,7 +316,7 @@ public class StorageServiceImpl implements StorageService {
 	}
 
 	@Override
-	public ResponseEntity<?> getFileInfoSpv(String userToken) {
+	public ResponseEntity<?> getFileInfoSpv(String userToken, String date) {
 		String userId = accessTokenValidator.fetchUserIdFromAccessToken(userToken);
 		if (StringUtils.isEmpty(userId)) {
 			logger.error("Failed to get user");
@@ -338,13 +338,10 @@ public class StorageServiceImpl implements StorageService {
 		Map<String, Map<String, Object>> reportTypeInfo = new HashMap<>();
 		for (Map.Entry<String, String> entry : reportFileNameMap.entrySet()) {
 			Map<String, Object> resourceMap = new HashMap<>();
-			LocalDateTime now = LocalDateTime.now();
-			DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-			String todayFormattedDate = now.format(dateFormat);
 
 			String fileName = entry.getValue();
 			String reportType = entry.getValue().replace(".csv", "");
-			String objectKey = serverProperties.getReportDownloadFolderName() + "/" + serverProperties.getSpvSubFolderName() + "/" + todayFormattedDate + "/" + reportType + "/" + fileName;
+			String objectKey = serverProperties.getReportDownloadFolderName() + "/" + serverProperties.getSpvSubFolderName() + "/" + date + "/" + reportType + "/" + fileName;
 			try {
 				Model.Blob blob = storageService.getObject(serverProperties.getReportDownloadContainerName(), objectKey, Option.apply(Boolean.FALSE));
 				if (blob != null) {
@@ -353,21 +350,6 @@ public class StorageServiceImpl implements StorageService {
 				}
 			} catch (Exception e) {
 				logger.error("Failed to read the downloaded file for url: " + objectKey);
-				LocalDateTime yesterday = now.minusDays(1);
-				String yesterdayFormattedDate = yesterday.format(dateFormat);
-				objectKey = serverProperties.getReportDownloadFolderName() + "/" + serverProperties.getSpvSubFolderName() + "/" + yesterdayFormattedDate + "/" + reportType + "/" + fileName;
-				try {
-					Model.Blob blob = storageService.getObject(serverProperties.getReportDownloadContainerName(), objectKey, Option.apply(Boolean.FALSE));
-					if (blob != null) {
-						resourceMap.put("lastModified", blob.lastModified());
-						resourceMap.put("fileMetaData", blob.metadata());
-					} else {
-						resourceMap.put("msg", "No Report Available");
-						logger.info("Unable to fetch fileInfo");
-					}
-				} catch (Exception ex) {
-					logger.error("Failed to read the downloaded file for url: " + objectKey);
-				}
 			}
 			reportTypeInfo.put(fileName, resourceMap);
 		}
