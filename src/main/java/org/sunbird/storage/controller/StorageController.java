@@ -66,8 +66,9 @@ public class StorageController {
 		return storageService.downloadFile(reportType, date, fileName, userToken);
 	}
 
-	@GetMapping("/v1/spvReportInfo")
-	public ResponseEntity<?> getFileInfoSPV(@RequestHeader(Constants.X_AUTH_TOKEN) String userToken) {
-		return storageService.getFileInfoSpv(userToken);
+	@GetMapping("/v1/spvReportInfo/{date}")
+	public ResponseEntity<?> getFileInfoSPV(@RequestHeader(Constants.X_AUTH_TOKEN) String userToken,
+											@PathVariable("date") String date) {
+		return storageService.getFileInfoSpv(userToken, date);
 	}
 }
