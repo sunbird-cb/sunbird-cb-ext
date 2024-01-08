@@ -103,7 +103,7 @@ public class CbPlanController {
             @RequestHeader(Constants.X_AUTH_TOKEN) String token,
             @RequestHeader(Constants.X_AUTH_USER_ORG_ID)String userOrgId){
 
-        SBApiResponse response = cbPlanService.requestCbplanConten(request, token, userOrgId);
+        SBApiResponse response = cbPlanService.requestCbplanContent(request, token, userOrgId);
         return new ResponseEntity<>(response, response.getResponseCode());
     }
 }

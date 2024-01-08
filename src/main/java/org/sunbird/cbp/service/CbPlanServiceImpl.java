@@ -515,7 +515,7 @@ public class CbPlanServiceImpl implements CbPlanService {
         return response;
     }
 
-    public SBApiResponse requestCbplanConten(SunbirdApiRequest request, String token, String userOrgId) {
+    public SBApiResponse requestCbplanContent(SunbirdApiRequest request, String token, String userOrgId) {
         SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.CBP_PLAN_CONTENT_REQUEST_API);
         Map<String, Object> contentRequest = (Map<String, Object>) request.getRequest();
         Map<String, Object> competency = (Map<String, Object>) contentRequest.get(Constants.COMPETENCY);
