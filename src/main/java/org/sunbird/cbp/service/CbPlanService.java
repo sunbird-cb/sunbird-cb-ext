@@ -23,5 +23,5 @@ public interface CbPlanService {
 
      SBApiResponse getCBPlanListForUser(String userOrgId, String authUserToken,boolean isPrivate);
 
-
-    }
+     SBApiResponse requestCbplanContent(SunbirdApiRequest request, String userOrgId, String token);
+}

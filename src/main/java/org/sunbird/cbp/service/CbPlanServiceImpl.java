@@ -422,14 +422,14 @@ public class CbPlanServiceImpl implements CbPlanService {
     }
 
     @Override
-    public SBApiResponse getCBPlanListForUser(String userOrgId, String authUserToken, boolean isPrivate) {
+    public SBApiResponse getCBPlanListForUser(String userOrgId, String authTokenOrUserId, boolean isPrivate) {
         SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.CBP_PLAN_USER_LIST_API);
         try {
             String userId = "";
             if (isPrivate)
-                userId = authUserToken;
+                userId = authTokenOrUserId;
             else
-                userId = validateAuthTokenAndFetchUserId(authUserToken);
+                userId = validateAuthTokenAndFetchUserId(authTokenOrUserId);
             logger.info("UserId of the User : " + userId + "User org ID : " + userOrgId);
             List<String> fields = Arrays.asList(Constants.PROFILE_DETAILS, Constants.ROOT_ORG_ID);
             Map<String, Object> propertiesMap = new HashMap<>();
@@ -482,14 +482,19 @@ public class CbPlanServiceImpl implements CbPlanService {
                 cbPlanDetails.put(Constants.USER_TYPE, cbPlan.get(Constants.CB_ASSIGNMENT_TYPE));
                 cbPlanDetails.put(Constants.END_DATE, cbPlan.get(Constants.END_DATE));
                 List<String> courses = (List<String>) cbPlan.get(Constants.CB_CONTENT_LIST);
-                List<String> courseFields = new ArrayList<>();
                 // Required Fields to be added later if required
                 List<Map<String, Object>> courseList = new ArrayList<>();
                 for (String courseId : courses) {
                     Map<String, Object> contentDetails = null;
                     if (!courseDetailsMap.containsKey(courseId)) {
-                        contentDetails = contentService.readContentFromCache(courseId, courseFields);
-                        courseDetailsMap.put(courseId, contentDetails);
+                        contentDetails = contentService.readContentFromCache(courseId, null);
+                        if (MapUtils.isNotEmpty(contentDetails)) {
+                            if (Constants.LIVE.equalsIgnoreCase((String) contentDetails.get(Constants.STATUS))) {
+                                courseDetailsMap.put(courseId, contentDetails);
+                            }
+                        } else {
+                            logger.error("Failed to read course details for Id: " + courseId);
+                        }
                     } else {
                         contentDetails = (Map<String, Object>) courseDetailsMap.get(courseId);
                     }
@@ -503,6 +508,37 @@ public class CbPlanServiceImpl implements CbPlanService {
             response.getResult().put(Constants.CONTENT, resultMap);
         } catch (Exception e) {
             logger.error("Failed to lookup for user cb plan details. Exception: " + e.getMessage(), e);
+            response.getParams().setStatus(Constants.FAILED);
+            response.getParams().setErrmsg(e.getMessage());
+            response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return response;
+    }
+
+    public SBApiResponse requestCbplanContent(SunbirdApiRequest request, String token, String userOrgId) {
+        SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.CBP_PLAN_CONTENT_REQUEST_API);
+        Map<String, Object> contentRequest = (Map<String, Object>) request.getRequest();
+        Map<String, Object> competency = (Map<String, Object>) contentRequest.get(Constants.COMPETENCY);
+        List<String> providersOrgId = (List<String>) contentRequest.get("providerList");
+        String description = (String) contentRequest.get(Constants.DESCRIPTION);
+        try {
+            String userId = validateAuthTokenAndFetchUserId(token);
+            if (!validateRequestCbplanPayload(userId, competency, providersOrgId, response))
+                return response;
+            Map<String, String> mdoInfo = userUtilityService.getUserDetails(Collections.singletonList(userId), new ArrayList<>()).get(userId);
+
+            Map<String, Object> propertiesMap = new HashMap<>();
+            propertiesMap.put(Constants.ORG_ID, mdoInfo.get(Constants.ROOT_ORG_ID));
+            propertiesMap.put(Constants.ID, UUID.randomUUID().toString());
+            propertiesMap.put(Constants.COMPETENCY_INFO, mapper.writeValueAsString(competency));
+            propertiesMap.put(Constants.STATUS, Constants.STATUS_IN_PROGRESS);
+            propertiesMap.put(Constants.PROVIDER_ORG_ID, providersOrgId);
+            propertiesMap.put(Constants.DESCRIPTION, description);
+            propertiesMap.put(Constants.CREATED_AT, new Date());
+            propertiesMap.put(Constants.CREATED_BY, userId);
+            cassandraOperation.insertRecord(Constants.SUNBIRD_KEY_SPACE_NAME, Constants.CB_CONTENT_REQUEST_TABLE, propertiesMap);
+        } catch (Exception e) {
+            logger.error("Failed to send request for a content for cbplam. Exception: " + e.getMessage(), e);
             response.getParams().setStatus(Constants.FAILED);
             response.getParams().setErrmsg(e.getMessage());
             response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -974,5 +1010,22 @@ public class CbPlanServiceImpl implements CbPlanService {
             userInfo.put(Constants.DESIGNATION, userDesignation);
             userInfo.remove(Constants.PROFILE_DETAILS_KEY);
         }
+    }
+
+    private boolean validateRequestCbplanPayload(String userId, Map<String, Object> competency, List<String> providersOrgId, SBApiResponse response) {
+        StringBuilder exceptionMessage = new StringBuilder();
+        if (StringUtils.isEmpty(userId))
+            exceptionMessage.append(Constants.USER_ID_DOESNT_EXIST);
+        if (competency == null || competency.isEmpty())
+            exceptionMessage.append(" " + Constants.COMPETENCY_DETAILS_MISSING);
+        if (CollectionUtils.isEmpty(providersOrgId))
+            exceptionMessage.append(" " + Constants.ORG_ID_MISSING);
+        if (StringUtils.isNotEmpty(exceptionMessage)) {
+            response.getParams().setStatus(Constants.FAILED);
+            response.setResponseCode(HttpStatus.BAD_REQUEST);
+            response.getParams().setErrmsg(exceptionMessage.toString());
+            return false;
+        }
+        return true;
     }
 }
