@@ -447,12 +447,14 @@ public class CbPlanServiceImpl implements CbPlanService {
             String userDesignation = "";
             Map<String, Object> profileDetailsMap = null;
             List<Map<String, Object>> professionalDetails = null;
+            Boolean isVerifiedKaramyogi = false;
             if (StringUtils.isNotEmpty(profileDetails)) {
                 profileDetailsMap = mapper.readValue(profileDetails, new TypeReference<HashMap<String, Object>>() {
                 });
             }
             if (MapUtils.isNotEmpty(profileDetailsMap)) {
                 professionalDetails = (List<Map<String, Object>>) profileDetailsMap.get(Constants.PROFESSIONAL_DETAILS);
+                isVerifiedKaramyogi = (Boolean) profileDetailsMap.get(Constants.VERIFIED_KARMAYOGI);
             }
             if (CollectionUtils.isNotEmpty(professionalDetails)) {
                 userDesignation = (String) professionalDetails.get(0).get(Constants.DESIGNATION);
@@ -490,7 +492,21 @@ public class CbPlanServiceImpl implements CbPlanService {
                         contentDetails = contentService.readContentFromCache(courseId, null);
                         if (MapUtils.isNotEmpty(contentDetails)) {
                             if (Constants.LIVE.equalsIgnoreCase((String) contentDetails.get(Constants.STATUS))) {
-                                courseDetailsMap.put(courseId, contentDetails);
+                                if (courseId.contains("_rc")) {
+                                    Map<String, Object> secureSettings = (Map<String, Object>) contentDetails.get(Constants.SECURE_SETTINGS);
+                                    if (isVerifiedKaramyogi != null && isVerifiedKaramyogi) {
+                                        if (MapUtils.isNotEmpty(secureSettings)) {
+                                            List<String> secureOrganisationList = (List<String>) secureSettings.get(Constants.ORGANISATION);
+                                            if (secureOrganisationList.contains(userOrgId)) {
+                                                courseDetailsMap.put(courseId, contentDetails);
+                                            }
+                                        }
+                                    } else {
+                                        contentDetails.clear();
+                                    }
+                                } else {
+                                    courseDetailsMap.put(courseId, contentDetails);
+                                }
                             }
                         } else {
                             logger.error("Failed to read course details for Id: " + courseId);
