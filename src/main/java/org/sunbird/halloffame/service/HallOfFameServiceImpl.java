@@ -33,7 +33,7 @@ public class HallOfFameServiceImpl implements HallOfFameService {
         int previousToLastMonth = lastToPreviousMonthDate.getMonthValue();
         int previousToLastMonthsYearValue = lastToPreviousMonthDate.getYear();
 
-        String formattedDate = currentDate.format(DateTimeFormatter.ofPattern("MMMM yyyy"));
+        String formattedDateLastMonth = currentDate.minusMonths(1).format(DateTimeFormatter.ofPattern("MMMM yyyy"));
         Map<String, Object> propertymap = new HashMap<>();
         List<Object> monthList = Arrays.asList(lastMonthValue, previousToLastMonth);
         propertymap.put(Constants.MONTH, monthList);
@@ -57,7 +57,7 @@ public class HallOfFameServiceImpl implements HallOfFameService {
                 .collect(Collectors.toList());
 
         if (lastToPreviousMonthList.isEmpty() && !lastMonthList.isEmpty()) {
-            resultMap.put(Constants.TITLE, formattedDate);
+            resultMap.put(Constants.TITLE, formattedDateLastMonth);
             Map<String, Map<String, Object>> monthWithRankList = processRankBasedOnKpPoints(lastMonthList);
 
             List<Map<String, Object>> trialmapList = monthWithRankList.values().stream()
@@ -72,6 +72,7 @@ public class HallOfFameServiceImpl implements HallOfFameService {
             return resultMap;
         }
         if (lastMonthList.isEmpty()) {
+            String formattedDatePreviousToLastMonth = LocalDate.now().minusMonths(2).format(DateTimeFormatter.ofPattern("MMMM yyyy"));
             int pvsToLastMonth = LocalDate.now().minusMonths(2).getMonthValue();
             int pvsToLastMonthsYear = LocalDate.now().minusMonths(2).getYear();
             int previousToLastTwoMonths = LocalDate.now().minusMonths(3).getMonthValue();
@@ -94,6 +95,7 @@ public class HallOfFameServiceImpl implements HallOfFameService {
                     .filter(record -> ((int) record.get(Constants.MONTH)) == pvsToLastMonth
                             && ((int) record.get(Constants.YEAR)) == pvsToLastMonthsYear)
                     .collect(Collectors.toList());
+            resultMap.put(Constants.TITLE,formattedDatePreviousToLastMonth);
         }
 
         Map<String, Map<String, Object>> lastMonthWithRankList = processRankBasedOnKpPoints(lastMonthList);
@@ -119,7 +121,9 @@ public class HallOfFameServiceImpl implements HallOfFameService {
                     return trialmap;
                 })
                 .collect(Collectors.toList());
-        resultMap.put(Constants.TITLE, formattedDate);
+        if (!resultMap.containsKey(Constants.TITLE)) {
+            resultMap.put(Constants.TITLE, formattedDateLastMonth);
+        }
         resultMap.put(Constants.MDO_LIST, trialmapList);
         return resultMap;
     }
