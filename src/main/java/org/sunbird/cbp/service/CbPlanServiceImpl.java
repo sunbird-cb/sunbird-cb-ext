@@ -498,7 +498,9 @@ public class CbPlanServiceImpl implements CbPlanService {
                     } else {
                         contentDetails = (Map<String, Object>) courseDetailsMap.get(courseId);
                     }
-                    courseList.add(contentDetails);
+                    if (MapUtils.isNotEmpty(contentDetails)) {
+                        courseList.add(contentDetails);
+                    }
                 }
                 cbPlanDetails.put(Constants.CB_CONTENT_LIST, courseList);
                 resultMap.add(cbPlanDetails);
@@ -656,9 +658,7 @@ public class CbPlanServiceImpl implements CbPlanService {
                 }
             }
         }
-        if (CollectionUtils.isNotEmpty(enrichContentInfoMap)) {
-            enrichData.put(Constants.CONTENT_LIST, enrichContentInfoMap);
-        }
+        enrichData.put(Constants.CONTENT_LIST, enrichContentInfoMap);
         return enrichData;
     }
 
@@ -903,7 +903,9 @@ public class CbPlanServiceImpl implements CbPlanService {
                             }
                         }
                     }
-                    courseMapList.add(courseInfoMap.get(contentId));
+                    if (MapUtils.isNotEmpty(courseInfoMap.get(contentId))) {
+                        courseMapList.add(courseInfoMap.get(contentId));
+                    }
                 }
                 cbPlan.put(Constants.CB_CONTENT_LIST, courseMapList);
 
