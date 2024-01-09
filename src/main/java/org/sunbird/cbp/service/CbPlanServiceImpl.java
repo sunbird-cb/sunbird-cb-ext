@@ -531,7 +531,7 @@ public class CbPlanServiceImpl implements CbPlanService {
         List<String> providersOrgId = (List<String>) contentRequest.get("providerList");
         String description = (String) contentRequest.get(Constants.DESCRIPTION);
         try {
-            String userId = "2887addb-8bcb-4fb1-b3d2-2acf5eed2163"; //validateAuthTokenAndFetchUserId(token);
+            String userId = validateAuthTokenAndFetchUserId(token);
             if (!validateRequestCbplanPayload(userId, competency, providersOrgId, response))
                 return response;
             Map<String, String> mdoInfo = userUtilityService.getUserDetails(Collections.singletonList(userId), new ArrayList<>()).get(userId);
