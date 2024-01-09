@@ -498,9 +498,7 @@ public class CbPlanServiceImpl implements CbPlanService {
                     } else {
                         contentDetails = (Map<String, Object>) courseDetailsMap.get(courseId);
                     }
-                    if (MapUtils.isNotEmpty(contentDetails)) {
-                        courseList.add(contentDetails);
-                    }
+                    courseList.add(contentDetails);
                 }
                 cbPlanDetails.put(Constants.CB_CONTENT_LIST, courseList);
                 resultMap.add(cbPlanDetails);
@@ -517,7 +515,7 @@ public class CbPlanServiceImpl implements CbPlanService {
         return response;
     }
 
-    public SBApiResponse requestCbplanContent(SunbirdApiRequest request, String token, String userOrgId) {
+    public SBApiResponse requestCbplanConten(SunbirdApiRequest request, String token, String userOrgId) {
         SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.CBP_PLAN_CONTENT_REQUEST_API);
         Map<String, Object> contentRequest = (Map<String, Object>) request.getRequest();
         Map<String, Object> competency = (Map<String, Object>) contentRequest.get(Constants.COMPETENCY);
@@ -638,27 +636,25 @@ public class CbPlanServiceImpl implements CbPlanService {
         List<Map<String, Object>> enrichContentInfoMap = new ArrayList<>();
         for (String contentId : contentTypeInfo) {
             Map<String, Object> contentResponse = contentService.readContentFromCache(contentId, null);
-            if (MapUtils.isNotEmpty(contentResponse)) {
-                if (Constants.LIVE.equalsIgnoreCase((String) contentResponse.get(Constants.STATUS))) {
-                    Map<String, Object> enrichContentMap = new HashMap<>();
-                    enrichContentMap.put(Constants.NAME, contentResponse.get(Constants.NAME));
-                    enrichContentMap.put(Constants.COMPETENCIES_V5, contentResponse.get(Constants.COMPETENCIES_V5));
-                    enrichContentMap.put(Constants.AVG_RATING, contentResponse.get(Constants.AVG_RATING));
-                    enrichContentMap.put(Constants.IDENTIFIER, contentResponse.get(Constants.IDENTIFIER));
-                    enrichContentMap.put(Constants.DESCRIPTION, contentResponse.get(Constants.DESCRIPTION));
-                    enrichContentMap.put(Constants.ADDITIONAL_TAGS, contentResponse.get(Constants.ADDITIONAL_TAGS));
-                    enrichContentMap.put(Constants.CONTENT_TYPE_KEY, contentResponse.get(Constants.CONTENT_TYPE_KEY));
-                    enrichContentMap.put(Constants.PRIMARY_CATEGORY, contentResponse.get(Constants.PRIMARY_CATEGORY));
-                    enrichContentMap.put(Constants.DURATION, contentResponse.get(Constants.DURATION));
-                    enrichContentMap.put(Constants.COURSE_APP_ICON, contentResponse.get(Constants.COURSE_APP_ICON));
-                    enrichContentMap.put(Constants.POSTER_IMAGE, contentResponse.get(Constants.POSTER_IMAGE));
-                    enrichContentMap.put(Constants.ORGANISATION, contentResponse.get(Constants.ORGANISATION));
-                    enrichContentMap.put(Constants.CREATOR_LOGO, contentResponse.get(Constants.CREATOR_LOGO));
-                    enrichContentInfoMap.add(enrichContentMap);
-                }
-            }
+            Map<String, Object> enrichContentMap = new HashMap<>();
+            enrichContentMap.put(Constants.NAME, contentResponse.get(Constants.NAME));
+            enrichContentMap.put(Constants.COMPETENCIES_V5, contentResponse.get(Constants.COMPETENCIES_V5));
+            enrichContentMap.put(Constants.AVG_RATING, contentResponse.get(Constants.AVG_RATING));
+            enrichContentMap.put(Constants.IDENTIFIER, contentResponse.get(Constants.IDENTIFIER));
+            enrichContentMap.put(Constants.DESCRIPTION, contentResponse.get(Constants.DESCRIPTION));
+            enrichContentMap.put(Constants.ADDITIONAL_TAGS, contentResponse.get(Constants.ADDITIONAL_TAGS));
+            enrichContentMap.put(Constants.CONTENT_TYPE_KEY, contentResponse.get(Constants.CONTENT_TYPE_KEY));
+            enrichContentMap.put(Constants.PRIMARY_CATEGORY, contentResponse.get(Constants.PRIMARY_CATEGORY));
+            enrichContentMap.put(Constants.DURATION, contentResponse.get(Constants.DURATION));
+            enrichContentMap.put(Constants.COURSE_APP_ICON, contentResponse.get(Constants.COURSE_APP_ICON));
+            enrichContentMap.put(Constants.POSTER_IMAGE, contentResponse.get(Constants.POSTER_IMAGE));
+            enrichContentMap.put(Constants.ORGANISATION, contentResponse.get(Constants.ORGANISATION));
+            enrichContentMap.put(Constants.CREATOR_LOGO, contentResponse.get(Constants.CREATOR_LOGO));
+            enrichContentInfoMap.add(enrichContentMap);
         }
-        enrichData.put(Constants.CONTENT_LIST, enrichContentInfoMap);
+        if (CollectionUtils.isNotEmpty(enrichContentInfoMap)) {
+            enrichData.put(Constants.CONTENT_LIST, enrichContentInfoMap);
+        }
         return enrichData;
     }
 
@@ -897,15 +893,9 @@ public class CbPlanServiceImpl implements CbPlanService {
                     if (!courseInfoMap.containsKey(contentId)) {
                         Map<String, Object> courseInfo = contentService.readContentFromCache(contentId,
                                 Collections.emptyList());
-                        if (MapUtils.isNotEmpty(courseInfo)) {
-                            if (Constants.LIVE.equalsIgnoreCase((String) courseInfo.get(Constants.STATUS))) {
-                                courseInfoMap.put(contentId, courseInfo);
-                            }
-                        }
+                        courseInfoMap.put(contentId, courseInfo);
                     }
-                    if (courseInfoMap.containsKey(contentId)) {
-                        courseMapList.add(courseInfoMap.get(contentId));
-                    }
+                    courseMapList.add(courseInfoMap.get(contentId));
                 }
                 cbPlan.put(Constants.CB_CONTENT_LIST, courseMapList);
 

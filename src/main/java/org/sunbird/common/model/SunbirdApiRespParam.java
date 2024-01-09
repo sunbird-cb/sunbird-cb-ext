@@ -48,9 +48,6 @@ public class SunbirdApiRespParam {
 		this.errmsg = errmsg;
 	}
 
-	public SunbirdApiRespParam() {
-	}
-
 	public SunbirdApiRespParam(String id) {
 		resmsgid = id;
 		msgid = id;

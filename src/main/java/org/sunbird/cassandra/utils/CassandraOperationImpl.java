@@ -321,11 +321,7 @@ public class CassandraOperationImpl implements CassandraOperation {
 			for (Map<String, Object> propertyMap : propertyMaps) {
 				for (Map.Entry<String, Object> entry : propertyMap.entrySet()) {
 					key = entry.getKey();
-					if (entry.getValue() instanceof List) {
-						values.addAll((List<String>) entry.getValue());
-					} else {
-						values.add(entry.getValue());
-					}
+					values.add(entry.getValue());
 				}
 				selectQuery.and(QueryBuilder.in(key, values.toArray()));
 			}
