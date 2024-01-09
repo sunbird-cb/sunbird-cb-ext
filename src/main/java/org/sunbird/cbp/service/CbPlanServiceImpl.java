@@ -903,7 +903,7 @@ public class CbPlanServiceImpl implements CbPlanService {
                             }
                         }
                     }
-                    if (MapUtils.isNotEmpty(courseInfoMap.get(contentId))) {
+                    if (courseInfoMap.containsKey(contentId)) {
                         courseMapList.add(courseInfoMap.get(contentId));
                     }
                 }
