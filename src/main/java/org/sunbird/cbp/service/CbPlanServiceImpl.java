@@ -493,15 +493,16 @@ public class CbPlanServiceImpl implements CbPlanService {
                         if (MapUtils.isNotEmpty(contentDetails)) {
                             if (Constants.LIVE.equalsIgnoreCase((String) contentDetails.get(Constants.STATUS))) {
                                 if (courseId.contains("_rc")) {
-                                    Map<String, Object> secureSettings = (Map<String, Object>) contentDetails.get(Constants.SECURE_SETTINGS);
                                     if (isVerifiedKaramyogi != null && isVerifiedKaramyogi) {
+                                        Map<String, Object> secureSettings = (Map<String, Object>) contentDetails.get(Constants.SECURE_SETTINGS);
                                         if (MapUtils.isNotEmpty(secureSettings)) {
                                             List<String> secureOrganisationList = (List<String>) secureSettings.get(Constants.ORGANISATION);
-                                            if (secureOrganisationList.contains(userOrgId)) {
+                                            if (CollectionUtils.isNotEmpty(secureOrganisationList) && secureOrganisationList.contains(userOrgId)) {
                                                 courseDetailsMap.put(courseId, contentDetails);
                                             }
                                         }
-                                    } else {
+                                    }
+                                    if (!courseDetailsMap.containsKey(courseId)) {
                                         contentDetails.clear();
                                     }
                                 } else {
