@@ -198,6 +198,9 @@ public class CbExtServerProperties {
 	@Value("${cb-plan.update.publish.authorized.roles}")
 	private String cbPlanUpdatePublishAuthorizedRoles;
 
+	@Value("${kafka.topic.cbplan.content.request}")
+	private String cbplanContentRequestKafkaTopic;
+
 	public String getRedisDataHostName() {
 		return redisDataHostName;
 	}
@@ -2145,5 +2148,13 @@ public class CbExtServerProperties {
 
 	public void setSpvSubFolderName(String spvSubFolderName) {
 		this.spvSubFolderName = spvSubFolderName;
+	}
+
+	public String getCbplanContentRequestKafkaTopic() {
+		return cbplanContentRequestKafkaTopic;
+	}
+
+	public void setCbplanContentRequestKafkaTopic(String cbplanContentRequestKafkaTopic) {
+		this.cbplanContentRequestKafkaTopic = cbplanContentRequestKafkaTopic;
 	}
 }
