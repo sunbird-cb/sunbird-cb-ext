@@ -35,6 +35,13 @@ public class PropertiesConfig {
     @Value("${hierarchy.store.keyspace.name}")
     private String hierarchyStoreKeyspaceName;
 
+    @Value("${cbplan.content.request.notification.template}")
+    private String cbplanContentRequestTemplate;  //notify.service.path.async
+
+    @Value("${notify.service.path.async}")
+    private String notificationAsyncPath;
+
+
     public String getLmsServiceHost() {
         return lmsServiceHost;
     }
@@ -105,5 +112,21 @@ public class PropertiesConfig {
 
     public void setHierarchyStoreKeyspaceName(String hierarchyStoreKeyspaceName) {
         this.hierarchyStoreKeyspaceName = hierarchyStoreKeyspaceName;
+    }
+
+    public String getCbplanContentRequestTemplate() {
+        return cbplanContentRequestTemplate;
+    }
+
+    public void setCbplanContentRequestTemplate(String cbplanContentRequestTemplate) {
+        this.cbplanContentRequestTemplate = cbplanContentRequestTemplate;
+    }
+
+    public String getNotificationAsyncPath() {
+        return notificationAsyncPath;
+    }
+
+    public void setNotificationAsyncPath(String notificationAsyncPath) {
+        this.notificationAsyncPath = notificationAsyncPath;
     }
 }

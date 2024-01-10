@@ -30,6 +30,7 @@ import org.sunbird.common.util.AccessTokenValidator;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.common.util.ProjectUtil;
+import org.sunbird.core.producer.Producer;
 import org.sunbird.user.service.UserUtilityService;
 
 import com.datastax.driver.core.utils.UUIDs;
@@ -58,6 +59,12 @@ public class CbPlanServiceImpl implements CbPlanService {
     CbExtServerProperties serverProperties;
 
     ObjectMapper mapper = new ObjectMapper();
+
+    @Autowired
+    Producer kafkaProducer;
+
+    @Autowired
+    private CbExtServerProperties cbExtServerProperties;
 
     @Override
     public SBApiResponse createCbPlan(SunbirdApiRequest request, String userOrgId, String authUserToken) {
@@ -555,9 +562,15 @@ public class CbPlanServiceImpl implements CbPlanService {
             propertiesMap.put(Constants.DESCRIPTION, description);
             propertiesMap.put(Constants.CREATED_AT, new Date());
             propertiesMap.put(Constants.CREATED_BY, userId);
-            cassandraOperation.insertRecord(Constants.SUNBIRD_KEY_SPACE_NAME, Constants.CB_CONTENT_REQUEST_TABLE, propertiesMap);
+            SBApiResponse dbResponse = cassandraOperation.insertRecord(Constants.SUNBIRD_KEY_SPACE_NAME, Constants.CB_CONTENT_REQUEST_TABLE, propertiesMap);
+            if(!Constants.SUCCESS.equalsIgnoreCase((String)dbResponse.get(Constants.RESPONSE))){
+                throw new RuntimeException("An error occurred while creating new content Request");
+            }
+            propertiesMap.put("mdoName", mdoInfo.get(Constants.CHANNEL));
+            propertiesMap.put(Constants.EMAIL, mdoInfo.get(Constants.EMAIL));
+            kafkaProducer.push(cbExtServerProperties.getCbplanContentRequestKafkaTopic(), propertiesMap);
         } catch (Exception e) {
-            logger.error("Failed to send request for a content for cbplam. Exception: " + e.getMessage(), e);
+            logger.error("Failed to send request for a content for cbplan Exception: " + e.getMessage(), e);
             response.getParams().setStatus(Constants.FAILED);
             response.getParams().setErrmsg(e.getMessage());
             response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
