@@ -108,7 +108,7 @@ public class HallOfFameServiceImpl implements HallOfFameService {
                     Map<String, Object> lastToPreviousData = lastToPreviousMonthWithRankList.getOrDefault(pvOrgId, Collections.emptyMap());
                     if (lastToPreviousData.isEmpty()) {
                         trialmap.put(Constants.NEGATIVE_OR_POSITIVE, Constants.POSITIVE);
-                        trialmap.put(Constants.PROGRESS, "0");
+                        trialmap.put(Constants.PROGRESS, 0);
                     } else {
                         lastToPreviousData.forEach((key, value) -> {
                             if (Constants.RANK.equals(key)) {
