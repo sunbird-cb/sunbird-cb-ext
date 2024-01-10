@@ -159,7 +159,6 @@ public class HallOfFameServiceImpl implements HallOfFameService {
         int newRank = 1;
         for (Map<String, Object> entryValue : resultMap.values()) {
             entryValue.put("rank", newRank++);
-            entryValue.put("average_kp",Math.abs((Integer) entryValue.get("average_kp")));
         }
         return resultMap;
     }
