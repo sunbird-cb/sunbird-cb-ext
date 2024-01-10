@@ -604,8 +604,8 @@ public class CbExtServerProperties {
 	@Value("#{${spv.report.property.map}}")
 	private Map<String, String> spvReportMap;
 
-	@Value("${spv_sub_folder_name}")
-	private String spvSubFolderName;
+	@Value("#{${spv.report.property.subFolder.map}}")
+	private Map<String, String> spvReportSubFolderTypeMap;
 
 	public boolean qListFromCacheEnabled() {
 		return qListFromCacheEnabled;
@@ -2142,12 +2142,12 @@ public class CbExtServerProperties {
 		this.spvReportMap = spvReportMap;
 	}
 
-	public String getSpvSubFolderName() {
-		return spvSubFolderName;
+	public Map<String, String> getSpvReportSubFolderTypeMap() {
+		return spvReportSubFolderTypeMap;
 	}
 
-	public void setSpvSubFolderName(String spvSubFolderName) {
-		this.spvSubFolderName = spvSubFolderName;
+	public void setSpvReportSubFolderTypeMap(Map<String, String> spvReportSubFolderTypeMap) {
+		this.spvReportSubFolderTypeMap = spvReportSubFolderTypeMap;
 	}
 
 	public String getCbplanContentRequestKafkaTopic() {
