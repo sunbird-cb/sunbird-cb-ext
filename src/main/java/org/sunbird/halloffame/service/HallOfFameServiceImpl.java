@@ -108,7 +108,7 @@ public class HallOfFameServiceImpl implements HallOfFameService {
                     Map<String, Object> lastToPreviousData = lastToPreviousMonthWithRankList.getOrDefault(pvOrgId, Collections.emptyMap());
                     if (lastToPreviousData.isEmpty()) {
                         trialmap.put(Constants.NEGATIVE_OR_POSITIVE, Constants.POSITIVE);
-                        trialmap.put(Constants.PROGRESS, "0");
+                        trialmap.put(Constants.PROGRESS, 0);
                     } else {
                         lastToPreviousData.forEach((key, value) -> {
                             if (Constants.RANK.equals(key)) {
@@ -159,6 +159,7 @@ public class HallOfFameServiceImpl implements HallOfFameService {
         int newRank = 1;
         for (Map<String, Object> entryValue : resultMap.values()) {
             entryValue.put("rank", newRank++);
+            entryValue.put("average_kp",Math.abs((Integer) entryValue.get("average_kp")));
         }
         return resultMap;
     }
