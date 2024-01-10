@@ -288,7 +288,8 @@ public class StorageServiceImpl implements StorageService {
 				logger.error("User is not authorized to download the file for other org: ");
 				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 			}
-			String objectKey = serverProperties.getReportDownloadFolderName() + "/" + serverProperties.getSpvSubFolderName() + "/" + date + "/" + reportType + "/" + fileName;
+			Map<String, String> spvReportSubFolderTypeMap = serverProperties.getSpvReportSubFolderTypeMap();
+			String objectKey = serverProperties.getReportDownloadFolderName() + "/" + spvReportSubFolderTypeMap.get(fileName) + "/" + date + "/" + reportType + "/" + fileName;
 			storageService.download(serverProperties.getReportDownloadContainerName(), objectKey, Constants.LOCAL_BASE_PATH,
 					Option.apply(Boolean.FALSE));
 			Path tmpPath = Paths.get(Constants.LOCAL_BASE_PATH + fileName);
@@ -335,13 +336,13 @@ public class StorageServiceImpl implements StorageService {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 		}
 		Map<String, String> reportFileNameMap = serverProperties.getSpvReportMap();
+		Map<String, String> spvReportSubFolderTypeMap = serverProperties.getSpvReportSubFolderTypeMap();
 		Map<String, Map<String, Object>> reportTypeInfo = new HashMap<>();
 		for (Map.Entry<String, String> entry : reportFileNameMap.entrySet()) {
 			Map<String, Object> resourceMap = new HashMap<>();
-
 			String fileName = entry.getValue();
 			String reportType = entry.getValue().replace(".csv", "");
-			String objectKey = serverProperties.getReportDownloadFolderName() + "/" + serverProperties.getSpvSubFolderName() + "/" + date + "/" + reportType + "/" + fileName;
+			String objectKey = serverProperties.getReportDownloadFolderName() + "/" + spvReportSubFolderTypeMap.get(fileName) + "/" + date + "/" + reportType + "/" + fileName;
 			try {
 				Model.Blob blob = storageService.getObject(serverProperties.getReportDownloadContainerName(), objectKey, Option.apply(Boolean.FALSE));
 				if (blob != null) {
