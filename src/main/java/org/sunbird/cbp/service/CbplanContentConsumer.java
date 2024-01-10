@@ -58,24 +58,20 @@ public class CbplanContentConsumer {
             Set<String> providerRootOrgIds = new HashSet<>((List<String>) cbplanContentRequest.get(Constants.PROVIDER_ORG_ID));
 
             Map<String, Object> mailNotificationDetails = new HashMap<>();
-            mailNotificationDetails.put(Constants.PROVIDER_EMAIL_ID_LIST, getUserDetails(providerRootOrgIds));
+            mailNotificationDetails.put(Constants.PROVIDER_EMAIL_ID_LIST, getCBPAdminDetails(providerRootOrgIds));
             mailNotificationDetails.put(Constants.MDO_NAME, cbplanContentRequest.get(Constants.MDO_NAME));
             mailNotificationDetails.put(Constants.COMPETENCY_AREA, competencyInfoMap.get(Constants.NAME));
             mailNotificationDetails.put(Constants.COMPETENCY_THEMES, allThemes.replace(allThemes.length()-2, allThemes.length() - 1, "."));
             mailNotificationDetails.put(Constants.COMPETENCY_SUB_THEMES, allSubThemes.replace(allSubThemes.length()-2, allSubThemes.length()-1, "."));
-            mailNotificationDetails.put(Constants.FIRST_PARA, configuration.getCbplanContentRequestFirstPara());
-            mailNotificationDetails.put(Constants.SECOND_PARA, configuration.getCbplanContentRequestSecondPara());
             mailNotificationDetails.put(Constants.DESCRIPTION , cbplanContentRequest.get(Constants.DESCRIPTION));
-            mailNotificationDetails.put(Constants.FOOTNOTE, configuration.getCbplanContentRequestFootnote());
             sendNotificationToProviders(mailNotificationDetails);
 
         } catch (Exception e) {
-            logger.error(e);
-            logger.info("Exception occurred while sending email : " + e.getMessage()  + "Content request received " + cbplanContentRequest);
+            logger.error("Exception occurred while sending email : " + e.getMessage()  + "Content request received " + cbplanContentRequest,e);
         }
     }
 
-    public List<String> getUserDetails(Set<String> rootOrgIds){
+    public List<String> getCBPAdminDetails(Set<String> rootOrgIds){
         List<Map<String, String>> userRecords = new ArrayList<>();
         Map<String, Object> request = getSearchObject(rootOrgIds);
         HashMap<String, String> headersValue = new HashMap<>();
@@ -106,7 +102,7 @@ public class CbplanContentConsumer {
             logger.info("CBP Admin emails fetched successfully: " + providerIdEmails);
             return providerIdEmails;
         } catch (Exception e) {
-            logger.error("Exception while fetching user details : ",e);
+            logger.error("Exception while fetching cbp admin details : " +e.getMessage() + " request : " + request,e);
             throw new ApplicationException("Hub Service ERROR: ", e);
         }
     }
@@ -135,15 +131,12 @@ public class CbplanContentConsumer {
         notificationRequest.setIds(providerIdList);
         notificationRequest.setMode(Constants.EMAIL);
 
-        String body = (String) mailNotificationDetails.get(Constants.SECOND_PARA);
-        params.put(Constants.FIRST_BODY_PARAM, mailNotificationDetails.get(Constants.FIRST_PARA));
-        params.put(Constants.SECOND_BODY_PARAM, body.replace(Constants.MDO_NAME_TAG , mdoName) );
+        params.put(Constants.MDO_NAME_PARAM, mdoName);
         params.put(Constants.NAME, mdoName);
         params.put(Constants.COMPETENCY_AREA_PARAM, mailNotificationDetails.get(Constants.COMPETENCY_AREA));
         params.put(Constants.COMPETENCY_THEME_PARAM, mailNotificationDetails.get(Constants.COMPETENCY_THEMES));
         params.put(Constants.COMPETENCY_SUB_THEME_PARAM, mailNotificationDetails.get(Constants.COMPETENCY_SUB_THEMES));
         params.put(Constants.DESCRIPTION, mailNotificationDetails.get(Constants.DESCRIPTION));
-        params.put(Constants.FOOTNOTE, mailNotificationDetails.get(Constants.FOOTNOTE));
         params.put(Constants.FROM_EMAIL, configuration.getSupportEmail());
         params.put(Constants.ORG_NAME, mdoName);
         Template template = new Template(constructEmailTemplate(configuration.getCbplanContentRequestTemplate(), params),configuration.getCbplanContentRequestTemplate(), params);
@@ -165,7 +158,7 @@ public class CbplanContentConsumer {
         builder.append(configuration.getNotifyServiceHost()).append(configuration.getNotifyServicePath());
         try {
             Map<String, Object> response = outboundReqService.fetchResultUsingPost(builder.toString(), request, null);
-            logger.info("The email notification is successfully sent, response is: " + response);
+            logger.debug("The email notification is successfully sent, response is: " + response);
         } catch (Exception e) {
             logger.error("Exception while posting the data in notification service: ", e);
         }

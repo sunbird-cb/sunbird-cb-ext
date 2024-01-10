@@ -35,15 +35,6 @@ public class PropertiesConfig {
     @Value("${hierarchy.store.keyspace.name}")
     private String hierarchyStoreKeyspaceName;
 
-    @Value("${cbplan.new.content.request.para.one}")
-    private String cbplanContentRequestFirstPara;
-
-    @Value("${cbplan.new.content.request.para.two}")
-    private String cbplanContentRequestSecondPara;
-
-    @Value("${cbplan.new.content.request.footnote}")
-    private String cbplanContentRequestFootnote;  //cbplan.content.request.notification.template
-
     @Value("${cbplan.content.request.notification.template}")
     private String cbplanContentRequestTemplate;  //notify.service.path.async
 
@@ -121,30 +112,6 @@ public class PropertiesConfig {
 
     public void setHierarchyStoreKeyspaceName(String hierarchyStoreKeyspaceName) {
         this.hierarchyStoreKeyspaceName = hierarchyStoreKeyspaceName;
-    }
-
-    public String getCbplanContentRequestFirstPara() {
-        return cbplanContentRequestFirstPara;
-    }
-
-    public void setCbplanContentRequestFirstPara(String cbplanContentRequestFirstPara) {
-        this.cbplanContentRequestFirstPara = cbplanContentRequestFirstPara;
-    }
-
-    public String getCbplanContentRequestSecondPara() {
-        return cbplanContentRequestSecondPara;
-    }
-
-    public void setCbplanContentRequestSecondPara(String cbplanContentRequestSecondPara) {
-        this.cbplanContentRequestSecondPara = cbplanContentRequestSecondPara;
-    }
-
-    public String getCbplanContentRequestFootnote() {
-        return cbplanContentRequestFootnote;
-    }
-
-    public void setCbplanContentRequestFootnote(String cbplanContentRequestFootnote) {
-        this.cbplanContentRequestFootnote = cbplanContentRequestFootnote;
     }
 
     public String getCbplanContentRequestTemplate() {

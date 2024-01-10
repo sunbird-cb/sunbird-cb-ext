@@ -953,7 +953,7 @@ public class Constants {
 	public static final String PROVIDER_EMAIL_ID_LIST = "providerEmailIdList";
 	public static final String CBP_ADMIN = "CBP_Admin";
 	public static final String ORGANIZATIONS_ROLES = "organisations.roles";
-	public static final String MDO_NAME_TAG = "#mdo_name";
+	public static final String MDO_NAME_PARAM= "mdo_name";
 	public static final String FIRST_BODY_PARAM = "body_para1"; //"body_para2"
 	public static final String SECOND_BODY_PARAM = "body_para2";
 	public static final String COMPETENCY_AREA_PARAM = "competency_area";
