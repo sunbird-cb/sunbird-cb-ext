@@ -573,6 +573,9 @@ public class CbExtServerProperties {
 	@Value("${sb.service.user.lookup.path}")
 	private String lmsUserLookupPath;
 
+	@Value("${wf.service.update.pendingRequestsToNewMDO}")
+	private String pendingRequestsToNewMDOPath;
+
 	public boolean qListFromCacheEnabled() {
 		return qListFromCacheEnabled;
 	}
@@ -2056,4 +2059,12 @@ public class CbExtServerProperties {
 	public void setCbPlanEndDate(String cbPlanEndDate) {
 		this.cbPlanEndDate = cbPlanEndDate;
   }
+
+	public String getPendingRequestsToNewMDOPath() {
+		return pendingRequestsToNewMDOPath;
+	}
+
+	public void setPendingRequestsToNewMDOPath(String pendingRequestsToNewMDOPath) {
+		this.pendingRequestsToNewMDOPath = pendingRequestsToNewMDOPath;
+	}
 }

@@ -500,7 +500,31 @@ public class ProfileServiceImpl implements ProfileService {
 			return response;
 		}
 
-		if (StringUtils.isNotEmpty(errMsg)) {
+		Map<String, Object> workflowResponse;
+		if (StringUtils.isEmpty(errMsg)) {
+			HashMap<String, String> wfHeaders = new HashMap<>();
+			wfHeaders.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
+			wfHeaders.put(Constants.ROOT_ORG_CONSTANT, Constants.IGOT);
+			wfHeaders.put(Constants.ORG_CONSTANT, Constants.DOPT);
+
+			Map<String, Object> wfRequestBody = new HashMap<>();
+			wfRequestBody.put(Constants.USER_ID, requestBody.get(Constants.USER_ID));
+			wfRequestBody.put(Constants.DEPARTMENTNAME, requestBody.get(Constants.CHANNEL));
+			wfRequestBody.put(Constants.FORCE_MIGRATION, true);
+			Map<String, Object> wfRequest = new HashMap<>();
+			wfRequest.put(Constants.REQUEST, wfRequestBody);
+
+			workflowResponse = outboundRequestHandlerService.fetchResultUsingPost(
+					serverConfig.getWfServiceHost() + serverConfig.getPendingRequestsToNewMDOPath(), wfRequest,
+					wfHeaders);
+			Map<String, Object> result = (Map<String, Object>) workflowResponse.get(Constants.RESULT);
+			if (!ObjectUtils.isEmpty(workflowResponse) && !Constants.OK.equalsIgnoreCase((String) result.get(Constants.STATUS))) {
+				response.getParams().setErrmsg((String) workflowResponse.get(Constants.ERROR_MESSAGE));
+				return response;
+			}
+			log.info("Successfully transferred the pending approval requests to the new MDO");
+
+		} else {
 			response.getParams().setErrmsg(errMsg);
 			return response;
 		}
