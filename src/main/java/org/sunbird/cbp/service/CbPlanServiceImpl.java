@@ -1072,21 +1072,24 @@ public class CbPlanServiceImpl implements CbPlanService {
     }
 
     private boolean updateLookupInfoForProperties(List<Map<String, Object>> cbPlanMap, CbPlan planDto) {
-        boolean isUpdatedLookup = false;
+        boolean isUpdatedLookup = true;
         for (Map<String, Object> cbLookupInfo : cbPlanMap) {
-            Map<String, Object> compositeKey = new HashMap<>();
-            compositeKey.put(Constants.ORG_ID, planDto.getOrgId());
-            compositeKey.put(Constants.CB_PLAN_ID, planDto.getId());
-            compositeKey.put(Constants.CB_ASSIGNMENT_TYPE_INFO_KEY, cbLookupInfo.get(Constants.CB_ASSIGNMENT_TYPE_INFO_KEY));
+            Date endDate = (Date)cbLookupInfo.get(Constants.END_DATE);
+            if (!planDto.getEndDate().equals(endDate)) {
+                Map<String, Object> compositeKey = new HashMap<>();
+                compositeKey.put(Constants.ORG_ID, planDto.getOrgId());
+                compositeKey.put(Constants.CB_PLAN_ID, planDto.getId());
+                compositeKey.put(Constants.CB_ASSIGNMENT_TYPE_INFO_KEY, cbLookupInfo.get(Constants.CB_ASSIGNMENT_TYPE_INFO_KEY));
 
-            Map<String, Object> lookupInfoUpdated = new HashMap<>();
-            lookupInfoUpdated.put(Constants.END_DATE, planDto.getEndDate());
-            Map<String, Object> resp = cassandraOperation.updateRecord(Constants.KEYSPACE_SUNBIRD,
-                    Constants.TABLE_CB_PLAN_LOOKUP, lookupInfoUpdated, compositeKey);
-            if (resp.get(Constants.RESPONSE).equals(Constants.SUCCESS)) {
-                isUpdatedLookup = true;
-            } else {
-                isUpdatedLookup = false;
+                Map<String, Object> lookupInfoUpdated = new HashMap<>();
+                lookupInfoUpdated.put(Constants.END_DATE, planDto.getEndDate());
+                Map<String, Object> resp = cassandraOperation.updateRecord(Constants.KEYSPACE_SUNBIRD,
+                        Constants.TABLE_CB_PLAN_LOOKUP, lookupInfoUpdated, compositeKey);
+                if (resp.get(Constants.RESPONSE).equals(Constants.SUCCESS)) {
+                    isUpdatedLookup = true;
+                } else {
+                    isUpdatedLookup = false;
+                }
             }
         }
         return isUpdatedLookup;
