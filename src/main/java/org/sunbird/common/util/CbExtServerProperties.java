@@ -581,6 +581,9 @@ public class CbExtServerProperties {
 	@Value("${sb.service.user.lookup.path}")
 	private String lmsUserLookupPath;
 
+	@Value("${wf.service.update.pendingRequestsToNewMDO}")
+	private String pendingRequestsToNewMDOPath;
+
 	@Value("${batch.enrolment.return.size}")
 	private Integer batchEnrolmentReturnSize;
 
@@ -2092,7 +2095,15 @@ public class CbExtServerProperties {
 
 	public void setCbPlanEndDate(String cbPlanEndDate) {
 		this.cbPlanEndDate = cbPlanEndDate;
-  }
+  	}
+
+	public String getPendingRequestsToNewMDOPath() {
+		return pendingRequestsToNewMDOPath;
+	}
+
+	public void setPendingRequestsToNewMDOPath(String pendingRequestsToNewMDOPath) {
+		this.pendingRequestsToNewMDOPath = pendingRequestsToNewMDOPath;
+	}
 
 	public List<String> getCbPlanUpdatePublishAuthorizedRoles() {
 		return Arrays.asList(cbPlanUpdatePublishAuthorizedRoles.split(",", -1));
