@@ -17,6 +17,7 @@ import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
 import org.sunbird.common.util.Constants;
 import org.sunbird.core.config.PropertiesConfig;
 import org.sunbird.core.logger.CbExtLogger;
+import org.sunbird.user.service.UserUtilityService;
 
 import java.io.StringWriter;
 import java.util.*;
@@ -37,6 +38,9 @@ public class CbplanContentConsumer {
     @Autowired
     CassandraOperation cassandraOperation;
 
+    @Autowired
+    UserUtilityService userService;
+
     @KafkaListener(topics = "${kafka.topic.cbplan.content.request}", groupId = "${kafka.topic.cbplan.content.request.group}")
     public void cbplanContentRequestConsumer(ConsumerRecord<String, String> data){
         HashMap<String, Object> cbplanContentRequest = null;
@@ -56,6 +60,8 @@ public class CbplanContentConsumer {
                 }
             }
             Set<String> providerRootOrgIds = new HashSet<>((List<String>) cbplanContentRequest.get(Constants.PROVIDER_ORG_ID));
+            String mdoAdminId = (String) cbplanContentRequest.get(Constants.CREATED_BY);
+            String mdoAdminEmail = userService.getUserDetails(Collections.singletonList(mdoAdminId), new ArrayList<>()).get(mdoAdminId).get(Constants.EMAIL);
 
             Map<String, Object> mailNotificationDetails = new HashMap<>();
             mailNotificationDetails.put(Constants.PROVIDER_EMAIL_ID_LIST, getCBPAdminDetails(providerRootOrgIds));
@@ -64,6 +70,7 @@ public class CbplanContentConsumer {
             mailNotificationDetails.put(Constants.COMPETENCY_THEMES, allThemes.replace(allThemes.length()-2, allThemes.length() - 1, "."));
             mailNotificationDetails.put(Constants.COMPETENCY_SUB_THEMES, allSubThemes.replace(allSubThemes.length()-2, allSubThemes.length()-1, "."));
             mailNotificationDetails.put(Constants.DESCRIPTION , cbplanContentRequest.get(Constants.DESCRIPTION));
+            mailNotificationDetails.put(Constants.COPY_EMAIL, mdoAdminEmail);
             sendNotificationToProviders(mailNotificationDetails);
 
         } catch (Exception e) {
@@ -124,12 +131,14 @@ public class CbplanContentConsumer {
     private void sendNotificationToProviders( Map<String, Object> mailNotificationDetails) {
         List<String> providerIdList = (List<String>) mailNotificationDetails.get(Constants.PROVIDER_EMAIL_ID_LIST);
         String mdoName = (String) mailNotificationDetails.get(Constants.MDO_NAME);
+        String mdoAdminEmail = (String) mailNotificationDetails.get(Constants.COPY_EMAIL);
 
         Map<String, Object> params = new HashMap<>();
         NotificationRequest notificationRequest = new NotificationRequest();
         notificationRequest.setDeliveryType(Constants.MESSAGE);
         notificationRequest.setIds(providerIdList);
         notificationRequest.setMode(Constants.EMAIL);
+        notificationRequest.setCopyEmail(Collections.singletonList(mdoAdminEmail));
 
         params.put(Constants.MDO_NAME_PARAM, mdoName);
         params.put(Constants.NAME, mdoName);

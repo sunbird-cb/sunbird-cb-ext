@@ -959,6 +959,7 @@ public class Constants {
 	public static final String COMPETENCY_AREA_PARAM = "competency_area";
 	public static final String COMPETENCY_THEME_PARAM = "competency_theme";
 	public static final String COMPETENCY_SUB_THEME_PARAM = "competency_subtheme";
+	public static final String COPY_EMAIL = "copyEmail";
 
 
     private Constants() {
