@@ -498,24 +498,24 @@ public class CbPlanServiceImpl implements CbPlanService {
                     if (!courseDetailsMap.containsKey(courseId)) {
                         contentDetails = contentService.readContentFromCache(courseId, null);
                         if (MapUtils.isNotEmpty(contentDetails)) {
-                            if (Constants.LIVE.equalsIgnoreCase((String) contentDetails.get(Constants.STATUS))) {
-                                if (courseId.contains("_rc")) {
-                                    if (isVerifiedKaramyogi != null && isVerifiedKaramyogi) {
-                                        Map<String, Object> secureSettings = (Map<String, Object>) contentDetails.get(Constants.SECURE_SETTINGS);
-                                        if (MapUtils.isNotEmpty(secureSettings)) {
-                                            List<String> secureOrganisationList = (List<String>) secureSettings.get(Constants.ORGANISATION);
-                                            if (CollectionUtils.isNotEmpty(secureOrganisationList) && secureOrganisationList.contains(userOrgId)) {
-                                                courseDetailsMap.put(courseId, contentDetails);
-                                            }
+                            //if (Constants.LIVE.equalsIgnoreCase((String) contentDetails.get(Constants.STATUS))) {
+                            if (courseId.contains("_rc")) {
+                                if (isVerifiedKaramyogi != null && isVerifiedKaramyogi) {
+                                    Map<String, Object> secureSettings = (Map<String, Object>) contentDetails.get(Constants.SECURE_SETTINGS);
+                                    if (MapUtils.isNotEmpty(secureSettings)) {
+                                        List<String> secureOrganisationList = (List<String>) secureSettings.get(Constants.ORGANISATION);
+                                        if (CollectionUtils.isNotEmpty(secureOrganisationList) && secureOrganisationList.contains(userOrgId)) {
+                                            courseDetailsMap.put(courseId, contentDetails);
                                         }
                                     }
-                                    if (!courseDetailsMap.containsKey(courseId)) {
-                                        contentDetails.clear();
-                                    }
-                                } else {
-                                    courseDetailsMap.put(courseId, contentDetails);
                                 }
+                                if (!courseDetailsMap.containsKey(courseId)) {
+                                    contentDetails.clear();
+                                }
+                            } else {
+                                courseDetailsMap.put(courseId, contentDetails);
                             }
+                            //}
                         } else {
                             logger.error("Failed to read course details for Id: " + courseId);
                         }
@@ -1074,7 +1074,7 @@ public class CbPlanServiceImpl implements CbPlanService {
     private boolean updateLookupInfoForProperties(List<Map<String, Object>> cbPlanMap, CbPlan planDto) {
         boolean isUpdatedLookup = true;
         for (Map<String, Object> cbLookupInfo : cbPlanMap) {
-            Date endDate = (Date)cbLookupInfo.get(Constants.END_DATE);
+            Date endDate = (Date) cbLookupInfo.get(Constants.END_DATE);
             if (!planDto.getEndDate().equals(endDate)) {
                 Map<String, Object> compositeKey = new HashMap<>();
                 compositeKey.put(Constants.ORG_ID, planDto.getOrgId());
