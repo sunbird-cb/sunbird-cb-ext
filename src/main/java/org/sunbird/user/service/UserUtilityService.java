@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.telemetry.model.LastLoginInfo;
 import org.sunbird.user.registration.model.UserRegistration;
 
@@ -49,4 +50,5 @@ public interface UserUtilityService {
 	Map<String, Map<String, Object>> getUserDetailsFromES(List<String> userIdList, List<String> userFields) throws IOException;
 
 	Map<String, Object> getUsersDataFromLookup(String email, String authToken);
+	SBApiResponse getRecommendation(String authUserToken, Map<String, Object> orgRequest);
 }

@@ -40,7 +40,8 @@ public class PropertiesConfig {
 
     @Value("${notify.service.path.async}")
     private String notificationAsyncPath;
-
+    @Value("${recommend.content.notification.template}")
+    private String recommendContentTemplate;
 
     public String getLmsServiceHost() {
         return lmsServiceHost;
@@ -128,5 +129,12 @@ public class PropertiesConfig {
 
     public void setNotificationAsyncPath(String notificationAsyncPath) {
         this.notificationAsyncPath = notificationAsyncPath;
+    }
+    public String getRecommendContentTemplate() {
+        return recommendContentTemplate;
+    }
+
+    public void setRecommendContentTemplate(String recommendContentTemplate) {
+        this.recommendContentTemplate = recommendContentTemplate;
     }
 }

@@ -1,20 +1,17 @@
 package org.sunbird.user.service;
 
 import java.io.IOException;
+import java.io.StringWriter;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.jcraft.jsch.UserInfo;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.velocity.VelocityContext;
+import org.apache.velocity.app.VelocityEngine;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -25,23 +22,18 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.client.RestTemplate;
 import org.sunbird.cassandra.utils.CassandraOperation;
-import org.sunbird.common.model.SearchUserApiContent;
-import org.sunbird.common.model.SearchUserApiResp;
-import org.sunbird.common.model.SunbirdApiRequest;
-import org.sunbird.common.model.SunbirdApiResp;
-import org.sunbird.common.model.SunbirdUserProfileDetail;
+import org.sunbird.common.model.*;
 import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
-import org.sunbird.common.util.CbExtServerProperties;
-import org.sunbird.common.util.Constants;
-import org.sunbird.common.util.IndexerService;
-import org.sunbird.common.util.ProjectUtil;
+import org.sunbird.common.util.*;
 import org.sunbird.core.cipher.DecryptServiceImpl;
+import org.sunbird.core.config.PropertiesConfig;
 import org.sunbird.core.exception.ApplicationLogicError;
 import org.sunbird.telemetry.model.LastLoginInfo;
 import org.sunbird.user.registration.model.UserRegistration;
@@ -82,6 +74,12 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 
 	@Autowired
 	ObjectMapper objectMapper;
+	@Autowired
+	AccessTokenValidator accessTokenValidator;
+	@Autowired
+	PropertiesConfig configuration;
+	@Autowired
+	private OutboundRequestHandlerServiceImpl outboundReqService;
 
 	private Logger logger = LoggerFactory.getLogger(UserUtilityServiceImpl.class);
 
@@ -769,5 +767,192 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 			}
 		}
 		return new HashMap<>();
+	}
+
+	@Override
+	public SBApiResponse getRecommendation(String authUserToken, Map<String, Object> request) {
+		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.USER_CONTENT_RECOMMENDATION);
+		try {
+
+			String userId = validateAuthTokenAndFetchUserId(authUserToken);
+			List<String> fields = Arrays.asList(Constants.FIRSTNAME);
+			Map<String, Object> propertiesMap = new HashMap<>();
+			propertiesMap.put(Constants.ID, userId);
+			List<Map<String, Object>> userDetailsResult = cassandraOperation.getRecordsByPropertiesWithoutFiltering(
+					Constants.SUNBIRD_KEY_SPACE_NAME, Constants.USER, propertiesMap, fields);
+			Map<String, Object> userDetails = userDetailsResult.get(0);
+			String name = (String) userDetails.get(Constants.FIRSTNAME);
+
+			Map<String, Object> requestData = (Map<String, Object>) request.get(Constants.REQUEST);
+
+			String errorMsg = validateRequest(requestData);
+			if (!StringUtils.isEmpty(errorMsg)) {
+				response.getParams().setErrmsg(errorMsg);
+				response.getParams().setStatus(Constants.FAILED);
+				response.setResponseCode(HttpStatus.BAD_REQUEST);
+				return response;
+			}
+
+			List<Map<String, Object>> recipientsList = (List<Map<String, Object>>) requestData.get("recipients");
+			List<String> emailList = new ArrayList<>();
+			for (Map<String, Object> map : recipientsList) {
+				emailList.add((String) map.get(Constants.EMAIL));
+			}
+
+			Map<String, Object> requestObject = new HashMap<>();
+			Map<String, Object> req = new HashMap<>();
+			Map<String, Object> filters = new HashMap<>();
+			;
+			filters.put(Constants.PROFILE_DETAILS_PRIMARY_EMAIL, emailList);
+			List<String> userFields = Arrays.asList(Constants.USER_ID, Constants.PROFILE_DETAILS);
+			req.put(Constants.FILTERS, filters);
+			req.put(Constants.FIELDS, userFields);
+			requestObject.put(Constants.REQUEST, req);
+			HashMap<String, String> headersValue = new HashMap<>();
+			headersValue.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
+			StringBuilder url = new StringBuilder(configuration.getLmsServiceHost()).append(configuration.getLmsUserSearchEndPoint());
+			Map<String, Object> searchProfileApiResp = outboundReqService.fetchResultUsingPost(url.toString(), requestObject, headersValue);
+			List<String> emailResponseList = new ArrayList<>();
+			if (searchProfileApiResp != null
+					&& Constants.OK.equalsIgnoreCase((String) searchProfileApiResp.get(Constants.RESPONSE_CODE))) {
+				Map<String, Object> map = (Map<String, Object>) searchProfileApiResp.get(Constants.RESULT);
+				Map<String, Object> resp = (Map<String, Object>) map.get(Constants.RESPONSE);
+				List<Map<String, Object>> contents = (List<Map<String, Object>>) resp.get(Constants.CONTENT);
+				for (Map<String, Object> content : contents) {
+					Map<String, Object> profileDetails = (Map<String, Object>) content.get(Constants.PROFILE_DETAILS);
+					Map<String, Object> personalDetails = (Map<String, Object>) profileDetails.get(Constants.PERSONAL_DETAILS);
+					String email = (String) personalDetails.get(Constants.PRIMARY_EMAIL);
+					emailResponseList.add(email);
+				}
+			}
+
+			if (!emailResponseList.isEmpty()) {
+				String subject = "";
+				StringBuilder link = new StringBuilder();
+				link.append(serverConfig.getCourseLinkUrl()).append(requestData.get(Constants.COURSE_ID)).append("/").append("overview");
+				String contentLink = link.toString();
+
+				subject = Constants.RECOMMEND_CONTENT_SUBJECT.replace(Constants.RECOMMENDER, name);
+				Map<String, Object> mailNotificationDetails = new HashMap<>();
+				mailNotificationDetails.put(Constants.RECIPIENT_EMAILS, emailResponseList);
+				mailNotificationDetails.put(Constants.COURSE_NAME, requestData.get(Constants.COURSE_NAME));
+				mailNotificationDetails.put(Constants.SUBJECT, subject);
+				mailNotificationDetails.put(Constants.LINK, contentLink);
+				mailNotificationDetails.put(Constants.COURSE_POSTER_IMAGE_URL, requestData.get(Constants.COURSE_POSTER_IMAGE_URL));
+				mailNotificationDetails.put(Constants.COURSE_PROVIDER, requestData.get(Constants.COURSE_PROVIDER));
+				sendNotificationToRecipients(mailNotificationDetails);
+			}
+		} catch (Exception e) {
+			String errMsg = "Error while performing operation." + e;
+			response.getParams().setErrmsg(errMsg);
+			response.getParams().setStatus(Constants.FAILED);
+			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		return response;
+	}
+
+	private String validateRequest(Map<String, Object> request) {
+		StringBuffer str = new StringBuffer();
+
+		List<String> errList = new ArrayList<String>();
+		if (ObjectUtils.isEmpty(request.get(Constants.COURSE_ID))) {
+			errList.add(Constants.COURSE_ID);
+		}
+		if (ObjectUtils.isEmpty(request.get(Constants.COURSE_NAME))) {
+			errList.add(Constants.COURSE_NAME);
+		}
+		if (ObjectUtils.isEmpty(request.get(Constants.COURSE_POSTER_IMAGE_URL))) {
+			errList.add(Constants.COURSE_POSTER_IMAGE_URL);
+		}
+		if (ObjectUtils.isEmpty(request.get(Constants.COURSE_PROVIDER))) { //courseProvider
+			errList.add(Constants.COURSE_PROVIDER);
+		}
+		if (ObjectUtils.isEmpty(request.get(Constants.RECIPIENTS))) {
+			errList.add(Constants.RECIPIENTS);
+		}
+		if (!errList.isEmpty()) {
+			str.append("Failed to Due To Missing Params - ").append(errList).append(".");
+		}
+
+		if (errList.isEmpty()) {
+			List<Map<String, Object>> listOfMaps = (List<Map<String, Object>>) request.get(Constants.RECIPIENTS);
+			if (!CollectionUtils.isEmpty(listOfMaps)) {
+				for (Map<String, Object> map : listOfMaps) {
+					if (!map.containsKey(Constants.EMAIL) || StringUtils.isBlank((String) map.get(Constants.EMAIL))) {
+						str.append("Failed due to missing or empty recipient's email.");
+						break;
+					}
+				}
+			} else {
+				str.append("Failed due to empty recipient's list");
+			}
+		}
+		return str.toString();
+	}
+
+	private String validateAuthTokenAndFetchUserId(String authUserToken) {
+		return accessTokenValidator.fetchUserIdFromAccessToken(authUserToken);
+	}
+
+	private void sendNotificationToRecipients(Map<String, Object> mailNotificationDetails) {
+		List<String> recipientsList = (List<String>) mailNotificationDetails.get(Constants.RECIPIENT_EMAILS);
+
+		Map<String, Object> params = new HashMap<>();
+		NotificationRequest notificationRequest = new NotificationRequest();
+		notificationRequest.setDeliveryType(Constants.MESSAGE);
+		notificationRequest.setIds(recipientsList);
+		notificationRequest.setMode(Constants.EMAIL);
+		params.put(Constants.COURSE_NAME, mailNotificationDetails.get(Constants.COURSE_NAME));
+		params.put(Constants.COURSE_POSTER_IMAGE_URL, mailNotificationDetails.get(Constants.COURSE_POSTER_IMAGE_URL));
+		params.put(Constants.COURSE_PROVIDER, mailNotificationDetails.get(Constants.COURSE_PROVIDER));
+		params.put(Constants.LINK, mailNotificationDetails.get(Constants.LINK));
+		Template template = new Template(constructEmailTemplate(configuration.getRecommendContentTemplate(), params), configuration.getRecommendContentTemplate(), params);
+		template.setParams(params);
+		Config config = new Config();
+		config.setSubject((String) mailNotificationDetails.get(Constants.SUBJECT));
+		config.setSender(configuration.getSupportEmail());
+		Map<String, Object> req = new HashMap<>();
+		notificationRequest.setTemplate(template);
+		notificationRequest.setConfig(config);
+		Map<String, List<NotificationRequest>> notificationMap = new HashMap<>();
+		notificationMap.put(Constants.NOTIFICATIONS, Collections.singletonList(notificationRequest));
+		req.put(Constants.REQUEST, notificationMap);
+		sendNotification(req);
+	}
+
+	private void sendNotification(Map<String, Object> request) {
+		StringBuilder builder = new StringBuilder();
+		builder.append(configuration.getNotifyServiceHost()).append(configuration.getNotifyServicePath());
+		try {
+			Map<String, Object> response = outboundReqService.fetchResultUsingPost(builder.toString(), request, null);
+			logger.debug("The email notification is successfully sent, response is: " + response);
+		} catch (Exception e) {
+			logger.error("Exception while posting the data in notification service: ", e);
+		}
+	}
+
+	private String constructEmailTemplate(String templateName, Map<String, Object> params) {
+		String replacedHTML = new String();
+		try {
+			Map<String, Object> propertyMap = new HashMap<>();
+			propertyMap.put(Constants.NAME, templateName);
+			List<Map<String, Object>> templateMap = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_EMAIL_TEMPLATE, propertyMap, Collections.singletonList(Constants.TEMPLATE));
+			String htmlTemplate = templateMap.stream()
+					.findFirst()
+					.map(template -> (String) template.get(Constants.TEMPLATE))
+					.orElse(null);
+			VelocityEngine velocityEngine = new VelocityEngine();
+			velocityEngine.init();
+			VelocityContext context = new VelocityContext();
+			for (Map.Entry<String, Object> entry : params.entrySet()) {
+				context.put(entry.getKey(), entry.getValue());
+			}
+			StringWriter writer = new StringWriter();
+			velocityEngine.evaluate(context, writer, "HTMLTemplate", htmlTemplate);
+			replacedHTML = writer.toString();
+		} catch (Exception e) {
+			logger.error("Unable to create template ", e);
+		}
+		return replacedHTML;
 	}
 }

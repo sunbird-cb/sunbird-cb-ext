@@ -959,6 +959,12 @@ public class Constants {
 	public static final String COMPETENCY_AREA_PARAM = "competency_area";
 	public static final String COMPETENCY_THEME_PARAM = "competency_theme";
 	public static final String COMPETENCY_SUB_THEME_PARAM = "competency_subtheme";
+	public static final String USER_CONTENT_RECOMMENDATION = "user.v1.content.recommendation";
+	public static final String RECOMMEND_CONTENT_SUBJECT ="#Recommender recommends this iGOT Karmayogi Course for you!";
+	public static final String RECOMMENDER = "#Recommender";
+	public static final String COURSE_POSTER_IMAGE_URL= "coursePosterImageUrl";
+	public static final String COURSE_PROVIDER = "courseProvider";
+	public static final String RECIPIENTS = "recipients";
 
 
     private Constants() {
