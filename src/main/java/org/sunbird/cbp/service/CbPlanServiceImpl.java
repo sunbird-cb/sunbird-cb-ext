@@ -484,7 +484,8 @@ public class CbPlanServiceImpl implements CbPlanService {
             }
             List<Map<String, Object>> resultMap = new ArrayList<>();
             Map<String, Object> courseDetailsMap = new HashMap<>();
-            cbplanResult = cbplanResult.stream().filter(userCbPlan -> (Boolean)userCbPlan.get(Constants.CB_IS_ACTIVE) == true).collect(Collectors.toList());
+            cbplanResult = cbplanResult.stream().filter(userCbPlan -> (Boolean)userCbPlan.get(Constants.CB_IS_ACTIVE) == true)
+                    .sorted(Comparator.comparing(m -> (Date) ((Map<String, Object>) m).get(Constants.END_DATE)).reversed()).collect(Collectors.toList());
             for (Map<String, Object> cbPlan : cbplanResult) {
                 Map<String, Object> cbPlanDetails = new HashMap<>();
                 cbPlanDetails.put(Constants.ID, cbPlan.get(Constants.CB_PLAN_ID_KEY));
@@ -520,7 +521,7 @@ public class CbPlanServiceImpl implements CbPlanService {
                             logger.error("Failed to read course details for Id: " + courseId);
                         }
                     } else {
-                        contentDetails = (Map<String, Object>) courseDetailsMap.get(courseId);
+                        continue;
                     }
                     if (MapUtils.isNotEmpty(contentDetails)) {
                         courseList.add(contentDetails);
