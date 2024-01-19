@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.sunbird.common.model.SBApiResponse;
+import org.sunbird.common.util.Constants;
 import org.sunbird.telemetry.model.LastLoginInfo;
 import org.sunbird.user.service.UserUtilityService;
 
@@ -21,9 +22,10 @@ public class UserUtilityController {
 			throws NumberFormatException {
 		return new ResponseEntity<>(userUtilService.updateLogin(userLoginInfo), HttpStatus.OK);
 	}
+
 	@PostMapping("/user/v1/content/recommend")
-	public ResponseEntity<SBApiResponse>recommendContent(@RequestHeader("x-authenticated-user-token") String authUserToken, @RequestBody Map<String, Object> request ) {
-		SBApiResponse response = userUtilService.getRecommendation(authUserToken,request);
+	public ResponseEntity<SBApiResponse> recommendContent(@RequestHeader(Constants.USER_TOKEN) String authUserToken, @RequestBody Map<String, Object> request) {
+		SBApiResponse response = userUtilService.getRecommendation(authUserToken, request);
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
 }
