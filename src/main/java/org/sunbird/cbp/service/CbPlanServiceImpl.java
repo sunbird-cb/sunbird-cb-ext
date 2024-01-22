@@ -734,15 +734,21 @@ public class CbPlanServiceImpl implements CbPlanService {
         List<Map<String, Object>> cbPlanMap = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
                 Constants.TABLE_CB_PLAN_LOOKUP, cbPlanInfo, null);
         List<String> cbPlanInfoInsertAssignmentKey = new ArrayList<>();
-        List<String> cbPlanInfoRemoveAssignmentKey = new ArrayList<>();
+        List<String> cbPlanInfoUpdateAssignmentKey = new ArrayList<>();
+        List<String> cbPlanInfoRequestUpdateAssignmentKey = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(cbPlanMap)) {
             List<String> assignmentKeyInfoList = cbPlanMap.stream()
                     .map(c -> (String) c.get(Constants.CB_ASSIGNMENT_TYPE_INFO_KEY)).collect(Collectors.toList());
             cbPlanInfoInsertAssignmentKey = planDto.getAssignmentTypeInfo().stream()
                     .filter(assignmentKeyInfo -> !assignmentKeyInfoList.contains(assignmentKeyInfo))
                     .collect(Collectors.toList());
-            cbPlanInfoRemoveAssignmentKey = assignmentKeyInfoList.stream()
+            cbPlanInfoUpdateAssignmentKey = assignmentKeyInfoList.stream()
                     .filter(key -> !planDto.getAssignmentTypeInfo().contains(key)).collect(Collectors.toList());
+            cbPlanInfoRequestUpdateAssignmentKey = cbPlanMap.stream().filter(key -> (planDto.getAssignmentTypeInfo().contains((String)key.get(Constants.CB_ASSIGNMENT_TYPE_INFO_KEY))
+                                                  && (Boolean)key.get(Constants.CB_IS_ACTIVE) == false))
+                                                    .map(key -> (String) key.get(Constants.CB_ASSIGNMENT_TYPE_INFO_KEY))
+                                                    .collect(Collectors.toList());
+            cbPlanInfoUpdateAssignmentKey.addAll(cbPlanInfoRequestUpdateAssignmentKey);
             isUpdatedLookup = updateLookupInfoForProperties(cbPlanMap, planDto);
         } else {
             cbPlanInfoInsertAssignmentKey = planDto.getAssignmentTypeInfo();
@@ -766,14 +772,18 @@ public class CbPlanServiceImpl implements CbPlanService {
             }
         }
 
-        for (String assignmentTypeInfo : cbPlanInfoRemoveAssignmentKey) {
+        for (String assignmentTypeInfo : cbPlanInfoUpdateAssignmentKey) {
             Map<String, Object> compositeKey = new HashMap<>();
             compositeKey.put(Constants.ORG_ID, orgId);
             compositeKey.put(Constants.CB_PLAN_ID, cbPlanId);
             compositeKey.put(Constants.CB_ASSIGNMENT_TYPE_INFO_KEY, assignmentTypeInfo);
 
             Map<String, Object> lookupInfoUpdated = new HashMap<>();
-            lookupInfoUpdated.put(Constants.CB_IS_ACTIVE, false);
+            if (CollectionUtils.isNotEmpty(cbPlanInfoRequestUpdateAssignmentKey) && cbPlanInfoRequestUpdateAssignmentKey.contains(assignmentTypeInfo)) {
+                lookupInfoUpdated.put(Constants.CB_IS_ACTIVE, true);
+            } else {
+                lookupInfoUpdated.put(Constants.CB_IS_ACTIVE, false);
+            }
             lookupInfoUpdated.put(Constants.END_DATE, planDto.getEndDate());
             Map<String, Object> resp = cassandraOperation.updateRecord(Constants.KEYSPACE_SUNBIRD,
                     Constants.TABLE_CB_PLAN_LOOKUP, lookupInfoUpdated, compositeKey);
