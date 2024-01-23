@@ -33,7 +33,6 @@ import org.sunbird.common.model.*;
 import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
 import org.sunbird.common.util.*;
 import org.sunbird.core.cipher.DecryptServiceImpl;
-import org.sunbird.core.config.PropertiesConfig;
 import org.sunbird.core.exception.ApplicationLogicError;
 import org.sunbird.telemetry.model.LastLoginInfo;
 import org.sunbird.user.registration.model.UserRegistration;
@@ -767,7 +766,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 	}
 
 	@Override
-	public SBApiResponse getRecommendation(String authUserToken, Map<String, Object> request) {
+	public SBApiResponse recommendContent(String authUserToken, Map<String, Object> request) {
 		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.USER_CONTENT_RECOMMENDATION);
 		try {
 			String userId = validateAuthTokenAndFetchUserId(authUserToken);
@@ -808,7 +807,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 			requestObject.put(Constants.REQUEST, req);
 			HashMap<String, String> headersValue = new HashMap<>();
 			headersValue.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
-			StringBuilder url = new StringBuilder(props.getLmsServiceHost()).append(props.getLmsUserSearchEndPoint());
+			StringBuilder url = new StringBuilder(props.getSbUrl()).append(props.getUserSearchEndPoint());
 			Map<String, Object> searchProfileApiResp = outboundRequestHandlerService.fetchResultUsingPost(url.toString(), requestObject, headersValue);
 			List<String> emailResponseList = new ArrayList<>();
 			if (searchProfileApiResp != null
@@ -840,7 +839,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 			}
 		} catch (Exception e) {
 			String errMsg = "Error while performing operation." + e.getMessage();
-			logger.error(errMsg + e);
+			logger.error(errMsg, e);
 			response.getParams().setErrmsg(errMsg);
 			response.getParams().setStatus(Constants.FAILED);
 			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);

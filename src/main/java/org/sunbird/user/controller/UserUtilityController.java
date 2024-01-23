@@ -25,7 +25,7 @@ public class UserUtilityController {
 
 	@PostMapping("/user/v1/content/recommend")
 	public ResponseEntity<SBApiResponse> recommendContent(@RequestHeader(Constants.USER_TOKEN) String authUserToken, @RequestBody Map<String, Object> request) {
-		SBApiResponse response = userUtilService.getRecommendation(authUserToken, request);
+		SBApiResponse response = userUtilService.recommendContent(authUserToken, request);
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
 }

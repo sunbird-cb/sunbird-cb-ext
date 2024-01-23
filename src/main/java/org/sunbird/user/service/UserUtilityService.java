@@ -50,5 +50,5 @@ public interface UserUtilityService {
 	Map<String, Map<String, Object>> getUserDetailsFromES(List<String> userIdList, List<String> userFields) throws IOException;
 
 	Map<String, Object> getUsersDataFromLookup(String email, String authToken);
-	SBApiResponse getRecommendation(String authUserToken, Map<String, Object> orgRequest);
+	SBApiResponse recommendContent(String authUserToken, Map<String, Object> orgRequest);
 }

@@ -613,15 +613,6 @@ public class CbExtServerProperties {
 	@Value("${notify.service.host}")
 	private String notifyServiceHost;
 
-	@Value("${notify.service.path}")
-	private String notifyServicePath;
-
-	@Value("${lms.service.host}")
-	private String lmsServiceHost;
-
-	@Value("${lms.user.search}")
-	private String lmsUserSearchEndPoint;
-
 	@Value("${recommend.content.notification.template}")
 	private String recommendContentTemplate;
 
@@ -2196,30 +2187,6 @@ public class CbExtServerProperties {
 
 	public void setNotifyServiceHost(String notifyServiceHost) {
 		this.notifyServiceHost = notifyServiceHost;
-	}
-
-	public String getNotifyServicePath() {
-		return notifyServicePath;
-	}
-
-	public void setNotifyServicePath(String notifyServicePath) {
-		this.notifyServicePath = notifyServicePath;
-	}
-
-	public String getLmsServiceHost() {
-		return lmsServiceHost;
-	}
-
-	public void setLmsServiceHost(String lmsServiceHost) {
-		this.lmsServiceHost = lmsServiceHost;
-	}
-
-	public String getLmsUserSearchEndPoint() {
-		return lmsUserSearchEndPoint;
-	}
-
-	public void setLmsUserSearchEndPoint(String lmsUserSearchEndPoint) {
-		this.lmsUserSearchEndPoint = lmsUserSearchEndPoint;
 	}
 
 	public String getRecommendContentTemplate() {
