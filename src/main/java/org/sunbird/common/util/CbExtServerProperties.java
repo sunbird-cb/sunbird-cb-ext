@@ -610,6 +610,18 @@ public class CbExtServerProperties {
 	@Value("#{${spv.report.property.subFolder.map}}")
 	private Map<String, String> spvReportSubFolderTypeMap;
 
+	@Value("${notify.service.host}")
+	private String notifyServiceHost;
+
+	@Value("${recommend.content.notification.template}")
+	private String recommendContentTemplate;
+
+	@Value("${notification.support.mail}")
+	private String supportEmail;
+
+	@Value("${notify.service.path.async}")
+	private String notifyServicePathAsync;
+
 	public boolean qListFromCacheEnabled() {
 		return qListFromCacheEnabled;
 	}
@@ -2167,5 +2179,37 @@ public class CbExtServerProperties {
 
 	public void setCbplanContentRequestKafkaTopic(String cbplanContentRequestKafkaTopic) {
 		this.cbplanContentRequestKafkaTopic = cbplanContentRequestKafkaTopic;
+	}
+
+	public String getNotifyServiceHost() {
+		return notifyServiceHost;
+	}
+
+	public void setNotifyServiceHost(String notifyServiceHost) {
+		this.notifyServiceHost = notifyServiceHost;
+	}
+
+	public String getRecommendContentTemplate() {
+		return recommendContentTemplate;
+	}
+
+	public void setRecommendContentTemplate(String recommendContentTemplate) {
+		this.recommendContentTemplate = recommendContentTemplate;
+	}
+
+	public String getSupportEmail() {
+		return supportEmail;
+	}
+
+	public void setSupportEmail(String supportEmail) {
+		this.supportEmail = supportEmail;
+	}
+
+	public String getNotifyServicePathAsync() {
+		return notifyServicePathAsync;
+	}
+
+	public void setNotifyServicePathAsync(String notifyServicePathAsync) {
+		this.notifyServicePathAsync = notifyServicePathAsync;
 	}
 }

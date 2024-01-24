@@ -41,7 +41,6 @@ public class PropertiesConfig {
     @Value("${notify.service.path.async}")
     private String notificationAsyncPath;
 
-
     public String getLmsServiceHost() {
         return lmsServiceHost;
     }
