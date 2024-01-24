@@ -610,6 +610,9 @@ public class CbExtServerProperties {
 	@Value("#{${spv.report.property.subFolder.map}}")
 	private Map<String, String> spvReportSubFolderTypeMap;
 
+	@Value("${user.registration.welcome.email.profileUpdateLink}")
+	private String welcomeEmailProfileUpdateLink;
+
 	public boolean qListFromCacheEnabled() {
 		return qListFromCacheEnabled;
 	}
@@ -2167,5 +2170,13 @@ public class CbExtServerProperties {
 
 	public void setCbplanContentRequestKafkaTopic(String cbplanContentRequestKafkaTopic) {
 		this.cbplanContentRequestKafkaTopic = cbplanContentRequestKafkaTopic;
+	}
+
+	public String getWelcomeEmailProfileUpdateLink() {
+		return welcomeEmailProfileUpdateLink;
+	}
+
+	public void setWelcomeEmailProfileUpdateLink(String welcomeEmailProfileUpdateLink) {
+		this.welcomeEmailProfileUpdateLink = welcomeEmailProfileUpdateLink;
 	}
 }
