@@ -968,8 +968,15 @@ public class Constants {
 	public static final String OVERVIEW = "overview";
 	public static final String CATEGORY = "category";
 
+	public static final String EHRMS = "ehrms";
+	public static final String EMP_CODE = "emp_code";
+	public static final String EHRMS_AUTH_USERNAME = "username";
 
-    private Constants() {
+	public static final String EHRMS_AUTH_PASSWORD = "password";
+	public static final String USER_ID_LOWER = "userid";
+	public static final String EHRMS_USER_TOKEN = "ehrmsUserToken";
+
+	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}
 
