@@ -6,7 +6,7 @@ package org.sunbird.ehrms.service;
 
 import org.sunbird.common.model.SBApiResponse;
 
-public interface EmployeeService {
-   public SBApiResponse fetchEmployeeDetail(String rootOrgId, String authToken) ;
+public interface EhrmsService {
+   public SBApiResponse fetchEhrmsProfileDetail(String rootOrgId, String authToken) ;
 
 }

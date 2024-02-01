@@ -24,7 +24,7 @@ import org.sunbird.common.util.ProjectUtil;
 import java.util.*;
 
 @Service
-public class EmployeeServiceImpl implements EmployeeService {
+public class fetchEhrmsProfileDetailImpl implements EhrmsService {
     private final Logger logger = LoggerFactory.getLogger(getClass().getName());
     private final ObjectMapper mapper = new ObjectMapper();
 
@@ -47,7 +47,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         return accessTokenValidator.fetchUserIdFromAccessToken(authUserToken);
     }
 
-    public SBApiResponse fetchEmployeeDetail(String rootOrgId, String authToken) {
+    public SBApiResponse fetchEhrmsProfileDetail(String rootOrgId, String authToken) {
         SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.EHRMS);
         try {
             String userId = validateAuthTokenAndFetchUserId(authToken);

@@ -555,8 +555,8 @@ public class Constants {
     public static final String ORGANISATIONS = "organisations";
 
     public static final String CIPHER_ALGORITHM = "AES";
-    public static final byte[] CIPHER_KEY = new byte[]{'T', 'h', 'i', 's', 'A', 's', 'I', 'S', 'e', 'r', 'c', 'e',
-            'K', 't', 'e', 'y'};
+    public static final byte[] CIPHER_KEY = new byte[] { 'T', 'h', 'i', 's', 'A', 's', 'I', 'S', 'e', 'r', 'c', 'e',
+            'K', 't', 'e', 'y' };
     public static final List<String> DECRYPTED_FIELDS = Arrays.asList("phone", "email");
     public static final String CREATED_FOR = "createdFor";
     public static final String COURSE_ORG_ID = "courseOrgId";
@@ -660,7 +660,7 @@ public class Constants {
     public static final String SUCCESSFUL_UPPERCASE = "SUCCESSFUL";
     public static final String FAILED_UPPERCASE = "FAILED";
     public static final String STATUS_IN_PROGRESS_UPPERCASE = "IN-PROGRESS";
-    public static final String LOCAL_BASE_PATH = "/tmp/";
+    public static final String LOCAL_BASE_PATH= "/tmp/";
     public static final String USER_CREATION_FAILED = "User Creation Failed";
     public static final String TOTAL_RECORDS = "totalRecords";
     public static final String SUCCESSFUL_RECORDS_COUNT = "successfulRecordsCount";
@@ -710,33 +710,33 @@ public class Constants {
 
     public static final String END_TIME_KEY = "endTime";
 
-    public static final String SESSION_ID = "sessionId";
+    public static final String SESSION_ID="sessionId";
 
-    public static final String QR_CODE_URL = "qrcodeurl";
+    public static final String QR_CODE_URL="qrcodeurl";
 
-    public static final String VM = "vm";
+    public static final String VM="vm";
 
-    public static final String HEADER = "header";
+    public static final String HEADER="header";
 
-    public static final String FOOTER = "footer";
+    public static final String FOOTER="footer";
 
-    public static final String PDF = "pdf";
+    public static final String PDF="pdf";
 
-    public static final String PROGRAM_NAME = "programName";
+    public static final String PROGRAM_NAME="programName";
 
-    public static final String EMPTY = "";
+    public static final String EMPTY="";
 
-    public static final String BATCH_SESSION_HEADER = "pdf-batch-session-header";
+    public static final String BATCH_SESSION_HEADER="pdf-batch-session-header";
 
-    public static final String BATCH_SESSION_FOOTER = "pdf-batch-session-footer";
+    public static final String BATCH_SESSION_FOOTER="pdf-batch-session-footer";
 
-    public static final String BATCH_SESSION_BODY = "pdf-batch-session-body";
+    public static final String BATCH_SESSION_BODY="pdf-batch-session-body";
 
-    public static final String SESSION = "session";
+    public static final String SESSION="session";
 
-    public static final String TABLE_COURSE_BATCH_ATTRIBUTES = "batch_attributes";
+    public static final String TABLE_COURSE_BATCH_ATTRIBUTES="batch_attributes";
 
-    public static final String TABLE_COURSE_SESSION_DETAILS = "sessionDetails_v2";
+    public static final String TABLE_COURSE_SESSION_DETAILS="sessionDetails_v2";
     public static final String BATCH_ALREADY_ENROLLED_MSG = "Already Enrolled in batches.";
     public static final String BATCH_AUTO_ENROLL_ERROR_MSG = "Failed to auto enrol user in batch.";
     public static final String BATCH_NOT_AVAILABLE_ERROR_MSG = "No Batch Available.";
@@ -747,17 +747,17 @@ public class Constants {
     public static final String MEETING_LINK = "meetingLink";
 
 
-    public static final String BLENDED_PROGRAM_NAME = "blendedProgramName";
+    public static final String BLENDED_PROGRAM_NAME="blendedProgramName";
 
-    public static final String BATCH_NAME = "batchName";
+    public static final String BATCH_NAME="batchName";
 
-    public static final String SESSION_TYPE = "sessionType";
+    public static final String SESSION_TYPE="sessionType";
 
-    public static final String SESSION_TYPE_OFFLINE = "Offline";
+    public static final String SESSION_TYPE_OFFLINE="Offline";
 
-    public static final String UNDER_SCORE = "_";
+    public static final String UNDER_SCORE="_";
 
-    public static final String SESSION_NAME = "sessionName";
+    public static final String SESSION_NAME="sessionName";
 
     public static final String ASSESSMENT_INVALID = "Assessment Data doesn't contain mandatory values of expected duration.";
 
@@ -782,56 +782,56 @@ public class Constants {
 
     public static final String STATUS_RAW = "status.raw";
 
-    public static final String COLON = ":";
+    public static final String COLON =":";
 
-    public static final String TRENDING_COURSES_REDIS_KEY = "lhp_trending";
+    public static final String TRENDING_COURSES_REDIS_KEY="lhp_trending";
     public static final String ORGANISATION = "organisation";
     public static final int NUM_WEEKS = 4;
 
-    public static final String INSIGHTS_LEARNING_HOURS_REDIS_KEY = "lhp_learningHours";
+    public static final String INSIGHTS_LEARNING_HOURS_REDIS_KEY="lhp_learningHours";
 
-    public static final String INSIGHTS_CERTIFICATIONS_REDIS_KEY = "lhp_certifications";
+    public static final String INSIGHTS_CERTIFICATIONS_REDIS_KEY="lhp_certifications";
 
-    public static final String INSIGHTS_TYPE_CERTIFICATE = "certification";
-    public static final String INSIGHTS_TYPE_LEARNING_HOURS = "learning-hours";
+    public static final String INSIGHTS_TYPE_CERTIFICATE ="certification";
+    public static final String INSIGHTS_TYPE_LEARNING_HOURS ="learning-hours";
 
-    public static final String WEEKLY_CLAPS = "weekly-claps";
-    public static final String NUDGES = "nudges";
-    public static final String LABEL = "label";
+    public static final String WEEKLY_CLAPS ="weekly-claps";
+    public static final String NUDGES ="nudges";
+    public static final String LABEL ="label";
 
     public static final String GROWTH = "growth";
 
-    public static final String POSITIVE = "positive";
-    public static final String NEGATIVE = "negative";
+    public static final String POSITIVE="positive";
+    public static final String NEGATIVE="negative";
 
-    public static final String YESTERDAY = "yesterday";
+    public static final String YESTERDAY="yesterday";
 
-    public static final String TODAY = "today";
+    public static final String TODAY ="today";
 
-    public static final String WEEK = "week";
+    public static final String WEEK ="week";
 
-    public static final String ACHIEVED = "achieved";
+    public static final String ACHIEVED ="achieved";
 
-    public static final String API_USER_INSIGHTS = "api.user.insights";
+    public static final String API_USER_INSIGHTS="api.user.insights";
 
-    public static final String API_TRENDING_SEARCH = "api.trending.search";
+    public static final String API_TRENDING_SEARCH="api.trending.search";
 
-    public static final String COURSES = "courses";
+    public static final String COURSES="courses";
 
-    public static final String PROGRAMS = "programs";
+    public static final String PROGRAMS="programs";
 
-    public static final String CERTIFICATIONS = "certifications";
+    public static final String CERTIFICATIONS="certifications";
 
     public static final String TREND_SEARCH_NO_RESULT_ERROR_MESG = "Doesn't have any trending {0} for the requested organization";
 
-    public static final String TOTAL_CLAPS = "total_claps";
-    public static final String W1 = "w1";
-    public static final String W2 = "w2";
-    public static final String W3 = "w3";
-    public static final String W4 = "w4";
+    public static final String TOTAL_CLAPS="total_claps";
+    public static final String W1 ="w1";
+    public static final String W2 ="w2";
+    public static final String W3= "w3";
+    public static final String W4 ="w4";
 
     public static final String LEARNER_STATS = "learner_stats";
-    public static final String LEARNER_STATUS_USER_ID = "userid";
+    public static final String LEARNER_STATUS_USER_ID="userid";
 
     public static final String VERSION_KEY = "versionKey";
     public static final String AVG_RATING = "avgRating";
@@ -869,19 +869,19 @@ public class Constants {
     public static final String CB_CONTENT_LIST = "contentList";
     public static final String CB_CONTENT_TYPE = "contentType";
     public static final String CB_ASSIGNMENT_TYPE = "assignmentType";
-    public static final String CB_CREATED_AT = "createdAt";
-    public static final String CB_ASSIGNMENT_TYPE_INFO = "assignmentTypeInfo";
+    public static final	String CB_CREATED_AT	= "createdAt";
+    public static final	String CB_ASSIGNMENT_TYPE_INFO = "assignmentTypeInfo";
     public static final String UPDATED_AT = "updatedAt";
-    public static final String CB_PUBLISHED_BY = "publishedBy";
+    public static final	String CB_PUBLISHED_BY	= "publishedBy";
     public static final String CB_PUBLISHED_AT = "publishedAt";
     public static final String CB_PLAN_ID = "cb_plan_id";
     public static final String CB_ASSIGNMENT_TYPE_INFO_KEY = "assignmentTypeInfoKey";
     public static final String TABLE_CB_PLAN_LOOKUP = "cb_plan_lookup";
     public static final String CB_IS_ACTIVE = "isActive";
-    public static final String API_V2_READ_DEPT_POSITION = "v2.read.dept.position";
+    public static final String API_V2_READ_DEPT_POSITION="v2.read.dept.position";
     public static final String API_VERSION_2 = "2.0";
-    public static final String DEPT_KEY = "dept_key";
-    public static final String ORG_DESIGNATION = "org_designations";
+    public static final String DEPT_KEY="dept_key";
+    public static final String ORG_DESIGNATION ="org_designations";
     public static final String CB_RETIRE = "RETIRE";
     public static final String USER_DETAILS = "userDetails";
     public static final String COMPETENCIES_V5 = "competencies_v5";
@@ -895,8 +895,8 @@ public class Constants {
     public static final String CB_CUSTOM_TYPE = "customUser";
 
     public static final String CB_DESIGNATION_TYPE = "designation";
-    public static final String CBP_PLAN_USER_LIST_API = "api.cbplan.user.list";
-    public static final String CBP_PLAN_CONTENT_REQUEST_API = "api.cbplan.content.request";
+    public static final String CBP_PLAN_USER_LIST_API ="api.cbplan.user.list";
+    public static final String CBP_PLAN_CONTENT_REQUEST_API ="api.cbplan.content.request";
     public static final String USER_TYPE = "userType";
     public static final String CB_PLAN_ID_KEY = "cbPlanId";
     public static final String ALL_USER = "AllUser";
@@ -904,22 +904,22 @@ public class Constants {
     public static final String COURSE_APP_ICON = "appIcon";
     public static final String CREATOR_LOGO = "creatorLogo";
     public static final String CREATED_BY_NAME = "createdByName";
-    public static final String USER_KARMA_POINTS = "user_karma_points";
+    public static final String USER_KARMA_POINTS ="user_karma_points";
     public static final String KARMA_POINTS_USER_ID = "userid";
-    public static final String CONTEXT_ID = "context_id";
+    public static final String CONTEXT_ID ="context_id";
     public static final String X_AUTH_USER_ROLES = "x-authenticated-user-roles";
-    public static final String MDO_ID = "mdo_id";
+    public static final String MDO_ID ="mdo_id";
     public static final String MONTH = "month";
-    public static final String MDO_KARMA_POINTS = "mdo_karma_points";
-    public static final String NEGATIVE_OR_POSITIVE = "negativeOrPositive";
-    public static final String ORGID = "org_id";
-    public static final String RANK = "rank";
-    public static final String YEAR = "year";
-    public static final String AVERAGE_KP = "average_kp";
-    public static final String MDO_LIST = "mdoList";
+    public static final String MDO_KARMA_POINTS="mdo_karma_points";
+    public static final String NEGATIVE_OR_POSITIVE ="negativeOrPositive";
+    public static final String ORGID="org_id";
+    public static final String RANK ="rank";
+    public static final String YEAR ="year";
+    public static final String AVERAGE_KP ="average_kp";
+    public static final String MDO_LIST="mdoList";
     public static final String KARMA_POINTS_LIST = "kpList";
     public static final String DB_COLUMN_CREDIT_DATE = "credit_date";
-    public static final String DB_CLOUMN_CONTEXT_TYPE = "context_type";
+    public static final String DB_CLOUMN_CONTEXT_TYPE="context_type";
 
     public static final String DB_COLUMN_CONTEXT_ID = "context_id";
 
@@ -927,22 +927,22 @@ public class Constants {
 
     public static final String COURSE_COMPLETION = "COURSE_COMPLETION";
 
-    public static final String CONTEXT_ID_CAMEL = "contextId";
+    public static final String CONTEXT_ID_CAMEL ="contextId";
 
-    public static final String CONTEXT_TYPE_CAMEL = "contextType";
+    public static final String CONTEXT_TYPE_CAMEL= "contextType";
 
     public static final String DB_COLUMN_USER_KARMA_POINTS_KEY = "user_karma_points_key";
 
 
-    public static final String TABLE_KARMA_POINTS_LOOK_UP = "user_karma_points_credit_lookup";
-    public static final String TABLE_KARMA_POINTS = "user_karma_points";
+    public static final String TABLE_KARMA_POINTS_LOOK_UP ="user_karma_points_credit_lookup";
+    public static final String TABLE_KARMA_POINTS ="user_karma_points";
     public static final String COMPETENCY_INFO = "competencyInfo";
     public static final String PROVIDER_ORG_ID = "providerOrgId";
     public static final String CB_CONTENT_REQUEST_TABLE = "cb_content_request";
     public static final String ORG_ID_MISSING = "Root Org Ids missing, please send the org Ids for content request";
     public static final String COMPETENCY_DETAILS_MISSING = "Competency details missing for content request";
 
-    public static final String TABLE_USER_KARMA_POINTS_SUMMARY = "user_karma_points_summary";
+    public static final String TABLE_USER_KARMA_POINTS_SUMMARY ="user_karma_points_summary";
     public static final String REQUEST_CONTENT_SUBJECT = "New Content Request for Capacity Building Plan Development";
     public static final String COMPETENCY_THEMES = "competencyThemes";
     public static final String COMPETENCY_SUB_THEMES = "competencySubThemes";
@@ -953,7 +953,7 @@ public class Constants {
     public static final String PROVIDER_EMAIL_ID_LIST = "providerEmailIdList";
     public static final String CBP_ADMIN = "CBP_Admin";
     public static final String ORGANIZATIONS_ROLES = "organisations.roles";
-    public static final String MDO_NAME_PARAM = "mdo_name";
+    public static final String MDO_NAME_PARAM= "mdo_name";
     public static final String FIRST_BODY_PARAM = "body_para1"; //"body_para2"
     public static final String SECOND_BODY_PARAM = "body_para2";
     public static final String COMPETENCY_AREA_PARAM = "competency_area";
@@ -961,16 +961,16 @@ public class Constants {
     public static final String COMPETENCY_SUB_THEME_PARAM = "competency_subtheme";
     public static final String COPY_EMAIL = "copyEmail";
     public static final String USER_CONTENT_RECOMMENDATION = "user.v1.content.recommendation";
-    public static final String RECOMMEND_CONTENT_SUBJECT = " recommends this iGOT Karmayogi Course for you!";
-    public static final String COURSE_POSTER_IMAGE_URL = "coursePosterImageUrl";
+    public static final String RECOMMEND_CONTENT_SUBJECT =" recommends this iGOT Karmayogi Course for you!";
+    public static final String COURSE_POSTER_IMAGE_URL= "coursePosterImageUrl";
     public static final String COURSE_PROVIDER = "courseProvider";
     public static final String RECIPIENTS = "recipients";
     public static final String OVERVIEW = "overview";
     public static final String CATEGORY = "category";
+    public static final String ORG_ID_LIST = "orgIdList";
     public static final String EHRMS = "ehrms";
     public static final String EMP_CODE = "emp_code";
     public static final String EHRMS_AUTH_USERNAME = "username";
-    public static final String ORG_ID_LIST = "orgIdList";
     public static final String EHRMS_AUTH_PASSWORD = "password";
     public static final String USER_ID_LOWER = "userid";
     public static final String EHRMS_USER_TOKEN = "ehrmsUserToken";
@@ -978,6 +978,7 @@ public class Constants {
     private Constants() {
         throw new IllegalStateException("Utility class");
     }
+
 
 
 }

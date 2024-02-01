@@ -9,20 +9,20 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.util.Constants;
-import org.sunbird.ehrms.service.EmployeeService;
+import org.sunbird.ehrms.service.EhrmsService;
 
 
 @RestController
 @RequestMapping("/ehrms")
-public class EmployeeController {
+public class EhrmsController {
     @Autowired
-    private EmployeeService employeeService;
+    private EhrmsService ehrmsService;
 
     @GetMapping("/details")
-    public ResponseEntity <SBApiResponse> fetchEmployeeDetail
+    public ResponseEntity <SBApiResponse> fetchEhrmsProfileDetail
             (@RequestHeader(Constants.X_AUTH_TOKEN) String authToken,
              @RequestHeader(Constants.X_AUTH_USER_ORG_ID) String rootOrgId) throws Exception {
-        SBApiResponse response = employeeService.fetchEmployeeDetail(rootOrgId, authToken);
+        SBApiResponse response = ehrmsService.fetchEhrmsProfileDetail(rootOrgId, authToken);
         return new ResponseEntity<>(response, response.getResponseCode());
     }
 
