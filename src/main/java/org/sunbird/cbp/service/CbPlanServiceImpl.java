@@ -67,10 +67,15 @@ public class CbPlanServiceImpl implements CbPlanService {
     private CbExtServerProperties cbExtServerProperties;
 
     @Override
-    public SBApiResponse createCbPlan(SunbirdApiRequest request, String userOrgId, String authUserToken) {
+    public SBApiResponse createCbPlan(SunbirdApiRequest request, String userOrgId, String authUserToken, boolean isMigrate) {
         SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_CB_PLAN_CREATE);
         try {
-            String userId = validateAuthTokenAndFetchUserId(authUserToken);
+            String userId = null;
+            if (isMigrate) {
+                userId = authUserToken;
+            } else {
+                userId = validateAuthTokenAndFetchUserId(authUserToken);
+            }
             if (StringUtils.isBlank(userId)) {
                 response.getParams().setStatus(Constants.FAILED);
                 response.getParams().setErrmsg(Constants.USER_ID_DOESNT_EXIST);
@@ -204,11 +209,16 @@ public class CbPlanServiceImpl implements CbPlanService {
     }
 
     @Override
-    public SBApiResponse publishCbPlan(SunbirdApiRequest request, String userOrgId, String authUserToken, List<String> userRoles) {
+    public SBApiResponse publishCbPlan(SunbirdApiRequest request, String userOrgId, String authUserToken, List<String> userRoles, boolean isMigrate) {
         SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_CB_PLAN_PUBLISH);
         Map<String, Object> requestData = (Map<String, Object>) request.getRequest();
         try {
-            String userId = validateAuthTokenAndFetchUserId(authUserToken);
+            String userId = null;
+            if (isMigrate) {
+                userId = authUserToken;
+            } else {
+                userId = validateAuthTokenAndFetchUserId(authUserToken);
+            }
             if (StringUtils.isBlank(userId)) {
                 response.getParams().setStatus(Constants.FAILED);
                 response.getParams().setErrmsg(Constants.USER_ID_DOESNT_EXIST);

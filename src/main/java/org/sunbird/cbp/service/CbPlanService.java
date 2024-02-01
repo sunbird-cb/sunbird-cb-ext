@@ -7,11 +7,11 @@ import org.sunbird.common.model.SunbirdApiRequest;
 import java.util.List;
 
 public interface CbPlanService {
-    SBApiResponse createCbPlan(SunbirdApiRequest request, String userOrgId, String token);
+    SBApiResponse createCbPlan(SunbirdApiRequest request, String userOrgId, String token, boolean isMigrate);
 
     SBApiResponse updateCbPlan(SunbirdApiRequest request, String userOrgId, String token, List<String> userRoles);
 
-    SBApiResponse publishCbPlan(SunbirdApiRequest request, String userOrgId, String token, List<String> userRoles);
+    SBApiResponse publishCbPlan(SunbirdApiRequest request, String userOrgId, String token, List<String> userRoles, boolean isMigrate);
 
     SBApiResponse retireCbPlan(SunbirdApiRequest request, String userOrgId, String token, List<String> userRoles);
 
