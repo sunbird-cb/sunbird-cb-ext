@@ -967,7 +967,7 @@ public class Constants {
 	public static final String RECIPIENTS = "recipients";
 	public static final String OVERVIEW = "overview";
 	public static final String CATEGORY = "category";
-
+	public static final String ORG_ID_LIST = "orgIdList";
 
     private Constants() {
 		throw new IllegalStateException("Utility class");

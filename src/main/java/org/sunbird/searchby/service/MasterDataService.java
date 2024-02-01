@@ -13,5 +13,8 @@ public interface MasterDataService {
 	SBApiResponse upsertMasterData(Map<String, Object> request);
 
 	Map<String, Object> getProfilePageMetaData();
+
 	SBApiResponse getDeptPositions(String userOrgId);
+
+	SBApiResponse retrieveDeptPositionByAdmin(Map<String, Object> request);
 }
