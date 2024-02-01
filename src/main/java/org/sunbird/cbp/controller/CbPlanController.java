@@ -23,7 +23,7 @@ public class CbPlanController {
             @RequestHeader(Constants.X_AUTH_TOKEN) String token,
             @RequestHeader(Constants.X_AUTH_USER_ORG_ID) String userOrgId) throws Exception {
 
-        SBApiResponse response = cbPlanService.createCbPlan(request, userOrgId, token);
+        SBApiResponse response = cbPlanService.createCbPlan(request, userOrgId, token, false);
         return new ResponseEntity<>(response, response.getResponseCode());
     }
 
@@ -45,7 +45,7 @@ public class CbPlanController {
             @RequestHeader(Constants.X_AUTH_USER_ORG_ID) String userOrgId,
             @RequestHeader(Constants.X_AUTH_USER_ROLES) List<String> userRoles) throws Exception {
 
-        SBApiResponse response = cbPlanService.publishCbPlan(request, userOrgId, token, userRoles);
+        SBApiResponse response = cbPlanService.publishCbPlan(request, userOrgId, token, userRoles, false);
         return new ResponseEntity<>(response, response.getResponseCode());
     }
 
@@ -106,4 +106,24 @@ public class CbPlanController {
         SBApiResponse response = cbPlanService.requestCbplanContent(request, token, userOrgId);
         return new ResponseEntity<>(response, response.getResponseCode());
     }
+
+    @PostMapping("/v1/migrate/create")
+    public ResponseEntity<SBApiResponse> createMigrateCbPlan(
+            @RequestBody SunbirdApiRequest request,
+            @RequestHeader(Constants.X_AUTH_USER_ID) String userId,
+            @RequestHeader(Constants.X_AUTH_USER_ORG_ID) String userOrgId) throws Exception {
+
+        SBApiResponse response = cbPlanService.createCbPlan(request, userOrgId, userId, true);
+        return new ResponseEntity<>(response, response.getResponseCode());
+    }
+    @PostMapping("/v1/migrate/publish")
+    public ResponseEntity<SBApiResponse> publishMigrateCbPlan(
+            @RequestBody SunbirdApiRequest request,
+            @RequestHeader(Constants.X_AUTH_USER_ID) String userId,
+            @RequestHeader(Constants.X_AUTH_USER_ORG_ID) String userOrgId) throws Exception {
+
+        SBApiResponse response = cbPlanService.publishCbPlan(request, userOrgId, userId, null, true);
+        return new ResponseEntity<>(response, response.getResponseCode());
+    }
+
 }
