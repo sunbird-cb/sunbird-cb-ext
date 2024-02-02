@@ -51,6 +51,12 @@ public class fetchEhrmsProfileDetailImpl implements EhrmsService {
         SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.EHRMS);
         try {
             String userId = validateAuthTokenAndFetchUserId(authToken);
+            if (StringUtils.isBlank(userId)) {
+                response.getParams().setStatus(Constants.FAILED);
+                response.getParams().setErrmsg(Constants.USER_ID_DOESNT_EXIST);
+                response.setResponseCode(HttpStatus.BAD_REQUEST);
+                return response;
+            }
             Map<String, Object> propertyMap = new HashMap<>();
             propertyMap.put(Constants.USER_ID_LOWER, userId);
             Map<String, Object> result = cassandraOperation.getRecordsByProperties(
@@ -62,8 +68,10 @@ public class fetchEhrmsProfileDetailImpl implements EhrmsService {
             );
             if (result != null && !result.isEmpty()) {
                 String userProfileDetails = (String) ((Map<String, Object>) result.get(userId)).get(Constants.PROFILE_DETAILS_LOWER);
+                logger.info("User Profile Details : " + userProfileDetails);
                 Map<String, Object> userDetails = mapper.readValue(userProfileDetails, new TypeReference<Map<String, Object>>() {
                 });
+                logger.info("User Details : " + userDetails);
                 String externalSystemId = (String) ((Map<String, Object>) userDetails.get(Constants.ADDITIONAL_PROPERTIES)).get(Constants.EXTERNAL_SYSTEM_ID);
                 if (externalSystemId == null || externalSystemId.isEmpty()) {
                     response.getParams().setStatus(Constants.FAILED);
@@ -83,7 +91,6 @@ public class fetchEhrmsProfileDetailImpl implements EhrmsService {
                 response.setResult(fetchEhrmsUserDetails);
                 return response;
             }
-
         } catch (Exception e) {
             logger.error("Failed to look up user details. Exception: {}", e.getMessage(), e);
             response.getParams().setStatus(Constants.FAILED);
