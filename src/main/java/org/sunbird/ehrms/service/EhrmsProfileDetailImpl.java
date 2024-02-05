@@ -47,16 +47,16 @@ public class fetchEhrmsProfileDetailImpl implements EhrmsService {
         return accessTokenValidator.fetchUserIdFromAccessToken(authUserToken);
     }
 
-    public SBApiResponse fetchEhrmsProfileDetail(String rootOrgId, String authToken) {
+    public SBApiResponse fetchEhrmsProfileDetail(String userId, String authToken) {
         SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.EHRMS);
         try {
-            String userId = validateAuthTokenAndFetchUserId(authToken);
+           /* String userId = validateAuthTokenAndFetchUserId(authToken);
             if (StringUtils.isBlank(userId)) {
                 response.getParams().setStatus(Constants.FAILED);
                 response.getParams().setErrmsg(Constants.USER_ID_DOESNT_EXIST);
                 response.setResponseCode(HttpStatus.BAD_REQUEST);
-                return response;
-            }
+                return response;*/
+            //}
             Map<String, Object> propertyMap = new HashMap<>();
             propertyMap.put(Constants.USER_ID_LOWER, userId);
             Map<String, Object> result = cassandraOperation.getRecordsByProperties(
