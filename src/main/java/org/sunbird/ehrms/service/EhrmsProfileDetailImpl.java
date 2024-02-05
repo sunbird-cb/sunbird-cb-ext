@@ -59,18 +59,22 @@ public class EhrmsProfileDetailImpl implements EhrmsService {
                     Arrays.asList(Constants.PROFILE_DETAILS_LOWER, Constants.USER_ID_LOWER),
                     Constants.USER_ID
             );
+            String externalSystemId = null;
             if (result != null && !result.isEmpty()) {
                 String userProfileDetails = (String) ((Map<String, Object>) result.get(userId)).get(Constants.PROFILE_DETAILS_LOWER);
                 logger.info("User Profile Details : " + userProfileDetails);
                 Map<String, Object> userDetails = mapper.readValue(userProfileDetails, new TypeReference<Map<String, Object>>() {
                 });
                 logger.info("User Details : " + userDetails);
-                String externalSystemId = (String) ((Map<String, Object>) userDetails.get(Constants.ADDITIONAL_PROPERTIES)).get(Constants.EXTERNAL_SYSTEM_ID);
-                if (externalSystemId == null || externalSystemId.isEmpty()) {
-                    response.getParams().setStatus(Constants.FAILED);
-                    response.getParams().setErrmsg("User does not have externalSystemId in profile details");
-                    response.setResponseCode(HttpStatus.BAD_REQUEST);
-                    return response;
+                Map<String, Object> userAdditionalProperties =  ((Map<String, Object>) userDetails.get(Constants.ADDITIONAL_PROPERTIES));
+                if (userAdditionalProperties != null && !userAdditionalProperties.isEmpty()) {
+                    externalSystemId = (String) userAdditionalProperties.get(Constants.EXTERNAL_SYSTEM_ID);
+                    if (externalSystemId == null || externalSystemId.isEmpty()) {
+                        response.getParams().setStatus(Constants.FAILED);
+                        response.getParams().setErrmsg("User does not have externalSystemId in profile details");
+                        response.setResponseCode(HttpStatus.BAD_REQUEST);
+                        return response;
+                    }
                 }
                 String ehrmsAuthUrl = serverConfig.getEhrmsAuthUrl();
                 String ehrmsAuthUsername = serverConfig.getEhrmsAuthUserName();
