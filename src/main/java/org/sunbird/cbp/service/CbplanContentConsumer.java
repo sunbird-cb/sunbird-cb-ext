@@ -21,6 +21,7 @@ import org.sunbird.user.service.UserUtilityService;
 
 import java.io.StringWriter;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 @Component
 public class CbplanContentConsumer {
@@ -42,10 +43,20 @@ public class CbplanContentConsumer {
     UserUtilityService userService;
 
     @KafkaListener(topics = "${kafka.topic.cbplan.content.request}", groupId = "${kafka.topic.cbplan.content.request.group}")
-    public void cbplanContentRequestConsumer(ConsumerRecord<String, String> data){
-        HashMap<String, Object> cbplanContentRequest = null;
+    public void cbplanContentRequestConsumer(ConsumerRecord<String, String> data) {
         try {
-            cbplanContentRequest = mapper.readValue(data.value(), HashMap.class);
+            Map<String, Object> cbplanContentRequest = mapper.readValue(data.value(), HashMap.class);
+            CompletableFuture.runAsync(() -> {
+                processKafkaMessage(cbplanContentRequest);
+            });
+        } catch(Exception e) {           
+            logger.error("Failed to process content request. Message received : " + data.value(), e);
+        }
+    }
+
+    private void processKafkaMessage(Map<String, Object> cbplanContentRequest) {
+        try {
+            long startTime = System.currentTimeMillis();
             String competencyInfo = (String) cbplanContentRequest.get(Constants.COMPETENCY_INFO);
             Map<String, Object> competencyInfoMap = mapper.readValue(competencyInfo, HashMap.class);
 
@@ -72,9 +83,9 @@ public class CbplanContentConsumer {
             mailNotificationDetails.put(Constants.DESCRIPTION , cbplanContentRequest.get(Constants.DESCRIPTION));
             mailNotificationDetails.put(Constants.COPY_EMAIL, mdoAdminEmail);
             sendNotificationToProviders(mailNotificationDetails);
-
+            logger.info(String.format("Completed request for content. Time taken: ", (System.currentTimeMillis() - startTime)));
         } catch (Exception e) {
-            logger.error("Exception occurred while sending email : " + e.getMessage()  + "Content request received " + cbplanContentRequest,e);
+            logger.error("Exception occurred while sending email : " + e.getMessage(), e);
         }
     }
 
