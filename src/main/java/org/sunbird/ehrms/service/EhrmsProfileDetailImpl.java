@@ -24,7 +24,7 @@ import org.sunbird.common.util.ProjectUtil;
 import java.util.*;
 
 @Service
-public class fetchEhrmsProfileDetailImpl implements EhrmsService {
+public class EhrmsProfileDetailImpl implements EhrmsService {
     private final Logger logger = LoggerFactory.getLogger(getClass().getName());
     private final ObjectMapper mapper = new ObjectMapper();
 
@@ -50,13 +50,6 @@ public class fetchEhrmsProfileDetailImpl implements EhrmsService {
     public SBApiResponse fetchEhrmsProfileDetail(String userId, String authToken) {
         SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.EHRMS);
         try {
-           /* String userId = validateAuthTokenAndFetchUserId(authToken);
-            if (StringUtils.isBlank(userId)) {
-                response.getParams().setStatus(Constants.FAILED);
-                response.getParams().setErrmsg(Constants.USER_ID_DOESNT_EXIST);
-                response.setResponseCode(HttpStatus.BAD_REQUEST);
-                return response;*/
-            //}
             Map<String, Object> propertyMap = new HashMap<>();
             propertyMap.put(Constants.USER_ID_LOWER, userId);
             Map<String, Object> result = cassandraOperation.getRecordsByProperties(
