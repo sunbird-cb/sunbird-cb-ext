@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.sunbird.cache.RedisCacheMgr;
 import org.sunbird.cassandra.utils.CassandraOperation;
@@ -21,6 +22,7 @@ import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.common.util.ProjectUtil;
 
+import java.io.IOException;
 import java.util.*;
 
 @Service
@@ -43,10 +45,6 @@ public class EhrmsProfileDetailImpl implements EhrmsService {
     @Autowired
     private CassandraOperation cassandraOperation;
 
-    private String validateAuthTokenAndFetchUserId(String authUserToken) {
-        return accessTokenValidator.fetchUserIdFromAccessToken(authUserToken);
-    }
-
     public SBApiResponse fetchEhrmsProfileDetail(String userId, String authToken) {
         SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.EHRMS);
         try {
@@ -66,7 +64,7 @@ public class EhrmsProfileDetailImpl implements EhrmsService {
                 Map<String, Object> userDetails = mapper.readValue(userProfileDetails, new TypeReference<Map<String, Object>>() {
                 });
                 logger.info("User Details : " + userDetails);
-                Map<String, Object> userAdditionalProperties =  ((Map<String, Object>) userDetails.get(Constants.ADDITIONAL_PROPERTIES));
+                Map<String, Object> userAdditionalProperties = ((Map<String, Object>) userDetails.get(Constants.ADDITIONAL_PROPERTIES));
                 if (userAdditionalProperties != null && !userAdditionalProperties.isEmpty()) {
                     externalSystemId = (String) userAdditionalProperties.get(Constants.EXTERNAL_SYSTEM_ID);
                     if (externalSystemId == null || externalSystemId.isEmpty()) {
@@ -88,6 +86,11 @@ public class EhrmsProfileDetailImpl implements EhrmsService {
                 response.setResult(fetchEhrmsUserDetails);
                 return response;
             }
+        } catch (HttpClientErrorException errorException) {
+            String responseBodyString = errorException.getResponseBodyAsString();
+            response.getParams().setStatus(Constants.FAILED);
+            response.setResponseCode(errorException.getStatusCode());
+            response.setResult(prepareErrorResponse(responseBodyString));
         } catch (Exception e) {
             logger.error("Failed to look up user details. Exception: {}", e.getMessage(), e);
             response.getParams().setStatus(Constants.FAILED);
@@ -114,5 +117,16 @@ public class EhrmsProfileDetailImpl implements EhrmsService {
         HttpEntity entity = new HttpEntity(body, headers);
         ResponseEntity<Map> response = restTemplate.exchange(ehrmsAuthUrl, HttpMethod.POST, entity, Map.class);
         return response.getBody();
+    }
+
+    private Map<String, Object> prepareErrorResponse(String responseBodyString) {
+        Map<String, Object> errResponseBody = null;
+        try {
+            errResponseBody = mapper.readValue(responseBodyString, new TypeReference<Map<String, Object>>() {
+            });
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return errResponseBody;
     }
 }
