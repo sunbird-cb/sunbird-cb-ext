@@ -24,7 +24,7 @@ import org.sunbird.common.util.ProjectUtil;
 import java.util.*;
 
 @Service
-public class fetchEhrmsProfileDetailImpl implements EhrmsService {
+public class FetchEhrmsProfileDetailImpl implements EhrmsService {
     private final Logger logger = LoggerFactory.getLogger(getClass().getName());
     private final ObjectMapper mapper = new ObjectMapper();
 
