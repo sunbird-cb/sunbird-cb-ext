@@ -392,6 +392,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		requestBody.put(Constants.SIGNIN_LINK, props.getWelcomeEmailSigninLink());
 		requestBody.put(Constants.DISCOVER_LINK, props.getWelcomeEmailDiscoverLink());
 		requestBody.put(Constants.MEETING_LINK, props.getWelcomeEmailMeetingLink());
+		requestBody.put(Constants.PROFILE_UPDATE_LINK,props.getWelcomeEmailProfileUpdateLink());
 
 		request.put(Constants.REQUEST, requestBody);
 

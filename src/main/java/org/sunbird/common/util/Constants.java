@@ -745,6 +745,7 @@ public class Constants {
 	public static final String SIGNIN_LINK = "signinLink";
 	public static final String DISCOVER_LINK = "discoverLink";
 	public static final String MEETING_LINK = "meetingLink";
+	public static final String PROFILE_UPDATE_LINK ="profileUpdateLink";
 
 
 	public static final String BLENDED_PROGRAM_NAME="blendedProgramName";
