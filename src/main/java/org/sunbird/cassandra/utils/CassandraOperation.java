@@ -114,5 +114,5 @@ public interface CassandraOperation {
 	public List<Map<String, Object>> getKarmaPointsRecordsByPropertiesWithPaginationList(String keyspaceName, String tableName,
             Map<String, Object> propertyMap, List<String> fields, int limit, Date updatedOn, String key,Date limitDate);
 
-	public Long getRecordCountWithUserId(String keyspace, String table, String userId);
+	public Long getRecordCountWithUserId(String keyspace, String table, String userId,Date limitDate);
 	}
