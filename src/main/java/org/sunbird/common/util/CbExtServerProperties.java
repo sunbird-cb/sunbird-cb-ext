@@ -641,6 +641,12 @@ public class CbExtServerProperties {
 	@Value("${redis.ehrms.token.timeout}")
 	private Integer redisEhrmsTokenTimeOut;
 
+	@Value("${cert-registry-service-host}")
+	private String certRegistryServiceBaseUrl;
+
+	@Value("${cert-registry-certificate-download-url}")
+	private String certRegistryCertificateDownloadUrl;
+
 	public boolean qListFromCacheEnabled() {
 		return qListFromCacheEnabled;
 	}
@@ -2282,5 +2288,21 @@ public class CbExtServerProperties {
 
 	public void setRedisEhrmsTokenTimeOut(Integer redisEhrmsTokenTimeOut) {
 		this.redisEhrmsTokenTimeOut = redisEhrmsTokenTimeOut;
+	}
+
+	public String getCertRegistryServiceBaseUrl() {
+		return certRegistryServiceBaseUrl;
+	}
+
+	public void setCertRegistryServiceBaseUrl(String certRegistryServiceBaseUrl) {
+		this.certRegistryServiceBaseUrl = certRegistryServiceBaseUrl;
+	}
+
+	public String getCertRegistryCertificateDownloadUrl() {
+		return certRegistryCertificateDownloadUrl;
+	}
+
+	public void setCertRegistryCertificateDownloadUrl(String certRegistryCertificateDownloadUrl) {
+		this.certRegistryCertificateDownloadUrl = certRegistryCertificateDownloadUrl;
 	}
 }
