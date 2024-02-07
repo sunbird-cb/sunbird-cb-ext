@@ -435,10 +435,10 @@ public class CassandraOperationImpl implements CassandraOperation {
 		}
 		return response;
 	}
-	public Long getRecordCountWithUserId(String keyspace, String tableName, String userId) {
+	public Long getRecordCountWithUserId(String keyspace, String tableName, String userId,Date limitDate) {
 		try {
-			Where selectQuery = QueryBuilder.select().countAll().from(keyspace, tableName)
-					.where(QueryBuilder.eq(Constants.USER_ID, userId));
+			Select selectQuery = QueryBuilder.select().countAll().from(keyspace, tableName);
+			 selectQuery.where(QueryBuilder.eq(Constants.USER_ID, userId));
 			Row row = connectionManager.getSession(keyspace).execute(selectQuery).one();
 			return row.getLong(0);
 		} catch (Exception e) {
