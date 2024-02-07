@@ -438,7 +438,8 @@ public class CassandraOperationImpl implements CassandraOperation {
 	public Long getRecordCountWithUserId(String keyspace, String tableName, String userId,Date limitDate) {
 		try {
 			Select selectQuery = QueryBuilder.select().countAll().from(keyspace, tableName);
-			 selectQuery.where(QueryBuilder.eq(Constants.USER_ID, userId));
+			selectQuery.where(QueryBuilder.eq(Constants.USER_ID, userId));
+			selectQuery.where(QueryBuilder.gt(Constants.DB_COLUMN_CREDIT_DATE, limitDate));
 			Row row = connectionManager.getSession(keyspace).execute(selectQuery).one();
 			return row.getLong(0);
 		} catch (Exception e) {
