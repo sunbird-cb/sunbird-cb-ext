@@ -11,6 +11,8 @@ import org.sunbird.core.producer.Producer;
 import org.sunbird.karmapoints.model.ClaimKarmaPointsRequest;
 import org.sunbird.karmapoints.model.KarmaPointsRequest;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.*;
 import java.util.*;
 
@@ -42,14 +44,12 @@ public class KarmaPointsServiceImpl implements KarmaPointsService {
             formattedDateTime = Date.from(currentDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
         }
         List<Map<String, Object>> result = cassandraOperation.getKarmaPointsRecordsByPropertiesWithPaginationList(
-                Constants.KEYSPACE_SUNBIRD, Constants.USER_KARMA_POINTS, propertyMap, new ArrayList<>(), limit, formattedDateTime, Constants.CONTEXT_ID);
+                Constants.KEYSPACE_SUNBIRD, Constants.USER_KARMA_POINTS, propertyMap, new ArrayList<>(), limit, formattedDateTime, Constants.CONTEXT_ID,fetchLimitDate());
         resultMap.put(Constants.KARMA_POINTS_LIST, result);
 
         long count = cassandraOperation.getRecordCountWithUserId(Constants.KEYSPACE_SUNBIRD, Constants.USER_KARMA_POINTS, userId);
         resultMap.put(Constants.KARMA_POINTS_LIST, result);
-
         resultMap.put(Constants.COUNT, count);
-
         result.forEach(record -> {
             long dateAsLong = record.entrySet().stream()
                     .filter(entry -> Constants.DB_COLUMN_CREDIT_DATE.equals(entry.getKey()))
@@ -111,5 +111,16 @@ public class KarmaPointsServiceImpl implements KarmaPointsService {
             result = userKpList.get(0);
         resultMap.put(Constants.KARMA_POINTS_LIST, result);
         return resultMap;
+    }
+
+    public Date fetchLimitDate() {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String dateString = "2023-12-01";
+        try {
+            return dateFormat.parse(dateString);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }
