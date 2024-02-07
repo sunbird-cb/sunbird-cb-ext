@@ -425,6 +425,7 @@ public class CassandraOperationImpl implements CassandraOperation {
 			selectQuery = processQueryWithoutFiltering(keyspaceName, tableName, propertyMap, fields);
 			selectQuery.limit(limit);
 			selectQuery.where(QueryBuilder.lt(Constants.DB_COLUMN_CREDIT_DATE, updatedOn));
+			selectQuery.orderBy(QueryBuilder.desc(Constants.DB_COLUMN_CREDIT_DATE));
 			ResultSet results = connectionManager.getSession(keyspaceName).execute(selectQuery);
 			response = CassandraUtil.createResponse(results);
 		} catch (Exception e) {
