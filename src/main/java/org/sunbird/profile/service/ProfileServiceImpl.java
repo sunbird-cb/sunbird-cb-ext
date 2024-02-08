@@ -319,7 +319,7 @@ public class ProfileServiceImpl implements ProfileService {
 				}
 			}
 		} catch (Exception e) {
-			log.error("Failed to process profile update. Exception: ", e);
+			log.error(Constants.FAILED_PROFILE_UPDATE_PROCESS, e);
 			response.getParams().setStatus(Constants.FAILED);
 			response.getParams().setErr(e.getMessage());
 			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -1809,7 +1809,7 @@ public class ProfileServiceImpl implements ProfileService {
 				}
 			}
 		} catch (Exception e) {
-			log.error("Failed to process profile update. Exception: ", e);
+			log.error(Constants.FAILED_PROFILE_UPDATE_PROCESS, e);
 			response.getParams().setStatus(Constants.FAILED);
 			response.getParams().setErr(e.getMessage());
 			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -1885,7 +1885,7 @@ public class ProfileServiceImpl implements ProfileService {
 				}
 			}
 		} catch (Exception e) {
-			log.error("Failed to process profile update. Exception: ", e);
+			log.error(Constants.FAILED_PROFILE_UPDATE_PROCESS, e);
 			response.getParams().setStatus(Constants.FAILED);
 			response.getParams().setErr(e.getMessage());
 			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);

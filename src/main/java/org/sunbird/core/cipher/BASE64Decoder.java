@@ -73,31 +73,35 @@ public class BASE64Decoder extends CharacterDecoder {
 			rem = 2;
 		}
 		switch (rem) {
-		case 4:
-			d = pem_convert_array[decode_buffer[3] & 0xff];
-			// NOBREAK
-		case 3:
-			c = pem_convert_array[decode_buffer[2] & 0xff];
-			// NOBREAK
-		case 2:
-			b = pem_convert_array[decode_buffer[1] & 0xff];
-			a = pem_convert_array[decode_buffer[0] & 0xff];
-			break;
+			case 4:
+				d = pem_convert_array[decode_buffer[3] & 0xff];
+				// NOBREAK
+			case 3:
+				c = pem_convert_array[decode_buffer[2] & 0xff];
+				// NOBREAK
+			case 2:
+				b = pem_convert_array[decode_buffer[1] & 0xff];
+				a = pem_convert_array[decode_buffer[0] & 0xff];
+				break;
+			default:
+				break;
 		}
 
 		switch (rem) {
-		case 2:
-			outStream.write((byte) (((a << 2) & 0xfc) | ((b >>> 4) & 3)));
-			break;
-		case 3:
-			outStream.write((byte) (((a << 2) & 0xfc) | ((b >>> 4) & 3)));
-			outStream.write((byte) (((b << 4) & 0xf0) | ((c >>> 2) & 0xf)));
-			break;
-		case 4:
-			outStream.write((byte) (((a << 2) & 0xfc) | ((b >>> 4) & 3)));
-			outStream.write((byte) (((b << 4) & 0xf0) | ((c >>> 2) & 0xf)));
-			outStream.write((byte) (((c << 6) & 0xc0) | (d & 0x3f)));
-			break;
+			case 2:
+				outStream.write((byte) (((a << 2) & 0xfc) | ((b >>> 4) & 3)));
+				break;
+			case 3:
+				outStream.write((byte) (((a << 2) & 0xfc) | ((b >>> 4) & 3)));
+				outStream.write((byte) (((b << 4) & 0xf0) | ((c >>> 2) & 0xf)));
+				break;
+			case 4:
+				outStream.write((byte) (((a << 2) & 0xfc) | ((b >>> 4) & 3)));
+				outStream.write((byte) (((b << 4) & 0xf0) | ((c >>> 2) & 0xf)));
+				outStream.write((byte) (((c << 6) & 0xc0) | (d & 0x3f)));
+				break;
+			default:
+				break;
 		}
 		return;
 	}
