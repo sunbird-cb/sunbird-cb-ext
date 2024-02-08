@@ -9,7 +9,7 @@ public class NotificationRequest {
     private Config config;
     private List<String> ids;
     private Template template;
-    private Map<String, Object> rawData;
+    private Map rawData;
     private List<String> copyEmail;
 
     public String getMode() {
@@ -56,7 +56,7 @@ public class NotificationRequest {
         return rawData;
     }
 
-    public void setRawData(Map<String,Object> rawData) {
+    public void setRawData(Map rawData) {
         this.rawData = rawData;
     }
 
