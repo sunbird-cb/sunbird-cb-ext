@@ -126,12 +126,8 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 
 	private Map<String, Object> getQumlAnswers(List<String> questions,Map<String,Object> questionMap) throws Exception {
 		Map<String, Object> ret = new HashMap<>();
-
-		//Map<String, Map<String, Object>> questionMap = new HashMap<String, Map<String, Object>>();
-
 		for (String questionId : questions) {
 			List<String> correctOption = new ArrayList<>();
-			//questionMap = fetchQuestionMapDetails(questionId);
 			Map<String, Object> question = (Map<String, Object>) questionMap.get(questionId);
 			if (question.containsKey(Constants.QUESTION_TYPE)) {
 				String questionType = ((String) question.get(Constants.QUESTION_TYPE)).toLowerCase();

@@ -106,13 +106,13 @@ public class CbPlanServiceImpl implements CbPlanService {
                     response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
                 }
             } catch (JsonProcessingException e) {
-                logger.error("Failed to Create CB Plan for OrgId: " + userOrgId, e);
+                logger.error("Failed to Create CB Plan for OrgId: %s" + userOrgId, e);
                 response.getParams().setStatus(Constants.FAILED);
                 response.getParams().setErrmsg(e.getMessage());
                 response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
             }
         } catch (Exception e) {
-            logger.error("Failed to Create CB Plan for OrgId: " + userOrgId, e);
+            logger.error("Failed to Create CB Plan for OrgId: %s" + userOrgId, e);
             response.getParams().setStatus(Constants.FAILED);
             response.getParams().setErrmsg(e.getMessage());
             response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -468,7 +468,7 @@ public class CbPlanServiceImpl implements CbPlanService {
             }
             List<String> assignmentTypeInfoKeyQueryList = new ArrayList<>(Arrays.asList(userId, Constants.ALL_USER));
             if (StringUtils.isNotEmpty(userDesignation)) {
-                logger.info("User Designation : " + userDesignation);
+                logger.info("User Designation : {}" , userDesignation);
                 assignmentTypeInfoKeyQueryList.add(userDesignation);
             }
             propertiesMap.clear();
@@ -499,7 +499,6 @@ public class CbPlanServiceImpl implements CbPlanService {
                     if (!courseDetailsMap.containsKey(courseId)) {
                         contentDetails = contentService.readContentFromCache(courseId, null);
                         if (MapUtils.isNotEmpty(contentDetails)) {
-                            //if (Constants.LIVE.equalsIgnoreCase((String) contentDetails.get(Constants.STATUS))) {
                             if (courseId.contains("_rc")) {
                                 if (isVerifiedKaramyogi != null && isVerifiedKaramyogi) {
                                     Map<String, Object> secureSettings = (Map<String, Object>) contentDetails.get(Constants.SECURE_SETTINGS);
@@ -516,9 +515,8 @@ public class CbPlanServiceImpl implements CbPlanService {
                             } else {
                                 courseDetailsMap.put(courseId, contentDetails);
                             }
-                            //}
                         } else {
-                            logger.error("Failed to read course details for Id: " + courseId);
+                            logger.error("Failed to read course details for Id: {}" , courseId);
                         }
                     } else {
                         continue;
@@ -530,7 +528,7 @@ public class CbPlanServiceImpl implements CbPlanService {
                 cbPlanDetails.put(Constants.CB_CONTENT_LIST, courseList);
                 resultMap.add(cbPlanDetails);
             }
-            logger.info("Number of CB Plan Available for the user is " + resultMap.size());
+            logger.info("Number of CB Plan Available for the user is {}" , resultMap.size());
             response.getResult().put(Constants.COUNT, resultMap.size());
             response.getResult().put(Constants.CONTENT, resultMap);
         } catch (Exception e) {
@@ -914,7 +912,7 @@ public class CbPlanServiceImpl implements CbPlanService {
                     cbPlan.remove(Constants.DRAFT_DATA);
                 }
 
-                // these values could be null if plan is draft. set to empty string if so;
+                // these values could be null if plan is draft. set to empty string if so
                 String assignmentType = (String) cbPlan.get(Constants.CB_ASSIGNMENT_TYPE);
                 assignmentType = (assignmentType == null) ? "" : assignmentType;
                 String contentType = (String) cbPlan.get(Constants.CB_CONTENT_TYPE);

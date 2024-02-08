@@ -70,11 +70,11 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
         try {
             String userId = validateAuthTokenAndFetchUserId(token);
             if (userId != null) {
-                logger.info("readAssessment.. userId :" + userId);
+                logger.info("readAssessment.. userId : {}" , userId);
                 Map<String, Object> assessmentAllDetail = new HashMap<>();
                 errMsg = fetchReadHierarchyDetails(assessmentAllDetail, token, assessmentIdentifier);
                 if (errMsg.isEmpty() && !((String) assessmentAllDetail.get(Constants.PRIMARY_CATEGORY)).equalsIgnoreCase(Constants.PRACTICE_QUESTION_SET)) {
-                    logger.info("Fetched assessment Details... for : " + assessmentIdentifier);
+                    logger.info("Fetched assessment Details... for : {}" ,assessmentIdentifier);
                     List<Map<String, Object>> existingDataList = assessmentRepository.fetchUserAssessmentDataFromDB(userId, assessmentIdentifier);
                     Timestamp assessmentStartTime = new Timestamp(new java.util.Date().getTime());
                     if (existingDataList.isEmpty()) {
@@ -222,7 +222,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                 redisCacheMgr.putCache(Constants.ASSESSMENT_ID + assessmentIdentifier, ((Map<String, Object>) readHierarchyApiResponse.get(Constants.RESULT)).get(Constants.QUESTION_SET));
             }
         } catch (Exception e) {
-            logger.info("Error while fetching or mapping read hierarchy data" + e.getMessage());
+            logger.info("Error while fetching or mapping read hierarchy data : {}" , e.getMessage());
             return Constants.ASSESSMENT_HIERARCHY_READ_FAILED;
         }
         return StringUtils.EMPTY;
@@ -428,15 +428,14 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                     kafkaResult.put(Constants.TOTAL_SCORE, result.get(Constants.OVERALL_RESULT));
                     if ((primaryCategory.equalsIgnoreCase("Competency Assessment") && submitRequest.containsKey("competencies_v3") && submitRequest.get("competencies_v3") != null)) {
                         Object[] obj = (Object[]) JSON.parse((String) submitRequest.get("competencies_v3"));
+                        Object competencies  = obj == null ? obj  : Arrays.asList(obj);
+                        logger.info("competencies_v3 : {} ", competencies);
                         if (obj != null) {
                             Object map = obj[0];
                             ObjectMapper m = new ObjectMapper();
                             Map<String, Object> props = m.convertValue(map, Map.class);
                             kafkaResult.put(Constants.COMPETENCY, props.isEmpty() ? "" : props);
-                            System.out.println(obj);
-
                         }
-                        System.out.println(obj);
                     }
                     logger.info(kafkaResult.toString());
                     kafkaProducer.push(serverProperties.getAssessmentSubmitTopic(), kafkaResult);

@@ -48,15 +48,6 @@ public class PdfGenerationService {
 		pageTable.add(getUserRoleActivities(wa, statusSelected));
 
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
-//		try {
-//			JsonPDF.writeToStream((new ByteArrayInputStream(pageTable.toJSONString().getBytes())), out, null);
-//		} catch (Exception e) {
-//			String errorMessage = "Failed to generate PDF from JSON Object. Exception: " + e.getMessage();
-//			logger.warn(errorMessage);
-//			logger.error(e);
-//			return getWaErrorPdf(errorMessage);
-//		}
-//
 		return out.toByteArray();
 	}
 
@@ -91,7 +82,6 @@ public class PdfGenerationService {
 		
 		try {
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
-//			JsonPDF.writeToStream((new ByteArrayInputStream(pageTable.toJSONString().getBytes())), out, null);
 			return out.toByteArray();
 		} catch (Exception e) {
 			logger.error(e);

@@ -88,7 +88,7 @@ public class OffensiveDataFlagServiceImpl implements OffensiveDataFlagService {
                     response.getResult().put(Constants.STATUS, Constants.UPDATED);
                 }
             } catch (Exception e) {
-                errMsg = String.format("Failed to update an offensive flag with the details. Exception: ", e.getMessage());
+                errMsg = String.format("Failed to update an offensive flag with the details. Exception: %s", e.getMessage());
                 logger.error(errMsg, e);
             }
         }
