@@ -21,8 +21,8 @@ public class EhrmsController {
     @GetMapping("/details")
     public ResponseEntity <SBApiResponse> fetchEhrmsProfileDetail
             (@RequestHeader(Constants.X_AUTH_TOKEN) String authToken,
-             @RequestHeader(Constants.X_AUTH_USER_ORG_ID) String rootOrgId) throws Exception {
-        SBApiResponse response = ehrmsService.fetchEhrmsProfileDetail(rootOrgId, authToken);
+             @RequestHeader(Constants.X_AUTH_USER_ID) String userId) throws Exception {
+        SBApiResponse response = ehrmsService.fetchEhrmsProfileDetail(userId, authToken);
         return new ResponseEntity<>(response, response.getResponseCode());
     }
 
