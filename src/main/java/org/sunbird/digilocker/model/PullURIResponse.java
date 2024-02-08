@@ -110,7 +110,7 @@ public class PullURIResponse {
             this.persons = new Persons();
         }
 
-        @XmlElement(name = "Persons")
+        @JacksonXmlProperty(localName = "Persons", namespace = "http://tempuri.org/")
         public Persons getPersons() {
             return persons;
         }
@@ -128,7 +128,7 @@ public class PullURIResponse {
             this.person = new Person();
         }
 
-        @JacksonXmlProperty(localName = "Person")
+        @JacksonXmlProperty(localName = "Person", namespace = "http://tempuri.org/")
         public Person getPerson() {
             return person;
         }
@@ -147,6 +147,7 @@ public class PullURIResponse {
 
         public Person() {}
 
+        @JacksonXmlProperty(isAttribute = true)
         public String getName() {
             return name;
         }
@@ -154,7 +155,7 @@ public class PullURIResponse {
         public void setName(String name) {
             this.name = name;
         }
-
+        @JacksonXmlProperty(isAttribute = true)
         public String getDob() {
             return dob;
         }
@@ -162,7 +163,7 @@ public class PullURIResponse {
         public void setDob(String dob) {
             this.dob = dob;
         }
-
+        @JacksonXmlProperty(isAttribute = true)
         public String getGender() {
             return gender;
         }
@@ -170,7 +171,7 @@ public class PullURIResponse {
         public void setGender(String gender) {
             this.gender = gender;
         }
-
+        @JacksonXmlProperty(isAttribute = true)
         public String getPhone() {
             return phone;
         }

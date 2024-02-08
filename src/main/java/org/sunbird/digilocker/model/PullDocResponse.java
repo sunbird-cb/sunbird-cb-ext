@@ -71,7 +71,7 @@ public class PullDocResponse {
     public static class DocDetails {
 
         private String docContent;
-        private Person dataContent;
+        private CertificateInfo dataContent;
 
         @JacksonXmlProperty(localName = "DocContent", namespace = "http://tempuri.org/")
         public String getDocContent() {
@@ -83,54 +83,39 @@ public class PullDocResponse {
         }
 
         @JacksonXmlProperty(localName = "DataContent", namespace = "http://tempuri.org/")
-        public Person getDataContent() {
+        public CertificateInfo getDataContent() {
             return dataContent;
         }
 
-        public void setDataContent(Person dataContent) {
+        public void setDataContent(CertificateInfo dataContent) {
             this.dataContent = dataContent;
         }
     }
 
     // Inner class for Person
-    public static class Person {
-        private String name;
-        private String dob;
-        private String gender;
-        private String phone;
+    public static class CertificateInfo {
 
-        public Person() {}
+        private String certificateName;
+        private String issuedOn;
 
-        public String getName() {
-            return name;
+        public CertificateInfo() {}
+
+        @JacksonXmlProperty(localName = "certificateName", namespace = "http://tempuri.org/")
+        public String getCertificateName() {
+            return certificateName;
         }
 
-        public void setName(String name) {
-            this.name = name;
+        public void setCertificateName(String certificateName) {
+            this.certificateName = certificateName;
         }
 
-        public String getDob() {
-            return dob;
+        @JacksonXmlProperty(localName = "issuedOn", namespace = "http://tempuri.org/")
+        public String getIssuedOn() {
+            return issuedOn;
         }
 
-        public void setDob(String dob) {
-            this.dob = dob;
-        }
-
-        public String getGender() {
-            return gender;
-        }
-
-        public void setGender(String gender) {
-            this.gender = gender;
-        }
-
-        public String getPhone() {
-            return phone;
-        }
-
-        public void setPhone(String phone) {
-            this.phone = phone;
+        public void setIssuedOn(String issuedOn) {
+            this.issuedOn = issuedOn;
         }
     }
 }
