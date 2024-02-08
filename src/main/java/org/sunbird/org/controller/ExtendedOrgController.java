@@ -41,13 +41,13 @@ public class ExtendedOrgController {
 	}
 
 	@PostMapping("/org/v1/ext/search")
-	public ResponseEntity<?> orgExtSearch(@RequestBody Map<String, Object> request) throws Exception {
+	public ResponseEntity<SBApiResponse> orgExtSearch(@RequestBody Map<String, Object> request) throws Exception {
 		SBApiResponse response = orgService.orgExtSearch(request);
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
 
 	@PostMapping("/org/v2/ext/signup/search")
-	public ResponseEntity<?> orgExtSearchV2(@RequestBody Map<String, Object> request) {
+	public ResponseEntity<SBApiResponse> orgExtSearchV2(@RequestBody Map<String, Object> request) {
 		SBApiResponse response = orgService.orgExtSearchV2(request);
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}

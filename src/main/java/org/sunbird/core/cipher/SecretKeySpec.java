@@ -41,7 +41,7 @@ public class SecretKeySpec implements KeySpec, SecretKey {
 			retval += this.key[i] * i;
 		}
 
-		return this.algorithm.equalsIgnoreCase("TripleDES") ? retval ^ "desede".hashCode()
+		return this.algorithm.equalsIgnoreCase(Constants.TRIPLE_DES) ? retval ^ "desede".hashCode()
 				: retval ^ this.algorithm.toLowerCase(Locale.ENGLISH).hashCode();
 	}
 
@@ -53,8 +53,8 @@ public class SecretKeySpec implements KeySpec, SecretKey {
 		} else {
 			String thatAlg = ((SecretKey) obj).getAlgorithm();
 			if (thatAlg.equalsIgnoreCase(this.algorithm)
-					|| thatAlg.equalsIgnoreCase("DESede") && this.algorithm.equalsIgnoreCase("TripleDES")
-					|| thatAlg.equalsIgnoreCase("TripleDES") && this.algorithm.equalsIgnoreCase("DESede")) {
+					|| thatAlg.equalsIgnoreCase("DESede") && this.algorithm.equalsIgnoreCase(Constants.TRIPLE_DES)
+					|| thatAlg.equalsIgnoreCase(Constants.TRIPLE_DES) && this.algorithm.equalsIgnoreCase("DESede")) {
 				byte[] thatKey = ((SecretKey) obj).getEncoded();
 				return MessageDigest.isEqual(this.key, thatKey);
 			} else {

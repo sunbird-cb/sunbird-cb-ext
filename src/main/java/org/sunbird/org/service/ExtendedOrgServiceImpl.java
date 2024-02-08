@@ -70,7 +70,7 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 				// system.
 				orgId = createOrgInSunbird(request, (String) requestData.get(Constants.CHANNEL), userToken);
 				if (StringUtils.isBlank(orgId)) {
-					response.getParams().setErrmsg("Failed to create organisation in Sunbird.");
+					response.getParams().setErrmsg(Constants.FAILED_CREATING_ORG_IN_SUNBIRD);
 					response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
 					return response;
 				}
@@ -94,7 +94,7 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 						requestData.put(Constants.CHANNEL, channelName);
 						orgId = createOrgInSunbird(request, (String) requestData.get(Constants.CHANNEL), userToken);
 						if (StringUtils.isBlank(orgId)) {
-							response.getParams().setErrmsg("Failed to create organisation in Sunbird.");
+							response.getParams().setErrmsg(Constants.FAILED_CREATING_ORG_IN_SUNBIRD);
 							response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
 							return response;
 						}
@@ -494,7 +494,7 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 				response.getResult().put(Constants.ORGANIZATION_ID, orgId);
 				response.getResult().put(Constants.RESPONSE, Constants.SUCCESS);
 			} else {
-				response.getParams().setErrmsg("Failed to create organisation in Sunbird.");
+				response.getParams().setErrmsg(Constants.FAILED_CREATING_ORG_IN_SUNBIRD);
 				response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
 			}
 		} catch (Exception e) {

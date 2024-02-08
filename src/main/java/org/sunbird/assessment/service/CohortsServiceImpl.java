@@ -242,8 +242,8 @@ public class CohortsServiceImpl implements CohortsService {
 		Map<String, Object> enrollResponse = new HashMap<>();
 		String date = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
 		batchObj.put("courseId", contentId);
-		batchObj.put("name", "Open Batch");
-		batchObj.put("description", "Open Batch");
+		batchObj.put("name", Constants.OPEN_BATCH);
+		batchObj.put("description", Constants.OPEN_BATCH);
 		batchObj.put("enrollmentType", "open");
 		batchObj.put("startDate", date);
 		batchObj.put("createdBy", userUUID);
@@ -262,7 +262,7 @@ public class CohortsServiceImpl implements CohortsService {
 		selectedBatch.setCreatedFor(new ArrayList<>());
 		selectedBatch.setEnrollmentEndDate(null);
 		selectedBatch.setEnrollmentType("open");
-		selectedBatch.setName("Open Batch");
+		selectedBatch.setName(Constants.OPEN_BATCH);
 		selectedBatch.setStartDate(date);
 		selectedBatch.setStatus(1);
 		selectedBatch.setBatchId(batchId);
