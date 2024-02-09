@@ -1535,7 +1535,6 @@ public class ProfileServiceImpl implements ProfileService {
 			final BoolQueryBuilder finalQuery = QueryBuilders.boolQuery();
 			finalQuery.must(QueryBuilders.termQuery(Constants.STATUS, 1));
 			SearchSourceBuilder sourceBuilder = null;
-			wb = null;
 			long userCount = 0l;
 			do {
 				sourceBuilder = new SearchSourceBuilder().query(finalQuery).from(index).size(size);

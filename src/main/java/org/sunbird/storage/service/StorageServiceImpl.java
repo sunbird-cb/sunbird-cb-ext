@@ -226,14 +226,6 @@ public class StorageServiceImpl implements StorageService {
 			DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 			String todayFormattedDate = now.format(dateFormat);
 			String mdoId = "mdoid=" + orgId;
-				/*if (orgId != null && !orgId.isEmpty()) {
-					if (orgId.contains("=")) {
-						String[] array = orgId.split("=");
-						mdoId = array[1];
-					} else {
-						mdoId = orgId;
-					}
-				}*/
 			String fileName = reportFileNameMap.get(reportType);
 			String objectKey = serverProperties.getReportDownloadFolderName() + "/" + reportType + "/" + todayFormattedDate + "/" + mdoId + "/" + fileName;
 			try {
