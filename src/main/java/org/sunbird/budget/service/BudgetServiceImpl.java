@@ -52,7 +52,7 @@ public class BudgetServiceImpl implements BudgetService {
 
 			if (!existingDataList.isEmpty()) {
 				String errMsg = "Budget Scheme exist for given name. Failed to create BudgetInfo for OrgId: "
-						+ data.getOrgId() + ", BudgetYear: " + data.getBudgetYear() + ", SchemeName: "
+						+ data.getOrgId() + Constants.BUDGET_YEAR_CONSTANT + data.getBudgetYear() + ", SchemeName: "
 						+ data.getSchemeName();
 				logger.error(errMsg);
 				response.getParams().setErr(errMsg);
@@ -96,8 +96,8 @@ public class BudgetServiceImpl implements BudgetService {
 					Constants.TABLE_ORG_BUDGET_SCHEME, propertyMap, new ArrayList<>());
 
 			if (existingBudgetInfo.isEmpty()) {
-				String errMsg = "Failed to find BudgetScheme for OrgId: " + docInfo.getOrgId() + ", Id: "
-						+ docInfo.getId() + ", BudgetYear: " + docInfo.getBudgetYear();
+				String errMsg = Constants.FAILED_BUDGET_SCHEME_FOR_ORGID + docInfo.getOrgId() +Constants.ID_CONSTANT
+						+ docInfo.getId() + Constants.BUDGET_YEAR_CONSTANT + docInfo.getBudgetYear();
 				logger.error(errMsg);
 				response.getParams().setErrmsg(errMsg);
 				response.setResponseCode(HttpStatus.BAD_REQUEST);
@@ -162,7 +162,7 @@ public class BudgetServiceImpl implements BudgetService {
 			errMsg = "No Budget Year Collection found for Org: " + orgId;
 		} else {
 			budgetResponseList = getSpecificBudgetYearDetails(orgId, budgetYear);
-			errMsg = "No Budget Scheme found for Org: " + orgId + ", BudgetYear: " + budgetYear;
+			errMsg = "No Budget Scheme found for Org: " + orgId + Constants.BUDGET_YEAR_CONSTANT + budgetYear;
 		}
 
 		if (CollectionUtils.isEmpty(budgetResponseList)) {
@@ -191,8 +191,8 @@ public class BudgetServiceImpl implements BudgetService {
 			List<Map<String, Object>> existingBudgetInfo = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
 					Constants.TABLE_ORG_BUDGET_SCHEME, keyMap, null);
 			if (existingBudgetInfo.isEmpty()) {
-				String errMsg = "Failed to find BudgetScheme for OrgId: " + data.getOrgId() + ", Id: " + data.getId()
-						+ ", BudgetYear: " + data.getBudgetYear();
+				String errMsg = Constants.FAILED_BUDGET_SCHEME_FOR_ORGID + data.getOrgId() +Constants.ID_CONSTANT + data.getId()
+						+ Constants.BUDGET_YEAR_CONSTANT + data.getBudgetYear();
 				logger.error(errMsg);
 				response.getParams().setErrmsg(errMsg);
 				response.setResponseCode(HttpStatus.BAD_REQUEST);
@@ -215,7 +215,7 @@ public class BudgetServiceImpl implements BudgetService {
 					}
 					if (isOtherRecordExist) {
 						String errMsg = "Budget Scheme exist for given name. Failed to update BudgetInfo for OrgId: "
-								+ data.getOrgId() + ", BudgetYear: " + data.getBudgetYear() + ", SchemeName: "
+								+ data.getOrgId() + Constants.BUDGET_YEAR_CONSTANT + data.getBudgetYear() + ", SchemeName: "
 								+ data.getSchemeName();
 						logger.error(errMsg);
 						response.getParams().setErr(errMsg);
@@ -272,7 +272,7 @@ public class BudgetServiceImpl implements BudgetService {
 				response.getParams().setStatus(Constants.SUCCESSFUL);
 				response.setResponseCode(HttpStatus.OK);
 			} else {
-				String errMsg = "Failed to find BudgetScheme for OrgId: " + orgId + ", Id: " + id + ", BudgetYear: "
+				String errMsg = Constants.FAILED_BUDGET_SCHEME_FOR_ORGID + orgId +Constants.ID_CONSTANT + id + Constants.BUDGET_YEAR_CONSTANT
 						+ budgetYear;
 				logger.error(errMsg);
 				response.getParams().setErrmsg(errMsg);
@@ -301,8 +301,8 @@ public class BudgetServiceImpl implements BudgetService {
 			if (!budgetInfo.isEmpty()) {
 				BudgetInfo budgetInfoModel = mapper.convertValue(budgetInfo.get(0), BudgetInfo.class);
 				if (CollectionUtils.isEmpty(budgetInfoModel.getProofDocs())) {
-					String errMsg = "Failed to find BudgetScheme for OrgId: " + orgId + ", Id: " + budgetDetailsId
-							+ ", BudgetYear: " + budgetYear;
+					String errMsg = Constants.FAILED_BUDGET_SCHEME_FOR_ORGID + orgId +Constants.ID_CONSTANT + budgetDetailsId
+							+ Constants.BUDGET_YEAR_CONSTANT + budgetYear;
 					logger.error(errMsg);
 					response.getParams().setErrmsg(errMsg);
 					response.setResponseCode(HttpStatus.BAD_REQUEST);
@@ -334,8 +334,8 @@ public class BudgetServiceImpl implements BudgetService {
 					response.setResponseCode(HttpStatus.OK);
 				}
 			} else {
-				String errMsg = "Failed to find BudgetScheme for OrgId: " + orgId + ", Id: " + budgetDetailsId
-						+ ", BudgetYear: " + budgetYear;
+				String errMsg = Constants.FAILED_BUDGET_SCHEME_FOR_ORGID + orgId +Constants.ID_CONSTANT + budgetDetailsId
+						+ Constants.BUDGET_YEAR_CONSTANT + budgetYear;
 				logger.error(errMsg);
 				response.getParams().setErrmsg(errMsg);
 				response.setResponseCode(HttpStatus.BAD_REQUEST);
@@ -424,7 +424,7 @@ public class BudgetServiceImpl implements BudgetService {
 		}
 
 		if (!CollectionUtils.isEmpty(errObjList)) {
-			throw new Exception("One or more required fields are empty. Empty fields " + errObjList.toString());
+			throw new Exception(Constants.ONE_OR_MORE_ERROR_FIELD_VALIDATION + errObjList.toString());
 		}
 	}
 
@@ -477,7 +477,7 @@ public class BudgetServiceImpl implements BudgetService {
 		}
 
 		if (schemeName && sBudgetAllocated && tBudgetAllocated && tBudgetUtilization) {
-			throw new Exception("One or more required fields are empty. Empty fields " + errObjList.toString());
+			throw new Exception(Constants.ONE_OR_MORE_ERROR_FIELD_VALIDATION + errObjList.toString());
 		} else {
 			if (schemeName)
 				errObjList.remove(Constants.SCHEME_NAME);
@@ -490,7 +490,7 @@ public class BudgetServiceImpl implements BudgetService {
 		}
 
 		if (!CollectionUtils.isEmpty(errObjList)) {
-			throw new Exception("One or more required fields are empty. Empty fields " + errObjList.toString());
+			throw new Exception(Constants.ONE_OR_MORE_ERROR_FIELD_VALIDATION + errObjList.toString());
 		}
 	}
 
@@ -574,7 +574,7 @@ public class BudgetServiceImpl implements BudgetService {
 		}
 
 		if (!CollectionUtils.isEmpty(errObjList)) {
-			throw new Exception("One or more required fields are empty. Empty fields " + errObjList.toString());
+			throw new Exception(Constants.ONE_OR_MORE_ERROR_FIELD_VALIDATION + errObjList.toString());
 		}
 	}
 }

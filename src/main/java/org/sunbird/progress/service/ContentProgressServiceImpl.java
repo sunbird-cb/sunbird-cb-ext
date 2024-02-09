@@ -110,8 +110,8 @@ public class ContentProgressServiceImpl implements ContentProgressService {
                 String contentId = (String) contentMap.get("contentid");
                 contentMap.remove(Constants.USER_ID);
                 Map<String, Object> userMap = userDetailsList.get(userId);
-                if (userMap.containsKey("progressDetails")) {
-                    Map<String, Map<String, Object>> progressDetailsMap = (Map<String, Map<String, Object>>) userMap.get("progressDetails");
+                if (userMap.containsKey(Constants.PROGRESS_DETAILS)) {
+                    Map<String, Map<String, Object>> progressDetailsMap = (Map<String, Map<String, Object>>) userMap.get(Constants.PROGRESS_DETAILS);
                     progressDetailsMap.compute(contentId, (key, existingValue) -> {
                         return contentMap;
                     });
@@ -121,16 +121,16 @@ public class ContentProgressServiceImpl implements ContentProgressService {
                     progressMap.put("contentId", contentId);
                     progressMap.put("status", contentMap.get("status"));
                     progressDetailsMap.put(contentId, progressMap);
-                    userMap.put("progressDetails", progressDetailsMap);
+                    userMap.put(Constants.PROGRESS_DETAILS, progressDetailsMap);
 
                 }
             });
             userDetailsList.forEach((userId, userInformation) -> {
-                if (userInformation.containsKey("progressDetails")) {
-                    Map<String, Object> progressDetails = (Map<String, Object>) userInformation.get("progressDetails");
-                    userInformation.put("progressDetails", new ArrayList<>(progressDetails.values()));
+                if (userInformation.containsKey(Constants.PROGRESS_DETAILS)) {
+                    Map<String, Object> progressDetails = (Map<String, Object>) userInformation.get(Constants.PROGRESS_DETAILS);
+                    userInformation.put(Constants.PROGRESS_DETAILS, new ArrayList<>(progressDetails.values()));
                 } else {
-                    userInformation.put("progressDetails", new ArrayList<>());
+                    userInformation.put(Constants.PROGRESS_DETAILS, new ArrayList<>());
                 }
             });
             response.getResult().put(Constants.COUNT, userDetailsList.size());

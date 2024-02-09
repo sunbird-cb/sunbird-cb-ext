@@ -3,6 +3,7 @@ package org.sunbird.course.model;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import org.sunbird.common.util.Constants;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({ "id", "ver", "ts", "params", "responseCode", "result" })
@@ -88,27 +89,27 @@ public class NewCourseData {
 				.append('[');
 		sb.append("id");
 		sb.append('=');
-		sb.append(((this.id == null) ? "<null>" : this.id));
+		sb.append(((this.id == null) ? Constants.NULL_CONSTANT : this.id));
 		sb.append(',');
 		sb.append("ver");
 		sb.append('=');
-		sb.append(((this.ver == null) ? "<null>" : this.ver));
+		sb.append(((this.ver == null) ? Constants.NULL_CONSTANT : this.ver));
 		sb.append(',');
 		sb.append("ts");
 		sb.append('=');
-		sb.append(((this.ts == null) ? "<null>" : this.ts));
+		sb.append(((this.ts == null) ? Constants.NULL_CONSTANT : this.ts));
 		sb.append(',');
 		sb.append("params");
 		sb.append('=');
-		sb.append(((this.params == null) ? "<null>" : this.params));
+		sb.append(((this.params == null) ? Constants.NULL_CONSTANT : this.params));
 		sb.append(',');
 		sb.append("responseCode");
 		sb.append('=');
-		sb.append(((this.responseCode == null) ? "<null>" : this.responseCode));
+		sb.append(((this.responseCode == null) ? Constants.NULL_CONSTANT : this.responseCode));
 		sb.append(',');
 		sb.append("result");
 		sb.append('=');
-		sb.append(((this.result == null) ? "<null>" : this.result));
+		sb.append(((this.result == null) ? Constants.NULL_CONSTANT : this.result));
 		sb.append(',');
 		if (sb.charAt((sb.length() - 1)) == ',') {
 			sb.setCharAt((sb.length() - 1), ']');

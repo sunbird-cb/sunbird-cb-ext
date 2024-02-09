@@ -147,7 +147,7 @@ public class UserBulkUploadService {
                                 invalidErrList.add("Invalid Full Name");
                             }
                         } else {
-                            invalidErrList.add("Invalid column type. Expecting string format");
+                            invalidErrList.add(Constants.INVALID_COL_TYPE_EXPECTING_STRING);
                         }
                     }
                     if (nextRow.getCell(1) == null || nextRow.getCell(1).getCellType() == CellType.BLANK) {
@@ -156,7 +156,7 @@ public class UserBulkUploadService {
                         if (nextRow.getCell(1).getCellType() == CellType.STRING) {
                             userRegistration.setEmail(nextRow.getCell(1).getStringCellValue().trim());
                         } else {
-                            invalidErrList.add("Invalid column type. Expecting string format");
+                            invalidErrList.add(Constants.INVALID_COL_TYPE_EXPECTING_STRING);
                         }
                     }
                     if (nextRow.getCell(2) == null || nextRow.getCell(2).getCellType() == CellType.BLANK) {
@@ -180,7 +180,7 @@ public class UserBulkUploadService {
                                 invalidErrList.add("Invalid Group : Group can be only among one of these " + serverProperties.getBulkUploadGroupValue());
                             }
                         } else {
-                            invalidErrList.add("Invalid column type. Expecting string format");
+                            invalidErrList.add(Constants.INVALID_COL_TYPE_EXPECTING_STRING);
                         }
                     }
                     if (nextRow.getCell(4) != null && nextRow.getCell(4).getCellType() != CellType.BLANK) {
@@ -198,7 +198,7 @@ public class UserBulkUploadService {
                                 invalidErrList.add("Invalid Tag : Tags are comma seperated string values. A Tag can contain only alphabets with spaces. eg: Bihar Circle, Patna Division");
                             }
                         } else {
-                            invalidErrList.add("Invalid column type. Expecting string format");
+                            invalidErrList.add(Constants.INVALID_COL_TYPE_EXPECTING_STRING);
                         }
                     }
                     if (nextRow.getCell(5) != null && nextRow.getCell(5).getCellType() != CellType.BLANK) {
@@ -223,7 +223,7 @@ public class UserBulkUploadService {
                                 invalidErrList.add("Invalid External System : External System can contain only alphabets and can have a max length of 255");
                             }
                         } else {
-                            invalidErrList.add("Invalid column type. Expecting string format");
+                            invalidErrList.add(Constants.INVALID_COL_TYPE_EXPECTING_STRING);
                         }
                     }
                     userRegistration.setOrgName(inputDataMap.get(Constants.ORG_NAME));

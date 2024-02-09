@@ -1,10 +1,10 @@
 package org.sunbird.course.model;
 
 
-import javax.annotation.Generated;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import org.sunbird.common.util.Constants;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({ "resmsgid", "msgid", "status", "err", "errmsg" })
@@ -78,23 +78,23 @@ public class Params {
 				.append('[');
 		sb.append("resmsgid");
 		sb.append('=');
-		sb.append(((this.resmsgid == null) ? "<null>" : this.resmsgid));
+		sb.append(((this.resmsgid == null) ? Constants.NULL_CONSTANT : this.resmsgid));
 		sb.append(',');
 		sb.append("msgid");
 		sb.append('=');
-		sb.append(((this.msgid == null) ? "<null>" : this.msgid));
+		sb.append(((this.msgid == null) ? Constants.NULL_CONSTANT : this.msgid));
 		sb.append(',');
 		sb.append("status");
 		sb.append('=');
-		sb.append(((this.status == null) ? "<null>" : this.status));
+		sb.append(((this.status == null) ? Constants.NULL_CONSTANT : this.status));
 		sb.append(',');
 		sb.append("err");
 		sb.append('=');
-		sb.append(((this.err == null) ? "<null>" : this.err));
+		sb.append(((this.err == null) ? Constants.NULL_CONSTANT : this.err));
 		sb.append(',');
 		sb.append("errmsg");
 		sb.append('=');
-		sb.append(((this.errmsg == null) ? "<null>" : this.errmsg));
+		sb.append(((this.errmsg == null) ? Constants.NULL_CONSTANT : this.errmsg));
 		sb.append(',');
 		if (sb.charAt((sb.length() - 1)) == ',') {
 			sb.setCharAt((sb.length() - 1), ']');

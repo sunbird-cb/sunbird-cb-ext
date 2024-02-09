@@ -86,7 +86,7 @@ public class ContentServiceImpl implements ContentService {
 		Map<String, Object> batch = new HashMap<>();
 		batch.put("active", true);
 		request.put("batch", batch);
-		requestBody.put("request", request);
+		requestBody.put(Constants.REQUEST, request);
 
 		for (String batchId : batchIdList) {
 			try {
@@ -128,7 +128,7 @@ public class ContentServiceImpl implements ContentService {
 		Map<String, Object> batch = new HashMap<>();
 		batch.put("active", true);
 		request.put("batch", batch);
-		requestBody.put("request", request);
+		requestBody.put(Constants.REQUEST, request);
 		try {
 			batch.put("batchId", batchId);
 			SunbirdApiResp response = mapper.convertValue(
@@ -172,7 +172,7 @@ public class ContentServiceImpl implements ContentService {
 		Map<String, Object> search = new HashMap<>();
 		search.put(Constants.IDENTIFIER, questionIdList);
 		request.put("search", search);
-		requestMap.put("request", request);
+		requestMap.put(Constants.REQUEST, request);
 
 		Map<String, String> headerValues = new HashMap<>();
 		headerValues.put(Constants.AUTH_TOKEN, serverConfig.getSbApiKey());

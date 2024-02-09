@@ -468,7 +468,7 @@ public class CbPlanServiceImpl implements CbPlanService {
             }
             List<String> assignmentTypeInfoKeyQueryList = new ArrayList<>(Arrays.asList(userId, Constants.ALL_USER));
             if (StringUtils.isNotEmpty(userDesignation)) {
-                logger.info("User Designation : {}" , userDesignation);
+                logger.info("User Designation : " + userDesignation);
                 assignmentTypeInfoKeyQueryList.add(userDesignation);
             }
             propertiesMap.clear();

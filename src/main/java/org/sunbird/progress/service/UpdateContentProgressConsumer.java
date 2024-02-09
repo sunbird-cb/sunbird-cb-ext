@@ -84,7 +84,7 @@ public class UpdateContentProgressConsumer {
                 String userId = (String) learnerInfo.get(Constants.USER_ID);
                 mailNotificationDetails.put(Constants.USER_ID, userId);
                 req = new HashMap<>();
-                req.put("request", request);
+                req.put(Constants.REQUEST, request);
                 Map<String, Object> response = outboundReqService.fetchResultUsingPatch(
                         cbExtServerProperties.getCourseServiceHost() + cbExtServerProperties.getProgressUpdateEndPoint(),
                         req, contentProgressRequest.getHeadersValues());
@@ -204,7 +204,7 @@ public class UpdateContentProgressConsumer {
         notificationRequest.setConfig(config);
         Map<String, List<NotificationRequest>> notificationMap = new HashMap<>();
         notificationMap.put("notifications", Arrays.asList(notificationRequest));
-        req.put("request", notificationMap);
+        req.put(Constants.REQUEST, notificationMap);
         sendNotification(req);
     }
 
@@ -250,7 +250,7 @@ public class UpdateContentProgressConsumer {
         request.put("limit", userIds.size());
         request.put("offset", 0);
         request.put("filters", filters);
-        requestObject.put("request", request);
+        requestObject.put(Constants.REQUEST, request);
         return requestObject;
     }
 
