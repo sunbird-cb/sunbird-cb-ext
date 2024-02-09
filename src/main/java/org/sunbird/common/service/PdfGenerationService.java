@@ -55,7 +55,7 @@ public class PdfGenerationService {
 		if (ObjectUtils.isEmpty(wa.getActiveWAObject())) {
 			// There is no active WA object found. We can not create QR Code for
 			// redirection.
-			// TODO - Construct Error pdf and return.
+			// Construct Error pdf and return.
 		}
 
 		return null;
@@ -154,7 +154,7 @@ public class PdfGenerationService {
 				deptLogoArray.add(firstColProperties);
 				// Add image
 				{
-					// TODO check the DeptRepo for Dept Image details.
+					// check the DeptRepo for Dept Image details.
 					JSONArray deptLogoImage = new JSONArray();
 					deptLogoImage.add("image");
 					JSONObject imageProperties = new JSONObject();

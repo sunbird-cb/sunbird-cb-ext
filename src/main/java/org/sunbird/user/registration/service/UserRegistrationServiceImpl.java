@@ -233,7 +233,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 			 * 1. Create User 2. Read created User 3. Update User 4. Create NodeBB user Id
 			 * 5. Assign Role 6. Reset Password and get activation link
 			 */
-			LOGGER.info("Initiated User Creation flow for Reg. Code :: " + registrationCode);
+			LOGGER.info("Initiated User Creation flow for Reg. Code :: {}" , registrationCode);
 			UserRegistration userReg = getUserRegistrationForRegCode(registrationCode);
 
 			// Create the org if it's not already onboarded.
@@ -244,7 +244,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 					userReg.setSbOrgId(orgId);
 					LOGGER.info(String.format("Auto on-boarded organisation with Name: %s, MapId: %s, OrgId: %s",
 							userReg.getOrgName(), userReg.getMapId(), userReg.getSbOrgId()));
-					// TODO - Need to find a best way to give time for org creation takes effect.
+					// Need to find a best way to give time for org creation takes effect.
 					try {
 						Thread.sleep(1000);
 					} catch (Exception e) {
@@ -263,7 +263,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 			if (userUtilityService.createUser(userReg)) {
 				LOGGER.info("Successfully completed user creation flow.");
 			} else {
-				LOGGER.error("Failed to create user for Reg.Code :: " + registrationCode);
+				LOGGER.error("Failed to create user for Reg.Code :: {}" , registrationCode);
 				regStatus = UserRegistrationStatus.FAILED;
 			}
 

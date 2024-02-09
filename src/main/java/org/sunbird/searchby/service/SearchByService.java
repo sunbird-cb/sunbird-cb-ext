@@ -146,7 +146,7 @@ public class SearchByService {
 					if (!CollectionUtils.isEmpty(facetValueList)) {
 						for (Map<String, Object> facetValueObj : facetValueList) {
 							CompetencyInfo compInfo = new CompetencyInfo();
-							// TODO - Make sure which competency field is unique
+							// Make sure which competency field is unique
 							compInfo.setName((String) facetValueObj.get(Constants.NAME));
 							compInfo.setContentCount((int) facetValueObj.get(Constants.COUNT));
 							competencyMap.put((String) facetValueObj.get(Constants.NAME), compInfo);
