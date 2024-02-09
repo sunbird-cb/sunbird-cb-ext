@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.sunbird.assessment.repo.CohortUsers;
 import org.sunbird.assessment.service.CohortsService;
-import org.sunbird.common.model.Response;
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.util.Constants;
 
