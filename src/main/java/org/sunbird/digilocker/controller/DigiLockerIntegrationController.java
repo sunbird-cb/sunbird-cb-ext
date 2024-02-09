@@ -11,19 +11,19 @@ import org.sunbird.digilocker.model.PullURIResponse;
 import org.sunbird.digilocker.service.DigiLockerIntegrationService;
 
 @RestController
-@RequestMapping("digiLocker")
+@RequestMapping("digilocker")
 public class DigiLockerIntegrationController {
     @Autowired
     DigiLockerIntegrationService digiLockerIntegrationService;
 
-    @PostMapping(value = "/getURIRequest", consumes = MediaType.APPLICATION_XML_VALUE, produces = MediaType.APPLICATION_XML_VALUE)
+    @PostMapping(value = "/retrieveURI", consumes = MediaType.APPLICATION_XML_VALUE, produces = MediaType.APPLICATION_XML_VALUE)
     public @ResponseBody ResponseEntity<PullURIResponse> getURIRequest(@RequestBody PullURIRequest request) {
 
         PullURIResponse response = digiLockerIntegrationService.generateURIResponse(request);
         return ResponseEntity.ok().body(response);
     }
 
-    @PostMapping(value = "/getDocRequest", consumes = MediaType.APPLICATION_XML_VALUE, produces = MediaType.APPLICATION_XML_VALUE)
+    @PostMapping(value = "/retrieveDoc", consumes = MediaType.APPLICATION_XML_VALUE, produces = MediaType.APPLICATION_XML_VALUE)
     public @ResponseBody ResponseEntity<PullDocResponse> getDocRequest(@RequestBody PullDocRequest request) {
         PullDocResponse response = digiLockerIntegrationService.generateDocResponse(request);
         return ResponseEntity.ok().body(response);

@@ -7,6 +7,7 @@ import org.sunbird.digilocker.model.PullURIResponse;
 
 public interface DigiLockerIntegrationService {
 
-    public PullURIResponse generateURIResponse(PullURIRequest request);
-    public PullDocResponse generateDocResponse(PullDocRequest request);
+    PullURIResponse generateURIResponse(PullURIRequest request);
+
+    PullDocResponse generateDocResponse(PullDocRequest request);
 }

@@ -22,7 +22,7 @@ public class PullDocRequest {
     private String ver;
 
     @JacksonXmlProperty(localName = "DocDetails")
-    private PullDocRequest.DocDetails docDetails;
+    private DocRequestDetails docDetails;
 
     public String getFormat() {
         return format;
@@ -64,35 +64,12 @@ public class PullDocRequest {
         this.ver = ver;
     }
 
-    public PullDocRequest.DocDetails getDocDetails() {
+    public DocRequestDetails getDocDetails() {
         return docDetails;
     }
 
-    public void setDocDetails(PullDocRequest.DocDetails docDetails) {
+    public void setDocDetails(DocRequestDetails docDetails) {
         this.docDetails = docDetails;
     }
 
-    public static class DocDetails {
-        @JacksonXmlProperty(localName = "DigiLockerId")
-        private String DigiLockerId;
-
-        @JacksonXmlProperty(localName = "URI")
-        private String URI;
-
-        public String getDigiLockerId() {
-            return DigiLockerId;
-        }
-
-        public void setDigiLockerId(String digiLockerId) {
-            DigiLockerId = digiLockerId;
-        }
-
-        public String getURI() {
-            return URI;
-        }
-
-        public void setURI(String URI) {
-            this.URI = URI;
-        }
-    }
 }

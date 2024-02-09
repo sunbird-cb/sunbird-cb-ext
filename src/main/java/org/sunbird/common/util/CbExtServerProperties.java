@@ -647,6 +647,9 @@ public class CbExtServerProperties {
 	@Value("${cert-registry-certificate-download-url}")
 	private String certRegistryCertificateDownloadUrl;
 
+	@Value("${digilocker-issuer-id}")
+	private String digiLockerIssuerId;
+
 	public boolean qListFromCacheEnabled() {
 		return qListFromCacheEnabled;
 	}
@@ -2304,5 +2307,13 @@ public class CbExtServerProperties {
 
 	public void setCertRegistryCertificateDownloadUrl(String certRegistryCertificateDownloadUrl) {
 		this.certRegistryCertificateDownloadUrl = certRegistryCertificateDownloadUrl;
+	}
+
+	public String getDigiLockerIssuerId() {
+		return digiLockerIssuerId;
+	}
+
+	public void setDigiLockerIssuerId(String digiLockerIssuerId) {
+		this.digiLockerIssuerId = digiLockerIssuerId;
 	}
 }
