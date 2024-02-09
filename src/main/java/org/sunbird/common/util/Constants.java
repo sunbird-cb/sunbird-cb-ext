@@ -983,6 +983,7 @@ public class Constants {
 	public static final String LAST_ISSUED_ON = "lastIssuedOn";
 	public static final String TABLE_DIGILOCKER_DOC_INFO = "test_digilocker_doc_lookup";
 	public static final String ISSUED_USER_CERTIFICATE = "issuedCertificates";
+	public static final String DOC_TYPE = "docType";
 
 
     private Constants() {

@@ -100,6 +100,7 @@ public class DigiLockerIntegrationServiceImpl implements DigiLockerIntegrationSe
                         dockerLookUpInfo.put(Constants.COURSE_ID, userEnrollmentInfo.get(0).get(Constants.COURSE_ID));
                         dockerLookUpInfo.put(Constants.CERTIFICATE_NAME, userEnrollment.get(0).get(Constants.NAME));
                         dockerLookUpInfo.put(Constants.CREATED_DATE, new Date());
+                        dockerLookUpInfo.put(Constants.DOC_TYPE,request.getDocDetails().getDocType());
                         if (addUpdateDigiLockerLookup(dockerLookUpInfo)) {
                             response.setResponseStatus(new PullURIResponse.ResponseStatus("1", new Date().toString(), request.getTxn()));
                             response.setDocDetails(docDetails);
