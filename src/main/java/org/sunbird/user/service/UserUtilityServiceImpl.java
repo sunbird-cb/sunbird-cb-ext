@@ -343,12 +343,6 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		request.put(Constants.REQUEST, requestBody);
 
 		retValue = getActivationLink(userRegistration);
-		/*Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPost(
-				props.getDiscussionHubHost() + props.getDiscussionHubCreateUserPath(), request,
-				ProjectUtil.getDefaultHeaders());
-		if (Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
-			retValue = getActivationLink(userRegistration);
-		}*/
 		printMethodExecutionResult("Create NodeBB User", userRegistration.toMininumString(), retValue);
 		return retValue;
 	}
@@ -659,9 +653,8 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 				return (String) params.get(Constants.ERROR_MESSAGE);
 			}
 		} else if (readData != null && Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
-			//	if (getActivationLink(userRegistration)) {
 			return (String) readData.get(Constants.RESPONSE_CODE);
-			//	}
+
 		}
 		return Constants.BULK_USER_UPDATE_API_FAILED;
 	}
@@ -724,7 +717,6 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 			userInfo.put(Constants.ROOT_ORG_ID, (String) user.get(Constants.ROOT_ORG_ID));
 			userInfo.put(Constants.CHANNEL, (String) user.get(Constants.CHANNEL));
 			userInfo.put(Constants.DESIGNATION, (String) user.get(Constants.PROFILE_DETAILS_DESIGNATION));
-			//userInfo.put(Constants.DEPARTMENTNAME, (String) user.get(Constants.EMPLOYMENT_DETAILS_DEPARTMENT_NAME));
 			JsonNode jsonNode = objectMapper.convertValue(user, JsonNode.class);
 			JsonNode primaryEmailNode = jsonNode.at("/profileDetails/personalDetails/primaryEmail");
 			String primaryEmail = primaryEmailNode.asText();
@@ -939,7 +931,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		builder.append(props.getNotifyServiceHost()).append(props.getNotifyServicePathAsync());
 		try {
 			Map<String, Object> response = outboundRequestHandlerService.fetchResultUsingPost(builder.toString(), request, null);
-			logger.debug("The email notification is successfully sent, response is: " + response);
+			logger.debug("The email notification is successfully sent, response is: {}" , response);
 		} catch (Exception e) {
 			logger.error("Exception while posting the data in notification service: ", e);
 		}

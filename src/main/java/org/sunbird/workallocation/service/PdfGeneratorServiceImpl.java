@@ -205,7 +205,6 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 			log.error("Exception occurred while loading the default department logo");
 		}
 		headerDetails.put(DEPT_NAME,  workOrder.get(DEPT_NAME));
-//		headerDetails.put("deptImgUrl",  (String) workOrder.get("deptImgUrl"));
 		String headerMessage = readVm("pdf-header.vm", headerDetails);
 		String headerHtmlFilePath = createHTMLFile("pdf-header", headerMessage);
 
@@ -362,7 +361,8 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 					log.info("Writing the pdf file {}", line);
 				}
 			} catch (IOException e) {
-				log.error("Exception occurred while writing the pdf file {}", e);
+				log.error("Exception occurred while writing the pdf file", e);
+
 			} finally {
 				if (brCleanUp != null) {
 					brCleanUp.close();
