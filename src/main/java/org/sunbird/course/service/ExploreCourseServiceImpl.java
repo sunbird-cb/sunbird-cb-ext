@@ -71,7 +71,7 @@ public class ExploreCourseServiceImpl implements ExploreCourseService {
 			logger.error(errMsg, e);
 		}
 		if (StringUtils.isNotEmpty(errMsg)) {
-			logger.error("Failed to initialize the Open Course Details to Cache. ErrMsg: " + errMsg);
+			logger.error("Failed to initialize the Open Course Details to Cache. ErrMsg: {}" , errMsg);
 			response.getParams().setErrmsg(errMsg);
 			response.getParams().setStatus(Constants.FAILED);
 			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
