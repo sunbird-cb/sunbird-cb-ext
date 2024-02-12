@@ -16,15 +16,15 @@ public class DigiLockerIntegrationController {
     @Autowired
     DigiLockerIntegrationService digiLockerIntegrationService;
 
-    @PostMapping(value = "/retrieveURI", consumes = MediaType.APPLICATION_XML_VALUE, produces = MediaType.APPLICATION_XML_VALUE)
-    public @ResponseBody ResponseEntity<PullURIResponse> getURIRequest(@RequestBody PullURIRequest request) {
+    @PostMapping(value = "/v1/retrieveURI", consumes = MediaType.APPLICATION_XML_VALUE, produces = MediaType.APPLICATION_XML_VALUE)
+    public @ResponseBody ResponseEntity<PullURIResponse> getURIRequestV1(@RequestBody PullURIRequest request) {
 
         PullURIResponse response = digiLockerIntegrationService.generateURIResponse(request);
         return ResponseEntity.ok().body(response);
     }
 
-    @PostMapping(value = "/retrieveDoc", consumes = MediaType.APPLICATION_XML_VALUE, produces = MediaType.APPLICATION_XML_VALUE)
-    public @ResponseBody ResponseEntity<PullDocResponse> getDocRequest(@RequestBody PullDocRequest request) {
+    @PostMapping(value = "/v1/retrieveDoc", consumes = MediaType.APPLICATION_XML_VALUE, produces = MediaType.APPLICATION_XML_VALUE)
+    public @ResponseBody ResponseEntity<PullDocResponse> getDocRequestV1(@RequestBody PullDocRequest request) {
         PullDocResponse response = digiLockerIntegrationService.generateDocResponse(request);
         return ResponseEntity.ok().body(response);
     }
