@@ -124,6 +124,7 @@ public class DigiLockerIntegrationServiceImpl implements DigiLockerIntegrationSe
                                 responseStatus.setStatus("1");
                                 response.setDocDetails(docDetails);
                             } else {
+                                logger.error("Error while updating the document lookup table for userId: " + userId + " for request: " + request);
                                 responseStatus.setStatus("0");
                             }
                         }
@@ -176,6 +177,7 @@ public class DigiLockerIntegrationServiceImpl implements DigiLockerIntegrationSe
                 responseStatus.setStatus("0");
             }
         } catch (Exception e) {
+            logger.error("Some exception while processing the request: ", e);
             responseStatus.setStatus("0");
         }
         response.setResponseStatus(responseStatus);
