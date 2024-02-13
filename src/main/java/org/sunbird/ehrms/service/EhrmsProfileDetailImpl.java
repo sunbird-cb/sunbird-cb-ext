@@ -78,11 +78,15 @@ public class EhrmsProfileDetailImpl implements EhrmsService {
                 String ehrmsAuthUsername = serverConfig.getEhrmsAuthUserName();
                 String ehrmsAuthPassword = serverConfig.getEhrmsAuthPassword();
                 String jwtToken = redisCacheMgr.getCache(Constants.EHRMS_USER_TOKEN);
-                if (StringUtils.isEmpty(jwtToken)) {
+                logger.info("EhrmsUserName : {}",serverConfig.getEhrmsAuthUserName());
+                logger.info("EhrmsPassword : {}",serverConfig.getEhrmsAuthPassword());
+               // if (StringUtils.isEmpty(jwtToken)) {
                     jwtToken = fetchJwtToken(ehrmsAuthUrl, ehrmsAuthUsername, ehrmsAuthPassword).replace("\"", "");
+                    logger.info("JwtToken : {} ", jwtToken);
                     redisCacheMgr.putCache(Constants.EHRMS_USER_TOKEN, jwtToken, serverConfig.getRedisEhrmsTokenTimeOut());
-                }
+                //}
                 Map<String, Object> fetchEhrmsUserDetails = fetchEhrmsUserDetails(serverConfig.getEhrmsDetailUrl(), externalSystemId, jwtToken);
+                logger.info("FetchEhrmsUserDetails list : {}", fetchEhrmsUserDetails);
                 response.setResult(fetchEhrmsUserDetails);
                 return response;
             }
