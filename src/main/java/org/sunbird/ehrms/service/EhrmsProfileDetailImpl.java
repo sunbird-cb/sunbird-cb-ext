@@ -78,9 +78,7 @@ public class EhrmsProfileDetailImpl implements EhrmsService {
                 String ehrmsAuthUsername = serverConfig.getEhrmsAuthUserName();
                 String ehrmsAuthPassword = serverConfig.getEhrmsAuthPassword();
                 String jwtToken = redisCacheMgr.getCache(Constants.EHRMS_USER_TOKEN);
-                logger.info("EhrmsUserName : {}",serverConfig.getEhrmsAuthUserName());
-                logger.info("EhrmsPassword : {}",serverConfig.getEhrmsAuthPassword());
-               // if (StringUtils.isEmpty(jwtToken)) {
+                // if (StringUtils.isEmpty(jwtToken)) {
                     jwtToken = fetchJwtToken(ehrmsAuthUrl, ehrmsAuthUsername, ehrmsAuthPassword).replace("\"", "");
                     logger.info("JwtToken : {} ", jwtToken);
                     redisCacheMgr.putCache(Constants.EHRMS_USER_TOKEN, jwtToken, serverConfig.getRedisEhrmsTokenTimeOut());
