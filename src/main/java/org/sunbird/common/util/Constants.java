@@ -962,7 +962,7 @@ public class Constants {
 	public static final String COMPETENCY_SUB_THEME_PARAM = "competency_subtheme";
 	public static final String COPY_EMAIL = "copyEmail";
 	public static final String USER_CONTENT_RECOMMENDATION = "user.v1.content.recommendation";
-	public static final String RECOMMEND_CONTENT_SUBJECT =" recommends this iGOT Karmayogi Course for you!";
+	public static final String RECOMMEND_CONTENT_SUBJECT = " recommends this iGOT Karmayogi #primaryCategory for you!";
 	public static final String COURSE_POSTER_IMAGE_URL= "coursePosterImageUrl";
 	public static final String COURSE_PROVIDER = "courseProvider";
 	public static final String RECIPIENTS = "recipients";
@@ -975,6 +975,7 @@ public class Constants {
 	public static final String EHRMS_AUTH_PASSWORD = "password";
 	public static final String USER_ID_LOWER = "userid";
 	public static final String EHRMS_USER_TOKEN = "ehrmsUserToken";
+	public static final String PRIMARY_CATEGORY_TAG = "#primaryCategory";
 
     private Constants() {
 		throw new IllegalStateException("Utility class");
