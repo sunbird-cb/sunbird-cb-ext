@@ -830,12 +830,13 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 				Map<String, Object> mailNotificationDetails = new HashMap<>();
 				mailNotificationDetails.put(Constants.RECIPIENT_EMAILS, emailResponseList);
 				mailNotificationDetails.put(Constants.COURSE_NAME, requestData.get(Constants.COURSE_NAME));
-				mailNotificationDetails.put(Constants.SUBJECT, name + Constants.RECOMMEND_CONTENT_SUBJECT);
+				mailNotificationDetails.put(Constants.SUBJECT, name + Constants.RECOMMEND_CONTENT_SUBJECT.replace(Constants.PRIMARY_CATEGORY_TAG, (String) requestData.get(Constants.PRIMARY_CATEGORY)));
 				mailNotificationDetails.put(Constants.LINK, link.toString());
 				mailNotificationDetails.put(Constants.COURSE_POSTER_IMAGE_URL, requestData.get(Constants.COURSE_POSTER_IMAGE_URL));
 				mailNotificationDetails.put(Constants.COURSE_PROVIDER, requestData.get(Constants.COURSE_PROVIDER));
 				mailNotificationDetails.put(Constants.USER_ID, userId);
 				mailNotificationDetails.put(Constants.USER, name);
+				mailNotificationDetails.put(Constants.PRIMARY_CATEGORY, requestData.get(Constants.PRIMARY_CATEGORY));
 				sendNotificationToRecipients(mailNotificationDetails);
 			}
 		} catch (Exception e) {
@@ -872,6 +873,9 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		if (StringUtils.isEmpty((String) requestData.get(Constants.COURSE_PROVIDER))) {
 			errList.add(Constants.COURSE_PROVIDER);
 		}
+		if (StringUtils.isEmpty((String) requestData.get(Constants.PRIMARY_CATEGORY))) {
+			errList.add(Constants.PRIMARY_CATEGORY);
+		}
 		if (ObjectUtils.isEmpty(requestData.get(Constants.RECIPIENTS))) {
 			errList.add(Constants.RECIPIENTS);
 		}
@@ -907,6 +911,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		params.put(Constants.COURSE_POSTER_IMAGE_URL, mailNotificationDetails.get(Constants.COURSE_POSTER_IMAGE_URL));
 		params.put(Constants.COURSE_PROVIDER, mailNotificationDetails.get(Constants.COURSE_PROVIDER));
 		params.put(Constants.LINK, mailNotificationDetails.get(Constants.LINK));
+		params.put(Constants.PRIMARY_CATEGORY, mailNotificationDetails.get(Constants.PRIMARY_CATEGORY));
 		Template template = new Template(constructEmailTemplate(props.getRecommendContentTemplate(), params), props.getRecommendContentTemplate(), params);
 		usermap.put(Constants.ID, mailNotificationDetails.get(Constants.USER_ID));
 		usermap.put(Constants.TYPE, Constants.USER);
