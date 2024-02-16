@@ -99,4 +99,54 @@ public class PortalServiceImpl implements PortalService {
 		logger.error(ex);
 		throw ex;
 	}
+
+	@Override
+	public List<Map<String,String>> getDeptNameListByAdmin() {
+		try {
+			List<Map<String,String>> orgDetailsList = new ArrayList<>();
+			int count = 0;
+			int iterateCount = 0;
+			do {
+				// request body
+				Map<String, Object> requestMap = new HashMap<>();
+				requestMap.put(Constants.OFFSET, iterateCount);
+				requestMap.put(Constants.LIMIT, 100);
+				requestMap.put(Constants.FIELDS,
+						new ArrayList<>(Arrays.asList(Constants.CHANNEL, Constants.IS_MDO, Constants.IS_CBP, Constants.ID)));
+				requestMap.put(Constants.FILTERS, new HashMap<String, Object>() {
+					{
+						put(Constants.IS_TENANT, Boolean.TRUE);
+						put(Constants.STATUS, 1);
+					}
+				});
+
+				String serviceURL = serverConfig.getSbUrl() + serverConfig.getSbOrgSearchPath();
+				SunbirdApiResp orgResponse = mapper.convertValue(
+						outboundRequestHandlerService.fetchResultUsingPost(serviceURL, new HashMap<String, Object>() {
+							{
+								put(Constants.REQUEST, requestMap);
+							}
+						}), SunbirdApiResp.class);
+
+				SunbirdApiResultResponse resultResp = orgResponse.getResult().getResponse();
+				count = resultResp.getCount();
+				iterateCount = iterateCount + resultResp.getContent().size();
+				for (SunbirdApiRespContent content : resultResp.getContent()) {
+					// return orgname only if cbp or mdo
+					if ((!ObjectUtils.isEmpty(content.getIsMdo()) && content.getIsMdo())
+							|| (!ObjectUtils.isEmpty(content.getIsCbp()) && content.getIsCbp())) {
+								Map<String, String> orgMap = new HashMap<String, String>();
+								orgMap.put(Constants.CHANNEL, content.getChannel());
+								orgMap.put(Constants.ORG_ID, content.getId());
+								orgDetailsList.add(orgMap);
+					}
+				}
+			} while (count != iterateCount);
+			return orgDetailsList;
+		} catch (Exception e) {
+			logger.info("Exception occurred in getDeptNameList");
+			logger.error(e);
+		}
+		return Collections.emptyList();
+	}
 }

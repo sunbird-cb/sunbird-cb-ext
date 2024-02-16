@@ -8,6 +8,7 @@ import java.util.Map;
 import org.codehaus.plexus.util.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.sunbird.common.model.SBApiResponse;
 
 @Component
 public class CbExtServerProperties {
@@ -612,6 +613,42 @@ public class CbExtServerProperties {
 
 	@Value("${user.registration.welcome.email.profileUpdateLink}")
 	private String welcomeEmailProfileUpdateLink;
+
+	@Value("${notify.service.host}")
+	private String notifyServiceHost;
+
+	@Value("${recommend.content.notification.template}")
+	private String recommendContentTemplate;
+
+	@Value("${notification.support.mail}")
+	private String supportEmail;
+
+	@Value("${notify.service.path.async}")
+	private String notifyServicePathAsync;
+
+	@Value("${ehrms.detail.url}")
+	private String ehrmsDetailUrl;
+
+	@Value("${ehrms.auth.url}")
+	private String ehrmsAuthUrl;
+
+	@Value("${ehrms.auth.username}")
+	private String ehrmsAuthUserName;
+
+	@Value("${ehrms.auth.password}")
+	private String ehrmsAuthPassword;
+
+	@Value("${redis.ehrms.token.timeout}")
+	private Integer redisEhrmsTokenTimeOut;
+
+	@Value("${cert-registry-service-host}")
+	private String certRegistryServiceBaseUrl;
+
+	@Value("${cert-registry-certificate-download-url}")
+	private String certRegistryCertificateDownloadUrl;
+
+	@Value("${digilocker-issuer-id}")
+	private String digiLockerIssuerId;
 
 	public boolean qListFromCacheEnabled() {
 		return qListFromCacheEnabled;
@@ -2178,5 +2215,105 @@ public class CbExtServerProperties {
 
 	public void setWelcomeEmailProfileUpdateLink(String welcomeEmailProfileUpdateLink) {
 		this.welcomeEmailProfileUpdateLink = welcomeEmailProfileUpdateLink;
+	}
+
+	public String getNotifyServiceHost() {
+		return notifyServiceHost;
+	}
+
+	public void setNotifyServiceHost(String notifyServiceHost) {
+		this.notifyServiceHost = notifyServiceHost;
+	}
+
+	public String getRecommendContentTemplate() {
+		return recommendContentTemplate;
+	}
+
+	public void setRecommendContentTemplate(String recommendContentTemplate) {
+		this.recommendContentTemplate = recommendContentTemplate;
+	}
+
+	public String getSupportEmail() {
+		return supportEmail;
+	}
+
+	public void setSupportEmail(String supportEmail) {
+		this.supportEmail = supportEmail;
+	}
+
+	public String getNotifyServicePathAsync() {
+		return notifyServicePathAsync;
+	}
+
+	public void setNotifyServicePathAsync(String notifyServicePathAsync) {
+		this.notifyServicePathAsync = notifyServicePathAsync;
+	}
+
+	public String getEhrmsDetailUrl() {
+		return ehrmsDetailUrl;
+	}
+
+	public void setEhrmsDetailUrl(SBApiResponse response) {
+		this.ehrmsDetailUrl = ehrmsDetailUrl;
+	}
+
+	public void setEhrmsDetailUrl(String ehrmsDetailUrl) {
+		this.ehrmsDetailUrl = ehrmsDetailUrl;
+	}
+
+	public String getEhrmsAuthUrl() {
+		return ehrmsAuthUrl;
+	}
+
+	public void setEhrmsAuthUrl(String ehrmsAuthUrl) {
+		this.ehrmsAuthUrl = ehrmsAuthUrl;
+	}
+
+	public String getEhrmsAuthUserName() {
+		return ehrmsAuthUserName;
+	}
+
+	public void setEhrmsAuthUserName(String ehrmsAuthUserName) {
+		this.ehrmsAuthUserName = ehrmsAuthUserName;
+	}
+
+	public String getEhrmsAuthPassword() {
+		return ehrmsAuthPassword;
+	}
+
+	public void setEhrmsAuthPassword(String ehrmsAuthPassword) {
+		this.ehrmsAuthPassword = ehrmsAuthPassword;
+	}
+
+	public Integer getRedisEhrmsTokenTimeOut() {
+		return redisEhrmsTokenTimeOut;
+	}
+
+	public void setRedisEhrmsTokenTimeOut(Integer redisEhrmsTokenTimeOut) {
+		this.redisEhrmsTokenTimeOut = redisEhrmsTokenTimeOut;
+	}
+
+	public String getCertRegistryServiceBaseUrl() {
+		return certRegistryServiceBaseUrl;
+	}
+
+	public void setCertRegistryServiceBaseUrl(String certRegistryServiceBaseUrl) {
+		this.certRegistryServiceBaseUrl = certRegistryServiceBaseUrl;
+	}
+
+	public String getCertRegistryCertificateDownloadUrl() {
+		return certRegistryCertificateDownloadUrl;
+	}
+
+	public void setCertRegistryCertificateDownloadUrl(String certRegistryCertificateDownloadUrl) {
+		this.certRegistryCertificateDownloadUrl = certRegistryCertificateDownloadUrl;
+	}
+
+	public String getDigiLockerIssuerId() {
+		return digiLockerIssuerId;
+	}
+
+	public void setDigiLockerIssuerId(String digiLockerIssuerId) {
+		this.digiLockerIssuerId = digiLockerIssuerId;
 	}
 }

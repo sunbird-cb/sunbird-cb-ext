@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.sunbird.cassandra.utils.CassandraOperation;
 import org.sunbird.common.model.Config;
+import org.sunbird.common.model.NotificationAsyncRequest;
 import org.sunbird.common.model.NotificationRequest;
 import org.sunbird.common.model.Template;
 import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
@@ -82,7 +83,8 @@ public class CbplanContentConsumer {
             mailNotificationDetails.put(Constants.COMPETENCY_SUB_THEMES, allSubThemes.replace(allSubThemes.length()-2, allSubThemes.length()-1, "."));
             mailNotificationDetails.put(Constants.DESCRIPTION , cbplanContentRequest.get(Constants.DESCRIPTION));
             mailNotificationDetails.put(Constants.COPY_EMAIL, mdoAdminEmail);
-            sendNotificationToProviders(mailNotificationDetails);
+            mailNotificationDetails.put(Constants.CREATED_BY, mdoAdminId);
+            sendNotificationToProvidersAsync(mailNotificationDetails);
             logger.info(String.format("Completed request for content. Time taken: ", (System.currentTimeMillis() - startTime)));
         } catch (Exception e) {
             logger.error("Exception occurred while sending email : " + e.getMessage(), e);
@@ -139,7 +141,7 @@ public class CbplanContentConsumer {
         return requestObject;
     }
 
-    private void sendNotificationToProviders( Map<String, Object> mailNotificationDetails) {
+    private void sendNotificationToProviders(Map<String, Object> mailNotificationDetails) {
         List<String> providerIdList = (List<String>) mailNotificationDetails.get(Constants.PROVIDER_EMAIL_ID_LIST);
         String mdoName = (String) mailNotificationDetails.get(Constants.MDO_NAME);
         String mdoAdminEmail = (String) mailNotificationDetails.get(Constants.COPY_EMAIL);
@@ -170,12 +172,12 @@ public class CbplanContentConsumer {
         Map<String, List<NotificationRequest>> notificationMap = new HashMap<>();
         notificationMap.put(Constants.NOTIFICATIONS, Collections.singletonList(notificationRequest));
         req.put(Constants.REQUEST, notificationMap);
-        sendNotification(req);
+        sendNotification(req, configuration.getNotifyServicePath());
     }
 
-    private void sendNotification(Map<String, Object> request) {
+    private void sendNotification(Map<String, Object> request, String urlPath) {
         StringBuilder builder = new StringBuilder();
-        builder.append(configuration.getNotifyServiceHost()).append(configuration.getNotifyServicePath());
+        builder.append(configuration.getNotifyServiceHost()).append(urlPath);
         try {
             Map<String, Object> response = outboundReqService.fetchResultUsingPost(builder.toString(), request, null);
             logger.debug("The email notification is successfully sent, response is: " + response);
@@ -207,5 +209,56 @@ public class CbplanContentConsumer {
             logger.error("Unable to create template ", e);
         }
         return replacedHTML;
+    }
+
+    private void sendNotificationToProvidersAsync(Map<String, Object> mailNotificationDetails){
+        List<String> providerIdList = (List<String>) mailNotificationDetails.get(Constants.PROVIDER_EMAIL_ID_LIST);
+        String mdoName = (String) mailNotificationDetails.get(Constants.MDO_NAME);
+        String mdoAdminEmail = (String) mailNotificationDetails.get(Constants.COPY_EMAIL);
+
+        Map<String, Object> params = new HashMap<>();
+        NotificationAsyncRequest notificationAsyncRequest = new NotificationAsyncRequest();
+        notificationAsyncRequest.setPriority(1);
+        notificationAsyncRequest.setType(Constants.EMAIL);
+        notificationAsyncRequest.setCopyEmail(Collections.singletonList(mdoAdminEmail));
+        notificationAsyncRequest.setIds(providerIdList);
+
+        params.put(Constants.MDO_NAME_PARAM, mdoName);
+        params.put(Constants.NAME, mdoName);
+        params.put(Constants.COMPETENCY_AREA_PARAM, mailNotificationDetails.get(Constants.COMPETENCY_AREA));
+        params.put(Constants.COMPETENCY_THEME_PARAM, mailNotificationDetails.get(Constants.COMPETENCY_THEMES));
+        params.put(Constants.COMPETENCY_SUB_THEME_PARAM, mailNotificationDetails.get(Constants.COMPETENCY_SUB_THEMES));
+        params.put(Constants.DESCRIPTION, mailNotificationDetails.get(Constants.DESCRIPTION));
+        params.put(Constants.FROM_EMAIL, configuration.getSupportEmail());
+        params.put(Constants.ORG_NAME, mdoName);
+        Template template = new Template(constructEmailTemplate(configuration.getCbplanContentRequestTemplate(), params),configuration.getCbplanContentRequestTemplate(), params);
+
+        Config config = new Config();
+        config.setSubject(Constants.REQUEST_CONTENT_SUBJECT);
+        config.setSender(configuration.getSupportEmail());
+
+        Map<String, Object> templateMap = new HashMap<>();
+        templateMap.put(Constants.CONFIG, config);
+        templateMap.put(Constants.TYPE, Constants.EMAIL);
+        templateMap.put(Constants.DATA, template.getData());
+        templateMap.put(Constants.ID, configuration.getCbplanContentRequestTemplate());
+        templateMap.put(Constants.PARAMS, params);
+
+        Map<String, Object> action = new HashMap<>();
+        action.put(Constants.TEMPLATE, templateMap);
+        action.put(Constants.TYPE, Constants.EMAIL);
+        action.put(Constants.CATEGORY, Constants.EMAIL);
+
+        Map<String, Object> createdBy = new HashMap<>();
+        createdBy.put(Constants.ID, mailNotificationDetails.get(Constants.CREATED_BY));
+        createdBy.put(Constants.TYPE, Constants.MDO);
+        action.put(Constants.CREATED_BY, createdBy);
+        notificationAsyncRequest.setAction(action);
+
+        Map<String, Object> req = new HashMap<>();
+        Map<String, List<NotificationAsyncRequest>> notificationMap = new HashMap<>();
+        notificationMap.put(Constants.NOTIFICATIONS, Collections.singletonList(notificationAsyncRequest));
+        req.put(Constants.REQUEST, notificationMap);
+        sendNotification(req, configuration.getNotificationAsyncPath());
     }
 }
