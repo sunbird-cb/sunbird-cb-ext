@@ -961,6 +961,12 @@ public class Constants {
 	public static final String COMPETENCY_THEME_PARAM = "competency_theme";
 	public static final String COMPETENCY_SUB_THEME_PARAM = "competency_subtheme";
 	public static final String COPY_EMAIL = "copyEmail";
+	public static final String EHRMS = "ehrms";
+	public static final String EMP_CODE = "emp_code";
+	public static final String EHRMS_AUTH_USERNAME = "username";
+	public static final String EHRMS_AUTH_PASSWORD = "password";
+	public static final String USER_ID_LOWER = "userid";
+	public static final String EHRMS_USER_TOKEN = "ehrmsUserToken";
 
 
     private Constants() {
