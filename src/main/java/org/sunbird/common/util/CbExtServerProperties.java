@@ -650,6 +650,9 @@ public class CbExtServerProperties {
 	@Value("${digilocker-issuer-id}")
 	private String digiLockerIssuerId;
 
+	@Value("${report.property.file.allMdo}")
+	private String reportPropertyFileAllMdo;
+
 	public boolean qListFromCacheEnabled() {
 		return qListFromCacheEnabled;
 	}
@@ -2315,5 +2318,13 @@ public class CbExtServerProperties {
 
 	public void setDigiLockerIssuerId(String digiLockerIssuerId) {
 		this.digiLockerIssuerId = digiLockerIssuerId;
+	}
+
+	public List<String> getReportPropertyFileAllMdo() {
+		return Arrays.asList(reportPropertyFileAllMdo.split(",", -1));
+	}
+
+	public void setReportPropertyFileAllMdo(String reportPropertyFileAllMdo) {
+		this.reportPropertyFileAllMdo = reportPropertyFileAllMdo;
 	}
 }
