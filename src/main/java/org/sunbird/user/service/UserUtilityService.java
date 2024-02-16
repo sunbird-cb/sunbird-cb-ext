@@ -51,4 +51,6 @@ public interface UserUtilityService {
 
 	Map<String, Object> getUsersDataFromLookup(String email, String authToken);
 	SBApiResponse recommendContent(String authUserToken, Map<String, Object> orgRequest);
+
+	Map<String, Object> getUserDetails(String key, String value);
 }

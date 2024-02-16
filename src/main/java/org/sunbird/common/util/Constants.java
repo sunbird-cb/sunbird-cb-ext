@@ -975,9 +975,18 @@ public class Constants {
 	public static final String EHRMS_AUTH_PASSWORD = "password";
 	public static final String USER_ID_LOWER = "userid";
 	public static final String EHRMS_USER_TOKEN = "ehrmsUserToken";
-	public static final String PRIMARY_CATEGORY_TAG = "#primaryCategory";
+	public static final String DOC_ID = "docId";
+	public static final String DIGI_LOCKER_ID = "digiLockerId";
+	public static final String ACCESS_TOKEN = "accessToken";
+	public static final String CERTIFICATE_ID = "certificateId";
+	public static final String CERTIFICATE_NAME = "certificateName";
+	public static final String LAST_ISSUED_ON = "lastIssuedOn";
+	public static final String TABLE_DIGILOCKER_DOC_INFO = "test_digilocker_doc_lookup";
+	public static final String ISSUED_USER_CERTIFICATE = "issuedCertificates";
+	public static final String DOC_TYPE = "docType";
+  public static final String PRIMARY_CATEGORY_TAG = "#primaryCategory";
 
-    private Constants() {
+  private Constants() {
 		throw new IllegalStateException("Utility class");
 	}
 

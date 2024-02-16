@@ -974,4 +974,45 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		}
 		return replacedHTML;
 	}
+
+	@Override
+	public Map<String, Object> getUserDetails(String key, String value) {
+		// request body
+		SunbirdApiRequest requestObj = new SunbirdApiRequest();
+		Map<String, Object> reqMap = new HashMap<>();
+		reqMap.put(Constants.FILTERS, new HashMap<String, Object>() {
+			{
+				put(key, value);
+			}
+		});
+		requestObj.setRequest(reqMap);
+
+		HashMap<String, String> headersValue = new HashMap<>();
+		headersValue.put(Constants.CONTENT_TYPE, "application/json");
+		headersValue.put(Constants.AUTHORIZATION, props.getSbApiKey());
+
+		try {
+			String url = props.getSbUrl() + props.getUserSearchEndPoint();
+
+			Map<String, Object> response = outboundRequestHandlerService.fetchResultUsingPost(url, requestObj,
+					headersValue);
+			if (response != null && "OK".equalsIgnoreCase((String) response.get("responseCode"))) {
+				Map<String, Object> map = (Map<String, Object>) response.get("result");
+				if (map.get("response") != null) {
+					Map<String, Object> responseObj = (Map<String, Object>) map.get("response");
+					if (MapUtils.isNotEmpty(responseObj)) {
+						List<Map<String, Object>> content = (List<Map<String, Object>>)responseObj.get("content");
+						if (org.apache.commons.collections.CollectionUtils.isNotEmpty(content)) {
+							return content.get(0);
+						}
+					}
+
+				}
+			}
+		} catch (Exception e) {
+			throw new ApplicationLogicError("Sunbird Service ERROR: ", e);
+		}
+		return null;
+	}
+
 }
