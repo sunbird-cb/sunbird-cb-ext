@@ -298,7 +298,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 
 	private String validateRegisterationPayload(UserRegistrationInfo userRegInfo) {
 		StringBuffer str = new StringBuffer();
-		List<String> errList = new ArrayList<String>();
+		List<String> errList = new ArrayList<>();
 		if (StringUtils.isBlank(userRegInfo.getFirstName())) {
 			errList.add("FirstName");
 		}
@@ -346,7 +346,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 	private String validateOTPPayload(Map<String,Object> otpRequest) {
 		StringBuffer str = new StringBuffer();
 		Map<String,Object> request = (Map<String, Object>) otpRequest.get("request");
-		List<String> errList = new ArrayList<String>();
+		List<String> errList = new ArrayList<>();
 		if (ObjectUtils.isEmpty(request.get(Constants.KEY))) {
 			errList.add(Constants.KEY);
 		}
@@ -463,7 +463,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 	}
 
 	private List<String> getMasterOrgList() {
-		List<String> orgList = new ArrayList<String>();
+		List<String> orgList = new ArrayList<>();
 		// read file into stream, try-with-resources
 
 		InputStream in = this.getClass().getClassLoader()
@@ -491,7 +491,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 			requestMap.put(Constants.OFFSET, iterateCount);
 			requestMap.put(Constants.LIMIT, 1000);
 			requestMap.put(Constants.FIELDS, new ArrayList<>(Arrays.asList(Constants.CHANNEL, Constants.IDENTIFIER)));
-			Map<String, Object> sortByMap = new HashMap<String, Object>();
+			Map<String, Object> sortByMap = new HashMap<>();
 			sortByMap.put(Constants.CHANNEL, Constants.ASC_ORDER);
 			requestMap.put(Constants.SORT_BY, sortByMap);
 			requestMap.put(Constants.FILTERS, new HashMap<String, Object>() {
@@ -538,8 +538,8 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 	}
 
 	private Map<String, Object> getOrgCreateRequest(UserRegistration userReg) {
-		Map<String, Object> orgRequestBody = new HashMap<String, Object>();
-		Map<String, Object> orgRequest = new HashMap<String, Object>();
+		Map<String, Object> orgRequestBody = new HashMap<>();
+		Map<String, Object> orgRequest = new HashMap<>();
 		orgRequest.put(Constants.ORG_NAME, userReg.getOrgName());
 		orgRequest.put(Constants.CHANNEL, userReg.getChannel());
 		orgRequest.put(Constants.ORGANIZATION_TYPE, userReg.getOrganisationType());

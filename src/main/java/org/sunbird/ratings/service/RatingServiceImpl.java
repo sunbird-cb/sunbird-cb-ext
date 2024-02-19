@@ -469,7 +469,7 @@ public class RatingServiceImpl implements RatingService {
             }
 
             Map<String, Object> requestBody = (Map<String, Object>) request.get(Constants.REQUEST);
-            Map<String, Object> compositeKey = new HashMap<String, Object>();
+            Map<String, Object> compositeKey = new HashMap<>();
 
             activityId = (String) requestBody.get(Constants.ACTIVITY_ID);
             compositeKey.put(Constants.ACTIVITY_ID, activityId);
@@ -497,7 +497,7 @@ public class RatingServiceImpl implements RatingService {
             return strBuilder.toString();
         }
 
-        List<String> missingAttrib = new ArrayList<String>();
+        List<String> missingAttrib = new ArrayList<>();
         if (!requestBody.containsKey(Constants.ACTIVITY_ID)) {
             missingAttrib.add(Constants.ACTIVITY_ID);
         }

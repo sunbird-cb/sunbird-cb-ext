@@ -399,7 +399,7 @@ public class BudgetServiceImpl implements BudgetService {
 	}
 
 	private void validateAddBudgetInfo(BudgetInfo budgetInfo) throws Exception {
-		List<String> errObjList = new ArrayList<String>();
+		List<String> errObjList = new ArrayList<>();
 		if (StringUtils.isEmpty(budgetInfo.getOrgId())) {
 			errObjList.add(Constants.ORG_ID);
 		}
@@ -429,7 +429,7 @@ public class BudgetServiceImpl implements BudgetService {
 	}
 
 	private void validateUpdateBudgetInfo(BudgetInfo budgetInfo) throws Exception {
-		List<String> errObjList = new ArrayList<String>();
+		List<String> errObjList = new ArrayList<>();
 		if (StringUtils.isEmpty(budgetInfo.getOrgId())) {
 			errObjList.add(Constants.ORG_ID);
 		}
@@ -550,7 +550,7 @@ public class BudgetServiceImpl implements BudgetService {
 	}
 
 	private void validateAddBudgetDocInfo(BudgetDocInfo budgetInfo) throws Exception {
-		List<String> errObjList = new ArrayList<String>();
+		List<String> errObjList = new ArrayList<>();
 		if (StringUtils.isEmpty(budgetInfo.getOrgId())) {
 			errObjList.add(Constants.ORG_ID);
 		}

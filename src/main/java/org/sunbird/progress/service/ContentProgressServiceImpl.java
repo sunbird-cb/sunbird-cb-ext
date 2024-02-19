@@ -120,8 +120,8 @@ public class ContentProgressServiceImpl implements ContentProgressService {
                         return contentMap;
                     });
                 } else {
-                    Map<String, Map<String, Object>> progressDetailsMap = new HashMap<String, Map<String, Object>>();
-                    Map<String, Object> progressMap = new HashMap<String, Object>();
+                    Map<String, Map<String, Object>> progressDetailsMap = new HashMap<>();
+                    Map<String, Object> progressMap = new HashMap<>();
                     progressMap.put("contentId", contentId);
                     progressMap.put("status", contentMap.get("status"));
                     progressDetailsMap.put(contentId, progressMap);

@@ -98,7 +98,7 @@ public class BudgetDocInfo {
 	}
 
 	public Map<String, String> getProofDoc() {
-		Map<String, String> proofDoc = new HashMap<String, String>();
+		Map<String, String> proofDoc = new HashMap<>();
 		proofDoc.put(Constants.BUDGET_DOC_FILE_NAME, fileName);
 		proofDoc.put(Constants.BUDGET_DOC_FILE_SIZE, fileSize);
 		proofDoc.put(Constants.BUDGET_DOC_FILE_TYPE, fileType);

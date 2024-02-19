@@ -322,7 +322,7 @@ public class ContentServiceImpl implements ContentService {
 						for (Map<String, Object> content : contentList) {
 							String id = (String) content.get(Constants.IDENTIFIER);
 							if (!contentInfoMap.containsKey(id)) {
-								Map<String, String> contentInfo = new HashMap<String, String>();
+								Map<String, String> contentInfo = new HashMap<>();
 								contentInfo.put(Constants.COURSE_ID, id);
 								for (String field : fields) {
 									if (content.containsKey(field)) {
@@ -430,7 +430,7 @@ public class ContentServiceImpl implements ContentService {
 				responseData = readContent(contentId, fields);
 			} else {
 				try {
-					responseData = new HashMap<String, Object>();
+					responseData = new HashMap<>();
 					Map<String, Object> contentData = mapper.readValue(contentString,
 							new TypeReference<Map<String, Object>>() {
 							});
