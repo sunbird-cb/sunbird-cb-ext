@@ -122,7 +122,7 @@ public class ExploreCourseServiceImpl implements ExploreCourseService {
 		String errMsg = "";
 		try {
 			List<Map<String, Object>> courseList = cassandraOperation.getRecordsByPropertiesWithoutFiltering(
-					Constants.SUNBIRD_KEY_SPACE_NAME, Constants.TABLE_EXPLORE_COURSE_LIST, MapUtils.EMPTY_MAP,
+					Constants.SUNBIRD_KEY_SPACE_NAME, Constants.TABLE_EXPLORE_COURSE_LIST_V2, MapUtils.EMPTY_MAP,
 					ListUtils.EMPTY_LIST);
 			List<String> identifierList = new ArrayList<String>();
 			for (Map<String, Object> course : courseList) {
