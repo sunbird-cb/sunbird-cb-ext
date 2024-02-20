@@ -248,6 +248,7 @@ public class Constants {
 	public static final String TABLE_RATINGS_LOOKUP = "ratings_lookup";
 	public static final String TABLE_RATINGS_SUMMARY = "ratings_summary";
 	public static final String TABLE_EXPLORE_COURSE_LIST = "explore_course_list";
+	public static final String TABLE_EXPLORE_COURSE_LIST_V2 = "explore_course_list_v2";
 	public static final String VALUE = "value";
 	public static final String DEPT_NAME = "deptName";
 	public static final String PROFILE_DETAILS = "profileDetails";

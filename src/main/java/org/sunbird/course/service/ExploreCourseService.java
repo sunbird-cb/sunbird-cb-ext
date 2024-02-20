@@ -11,7 +11,7 @@ import org.sunbird.common.model.SBApiResponse;
  */
 public interface ExploreCourseService {
 	/**
-	 * Retrieves the list of course details from sunbird_courses.public_course
+	 * Retrieves the list of course details from sunbird.explore_course_list
 	 * table.
 	 * 
 	 * @return - Course details in Sunbird API Response format.
@@ -24,4 +24,12 @@ public interface ExploreCourseService {
 	 * @return - Returns success or failure details in Sunbird API Response format.
 	 */
 	public SBApiResponse refreshCache();
+
+	/**
+	 * Retrieves the list of course details from sunbird.explore_course_list_v2
+	 * table.
+	 * 
+	 * @return - Course details in Sunbird API Response format.
+	 */
+	public SBApiResponse getExploreCourseListV2();
 }
