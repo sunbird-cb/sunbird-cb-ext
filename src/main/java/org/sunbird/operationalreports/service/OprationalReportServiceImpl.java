@@ -71,6 +71,7 @@ public class OprationalReportServiceImpl implements OperationalReportService {
             logger.info("Get Download Folder Name value is : " +  serverProperties.getReportDownloadFolderName());
             logger.info("Get Download Container Name value is : " +  serverProperties.getReportDownloadContainerName());
             logger.info("Object key value is : " + objectKey);
+            logger.info("file path for the temp" +Paths.get(String.format("%s/%s", Constants.LOCAL_BASE_PATH, fileName)));
             storageService.download(serverProperties.getReportDownloadContainerName(), objectKey, Constants.LOCAL_BASE_PATH, Option.apply(Boolean.FALSE));
             Path filePath = Paths.get(String.format("%s/%s", Constants.LOCAL_BASE_PATH, fileName));
             logger.info("filePath value is : " + filePath);
