@@ -975,6 +975,9 @@ public class Constants {
 	public static final String EHRMS_AUTH_PASSWORD = "password";
 	public static final String USER_ID_LOWER = "userid";
 	public static final String EHRMS_USER_TOKEN = "ehrmsUserToken";
+	public static final String MDO_REPORT_ACCESSOR = "MDO_REPORT_ACCESSOR";
+	public static final String GRANT_REPORT_ACCESS_API ="api.grant.access.report";
+	public static final String MDO_ADMIN ="mdoadmin";
 
     private Constants() {
 		throw new IllegalStateException("Utility class");

@@ -641,6 +641,9 @@ public class CbExtServerProperties {
 	@Value("${redis.ehrms.token.timeout}")
 	private Integer redisEhrmsTokenTimeOut;
 
+	@Value("${sb.role.read}")
+	private String sbRoleRead;
+
 	public boolean qListFromCacheEnabled() {
 		return qListFromCacheEnabled;
 	}
@@ -2282,5 +2285,13 @@ public class CbExtServerProperties {
 
 	public void setRedisEhrmsTokenTimeOut(Integer redisEhrmsTokenTimeOut) {
 		this.redisEhrmsTokenTimeOut = redisEhrmsTokenTimeOut;
+	}
+
+	public String getSbRoleRead() {
+		return sbRoleRead;
+	}
+
+	public void setSbRoleRead(String sbRoleRead) {
+		this.sbRoleRead = sbRoleRead;
 	}
 }
