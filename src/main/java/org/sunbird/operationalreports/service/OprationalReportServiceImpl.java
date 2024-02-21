@@ -59,12 +59,7 @@ public class OprationalReportServiceImpl implements OperationalReportService {
      */
     @Override
     public ResponseEntity<InputStreamResource> downloadFile(String reportType, String date, String orgId, String fileName) throws IOException {
-        /**
-         * First remove the existing password and apply new password.
-         */
         HttpHeaders headers = new HttpHeaders();
-
-
         try {
             /**
              *
@@ -73,12 +68,20 @@ public class OprationalReportServiceImpl implements OperationalReportService {
              */
             String objectKey = serverProperties.getReportDownloadFolderName() + "/" + reportType + "/" + date + "/" + orgId + "/" + fileName;
             storageService.download(serverProperties.getReportDownloadContainerName(), objectKey, Constants.LOCAL_BASE_PATH, Option.apply(Boolean.FALSE));
+            logger.info("Local Base Path Value is : " +  Constants.LOCAL_BASE_PATH);
+            logger.info("Get Download Folder Name value is : " +  serverProperties.getReportDownloadFolderName());
+            logger.info("Get Download Container Name value is : " +  serverProperties.getReportDownloadContainerName());
+            logger.info("Object key value is : " + objectKey);
             Path filePath = Paths.get(String.format("%s/%s", Constants.LOCAL_BASE_PATH, fileName));
+            logger.info("filePath value is : " + filePath);
             headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"");
             headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
             String sourceFolderPath = String.format("%s/%s/%s/%s", Constants.LOCAL_BASE_PATH, reportType, date, orgId + "/output");
+            logger.info("sourceFolderPath value is : " + sourceFolderPath);
             String destinationFolderPath = sourceFolderPath + "/unzippath";
+            logger.info("destinationFolderPath value is : " + destinationFolderPath);
             String zipFilePath = String.valueOf(filePath);
+            logger.info("zipFilePath value is : " + zipFilePath);
             int passwordLength = 15;
             String password = generateAlphanumericPassword(passwordLength);
             headers.add("password", password);
@@ -96,7 +99,7 @@ public class OprationalReportServiceImpl implements OperationalReportService {
         }
     }
 
-    public static void createZipFolder(String sourceFolderPath, String fileName, String password) throws RuntimeException {
+    public static void createZipFolder(String sourceFolderPath, String fileName, String password) {
         ArrayList<File> filesToAdd = new ArrayList<>();
         getAllFiles(new File(sourceFolderPath + "/unzippath"), filesToAdd);
         try (ZipFile zipFile = new ZipFile(sourceFolderPath + "/" + fileName)) {
