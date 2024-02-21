@@ -85,8 +85,11 @@ public class OprationalReportServiceImpl implements OperationalReportService {
             int passwordLength = 15;
             String password = generateAlphanumericPassword(passwordLength);
             headers.add("password", password);
+            logger.info("Unlocking the zip folder starts here");
             unlockZipFolder(zipFilePath, destinationFolderPath, "123456");
+            logger.info("Creating the zip folder starts here");
             createZipFolder(sourceFolderPath, fileName, password);
+            logger.info("Input Streaming the resource starts here");
             InputStreamResource inputStreamResource = new InputStreamResource(Files.newInputStream(Paths.get(sourceFolderPath + "/" + fileName)));
             removeDirectory(sourceFolderPath);
             return ResponseEntity.ok()
