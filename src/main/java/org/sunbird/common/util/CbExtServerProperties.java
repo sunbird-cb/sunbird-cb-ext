@@ -653,6 +653,13 @@ public class CbExtServerProperties {
 	@Value("${report.property.file.allMdo}")
 	private String reportPropertyFileAllMdo;
 
+	@Value("${operational.reports.passwordlength}")
+	private int zipFilePasswordLength;
+
+	@Value("${operational.reports.unzip.password}")
+	private String unZipFilePassword;
+
+
 	public boolean qListFromCacheEnabled() {
 		return qListFromCacheEnabled;
 	}
@@ -2326,5 +2333,21 @@ public class CbExtServerProperties {
 
 	public void setReportPropertyFileAllMdo(String reportPropertyFileAllMdo) {
 		this.reportPropertyFileAllMdo = reportPropertyFileAllMdo;
+	}
+
+	public int getZipFilePasswordLength() {
+		return zipFilePasswordLength;
+	}
+
+	public void setZipFilePasswordLength(int zipFilePasswordLength) {
+		this.zipFilePasswordLength = zipFilePasswordLength;
+	}
+
+	public String getUnZipFilePassword() {
+		return unZipFilePassword;
+	}
+
+	public void setUnZipFilePassword(String unZipFilePassword) {
+		this.unZipFilePassword = unZipFilePassword;
 	}
 }

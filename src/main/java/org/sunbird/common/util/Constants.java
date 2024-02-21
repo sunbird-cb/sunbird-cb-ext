@@ -986,6 +986,7 @@ public class Constants {
 	public static final String ISSUED_USER_CERTIFICATE = "issuedCertificates";
 	public static final String DOC_TYPE = "docType";
   public static final String PRIMARY_CATEGORY_TAG = "#primaryCategory";
+  	public static final String PASSWORD = "password";
 
   private Constants() {
 		throw new IllegalStateException("Utility class");
