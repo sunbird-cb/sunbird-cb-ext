@@ -640,7 +640,7 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
             return result;
         }
 
-        Map<String, Object> userAssessmentAllDetail = new HashMap<String, Object>();
+        Map<String, Object> userAssessmentAllDetail = new HashMap<>();
 
         List<Map<String, Object>> existingDataList = assessUtilServ.readUserSubmittedAssessmentRecords(
                 userId, assessmentIdFromRequest);
@@ -941,7 +941,7 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
         if (MapUtils.isEmpty(requestBody)) {
             return Constants.INVALID_REQUEST;
         }
-        List<String> missingAttribs = new ArrayList<String>();
+        List<String> missingAttribs = new ArrayList<>();
         if (!requestBody.containsKey(Constants.ASSESSMENT_ID_KEY)
                 || StringUtils.isBlank((String) requestBody.get(Constants.ASSESSMENT_ID_KEY))) {
             missingAttribs.add(Constants.ASSESSMENT_ID_KEY);

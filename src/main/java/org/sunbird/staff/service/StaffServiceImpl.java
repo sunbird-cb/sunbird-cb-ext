@@ -280,7 +280,7 @@ public class StaffServiceImpl implements StaffService {
 	}
 
 	private void validateAddStaffInfo(StaffInfo staffInfo) throws Exception {
-		List<String> errObjList = new ArrayList<String>();
+		List<String> errObjList = new ArrayList<>();
 		if (StringUtils.isEmpty(staffInfo.getOrgId())) {
 			errObjList.add(Constants.ORG_ID);
 		}
@@ -300,7 +300,7 @@ public class StaffServiceImpl implements StaffService {
 	}
 
 	private void validateUpdateStaffInfo(StaffInfo staffInfo) throws Exception {
-		List<String> errObjList = new ArrayList<String>();
+		List<String> errObjList = new ArrayList<>();
 		if (StringUtils.isEmpty(staffInfo.getOrgId())) {
 			errObjList.add(Constants.ORG_ID);
 		}

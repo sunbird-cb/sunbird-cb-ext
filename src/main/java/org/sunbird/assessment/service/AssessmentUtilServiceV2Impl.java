@@ -345,7 +345,7 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 			 questStr = redisCacheMgr.getCache(Constants.ASSESSMENT_ID + assessmentIdentifier + Constants.UNDER_SCORE + Constants.QUESTION_SET);		
 		}
 		if(StringUtils.isEmpty(questStr)) {
-			Map<String, Object> propertyMap = new HashMap<String, Object>();
+			Map<String, Object> propertyMap = new HashMap<>();
 		propertyMap.put(Constants.IDENTIFIER, assessmentIdentifier);
 		List<Map<String, Object>> hierarchyList = cassandraOperation.getRecordsByPropertiesWithoutFiltering(
 				serverProperties.getAssessmentHierarchyNameSpace(),
@@ -378,7 +378,7 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 	}
 
 	public List<Map<String, Object>> readUserSubmittedAssessmentRecords(String userId, String assessmentId) {
-		Map<String, Object> propertyMap = new HashMap<String, Object>();
+		Map<String, Object> propertyMap = new HashMap<>();
 		propertyMap.put(Constants.USER_ID, userId);
 		propertyMap.put(Constants.ASSESSMENT_ID_KEY, assessmentId);
 		return cassandraOperation.getRecordsByPropertiesWithoutFiltering(

@@ -168,7 +168,7 @@ public class MasterDataServiceImpl implements MasterDataService {
     }
 
     private String validateUpsertRequest(Map<String,Object> masterData) {
-        List<String> params = new ArrayList<String>();
+        List<String> params = new ArrayList<>();
         StringBuilder strBuilder = new StringBuilder();
         if (ObjectUtils.isEmpty(masterData)) {
             strBuilder.append("Model object is empty.");
@@ -287,7 +287,7 @@ public class MasterDataServiceImpl implements MasterDataService {
 		compSearchObj.put(Constants.KEYWORD, StringUtils.EMPTY);
 		searchList.add(compSearchObj);
 
-		compSearchObj = new HashMap<String, Object>();
+		compSearchObj = new HashMap<>();
 		compSearchObj.put(Constants.TYPE, Constants.POSITION.toUpperCase());
 		compSearchObj.put(Constants.KEYWORD, Constants.VERIFIED);
 		compSearchObj.put(Constants.FIELD, Constants.STATUS);
@@ -295,7 +295,7 @@ public class MasterDataServiceImpl implements MasterDataService {
 
 		reqBody.put(Constants.SEARCHES, searchList);
 
-		List<String> positionNameList = new ArrayList<String>();
+		List<String> positionNameList = new ArrayList<>();
 		Map<String, Object> fracSearchRes = outboundRequestHandlerService.fetchResultUsingPost(
 				cbExtServerProperties.getFracHost() + cbExtServerProperties.getFracSearchPath(), reqBody, headers);
 		List<Map<String, Object>> fracResponseList = (List<Map<String, Object>>) fracSearchRes

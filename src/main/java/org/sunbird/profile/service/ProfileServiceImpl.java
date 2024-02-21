@@ -375,7 +375,7 @@ public class ProfileServiceImpl implements ProfileService {
 				}
 				if (status.equals(RestStatus.CREATED) || status.equals(RestStatus.OK)) {
 					response.setResponseCode(HttpStatus.ACCEPTED);
-					Map<String, Object> resultMap = new HashMap<String, Object>();
+					Map<String, Object> resultMap = new HashMap<>();
 					resultMap.put(Constants.ORG_ID, orgId);
 					resultMap.put(Constants.PROFILE_DETAILS, esOrgProfileMap);
 					response.getResult().put(Constants.RESULT, resultMap);
@@ -540,7 +540,7 @@ public class ProfileServiceImpl implements ProfileService {
 		SBApiResponse response = createDefaultResponse(Constants.ORG_ONBOARDING_PROFILE_RETRIEVE_API);
 		Map<String, Object> orgProfile = getOrgProfileForOrgId(orgId);
 		if (!ObjectUtils.isEmpty(orgProfile)) {
-			Map<String, Object> resultMap = new HashMap<String, Object>();
+			Map<String, Object> resultMap = new HashMap<>();
 			resultMap.put(Constants.ORG_ID, orgId);
 			resultMap.put(Constants.PROFILE_DETAILS, orgProfile);
 			response.getResult().put(Constants.RESULT, resultMap);
@@ -574,7 +574,7 @@ public class ProfileServiceImpl implements ProfileService {
 				return response;
 			}
 
-			Map<String, Object> responseMap = new HashMap<String, Object>();
+			Map<String, Object> responseMap = new HashMap<>();
 			responseMap.put(Constants.IS_UPDATE_REQUIRED, false);
 
 			if (custodianOrgChannel.equalsIgnoreCase((String) userData.get(Constants.CHANNEL))
@@ -804,7 +804,7 @@ public class ProfileServiceImpl implements ProfileService {
 		List<String> approvalFields = (List<String>) dataCacheMgr
 				.getObjectFromCache(Constants.PROFILE_APPROVAL_FIELDS_KEY);
 		if (CollectionUtils.isEmpty(approvalFields)) {
-			Map<String, Object> searchRequest = new HashMap<String, Object>();
+			Map<String, Object> searchRequest = new HashMap<>();
 			searchRequest.put(Constants.ID, Constants.PROFILE_APPROVAL_FIELDS_KEY);
 
 			List<Map<String, Object>> existingDataList = cassandraOperation.getRecordsByPropertiesWithoutFiltering(
@@ -829,7 +829,7 @@ public class ProfileServiceImpl implements ProfileService {
 	public String getVerifiedProfileSchema() {
 		String strSchema = dataCacheMgr.getStringFromCache(Constants.VERIFIED_PROFILE_FIELDS_KEY);
 		if (StringUtils.isEmpty(strSchema)) {
-			Map<String, Object> searchRequest = new HashMap<String, Object>();
+			Map<String, Object> searchRequest = new HashMap<>();
 			searchRequest.put(Constants.ID, Constants.VERIFIED_PROFILE_FIELDS_KEY);
 
 			List<Map<String, Object>> existingDataList = cassandraOperation.getRecordsByPropertiesWithoutFiltering(
@@ -895,7 +895,7 @@ public class ProfileServiceImpl implements ProfileService {
 
 	private String validateOrgProfilePayload(Map<String, Object> orgProfileInfo) {
 		StringBuffer str = new StringBuffer();
-		List<String> errList = new ArrayList<String>();
+		List<String> errList = new ArrayList<>();
 		if (StringUtils.isBlank((String) orgProfileInfo.get(Constants.ORG_ID))) {
 			errList.add(Constants.ORG_ID);
 		}
@@ -922,7 +922,7 @@ public class ProfileServiceImpl implements ProfileService {
 	public String getCustodianOrgId() {
 		String custodianOrgId = dataCacheMgr.getStringFromCache(Constants.CUSTODIAN_ORG_ID);
 		if (StringUtils.isEmpty(custodianOrgId)) {
-			Map<String, Object> searchRequest = new HashMap<String, Object>();
+			Map<String, Object> searchRequest = new HashMap<>();
 			searchRequest.put(Constants.ID, Constants.CUSTODIAN_ORG_ID);
 
 			List<Map<String, Object>> existingDataList = cassandraOperation.getRecordsByPropertiesWithoutFiltering(
@@ -939,7 +939,7 @@ public class ProfileServiceImpl implements ProfileService {
 	public String getCustodianOrgChannel() {
 		String custodianOrgChannel = dataCacheMgr.getStringFromCache(Constants.CUSTODIAN_ORG_CHANNEL);
 		if (StringUtils.isEmpty(custodianOrgChannel)) {
-			Map<String, Object> searchRequest = new HashMap<String, Object>();
+			Map<String, Object> searchRequest = new HashMap<>();
 			searchRequest.put(Constants.ID, Constants.CUSTODIAN_ORG_CHANNEL);
 
 			List<Map<String, Object>> existingDataList = cassandraOperation.getRecordsByPropertiesWithoutFiltering(
@@ -955,7 +955,7 @@ public class ProfileServiceImpl implements ProfileService {
 
 	private String validateBasicProfilePayload(Map<String, Object> requestObj) {
 		StringBuffer str = new StringBuffer();
-		List<String> errList = new ArrayList<String>();
+		List<String> errList = new ArrayList<>();
 
 		if (ObjectUtils.isEmpty(requestObj.get(Constants.REQUEST))) {
 			errList.add(Constants.REQUEST);
@@ -977,7 +977,7 @@ public class ProfileServiceImpl implements ProfileService {
 	}
 
 	private Map<String, Object> getOrgCreateRequest(Map<String, Object> request) {
-		Map<String, Object> requestBody = new HashMap<String, Object>();
+		Map<String, Object> requestBody = new HashMap<>();
 		requestBody.put(Constants.ORG_NAME, request.get(Constants.ORG_NAME));
 		requestBody.put(Constants.CHANNEL, request.get(Constants.CHANNEL));
 		requestBody.put(Constants.SB_ROOT_ORG_ID, request.get(Constants.SB_ROOT_ORG_ID));
@@ -985,7 +985,7 @@ public class ProfileServiceImpl implements ProfileService {
 		requestBody.put(Constants.ORGANIZATION_SUB_TYPE, request.get(Constants.ORGANIZATION_SUB_TYPE));
 		requestBody.put(Constants.MAP_ID, request.get(Constants.MAP_ID));
 		requestBody.put(Constants.IS_TENANT, true);
-		Map<String, Object> newRequest = new HashMap<String, Object>();
+		Map<String, Object> newRequest = new HashMap<>();
 		newRequest.put(Constants.REQUEST, requestBody);
 		return newRequest;
 	}
@@ -1070,7 +1070,7 @@ public class ProfileServiceImpl implements ProfileService {
 		if (userReadResponse.containsKey(Constants.ROLES)) {
 			existingRoles = (List<String>) userReadResponse.get(Constants.ROLES);
 		} else {
-			existingRoles = new ArrayList<String>();
+			existingRoles = new ArrayList<>();
 		}
 
 		Map<String, Object> existingProfile = (Map<String, Object>) userReadResponse.get(Constants.PROFILE_DETAILS);
@@ -1085,7 +1085,7 @@ public class ProfileServiceImpl implements ProfileService {
 		} else {
 			professionalDetails = new ArrayList<Map<String, Object>>() {
 				{
-					Map<String, Object> profDetail = new HashMap<String, Object>();
+					Map<String, Object> profDetail = new HashMap<>();
 					profDetail.put(Constants.OSID, UUID.randomUUID().toString());
 					add(profDetail);
 				}
@@ -1099,12 +1099,12 @@ public class ProfileServiceImpl implements ProfileService {
 		if (existingProfile.containsKey(Constants.EMPLOYMENTDETAILS)) {
 			empDetails = (Map<String, Object>) existingProfile.get(Constants.EMPLOYMENTDETAILS);
 		} else {
-			empDetails = new HashMap<String, Object>();
+			empDetails = new HashMap<>();
 			existingProfile.put(Constants.EMPLOYMENTDETAILS, empDetails);
 		}
 		empDetails.put(Constants.DEPARTMENTNAME, request.get(Constants.CHANNEL));
 
-		Map<String, Object> updateReqBody = new HashMap<String, Object>();
+		Map<String, Object> updateReqBody = new HashMap<>();
 
 		Map<String, Object> existingPersonalDetail = (Map<String, Object>) existingProfile
 				.get(Constants.PERSONAL_DETAILS);
@@ -1133,11 +1133,11 @@ public class ProfileServiceImpl implements ProfileService {
 	private String assignUserRole(Map<String, Object> requestBody, List<String> existingRoles) {
 		String errMsg = StringUtils.EMPTY;
 		Map<String, Object> assignRoleReq = new HashMap<>();
-		Map<String, Object> assignRoleReqBody = new HashMap<String, Object>();
+		Map<String, Object> assignRoleReqBody = new HashMap<>();
 		assignRoleReqBody.put(Constants.ORGANIZATION_ID, requestBody.get(Constants.SB_ORG_ID));
 		assignRoleReqBody.put(Constants.USER_ID, requestBody.get(Constants.USER_ID));
 		if (existingRoles == null) {
-			existingRoles = new ArrayList<String>();
+			existingRoles = new ArrayList<>();
 		}
 		if (existingRoles.size() == 0) {
 			existingRoles.add(Constants.PUBLIC);
@@ -1157,7 +1157,7 @@ public class ProfileServiceImpl implements ProfileService {
 
 	private String validateMigrateRequest(Map<String, Object> requestBody) {
 		StringBuffer str = new StringBuffer();
-		List<String> errObjList = new ArrayList<String>();
+		List<String> errObjList = new ArrayList<>();
 
 		Map<String, Object> request = (Map<String, Object>) requestBody.get(Constants.REQUEST);
 		if (ObjectUtils.isEmpty(request)) {
@@ -1210,8 +1210,8 @@ public class ProfileServiceImpl implements ProfileService {
 
 	private String syncUserData(String userId) {
 		String errMsg = null;
-		Map<String, Object> requestBody = new HashMap<String, Object>();
-		Map<String, Object> request = new HashMap<String, Object>();
+		Map<String, Object> requestBody = new HashMap<>();
+		Map<String, Object> request = new HashMap<>();
 		request.put(Constants.OPERATION_TYPE, Constants.SYNC);
 		request.put(Constants.OBJECT_IDS, Arrays.asList(userId));
 		request.put(Constants.OBJECT_TYPE, Constants.USER);
@@ -1274,14 +1274,14 @@ public class ProfileServiceImpl implements ProfileService {
 	private boolean updateUser(Map<String, Object> requestObject) {
 		boolean retValue = false;
 		Map<String, Object> updateRequest = new HashMap<>();
-		Map<String, Object> updateRequestBody = new HashMap<String, Object>();
+		Map<String, Object> updateRequestBody = new HashMap<>();
 		updateRequestBody.put(Constants.USER_ID, requestObject.get(Constants.USER_ID));
-		Map<String, Object> profileDetails = new HashMap<String, Object>();
+		Map<String, Object> profileDetails = new HashMap<>();
 		profileDetails.put(Constants.MANDATORY_FIELDS_EXISTS, false);
-		Map<String, Object> employementDetails = new HashMap<String, Object>();
+		Map<String, Object> employementDetails = new HashMap<>();
 		employementDetails.put(Constants.DEPARTMENTNAME, requestObject.get(Constants.ORG_NAME));
 		profileDetails.put(Constants.EMPLOYMENTDETAILS, employementDetails);
-		Map<String, Object> personalDetails = new HashMap<String, Object>();
+		Map<String, Object> personalDetails = new HashMap<>();
 		Map<String, Object> requestBody = (Map<String, Object>) requestObject.get(Constants.REQUEST);
 		personalDetails.put(Constants.FIRSTNAME.toLowerCase(), requestBody.get(Constants.FIRSTNAME));
 		personalDetails.put(Constants.PRIMARY_EMAIL, requestBody.get(Constants.EMAIL));
@@ -1298,7 +1298,7 @@ public class ProfileServiceImpl implements ProfileService {
 		}
 		profileDetails.put(Constants.PERSONAL_DETAILS, personalDetails);
 
-		Map<String, Object> professionDetailObj = new HashMap<String, Object>();
+		Map<String, Object> professionDetailObj = new HashMap<>();
 		professionDetailObj.put(Constants.ORGANIZATION_TYPE, Constants.GOVERNMENT);
 		if (StringUtils.isNotEmpty((String) requestObject.get(Constants.POSITION))) {
 			professionDetailObj.put(Constants.DESIGNATION, requestObject.get(Constants.POSITION));
@@ -1324,7 +1324,7 @@ public class ProfileServiceImpl implements ProfileService {
 	private boolean assignRole(Map<String, Object> request) {
 		boolean retValue = false;
 		Map<String, Object> requestObj = new HashMap<>();
-		Map<String, Object> requestBody = new HashMap<String, Object>();
+		Map<String, Object> requestBody = new HashMap<>();
 		requestBody.put(Constants.ORGANIZATION_ID, request.get(Constants.ORGANIZATION_ID));
 		requestBody.put(Constants.USER_ID, request.get(Constants.USER_ID));
 		requestBody.put(Constants.ROLES, Arrays.asList(Constants.PUBLIC));
@@ -1340,7 +1340,7 @@ public class ProfileServiceImpl implements ProfileService {
 	}
 
 	private String validateSignupRequest(Map<String, Object> requestData) {
-		List<String> params = new ArrayList<String>();
+		List<String> params = new ArrayList<>();
 		StringBuilder strBuilder = new StringBuilder();
 		Map<String, Object> request = (Map<String, Object>) requestData.get(Constants.REQUEST);
 		if (ObjectUtils.isEmpty(request)) {
@@ -1368,7 +1368,7 @@ public class ProfileServiceImpl implements ProfileService {
 			}
 		}
 		Map<String, Object> request = new HashMap<>();
-		Map<String, Object> requestBody = new HashMap<String, Object>();
+		Map<String, Object> requestBody = new HashMap<>();
 		requestBody.put(Constants.BODY, Constants.HELLO);
 		requestBody.put(Constants.EMAIL_TEMPLATE_TYPE, serverConfig.getBulkUploadEmailTemplate());
 		requestBody.put(Constants.LINK, fileUrl);
@@ -1394,9 +1394,9 @@ public class ProfileServiceImpl implements ProfileService {
 		propertyMap.put(Constants.ACTIVE, Boolean.TRUE);
 
 		// Use the following map to construct the excel report
-		Map<String, Map<String, String>> userInfoMap = new HashMap<String, Map<String, String>>();
-		Map<String, Map<String, String>> courseInfoMap = new HashMap<String, Map<String, String>>();
-		Map<String, String> orgInfoMap = new HashMap<String, String>();
+		Map<String, Map<String, String>> userInfoMap = new HashMap<>();
+		Map<String, Map<String, String>> courseInfoMap = new HashMap<>();
+		Map<String, String> orgInfoMap = new HashMap<>();
 
 		try {
 			List<Map<String, Object>> userEnrolmentList = cassandraOperation.getRecordsByProperties(
@@ -1429,7 +1429,7 @@ public class ProfileServiceImpl implements ProfileService {
 			Map<String, Map<String, String>> userEnrolmentMap = new HashMap<String, Map<String, String>>();
 			// Construct the userEnrolment Map;
 			for (Map<String, Object> enrolment : userEnrolmentList) {
-				Map<String, String> enrolmentReport = new HashMap<String, String>();
+				Map<String, String> enrolmentReport = new HashMap<>();
 				// Get user details
 				String userId = (String) enrolment.get(Constants.USER_ID);
 				String courseId = (String) enrolment.get(Constants.COURSE_ID);
@@ -1501,7 +1501,7 @@ public class ProfileServiceImpl implements ProfileService {
 				}
 			}
 
-			List<String> reportFields = new ArrayList<String>();
+			List<String> reportFields = new ArrayList<>();
 			reportFields.addAll(Constants.USER_ENROLMENT_REPORT_FIELDS);
 			reportFields.addAll(Constants.COURSE_ENROLMENT_REPORT_FIELDS);
 			reportFields.addAll(Constants.USER_ENROLMENT_COMMON_FIELDS);
@@ -1520,7 +1520,7 @@ public class ProfileServiceImpl implements ProfileService {
 		long startTime = System.currentTimeMillis();
 		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_USER_REPORT);
 		try {
-			List<String> fields = new ArrayList<String>();
+			List<String> fields = new ArrayList<>();
 			fields.addAll(Constants.USER_ENROLMENT_REPORT_FIELDS);
 			fields.add(Constants.ROLES);
 			int index = 0;
@@ -1579,7 +1579,7 @@ public class ProfileServiceImpl implements ProfileService {
 	private void processUserDetails(List<Map<String, Object>> userMapList,
 			Map<String, Map<String, String>> userInfoMap) {
 		for (Map<String, Object> user : userMapList) {
-			Map<String, String> userInfo = new HashMap<String, String>();
+			Map<String, String> userInfo = new HashMap<>();
 			userInfo.put(Constants.USER_ID, (String) user.get(Constants.USER_ID));
 			userInfo.put(Constants.FIRSTNAME, (String) user.get(Constants.FIRSTNAME));
 			userInfo.put(Constants.ROOT_ORG_ID, (String) user.get(Constants.ROOT_ORG_ID));
@@ -1633,7 +1633,7 @@ public class ProfileServiceImpl implements ProfileService {
 
 		Iterator<Entry<String, Map<String, String>>> it = courseInfoMap.entrySet().iterator();
 
-		List<String> orgIdList = new ArrayList<String>();
+		List<String> orgIdList = new ArrayList<>();
 		while (it.hasNext()) {
 			Entry<String, Map<String, String>> item = it.next();
 			String orgId = item.getValue().get(Constants.COURSE_ORG_ID);
@@ -1906,7 +1906,7 @@ public class ProfileServiceImpl implements ProfileService {
 		List<String> adminApprovalFields = (List<String>) dataCacheMgr
 				.getObjectFromCache(serverConfig.getMdoAdminUpdateUsers());
 		if (CollectionUtils.isEmpty(adminApprovalFields)) {
-			Map<String, Object> searchRequest = new HashMap<String, Object>();
+			Map<String, Object> searchRequest = new HashMap<>();
 			searchRequest.put(Constants.ID, serverConfig.getMdoAdminUpdateUsers());
 
 			List<Map<String, Object>> existingDataList = cassandraOperation.getRecordsByPropertiesWithoutFiltering(
