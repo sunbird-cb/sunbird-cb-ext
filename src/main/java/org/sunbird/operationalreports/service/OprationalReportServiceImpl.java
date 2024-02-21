@@ -67,11 +67,11 @@ public class OprationalReportServiceImpl implements OperationalReportService {
              * standalone-reports/reportType/date/orgId/response.json
              */
             String objectKey = serverProperties.getReportDownloadFolderName() + "/" + reportType + "/" + date + "/" + orgId + "/" + fileName;
-            storageService.download(serverProperties.getReportDownloadContainerName(), objectKey, Constants.LOCAL_BASE_PATH, Option.apply(Boolean.FALSE));
             logger.info("Local Base Path Value is : " +  Constants.LOCAL_BASE_PATH);
             logger.info("Get Download Folder Name value is : " +  serverProperties.getReportDownloadFolderName());
             logger.info("Get Download Container Name value is : " +  serverProperties.getReportDownloadContainerName());
             logger.info("Object key value is : " + objectKey);
+            storageService.download(serverProperties.getReportDownloadContainerName(), objectKey, Constants.LOCAL_BASE_PATH, Option.apply(Boolean.FALSE));
             Path filePath = Paths.get(String.format("%s/%s", Constants.LOCAL_BASE_PATH, fileName));
             logger.info("filePath value is : " + filePath);
             headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"");
