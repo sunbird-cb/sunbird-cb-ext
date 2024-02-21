@@ -14,12 +14,15 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.sunbird.cloud.storage.BaseStorageService;
+import org.sunbird.cloud.storage.factory.StorageConfig;
+import org.sunbird.cloud.storage.factory.StorageServiceFactory;
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.operationalreports.exception.ZipProcessingException;
 import scala.Option;
 
+import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -49,6 +52,16 @@ public class OprationalReportServiceImpl implements OperationalReportService {
         //Need to Implimented
         return null;
     }
+    @PostConstruct
+    public void init() {
+        if (storageService == null) {
+            storageService = StorageServiceFactory.getStorageService(new StorageConfig(
+                    serverProperties.getCloudStorageTypeName(), serverProperties.getCloudStorageKey(),
+                    serverProperties.getCloudStorageSecret(), Option.apply(serverProperties.getCloudStorageCephs3Endpoint())));
+        }
+    }
+
+
 
     /**
      * @param reportType
@@ -67,7 +80,8 @@ public class OprationalReportServiceImpl implements OperationalReportService {
              * standalone-reports/reportType/date/orgId/response.json
              */
             String objectKey = serverProperties.getReportDownloadFolderName() + "/" + reportType + "/" + date + "/" + orgId + "/" + fileName;
-            logger.info("Local Base Path Value is : " +  Constants.LOCAL_BASE_PATH);
+            logger.info(serverProperties.getCloudStorageTypeName() +"--"+ serverProperties.getCloudStorageKey() +"--"+
+                    serverProperties.getCloudStorageSecret() +"--"+ Option.apply(serverProperties.getCloudStorageCephs3Endpoint()));
             logger.info("Get Download Folder Name value is : " +  serverProperties.getReportDownloadFolderName());
             logger.info("Get Download Container Name value is : " +  serverProperties.getReportDownloadContainerName());
             logger.info("Object key value is : " + objectKey);
