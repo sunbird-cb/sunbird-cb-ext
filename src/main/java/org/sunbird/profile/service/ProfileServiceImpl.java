@@ -346,7 +346,7 @@ public class ProfileServiceImpl implements ProfileService {
 	}
 
 	@Override
-	public SBApiResponse orgProfileUpdate(Map<String, Object> request) throws Exception {
+	public SBApiResponse orgProfileUpdate(Map<String, Object> request) {
 		SBApiResponse response = new SBApiResponse(Constants.ORG_PROFILE_UPDATE);
 		Map<String, Object> requestData = (Map<String, Object>) request.get(Constants.REQUEST);
 		String errMsg = validateOrgProfilePayload(requestData);

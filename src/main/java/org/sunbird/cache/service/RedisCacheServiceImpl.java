@@ -21,7 +21,7 @@ public class RedisCacheServiceImpl implements RedisCacheService {
 	private CbExtLogger logger = new CbExtLogger(getClass().getName());
 
 	@Override
-	public SBApiResponse deleteCache() throws Exception {
+	public SBApiResponse deleteCache() {
 		SBApiResponse response = new SBApiResponse(Constants.API_REDIS_DELETE);
 		boolean res = redisCache.deleteAllCBExtKey();
 		if (res) {

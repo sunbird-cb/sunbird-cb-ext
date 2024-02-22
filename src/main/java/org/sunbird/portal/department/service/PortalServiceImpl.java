@@ -85,7 +85,7 @@ public class PortalServiceImpl implements PortalService {
 	}
 
 	@Override
-	public List<DeptPublicInfo> getAllDept() throws Exception {
+	public List<DeptPublicInfo> getAllDept() throws UnsupportedOperationException {
 		UnsupportedOperationException ex = new UnsupportedOperationException(
 				"/portal/getAllDept API is not implemented.");
 		logger.error(ex);
@@ -93,7 +93,7 @@ public class PortalServiceImpl implements PortalService {
 	}
 
 	@Override
-	public DeptPublicInfo searchDept(String deptName) throws Exception {
+	public DeptPublicInfo searchDept(String deptName) throws UnsupportedOperationException {
 		UnsupportedOperationException ex = new UnsupportedOperationException(
 				"/portal/getAllDept API is not implemented.");
 		logger.error(ex);

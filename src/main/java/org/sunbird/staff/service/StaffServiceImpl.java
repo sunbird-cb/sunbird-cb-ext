@@ -218,7 +218,7 @@ public class StaffServiceImpl implements StaffService {
 	}
 
 	@Override
-	public SBApiResponse deleteStaffDetails(String orgId, String staffInfoId) throws Exception {
+	public SBApiResponse deleteStaffDetails(String orgId, String staffInfoId) {
 		SBApiResponse response = new SBApiResponse(Constants.API_STAFF_POSITION_DELETE);
 		try {
 			List<StaffInfo> existingStaffList = getStaffListByProperty(orgId, staffInfoId, StringUtils.EMPTY);

@@ -237,7 +237,7 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 	}
 
 	@Override
-	public SBApiResponse orgExtSearch(Map<String, Object> request) throws Exception {
+	public SBApiResponse orgExtSearch(Map<String, Object> request) {
 		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_ORG_EXT_SEARCH);
 		try {
 			String errMsg = validateOrgSearchReq(request);

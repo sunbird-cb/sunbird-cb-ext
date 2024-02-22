@@ -132,7 +132,7 @@ public class CohortsServiceImpl implements CohortsService {
 	@Override
 	@SuppressWarnings("unchecked")
 	public List<CohortUsers> getActiveUsers(String xAuthUser, String rootOrgId, String rootOrg, String contentId, String userId,
-			int count, Boolean toFilter) throws Exception {
+			int count, Boolean toFilter) {
 		// Check User exists
 // 		if (!userUtilService.validateUser(rootOrg, userId)) {
 // 			throw new BadRequestException("Invalid UserId.");
@@ -154,8 +154,7 @@ public class CohortsServiceImpl implements CohortsService {
 	}
 
 	@Override
-	public SBApiResponse autoEnrollmentInCourse(String authUserToken, String rootOrgId, String rootOrg, String contentId, String userUUID)
-			throws Exception {
+	public SBApiResponse autoEnrollmentInCourse(String authUserToken, String rootOrgId, String rootOrg, String contentId, String userUUID){
 		SBApiResponse finalResponse = ProjectUtil.createDefaultResponse(Constants.API_USER_ENROLMENT);
 		try {
 			List<SunbirdApiBatchResp> batchResp = fetchBatchDetails(rootOrgId, contentId);
@@ -432,7 +431,7 @@ public class CohortsServiceImpl implements CohortsService {
 	}
 
 	@Override
-	public SBApiResponse autoEnrollmentInCourseV2(String authUserToken, String rootOrgId, String rootOrg, String contentId, String userUUID) throws Exception {
+	public SBApiResponse autoEnrollmentInCourseV2(String authUserToken, String rootOrgId, String rootOrg, String contentId, String userUUID) {
 		SBApiResponse finalResponse = ProjectUtil.createDefaultResponse(Constants.API_USER_ENROLMENT);
 		try {
 			Map<String, Object> contentResponse = contentService.readContent(contentId);
