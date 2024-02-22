@@ -18,7 +18,7 @@ public class BASE64Decoder extends CharacterDecoder {
 	/**
 	 * This character array provides the character to value map based on RFC1521.
 	 */
-	private static final char pem_array[] = {
+	private static final char pemArray[] = {
 			// 0 1 2 3 4 5 6 7
 			'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', // 0
 			'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', // 1
@@ -30,18 +30,18 @@ public class BASE64Decoder extends CharacterDecoder {
 			'4', '5', '6', '7', '8', '9', '+', '/' // 7
 	};
 
-	private static final byte pem_convert_array[] = new byte[256];
+	private static final byte pemConvertArray[] = new byte[256];
 
 	static {
 		for (int i = 0; i < 255; i++) {
-			pem_convert_array[i] = -1;
+			pemConvertArray[i] = -1;
 		}
-		for (int i = 0; i < pem_array.length; i++) {
-			pem_convert_array[pem_array[i]] = (byte) i;
+		for (int i = 0; i < pemArray.length; i++) {
+			pemConvertArray[pemArray[i]] = (byte) i;
 		}
 	}
 
-	byte decode_buffer[] = new byte[4];
+	byte decodeBuffer[] = new byte[4];
 
 	/** Decode one BASE64 atom into 1, 2, or 3 bytes of data. */
 	@SuppressWarnings("fallthrough")
@@ -59,29 +59,29 @@ public class BASE64Decoder extends CharacterDecoder {
 				throw new IOException();
 			}
 		} while (i == '\n' || i == '\r');
-		decode_buffer[0] = (byte) i;
+		decodeBuffer[0] = (byte) i;
 
-		i = readFully(inStream, decode_buffer, 1, rem - 1);
+		i = readFully(inStream, decodeBuffer, 1, rem - 1);
 		if (i == -1) {
 			throw new IOException();
 		}
 
-		if (rem > 3 && decode_buffer[3] == '=') {
+		if (rem > 3 && decodeBuffer[3] == '=') {
 			rem = 3;
 		}
-		if (rem > 2 && decode_buffer[2] == '=') {
+		if (rem > 2 && decodeBuffer[2] == '=') {
 			rem = 2;
 		}
 		switch (rem) {
 			case 4:
-				d = pem_convert_array[decode_buffer[3] & 0xff];
+				d = pemConvertArray[decodeBuffer[3] & 0xff];
 				// NOBREAK
 			case 3:
-				c = pem_convert_array[decode_buffer[2] & 0xff];
+				c = pemConvertArray[decodeBuffer[2] & 0xff];
 				// NOBREAK
 			case 2:
-				b = pem_convert_array[decode_buffer[1] & 0xff];
-				a = pem_convert_array[decode_buffer[0] & 0xff];
+				b = pemConvertArray[decodeBuffer[1] & 0xff];
+				a = pemConvertArray[decodeBuffer[0] & 0xff];
 				break;
 			default:
 				break;

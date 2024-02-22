@@ -49,7 +49,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Service
 public class UserRegistrationServiceImpl implements UserRegistrationService {
 
-	private Logger LOGGER = LoggerFactory.getLogger(UserRegistrationServiceImpl.class);
+	private Logger logger = LoggerFactory.getLogger(UserRegistrationServiceImpl.class);
 
 	ObjectMapper mapper = new ObjectMapper();
 
@@ -137,7 +137,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 					}
 				}
 			} catch (Exception e) {
-				LOGGER.error(String.format("Exception in %s : %s", "registerUser", e.getMessage()), e);
+				logger.error(String.format("Exception in %s : %s", "registerUser", e.getMessage()), e);
 				errMsg = "Failed to process message. Exception: " + e.getMessage();
 			}
 		}
@@ -186,7 +186,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 			response.getResult().put(Constants.COUNT, orgList.size());
 			response.getResult().put(Constants.CONTENT, orgList);
 		} catch (Exception e) {
-			LOGGER.error("Exception occurred in getDeptDetails", e);
+			logger.error("Exception occurred in getDeptDetails", e);
 			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
 			response.getParams().setErrmsg("Exception occurred in getDeptDetails. Exception: " + e.getMessage());
 		}
@@ -215,7 +215,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 					errMsg = (String) ((Map<String, Object>)apiResponse.get(Constants.PARAMS)).get(Constants.ERROR_MESSAGE);
 				}
 			} catch (Exception e) {
-				LOGGER.error(String.format("Exception in %s : %s", "generateOTP", e.getMessage()), e);
+				logger.error(String.format("Exception in %s : %s", "generateOTP", e.getMessage()), e);
 				errMsg = "Failed to process message. Exception: " + e.getMessage();
 			}
 		}
@@ -233,7 +233,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 			 * 1. Create User 2. Read created User 3. Update User 4. Create NodeBB user Id
 			 * 5. Assign Role 6. Reset Password and get activation link
 			 */
-			LOGGER.info("Initiated User Creation flow for Reg. Code :: " + registrationCode);
+			logger.info("Initiated User Creation flow for Reg. Code :: " + registrationCode);
 			UserRegistration userReg = getUserRegistrationForRegCode(registrationCode);
 
 			// Create the org if it's not already onboarded.
@@ -242,7 +242,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 				if (orgResponse.getResponseCode() == HttpStatus.OK) {
 					String orgId = (String) orgResponse.getResult().get(Constants.ORGANIZATION_ID);
 					userReg.setSbOrgId(orgId);
-					LOGGER.info(String.format("Auto on-boarded organisation with Name: %s, MapId: %s, OrgId: %s",
+					logger.info(String.format("Auto on-boarded organisation with Name: %s, MapId: %s, OrgId: %s",
 							userReg.getOrgName(), userReg.getMapId(), userReg.getSbOrgId()));
 					// TODO - Need to find a best way to give time for org creation takes effect.
 					try {
@@ -251,7 +251,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 					}
 				} else {
 					try {
-						LOGGER.error("Failed to auto onboard organisation. Error: "
+						logger.error("Failed to auto onboard organisation. Error: "
 								+ (new ObjectMapper()).writeValueAsString(orgResponse));
 					} catch (Exception e) {
 					}
@@ -261,9 +261,9 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 
 			UserRegistrationStatus regStatus = UserRegistrationStatus.WF_APPROVED;
 			if (userUtilityService.createUser(userReg)) {
-				LOGGER.info("Successfully completed user creation flow.");
+				logger.info("Successfully completed user creation flow.");
 			} else {
-				LOGGER.error("Failed to create user for Reg.Code :: " + registrationCode);
+				logger.error("Failed to create user for Reg.Code :: " + registrationCode);
 				regStatus = UserRegistrationStatus.FAILED;
 			}
 
@@ -279,9 +279,9 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 			strBuilder.append(". ES object update operation is ")
 					.append(status == RestStatus.OK ? " successful." : " failed.");
 
-			LOGGER.info(strBuilder.toString());
+			logger.info(strBuilder.toString());
 		} catch (Exception e) {
-			LOGGER.error("Failed to process user create flow.", e);
+			logger.error("Failed to process user create flow.", e);
 		}
 	}
 
@@ -457,7 +457,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 					serverProperties.getEsProfileIndexType(), registrationCode);
 			return mapper.convertValue(esObject, UserRegistration.class);
 		} catch (Exception e) {
-			LOGGER.error(String.format("Exception in %s : %s", "getUserRegistrationDetails", e.getMessage()));
+			logger.error(String.format("Exception in %s : %s", "getUserRegistrationDetails", e.getMessage()));
 		}
 		return null;
 	}
@@ -474,7 +474,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 				orgList.add(line.trim());
 			}
 		} catch (Exception e) {
-			LOGGER.error("Failed to read the master org list. Exception: ", e);
+			logger.error("Failed to read the master org list. Exception: ", e);
 		}
 
 		return orgList;
