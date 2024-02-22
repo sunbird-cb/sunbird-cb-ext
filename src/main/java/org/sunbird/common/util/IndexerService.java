@@ -126,7 +126,7 @@ public class IndexerService {
 		return getEsResult(searchRequest, isSunbirdES);
 	}
 
-	public RestStatus BulkInsert(List<IndexRequest> indexRequestList) {
+	public RestStatus bulkInsert(List<IndexRequest> indexRequestList) {
 		BulkResponse restStatus = null;
 		if (!CollectionUtils.isEmpty(indexRequestList)) {
 			BulkRequest bulkRequest = new BulkRequest();

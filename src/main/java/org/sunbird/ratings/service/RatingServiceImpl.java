@@ -159,7 +159,7 @@ public class RatingServiceImpl implements RatingService {
 
                     for (JsonNode jsonNode : actualObj) {
                         final SummaryNodeModel summaryModel = mapper.convertValue(jsonNode, SummaryNodeModel.class);
-                        reviewMap.put(summaryModel.getUser_id(), summaryModel);
+                        reviewMap.put(summaryModel.getUserId(), summaryModel);
                         userList.add(jsonNode.get("user_id").asText());
                     }
 
