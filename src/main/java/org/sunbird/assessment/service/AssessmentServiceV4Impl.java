@@ -862,11 +862,9 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
                     kafkaResult.put(Constants.PRIMARY_CATEGORY, primaryCategory);
                     kafkaResult.put(Constants.TOTAL_SCORE, result.get(Constants.OVERALL_RESULT));
                     if ((primaryCategory.equalsIgnoreCase("Competency Assessment")
-                            && submitRequest.containsKey("competencies_v3")
-                            && submitRequest.get("competencies_v3") != null)) {
-                        Object[] obj = (Object[]) JSON.parse((String) submitRequest.get("competencies_v3"));
-                        Object competencies  = obj == null ? obj  : Arrays.asList(obj);
-                        logger.info("competencies_v3 : {} ", competencies);
+                            && submitRequest.containsKey(Constants.COMPETENCIES_V3)
+                            && submitRequest.get(Constants.COMPETENCIES_V3) != null)) {
+                        Object[] obj = (Object[]) JSON.parse((String) submitRequest.get(Constants.COMPETENCIES_V3));
                         if (obj != null) {
                             Object map = obj[0];
                             ObjectMapper m = new ObjectMapper();
