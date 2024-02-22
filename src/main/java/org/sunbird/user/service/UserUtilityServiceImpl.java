@@ -206,13 +206,13 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 	}
 
 	@Override
-	public Map<String, Object> getUsersReadData(String userId, String authToken, String userAuthToken) {
+	public Map<String, Object> getUsersReadData(String userId, String authToken, String xauthToken) {
 		Map<String, String> header = new HashMap<>();
 		if (StringUtils.isNotEmpty(authToken)) {
 			header.put(Constants.AUTH_TOKEN, authToken);
 		}
-		if (StringUtils.isNotEmpty(userAuthToken)) {
-			header.put(Constants.X_AUTH_TOKEN, userAuthToken);
+		if (StringUtils.isNotEmpty(xauthToken)) {
+			header.put(Constants.X_AUTH_TOKEN, xauthToken);
 		}
 		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService
 				.fetchUsingGetWithHeadersProfile(serverConfig.getSbUrl() + serverConfig.getLmsUserReadPath() + userId,
@@ -226,7 +226,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 	public boolean createUser(UserRegistration userRegistration) {
 		boolean retValue = false;
 		Map<String, Object> request = new HashMap<>();
-		Map<String, Object> requestBody = new HashMap<String, Object>();
+		Map<String, Object> requestBody = new HashMap<>();
 		requestBody.put(Constants.EMAIL, userRegistration.getEmail());
 		requestBody.put(Constants.CHANNEL, userRegistration.getChannel());
 		requestBody.put(Constants.FIRSTNAME, userRegistration.getFirstName());
@@ -260,20 +260,20 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 	public boolean updateUser(UserRegistration userRegistration) {
 		boolean retValue = false;
 		Map<String, Object> request = new HashMap<>();
-		Map<String, Object> requestBody = new HashMap<String, Object>();
+		Map<String, Object> requestBody = new HashMap<>();
 		requestBody.put(Constants.USER_ID, userRegistration.getUserId());
-		Map<String, Object> profileDetails = new HashMap<String, Object>();
+		Map<String, Object> profileDetails = new HashMap<>();
 		profileDetails.put(Constants.MANDATORY_FIELDS_EXISTS, false);
-		Map<String, Object> employementDetails = new HashMap<String, Object>();
+		Map<String, Object> employementDetails = new HashMap<>();
 		employementDetails.put(Constants.DEPARTMENTNAME, userRegistration.getOrgName());
 		profileDetails.put(Constants.EMPLOYMENTDETAILS, employementDetails);
-		Map<String, Object> personalDetails = new HashMap<String, Object>();
+		Map<String, Object> personalDetails = new HashMap<>();
 		personalDetails.put(Constants.FIRSTNAME.toLowerCase(), userRegistration.getFirstName());
 		personalDetails.put(Constants.PRIMARY_EMAIL, userRegistration.getEmail());
 		personalDetails.put(Constants.MOBILE, userRegistration.getPhone());
 		personalDetails.put(Constants.PHONE_VERIFIED, true);
 		profileDetails.put(Constants.PERSONAL_DETAILS, personalDetails);
-		Map<String, Object> professionDetailObj = new HashMap<String, Object>();
+		Map<String, Object> professionDetailObj = new HashMap<>();
 		professionDetailObj.put(Constants.ORGANIZATION_TYPE, Constants.GOVERNMENT);
 		if (StringUtils.isNotEmpty(userRegistration.getPosition())) {
 			professionDetailObj.put(Constants.DESIGNATION, userRegistration.getPosition());
@@ -284,7 +284,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		List<Map<String, Object>> professionalDetailsList = new ArrayList<Map<String, Object>>();
 		professionalDetailsList.add(professionDetailObj);
 		profileDetails.put(Constants.PROFESSIONAL_DETAILS, professionalDetailsList);
-		Map<String, Object> additionalProperties = new HashMap<String, Object>();
+		Map<String, Object> additionalProperties = new HashMap<>();
 		if (!StringUtils.isEmpty(userRegistration.getGroup())) {
 			additionalProperties.put(Constants.GROUP, userRegistration.getGroup());
 		}
@@ -316,7 +316,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 	public boolean assignRole(String sbOrgId, String userId, String objectDetails) {
 		boolean retValue = false;
 		Map<String, Object> request = new HashMap<>();
-		Map<String, Object> requestBody = new HashMap<String, Object>();
+		Map<String, Object> requestBody = new HashMap<>();
 		requestBody.put(Constants.ORGANIZATION_ID, sbOrgId);
 		requestBody.put(Constants.USER_ID, userId);
 		requestBody.put(Constants.ROLES, Arrays.asList(Constants.PUBLIC));
@@ -334,7 +334,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 	public boolean createNodeBBUser(UserRegistration userRegistration) {
 		boolean retValue = false;
 		Map<String, Object> request = new HashMap<>();
-		Map<String, Object> requestBody = new HashMap<String, Object>();
+		Map<String, Object> requestBody = new HashMap<>();
 		requestBody.put(Constants.USER_NAME.toLowerCase(), userRegistration.getUserName());
 		requestBody.put(Constants.IDENTIFIER, userRegistration.getUserId());
 		requestBody.put(Constants.USER_FULL_NAME.toLowerCase(),
@@ -349,8 +349,8 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 	@Override
 	public boolean getActivationLink(UserRegistration userRegistration) {
 		boolean retValue = false;
-		Map<String, Object> request = new HashMap<String, Object>();
-		Map<String, Object> requestBody = new HashMap<String, Object>();
+		Map<String, Object> request = new HashMap<>();
+		Map<String, Object> requestBody = new HashMap<>();
 		requestBody.put(Constants.USER_ID, userRegistration.getUserId());
 		requestBody.put(Constants.KEY, Constants.EMAIL);
 		requestBody.put(Constants.TYPE, Constants.EMAIL);
@@ -370,7 +370,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 	public boolean sendWelcomeEmail(String activationLink, UserRegistration userRegistration) {
 		boolean retValue = false;
 		Map<String, Object> request = new HashMap<>();
-		Map<String, Object> requestBody = new HashMap<String, Object>();
+		Map<String, Object> requestBody = new HashMap<>();
 		requestBody.put(Constants.ALLOWED_LOGGING, "You can use your email to Login");
 		requestBody.put(Constants.BODY, Constants.HELLO);
 		requestBody.put(Constants.EMAIL_TEMPLATE_TYPE, props.getWelcomeEmailTemplate());
@@ -478,7 +478,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 				List<Map<String, Object>> userInfoList = cassandraOperation
 						.getRecordsByPropertiesWithoutFiltering(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_USER, propertyMap, fields);
 				for (Map<String, Object> user : userInfoList) {
-					Map<String, String> userMap = new HashMap<String, String>();
+					Map<String, String> userMap = new HashMap<>();
 					String userId = (String) user.get(Constants.USER_ID);
 
 					if (userInfoMap.containsKey(userId)) {
@@ -573,7 +573,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 	@Override
 	public String createBulkUploadUser(UserRegistration userRegistration) {
 		Map<String, Object> request = new HashMap<>();
-		Map<String, Object> requestBody = new HashMap<String, Object>();
+		Map<String, Object> requestBody = new HashMap<>();
 		requestBody.put(Constants.EMAIL, userRegistration.getEmail());
 		requestBody.put(Constants.CHANNEL, userRegistration.getChannel());
 		requestBody.put(Constants.FIRSTNAME, userRegistration.getFirstName());
@@ -605,20 +605,20 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 	@Override
 	public String updateBulkUploadUser(UserRegistration userRegistration) {
 		Map<String, Object> request = new HashMap<>();
-		Map<String, Object> requestBody = new HashMap<String, Object>();
+		Map<String, Object> requestBody = new HashMap<>();
 		requestBody.put(Constants.USER_ID, userRegistration.getUserId());
-		Map<String, Object> profileDetails = new HashMap<String, Object>();
+		Map<String, Object> profileDetails = new HashMap<>();
 		profileDetails.put(Constants.MANDATORY_FIELDS_EXISTS, false);
-		Map<String, Object> employementDetails = new HashMap<String, Object>();
+		Map<String, Object> employementDetails = new HashMap<>();
 		employementDetails.put(Constants.DEPARTMENTNAME, userRegistration.getOrgName());
 		profileDetails.put(Constants.EMPLOYMENTDETAILS, employementDetails);
-		Map<String, Object> personalDetails = new HashMap<String, Object>();
+		Map<String, Object> personalDetails = new HashMap<>();
 		personalDetails.put(Constants.FIRSTNAME.toLowerCase(), userRegistration.getFirstName());
 		personalDetails.put(Constants.PRIMARY_EMAIL, userRegistration.getEmail());
 		personalDetails.put(Constants.MOBILE, userRegistration.getPhone());
 		personalDetails.put(Constants.PHONE_VERIFIED, true);
 		profileDetails.put(Constants.PERSONAL_DETAILS, personalDetails);
-		Map<String, Object> professionDetailObj = new HashMap<String, Object>();
+		Map<String, Object> professionDetailObj = new HashMap<>();
 		professionDetailObj.put(Constants.ORGANIZATION_TYPE, Constants.GOVERNMENT);
 		if (StringUtils.isNotEmpty(userRegistration.getPosition())) {
 			professionDetailObj.put(Constants.DESIGNATION, userRegistration.getPosition());
@@ -629,7 +629,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		List<Map<String, Object>> professionalDetailsList = new ArrayList<Map<String, Object>>();
 		professionalDetailsList.add(professionDetailObj);
 		profileDetails.put(Constants.PROFESSIONAL_DETAILS, professionalDetailsList);
-		Map<String, Object> additionalProperties = new HashMap<String, Object>();
+		Map<String, Object> additionalProperties = new HashMap<>();
 		if (!CollectionUtils.isEmpty(userRegistration.getTag())) {
 			additionalProperties.put(Constants.TAG, userRegistration.getTag());
 		}
@@ -739,7 +739,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 			header.put(Constants.AUTH_TOKEN, authToken);
 		}
 		Map<String, Object> request = new HashMap<>();
-		Map<String, Object> requestBody = new HashMap<String, Object>();
+		Map<String, Object> requestBody = new HashMap<>();
 		requestBody.put(Constants.KEY, Constants.EMAIL);
 		requestBody.put(Constants.VALUE, email);
 		request.put(Constants.REQUEST, requestBody);
@@ -841,7 +841,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 
 	private String validateRequest(Map<String, Object> request, String userId) {
 		StringBuffer str = new StringBuffer();
-		List<String> errList = new ArrayList<String>();
+		List<String> errList = new ArrayList<>();
 		Map<String, Object> requestData = (Map<String, Object>) request.get(Constants.REQUEST);
 		if (StringUtils.isBlank(userId)) {
 			str.append(Constants.USER_ID_DOESNT_EXIST);

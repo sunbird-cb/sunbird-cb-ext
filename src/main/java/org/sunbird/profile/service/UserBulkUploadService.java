@@ -186,7 +186,7 @@ public class UserBulkUploadService {
                     if (nextRow.getCell(4) != null && nextRow.getCell(4).getCellType() != CellType.BLANK) {
                         if (nextRow.getCell(4).getCellType() == CellType.STRING) {
                             String tagStr = nextRow.getCell(4).getStringCellValue().trim();
-                            List<String> tagList = new ArrayList<String>();
+                            List<String> tagList = new ArrayList<>();
                             if (!StringUtils.isEmpty(tagStr)) {
                                 String[] tagStrList = tagStr.split(",", -1);
                                 for(String tag : tagStrList) {

@@ -154,7 +154,7 @@ public class BudgetServiceImpl implements BudgetService {
 	}
 
 	@Override
-	public SBApiResponse getBudgetDetails(String orgId, String budgetYear) throws Exception {
+	public SBApiResponse getBudgetDetails(String orgId, String budgetYear) {
 		SBApiResponse response = new SBApiResponse(Constants.API_BUDGET_SCHEME_READ);
 		List<Map<String, Object>> budgetResponseList = null;
 		String errMsg = null;
@@ -399,7 +399,7 @@ public class BudgetServiceImpl implements BudgetService {
 	}
 
 	private void validateAddBudgetInfo(BudgetInfo budgetInfo) throws Exception {
-		List<String> errObjList = new ArrayList<String>();
+		List<String> errObjList = new ArrayList<>();
 		if (StringUtils.isEmpty(budgetInfo.getOrgId())) {
 			errObjList.add(Constants.ORG_ID);
 		}
@@ -429,7 +429,7 @@ public class BudgetServiceImpl implements BudgetService {
 	}
 
 	private void validateUpdateBudgetInfo(BudgetInfo budgetInfo) throws Exception {
-		List<String> errObjList = new ArrayList<String>();
+		List<String> errObjList = new ArrayList<>();
 		if (StringUtils.isEmpty(budgetInfo.getOrgId())) {
 			errObjList.add(Constants.ORG_ID);
 		}
@@ -550,7 +550,7 @@ public class BudgetServiceImpl implements BudgetService {
 	}
 
 	private void validateAddBudgetDocInfo(BudgetDocInfo budgetInfo) throws Exception {
-		List<String> errObjList = new ArrayList<String>();
+		List<String> errObjList = new ArrayList<>();
 		if (StringUtils.isEmpty(budgetInfo.getOrgId())) {
 			errObjList.add(Constants.ORG_ID);
 		}

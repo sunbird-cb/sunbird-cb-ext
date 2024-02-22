@@ -272,7 +272,7 @@ public class SearchByService {
 		Map<String, Object> compositeSearchResult = (Map<String, Object>) compositeSearchRes.get(Constants.RESULT);
 		List<Map<String, Object>> facetsList = (List<Map<String, Object>>) compositeSearchResult.get(Constants.FACETS);
 		if (!CollectionUtils.isEmpty(facetsList)) {
-			providerMap = new HashMap<String, ProviderInfo>();
+			providerMap = new HashMap<>();
 			for (Map<String, Object> facetObj : facetsList) {
 				String name = (String) facetObj.get(Constants.NAME);
 				if (Constants.SOURCE.equalsIgnoreCase(name)) {
@@ -361,7 +361,7 @@ public class SearchByService {
 
 		reqBody.put(Constants.SEARCHES, searchList);
 
-		List<String> positionNameList = new ArrayList<String>();
+		List<String> positionNameList = new ArrayList<>();
 		List<FracCommonInfo> positionList = getMasterPositionList(positionNameList);
 
 		Map<String, Object> fracSearchRes = outboundRequestHandlerService.fetchResultUsingPost(
@@ -385,7 +385,7 @@ public class SearchByService {
 			}
 			throw err;
 		}
-		Map<String, List<FracCommonInfo>> positionMap = new HashMap<String, List<FracCommonInfo>>();
+		Map<String, List<FracCommonInfo>> positionMap = new HashMap<>();
 		positionMap.put(Constants.POSITIONS_CACHE_NAME, positionList);
 		redisCacheMgr.putCache(Constants.POSITIONS_CACHE_NAME, positionMap);
 		return positionMap;

@@ -103,8 +103,8 @@ public class RatingServiceImpl implements RatingService {
                 ratingModelInfo.setRecommended(ratingData.get(Constants.RECOMMENDED)!=null ?(String)ratingData.get(Constants.RECOMMENDED): null);
                 if(ratingData.get(Constants.COMMENT_UPDATED_ON)!=null){
                     UUID commentupdatedOn = (UUID) ratingData.get(Constants.COMMENT_UPDATED_ON);
-                    Long CommentUpdatedTime = (commentupdatedOn.timestamp() - 0x01b21dd213814000L) / 10000L;
-                    ratingModelInfo.setCommentUpdatedOn(new Timestamp(CommentUpdatedTime));
+                    Long commentUpdatedTime = (commentupdatedOn.timestamp() - 0x01b21dd213814000L) / 10000L;
+                    ratingModelInfo.setCommentUpdatedOn(new Timestamp(commentUpdatedTime));
                 }
 
                 timeBasedUuid = (UUID) ratingData.get(Constants.UPDATED_ON);
@@ -159,7 +159,7 @@ public class RatingServiceImpl implements RatingService {
 
                     for (JsonNode jsonNode : actualObj) {
                         final SummaryNodeModel summaryModel = mapper.convertValue(jsonNode, SummaryNodeModel.class);
-                        reviewMap.put(summaryModel.getUser_id(), summaryModel);
+                        reviewMap.put(summaryModel.getUserId(), summaryModel);
                         userList.add(jsonNode.get("user_id").asText());
                     }
 
@@ -469,7 +469,7 @@ public class RatingServiceImpl implements RatingService {
             }
 
             Map<String, Object> requestBody = (Map<String, Object>) request.get(Constants.REQUEST);
-            Map<String, Object> compositeKey = new HashMap<String, Object>();
+            Map<String, Object> compositeKey = new HashMap<>();
 
             activityId = (String) requestBody.get(Constants.ACTIVITY_ID);
             compositeKey.put(Constants.ACTIVITY_ID, activityId);
@@ -497,7 +497,7 @@ public class RatingServiceImpl implements RatingService {
             return strBuilder.toString();
         }
 
-        List<String> missingAttrib = new ArrayList<String>();
+        List<String> missingAttrib = new ArrayList<>();
         if (!requestBody.containsKey(Constants.ACTIVITY_ID)) {
             missingAttrib.add(Constants.ACTIVITY_ID);
         }

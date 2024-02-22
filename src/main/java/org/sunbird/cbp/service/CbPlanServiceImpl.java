@@ -870,7 +870,7 @@ public class CbPlanServiceImpl implements CbPlanService {
                 return response;
             }
 
-            Map<String, Object> cbPlanPrimaryKey = new HashMap<String, Object>();
+            Map<String, Object> cbPlanPrimaryKey = new HashMap<>();
             cbPlanPrimaryKey.put(Constants.ORG_ID, userOrgId);
             List<String> fields = Arrays.asList(Constants.ORG_ID, Constants.ID, Constants.NAME,
                     Constants.CB_CONTENT_TYPE, Constants.CB_CONTENT_LIST, Constants.CB_ASSIGNMENT_TYPE,

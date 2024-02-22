@@ -46,12 +46,14 @@ public class AssessmentRepositoryImpl implements AssessmentRepository {
 	SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 
 	@Override
-	public Map<String, Object> getAssessmentAnswerKey(String artifactUrl) throws Exception {
+	public Map<String, Object> getAssessmentAnswerKey(String artifactUrl) {
+		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public Map<String, Object> getQuizAnswerKey(AssessmentSubmissionDTO quizMap) throws Exception {
+	public Map<String, Object> getQuizAnswerKey(AssessmentSubmissionDTO quizMap) {
+		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -129,6 +131,7 @@ public class AssessmentRepositoryImpl implements AssessmentRepository {
 	@Override
 	public List<Map<String, Object>> getAssessmentbyContentUser(String rootOrg, String courseId, String userId)
 			throws Exception {
+		// TODO Auto-generated method stub
 		return Collections.emptyList();
 	}
 

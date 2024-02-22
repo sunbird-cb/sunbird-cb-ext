@@ -135,7 +135,7 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 			}
 
 			if (orgCreatedWithNewChannel) {
-				Map<String, Object> updateRequest = new HashMap<String, Object>();
+				Map<String, Object> updateRequest = new HashMap<>();
 				String orgName = (String) requestData.get(Constants.ORG_NAME);
 				updateRequest.put(Constants.CHANNEL, (String) requestData.get(Constants.CHANNEL));
 				updateRequest.put(Constants.SB_ORG_ID, orgId);
@@ -220,7 +220,7 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 			orgHierarchyList = orgRepository.findAllByParentMapId(parentMapId);
 		}
 		if (CollectionUtils.isNotEmpty(orgHierarchyList)) {
-			Map<String, Object> responseMap = new HashMap<String, Object>();
+			Map<String, Object> responseMap = new HashMap<>();
 			responseMap.put(Constants.CONTENT, orgHierarchyList);
 			responseMap.put(Constants.COUNT, orgHierarchyList.size());
 			response.put(Constants.RESPONSE, responseMap);
@@ -236,7 +236,7 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 	}
 
 	@Override
-	public SBApiResponse orgExtSearch(Map<String, Object> request) throws Exception {
+	public SBApiResponse orgExtSearch(Map<String, Object> request) {
 		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_ORG_EXT_SEARCH);
 		try {
 			String errMsg = validateOrgSearchReq(request);
@@ -270,7 +270,7 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 						put(Constants.REQUEST, orgSearchRequest);
 					}
 				};
-				Map<String, String> headers = new HashMap<String, String>();
+				Map<String, String> headers = new HashMap<>();
 				headers.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
 				String url = configProperties.getSbUrl() + configProperties.getSbOrgSearchPath();
 
@@ -284,7 +284,7 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 					response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
 				}
 			} else {
-				Map<String, Object> responseMap = new HashMap<String, Object>();
+				Map<String, Object> responseMap = new HashMap<>();
 				responseMap.put(Constants.COUNT, 0);
 				responseMap.put(Constants.CONTENT, Collections.EMPTY_LIST);
 				response.put(Constants.RESPONSE, responseMap);
@@ -298,7 +298,7 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 	}
 
 	private String validateOrgRequest(Map<String, Object> request) {
-		List<String> params = new ArrayList<String>();
+		List<String> params = new ArrayList<>();
 		StringBuilder strBuilder = new StringBuilder();
 		Map<String, Object> requestData = (Map<String, Object>) request.get(Constants.REQUEST);
 		if (ObjectUtils.isEmpty(requestData)) {
@@ -339,7 +339,7 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 	}
 
 	private String validateOrgSearchReq(Map<String, Object> requestData) {
-		List<String> params = new ArrayList<String>();
+		List<String> params = new ArrayList<>();
 		StringBuilder strBuilder = new StringBuilder();
 
 		Map<String, Object> request = (Map<String, Object>) requestData.get(Constants.REQUEST);
@@ -361,7 +361,7 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 	}
 
 	private String checkOrgExist(String channel, String userToken) {
-		Map<String, String> headers = new HashMap<String, String>();
+		Map<String, String> headers = new HashMap<>();
 		headers.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
 		if (StringUtils.isNotEmpty(userToken)) {
 			headers.put(Constants.X_AUTH_TOKEN, userToken);
@@ -405,7 +405,7 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 
 	private String createOrgInSunbird(Map<String, Object> request, String channel, String userToken) {
 		String url = configProperties.getSbUrl() + configProperties.getLmsOrgCreatePath();
-		Map<String, String> headers = new HashMap<String, String>();
+		Map<String, String> headers = new HashMap<>();
 		headers.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
 		if (StringUtils.isNotEmpty(userToken)) {
 			headers.put(Constants.X_AUTH_TOKEN, userToken);
@@ -581,7 +581,7 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 	}
 
 	private String validateOrgRequestForRegistration(Map<String, Object> request) {
-		List<String> params = new ArrayList<String>();
+		List<String> params = new ArrayList<>();
 		StringBuilder strBuilder = new StringBuilder();
 		Map<String, Object> requestData = (Map<String, Object>) request.get(Constants.REQUEST);
 		if (ObjectUtils.isEmpty(requestData)) {
@@ -619,7 +619,7 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 	public SBApiResponse orgExtSearchV2(Map<String, Object> request) {
 		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_ORG_HIERACHY_SEARCH);
 		try {
-			Map<String, Object> searchFilters = new HashMap<String, Object>();
+			Map<String, Object> searchFilters = new HashMap<>();
 			String errMsg = validateSearchRequest(request, searchFilters);
 			if (StringUtils.isNotBlank(errMsg)) {
 				response.setResponseCode(HttpStatus.BAD_REQUEST);
@@ -769,8 +769,8 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 			String orgId = checkOrgExist(parentOrg.getChannel(), StringUtils.EMPTY);
 
 			if (StringUtils.isEmpty(orgId)) {
-				Map<String, Object> request = new HashMap<String, Object>();
-				Map<String, Object> requestBody = new HashMap<String, Object>();
+				Map<String, Object> request = new HashMap<>();
+				Map<String, Object> requestBody = new HashMap<>();
 
 				requestBody.put(Constants.ORG_NAME, parentOrg.getOrgName());
 				requestBody.put(Constants.CHANNEL, parentOrg.getChannel());

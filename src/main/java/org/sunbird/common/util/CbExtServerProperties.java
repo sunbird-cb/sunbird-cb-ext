@@ -461,7 +461,7 @@ public class CbExtServerProperties {
 	private String assessmentSubmitTopic;
 
 	@Value("${metaData.contextTypes}")
-	private String[] ContextTypes;
+	private String[] contextTypes;
 
 	@Value("${kafka.topics.user.bulk.upload}")
 	private String userBulkUploadTopic;
@@ -594,7 +594,7 @@ public class CbExtServerProperties {
 	private String cbPlanEndDate;
 
 	@Value("${karma.points.limit}")
-	private int KarmaPointsLimit;
+	private int karmaPointsLimit;
 	@Value("${kafka.topics.claim.acbp.karma.points}")
 	private String claimKarmaPointsTopic;
 
@@ -1856,11 +1856,11 @@ public class CbExtServerProperties {
 	}
 
 	public String[] getContextTypes() {
-		return ContextTypes;
+		return contextTypes;
 	}
 
 	public void setContextTypes(String[] contextTypes) {
-		ContextTypes = contextTypes;
+		this.contextTypes = contextTypes;
 	}
 
 	public String getUserBulkUploadTopic() {
@@ -2144,11 +2144,11 @@ public class CbExtServerProperties {
 	}
 
 	public int getKarmaPointsLimit() {
-		return KarmaPointsLimit;
+		return karmaPointsLimit;
 	}
 
 	public void setKarmaPointsLimit(int karmaPointsLimit) {
-		KarmaPointsLimit = karmaPointsLimit;
+		this.karmaPointsLimit = karmaPointsLimit;
 	}
 
 	public String getClaimKarmaPointsTopic() {

@@ -75,10 +75,10 @@ public class KarmaPointsServiceImpl implements KarmaPointsService {
                 Constants.TABLE_KARMA_POINTS_LOOK_UP, propertyMap, null, Constants.DB_COLUMN_USER_KARMA_POINTS_KEY);
         if(userCourseKpList.size() < 1)
           return resultMap;
-        long credit_date = ((Date)((Map<String, Object>)userCourseKpList.get(key)).get(Constants.DB_COLUMN_CREDIT_DATE)).getTime();
+        long creditDate = ((Date)((Map<String, Object>)userCourseKpList.get(key)).get(Constants.DB_COLUMN_CREDIT_DATE)).getTime();
         Map<String, Object> whereMap = new HashMap<>();
         whereMap.put(Constants.KARMA_POINTS_USER_ID, userId);
-        whereMap.put(Constants.DB_COLUMN_CREDIT_DATE, credit_date);
+        whereMap.put(Constants.DB_COLUMN_CREDIT_DATE, creditDate);
         whereMap.put(Constants.DB_CLOUMN_CONTEXT_TYPE, cntxType);
         whereMap.put(Constants.DB_COLUMN_CONTEXT_ID, cntxtId);
         whereMap.put(Constants.DB_COLUMN_OPERATION_TYPE, Constants.COURSE_COMPLETION);
