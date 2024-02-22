@@ -230,7 +230,7 @@ public class Constants {
 	public static final String TABLE_USER_ASSESSMENT_TIME = "user_assessment_time";
 	public static final String SHA_256_WITH_RSA = "SHA256withRSA";
 	public static final String SUB = "sub";
-	public static final String _UNAUTHORIZED = "Unauthorized";
+	public static final String UNAUTHORIZED_1 = "Unauthorized";
 	public static final String DOT_SEPARATOR = ".";
 	public static final String ACCESS_TOKEN_PUBLICKEY_BASEPATH = "accesstoken.publickey.basepath";
 	public static final String TABLE_ORG_AUDIT = "org_audit";
@@ -341,7 +341,7 @@ public class Constants {
 	public static final String NOTIFICATIONS = "notifications";
 	public static final String CORE_CONNECTIONS_PER_HOST_FOR_LOCAL = "coreConnectionsPerHostForLocal";
 	public static final String CORE_CONNECTIONS_PER_HOST_FOR_REMOTE = "coreConnectionsPerHostForRemote";
-	public static final String MAX_CONNECTIONS_PER_HOST_FOR_LOCAl = "maxConnectionsPerHostForLocal";
+	public static final String MAX_CONNECTIONS_PER_HOST_FOR_LOCAL = "maxConnectionsPerHostForLocal";
 	public static final String MAX_CONNECTIONS_PER_HOST_FOR_REMOTE = "maxConnectionsPerHostForRemote";
 	public static final String MAX_REQUEST_PER_CONNECTION = "maxRequestsPerConnection";
 	public static final String HEARTBEAT_INTERVAL = "heartbeatIntervalSeconds";
@@ -353,10 +353,10 @@ public class Constants {
 	public static final String INCOMPLETE_COURSES_MAIL_SUBJECT = "Complete the courses you started";
 	public static final String COURSE = "Course";
 	public static final String COURSE_KEYWORD = "course";
-	public static final String _URL = "_url";
+	public static final String URL_1 = "_url";
 	public static final String THUMBNAIL = "_thumbnail";
-	public static final String _NAME = "_name";
-	public static final String _DURATION = "_duration";
+	public static final String NAME_1 = "_name";
+	public static final String DURATION_1 = "_duration";
 	public static final String SEND_NOTIFICATION_PROPERTIES = "send-notification";
 	public static final String NOTIFICATION_HOST = "notification.service.host";
 	public static final String NOTIFICATION_ENDPOINT = "notification.event.endpoint";
@@ -538,7 +538,7 @@ public class Constants {
 			COURSE_ID_COLUMN, COMPLETION_PERCENTAGE_COLUMN, LAST_ACCESS_TIME);
 	public static final String BATCHES = "batches";
 	public static final String NO_OF_COURSES = "noOfCourses";
-	public static final String _DESCRIPTION = "_description";
+	public static final String DESCRIPTION_1 = "_description";
 	public static final String EMAIL_TYPE = "emailtype";
 	public static final String NEW_COURSES_EMAIL = "New Courses Email";
 	public static final String EMAIL_RECORD_TABLE = "email_record";

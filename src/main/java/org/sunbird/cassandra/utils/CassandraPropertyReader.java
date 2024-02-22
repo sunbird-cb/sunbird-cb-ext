@@ -4,9 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
-
 /**
  * This class will be used to read cassandratablecolumn properties file.
  * @author fathima
@@ -16,13 +13,13 @@ import org.springframework.context.annotation.PropertySource;
 public class CassandraPropertyReader {
 
 	private final Properties properties = new Properties();
-	  private static final String file = "cassandratablecolumn.properties";
+	  private static final String cassandraColumnProperties = "cassandratablecolumn.properties";
 	  private static CassandraPropertyReader cassandraPropertyReader = null;
 
 	  /** private default constructor 
 	 * @throws IOException */
 	  private CassandraPropertyReader() throws IOException {
-	    InputStream in = this.getClass().getClassLoader().getResourceAsStream(file);
+	    InputStream in = this.getClass().getClassLoader().getResourceAsStream(cassandraColumnProperties);
 	    try {
 	      properties.load(in);
 	    } catch (IOException e) {
