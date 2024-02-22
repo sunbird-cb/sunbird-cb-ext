@@ -10,11 +10,11 @@ public class SummaryModel {
     private Float totalcount3stars;
     private Float totalcount4stars;
     private Float totalcount5stars;
-    private Float total_number_of_ratings;
-    private Float sum_of_total_ratings;
+    private Float totalNumberOfRatings;
+    private Float sumOfTotalRatings;
     private String latest50Reviews;
 
-    public SummaryModel(String activityId, String activityType, Float totalcount1stars, Float totalcount2stars, Float totalcount3stars, Float totalcount4stars, Float totalcount5stars, Float total_number_of_ratings, Float sum_of_total_ratings, String latest50Reviews) {
+    public SummaryModel(String activityId, String activityType, Float totalcount1stars, Float totalcount2stars, Float totalcount3stars, Float totalcount4stars, Float totalcount5stars, Float totalNumberOfRatings, Float sumOfTotalRatings, String latest50Reviews) {
         this.activityId = activityId;
         this.activityType = activityType;
         this.totalcount1stars = totalcount1stars;
@@ -22,8 +22,8 @@ public class SummaryModel {
         this.totalcount3stars = totalcount3stars;
         this.totalcount4stars = totalcount4stars;
         this.totalcount5stars = totalcount5stars;
-        this.total_number_of_ratings = total_number_of_ratings;
-        this.sum_of_total_ratings = sum_of_total_ratings;
+        this.totalNumberOfRatings = totalNumberOfRatings;
+        this.sumOfTotalRatings = sumOfTotalRatings;
         this.latest50Reviews = latest50Reviews;
     }
 
@@ -71,12 +71,12 @@ public class SummaryModel {
         this.totalcount5stars = totalcount5stars;
     }
 
-    public Float getTotal_number_of_ratings() {
-        return total_number_of_ratings;
+    public Float getTotalNumberOfRatings() {
+        return totalNumberOfRatings;
     }
 
-    public void setTotal_number_of_ratings(Float total_number_of_ratings) {
-        this.total_number_of_ratings = total_number_of_ratings;
+    public void setTotalNumberOfRatings(Float totalNumberOfRatings) {
+        this.totalNumberOfRatings = totalNumberOfRatings;
     }
 
     public Float getTotalcount2stars() {
@@ -87,12 +87,12 @@ public class SummaryModel {
         this.totalcount2stars = totalcount2stars;
     }
 
-    public Float getSum_of_total_ratings() {
-        return sum_of_total_ratings;
+    public Float getSumOfTotalRatings() {
+        return sumOfTotalRatings;
     }
 
-    public void setSum_of_total_ratings(Float sum_of_total_ratings) {
-        this.sum_of_total_ratings = sum_of_total_ratings;
+    public void setSumOfTotalRatings(Float sumOfTotalRatings) {
+        this.sumOfTotalRatings = sumOfTotalRatings;
     }
 
     public String getActivityType() {
@@ -113,15 +113,15 @@ public class SummaryModel {
 
     static public class latestReviews {
         private String objectType;
-        private String user_id;
+        private String userId;
         private Timestamp date;
         private Float rating;
         private String review;
         private String firstName;
 
-        public latestReviews(String objectType, String user_id, Timestamp date, Float rating, String review, String firstName) {
+        public latestReviews(String objectType, String userId, Timestamp date, Float rating, String review, String firstName) {
             this.objectType = objectType;
-            this.user_id = user_id;
+            this.userId = userId;
             this.date = date;
             this.rating = rating;
             this.review = review;
@@ -136,12 +136,12 @@ public class SummaryModel {
             this.objectType = objectType;
         }
 
-        public String getUser_id() {
-            return user_id;
+        public String getUserId() {
+            return userId;
         }
 
-        public void setUser_id(String user_id) {
-            this.user_id = user_id;
+        public void setUserId(String userId) {
+            this.userId = userId;
         }
 
         public Timestamp getDate() {
