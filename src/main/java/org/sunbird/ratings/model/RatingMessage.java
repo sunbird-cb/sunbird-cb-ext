@@ -10,12 +10,12 @@ public class RatingMessage {
     private UpdatedValues prevValues;
     private UpdatedValues updatedValues;
 
-    public RatingMessage(String action, String activity_id, String activity_Type, String user_id, String created_Date) {
+    public RatingMessage(String action, String activityId, String activityType, String userId, String createdDate) {
         this.action = action;
-        this.activityId = activity_id;
-        this.activityType = activity_Type;
-        this.userId = user_id;
-        this.createdDate = created_Date;
+        this.activityId = activityId;
+        this.activityType = activityType;
+        this.userId = userId;
+        this.createdDate = createdDate;
     }
 
 
