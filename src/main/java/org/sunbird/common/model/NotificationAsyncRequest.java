@@ -8,6 +8,7 @@ public class NotificationAsyncRequest {
     private int priority;
     private Map<String, Object> action;
     private List<String> ids;
+    private List<String> copyEmail;
 
     public String getType() {
         return type;
@@ -39,5 +40,13 @@ public class NotificationAsyncRequest {
 
     public void setIds(List<String> ids) {
         this.ids = ids;
+    }
+
+    public List<String> getCopyEmail() {
+        return copyEmail;
+    }
+
+    public void setCopyEmail(List<String> copyEmail) {
+        this.copyEmail = copyEmail;
     }
 }

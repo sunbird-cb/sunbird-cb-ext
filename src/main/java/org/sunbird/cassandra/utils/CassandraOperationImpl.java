@@ -418,13 +418,17 @@ public class CassandraOperationImpl implements CassandraOperation {
 
 	@Override
 	public List<Map<String, Object>> getKarmaPointsRecordsByPropertiesWithPaginationList(String keyspaceName, String tableName,
-																						 Map<String, Object> propertyMap, List<String> fields, int limit, Date updatedOn, String key) {
+																						 Map<String, Object> propertyMap, List<String> fields, int limit, Date updatedOn, String key,Date limitDate) {
 		Select selectQuery = null;
 		List<Map<String, Object>> response = new ArrayList<>();
 		try {
 			selectQuery = processQueryWithoutFiltering(keyspaceName, tableName, propertyMap, fields);
 			selectQuery.limit(limit);
 			selectQuery.where(QueryBuilder.lt(Constants.DB_COLUMN_CREDIT_DATE, updatedOn));
+
+			if(limitDate != null)
+			selectQuery.where(QueryBuilder.gt(Constants.DB_COLUMN_CREDIT_DATE, limitDate));
+
 			selectQuery.orderBy(QueryBuilder.desc(Constants.DB_COLUMN_CREDIT_DATE));
 			ResultSet results = connectionManager.getSession(keyspaceName).execute(selectQuery);
 			response = CassandraUtil.createResponse(results);
@@ -433,10 +437,11 @@ public class CassandraOperationImpl implements CassandraOperation {
 		}
 		return response;
 	}
-	public Long getRecordCountWithUserId(String keyspace, String tableName, String userId) {
+	public Long getRecordCountWithUserId(String keyspace, String tableName, String userId,Date limitDate) {
 		try {
-			Where selectQuery = QueryBuilder.select().countAll().from(keyspace, tableName)
-					.where(QueryBuilder.eq(Constants.USER_ID, userId));
+			Select selectQuery = QueryBuilder.select().countAll().from(keyspace, tableName);
+			selectQuery.where(QueryBuilder.eq(Constants.USER_ID, userId));
+			selectQuery.where(QueryBuilder.gt(Constants.DB_COLUMN_CREDIT_DATE, limitDate));
 			Row row = connectionManager.getSession(keyspace).execute(selectQuery).one();
 			return row.getLong(0);
 		} catch (Exception e) {

@@ -644,6 +644,18 @@ public class CbExtServerProperties {
 	@Value("${sb.role.read}")
 	private String sbRoleRead;
 
+	@Value("${cert-registry-service-host}")
+	private String certRegistryServiceBaseUrl;
+
+	@Value("${cert-registry-certificate-download-url}")
+	private String certRegistryCertificateDownloadUrl;
+
+	@Value("${digilocker-issuer-id}")
+	private String digiLockerIssuerId;
+
+	@Value("${report.property.file.allMdo}")
+	private String reportPropertyFileAllMdo;
+
 	public boolean qListFromCacheEnabled() {
 		return qListFromCacheEnabled;
 	}
@@ -2285,6 +2297,38 @@ public class CbExtServerProperties {
 
 	public void setRedisEhrmsTokenTimeOut(Integer redisEhrmsTokenTimeOut) {
 		this.redisEhrmsTokenTimeOut = redisEhrmsTokenTimeOut;
+	}
+
+	public String getCertRegistryServiceBaseUrl() {
+		return certRegistryServiceBaseUrl;
+	}
+
+	public void setCertRegistryServiceBaseUrl(String certRegistryServiceBaseUrl) {
+		this.certRegistryServiceBaseUrl = certRegistryServiceBaseUrl;
+	}
+
+	public String getCertRegistryCertificateDownloadUrl() {
+		return certRegistryCertificateDownloadUrl;
+	}
+
+	public void setCertRegistryCertificateDownloadUrl(String certRegistryCertificateDownloadUrl) {
+		this.certRegistryCertificateDownloadUrl = certRegistryCertificateDownloadUrl;
+	}
+
+	public String getDigiLockerIssuerId() {
+		return digiLockerIssuerId;
+	}
+
+	public void setDigiLockerIssuerId(String digiLockerIssuerId) {
+		this.digiLockerIssuerId = digiLockerIssuerId;
+	}
+
+	public List<String> getReportPropertyFileAllMdo() {
+		return Arrays.asList(reportPropertyFileAllMdo.split(",", -1));
+	}
+
+	public void setReportPropertyFileAllMdo(String reportPropertyFileAllMdo) {
+		this.reportPropertyFileAllMdo = reportPropertyFileAllMdo;
 	}
 
 	public String getSbRoleRead() {

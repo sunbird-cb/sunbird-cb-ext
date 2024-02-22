@@ -962,7 +962,7 @@ public class Constants {
 	public static final String COMPETENCY_SUB_THEME_PARAM = "competency_subtheme";
 	public static final String COPY_EMAIL = "copyEmail";
 	public static final String USER_CONTENT_RECOMMENDATION = "user.v1.content.recommendation";
-	public static final String RECOMMEND_CONTENT_SUBJECT =" recommends this iGOT Karmayogi Course for you!";
+	public static final String RECOMMEND_CONTENT_SUBJECT = " recommends this iGOT Karmayogi #primaryCategory for you!";
 	public static final String COURSE_POSTER_IMAGE_URL= "coursePosterImageUrl";
 	public static final String COURSE_PROVIDER = "courseProvider";
 	public static final String RECIPIENTS = "recipients";
@@ -975,11 +975,21 @@ public class Constants {
 	public static final String EHRMS_AUTH_PASSWORD = "password";
 	public static final String USER_ID_LOWER = "userid";
 	public static final String EHRMS_USER_TOKEN = "ehrmsUserToken";
+	public static final String DOC_ID = "docId";
+	public static final String DIGI_LOCKER_ID = "digiLockerId";
+	public static final String ACCESS_TOKEN = "accessToken";
+	public static final String CERTIFICATE_ID = "certificateId";
+	public static final String CERTIFICATE_NAME = "certificateName";
+	public static final String LAST_ISSUED_ON = "lastIssuedOn";
+	public static final String TABLE_DIGILOCKER_DOC_INFO = "test_digilocker_doc_lookup";
+	public static final String ISSUED_USER_CERTIFICATE = "issuedCertificates";
+	public static final String DOC_TYPE = "docType";
+  public static final String PRIMARY_CATEGORY_TAG = "#primaryCategory";
 	public static final String MDO_REPORT_ACCESSOR = "MDO_REPORT_ACCESSOR";
 	public static final String GRANT_REPORT_ACCESS_API ="api.grant.access.report";
 	public static final String MDO_ADMIN ="mdoadmin";
 
-    private Constants() {
+  private Constants() {
 		throw new IllegalStateException("Utility class");
 	}
 

@@ -830,12 +830,13 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 				Map<String, Object> mailNotificationDetails = new HashMap<>();
 				mailNotificationDetails.put(Constants.RECIPIENT_EMAILS, emailResponseList);
 				mailNotificationDetails.put(Constants.COURSE_NAME, requestData.get(Constants.COURSE_NAME));
-				mailNotificationDetails.put(Constants.SUBJECT, name + Constants.RECOMMEND_CONTENT_SUBJECT);
+				mailNotificationDetails.put(Constants.SUBJECT, name + Constants.RECOMMEND_CONTENT_SUBJECT.replace(Constants.PRIMARY_CATEGORY_TAG, (String) requestData.get(Constants.PRIMARY_CATEGORY)));
 				mailNotificationDetails.put(Constants.LINK, link.toString());
 				mailNotificationDetails.put(Constants.COURSE_POSTER_IMAGE_URL, requestData.get(Constants.COURSE_POSTER_IMAGE_URL));
 				mailNotificationDetails.put(Constants.COURSE_PROVIDER, requestData.get(Constants.COURSE_PROVIDER));
 				mailNotificationDetails.put(Constants.USER_ID, userId);
 				mailNotificationDetails.put(Constants.USER, name);
+				mailNotificationDetails.put(Constants.PRIMARY_CATEGORY, requestData.get(Constants.PRIMARY_CATEGORY));
 				sendNotificationToRecipients(mailNotificationDetails);
 			}
 		} catch (Exception e) {
@@ -872,6 +873,9 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		if (StringUtils.isEmpty((String) requestData.get(Constants.COURSE_PROVIDER))) {
 			errList.add(Constants.COURSE_PROVIDER);
 		}
+		if (StringUtils.isEmpty((String) requestData.get(Constants.PRIMARY_CATEGORY))) {
+			errList.add(Constants.PRIMARY_CATEGORY);
+		}
 		if (ObjectUtils.isEmpty(requestData.get(Constants.RECIPIENTS))) {
 			errList.add(Constants.RECIPIENTS);
 		}
@@ -907,6 +911,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		params.put(Constants.COURSE_POSTER_IMAGE_URL, mailNotificationDetails.get(Constants.COURSE_POSTER_IMAGE_URL));
 		params.put(Constants.COURSE_PROVIDER, mailNotificationDetails.get(Constants.COURSE_PROVIDER));
 		params.put(Constants.LINK, mailNotificationDetails.get(Constants.LINK));
+		params.put(Constants.PRIMARY_CATEGORY, mailNotificationDetails.get(Constants.PRIMARY_CATEGORY));
 		Template template = new Template(constructEmailTemplate(props.getRecommendContentTemplate(), params), props.getRecommendContentTemplate(), params);
 		usermap.put(Constants.ID, mailNotificationDetails.get(Constants.USER_ID));
 		usermap.put(Constants.TYPE, Constants.USER);
@@ -969,4 +974,45 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		}
 		return replacedHTML;
 	}
+
+	@Override
+	public Map<String, Object> getUserDetails(String key, String value) {
+		// request body
+		SunbirdApiRequest requestObj = new SunbirdApiRequest();
+		Map<String, Object> reqMap = new HashMap<>();
+		reqMap.put(Constants.FILTERS, new HashMap<String, Object>() {
+			{
+				put(key, value);
+			}
+		});
+		requestObj.setRequest(reqMap);
+
+		HashMap<String, String> headersValue = new HashMap<>();
+		headersValue.put(Constants.CONTENT_TYPE, "application/json");
+		headersValue.put(Constants.AUTHORIZATION, props.getSbApiKey());
+
+		try {
+			String url = props.getSbUrl() + props.getUserSearchEndPoint();
+
+			Map<String, Object> response = outboundRequestHandlerService.fetchResultUsingPost(url, requestObj,
+					headersValue);
+			if (response != null && "OK".equalsIgnoreCase((String) response.get("responseCode"))) {
+				Map<String, Object> map = (Map<String, Object>) response.get("result");
+				if (map.get("response") != null) {
+					Map<String, Object> responseObj = (Map<String, Object>) map.get("response");
+					if (MapUtils.isNotEmpty(responseObj)) {
+						List<Map<String, Object>> content = (List<Map<String, Object>>)responseObj.get("content");
+						if (org.apache.commons.collections.CollectionUtils.isNotEmpty(content)) {
+							return content.get(0);
+						}
+					}
+
+				}
+			}
+		} catch (Exception e) {
+			throw new ApplicationLogicError("Sunbird Service ERROR: ", e);
+		}
+		return null;
+	}
+
 }

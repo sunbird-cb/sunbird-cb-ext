@@ -65,26 +65,30 @@ public class EhrmsProfileDetailImpl implements EhrmsService {
                 });
                 logger.info("User Details : {}" , userDetails);
                 Map<String, Object> userAdditionalProperties = ((Map<String, Object>) userDetails.get(Constants.ADDITIONAL_PROPERTIES));
-                if (userAdditionalProperties != null && !userAdditionalProperties.isEmpty()) {
-                    externalSystemId = (String) userAdditionalProperties.get(Constants.EXTERNAL_SYSTEM_ID);
-                    if (externalSystemId == null || externalSystemId.isEmpty()) {
-                        response.getParams().setStatus(Constants.FAILED);
-                        response.getParams().setErrmsg("User does not have externalSystemId in profile details");
-                        response.setResponseCode(HttpStatus.BAD_REQUEST);
-                        return response;
-                    }
+                if(userAdditionalProperties == null || userAdditionalProperties.isEmpty() )
+                {
+                    response.getParams().setStatus(Constants.FAILED);
+                    response.getParams().setErrmsg("User does not have externalSystemId in profile details");
+                    response.setResponseCode(HttpStatus.BAD_REQUEST);
+                    return response;
+                }
+                externalSystemId = (String) userAdditionalProperties.get(Constants.EXTERNAL_SYSTEM_ID);
+                logger.info("externalSystemId : {}" , externalSystemId);
+                if (externalSystemId == null || externalSystemId.isEmpty()) {
+                    response.getParams().setStatus(Constants.FAILED);
+                    response.getParams().setErrmsg("User does not have externalSystemId in profile details");
+                    response.setResponseCode(HttpStatus.BAD_REQUEST);
+                    return response;
                 }
                 String ehrmsAuthUrl = serverConfig.getEhrmsAuthUrl();
                 String ehrmsAuthUsername = serverConfig.getEhrmsAuthUserName();
                 String ehrmsAuthPassword = serverConfig.getEhrmsAuthPassword();
                 String jwtToken = redisCacheMgr.getCache(Constants.EHRMS_USER_TOKEN);
-                // if (StringUtils.isEmpty(jwtToken)) {
+                if (StringUtils.isEmpty(jwtToken)) {
                     jwtToken = fetchJwtToken(ehrmsAuthUrl, ehrmsAuthUsername, ehrmsAuthPassword).replace("\"", "");
-                    logger.info("JwtToken : {} ", jwtToken);
                     redisCacheMgr.putCache(Constants.EHRMS_USER_TOKEN, jwtToken, serverConfig.getRedisEhrmsTokenTimeOut());
-                //}
+                }
                 Map<String, Object> fetchEhrmsUserDetails = fetchEhrmsUserDetails(serverConfig.getEhrmsDetailUrl(), externalSystemId, jwtToken);
-                logger.info("FetchEhrmsUserDetails list : {}", fetchEhrmsUserDetails);
                 response.setResult(fetchEhrmsUserDetails);
                 return response;
             }
@@ -105,7 +109,9 @@ public class EhrmsProfileDetailImpl implements EhrmsService {
         Map<String, Object> body = new HashMap<>();
         body.put(Constants.EHRMS_AUTH_USERNAME, ehrmsAuthUsername);
         body.put(Constants.EHRMS_AUTH_PASSWORD, ehrmsAuthPassword);
-        HttpEntity entity = new HttpEntity(body, new HttpHeaders());
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON); // Set Content-Type to JSON
+        HttpEntity entity = new HttpEntity(body, headers);
         ResponseEntity<String> response = restTemplate.exchange(ehrmsAuthUrl, HttpMethod.POST, entity, String.class);
         return response.getBody();
     }
