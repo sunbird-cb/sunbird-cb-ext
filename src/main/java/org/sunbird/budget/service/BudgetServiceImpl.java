@@ -154,7 +154,7 @@ public class BudgetServiceImpl implements BudgetService {
 	}
 
 	@Override
-	public SBApiResponse getBudgetDetails(String orgId, String budgetYear) throws Exception {
+	public SBApiResponse getBudgetDetails(String orgId, String budgetYear) {
 		SBApiResponse response = new SBApiResponse(Constants.API_BUDGET_SCHEME_READ);
 		List<Map<String, Object>> budgetResponseList = null;
 		String errMsg = null;

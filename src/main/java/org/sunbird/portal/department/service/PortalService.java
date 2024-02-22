@@ -9,9 +9,9 @@ public interface PortalService {
 
 	List<String> getDeptNameList();
 
-	List<DeptPublicInfo> getAllDept() throws Exception;
+	List<DeptPublicInfo> getAllDept() throws UnsupportedOperationException;
 
-	DeptPublicInfo searchDept(String deptName) throws Exception;
+	DeptPublicInfo searchDept(String deptName) throws UnsupportedOperationException;
 
 	List<Map<String,String>> getDeptNameListByAdmin();
 }
