@@ -217,22 +217,22 @@ public class Base64Util {
         Encoder encoder = new Encoder(flags, null);
 
         // Compute the exact length of the array we will produce.
-        int output_len = len / 3 * 4;
+        int outputLen = len / 3 * 4;
 
         // Account for the tail of the data and the padding bytes, if any.
         if (encoder.do_padding) {
             if (len % 3 > 0) {
-                output_len += 4;
+                outputLen += 4;
             }
         } else {
             switch (len % 3) {
                 case 0:
                     break;
                 case 1:
-                    output_len += 2;
+                    outputLen += 2;
                     break;
                 case 2:
-                    output_len += 3;
+                    outputLen += 3;
                     break;
                 default:
                     break;
@@ -241,14 +241,14 @@ public class Base64Util {
 
         // Account for the newlines, if any.
         if (encoder.do_newline && len > 0) {
-            output_len += (((len - 1) / (3 * Encoder.LINE_GROUPS)) + 1) *
+            outputLen += (((len - 1) / (3 * Encoder.LINE_GROUPS)) + 1) *
                     (encoder.do_cr ? 2 : 1);
         }
 
-        encoder.output = new byte[output_len];
+        encoder.output = new byte[outputLen];
         encoder.process(input, offset, len, true);
 
-        assert encoder.op == output_len;
+        assert encoder.op == outputLen;
 
         return encoder.output;
     }
