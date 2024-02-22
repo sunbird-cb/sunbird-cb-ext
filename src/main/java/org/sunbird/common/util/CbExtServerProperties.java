@@ -653,6 +653,9 @@ public class CbExtServerProperties {
 	@Value("${report.property.file.allMdo}")
 	private String reportPropertyFileAllMdo;
 
+	@Value("${es.default.result.limit}")
+	private int esDefaultResultLimit;
+
 	public boolean qListFromCacheEnabled() {
 		return qListFromCacheEnabled;
 	}
@@ -2326,5 +2329,13 @@ public class CbExtServerProperties {
 
 	public void setReportPropertyFileAllMdo(String reportPropertyFileAllMdo) {
 		this.reportPropertyFileAllMdo = reportPropertyFileAllMdo;
+	}
+
+	public int getEsDefaultResultLimit() {
+		return esDefaultResultLimit;
+	}
+
+	public void setEsDefaultResultLimit(int esDefaultResultLimit) {
+		this.esDefaultResultLimit = esDefaultResultLimit;
 	}
 }
