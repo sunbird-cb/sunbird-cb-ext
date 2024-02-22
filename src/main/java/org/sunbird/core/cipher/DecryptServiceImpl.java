@@ -15,7 +15,7 @@ import org.sunbird.common.util.Constants;
 @Component
 public class DecryptServiceImpl {
 
-	private int ITERATIONS = 3;
+	private int iterations = 3;
 	
 	@Value("${sb.env.chiper.password}")
 	private String sbChiperPassword;
@@ -47,7 +47,7 @@ public class DecryptServiceImpl {
 		try {
 			String dValue = null;
 			String valueToDecrypt = encStr.trim();
-			for (int i = 0; i < ITERATIONS; i++) {
+			for (int i = 0; i < iterations; i++) {
 				byte[] decodedValue = new BASE64Decoder().decodeBuffer(valueToDecrypt);
 				byte[] decValue = decryptCipher.doFinal(decodedValue);
 				dValue = new String(decValue, StandardCharsets.UTF_8).substring(sbChiperPassword.length());
