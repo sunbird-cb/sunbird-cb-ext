@@ -85,7 +85,7 @@ public class PortalServiceImpl implements PortalService {
 	}
 
 	@Override
-	public List<DeptPublicInfo> getAllDept() throws Exception {
+	public List<DeptPublicInfo> getAllDept() throws UnsupportedOperationException {
 		UnsupportedOperationException ex = new UnsupportedOperationException(
 				"/portal/getAllDept API is not implemented.");
 		logger.error(ex);
@@ -93,7 +93,7 @@ public class PortalServiceImpl implements PortalService {
 	}
 
 	@Override
-	public DeptPublicInfo searchDept(String deptName) throws Exception {
+	public DeptPublicInfo searchDept(String deptName) throws UnsupportedOperationException {
 		UnsupportedOperationException ex = new UnsupportedOperationException(
 				"/portal/getAllDept API is not implemented.");
 		logger.error(ex);
@@ -135,7 +135,7 @@ public class PortalServiceImpl implements PortalService {
 					// return orgname only if cbp or mdo
 					if ((!ObjectUtils.isEmpty(content.getIsMdo()) && content.getIsMdo())
 							|| (!ObjectUtils.isEmpty(content.getIsCbp()) && content.getIsCbp())) {
-								Map<String, String> orgMap = new HashMap<String, String>();
+								Map<String, String> orgMap = new HashMap<>();
 								orgMap.put(Constants.CHANNEL, content.getChannel());
 								orgMap.put(Constants.ORG_ID, content.getId());
 								orgDetailsList.add(orgMap);

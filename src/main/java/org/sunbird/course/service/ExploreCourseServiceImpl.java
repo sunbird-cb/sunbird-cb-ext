@@ -55,7 +55,7 @@ public class ExploreCourseServiceImpl implements ExploreCourseService {
 			List<Map<String, Object>> courseList = cassandraOperation.getRecordsByProperties(
 					Constants.SUNBIRD_KEY_SPACE_NAME, Constants.TABLE_EXPLORE_COURSE_LIST, MapUtils.EMPTY_MAP,
 					ListUtils.EMPTY_LIST);
-			List<String> identifierList = new ArrayList<String>();
+			List<String> identifierList = new ArrayList<>();
 			for (Map<String, Object> course : courseList) {
 				identifierList.add((String) course.get(Constants.IDENTIFIER));
 			}
@@ -91,7 +91,7 @@ public class ExploreCourseServiceImpl implements ExploreCourseService {
 		try {
 			StringBuilder sbUrl = new StringBuilder(serverProperties.getKmBaseHost());
 			sbUrl.append(serverProperties.getKmBaseContentSearch());
-			Map<String, String> headers = new HashMap<String, String>();
+			Map<String, String> headers = new HashMap<>();
 			headers.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
 			return outboundRequestHandlerService.fetchResultUsingPost(sbUrl.toString(),
 					getContentSearchRequest(identifierList), headers);
@@ -103,12 +103,12 @@ public class ExploreCourseServiceImpl implements ExploreCourseService {
 
 	private Map<String, Object> getContentSearchRequest(List<String> identifierList) {
 		Map<String, Object> request = new HashMap<>();
-		Map<String, Object> requestBody = new HashMap<String, Object>();
-		Map<String, Object> filters = new HashMap<String, Object>();
+		Map<String, Object> requestBody = new HashMap<>();
+		Map<String, Object> filters = new HashMap<>();
 		filters.put(Constants.IDENTIFIER, identifierList);
 		filters.put(Constants.PRIMARY_CATEGORY, serverProperties.getKmCompositeSearchPrimaryCategoryFilters());
 		requestBody.put(Constants.FILTERS, filters);
-		Map<String, Object> sortBy = new HashMap<String, Object>();
+		Map<String, Object> sortBy = new HashMap<>();
 		sortBy.put(Constants.LAST_UPDATED_ON, Constants.DESCENDING_ORDER);
 		requestBody.put(Constants.SORT_BY, sortBy);
 		requestBody.put(Constants.FIELDS, serverProperties.getKmCompositeSearchFields());

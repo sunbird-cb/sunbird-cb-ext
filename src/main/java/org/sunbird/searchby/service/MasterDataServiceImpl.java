@@ -168,7 +168,7 @@ public class MasterDataServiceImpl implements MasterDataService {
     }
 
     private String validateUpsertRequest(Map<String,Object> masterData) {
-        List<String> params = new ArrayList<String>();
+        List<String> params = new ArrayList<>();
         StringBuilder strBuilder = new StringBuilder();
         if (ObjectUtils.isEmpty(masterData)) {
             strBuilder.append("Model object is empty.");
@@ -221,15 +221,15 @@ public class MasterDataServiceImpl implements MasterDataService {
     private Map<String, Object> createDesiredResponse(List<Map<String, Object>> contexts) {
         Map<String, Object> transformed = new HashMap<>();
         Map<String, List<Map<String, String>>> degrees = new HashMap<>();
-        degrees.put("graduations", new ArrayList<>());
-        degrees.put("postGraduations", new ArrayList<>());
+        degrees.put(Constants.GRADUATIONS, new ArrayList<>());
+        degrees.put(Constants.POST_GRADUATIONS, new ArrayList<>());
         Map<String, List<Map<String, String>>> designations = new HashMap<>();
-        designations.put("designations", new ArrayList<>());
-        designations.put("gradePay", new ArrayList<>());
+        designations.put(Constants.DESIGNATIONS, new ArrayList<>());
+        designations.put(Constants.GRADE_PAY, new ArrayList<>());
         Map<String, List<Map<String, String>>> govtOrg = new HashMap<>();
-        govtOrg.put("cadre", new ArrayList<>());
-        govtOrg.put("ministries", new ArrayList<>());
-        govtOrg.put("service", new ArrayList<>());
+        govtOrg.put(Constants.CADRE, new ArrayList<>());
+        govtOrg.put(Constants.MINISTRIES, new ArrayList<>());
+        govtOrg.put(Constants.SERVICE, new ArrayList<>());
         List<Map<String, String>> industries = new ArrayList<>();
 
         for (Map<String, Object> context : contexts) {
@@ -239,26 +239,26 @@ public class MasterDataServiceImpl implements MasterDataService {
             contextMap.put("name", contextName);
 
             switch (contextType) {
-                case "graduations":
-                    degrees.get("graduations").add(contextMap);
+                case Constants.GRADUATIONS:
+                    degrees.get(Constants.GRADUATIONS).add(contextMap);
                     break;
-                case "postGraduations":
-                    degrees.get("postGraduations").add(contextMap);
+                case Constants.POST_GRADUATIONS:
+                    degrees.get(Constants.POST_GRADUATIONS).add(contextMap);
                     break;
-                case "designations":
-                    designations.get("designations").add(contextMap);
+                case Constants.DESIGNATIONS:
+                    designations.get(Constants.DESIGNATIONS).add(contextMap);
                     break;
-                case "gradePay":
-                    designations.get("gradePay").add(contextMap);
+                case Constants.GRADE_PAY:
+                    designations.get(Constants.GRADE_PAY).add(contextMap);
                     break;
-                case "cadre":
-                    govtOrg.get("cadre").add(contextMap);
+                case Constants.CADRE:
+                    govtOrg.get(Constants.CADRE).add(contextMap);
                     break;
-                case "ministries":
-                    govtOrg.get("ministries").add(contextMap);
+                case Constants.MINISTRIES:
+                    govtOrg.get(Constants.MINISTRIES).add(contextMap);
                     break;
-                case "service":
-                    govtOrg.get("service").add(contextMap);
+                case Constants.SERVICE:
+                    govtOrg.get(Constants.SERVICE).add(contextMap);
                     break;
                 case "industries":
                     industries.add(contextMap);
@@ -268,7 +268,7 @@ public class MasterDataServiceImpl implements MasterDataService {
             }
         }
         transformed.put("degrees", degrees);
-        transformed.put("designations", designations);
+        transformed.put(Constants.DESIGNATIONS, designations);
         transformed.put("govtOrg", govtOrg);
         transformed.put("industries", industries);
         return transformed;
@@ -287,7 +287,7 @@ public class MasterDataServiceImpl implements MasterDataService {
 		compSearchObj.put(Constants.KEYWORD, StringUtils.EMPTY);
 		searchList.add(compSearchObj);
 
-		compSearchObj = new HashMap<String, Object>();
+		compSearchObj = new HashMap<>();
 		compSearchObj.put(Constants.TYPE, Constants.POSITION.toUpperCase());
 		compSearchObj.put(Constants.KEYWORD, Constants.VERIFIED);
 		compSearchObj.put(Constants.FIELD, Constants.STATUS);
@@ -295,7 +295,7 @@ public class MasterDataServiceImpl implements MasterDataService {
 
 		reqBody.put(Constants.SEARCHES, searchList);
 
-		List<String> positionNameList = new ArrayList<String>();
+		List<String> positionNameList = new ArrayList<>();
 		Map<String, Object> fracSearchRes = outboundRequestHandlerService.fetchResultUsingPost(
 				cbExtServerProperties.getFracHost() + cbExtServerProperties.getFracSearchPath(), reqBody, headers);
 		List<Map<String, Object>> fracResponseList = (List<Map<String, Object>>) fracSearchRes

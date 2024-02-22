@@ -109,32 +109,32 @@ public class ContentProgressServiceImpl implements ContentProgressService {
             userContentConsumptionList.forEach(contentMap -> {
                 String userId = (String) contentMap.get(Constants.USER_ID);
                 String contentId = (String) contentMap.get("contentid");
-               /* userDetailsList.get(userId).computeIfAbsent("progressDetails", key -> {
+               /* userDetailsList.get(userId).computeIfAbsent(Constants.PROGRESS_DETAILS, key -> {
                     return new HashMap<>(contentMaps);
                 });*/
                 contentMap.remove(Constants.USER_ID);
                 Map<String, Object> userMap = userDetailsList.get(userId);
-                if (userMap.containsKey("progressDetails")) {
-                    Map<String, Map<String, Object>> progressDetailsMap = (Map<String, Map<String, Object>>) userMap.get("progressDetails");
+                if (userMap.containsKey(Constants.PROGRESS_DETAILS)) {
+                    Map<String, Map<String, Object>> progressDetailsMap = (Map<String, Map<String, Object>>) userMap.get(Constants.PROGRESS_DETAILS);
                     progressDetailsMap.compute(contentId, (key, existingValue) -> {
                         return contentMap;
                     });
                 } else {
-                    Map<String, Map<String, Object>> progressDetailsMap = new HashMap<String, Map<String, Object>>();
-                    Map<String, Object> progressMap = new HashMap<String, Object>();
+                    Map<String, Map<String, Object>> progressDetailsMap = new HashMap<>();
+                    Map<String, Object> progressMap = new HashMap<>();
                     progressMap.put("contentId", contentId);
                     progressMap.put("status", contentMap.get("status"));
                     progressDetailsMap.put(contentId, progressMap);
-                    userMap.put("progressDetails", progressDetailsMap);
+                    userMap.put(Constants.PROGRESS_DETAILS, progressDetailsMap);
 
                 }
             });
             userDetailsList.forEach((userId, userInformation) -> {
-                if (userInformation.containsKey("progressDetails")) {
-                    Map<String, Object> progressDetails = (Map<String, Object>) userInformation.get("progressDetails");
-                    userInformation.put("progressDetails", new ArrayList<>(progressDetails.values()));
+                if (userInformation.containsKey(Constants.PROGRESS_DETAILS)) {
+                    Map<String, Object> progressDetails = (Map<String, Object>) userInformation.get(Constants.PROGRESS_DETAILS);
+                    userInformation.put(Constants.PROGRESS_DETAILS, new ArrayList<>(progressDetails.values()));
                 } else {
-                    userInformation.put("progressDetails", new ArrayList<>());
+                    userInformation.put(Constants.PROGRESS_DETAILS, new ArrayList<>());
                 }
             });
             response.getResult().put(Constants.COUNT, userDetailsList.size());

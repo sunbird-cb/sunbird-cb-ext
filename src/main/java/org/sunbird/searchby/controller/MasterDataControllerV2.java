@@ -22,13 +22,13 @@ public class MasterDataControllerV2 {
     private MasterDataServiceImpl masterDataService;
 
     @GetMapping("/deptPosition")
-    public ResponseEntity<?> getDeptPositionsList(@RequestHeader(Constants.X_AUTH_USER_ORG_ID) String userOrgId) {
+    public ResponseEntity<SBApiResponse> getDeptPositionsList(@RequestHeader(Constants.X_AUTH_USER_ORG_ID) String userOrgId) {
         SBApiResponse response = masterDataService.getDeptPositions(userOrgId);
         return new ResponseEntity<>(response, response.getResponseCode());
     }
 
     @PostMapping("/admin/deptPosition")
-    public ResponseEntity<?> retrieveDeptPositionByAdmin(@RequestBody Map<String, Object> request) {
+    public ResponseEntity<SBApiResponse> retrieveDeptPositionByAdmin(@RequestBody Map<String, Object> request) {
         SBApiResponse response = masterDataService.retrieveDeptPositionByAdmin(request);
         return new ResponseEntity<>(response, response.getResponseCode());
     }

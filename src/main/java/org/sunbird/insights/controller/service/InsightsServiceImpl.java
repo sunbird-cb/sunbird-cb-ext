@@ -42,17 +42,17 @@ public class InsightsServiceImpl implements InsightsService {
         String[] fieldsArray = keys.toArray(new String[keys.size()]);
         ArrayList<String> certificateOrgs= new ArrayList<>();
         certificateOrgs.add("across");
-        ArrayList<String> certificate_keys = nudgeKeys(certificateOrgs);
-        String[] fieldsArray_certificates = certificate_keys.toArray(new String[certificate_keys.size()]);
+        ArrayList<String> certificateKeys = nudgeKeys(certificateOrgs);
+        String[] fieldsArrayCertificates = certificateKeys.toArray(new String[certificateKeys.size()]);
         ArrayList<Object> nudges = new ArrayList<>();
         List<String> lhpLearningHours =  redisCacheMgr.hget(INSIGHTS_LEARNING_HOURS_REDIS_KEY, serverProperties.getRedisInsightIndex(),fieldsArray);
-        List<String> lhpCertifications = redisCacheMgr.hget(INSIGHTS_CERTIFICATIONS_REDIS_KEY, serverProperties.getRedisInsightIndex(),fieldsArray_certificates);
+        List<String> lhpCertifications = redisCacheMgr.hget(INSIGHTS_CERTIFICATIONS_REDIS_KEY, serverProperties.getRedisInsightIndex(),fieldsArrayCertificates);
         if(lhpLearningHours == null)
             lhpLearningHours = new ArrayList<>();
         if(lhpCertifications ==null)
             lhpCertifications = new ArrayList<>();
         populateIfNudgeExist(lhpLearningHours, nudges, INSIGHTS_TYPE_LEARNING_HOURS,organizations,labelsLearningHours);
-        populateIfNudgeExist(lhpCertifications, nudges, INSIGHTS_TYPE_CERTIFICATE,Arrays.asList(fieldsArray_certificates),labelsCertificates);
+        populateIfNudgeExist(lhpCertifications, nudges, INSIGHTS_TYPE_CERTIFICATE,Arrays.asList(fieldsArrayCertificates),labelsCertificates);
         HashMap<String, Object> responseMap = new HashMap<>();
         responseMap.put(WEEKLY_CLAPS, populateIfClapsExist(userId) );
         responseMap.put(NUDGES, nudges);

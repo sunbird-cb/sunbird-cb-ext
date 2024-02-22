@@ -640,7 +640,7 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
             return result;
         }
 
-        Map<String, Object> userAssessmentAllDetail = new HashMap<String, Object>();
+        Map<String, Object> userAssessmentAllDetail = new HashMap<>();
 
         List<Map<String, Object>> existingDataList = assessUtilServ.readUserSubmittedAssessmentRecords(
                 userId, assessmentIdFromRequest);
@@ -875,9 +875,9 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
                     kafkaResult.put(Constants.PRIMARY_CATEGORY, primaryCategory);
                     kafkaResult.put(Constants.TOTAL_SCORE, result.get(Constants.OVERALL_RESULT));
                     if ((primaryCategory.equalsIgnoreCase("Competency Assessment")
-                            && submitRequest.containsKey("competencies_v3")
-                            && submitRequest.get("competencies_v3") != null)) {
-                        Object[] obj = (Object[]) JSON.parse((String) submitRequest.get("competencies_v3"));
+                            && submitRequest.containsKey(Constants.COMPETENCIES_V3)
+                            && submitRequest.get(Constants.COMPETENCIES_V3) != null)) {
+                        Object[] obj = (Object[]) JSON.parse((String) submitRequest.get(Constants.COMPETENCIES_V3));
                         if (obj != null) {
                             Object map = obj[0];
                             ObjectMapper m = new ObjectMapper();
@@ -941,7 +941,7 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
         if (MapUtils.isEmpty(requestBody)) {
             return Constants.INVALID_REQUEST;
         }
-        List<String> missingAttribs = new ArrayList<String>();
+        List<String> missingAttribs = new ArrayList<>();
         if (!requestBody.containsKey(Constants.ASSESSMENT_ID_KEY)
                 || StringUtils.isBlank((String) requestBody.get(Constants.ASSESSMENT_ID_KEY))) {
             missingAttribs.add(Constants.ASSESSMENT_ID_KEY);

@@ -4,13 +4,13 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CohortUsers {
-	private String first_name;
-    private String last_name;
+	private String firstName;
+    private String lastName;
     private String email;
     private String desc;
-    private String user_id;
+    private String userId;
     private String department;
-    private String phone_No;
+    private String phoneNo;
     private String designation;
     private String userLocation;
     private String city;
@@ -21,20 +21,20 @@ public class CohortUsers {
     public void setDesc(String desc) {
         this.desc = desc;
     }
-    public String getFirst_name() {
-        return first_name;
+    public String getFirstName() {
+        return firstName;
     }
 
-    public void setFirst_name(String first_name) {
-        this.first_name = first_name;
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
     }
 
-    public String getLast_name() {
-        return last_name;
+    public String getLastName() {
+        return lastName;
     }
 
-    public void setLast_name(String last_name) {
-        this.last_name = last_name;
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 
     public String getEmail() {
@@ -45,12 +45,12 @@ public class CohortUsers {
         this.email = email;
     }
 
-	public String getUser_id() {
-		return user_id;
+	public String getUserId() {
+		return userId;
 	}
 
-	public void setUser_id(String user_id) {
-		this.user_id = user_id;
+	public void setUserId(String userId) {
+		this.userId = userId;
 	}
 
 	public String getDesignation() {
@@ -69,12 +69,12 @@ public class CohortUsers {
 		this.department = department;
 	}
 
-	public String getPhone_No() {
-		return phone_No;
+	public String getPhoneNo() {
+		return phoneNo;
 	}
 
-	public void setPhone_No(String phone_No) {
-		this.phone_No = phone_No;
+	public void setPhoneNo(String phoneNo) {
+		this.phoneNo = phoneNo;
 	}
 
 	public String getUserLocation() {

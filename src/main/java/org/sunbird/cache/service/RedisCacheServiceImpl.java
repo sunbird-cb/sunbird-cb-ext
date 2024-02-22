@@ -21,14 +21,14 @@ public class RedisCacheServiceImpl implements RedisCacheService {
 	private CbExtLogger logger = new CbExtLogger(getClass().getName());
 
 	@Override
-	public SBApiResponse deleteCache() throws Exception {
+	public SBApiResponse deleteCache() {
 		SBApiResponse response = new SBApiResponse(Constants.API_REDIS_DELETE);
 		boolean res = redisCache.deleteAllCBExtKey();
 		if (res) {
 			response.getParams().setStatus(Constants.SUCCESSFUL);
 			response.setResponseCode(HttpStatus.OK);
 		} else {
-			String errMsg = "No Keys found, Redis cache is empty";
+			String errMsg = Constants.NO_REDIS_CACHE_KEY_FOUND;
 			logger.info(errMsg);
 			response.getParams().setErrmsg(errMsg);
 			response.setResponseCode(HttpStatus.NOT_FOUND);
@@ -46,7 +46,7 @@ public class RedisCacheServiceImpl implements RedisCacheService {
 			response.setResponseCode(HttpStatus.OK);
 
 		} else {
-			String errMsg = "No Keys found, Redis cache is empty";
+			String errMsg = Constants.NO_REDIS_CACHE_KEY_FOUND;
 			logger.info(errMsg);
 			response.getParams().setErrmsg(errMsg);
 			response.setResponseCode(HttpStatus.NOT_FOUND);
@@ -65,7 +65,7 @@ public class RedisCacheServiceImpl implements RedisCacheService {
 			response.put(Constants.RESPONSE, result);
 			response.setResponseCode(HttpStatus.OK);
 		} else {
-			String errMsg = "No Keys found, Redis cache is empty";
+			String errMsg = Constants.NO_REDIS_CACHE_KEY_FOUND;
 			logger.info(errMsg);
 			response.getParams().setErrmsg(errMsg);
 			response.setResponseCode(HttpStatus.NOT_FOUND);

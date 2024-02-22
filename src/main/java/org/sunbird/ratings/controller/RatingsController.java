@@ -21,13 +21,13 @@ public class RatingsController {
     // ----------------- Public APIs --------------------
 
     @PostMapping("/ratings/v1/upsert")
-    public ResponseEntity<?> upsertRating(@Valid @RequestBody RequestRating requestRatingBody) {
+    public ResponseEntity<SBApiResponse> upsertRating(@Valid @RequestBody RequestRating requestRatingBody) {
         SBApiResponse response = ratingService.upsertRating(requestRatingBody);
         return new ResponseEntity<>(response, response.getResponseCode());
     }
 
     @GetMapping("/ratings/v1/read/{activityId}/{activityType}/{userId}")
-    public ResponseEntity<?> getRating(@PathVariable("activityId") String activityId,
+    public ResponseEntity<SBApiResponse> getRating(@PathVariable("activityId") String activityId,
                                        @PathVariable("activityType") String activityType,
                                        @PathVariable("userId") String userId) {
         SBApiResponse response = ratingService.getRatings(activityId, activityType, userId);
@@ -35,32 +35,32 @@ public class RatingsController {
     }
 
     @GetMapping("/ratings/v1/summary/{activityId}/{activityType}")
-    public ResponseEntity<?> getRatingSummary(@PathVariable("activityId") String activityId,
+    public ResponseEntity<SBApiResponse> getRatingSummary(@PathVariable("activityId") String activityId,
                                               @PathVariable("activityType") String activityType) {
         SBApiResponse response = ratingService.getRatingSummary(activityId, activityType);
         return new ResponseEntity<>(response, response.getResponseCode());
     }
 
     @PostMapping("/ratings/v1/ratingLookUp")
-    public ResponseEntity<?> ratingLookUp(@RequestBody LookupRequest request) {
+    public ResponseEntity<SBApiResponse> ratingLookUp(@RequestBody LookupRequest request) {
         SBApiResponse response = ratingService.ratingLookUp(request);
         return new ResponseEntity<>(response, response.getResponseCode());
     }
 
     @PostMapping("/ratings/v2/read")
-    public ResponseEntity<?> readRating(@RequestBody Map<String, Object> request) {
+    public ResponseEntity<SBApiResponse> readRating(@RequestBody Map<String, Object> request) {
         SBApiResponse response = ratingService.readRatings(request);
         return new ResponseEntity<>(response, response.getResponseCode());
     }
 
     @PostMapping("/ratings/meta/update")
-    public ResponseEntity<?> updateRatingsMetaData() {
+    public ResponseEntity<SBApiResponse> updateRatingsMetaData() {
         SBApiResponse response = ratingService.updateRatingsMetaData();
         return new ResponseEntity<>(response, response.getResponseCode());
     }
 
     @PostMapping("/update/v1/content/additionaltag")
-    public ResponseEntity<?> updateAdditionalTag(@RequestParam("tag") String tag) {
+    public ResponseEntity<SBApiResponse> updateAdditionalTag(@RequestParam("tag") String tag) {
         SBApiResponse response = ratingService.updateAdditionalTag(tag);
         return new ResponseEntity<>(response, response.getResponseCode());
     }

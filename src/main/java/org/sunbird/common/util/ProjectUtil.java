@@ -70,7 +70,7 @@ public class ProjectUtil {
 	}
 
 	public static Map<String, String> getDefaultHeaders() {
-		Map<String, String> headers = new HashMap<String, String>();
+		Map<String, String> headers = new HashMap<>();
 		headers.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
 		return headers;
 	}
