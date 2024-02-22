@@ -198,9 +198,7 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 	}
 
 	@Override
-	public String fetchQuestionIdentifierValue(List<String> identifierList, List<Object> questionList,
-			String primaryCategory)
-			throws Exception {
+	public String fetchQuestionIdentifierValue(List<String> identifierList, List<Object> questionList, String primaryCategory) {
 		List<String> newIdentifierList = new ArrayList<>();
 		newIdentifierList.addAll(identifierList);
 		String errMsg = "";

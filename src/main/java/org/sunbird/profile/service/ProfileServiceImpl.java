@@ -108,8 +108,7 @@ public class ProfileServiceImpl implements ProfileService {
 	private Logger log = LoggerFactory.getLogger(getClass().getName());
 
 	@Override
-	public SBApiResponse profileUpdate(Map<String, Object> request, String userToken, String authToken, String rootOrgId)
-			throws Exception {
+	public SBApiResponse profileUpdate(Map<String, Object> request, String userToken, String authToken, String rootOrgId) {
 		SBApiResponse response = new SBApiResponse(Constants.API_PROFILE_UPDATE);
 		try {
 			Map<String, Object> requestData = (Map<String, Object>) request.get(Constants.REQUEST);

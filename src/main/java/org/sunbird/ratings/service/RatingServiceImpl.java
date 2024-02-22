@@ -392,7 +392,7 @@ public class RatingServiceImpl implements RatingService {
         return values;
     }
 
-    private void validateRatingsInfo(ValidationBody validationBody, String flag) throws Exception {
+    private void validateRatingsInfo(ValidationBody validationBody, String flag) throws ValidationException {
 
         List<String> errObjList = new ArrayList<>();
 

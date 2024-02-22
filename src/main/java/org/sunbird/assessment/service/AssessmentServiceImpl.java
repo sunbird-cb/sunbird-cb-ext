@@ -117,8 +117,7 @@ public class AssessmentServiceImpl implements AssessmentService {
 	}
 
 	@Override
-	public Map<String, Object> getAssessmentByContentUser(String rootOrg, String courseId, String userId)
-			throws Exception {
+	public Map<String, Object> getAssessmentByContentUser(String rootOrg, String courseId, String userId) throws ApplicationLogicError {
 		Map<String, Object> result = new TreeMap<>();
 		try {
 			// get all submission data from cassandra

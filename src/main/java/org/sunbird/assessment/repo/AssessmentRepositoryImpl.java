@@ -129,8 +129,7 @@ public class AssessmentRepositoryImpl implements AssessmentRepository {
 	}
 
 	@Override
-	public List<Map<String, Object>> getAssessmentbyContentUser(String rootOrg, String courseId, String userId)
-			throws Exception {
+	public List<Map<String, Object>> getAssessmentbyContentUser(String rootOrg, String courseId, String userId) {
 		// TODO Auto-generated method stub
 		return Collections.emptyList();
 	}
