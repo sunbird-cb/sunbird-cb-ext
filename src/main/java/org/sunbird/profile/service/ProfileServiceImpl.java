@@ -108,7 +108,8 @@ public class ProfileServiceImpl implements ProfileService {
 	private Logger log = LoggerFactory.getLogger(getClass().getName());
 
 	@Override
-	public SBApiResponse profileUpdate(Map<String, Object> request, String userToken, String authToken, String rootOrgId) {
+	public SBApiResponse profileUpdate(Map<String, Object> request, String xAuthToken, String authToken, String rootOrgId)
+			throws Exception {
 		SBApiResponse response = new SBApiResponse(Constants.API_PROFILE_UPDATE);
 		try {
 			Map<String, Object> requestData = (Map<String, Object>) request.get(Constants.REQUEST);
@@ -119,7 +120,7 @@ public class ProfileServiceImpl implements ProfileService {
 			}
 
 			String userId = (String) requestData.get(Constants.USER_ID);
-			String userIdFromToken = accessTokenValidator.fetchUserIdFromAccessToken(userToken);
+			String userIdFromToken = accessTokenValidator.fetchUserIdFromAccessToken(xAuthToken);
 			if (!userId.equalsIgnoreCase(userIdFromToken)) {
 				response.setResponseCode(HttpStatus.BAD_REQUEST);
 				response.getParams().setStatus(Constants.FAILED);
@@ -144,7 +145,7 @@ public class ProfileServiceImpl implements ProfileService {
 			HashMap<String, String> headerValues = new HashMap<>();
 			headerValues.put(Constants.AUTH_TOKEN, authToken);
 			headerValues.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
-			headerValues.put(Constants.X_AUTH_TOKEN, userToken);
+			headerValues.put(Constants.X_AUTH_TOKEN, xAuthToken);
 			Map<String, Object> workflowResponse = new HashMap<>();
 			Map<String, Object> updateResponse = new HashMap<>();
 			if (!profileDetailsMap.isEmpty()) {

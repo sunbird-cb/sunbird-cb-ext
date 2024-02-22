@@ -71,8 +71,8 @@ public class KeyManager {
     publicKey = publicKey.replaceAll("[\\r\\n]+", "");
     byte[] keyBytes = Base64Util.decode(publicKey.getBytes("UTF-8"), Base64Util.DEFAULT);
 
-    X509EncodedKeySpec X509publicKey = new X509EncodedKeySpec(keyBytes);
+    X509EncodedKeySpec x509publicKey = new X509EncodedKeySpec(keyBytes);
     KeyFactory kf = KeyFactory.getInstance("RSA");
-    return kf.generatePublic(X509publicKey);
+    return kf.generatePublic(x509publicKey);
   }
 }
