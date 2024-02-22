@@ -1,6 +1,5 @@
 package org.sunbird.ratings.model;
 
-import java.util.UUID;
 
 public class SummaryNodeModel {
     private String objectType;

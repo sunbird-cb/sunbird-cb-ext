@@ -26,7 +26,6 @@ import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.common.util.ProjectUtil;
-import org.sunbird.core.logger.CbExtLogger;
 import org.sunbird.org.model.OrgHierarchy;
 import org.sunbird.org.model.OrgHierarchyInfo;
 import org.sunbird.org.repository.OrgHierarchyRepository;

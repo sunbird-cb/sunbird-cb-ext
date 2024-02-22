@@ -7,7 +7,6 @@ import java.util.*;
 import java.util.Map.Entry;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.jcraft.jsch.UserInfo;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.velocity.VelocityContext;
