@@ -277,10 +277,8 @@ public class MasterDataServiceImpl implements MasterDataService {
 	private void enrichFracPositions(List<MasterData> positionList, String userToken) {
 		Map<String, String> headers = new HashMap<>();
 		HashMap<String, Object> reqBody = new HashMap<>();
-		headers = new HashMap<>();
-		headers.put(Constants.AUTHORIZATION, Constants.BEARER + userToken);
-		reqBody = new HashMap<>();
-		List<Map<String, Object>> searchList = new ArrayList<>();
+        headers.put(Constants.AUTHORIZATION, Constants.BEARER + userToken);
+        List<Map<String, Object>> searchList = new ArrayList<>();
 		Map<String, Object> compSearchObj = new HashMap<>();
 		compSearchObj.put(Constants.TYPE, Constants.POSITION.toUpperCase());
 		compSearchObj.put(Constants.FIELD, Constants.NAME);

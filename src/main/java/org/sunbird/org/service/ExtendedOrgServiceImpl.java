@@ -509,7 +509,7 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 	private String createMapId(Map<String, Object> requestData) {
 		List<OrgHierarchy> existingOrgList = null;
 		String prefix = StringUtils.EMPTY;
-		String mapIdNew = StringUtils.EMPTY;
+		String mapIdNew;
 		String orgType = (String) requestData.get(Constants.ORGANIZATION_TYPE);
 		if (!Constants.STATE.equalsIgnoreCase(orgType) && !Constants.MINISTRY.equalsIgnoreCase(orgType)) {
 			String orgSubType = (String) requestData.get(Constants.ORGANIZATION_SUB_TYPE);
@@ -628,7 +628,7 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 				return response;
 			}
 			List<OrgHierarchyInfo> orgInfoList = new ArrayList<OrgHierarchyInfo>();
-			List<OrgHierarchy> orgList = Collections.emptyList();
+			List<OrgHierarchy> orgList;
 			if (searchFilters.containsKey(Constants.IDENTIFIER)) {
 				orgList = orgRepository.findAllBySbOrgId((List<String>) searchFilters.get(Constants.IDENTIFIER));
 			} else {

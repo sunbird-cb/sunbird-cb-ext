@@ -345,9 +345,7 @@ public class SearchByService {
 	private Map<String, List<FracCommonInfo>> updateDesignationDetails(String authUserToken) throws Exception {
 		Map<String, String> headers = new HashMap<>();
 		HashMap<String, Object> reqBody = new HashMap<>();
-		headers = new HashMap<>();
 		headers.put(Constants.AUTHORIZATION, Constants.BEARER + authUserToken);
-		reqBody = new HashMap<>();
 		List<Map<String, Object>> searchList = new ArrayList<>();
 		Map<String, Object> compSearchObj = new HashMap<>();
 		compSearchObj.put(Constants.TYPE, Constants.POSITION.toUpperCase());
@@ -355,7 +353,7 @@ public class SearchByService {
 		compSearchObj.put(Constants.KEYWORD, StringUtils.EMPTY);
 		searchList.add(compSearchObj);
 
-		compSearchObj = new HashMap<String, Object>();
+		compSearchObj = new HashMap<>();
 		compSearchObj.put(Constants.TYPE, Constants.POSITION.toUpperCase());
 		compSearchObj.put(Constants.KEYWORD, Constants.VERIFIED);
 		compSearchObj.put(Constants.FIELD, Constants.STATUS);

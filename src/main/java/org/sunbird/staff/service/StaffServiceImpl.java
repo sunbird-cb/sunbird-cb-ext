@@ -84,7 +84,7 @@ public class StaffServiceImpl implements StaffService {
 			List<StaffInfo> existingStaffList = getStaffListByProperty(data.getOrgId(), data.getId(),
 					StringUtils.EMPTY);
 
-			StaffInfo existingStaffInfo = new StaffInfo();
+			StaffInfo existingStaffInfo;
 			if (!existingStaffList.isEmpty()) {
 				existingStaffInfo = existingStaffList.get(0);
 			} else {

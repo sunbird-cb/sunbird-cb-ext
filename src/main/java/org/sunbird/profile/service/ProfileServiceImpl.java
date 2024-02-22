@@ -146,8 +146,8 @@ public class ProfileServiceImpl implements ProfileService {
 			headerValues.put(Constants.AUTH_TOKEN, authToken);
 			headerValues.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
 			headerValues.put(Constants.X_AUTH_TOKEN, userToken);
-			Map<String, Object> workflowResponse = new HashMap<>();
-			Map<String, Object> updateResponse = new HashMap<>();
+			Map<String, Object> workflowResponse;
+			Map<String, Object> updateResponse;
 			if (!profileDetailsMap.isEmpty()) {
 				List<String> listOfChangedDetails = new ArrayList<>();
 				for (String keys : profileDetailsMap.keySet()) {
@@ -223,8 +223,7 @@ public class ProfileServiceImpl implements ProfileService {
 						List<Map<String, Object>> transList = (List<Map<String, Object>>) transitionData
 								.get(listTransition);
 						for (int j = 0; j < transList.size(); j++) {
-							Map<String, Object> transData = new HashMap<>();
-							transData = transList.get(j);
+							Map<String, Object> transData = transList.get(j);
 							Set<String> list = transData.keySet();
 							String[] innerData = list.toArray(new String[list.size()]);
 
@@ -259,8 +258,7 @@ public class ProfileServiceImpl implements ProfileService {
 						updatedTransitionData.put(Constants.FIELD_KEY, listTransition);
 						finalTransitionList.add(updatedTransitionData);
 					} else {
-						Map<String, Object> transListObject = new HashMap<>();
-						transListObject = (Map<String, Object>) transitionData.get(listTransition);
+						Map<String, Object> transListObject = (Map<String, Object>) transitionData.get(listTransition);
 						Set<String> listObject = transListObject.keySet();
 						String[] innerObjectData = listObject.toArray(new String[listObject.size()]);
 						for (int k = 0; k < innerObjectData.length; k++) {
@@ -1465,7 +1463,7 @@ public class ProfileServiceImpl implements ProfileService {
 				userEnrolmentMap.put(enrolmentId, enrolmentReport);
 
 				Integer status = (Integer) enrolment.get(Constants.STATUS);
-				String strStatus = StringUtils.EMPTY;
+				String strStatus;
 				switch (status) {
 				case 0:
 					strStatus = Constants.STATUS_ENROLLED;

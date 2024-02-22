@@ -310,7 +310,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
         if (errMsg.isEmpty()) {
             String userId = validateAuthTokenAndFetchUserId(authUserToken);
             String scoreCutOffType = ((String) assessmentHierarchy.get(Constants.SCORE_CUTOFF_TYPE)).toLowerCase();
-            List<Map<String, Object>> existingDataList = new ArrayList<>();
+            List<Map<String, Object>> existingDataList;
             List<Map<String, Object>> sectionLevelsResults = new ArrayList<>();
             Map<String, Object> questionSetFromAssessment = new HashMap<>();
             for (Map<String, Object> hierarchySection : hierarchySectionList) {
