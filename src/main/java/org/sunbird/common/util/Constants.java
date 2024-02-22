@@ -987,6 +987,9 @@ public class Constants {
 	public static final String DOC_TYPE = "docType";
   public static final String PRIMARY_CATEGORY_TAG = "#primaryCategory";
   	public static final String PASSWORD = "password";
+	public static final String STRING_FORMAT_UNZIP="%s/%s/%s/%s";
+	public static final String UNZIP_PATH="/unzippath";
+	public static final String OUTPUT_PATH="/output";
 
   private Constants() {
 		throw new IllegalStateException("Utility class");

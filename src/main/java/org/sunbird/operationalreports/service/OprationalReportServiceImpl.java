@@ -32,6 +32,7 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 /**
@@ -90,8 +91,8 @@ public class OprationalReportServiceImpl implements OperationalReportService {
             String password = generateAlphanumericPassword(passwordLength);
             headers.add(Constants.PASSWORD, password);
             // Unzip the downloaded file
-            String sourceFolderPath = String.format("%s/%s/%s/%s", Constants.LOCAL_BASE_PATH, reportType, date, orgId + "/output");
-            String destinationFolderPath = sourceFolderPath + "/unzippath";
+            String sourceFolderPath = String.format(Constants.STRING_FORMAT_UNZIP, Constants.LOCAL_BASE_PATH, reportType, date, orgId + Constants.OUTPUT_PATH + UUID.randomUUID());
+            String destinationFolderPath = sourceFolderPath + Constants.UNZIP_PATH;
             String zipFilePath = String.valueOf(filePath);
             unlockZipFolder(zipFilePath, destinationFolderPath, serverProperties.getUnZipFilePassword());
             // Encrypt the unzipped files and create a new zip file
@@ -106,7 +107,6 @@ public class OprationalReportServiceImpl implements OperationalReportService {
                     .contentLength(Files.size(filePath))
                     .body(inputStreamResource);
         } catch (Exception e) {
-            // Log error if download or processing fails
             logger.error("Failed to read the downloaded file: " + fileName + ", Exception: ", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
@@ -136,7 +136,6 @@ public class OprationalReportServiceImpl implements OperationalReportService {
             }
             // Add files to the zip folder
             zipFile.addFiles(filesToAdd, parameters);
-            // Log success message
             logger.info("Zip folder created successfully.");
         } catch (IOException e) {
             // Throw exception if an error occurs during zip folder creation
@@ -162,7 +161,6 @@ public class OprationalReportServiceImpl implements OperationalReportService {
             }
             // Extract contents of the zip folder to the destination folder
             zipFile.extractAll(destinationFolderPath);
-            // Log success message
             logger.info("Zip folder unlocked successfully.");
         } catch (IOException e) {
             // Throw exception if an error occurs during unlocking of the zip folder
@@ -214,16 +212,13 @@ public class OprationalReportServiceImpl implements OperationalReportService {
                             // Attempt to delete each path (file or directory)
                             Files.delete(p);
                         } catch (IOException e) {
-                            // Log a message if deletion fails for a specific path
                             logger.info("Failed to delete: " + p + " - " + e.getMessage());
                         }
                     });
             // Delete the directory itself if it still exists
             Files.deleteIfExists(path);
-            // Log success message
             logger.info("Directory removed successfully.");
         } catch (IOException e) {
-            // Log an error message if an exception occurs during directory removal
             logger.info("Failed to remove directory: " + e.getMessage());
         }
     }
