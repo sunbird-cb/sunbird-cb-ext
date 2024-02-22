@@ -207,13 +207,13 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 	}
 
 	@Override
-	public Map<String, Object> getUsersReadData(String userId, String authToken, String userAuthToken) {
+	public Map<String, Object> getUsersReadData(String userId, String authToken, String xauthToken) {
 		Map<String, String> header = new HashMap<>();
 		if (StringUtils.isNotEmpty(authToken)) {
 			header.put(Constants.AUTH_TOKEN, authToken);
 		}
-		if (StringUtils.isNotEmpty(userAuthToken)) {
-			header.put(Constants.X_AUTH_TOKEN, userAuthToken);
+		if (StringUtils.isNotEmpty(xauthToken)) {
+			header.put(Constants.X_AUTH_TOKEN, xauthToken);
 		}
 		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService
 				.fetchUsingGetWithHeadersProfile(serverConfig.getSbUrl() + serverConfig.getLmsUserReadPath() + userId,

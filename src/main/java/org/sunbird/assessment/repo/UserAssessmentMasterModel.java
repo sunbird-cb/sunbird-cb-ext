@@ -108,13 +108,13 @@ public class UserAssessmentMasterModel {
 		return userId;
 	}
 
-	public void setUser_id(String userId) {
+	public void setUserId(String userId) {
 		this.userId = userId;
 	}
 
 	public UserAssessmentMasterModel(UserAssessmentMasterPrimaryKeyModel primaryKey, Integer correctCount,
-			Date dateCreated, Integer incorrectCount, Integer notAnsweredCount, String parentContentType,
-			BigDecimal passPercent, String sourceId, String sourceTitle, String userId) {
+									 Date dateCreated, Integer incorrectCount, Integer notAnsweredCount, String parentContentType,
+									 BigDecimal passPercent, String sourceId, String sourceTitle, String userId) {
 		super();
 		this.primaryKey = primaryKey;
 		this.correctCount = correctCount;
