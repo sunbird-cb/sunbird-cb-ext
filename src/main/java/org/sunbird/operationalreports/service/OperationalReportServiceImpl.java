@@ -4,7 +4,6 @@ package org.sunbird.operationalreports.service;
  * @author Deepak kumar Thakur
  */
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,9 +27,8 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Service
-public class OprationalReportServiceImpl implements OperationalReportService {
+public class OperationalReportServiceImpl implements OperationalReportService {
     private final Logger logger = LoggerFactory.getLogger(getClass().getName());
-    private final ObjectMapper mapper = new ObjectMapper();
 
     @Autowired
     private CbExtServerProperties serverConfig;
@@ -50,7 +48,7 @@ public class OprationalReportServiceImpl implements OperationalReportService {
     @Autowired
     private CassandraOperation cassandraOperation;
 
-    public SBApiResponse grantReportAccessToMDOAdmin(SunbirdApiRequest request, String userOrgId, String authToken) throws Exception {
+    public SBApiResponse grantReportAccessToMDOAdmin(SunbirdApiRequest request, String userOrgId, String authToken) {
         SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.GRANT_REPORT_ACCESS_API);
         try {
             Map<String, Object> mdoAdminDetails = (Map<String, Object>) request.getRequest();
@@ -58,8 +56,7 @@ public class OprationalReportServiceImpl implements OperationalReportService {
             String reportExpiryDate = (String) ((Map<String, Object>) mdoAdminDetails.get(Constants.MDO_ADMIN)).get("reportExpiryDate");
             Map<String, String> headersValue = new HashMap<>();
             headersValue.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
-            //String mdoLeaderUserId = accessTokenValidator.fetchUserIdFromAccessToken(authToken);
-            String mdoLeaderUserId = "291fd548-ab04-4f16-938a-67963ed0b6b6";
+            String mdoLeaderUserId = accessTokenValidator.fetchUserIdFromAccessToken(authToken);
             if (null == mdoLeaderUserId)
                 throw new RuntimeException("UserId Couldn't fetch from auth token");
             logger.info("MDO Leader User ID : {}", mdoLeaderUserId);
@@ -120,6 +117,10 @@ public class OprationalReportServiceImpl implements OperationalReportService {
             response.setResponseCode(HttpStatus.BAD_REQUEST);
         } catch (RuntimeException e) {
             logger.error("An exception occurred {}", e.getMessage(), e);
+            response.getParams().setStatus(Constants.FAILED);
+            response.getParams().setErrmsg(e.getMessage());
+            response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (ParseException e) {
             response.getParams().setStatus(Constants.FAILED);
             response.getParams().setErrmsg(e.getMessage());
             response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
