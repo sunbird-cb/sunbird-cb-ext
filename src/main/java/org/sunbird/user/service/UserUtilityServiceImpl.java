@@ -107,7 +107,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 			return expression;
 
 		} catch (Exception e) {
-			throw new ApplicationLogicError("Sunbird Service ERROR: ", e);
+			throw new ApplicationLogicError(Constants.SUNBIRD_SERVICE_ERROR, e);
 		}
 	}
 
@@ -136,7 +136,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 				}
 			}
 		} catch (Exception e) {
-			throw new ApplicationLogicError("Sunbird Service ERROR: ", e);
+			throw new ApplicationLogicError(Constants.SUNBIRD_SERVICE_ERROR, e);
 		}
 
 		return result;
@@ -173,7 +173,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 				}
 			}
 		} catch (Exception e) {
-			throw new ApplicationLogicError("Sunbird Service ERROR: ", e);
+			throw new ApplicationLogicError(Constants.SUNBIRD_SERVICE_ERROR, e);
 		}
 
 		return result;
@@ -199,7 +199,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 						serverConfig.getUserUtilityTopic());
 			}
 		} catch (Exception e) {
-			throw new ApplicationLogicError("Sunbird Service ERROR: ", e);
+			throw new ApplicationLogicError(Constants.SUNBIRD_SERVICE_ERROR, e);
 		}
 		response.put(userLoginInfo.getUserId(), Boolean.TRUE);
 		return response;
@@ -560,7 +560,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 				}
 			}
 		} catch (Exception e) {
-			throw new ApplicationLogicError("Sunbird Service ERROR: ", e);
+			throw new ApplicationLogicError(Constants.SUNBIRD_SERVICE_ERROR, e);
 		}
 		return true;
 	}

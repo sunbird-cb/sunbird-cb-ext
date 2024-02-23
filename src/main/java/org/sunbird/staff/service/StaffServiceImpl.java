@@ -42,7 +42,7 @@ public class StaffServiceImpl implements StaffService {
 					data.getPosition());
 			if (!CollectionUtils.isEmpty(existingList)) {
 				String errMsg = "Position exist for given name. Failed to create StaffInfo for OrgId: "
-						+ data.getOrgId() + ", Position: " + data.getPosition();
+						+ data.getOrgId() + Constants.STAFF_SERVICE_POSITION + data.getPosition();
 				logger.error(errMsg);
 				response.getParams().setErrmsg(errMsg);
 				response.setResponseCode(HttpStatus.BAD_REQUEST);
@@ -111,7 +111,7 @@ public class StaffServiceImpl implements StaffService {
 					if (isAnyOtherRecordExist) {
 						// Return error
 						String errMsg = "Position exist for given name. Failed to update StaffInfo for OrgId: "
-								+ data.getOrgId() + ", Position: " + data.getPosition();
+								+ data.getOrgId() + Constants.STAFF_SERVICE_POSITION + data.getPosition();
 						logger.error(errMsg);
 						response.getParams().setErrmsg(errMsg);
 						response.setResponseCode(HttpStatus.BAD_REQUEST);
@@ -231,7 +231,7 @@ public class StaffServiceImpl implements StaffService {
 				response.getParams().setStatus(Constants.SUCCESSFUL);
 				response.setResponseCode(HttpStatus.OK);
 			} else {
-				String errMsg = "Staff Position doesn't exist for OrgId: " + orgId + ", Position: " + staffInfoId;
+				String errMsg = "Staff Position doesn't exist for OrgId: " + orgId + Constants.STAFF_SERVICE_POSITION + staffInfoId;
 				logger.error(errMsg);
 				response.getParams().setErrmsg(errMsg);
 				response.setResponseCode(HttpStatus.BAD_REQUEST);
@@ -295,7 +295,7 @@ public class StaffServiceImpl implements StaffService {
 		}
 
 		if (!CollectionUtils.isEmpty(errObjList)) {
-			throw new Exception("One or more required fields are empty. Empty fields " + errObjList.toString());
+			throw new Exception(Constants.EMPTY_FIELDS_EXCEPTION + errObjList.toString());
 		}
 	}
 
@@ -335,7 +335,7 @@ public class StaffServiceImpl implements StaffService {
 		}
 
 		if (position && filled && vacant) {
-			throw new Exception("One or more required fields are empty. Empty fields " + errObjList.toString());
+			throw new Exception(Constants.EMPTY_FIELDS_EXCEPTION + errObjList.toString());
 		} else {
 			if (position)
 				errObjList.remove(Constants.POSITION);
@@ -346,7 +346,7 @@ public class StaffServiceImpl implements StaffService {
 		}
 
 		if (!CollectionUtils.isEmpty(errObjList)) {
-			throw new Exception("One or more required fields are empty. Empty fields " + errObjList.toString());
+			throw new Exception(Constants.EMPTY_FIELDS_EXCEPTION + errObjList.toString());
 		}
 	}
 }

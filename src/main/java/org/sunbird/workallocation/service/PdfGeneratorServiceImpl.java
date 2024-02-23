@@ -83,7 +83,7 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 		}
 		String footerTemplateName = "templates/pdf-draft-footer.html";
 		Map<String, Object> headerDetails = new HashMap<>();
-		String deptId = (String) request.getTagValuePair().get("deptId");
+		String deptId = (String) request.getTagValuePair().get(Constants.DEPT_ID);
 		headerDetails.put(DEPT_NAME, request.getTagValuePair().get(DEPT_NAME));
 		headerDetails.put(DEPT_IMG_URL, request.getTagValuePair().get(DEPT_IMG_URL));
 		String headerMessage = readVm("pdf-header.vm", headerDetails);
@@ -163,12 +163,12 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 		workOrder.put("printedTime", printedTime);
 		String status = (String) workOrder.get("status");
 		String deptId = "";
-		if(workOrder.get("deptId") instanceof Integer){
-			deptId = String.valueOf(workOrder.get("deptId"));
+		if(workOrder.get(Constants.DEPT_ID) instanceof Integer){
+			deptId = String.valueOf(workOrder.get(Constants.DEPT_ID));
 		}
-		else if(workOrder.get("deptId") instanceof String)
+		else if(workOrder.get(Constants.DEPT_ID) instanceof String)
 		{
-			deptId = (String)workOrder.get("deptId");
+			deptId = (String)workOrder.get(Constants.DEPT_ID);
 		}
 		String templateName = null;
 		String footerTemplateName = null;

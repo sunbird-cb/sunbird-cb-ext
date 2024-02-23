@@ -50,7 +50,6 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 			Integer correct = 0;
 			Integer blank = 0;
 			Integer inCorrect = 0;
-			Double result;
 			Integer total = 0;
 			Map<String, Object> resultMap = new HashMap<>();
 			Map<String, Object> answers = getQumlAnswers(originalQuestionList,questionMap);
