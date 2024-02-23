@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import org.sunbird.cassandra.utils.CassandraOperation;
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.model.SunbirdApiRequest;
@@ -52,13 +53,13 @@ public class OperationalReportServiceImpl implements OperationalReportService {
         SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.GRANT_REPORT_ACCESS_API);
         try {
             Map<String, Object> mdoAdminDetails = (Map<String, Object>) request.getRequest();
-            String mdoAdminUserId = (String) ((Map<String, Object>) mdoAdminDetails.get(Constants.MDOADMIN)).get(Constants.USER_ID);
-            String reportExpiryDate = (String) ((Map<String, Object>) mdoAdminDetails.get(Constants.MDOADMIN)).get("reportExpiryDate");
+            String mdoAdminUserId = (String) ((Map<String, Object>) mdoAdminDetails.get(Constants.MDO_ADMIN_ROLE)).get(Constants.USER_ID);
+            String reportExpiryDate = (String) ((Map<String, Object>) mdoAdminDetails.get(Constants.MDO_ADMIN_ROLE)).get(Constants.REPORT_EXPIRY_DATE);
             Map<String, String> headersValue = new HashMap<>();
             headersValue.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
             String mdoLeaderUserId = accessTokenValidator.fetchUserIdFromAccessToken(authToken);
             if (null == mdoLeaderUserId) {
-                throw new HttpClientErrorException(HttpStatus.NOT_FOUND,"UserId Couldn't fetch from auth token");
+                throw new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR,"UserId Couldn't fetch from auth token");
             }
             logger.info("MDO Leader User ID : {}", mdoLeaderUserId);
             StringBuilder url = new StringBuilder(configuration.getLmsServiceHost()).append(configuration.getLmsUserSearchEndPoint());
@@ -116,12 +117,8 @@ public class OperationalReportServiceImpl implements OperationalReportService {
             response.getParams().setStatus(Constants.FAILED);
             response.getParams().setErrmsg(e.getMessage());
             response.setResponseCode(HttpStatus.BAD_REQUEST);
-        } catch (RuntimeException e) {
+        } catch (ParseException | RuntimeException e) {
             logger.error("An exception occurred {}", e.getMessage(), e);
-            response.getParams().setStatus(Constants.FAILED);
-            response.getParams().setErrmsg(e.getMessage());
-            response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
-        } catch (ParseException e) {
             response.getParams().setStatus(Constants.FAILED);
             response.getParams().setErrmsg(e.getMessage());
             response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -143,9 +140,10 @@ public class OperationalReportServiceImpl implements OperationalReportService {
     }
 
     private long getParsedDate(String reportExpiryDate) throws ParseException {
+        long reportExpiryDateMillis;
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Date parsedDate = dateFormat.parse(reportExpiryDate);
-        long reportExpiryDateMillis = parsedDate.getTime();
+        reportExpiryDateMillis = parsedDate.getTime();
         return reportExpiryDateMillis;
     }
 }
