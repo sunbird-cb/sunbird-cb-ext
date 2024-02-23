@@ -217,38 +217,36 @@ public class Base64Util {
         Encoder encoder = new Encoder(flags, null);
 
         // Compute the exact length of the array we will produce.
-        int outputLen = len / 3 * 4;
+        int output_len = len / 3 * 4;
 
         // Account for the tail of the data and the padding bytes, if any.
-        if (encoder.doPadding) {
+        if (encoder.do_padding) {
             if (len % 3 > 0) {
-                outputLen += 4;
+                output_len += 4;
             }
         } else {
             switch (len % 3) {
                 case 0:
                     break;
                 case 1:
-                    outputLen += 2;
+                    output_len += 2;
                     break;
                 case 2:
-                    outputLen += 3;
-                    break;
-                default:
+                    output_len += 3;
                     break;
             }
         }
 
         // Account for the newlines, if any.
-        if (encoder.doNewLine && len > 0) {
+        if (encoder.do_newline && len > 0) {
             output_len += (((len - 1) / (3 * Encoder.LINE_GROUPS)) + 1) *
-                    (encoder.doCr ? 2 : 1);
+                    (encoder.do_cr ? 2 : 1);
+        }
 
-
-        encoder.output = new byte[outputLen];
+        encoder.output = new byte[output_len];
         encoder.process(input, offset, len, true);
 
-        assert encoder.op == outputLen;
+        assert encoder.op == output_len;
 
         return encoder.output;
     }
@@ -538,8 +536,6 @@ public class Base64Util {
                     // Read all the padding '='s we expected and no more.
                     // Fine.
                     break;
-                default:
-                    break;
             }
 
             this.state = state;
@@ -577,9 +573,9 @@ public class Base64Util {
                 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
                 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '-', '_',
         };
-        final public boolean doPadding;
-        final public boolean doNewLine;
-        final public boolean doCr;
+        final public boolean do_padding;
+        final public boolean do_newline;
+        final public boolean do_cr;
         final private byte[] tail;
         final private byte[] alphabet;
         /* package */ int tailLen;
@@ -588,15 +584,15 @@ public class Base64Util {
         public Encoder(int flags, byte[] output) {
             this.output = output;
 
-            doPadding = (flags & NO_PADDING) == 0;
-            doNewLine = (flags & NO_WRAP) == 0;
-            doCr = (flags & CRLF) != 0;
+            do_padding = (flags & NO_PADDING) == 0;
+            do_newline = (flags & NO_WRAP) == 0;
+            do_cr = (flags & CRLF) != 0;
             alphabet = ((flags & URL_SAFE) == 0) ? ENCODE : ENCODE_WEBSAFE;
 
             tail = new byte[2];
             tailLen = 0;
 
-            count = doNewLine ? LINE_GROUPS : -1;
+            count = do_newline ? LINE_GROUPS : -1;
         }
 
         /**
@@ -648,8 +644,6 @@ public class Base64Util {
                         tailLen = 0;
                     }
                     break;
-                default:
-                    break;
             }
 
             if (v != -1) {
@@ -658,7 +652,7 @@ public class Base64Util {
                 output[op++] = alphabet[(v >> 6) & 0x3f];
                 output[op++] = alphabet[v & 0x3f];
                 if (--count == 0) {
-                    if (doCr) output[op++] = '\r';
+                    if (do_cr) output[op++] = '\r';
                     output[op++] = '\n';
                     count = LINE_GROUPS;
                 }
@@ -680,7 +674,7 @@ public class Base64Util {
                 p += 3;
                 op += 4;
                 if (--count == 0) {
-                    if (doCr) output[op++] = '\r';
+                    if (do_cr) output[op++] = '\r';
                     output[op++] = '\n';
                     count = LINE_GROUPS;
                 }
@@ -698,12 +692,12 @@ public class Base64Util {
                     tailLen -= t;
                     output[op++] = alphabet[(v >> 6) & 0x3f];
                     output[op++] = alphabet[v & 0x3f];
-                    if (doPadding) {
+                    if (do_padding) {
                         output[op++] = '=';
                         output[op++] = '=';
                     }
-                    if (doNewLine) {
-                        if (doCr) output[op++] = '\r';
+                    if (do_newline) {
+                        if (do_cr) output[op++] = '\r';
                         output[op++] = '\n';
                     }
                 } else if (p - tailLen == len - 2) {
@@ -714,15 +708,15 @@ public class Base64Util {
                     output[op++] = alphabet[(v >> 12) & 0x3f];
                     output[op++] = alphabet[(v >> 6) & 0x3f];
                     output[op++] = alphabet[v & 0x3f];
-                    if (doPadding) {
+                    if (do_padding) {
                         output[op++] = '=';
                     }
-                    if (doNewLine) {
-                        if (doCr) output[op++] = '\r';
+                    if (do_newline) {
+                        if (do_cr) output[op++] = '\r';
                         output[op++] = '\n';
                     }
-                } else if (doNewLine && op > 0 && count != LINE_GROUPS) {
-                    if (doCr) output[op++] = '\r';
+                } else if (do_newline && op > 0 && count != LINE_GROUPS) {
+                    if (do_cr) output[op++] = '\r';
                     output[op++] = '\n';
                 }
 

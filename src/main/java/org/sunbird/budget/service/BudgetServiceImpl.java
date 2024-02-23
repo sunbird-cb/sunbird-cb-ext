@@ -27,6 +27,7 @@ import org.sunbird.common.util.Constants;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.sunbird.ratings.exception.ValidationException;
 
 @Service
 public class BudgetServiceImpl implements BudgetService {
@@ -38,7 +39,7 @@ public class BudgetServiceImpl implements BudgetService {
 	private CassandraOperation cassandraOperation;
 
 	@Override
-	public SBApiResponse submitBudgetDetails(BudgetInfo data, String userId) throws Exception {
+	public SBApiResponse submitBudgetDetails(BudgetInfo data, String userId) {
 		SBApiResponse response = new SBApiResponse(Constants.API_BUDGET_SCHEME_ADD);
 		try {
 			validateAddBudgetInfo(data);
@@ -83,7 +84,7 @@ public class BudgetServiceImpl implements BudgetService {
 		return response;
 	}
 
-	public SBApiResponse submitBudgetDocDetails(BudgetDocInfo docInfo, String userId) throws Exception {
+	public SBApiResponse submitBudgetDocDetails(BudgetDocInfo docInfo, String userId) {
 		SBApiResponse response = new SBApiResponse(Constants.API_BUDGET_SCHEME_DOC_ADD);
 		try {
 			validateAddBudgetDocInfo(docInfo);
@@ -178,7 +179,7 @@ public class BudgetServiceImpl implements BudgetService {
 	}
 
 	@Override
-	public SBApiResponse updateBudgetDetails(BudgetInfo data, String userId) throws Exception {
+	public SBApiResponse updateBudgetDetails(BudgetInfo data, String userId) {
 		SBApiResponse response = new SBApiResponse(Constants.API_BUDGET_SCHEME_UPDATE);
 		Map<String, Object> request = new HashMap<>();
 		Map<String, Object> keyMap = new HashMap<>();
@@ -258,7 +259,7 @@ public class BudgetServiceImpl implements BudgetService {
 	}
 
 	@Override
-	public SBApiResponse deleteBudgetDetails(String orgId, String id, String budgetYear) throws Exception {
+	public SBApiResponse deleteBudgetDetails(String orgId, String id, String budgetYear) {
 		SBApiResponse response = new SBApiResponse(Constants.API_BUDGET_SCHEME_DELETE);
 		Map<String, Object> keyMap = new HashMap<>();
 		keyMap.put(Constants.ORG_ID, orgId);
@@ -288,7 +289,7 @@ public class BudgetServiceImpl implements BudgetService {
 	}
 
 	public SBApiResponse deleteDocBudgetDetails(String orgId, String budgetDetailsId, String budgetYear,
-			String proofDocId) throws Exception {
+			String proofDocId) {
 		SBApiResponse response = new SBApiResponse(Constants.API_BUDGET_SCHEME_DELETE);
 		try {
 			Map<String, Object> propertyMap = new HashMap<>();

@@ -33,7 +33,7 @@ public class StaffServiceImpl implements StaffService {
 	private CassandraOperation cassandraOperation;
 
 	@Override
-	public SBApiResponse submitStaffDetails(StaffInfo data, String userId) throws Exception {
+	public SBApiResponse submitStaffDetails(StaffInfo data, String userId) {
 		SBApiResponse response = new SBApiResponse(Constants.API_STAFF_POSITION_ADD);
 		try {
 			validateAddStaffInfo(data);
@@ -76,7 +76,7 @@ public class StaffServiceImpl implements StaffService {
 	}
 
 	@Override
-	public SBApiResponse updateStaffDetails(StaffInfo data, String userId) throws Exception {
+	public SBApiResponse updateStaffDetails(StaffInfo data, String userId) {
 		SBApiResponse response = new SBApiResponse(Constants.API_STAFF_POSITION_UPDATE);
 		try {
 			validateUpdateStaffInfo(data);
@@ -199,7 +199,7 @@ public class StaffServiceImpl implements StaffService {
 	}
 
 	@Override
-	public SBApiResponse getStaffDetails(String orgId) throws Exception {
+	public SBApiResponse getStaffDetails(String orgId) {
 		SBApiResponse response = new SBApiResponse(Constants.API_STAFF_POSITION_READ);
 		List<StaffInfo> staffDetails = getStaffListByProperty(orgId, StringUtils.EMPTY, StringUtils.EMPTY);
 
