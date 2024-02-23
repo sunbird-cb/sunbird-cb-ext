@@ -628,6 +628,17 @@ public class CbExtServerProperties {
 	@Value("${redis.ehrms.token.timeout}")
 	private Integer redisEhrmsTokenTimeOut;
 
+	@Value("${redis.wheebox.key}")
+	private String redisWheeboxKey;
+
+	public String getRedisWheeboxKey() {
+		return redisWheeboxKey;
+	}
+
+	public void setRedisWheeboxKey(String redisWheeboxKey) {
+		this.redisWheeboxKey = redisWheeboxKey;
+	}
+
 	public boolean qListFromCacheEnabled() {
 		return qListFromCacheEnabled;
 	}
