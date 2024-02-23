@@ -1,6 +1,8 @@
 package org.sunbird.assessment.service;
 
 import static java.util.stream.Collectors.toList;
+import static org.sunbird.common.util.Constants.API_USER_INSIGHTS;
+import static org.sunbird.common.util.Constants.RESPONSE;
 
 import java.io.IOException;
 import java.sql.Timestamp;
@@ -963,5 +965,24 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
         }
 
         return errMsg;
+    }
+
+    public SBApiResponse readWheebox(String userAuthToken) {
+        SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_READ_ASSESSMENT_RESULT);
+           try {
+            String userId = accessTokenValidator.fetchUserIdFromAccessToken(userAuthToken);
+            if (StringUtils.isBlank(userId)) {
+                updateErrorDetails(response, Constants.USER_ID_DOESNT_EXIST, HttpStatus.INTERNAL_SERVER_ERROR);
+                return response;
+            }
+            Map<String, Object> res =assessUtilServ.fetchWheebox(userId);
+            if (res !=null && res.size() > 0) {
+                response.getResult().put(RESPONSE,res);
+            }
+        } catch (Exception e) {
+            String errMsg = String.format("Failed to process Assessment read response. Excption: %s", e.getMessage());
+            updateErrorDetails(response, errMsg, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return response;
     }
 }

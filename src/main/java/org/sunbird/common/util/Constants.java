@@ -968,6 +968,7 @@ public class Constants {
 	public static final String USER_ID_LOWER = "userid";
 	public static final String EHRMS_USER_TOKEN = "ehrmsUserToken";
 
+	public static final String API_READ_WHEEBOX_RESULT = "api.wheebox.read.result";
 
     private Constants() {
 		throw new IllegalStateException("Utility class");
