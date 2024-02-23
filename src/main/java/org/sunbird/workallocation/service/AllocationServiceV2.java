@@ -146,10 +146,10 @@ public class AllocationServiceV2 {
 			response.put(Constants.MESSAGE, Constants.FAILED);
 		}
 		HashMap<String, String> watEventData = new HashMap<>();
-		watEventData.put("workorderId", workOrder.getId());
+		watEventData.put(Constants.WORKORDER_ID, workOrder.getId());
 		producer.push(cbExtServerProperties.getKafkaTopicWatEvent(), watEventData);
 		HashMap<String, Object> data = new HashMap<>();
-		data.put("id", workOrder.getId());
+		data.put(Constants.ID, workOrder.getId());
 		response.put(Constants.DATA, data);
 		response.put(Constants.STATUS, HttpStatus.OK);
 		return response;
@@ -190,7 +190,7 @@ public class AllocationServiceV2 {
 			throw new ApplicationLogicError("Exception occurred while updating the work order", ex);
 		}
 		HashMap<String, String> watEventData = new HashMap<>();
-		watEventData.put("workorderId", workOrder.getId());
+		watEventData.put(Constants.WORKORDER_ID, workOrder.getId());
 		producer.push(cbExtServerProperties.getKafkaTopicWatEvent(), watEventData);
 		Response response = new Response();
 		if (!ObjectUtils.isEmpty(restStatus)) {
@@ -254,11 +254,11 @@ public class AllocationServiceV2 {
 			indexerService.updateEntity(workOrderIndex, workOrderIndexType, workOrder.getId(),
 					mapper.convertValue(workOrder, Map.class));
 		} catch (Exception ex) {
-			logger.error("Exception occurred while saving the work allocation!!", ex);
-			throw new ApplicationLogicError("Exception occurred while saving the work allocation!!", ex);
+			logger.error(Constants.WORK_ALLOCATION_SAVE_EXCEPTION, ex);
+			throw new ApplicationLogicError(Constants.WORK_ALLOCATION_SAVE_EXCEPTION, ex);
 		}
 		HashMap<String, String> watEventData = new HashMap<>();
-		watEventData.put("workorderId", workAllocationDTO.getWorkOrderId());
+		watEventData.put(Constants.WORKORDER_ID, workAllocationDTO.getWorkOrderId());
 		producer.push(cbExtServerProperties.getKafkaTopicWatEvent(), watEventData);
 		Response response = new Response();
 		if (!ObjectUtils.isEmpty(restStatus)) {
@@ -319,11 +319,11 @@ public class AllocationServiceV2 {
 			indexerService.updateEntity(workOrderIndex, workOrderIndexType, workOrder.getId(),
 					mapper.convertValue(workOrder, Map.class));
 		} catch (Exception ex) {
-			logger.error("Exception occurred while saving the work allocation!!", ex);
-			throw new ApplicationLogicError("Exception occurred while saving the work allocation!!", ex);
+			logger.error(Constants.WORK_ALLOCATION_SAVE_EXCEPTION, ex);
+			throw new ApplicationLogicError(Constants.WORK_ALLOCATION_SAVE_EXCEPTION, ex);
 		}
 		HashMap<String, String> watEventData = new HashMap<>();
-		watEventData.put("workorderId", workAllocationDTO.getWorkOrderId());
+		watEventData.put(Constants.WORKORDER_ID, workAllocationDTO.getWorkOrderId());
 		producer.push(cbExtServerProperties.getKafkaTopicWatEvent(), watEventData);
 		Response response = new Response();
 		if (!ObjectUtils.isEmpty(restStatus)) {
@@ -550,10 +550,10 @@ public class AllocationServiceV2 {
 			response.put(Constants.MESSAGE, Constants.FAILED);
 		}
 		HashMap<String, String> watEventData = new HashMap<>();
-		watEventData.put("workorderId", workOrder.getId());
+		watEventData.put(Constants.WORKORDER_ID, workOrder.getId());
 		producer.push(cbExtServerProperties.getKafkaTopicWatEvent(), watEventData);
 		HashMap<String, Object> data = new HashMap<>();
-		data.put("id", workOrder.getId());
+		data.put(Constants.ID, workOrder.getId());
 		response.put(Constants.DATA, data);
 		response.put(Constants.STATUS, HttpStatus.OK);
 		return response;
@@ -662,13 +662,13 @@ public class AllocationServiceV2 {
 				Arrays.asList(cbExtServerProperties.getContentDefaultChannelId()));
 		HashMap<String, Object> request = new HashMap<>();
 		HashMap<String, Object> contentReq = new HashMap<>();
-		contentReq.put("content", contentCreateRequest);
-		request.put("request", contentReq);
+		contentReq.put(Constants.CONTENT, contentCreateRequest);
+		request.put(Constants.REQUEST, contentReq);
 		HashMap<String, String> headers = new HashMap<>();
-		headers.put("x-channel-id", cbExtServerProperties.getContentDefaultChannelId());
-		headers.put("X-Authenticated-User-Token", xAuthUser);
-		headers.put("Authorization", cbExtServerProperties.getSbApiKey());
-		headers.put("Content-Type", "application/json");
+		headers.put(Constants.X_CHANNEL_ID, cbExtServerProperties.getContentDefaultChannelId());
+		headers.put(Constants.X_AUTHENTICATED_USER_TOKEN, xAuthUser);
+		headers.put(Constants.AUTH_TOKEN, cbExtServerProperties.getSbApiKey());
+		headers.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
 		Map<String, Object> response = outboundRequestHandlerService.fetchResultUsingPost(
 				cbExtServerProperties.getContentHost().concat(cbExtServerProperties.getContentCreateEndPoint()),
 				request, headers);
@@ -680,12 +680,12 @@ public class AllocationServiceV2 {
 	private String uploadPdfAndgetArtifactURL(String identifier, String xAuthUser, String filePath) {
 		String downloadableLink = null;
 		HttpHeaders headers = new HttpHeaders();
-		headers.set("X-Authenticated-User-Token", xAuthUser);
-		headers.set("Authorization", cbExtServerProperties.getSbApiKey());
+		headers.set(Constants.X_AUTHENTICATED_USER_TOKEN, xAuthUser);
+		headers.set(Constants.AUTH_TOKEN, cbExtServerProperties.getSbApiKey());
 		headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 		MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
 		FileSystemResource resource = new FileSystemResource(filePath);
-		body.add("data", resource);
+		body.add(Constants.DATA, resource);
 		HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
 		String uploadURL = cbExtServerProperties.getContentUploadEndPoint().replace("{identifier}", identifier);
 		ResponseEntity<Map> response = restTemplate
@@ -701,14 +701,14 @@ public class AllocationServiceV2 {
 		Map<String, Object> request = getSearchObject(userIds);
 		Map<String, Object> record;
 		HashMap<String, String> headersValue = new HashMap<>();
-		headersValue.put("Content-Type", "application/json");
+		headersValue.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
 		try {
 			StringBuilder builder = new StringBuilder();
 			builder.append(cbExtServerProperties.getSbUrl()).append(cbExtServerProperties.getUserSearchEndPoint());
 			Map<String, Object> profileResponse = outboundRequestHandlerService.fetchResultUsingPost(builder.toString(),
 					request, headersValue);
 			if (profileResponse != null && "OK".equalsIgnoreCase((String) profileResponse.get("responseCode"))) {
-				Map<String, Object> map = (Map<String, Object>) profileResponse.get("result");
+				Map<String, Object> map = (Map<String, Object>) profileResponse.get(Constants.RESULT);
 				if (map.get("response") != null) {
 					Map<String, Object> profiles = (Map<String, Object>) map.get("response");
 					List<Map<String, Object>> userProfiles = (List<Map<String, Object>>) profiles.get("content");

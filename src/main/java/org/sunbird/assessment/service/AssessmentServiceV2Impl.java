@@ -70,11 +70,11 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
         try {
             String userId = validateAuthTokenAndFetchUserId(token);
             if (userId != null) {
-                logger.info("readAssessment.. userId :" + userId);
+                logger.info("readAssessment.. userId : {}" , userId);
                 Map<String, Object> assessmentAllDetail = new HashMap<>();
                 errMsg = fetchReadHierarchyDetails(assessmentAllDetail, token, assessmentIdentifier);
                 if (errMsg.isEmpty() && !((String) assessmentAllDetail.get(Constants.PRIMARY_CATEGORY)).equalsIgnoreCase(Constants.PRACTICE_QUESTION_SET)) {
-                    logger.info("Fetched assessment Details... for : " + assessmentIdentifier);
+                    logger.info("Fetched assessment Details... for : {}" ,assessmentIdentifier);
                     List<Map<String, Object>> existingDataList = assessmentRepository.fetchUserAssessmentDataFromDB(userId, assessmentIdentifier);
                     Timestamp assessmentStartTime = new Timestamp(new java.util.Date().getTime());
                     if (existingDataList.isEmpty()) {
@@ -148,7 +148,6 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
     public SBApiResponse readQuestionList(Map<String, Object> requestBody, String authUserToken) {
         SBApiResponse response = createDefaultResponse(Constants.API_SUBMIT_ASSESSMENT);
         String errMsg;
-        String primaryCategory = "";
         Map<String, String> result = new HashMap<>();
         try {
             List<String> identifierList = new ArrayList<>();
@@ -222,7 +221,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                 redisCacheMgr.putCache(Constants.ASSESSMENT_ID + assessmentIdentifier, ((Map<String, Object>) readHierarchyApiResponse.get(Constants.RESULT)).get(Constants.QUESTION_SET));
             }
         } catch (Exception e) {
-            logger.info("Error while fetching or mapping read hierarchy data" + e.getMessage());
+            logger.info("Error while fetching or mapping read hierarchy data : {}" , e.getMessage());
             return Constants.ASSESSMENT_HIERARCHY_READ_FAILED;
         }
         return StringUtils.EMPTY;
@@ -310,7 +309,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
         if (errMsg.isEmpty()) {
             String userId = validateAuthTokenAndFetchUserId(authUserToken);
             String scoreCutOffType = ((String) assessmentHierarchy.get(Constants.SCORE_CUTOFF_TYPE)).toLowerCase();
-            List<Map<String, Object>> existingDataList = new ArrayList<>();
+            List<Map<String, Object>> existingDataList;
             List<Map<String, Object>> sectionLevelsResults = new ArrayList<>();
             Map<String, Object> questionSetFromAssessment = new HashMap<>();
             for (Map<String, Object> hierarchySection : hierarchySectionList) {
@@ -433,10 +432,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                             ObjectMapper m = new ObjectMapper();
                             Map<String, Object> props = m.convertValue(map, Map.class);
                             kafkaResult.put(Constants.COMPETENCY, props.isEmpty() ? "" : props);
-                            System.out.println(obj);
-
                         }
-                        System.out.println(obj);
                     }
                     logger.info(kafkaResult.toString());
                     kafkaProducer.push(serverProperties.getAssessmentSubmitTopic(), kafkaResult);

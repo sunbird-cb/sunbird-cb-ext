@@ -30,7 +30,7 @@ public class AssessmentAsyncSubmitConsumer {
             });
             assessmentServiceV4.handleAssessmentSubmitRequest(asyncRequest,false,null);
         } catch (Exception e) {
-            String errMsg = String.format("", e.getMessage());
+            String errMsg = String.format("Error: %s", e.getMessage());
             LOGGER.error(errMsg, e);
         }
     }

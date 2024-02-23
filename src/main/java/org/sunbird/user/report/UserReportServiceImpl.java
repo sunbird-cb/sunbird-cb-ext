@@ -62,7 +62,7 @@ public class UserReportServiceImpl implements UserReportService {
 
 		String fileName = userStorePath + "/userEnrolmentReport-" + java.time.LocalDate.now()
 				+ System.currentTimeMillis() + ".xlsx";
-		log.info("Constructed File Name -> " + fileName);
+		log.info("Constructed File Name -> {}" , fileName);
 
 		try {
 			File file = new File(fileName);
@@ -130,7 +130,7 @@ public class UserReportServiceImpl implements UserReportService {
 		try {
 			String fileName = userStorePath + "/userReport-" + java.time.LocalDate.now() + System.currentTimeMillis()
 					+ ".xlsx";
-			log.info("Constructed File Name -> " + fileName);
+			log.info("Constructed File Name -> {}" , fileName);
 			File file = new File(fileName);
 			file.createNewFile();
 			OutputStream fileOut = new FileOutputStream(file, false);

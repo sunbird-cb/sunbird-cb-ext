@@ -4,15 +4,7 @@ import static java.util.stream.Collectors.toList;
 
 import java.io.IOException;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -408,7 +400,7 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
                 }
 
         } catch (Exception e) {
-            String errMsg = String.format("Failed to process assessment submit request. Exception: ", e.getMessage());
+            String errMsg = String.format("Failed to process assessment submit request. Exception: %s", e.getMessage());
             logger.error(errMsg, e);
             updateErrorDetails(outgoingResponse, errMsg, HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -533,7 +525,7 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
                         (String) assessmentHierarchy.get(Constants.PRIMARY_CATEGORY));
             }
         } catch (Exception e) {
-            errMsg = String.format("Failed to process assessent submit request. Exception: ", e.getMessage());
+            errMsg = String.format("Failed to process assessent submit request. Exception: %s", e.getMessage());
             logger.error(errMsg, e);
         }
     }
@@ -727,11 +719,6 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
         } else {
             existingAssessmentData.putAll(existingDataList.get(0));
         }
-
-        //if (Constants.SUBMITTED.equalsIgnoreCase((String) existingAssessmentData.get(Constants.STATUS))) {
-        //    return Constants.ASSESSMENT_ALREADY_SUBMITTED;
-        //}
-
         Date assessmentStartTime = (Date) existingAssessmentData.get(Constants.START_TIME);
         if (assessmentStartTime == null) {
             return Constants.READ_ASSESSMENT_START_TIME_FAILED;
@@ -883,10 +870,7 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
                             ObjectMapper m = new ObjectMapper();
                             Map<String, Object> props = m.convertValue(map, Map.class);
                             kafkaResult.put(Constants.COMPETENCY, props.isEmpty() ? "" : props);
-                            System.out.println(obj);
-
                         }
-                        System.out.println(obj);
                     }
                     kafkaProducer.push(serverProperties.getAssessmentSubmitTopic(), kafkaResult);
                 }

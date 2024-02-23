@@ -1004,8 +1004,30 @@ public class Constants {
 	public static final String FAILED_PROFILE_UPDATE_PROCESS = "Failed to process profile update. Exception: ";
 	public static final String INVALID_COL_TYPE_EXPECTING_STRING = "Invalid column type. Expecting string format";
 	public static final String PROGRESS_DETAILS = "progressDetails";
+	public static final String RECEIVED_RESPONSE = "Received Response: ";
+	public static final String STAFF_SERVICE_POSITION = ", Position: ";
+	public static final String EMPTY_FIELDS_EXCEPTION = "One or more required fields are empty. Empty fields ";
+	public static final String FAILED_TO_UPLOAD_FILE_EXCEPTION = "Failed to upload file. Exception: ";
+	public static final String FAILED_TO_DELETE_FILE_EXCEPTION_MESSAGE = "Failed to delete file. Exception: ";
+	public static final String FAILED_TO_DOWNLOAD_FILE_EXCEPTION_MESSAGE ="Failed to download the file. Exception: ";
+	public static final String EXCEPTION = ", Exception: ";
+	public static final String FAILED_TO_DELETE_FILE = "Failed to delete file: ";
+	public static final String FAILED_TO_DOWNLOAD_FILE = "Failed to download the file: ";
+	public static final String FAILED_TO_READ_FILE ="Failed to read the downloaded file: ";
+	public static final String FAILED_USER_INFO_RETRIEVAL_MESSAGE = "Failed to get UserInfo from cassandra for userId: ";
+	public static final String UNAUTHORIZED_FILE_DOWNLOAD_FOR_OTHER_ORG = "User not authorized to download file for other org: ";
+	public static final String LASTMODIFIED ="lastModified";
+	public static final String FILEMETADATA ="fileMetaData";
+	public static final String FAILED_TO_READ_DOWNLOADED_FILE_FOR_URL = "Failed to read the downloaded file for URL: ";
+	public static final String EXCEPTION_MESSAGE_FORMAT = "Exception in %s : %s";
+	public static final String SUNBIRD_SERVICE_ERROR = "Sunbird Service ERROR: ";
+	public static final String WORKORDER_ID = "workorderId";
+	public static final String X_AUTHENTICATED_USER_TOKEN = "X-Authenticated-User-Token";
+	public static final String X_CHANNEL_ID = "x-channel-id";
+	public static final String WORK_ALLOCATION_SAVE_EXCEPTION = "Exception occurred while saving the work allocation!!";
+	public static final String DEPT_ID = "deptId";
 
-    private Constants() {
+	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}
 

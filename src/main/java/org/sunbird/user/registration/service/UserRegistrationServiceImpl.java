@@ -137,7 +137,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 					}
 				}
 			} catch (Exception e) {
-				logger.error(String.format("Exception in %s : %s", "registerUser", e.getMessage()), e);
+				logger.error(String.format(Constants.EXCEPTION_MESSAGE_FORMAT, "registerUser", e.getMessage()), e);
 				errMsg = "Failed to process message. Exception: " + e.getMessage();
 			}
 		}
@@ -215,7 +215,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 					errMsg = (String) ((Map<String, Object>)apiResponse.get(Constants.PARAMS)).get(Constants.ERROR_MESSAGE);
 				}
 			} catch (Exception e) {
-				logger.error(String.format("Exception in %s : %s", "generateOTP", e.getMessage()), e);
+				logger.error(String.format(Constants.EXCEPTION_MESSAGE_FORMAT, "generateOTP", e.getMessage()), e);
 				errMsg = "Failed to process message. Exception: " + e.getMessage();
 			}
 		}
@@ -457,7 +457,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 					serverProperties.getEsProfileIndexType(), registrationCode);
 			return mapper.convertValue(esObject, UserRegistration.class);
 		} catch (Exception e) {
-			logger.error(String.format("Exception in %s : %s", "getUserRegistrationDetails", e.getMessage()));
+			logger.error(String.format(Constants.EXCEPTION_MESSAGE_FORMAT, "getUserRegistrationDetails", e.getMessage()));
 		}
 		return null;
 	}

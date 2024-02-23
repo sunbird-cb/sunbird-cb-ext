@@ -1,7 +1,5 @@
 package org.sunbird.ratings.model;
 
-import java.sql.Timestamp;
-
 public class LookupResponse {
     private String activityId;
     private String review;
