@@ -23,4 +23,6 @@ public interface AssessmentUtilServiceV2 {
 	public Map<String, Object> readQListfromCache(List<String> questionIds, String assessmentIdentifier,boolean editMode,String token) throws IOException;
 
 	public Map<String,Object> fetchHierarchyFromAssessServc(String qSetId,String token);
+
+	public Map<String, Object> fetchWheebox(String userId);
 }

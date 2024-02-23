@@ -613,6 +613,31 @@ public class CbExtServerProperties {
 
 	@Value("${user.registration.welcome.email.profileUpdateLink}")
 	private String welcomeEmailProfileUpdateLink;
+	@Value("${ehrms.detail.url}")
+	private String ehrmsDetailUrl;
+
+	@Value("${ehrms.auth.url}")
+	private String ehrmsAuthUrl;
+
+	@Value("${ehrms.auth.username}")
+	private String ehrmsAuthUserName;
+
+	@Value("${ehrms.auth.password}")
+	private String ehrmsAuthPassword;
+
+	@Value("${redis.ehrms.token.timeout}")
+	private Integer redisEhrmsTokenTimeOut;
+
+	@Value("${redis.wheebox.key}")
+	private String redisWheeboxKey;
+
+	public String getRedisWheeboxKey() {
+		return redisWheeboxKey;
+	}
+
+	public void setRedisWheeboxKey(String redisWheeboxKey) {
+		this.redisWheeboxKey = redisWheeboxKey;
+	}
 
 	@Value("${notify.service.host}")
 	private String notifyServiceHost;
@@ -2223,6 +2248,7 @@ public class CbExtServerProperties {
 		this.welcomeEmailProfileUpdateLink = welcomeEmailProfileUpdateLink;
 	}
 
+
 	public String getNotifyServiceHost() {
 		return notifyServiceHost;
 	}
@@ -2298,6 +2324,7 @@ public class CbExtServerProperties {
 	public void setRedisEhrmsTokenTimeOut(Integer redisEhrmsTokenTimeOut) {
 		this.redisEhrmsTokenTimeOut = redisEhrmsTokenTimeOut;
 	}
+
 
 	public String getCertRegistryServiceBaseUrl() {
 		return certRegistryServiceBaseUrl;
