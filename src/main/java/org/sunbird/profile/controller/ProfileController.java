@@ -41,7 +41,7 @@ public class ProfileController {
 	}
 
 	@PatchMapping("/org/v1/profile/patch")
-	public ResponseEntity<SBApiResponse> orgProfileUpdate(@RequestBody Map<String, Object> request) throws Exception {
+	public ResponseEntity<SBApiResponse> orgProfileUpdate(@RequestBody Map<String, Object> request) {
 		SBApiResponse response = profileService.orgProfileUpdate(request);
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}

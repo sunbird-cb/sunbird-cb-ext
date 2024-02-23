@@ -703,7 +703,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
         return (new HashSet<>(questionsFromAssessment).containsAll(identifierList)) ? Boolean.TRUE : Boolean.FALSE;
     }
 
-    public SBApiResponse retakeAssessment(String assessmentIdentifier, String token) throws Exception {
+    public SBApiResponse retakeAssessment(String assessmentIdentifier, String token) {
         logger.info("AssessmentServiceV2Impl::retakeAssessment... Started");
         SBApiResponse response = createDefaultResponse(Constants.API_RETAKE_ASSESSMENT_GET);
         String errMsg = "";

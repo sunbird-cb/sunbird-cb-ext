@@ -1,11 +1,14 @@
 package org.sunbird.common.util;
 
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
+import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.HashMap;
 import java.util.List;
@@ -61,7 +64,7 @@ public class KeyManager {
     return keyMap.get(keyId);
   }
 
-  public static PublicKey loadPublicKey(String key) throws Exception {
+  public static PublicKey loadPublicKey(String key) throws UnsupportedEncodingException, NoSuchAlgorithmException, InvalidKeySpecException {
     String publicKey = new String(key.getBytes(), StandardCharsets.UTF_8);
     publicKey = publicKey.replaceAll("(-+BEGIN PUBLIC KEY-+)", "");
     publicKey = publicKey.replaceAll("(-+END PUBLIC KEY-+)", "");
