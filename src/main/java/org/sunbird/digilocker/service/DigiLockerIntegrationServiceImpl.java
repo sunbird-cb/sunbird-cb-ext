@@ -290,10 +290,10 @@ public class DigiLockerIntegrationServiceImpl implements DigiLockerIntegrationSe
 
     private CertificateInfo addCertificateInfo(CertificateAddInfoDTO certificateAddInfoDTO) {
         CertificateInfo certificateInfo = new CertificateInfo();
-        certificateInfo.getCertificateMetaData().setName(certificateAddInfoDTO.getCertificateName());
+        certificateInfo.getCertificateMetaData().setName(certificateAddInfoDTO.getDocumentName());
         certificateInfo.getCertificateMetaData().setNumber(certificateAddInfoDTO.getCertificateId());
         certificateInfo.getCertificateMetaData().setIssueDate(certificateAddInfoDTO.getCertificateIssueOn());
-        certificateInfo.getCertificateMetaData().setType(certificateAddInfoDTO.getDocumentName());
+        certificateInfo.getCertificateMetaData().setType(certificateAddInfoDTO.getDocumentInfo());
         certificateInfo.getCertificateMetaData().getCertificateData().getCertificate().setNumber(certificateAddInfoDTO.getCertificateId());
         return certificateInfo;
     }
