@@ -52,13 +52,14 @@ public class OperationalReportServiceImpl implements OperationalReportService {
         SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.GRANT_REPORT_ACCESS_API);
         try {
             Map<String, Object> mdoAdminDetails = (Map<String, Object>) request.getRequest();
-            String mdoAdminUserId = (String) ((Map<String, Object>) mdoAdminDetails.get(Constants.MDO_ADMIN)).get(Constants.USER_ID);
-            String reportExpiryDate = (String) ((Map<String, Object>) mdoAdminDetails.get(Constants.MDO_ADMIN)).get("reportExpiryDate");
+            String mdoAdminUserId = (String) ((Map<String, Object>) mdoAdminDetails.get(Constants.MDOADMIN)).get(Constants.USER_ID);
+            String reportExpiryDate = (String) ((Map<String, Object>) mdoAdminDetails.get(Constants.MDOADMIN)).get("reportExpiryDate");
             Map<String, String> headersValue = new HashMap<>();
             headersValue.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
             String mdoLeaderUserId = accessTokenValidator.fetchUserIdFromAccessToken(authToken);
-            if (null == mdoLeaderUserId)
-                throw new RuntimeException("UserId Couldn't fetch from auth token");
+            if (null == mdoLeaderUserId) {
+                throw new HttpClientErrorException(HttpStatus.NOT_FOUND,"UserId Couldn't fetch from auth token");
+            }
             logger.info("MDO Leader User ID : {}", mdoLeaderUserId);
             StringBuilder url = new StringBuilder(configuration.getLmsServiceHost()).append(configuration.getLmsUserSearchEndPoint());
             Map<String, Object> userSearchRequest = getSearchObject(Arrays.asList(mdoLeaderUserId, mdoAdminUserId));
@@ -83,28 +84,28 @@ public class OperationalReportServiceImpl implements OperationalReportService {
                 }
                 StringBuilder uri = new StringBuilder(serverConfig.getSbUrl());
                 Map<String, Object> roleRead = (Map<String, Object>) outboundRequestHandlerService.fetchResult(String.valueOf(uri.append(serverConfig.getSbRoleRead()).append(mdoAdminUserId)));
-                List<Map<String, Object>> roles = (List<Map<String, Object>>) ((Map<String, Object>) roleRead.get("result")).get("roles");
+                List<Map<String, Object>> roles = (List<Map<String, Object>>) ((Map<String, Object>) roleRead.get(Constants.RESULT)).get(Constants.ROLES);
                 List<String> assignedRoles = new ArrayList<>();
                 for (Map<String, Object> roleMap : roles) {
-                    assignedRoles.add((String) roleMap.get("role"));
+                    assignedRoles.add((String) roleMap.get(Constants.ROLE));
                 }
-                if (!assignedRoles.contains("MDO_ADMIN")) {
+                if (!assignedRoles.contains(Constants.MDO_ADMIN)) {
                     throw new HttpClientErrorException(HttpStatus.BAD_REQUEST, "The Grantee doesn't have MDO_ADMIN role");
                 }
                 assignedRoles.add(Constants.MDO_REPORT_ACCESSOR);
                 Map<String, Object> assignRoleReq = new HashMap<>();
                 Map<String, Object> roleRequestBody = new HashMap<>();
                 roleRequestBody.put(Constants.ORGANIZATION_ID, rootOrgId);
-                roleRequestBody.put("userId", mdoAdminUserId);
-                roleRequestBody.put("roles", assignedRoles);
-                assignRoleReq.put("request", roleRequestBody);
+                roleRequestBody.put(Constants.USER_ID, mdoAdminUserId);
+                roleRequestBody.put(Constants.ROLES, assignedRoles);
+                assignRoleReq.put(Constants.REQUEST, roleRequestBody);
                 outboundRequestHandlerService.fetchResultUsingPost(serverConfig.getSbUrl() + serverConfig.getSbAssignRolePath(), assignRoleReq,
                         headersValue);
                 Map<String, Object> primaryKeyMap = new HashMap<>();
                 primaryKeyMap.put(Constants.ID, mdoAdminUserId);
                 long reportExpiryDateMillis = getParsedDate(reportExpiryDate);
                 Map<String, Object> keyMap = new HashMap<>();
-                keyMap.put("report_access_expiry", reportExpiryDateMillis);
+                keyMap.put(Constants.REPORT_ACCESS_EXPIRY_TABLE, reportExpiryDateMillis);
                 cassandraOperation.updateRecord(
                         Constants.KEYSPACE_SUNBIRD, Constants.USER, keyMap, primaryKeyMap);
                 response.getResult().put(Constants.STATUS, Constants.SUCCESS);
