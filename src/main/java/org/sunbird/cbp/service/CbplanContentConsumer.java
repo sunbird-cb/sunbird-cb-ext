@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.sunbird.cassandra.utils.CassandraOperation;
 import org.sunbird.common.model.Config;
+import org.sunbird.common.model.NotificationAsyncRequest;
 import org.sunbird.common.model.NotificationRequest;
 import org.sunbird.common.model.Template;
 import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
@@ -72,57 +73,64 @@ public class CbplanContentConsumer {
             }
             Set<String> providerRootOrgIds = new HashSet<>((List<String>) cbplanContentRequest.get(Constants.PROVIDER_ORG_ID));
             String mdoAdminId = (String) cbplanContentRequest.get(Constants.CREATED_BY);
-            String mdoAdminEmail = userService.getUserDetails(Collections.singletonList(mdoAdminId), new ArrayList<>()).get(mdoAdminId).get(Constants.EMAIL);
-
-            Map<String, Object> mailNotificationDetails = new HashMap<>();
-            mailNotificationDetails.put(Constants.PROVIDER_EMAIL_ID_LIST, getCBPAdminDetails(providerRootOrgIds));
-            mailNotificationDetails.put(Constants.MDO_NAME, cbplanContentRequest.get(Constants.MDO_NAME));
-            mailNotificationDetails.put(Constants.COMPETENCY_AREA, competencyInfoMap.get(Constants.NAME));
-            mailNotificationDetails.put(Constants.COMPETENCY_THEMES, allThemes.replace(allThemes.length()-2, allThemes.length() - 1, "."));
-            mailNotificationDetails.put(Constants.COMPETENCY_SUB_THEMES, allSubThemes.replace(allSubThemes.length()-2, allSubThemes.length()-1, "."));
-            mailNotificationDetails.put(Constants.DESCRIPTION , cbplanContentRequest.get(Constants.DESCRIPTION));
-            mailNotificationDetails.put(Constants.COPY_EMAIL, mdoAdminEmail);
-            sendNotificationToProviders(mailNotificationDetails);
+            Map<String, Map<String, String>> userMap = userService.getUserDetails(Collections.singletonList(mdoAdminId), new ArrayList<>());
+            if (!CollectionUtils.isEmpty(userMap)) {
+                String mdoAdminEmail = userMap.get(mdoAdminId).get(Constants.EMAIL);
+                Map<String, Object> mailNotificationDetails = new HashMap<>();
+                mailNotificationDetails.put(Constants.PROVIDER_EMAIL_ID_LIST, getCBPAdminDetails(providerRootOrgIds));
+                mailNotificationDetails.put(Constants.MDO_NAME, cbplanContentRequest.get(Constants.MDO_NAME));
+                mailNotificationDetails.put(Constants.COMPETENCY_AREA, competencyInfoMap.get(Constants.NAME));
+                mailNotificationDetails.put(Constants.COMPETENCY_THEMES, allThemes.replace(allThemes.length()-2, allThemes.length() - 1, "."));
+                mailNotificationDetails.put(Constants.COMPETENCY_SUB_THEMES, allSubThemes.replace(allSubThemes.length()-2, allSubThemes.length()-1, "."));
+                mailNotificationDetails.put(Constants.DESCRIPTION , cbplanContentRequest.get(Constants.DESCRIPTION));
+                mailNotificationDetails.put(Constants.COPY_EMAIL, mdoAdminEmail);
+                mailNotificationDetails.put(Constants.CREATED_BY, mdoAdminId);
+                sendNotificationToProvidersAsync(mailNotificationDetails);
+            } else {
+                logger.error("User search returns empty result for Id: " + mdoAdminId, new Exception());
+            }
             logger.info(String.format("Completed request for content. Time taken: ", (System.currentTimeMillis() - startTime)));
         } catch (Exception e) {
             logger.error("Exception occurred while sending email : " + e.getMessage(), e);
         }
     }
 
-    public List<String> getCBPAdminDetails(Set<String> rootOrgIds){
-        List<Map<String, String>> userRecords = new ArrayList<>();
+    public List<String> getCBPAdminDetails(Set<String> rootOrgIds) throws Exception {
         Map<String, Object> request = getSearchObject(rootOrgIds);
         HashMap<String, String> headersValue = new HashMap<>();
         headersValue.put("Content-Type", "application/json");
-        try {
-            List<String> providerIdEmails = new ArrayList<>();
-            StringBuilder url = new StringBuilder(configuration.getLmsServiceHost()).append(configuration.getLmsUserSearchEndPoint());
-            Map<String, Object> searchProfileApiResp = outboundReqService.fetchResultUsingPost(url.toString(), request, headersValue);
-            if (searchProfileApiResp != null
-                    && "OK".equalsIgnoreCase((String) searchProfileApiResp.get(Constants.RESPONSE_CODE))) {
-                Map<String, Object> map = (Map<String, Object>) searchProfileApiResp.get(Constants.RESULT);
-                Map<String, Object> response = (Map<String, Object>) map.get(Constants.RESPONSE);
-                List<Map<String, Object>> contents = (List<Map<String, Object>>) response.get(Constants.CONTENT);
-                if (!CollectionUtils.isEmpty(contents)) {
-                    for(Map<String, Object> content: contents){
-                        String rootOrgId = (String)content.get(Constants.ROOT_ORG_ID);
-                        HashMap<String, Object> profileDetails = (HashMap<String, Object>) content.get(Constants.PROFILE_DETAILS);
-                        if (!CollectionUtils.isEmpty(profileDetails)) {
-                            HashMap<String, Object> personalDetails = (HashMap<String, Object>) profileDetails.get(Constants.PERSONAL_DETAILS);
-                            if (!CollectionUtils.isEmpty(personalDetails) && personalDetails.get(Constants.PRIMARY_EMAIL)!= null ) {
-                                if(rootOrgIds.contains(rootOrgId))
-                                    providerIdEmails.add((String)personalDetails.get(Constants.PRIMARY_EMAIL));
-                            }
+        List<String> providerIdEmails = new ArrayList<>();
+        StringBuilder url = new StringBuilder(configuration.getLmsServiceHost())
+                .append(configuration.getLmsUserSearchEndPoint());
+        Map<String, Object> searchProfileApiResp = outboundReqService.fetchResultUsingPost(url.toString(), request,
+                headersValue);
+        if (searchProfileApiResp != null
+                && "OK".equalsIgnoreCase((String) searchProfileApiResp.get(Constants.RESPONSE_CODE))) {
+            Map<String, Object> map = (Map<String, Object>) searchProfileApiResp.get(Constants.RESULT);
+            Map<String, Object> response = (Map<String, Object>) map.get(Constants.RESPONSE);
+            List<Map<String, Object>> contents = (List<Map<String, Object>>) response.get(Constants.CONTENT);
+            if (!CollectionUtils.isEmpty(contents)) {
+                for (Map<String, Object> content : contents) {
+                    String rootOrgId = (String) content.get(Constants.ROOT_ORG_ID);
+                    HashMap<String, Object> profileDetails = (HashMap<String, Object>) content
+                            .get(Constants.PROFILE_DETAILS);
+                    if (!CollectionUtils.isEmpty(profileDetails)) {
+                        HashMap<String, Object> personalDetails = (HashMap<String, Object>) profileDetails
+                                .get(Constants.PERSONAL_DETAILS);
+                        if (!CollectionUtils.isEmpty(personalDetails)
+                                && personalDetails.get(Constants.PRIMARY_EMAIL) != null) {
+                            if (rootOrgIds.contains(rootOrgId))
+                                providerIdEmails.add((String) personalDetails.get(Constants.PRIMARY_EMAIL));
                         }
                     }
                 }
             }
-            logger.info("CBP Admin emails fetched successfully: " + providerIdEmails);
-            return providerIdEmails;
-        } catch (Exception e) {
-            logger.error("Exception while fetching cbp admin details : " +e.getMessage() + " request : " + request,e);
-            throw new ApplicationException("Hub Service ERROR: ", e);
         }
+        if (CollectionUtils.isEmpty(providerIdEmails)) {
+            throw new Exception("Failed to find CBP Admin for OrgIds: " + rootOrgIds);
+        }
+        logger.info("CBP Admin emails fetched successfully: " + providerIdEmails);
+        return providerIdEmails;
     }
 
     private Map<String, Object> getSearchObject(Set<String> rootOrgIds) {
@@ -139,7 +147,7 @@ public class CbplanContentConsumer {
         return requestObject;
     }
 
-    private void sendNotificationToProviders( Map<String, Object> mailNotificationDetails) {
+    private void sendNotificationToProviders(Map<String, Object> mailNotificationDetails) {
         List<String> providerIdList = (List<String>) mailNotificationDetails.get(Constants.PROVIDER_EMAIL_ID_LIST);
         String mdoName = (String) mailNotificationDetails.get(Constants.MDO_NAME);
         String mdoAdminEmail = (String) mailNotificationDetails.get(Constants.COPY_EMAIL);
@@ -170,12 +178,12 @@ public class CbplanContentConsumer {
         Map<String, List<NotificationRequest>> notificationMap = new HashMap<>();
         notificationMap.put(Constants.NOTIFICATIONS, Collections.singletonList(notificationRequest));
         req.put(Constants.REQUEST, notificationMap);
-        sendNotification(req);
+        sendNotification(req, configuration.getNotifyServicePath());
     }
 
-    private void sendNotification(Map<String, Object> request) {
+    private void sendNotification(Map<String, Object> request, String urlPath) {
         StringBuilder builder = new StringBuilder();
-        builder.append(configuration.getNotifyServiceHost()).append(configuration.getNotifyServicePath());
+        builder.append(configuration.getNotifyServiceHost()).append(urlPath);
         try {
             Map<String, Object> response = outboundReqService.fetchResultUsingPost(builder.toString(), request, null);
             logger.debug("The email notification is successfully sent, response is: " + response);
@@ -207,5 +215,56 @@ public class CbplanContentConsumer {
             logger.error("Unable to create template ", e);
         }
         return replacedHTML;
+    }
+
+    private void sendNotificationToProvidersAsync(Map<String, Object> mailNotificationDetails){
+        List<String> providerIdList = (List<String>) mailNotificationDetails.get(Constants.PROVIDER_EMAIL_ID_LIST);
+        String mdoName = (String) mailNotificationDetails.get(Constants.MDO_NAME);
+        String mdoAdminEmail = (String) mailNotificationDetails.get(Constants.COPY_EMAIL);
+
+        Map<String, Object> params = new HashMap<>();
+        NotificationAsyncRequest notificationAsyncRequest = new NotificationAsyncRequest();
+        notificationAsyncRequest.setPriority(1);
+        notificationAsyncRequest.setType(Constants.EMAIL);
+        notificationAsyncRequest.setCopyEmail(Collections.singletonList(mdoAdminEmail));
+        notificationAsyncRequest.setIds(providerIdList);
+
+        params.put(Constants.MDO_NAME_PARAM, mdoName);
+        params.put(Constants.NAME, mdoName);
+        params.put(Constants.COMPETENCY_AREA_PARAM, mailNotificationDetails.get(Constants.COMPETENCY_AREA));
+        params.put(Constants.COMPETENCY_THEME_PARAM, mailNotificationDetails.get(Constants.COMPETENCY_THEMES));
+        params.put(Constants.COMPETENCY_SUB_THEME_PARAM, mailNotificationDetails.get(Constants.COMPETENCY_SUB_THEMES));
+        params.put(Constants.DESCRIPTION, mailNotificationDetails.get(Constants.DESCRIPTION));
+        params.put(Constants.FROM_EMAIL, configuration.getSupportEmail());
+        params.put(Constants.ORG_NAME, mdoName);
+        Template template = new Template(constructEmailTemplate(configuration.getCbplanContentRequestTemplate(), params),configuration.getCbplanContentRequestTemplate(), params);
+
+        Config config = new Config();
+        config.setSubject(Constants.REQUEST_CONTENT_SUBJECT);
+        config.setSender(configuration.getSupportEmail());
+
+        Map<String, Object> templateMap = new HashMap<>();
+        templateMap.put(Constants.CONFIG, config);
+        templateMap.put(Constants.TYPE, Constants.EMAIL);
+        templateMap.put(Constants.DATA, template.getData());
+        templateMap.put(Constants.ID, configuration.getCbplanContentRequestTemplate());
+        templateMap.put(Constants.PARAMS, params);
+
+        Map<String, Object> action = new HashMap<>();
+        action.put(Constants.TEMPLATE, templateMap);
+        action.put(Constants.TYPE, Constants.EMAIL);
+        action.put(Constants.CATEGORY, Constants.EMAIL);
+
+        Map<String, Object> createdBy = new HashMap<>();
+        createdBy.put(Constants.ID, mailNotificationDetails.get(Constants.CREATED_BY));
+        createdBy.put(Constants.TYPE, Constants.MDO);
+        action.put(Constants.CREATED_BY, createdBy);
+        notificationAsyncRequest.setAction(action);
+
+        Map<String, Object> req = new HashMap<>();
+        Map<String, List<NotificationAsyncRequest>> notificationMap = new HashMap<>();
+        notificationMap.put(Constants.NOTIFICATIONS, Collections.singletonList(notificationAsyncRequest));
+        req.put(Constants.REQUEST, notificationMap);
+        sendNotification(req, configuration.getNotificationAsyncPath());
     }
 }

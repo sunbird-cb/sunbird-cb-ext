@@ -347,4 +347,72 @@ public class MasterDataServiceImpl implements MasterDataService {
         }
         return response;
     }
+
+    public SBApiResponse retrieveDeptPositionByAdmin(Map<String, Object> request) {
+        SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_V2_READ_DEPT_POSITION);
+        String errMsg = validateRequestForPosition(request);
+        if (StringUtils.isNotBlank(errMsg)) {
+            logger.error(errMsg);
+            response.getParams().setStatus(Constants.FAILED);
+            response.getParams().setErrmsg(errMsg);
+            response.setResponseCode(HttpStatus.BAD_REQUEST);
+            return response;
+        }
+
+        try {
+            Map<String, Object> requestObj = (Map<String, Object>) request.get(Constants.REQUEST);
+            List<String> orgIdList = (List<String>) requestObj.get(Constants.ORG_ID_LIST);
+            Set<String> positionList = new HashSet<String>();
+            List<Map<String, String>> resultList = new ArrayList<>();
+            for (String orgId : orgIdList) {
+                List<String> deptPositionList = redisCacheMgr.hget(Constants.ORG_DESIGNATION,
+                        cbExtServerProperties.getRedisInsightIndex(), orgId);
+                if (!CollectionUtils.isEmpty(deptPositionList) && StringUtils.isNotBlank(deptPositionList.get(0))) {
+                    String deptPosition = deptPositionList.get(0);
+                    deptPositionList = Arrays.asList(deptPosition.split(","));
+                } else {
+                    deptPositionList = Collections.emptyList();
+                }
+
+                for (String position : deptPositionList) {
+                    if (StringUtils.isNotBlank(position)) {
+                        positionList.add(position);
+                    }
+                }
+            }
+
+            for (String position : positionList) {
+                Map<String, String> map = new HashMap<>();
+                map.put("name", position);
+                resultList.add(map);
+            }
+
+            Map<String, Object> responseData = new HashMap<>();
+
+            responseData.put(Constants.COUNT, resultList.size());
+            responseData.put(Constants.CONTENT, resultList);
+            response.getResult().put(Constants.RESPONSE, responseData);
+        } catch (Exception e) {
+            errMsg = String.format("Failed to get positions for orgIdList. Exception: ", e.getMessage());
+            logger.error(errMsg);
+            response.getParams().setStatus(Constants.FAILED);
+            response.getParams().setErrmsg(errMsg);
+            response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return response;
+    }
+
+    private String validateRequestForPosition(Map<String, Object> request) {
+        String errMsg = "";
+        Map<String, Object> requestObj = (Map<String, Object>) request.get(Constants.REQUEST);
+        if (ObjectUtils.isEmpty(requestObj)) {
+            errMsg = "Request object is not proper.";
+        } else {
+            List<String> orgIdList = (List<String>) requestObj.get(Constants.ORG_ID_LIST);
+            if (CollectionUtils.isEmpty(orgIdList)) {
+                errMsg = "orgIdList is empty in request";
+            }
+        }
+        return errMsg;
+    }
 }

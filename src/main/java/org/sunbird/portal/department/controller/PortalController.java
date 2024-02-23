@@ -1,6 +1,7 @@
 package org.sunbird.portal.department.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -34,4 +35,9 @@ public class PortalController {
 		return new ResponseEntity<>(portalService.searchDept(deptName), HttpStatus.OK);
 	}
 	// ----------------- END of Public APIs --------------------
+
+	@GetMapping("/portal/admin/listDeptNames")
+	public ResponseEntity<List<Map<String,String>>> getDeptNameListByAdmin() {
+		return new ResponseEntity<>(portalService.getDeptNameListByAdmin(), HttpStatus.OK);
+	}
 }

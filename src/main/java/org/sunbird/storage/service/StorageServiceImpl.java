@@ -180,7 +180,14 @@ public class StorageServiceImpl implements StorageService {
 				logger.error("User is not authorized to download the file for other org: " + rootOrgId + ", request orgId " + orgId);
 				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 			}
-			String objectKey = serverProperties.getReportDownloadFolderName() + "/" + reportType + "/" + date + "/" + orgId + "/" + fileName;
+			String objectKey = "";
+			if (serverProperties.getReportPropertyFileAllMdo().contains(fileName)) {
+				String reportSubFolderName = fileName.replace(".csv", "");
+				objectKey = serverProperties.getReportDownloadFolderName() + "/" + reportType + "/" + date + "/" + reportSubFolderName + "/" + fileName;
+			} else {
+				objectKey = serverProperties.getReportDownloadFolderName() + "/" + reportType + "/" + date + "/" + orgId + "/" + fileName;
+			}
+
 			storageService.download(serverProperties.getReportDownloadContainerName(), objectKey, Constants.LOCAL_BASE_PATH,
 					Option.apply(Boolean.FALSE));
 			Path tmpPath = Paths.get(Constants.LOCAL_BASE_PATH + fileName);
@@ -235,7 +242,13 @@ public class StorageServiceImpl implements StorageService {
 					}
 				}*/
 			String fileName = reportFileNameMap.get(reportType);
-			String objectKey = serverProperties.getReportDownloadFolderName() + "/" + reportType + "/" + todayFormattedDate + "/" + mdoId + "/" + fileName;
+			String objectKey = "";
+			if (serverProperties.getReportPropertyFileAllMdo().contains(fileName)) {
+				String reportSubFolderName = fileName.replace(".csv", "");
+				objectKey = serverProperties.getReportDownloadFolderName() + "/" + reportType + "/" + todayFormattedDate + "/" + reportSubFolderName + "/" + fileName;
+			} else {
+				objectKey = serverProperties.getReportDownloadFolderName() + "/" + reportType + "/" + todayFormattedDate + "/" + mdoId + "/" + fileName;
+			}
 			try {
 				Model.Blob blob = storageService.getObject(serverProperties.getReportDownloadContainerName(), objectKey, Option.apply(Boolean.FALSE));
 				if (blob != null) {
@@ -246,7 +259,12 @@ public class StorageServiceImpl implements StorageService {
 				logger.error("Failed to read the downloaded file for url: " + objectKey);
 				LocalDateTime yesterday = now.minusDays(1);
 				String yesterdayFormattedDate = yesterday.format(dateFormat);
-				objectKey = serverProperties.getReportDownloadFolderName() + "/" + reportType + "/" + yesterdayFormattedDate + "/" + mdoId + "/" + fileName;
+				if (serverProperties.getReportPropertyFileAllMdo().contains(fileName)) {
+					String reportSubFolderName = fileName.replace(".csv", "");
+					objectKey = serverProperties.getReportDownloadFolderName() + "/" + reportType + "/" + yesterdayFormattedDate + "/" + reportSubFolderName + "/" + fileName;
+				} else {
+					objectKey = serverProperties.getReportDownloadFolderName() + "/" + reportType + "/" + yesterdayFormattedDate + "/" + mdoId + "/" + fileName;
+				}
 				try {
 					Model.Blob blob = storageService.getObject(serverProperties.getReportDownloadContainerName(), objectKey, Option.apply(Boolean.FALSE));
 					if (blob != null) {

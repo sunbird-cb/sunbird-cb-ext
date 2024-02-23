@@ -39,22 +39,35 @@ public class OutboundRequestHandlerServiceImpl {
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
 		Object response = null;
+		StringBuilder str = null;
 		try {
 			HttpHeaders headers = new HttpHeaders();
+			headers.setContentType(MediaType.APPLICATION_JSON);
 			HttpEntity<Object> entity = new HttpEntity<>(request, headers);
-			response = restTemplate.postForObject(uri, entity, Map.class);
 			if (log.isDebugEnabled()) {
-				StringBuilder str = new StringBuilder(this.getClass().getCanonicalName())
+				str = new StringBuilder(this.getClass().getCanonicalName())
 						.append(Constants.FETCH_RESULT_CONSTANT).append(System.lineSeparator());
 				str.append(Constants.URI_CONSTANT).append(uri).append(System.lineSeparator());
 				str.append(Constants.REQUEST_CONSTANT).append(mapper.writeValueAsString(request))
 						.append(System.lineSeparator());
+				log.debug(str.toString());
+			}
+			response = restTemplate.postForObject(uri, entity, Map.class);
+			if (log.isDebugEnabled()) {
+				str = new StringBuilder(this.getClass().getCanonicalName())
+						.append(Constants.FETCH_RESULT_CONSTANT).append(System.lineSeparator());
 				str.append(Constants.RESPONSE_CONSTANT).append(mapper.writeValueAsString(response))
 						.append(System.lineSeparator());
 				log.debug(str.toString());
 			}
 		} catch (HttpClientErrorException e) {
-			log.error(e);
+			try {
+				response = (new ObjectMapper()).readValue(e.getResponseBodyAsString(),
+						new TypeReference<HashMap<String, Object>>() {
+						});
+			} catch (Exception e1) {
+			}
+			log.error("Failed to get details. ", e);
 		} catch (Exception e) {
 			log.error(e);
 		}

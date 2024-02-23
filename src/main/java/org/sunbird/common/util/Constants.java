@@ -248,6 +248,7 @@ public class Constants {
 	public static final String TABLE_RATINGS_LOOKUP = "ratings_lookup";
 	public static final String TABLE_RATINGS_SUMMARY = "ratings_summary";
 	public static final String TABLE_EXPLORE_COURSE_LIST = "explore_course_list";
+	public static final String TABLE_EXPLORE_COURSE_LIST_V2 = "explore_course_list_v2";
 	public static final String VALUE = "value";
 	public static final String DEPT_NAME = "deptName";
 	public static final String PROFILE_DETAILS = "profileDetails";
@@ -961,19 +962,34 @@ public class Constants {
 	public static final String COMPETENCY_THEME_PARAM = "competency_theme";
 	public static final String COMPETENCY_SUB_THEME_PARAM = "competency_subtheme";
 	public static final String COPY_EMAIL = "copyEmail";
+
+	public static final String USER_CONTENT_RECOMMENDATION = "user.v1.content.recommendation";
+	public static final String RECOMMEND_CONTENT_SUBJECT = " recommends this iGOT Karmayogi #primaryCategory for you!";
+	public static final String COURSE_POSTER_IMAGE_URL= "coursePosterImageUrl";
+	public static final String COURSE_PROVIDER = "courseProvider";
+	public static final String RECIPIENTS = "recipients";
+	public static final String OVERVIEW = "overview";
+	public static final String CATEGORY = "category";
+	public static final String ORG_ID_LIST = "orgIdList";
 	public static final String EHRMS = "ehrms";
 	public static final String EMP_CODE = "emp_code";
 	public static final String EHRMS_AUTH_USERNAME = "username";
 	public static final String EHRMS_AUTH_PASSWORD = "password";
 	public static final String USER_ID_LOWER = "userid";
 	public static final String EHRMS_USER_TOKEN = "ehrmsUserToken";
-
 	public static final String API_READ_WHEEBOX_RESULT = "api.wheebox.read.result";
-
-    private Constants() {
+	public static final String DOC_ID = "docId";
+	public static final String DIGI_LOCKER_ID = "digiLockerId";
+	public static final String ACCESS_TOKEN = "accessToken";
+	public static final String CERTIFICATE_ID = "certificateId";
+	public static final String CERTIFICATE_NAME = "certificateName";
+	public static final String LAST_ISSUED_ON = "lastIssuedOn";
+	public static final String TABLE_DIGILOCKER_DOC_INFO = "test_digilocker_doc_lookup";
+	public static final String ISSUED_USER_CERTIFICATE = "issuedCertificates";
+	public static final String DOC_TYPE = "docType";
+  public static final String PRIMARY_CATEGORY_TAG = "#primaryCategory";
+  private Constants() {
 		throw new IllegalStateException("Utility class");
 	}
-
-
 
 }
