@@ -651,21 +651,6 @@ public class CbExtServerProperties {
 	@Value("${notify.service.path.async}")
 	private String notifyServicePathAsync;
 
-	@Value("${ehrms.detail.url}")
-	private String ehrmsDetailUrl;
-
-	@Value("${ehrms.auth.url}")
-	private String ehrmsAuthUrl;
-
-	@Value("${ehrms.auth.username}")
-	private String ehrmsAuthUserName;
-
-	@Value("${ehrms.auth.password}")
-	private String ehrmsAuthPassword;
-
-	@Value("${redis.ehrms.token.timeout}")
-	private Integer redisEhrmsTokenTimeOut;
-
 	@Value("${cert-registry-service-host}")
 	private String certRegistryServiceBaseUrl;
 
