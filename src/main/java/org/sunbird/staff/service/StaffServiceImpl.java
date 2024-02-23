@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -186,7 +187,7 @@ public class StaffServiceImpl implements StaffService {
 	 *            String
 	 * @throws Exception
 	 */
-	private void saveAuditDetails(StaffInfo data, String userId) throws Exception {
+	private void saveAuditDetails(StaffInfo data, String userId) throws JsonProcessingException {
 		Map<String, Object> auditMap = new HashMap<>();
 		auditMap.put(Constants.ORG_ID, data.getOrgId());
 		auditMap.put(Constants.AUDIT_TYPE, Constants.STAFF);

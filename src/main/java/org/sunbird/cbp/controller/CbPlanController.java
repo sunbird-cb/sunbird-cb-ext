@@ -21,7 +21,7 @@ public class CbPlanController {
     public ResponseEntity<SBApiResponse> createCbPlan(
             @RequestBody SunbirdApiRequest request,
             @RequestHeader(Constants.X_AUTH_TOKEN) String token,
-            @RequestHeader(Constants.X_AUTH_USER_ORG_ID) String userOrgId) throws Exception {
+            @RequestHeader(Constants.X_AUTH_USER_ORG_ID) String userOrgId) {
 
         SBApiResponse response = cbPlanService.createCbPlan(request, userOrgId, token);
         return new ResponseEntity<>(response, response.getResponseCode());
@@ -32,7 +32,7 @@ public class CbPlanController {
             @RequestBody SunbirdApiRequest request,
             @RequestHeader(Constants.X_AUTH_TOKEN) String token,
             @RequestHeader(Constants.X_AUTH_USER_ORG_ID) String userOrgId,
-            @RequestHeader(Constants.X_AUTH_USER_ROLES) List<String> userRoles) throws Exception {
+            @RequestHeader(Constants.X_AUTH_USER_ROLES) List<String> userRoles) {
 
         SBApiResponse response = cbPlanService.updateCbPlan(request, userOrgId, token, userRoles);
         return new ResponseEntity<>(response, response.getResponseCode());
@@ -43,7 +43,7 @@ public class CbPlanController {
             @RequestBody SunbirdApiRequest request,
             @RequestHeader(Constants.X_AUTH_TOKEN) String token,
             @RequestHeader(Constants.X_AUTH_USER_ORG_ID) String userOrgId,
-            @RequestHeader(Constants.X_AUTH_USER_ROLES) List<String> userRoles) throws Exception {
+            @RequestHeader(Constants.X_AUTH_USER_ROLES) List<String> userRoles) {
 
         SBApiResponse response = cbPlanService.publishCbPlan(request, userOrgId, token, userRoles);
         return new ResponseEntity<>(response, response.getResponseCode());
@@ -54,7 +54,7 @@ public class CbPlanController {
             @RequestBody SunbirdApiRequest request,
             @RequestHeader(Constants.X_AUTH_TOKEN) String token,
             @RequestHeader(Constants.X_AUTH_USER_ORG_ID) String userOrgId,
-            @RequestHeader(Constants.X_AUTH_USER_ROLES) List<String> userRoles) throws Exception {
+            @RequestHeader(Constants.X_AUTH_USER_ROLES) List<String> userRoles) {
 
         SBApiResponse response = cbPlanService.retireCbPlan(request, userOrgId, token, userRoles);
         return new ResponseEntity<>(response, response.getResponseCode());
@@ -64,7 +64,7 @@ public class CbPlanController {
     public ResponseEntity<SBApiResponse> readCbPlan(
             @PathVariable("cbPlanId") String cbPlanId,
             @RequestHeader(Constants.X_AUTH_TOKEN) String token,
-            @RequestHeader(Constants.X_AUTH_USER_ORG_ID) String userOrgId) throws Exception {
+            @RequestHeader(Constants.X_AUTH_USER_ORG_ID) String userOrgId) {
 
         SBApiResponse response = cbPlanService.readCbPlan(cbPlanId, userOrgId, token);
         return new ResponseEntity<>(response, response.getResponseCode());
@@ -82,7 +82,7 @@ public class CbPlanController {
     @GetMapping("/v1/user/list")
     public ResponseEntity<SBApiResponse> getCBPlanListForUser(
             @RequestHeader(Constants.X_AUTH_TOKEN) String token,
-            @RequestHeader(Constants.X_AUTH_USER_ORG_ID)String userOrgId) throws Exception {
+            @RequestHeader(Constants.X_AUTH_USER_ORG_ID)String userOrgId) {
 
         SBApiResponse response = cbPlanService.getCBPlanListForUser(userOrgId, token);
         return new ResponseEntity<>(response, response.getResponseCode());
@@ -91,7 +91,7 @@ public class CbPlanController {
     @GetMapping("/v1/private/user/list")
     public ResponseEntity<SBApiResponse> getPrivateCBPlanListForUser(
             @RequestHeader(Constants.X_AUTH_USER_ID) String userId,
-            @RequestHeader(Constants.X_AUTH_USER_ORG_ID)String userOrgId) throws Exception {
+            @RequestHeader(Constants.X_AUTH_USER_ORG_ID)String userOrgId) {
 
         SBApiResponse response = cbPlanService.getCBPlanListForUser(userOrgId, userId,true);
         return new ResponseEntity<>(response, response.getResponseCode());

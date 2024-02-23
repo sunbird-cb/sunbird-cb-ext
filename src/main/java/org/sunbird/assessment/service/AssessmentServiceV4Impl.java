@@ -703,7 +703,7 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
 
     private String validateSubmitAssessmentRequest(Map<String, Object> submitRequest, String userId,
             List<Map<String, Object>> hierarchySectionList, List<Map<String, Object>> sectionListFromSubmitRequest,
-            Map<String, Object> assessmentHierarchy, Map<String, Object> existingAssessmentData,String token,boolean editMode) throws Exception {
+            Map<String, Object> assessmentHierarchy, Map<String, Object> existingAssessmentData,String token,boolean editMode) throws IOException {
         submitRequest.put(Constants.USER_ID, userId);
         if (StringUtils.isEmpty((String) submitRequest.get(Constants.IDENTIFIER))) {
             return Constants.INVALID_ASSESSMENT_ID;
@@ -765,7 +765,7 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
 
     private String validateIfQuestionIdsAreSame(Map<String, Object> submitRequest,
             List<Map<String, Object>> sectionListFromSubmitRequest, List<String> desiredKeys, String userId,
-            Map<String, Object> existingAssessmentData) throws Exception {
+            Map<String, Object> existingAssessmentData) throws IOException {
         String questionSetFromAssessmentString = (String) existingAssessmentData
                 .get(Constants.ASSESSMENT_READ_RESPONSE_KEY);
         if (StringUtils.isNotBlank(questionSetFromAssessmentString)) {

@@ -22,25 +22,25 @@ public class UserRegistrationController {
 	UserRegistrationService userRegService;
 
 	@PostMapping("/user/registration/v1/register")
-	public ResponseEntity<SBApiResponse> registerUser(@RequestBody UserRegistrationInfo userRegIno) throws Exception {
+	public ResponseEntity<SBApiResponse> registerUser(@RequestBody UserRegistrationInfo userRegIno) {
 		SBApiResponse response = userRegService.registerUser(userRegIno);
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
 
 	@GetMapping("/user/registration/v1/getUserRegistrationDetails")
-	public ResponseEntity<SBApiResponse> getUserRegistrationDetails(@RequestParam String regCode) throws Exception {
+	public ResponseEntity<SBApiResponse> getUserRegistrationDetails(@RequestParam String regCode) {
 		SBApiResponse response = userRegService.getUserRegistrationDetails(regCode);
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
 
 	@GetMapping("/user/registration/v1/getDeptDetails")
-	public ResponseEntity<SBApiResponse> getDeptDetails() throws Exception {
+	public ResponseEntity<SBApiResponse> getDeptDetails() {
 		SBApiResponse response = userRegService.getDeptDetails();
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
 
 	@PostMapping("/user/otp/v1/generate")
-	public ResponseEntity<SBApiResponse> generateOTP(@RequestBody Map<String, Object> otpRequests) throws Exception {
+	public ResponseEntity<SBApiResponse> generateOTP(@RequestBody Map<String, Object> otpRequests) {
 		SBApiResponse response = userRegService.generateOTP(otpRequests);
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
