@@ -136,6 +136,7 @@ public class KeyCloakConnectionProvider {
    * @author Manzarul
    */
   static class ResourceCleanUp extends Thread {
+    @Override
     public void run() {
       if (null != keycloak) {
         keycloak.close();

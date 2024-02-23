@@ -90,7 +90,6 @@ public class CbplanContentConsumer {
     }
 
     public List<String> getCBPAdminDetails(Set<String> rootOrgIds){
-        List<Map<String, String>> userRecords = new ArrayList<>();
         Map<String, Object> request = getSearchObject(rootOrgIds);
         HashMap<String, String> headersValue = new HashMap<>();
         headersValue.put("Content-Type", "application/json");

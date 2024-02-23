@@ -65,7 +65,7 @@ public class CatalogServiceImpl {
 			}
 		}
 
-		// TODO - Enrich Consumption details for the given term name.
+		// Enrich Consumption details for the given term name.
 		return catalog;
 	}
 }

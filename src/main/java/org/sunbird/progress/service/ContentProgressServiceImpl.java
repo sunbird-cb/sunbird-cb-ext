@@ -101,7 +101,6 @@ public class ContentProgressServiceImpl implements ContentProgressService {
                     }
                 }));
             }
-            //final Map<String, Map<String, Object>> contentMaps = prepareProgressDetailsMap(contentProgressInfo.getContentId());
             logger.info(" Troubleshoot start of the getUserContentConsumptionDetails : 1");
             List<Map<String, Object>> userContentConsumptionList = getUserContentConsumptionDetails(contentProgressInfo, usersList);
             logger.info(" Troubleshoot End of the getUserContentConsumptionDetails : 1");
@@ -109,9 +108,6 @@ public class ContentProgressServiceImpl implements ContentProgressService {
             userContentConsumptionList.forEach(contentMap -> {
                 String userId = (String) contentMap.get(Constants.USER_ID);
                 String contentId = (String) contentMap.get("contentid");
-               /* userDetailsList.get(userId).computeIfAbsent(Constants.PROGRESS_DETAILS, key -> {
-                    return new HashMap<>(contentMaps);
-                });*/
                 contentMap.remove(Constants.USER_ID);
                 Map<String, Object> userMap = userDetailsList.get(userId);
                 if (userMap.containsKey(Constants.PROGRESS_DETAILS)) {
@@ -192,17 +188,6 @@ public class ContentProgressServiceImpl implements ContentProgressService {
                 })
                 .collect(Collectors.toList());
     }
-
-    /*private Map<String, Map<String, Object>> prepareProgressDetailsMap(List<String> contentIdList) {
-        Map<String, Map<String, Object>> progressDetailsMap = new HashMap<String, Map<String, Object>>();
-        for (String contentId : contentIdList) {
-            Map<String, Object> progressMap = new HashMap<String, Object>();
-            progressMap.put("contentId", contentId);
-            progressMap.put("status", 0);
-            progressDetailsMap.put(contentId, progressMap);
-        }
-        return progressDetailsMap;
-    }*/
 
     private void validateContentProgressInfo(ContentProgressInfo contentProgressInfo) {
         if (StringUtils.isEmpty(contentProgressInfo.getBatchId())) {

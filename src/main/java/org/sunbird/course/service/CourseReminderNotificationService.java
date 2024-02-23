@@ -103,9 +103,8 @@ public class CourseReminderNotificationService {
 
 	private void fetchCourseIdsAndSetCourseNameAndThumbnail(List<Map<String, Object>> userCoursesList)
 			throws IOException {
-		Set<Object> courseIds = new HashSet<>();
 		List<String> desiredKeys = Collections.singletonList(Constants.COURSE_ID);
-		courseIds = userCoursesList.stream()
+		Set<Object> courseIds = userCoursesList.stream()
 				.flatMap(x -> desiredKeys.stream().filter(x::containsKey).distinct().map(x::get))
 				.collect(Collectors.toSet());
 		getAndSetCourseName(courseIds);

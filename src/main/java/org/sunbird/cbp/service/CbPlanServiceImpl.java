@@ -499,7 +499,6 @@ public class CbPlanServiceImpl implements CbPlanService {
                     if (!courseDetailsMap.containsKey(courseId)) {
                         contentDetails = contentService.readContentFromCache(courseId, null);
                         if (MapUtils.isNotEmpty(contentDetails)) {
-                            //if (Constants.LIVE.equalsIgnoreCase((String) contentDetails.get(Constants.STATUS))) {
                             if (courseId.contains("_rc")) {
                                 if (isVerifiedKaramyogi != null && isVerifiedKaramyogi) {
                                     Map<String, Object> secureSettings = (Map<String, Object>) contentDetails.get(Constants.SECURE_SETTINGS);
@@ -733,7 +732,7 @@ public class CbPlanServiceImpl implements CbPlanService {
         boolean isUpdatedLookup = false;
         List<Map<String, Object>> cbPlanMap = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
                 Constants.TABLE_CB_PLAN_LOOKUP, cbPlanInfo, null);
-        List<String> cbPlanInfoInsertAssignmentKey = new ArrayList<>();
+        List<String> cbPlanInfoInsertAssignmentKey;
         List<String> cbPlanInfoUpdateAssignmentKey = new ArrayList<>();
         List<String> cbPlanInfoRequestUpdateAssignmentKey = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(cbPlanMap)) {
@@ -1017,7 +1016,8 @@ public class CbPlanServiceImpl implements CbPlanService {
             return errMsg;
         }
 
-        String contentType, assignmentType;
+        String contentType;
+        String assignmentType;
         contentType = (String) searchReq.getFilters().get(Constants.CONTENT_TYPE);
         assignmentType = (String) searchReq.getFilters().get(Constants.CB_ASSIGNMENT_TYPE);
 
