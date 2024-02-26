@@ -494,20 +494,14 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 			Map<String, Object> sortByMap = new HashMap<>();
 			sortByMap.put(Constants.CHANNEL, Constants.ASC_ORDER);
 			requestMap.put(Constants.SORT_BY, sortByMap);
-			requestMap.put(Constants.FILTERS, new HashMap<String, Object>() {
-				{
-					put(Constants.IS_TENANT, Boolean.TRUE);
-				}
-			});
-
+			Map<String, Object> filtersMap = new HashMap<>();
+			filtersMap.put(Constants.IS_TENANT, Boolean.TRUE);
+			requestMap.put(Constants.FILTERS, filtersMap);
 			String serviceURL = serverProperties.getSbUrl() + serverProperties.getSbOrgSearchPath();
+			Map<String, Object> requestBody = new HashMap<>();
+			requestBody.put(Constants.REQUEST, requestMap);
 			SunbirdApiResp orgResponse = mapper.convertValue(
-					outboundRequestHandlerService.fetchResultUsingPost(serviceURL, new HashMap<String, Object>() {
-						{
-							put(Constants.REQUEST, requestMap);
-						}
-					}), SunbirdApiResp.class);
-
+					outboundRequestHandlerService.fetchResultUsingPost(serviceURL, requestBody), SunbirdApiResp.class);
 			SunbirdApiResultResponse resultResp = orgResponse.getResult().getResponse();
 			count = resultResp.getCount();
 			iterateCount = iterateCount + resultResp.getContent().size();
@@ -518,7 +512,6 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 					orgNameList.add(content.getChannel());
 				}
 			}
-
 			List<String> masterOrgList = getMasterOrgList();
 			for (String orgName : masterOrgList) {
 				if (!orgNameList.contains(orgName)) {
@@ -526,11 +519,9 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 				}
 			}
 		} while (count != iterateCount);
-
 		if (CollectionUtils.isEmpty(orgList)) {
 			throw new Exception("Failed to retrieve organisation details.");
 		}
-
 		Map<String, List<DeptPublicInfo>> deptListMap = new HashMap<String, List<DeptPublicInfo>>();
 		deptListMap.put(Constants.DEPARTMENT_LIST_CACHE_NAME, orgList);
 		redisCacheMgr.putCache(Constants.DEPARTMENT_LIST_CACHE_NAME, deptListMap);

@@ -148,16 +148,13 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		// headers
 		HttpHeaders headers = new HttpHeaders();
 		// request body
+		Map<String, Object> filtersMap = new HashMap<>();
+		filtersMap.put(Constants.USER_ID, userIds);
 		SunbirdApiRequest requestObj = new SunbirdApiRequest();
 		Map<String, Object> reqMap = new HashMap<>();
-		reqMap.put(Constants.FILTERS, new HashMap<String, Object>() {
-			{
-				put(Constants.USER_ID, userIds);
-			}
-		});
+		reqMap.put(Constants.FILTERS, filtersMap);
 		reqMap.put(Constants.FIELDS_CONSTANT, fields);
 		requestObj.setRequest(reqMap);
-
 		try {
 			String url = props.getSbUrl() + props.getUserSearchEndPoint();
 			HttpEntity<?> requestEnty = new HttpEntity<>(requestObj, headers);
@@ -414,16 +411,13 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 	@Override
 	public Map<String, Map<String, String>> getUserDetails(List<String> userIds, List<String> fields) {
 		// request body
+		Map<String, Object> filtersMap = new HashMap<>();
+		filtersMap.put(Constants.USER_ID, userIds);
 		SunbirdApiRequest requestObj = new SunbirdApiRequest();
 		Map<String, Object> reqMap = new HashMap<>();
-		reqMap.put(Constants.FILTERS, new HashMap<String, Object>() {
-			{
-				put(Constants.USER_ID, userIds);
-			}
-		});
+		reqMap.put(Constants.FILTERS, filtersMap);
 		reqMap.put(Constants.FIELDS_CONSTANT, fields);
 		requestObj.setRequest(reqMap);
-
 		try {
 			String url = props.getSbUrl() + props.getUserSearchEndPoint();
 			Map<String, Object> apiResponse = outboundRequestHandlerService.fetchResultUsingPost(url, requestObj, null);
@@ -530,22 +524,17 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 	@Override
 	public boolean isUserExist(String key, String value) {
 		// request body
+		Map<String, Object> filtersMap = new HashMap<>();
+		filtersMap.put(key, value);
 		SunbirdApiRequest requestObj = new SunbirdApiRequest();
 		Map<String, Object> reqMap = new HashMap<>();
-		reqMap.put(Constants.FILTERS, new HashMap<String, Object>() {
-			{
-				put(key, value);
-			}
-		});
+		reqMap.put(Constants.FILTERS, filtersMap);
 		requestObj.setRequest(reqMap);
-
 		HashMap<String, String> headersValue = new HashMap<>();
 		headersValue.put(Constants.CONTENT_TYPE, "application/json");
 		headersValue.put(Constants.AUTHORIZATION, props.getSbApiKey());
-
 		try {
 			String url = props.getSbUrl() + props.getUserSearchEndPoint();
-
 			Map<String, Object> response = outboundRequestHandlerService.fetchResultUsingPost(url, requestObj,
 					headersValue);
 			if (response != null && "OK".equalsIgnoreCase((String) response.get("responseCode"))) {

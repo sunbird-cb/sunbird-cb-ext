@@ -180,11 +180,6 @@ public class ProfileServiceImpl implements ProfileService {
 					}
 				}
 				//This field is updated via approval
-				/*if (validateJsonAgainstSchema(existingProfileDetails)) {
-					existingProfileDetails.put(Constants.VERIFIED_KARMAYOGI, true);
-				} else {
-					existingProfileDetails.put(Constants.VERIFIED_KARMAYOGI, false);
-				}*/
 				Map<String, Object> updateRequestValue = requestData;
 				updateRequestValue.put(Constants.PROFILE_DETAILS, existingProfileDetails);
 				Map<String, Object> updateRequest = new HashMap<>();
@@ -991,22 +986,16 @@ public class ProfileServiceImpl implements ProfileService {
 	}
 
 	private Map<String, Object> getUserMigrateRequest(String userId, String channel, boolean isSelfMigrate) {
-		Map<String, Object> requestBody = new HashMap<String, Object>() {
-			{
-				put(Constants.USER_ID, userId);
-				put(Constants.CHANNEL, channel);
-				put(Constants.SOFT_DELETE_OLD_ORG, true);
-				put(Constants.NOTIFY_MIGRATION, false);
-				if (!isSelfMigrate) {
-					put(Constants.FORCE_MIGRATION, true);
-				}
-			}
-		};
-		Map<String, Object> request = new HashMap<String, Object>() {
-			{
-				put(Constants.REQUEST, requestBody);
-			}
-		};
+		Map<String, Object> requestBody = new HashMap<>();
+		requestBody.put(Constants.USER_ID, userId);
+		requestBody.put(Constants.CHANNEL, channel);
+		requestBody.put(Constants.SOFT_DELETE_OLD_ORG, true);
+		requestBody.put(Constants.NOTIFY_MIGRATION, false);
+		if (!isSelfMigrate) {
+			requestBody.put(Constants.FORCE_MIGRATION, true);
+		}
+		Map<String, Object> request = new HashMap<>();
+		request.put(Constants.REQUEST, requestBody);
 		return request;
 	}
 
@@ -1083,18 +1072,14 @@ public class ProfileServiceImpl implements ProfileService {
 		if (existingProfile.containsKey(Constants.PROFESSIONAL_DETAILS)) {
 			professionalDetails = (List<Map<String, Object>>) existingProfile.get(Constants.PROFESSIONAL_DETAILS);
 		} else {
-			professionalDetails = new ArrayList<Map<String, Object>>() {
-				{
+			professionalDetails = new ArrayList<>();
 					Map<String, Object> profDetail = new HashMap<>();
 					profDetail.put(Constants.OSID, UUID.randomUUID().toString());
-					add(profDetail);
-				}
-			};
-			existingProfile.put(Constants.PROFESSIONAL_DETAILS, professionalDetails);
+					professionalDetails.add(profDetail);
+					existingProfile.put(Constants.PROFESSIONAL_DETAILS, professionalDetails);
 		}
 		professionalDetails.get(0).put(Constants.GROUP, request.get(Constants.GROUP));
 		professionalDetails.get(0).put(Constants.ORGANIZATION_TYPE, Constants.GOVERNMENT);
-
 		Map<String, Object> empDetails;
 		if (existingProfile.containsKey(Constants.EMPLOYMENTDETAILS)) {
 			empDetails = (Map<String, Object>) existingProfile.get(Constants.EMPLOYMENTDETAILS);
