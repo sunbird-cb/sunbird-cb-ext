@@ -21,20 +21,20 @@ public class KarmaPointsController {
     @PostMapping("/v1/karmapoints/read")
     public ResponseEntity<Map<String, Object>> fetchKarmaPointsData(@RequestBody KarmaPointsRequest request,
                                                                     @RequestHeader("x-authenticated-user-orgid") String userOrgId,
-                                                                    @RequestHeader("x-authenticated-userid") String userId) throws Exception {
+                                                                    @RequestHeader("x-authenticated-userid") String userId) {
         Map<String, Object> karmaPointsDataMap = karmaPointsService.fetchKarmaPointsData(userId, request);
         return new ResponseEntity<>(karmaPointsDataMap, HttpStatus.OK);
     }
 
     @PostMapping("/v1/user/course/karmapoints/read")
     public ResponseEntity<Map<String, Object>> readCourseKp(@RequestBody Map<String, Object> requestBody,
-                                                            @RequestHeader("x-authenticated-userid") String userId) throws Exception {
+                                                            @RequestHeader("x-authenticated-userid") String userId) {
         Map<String, Object> karmaPointsDataMap = karmaPointsService.fetchKarmaPointsUserCourse(userId, requestBody);
         return new ResponseEntity<>(karmaPointsDataMap, HttpStatus.OK);
     }
 
     @PostMapping("/v1/claimkarmapoints")
-    public ResponseEntity<Map<String, Object>> claimACBPKarmaPoints(@RequestBody ClaimKarmaPointsRequest request) throws Exception {
+    public ResponseEntity<Map<String, Object>> claimACBPKarmaPoints(@RequestBody ClaimKarmaPointsRequest request) {
         karmaPointsService.claimKarmaPoints(request);
         return new ResponseEntity<>(HttpStatus.OK);
     }
