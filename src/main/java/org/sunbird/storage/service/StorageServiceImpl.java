@@ -300,7 +300,8 @@ public class StorageServiceImpl implements StorageService {
 			try {
 				File file = new File(Constants.LOCAL_BASE_PATH + fileName);
 				if (file.exists()) {
-					file.delete();
+					boolean isFileDeleted = file.delete();
+					logger.debug("Status of file deleted is {}", isFileDeleted);
 				}
 			} catch (Exception e1) {
 			}

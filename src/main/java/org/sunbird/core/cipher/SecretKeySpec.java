@@ -18,7 +18,7 @@ public class SecretKeySpec implements KeySpec, SecretKey {
 
 	@PostConstruct
 	public void postConstruct() {
-		this.key = (byte[]) Constants.CIPHER_KEY.clone();
+		this.key = Constants.CIPHER_KEY.clone();
 		this.algorithm = Constants.CIPHER_ALGORITHM;
 	}
 
