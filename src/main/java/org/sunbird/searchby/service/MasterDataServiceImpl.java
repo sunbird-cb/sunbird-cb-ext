@@ -133,7 +133,7 @@ public class MasterDataServiceImpl implements MasterDataService {
                 Map<String, Object> updateResponse = cassandraOperation.updateRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_MASTER_DATA, updateRequest, request);
                 if (updateResponse != null
                         && !Constants.SUCCESS.equalsIgnoreCase((String) updateResponse.get(Constants.RESPONSE))) {
-                    errMsg = String.format("Failed to update details");
+                    errMsg = "Failed to update details";
                     response.getParams().setErrmsg(errMsg);
                     return response;
                 }
@@ -145,7 +145,7 @@ public class MasterDataServiceImpl implements MasterDataService {
                 request.put(Constants.CONTEXT_DATA, masterData.get(Constants.CONTEXT_DATA));
                 response = cassandraOperation.insertRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_MASTER_DATA, request);
                 if (!Constants.SUCCESS.equalsIgnoreCase((String) response.get(Constants.RESPONSE))) {
-                    errMsg = String.format("Failed to Create position");
+                    errMsg = "Failed to Create position";
                     response.setResponseCode(HttpStatus.BAD_REQUEST);
                     response.getParams().setErrmsg(errMsg);
                     return response;
@@ -391,7 +391,7 @@ public class MasterDataServiceImpl implements MasterDataService {
             responseData.put(Constants.CONTENT, resultList);
             response.getResult().put(Constants.RESPONSE, responseData);
         } catch (Exception e) {
-            errMsg = String.format("Failed to get positions for orgIdList. Exception: ", e.getMessage());
+            errMsg = String.format("Failed to get positions for orgIdList. Exception: %s", e.getMessage());
             logger.error(errMsg);
             response.getParams().setStatus(Constants.FAILED);
             response.getParams().setErrmsg(errMsg);

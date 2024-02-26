@@ -233,7 +233,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 			 * 1. Create User 2. Read created User 3. Update User 4. Create NodeBB user Id
 			 * 5. Assign Role 6. Reset Password and get activation link
 			 */
-			logger.info("Initiated User Creation flow for Reg. Code :: " + registrationCode);
+			logger.info("Initiated User Creation flow for Reg. Code :: {}", registrationCode);
 			UserRegistration userReg = getUserRegistrationForRegCode(registrationCode);
 
 			// Create the org if it's not already onboarded.
@@ -263,7 +263,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 			if (userUtilityService.createUser(userReg)) {
 				logger.info("Successfully completed user creation flow.");
 			} else {
-				logger.error("Failed to create user for Reg.Code :: " + registrationCode);
+				logger.error("Failed to create user for Reg.Code :: {}", registrationCode);
 				regStatus = UserRegistrationStatus.FAILED;
 			}
 

@@ -773,7 +773,7 @@ public class ProfileServiceImpl implements ProfileService {
 			sendBulkUploadNotification(orgId, channel, (String) uploadResponse.getResult().get(Constants.URL));
 		} catch (Exception e) {
 			setErrorData(response,
-					String.format("Failed to process user bulk upload request. Error: ", e.getMessage()));
+					String.format("Failed to process user bulk upload request. Error: %s", e.getMessage()));
 		}
 		return response;
 	}
@@ -794,7 +794,7 @@ public class ProfileServiceImpl implements ProfileService {
 			response.getResult().put(Constants.COUNT, bulkUploadList != null ? bulkUploadList.size() : 0);
 		} catch (Exception e) {
 			setErrorData(response,
-					String.format("Failed to get user bulk upload request status. Error: ", e.getMessage()));
+					String.format("Failed to get user bulk upload request status. Error: %s", e.getMessage()));
 		}
 		return response;
 	}

@@ -67,8 +67,7 @@ public class UserBulkUploadService {
                     e);
         }
         duration = System.currentTimeMillis() - startTime;
-        logger.info("UserBulkUploadService:: initiateUserBulkUploadProcess: Completed. Time taken: "
-                + duration + " milli-seconds");
+        logger.info("UserBulkUploadService:: initiateUserBulkUploadProcess: Completed. Time taken: {} milli-seconds", duration );
     }
 
     public void updateUserBulkUploadStatus(String rootOrgId, String identifier, String status, int totalRecordsCount,
@@ -268,8 +267,7 @@ public class UserBulkUploadService {
                         }
                     }
                     duration = System.currentTimeMillis() - startTime;
-                    logger.info("UserBulkUploadService:: Record Completed. Time taken: "
-                            + duration + " milli-seconds");
+                    logger.info("UserBulkUploadService:: Record Completed. Time taken: {} milli-seconds", duration);
                 }
                 if (totalRecordsCount == 0) {
                     XSSFRow row = sheet.createRow(sheet.getLastRowNum() + 1);

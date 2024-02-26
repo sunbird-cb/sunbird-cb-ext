@@ -83,7 +83,7 @@ public class CbplanContentConsumer {
             mailNotificationDetails.put(Constants.DESCRIPTION , cbplanContentRequest.get(Constants.DESCRIPTION));
             mailNotificationDetails.put(Constants.COPY_EMAIL, mdoAdminEmail);
             sendNotificationToProviders(mailNotificationDetails);
-            logger.info(String.format("Completed request for content. Time taken: ", (System.currentTimeMillis() - startTime)));
+            logger.info(String.format("Completed request for content. Time taken: %d milliseconds", (System.currentTimeMillis() - startTime)));
         } catch (Exception e) {
             logger.error("Exception occurred while sending email : " + e.getMessage(), e);
         }
