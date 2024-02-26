@@ -1291,10 +1291,6 @@ public class CbExtServerProperties {
 		this.assessmentQuestionListPath = assessmentQuestionListPath;
 	}
 
-	public String getSunbirdCbExtVersion() {
-		return sunbirdCbExtVersion;
-	}
-
 	public void setSunbirdCbExtVersion(String sunbirdCbExtVersion) {
 		this.sunbirdCbExtVersion = sunbirdCbExtVersion;
 	}
@@ -1624,7 +1620,7 @@ public class CbExtServerProperties {
 	}
 
 	public void setSbEsHostList(String sbEsHost) {
-		this.sbEsHostList = sbEsHostList;
+		this.sbEsHostList = sbEsHost;
 	}
 
 	public String getSbEsUser() {
