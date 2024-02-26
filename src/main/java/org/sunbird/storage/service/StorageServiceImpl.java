@@ -161,13 +161,13 @@ public class StorageServiceImpl implements StorageService {
 		try {
 			String userId = accessTokenValidator.fetchUserIdFromAccessToken(userToken);
 			if (StringUtils.isEmpty(userId)) {
-				logger.error("Failed to get UserId for orgId: " + orgId);
+				logger.error("Failed to get UserId for orgId: {}", orgId);
 				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 			}
 			Map<String, Map<String, String>> userInfoMap = new HashMap<>();
 			userUtilityService.getUserDetailsFromDB(Arrays.asList(userId), Arrays.asList(Constants.USER_ID, Constants.ROOT_ORG_ID), userInfoMap);
 			if (MapUtils.isEmpty(userInfoMap)) {
-				logger.error(Constants.FAILED_USER_INFO_RETRIEVAL_MESSAGE + userId);
+				logger.error(Constants.FAILED_USER_INFO_RETRIEVAL_MESSAGE, userId);
 				return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 			}
 			String rootOrgId = userInfoMap.get(userId).get(Constants.ROOT_ORG_ID);
@@ -177,7 +177,7 @@ public class StorageServiceImpl implements StorageService {
 				}
 			}
 			if (!rootOrgId.equalsIgnoreCase(orgId)) {
-				logger.error(Constants.UNAUTHORIZED_FILE_DOWNLOAD_FOR_OTHER_ORG+ rootOrgId + ", request orgId " + orgId);
+				logger.error(Constants.UNAUTHORIZED_FILE_DOWNLOAD_FOR_OTHER_ORG, rootOrgId, orgId);
 				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 			}
 			String objectKey = serverProperties.getReportDownloadFolderName() + "/" + reportType + "/" + date + "/" + orgId + "/" + fileName;
@@ -235,7 +235,7 @@ public class StorageServiceImpl implements StorageService {
 					resourceMap.put(Constants.FILEMETADATA, blob.metadata());
 				}
 			} catch (Exception e) {
-				logger.error(Constants.FAILED_TO_READ_DOWNLOADED_FILE_FOR_URL + objectKey);
+				logger.error(Constants.FAILED_TO_READ_DOWNLOADED_FILE_FOR_URL, objectKey);
 				LocalDateTime yesterday = now.minusDays(1);
 				String yesterdayFormattedDate = yesterday.format(dateFormat);
 				objectKey = serverProperties.getReportDownloadFolderName() + "/" + reportType + "/" + yesterdayFormattedDate + "/" + mdoId + "/" + fileName;
@@ -249,7 +249,7 @@ public class StorageServiceImpl implements StorageService {
 						logger.info("Unable to fetch fileInfo");
 					}
 				} catch (Exception ex) {
-					logger.error(Constants.FAILED_TO_READ_DOWNLOADED_FILE_FOR_URL + objectKey);
+					logger.error(Constants.FAILED_TO_READ_DOWNLOADED_FILE_FOR_URL, objectKey);
 				}
 			}
 			reportTypeInfo.put(fileName, resourceMap);
@@ -271,7 +271,7 @@ public class StorageServiceImpl implements StorageService {
 			Map<String, Map<String, String>> userInfoMap = new HashMap<>();
 			userUtilityService.getUserDetailsFromDB(Arrays.asList(userId), Arrays.asList(Constants.USER_ID, Constants.CHANNEL), userInfoMap);
 			if (MapUtils.isEmpty(userInfoMap)) {
-				logger.error(Constants.FAILED_USER_INFO_RETRIEVAL_MESSAGE + userId);
+				logger.error(Constants.FAILED_USER_INFO_RETRIEVAL_MESSAGE, userId);
 				return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 			}
 			String channel = userInfoMap.get(userId).get(Constants.CHANNEL);
@@ -318,7 +318,7 @@ public class StorageServiceImpl implements StorageService {
 		Map<String, Map<String, String>> userInfoMap = new HashMap<>();
 		userUtilityService.getUserDetailsFromDB(Arrays.asList(userId), Arrays.asList(Constants.USER_ID, Constants.CHANNEL), userInfoMap);
 		if (MapUtils.isEmpty(userInfoMap)) {
-			logger.error(Constants.FAILED_USER_INFO_RETRIEVAL_MESSAGE + userId);
+			logger.error(Constants.FAILED_USER_INFO_RETRIEVAL_MESSAGE, userId);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 		}
 		String channel = userInfoMap.get(userId).get(Constants.CHANNEL);
@@ -342,7 +342,7 @@ public class StorageServiceImpl implements StorageService {
 					resourceMap.put(Constants.FILEMETADATA, blob.metadata());
 				}
 			} catch (Exception e) {
-				logger.error(Constants.FAILED_TO_READ_DOWNLOADED_FILE_FOR_URL + objectKey);
+				logger.error(Constants.FAILED_TO_READ_DOWNLOADED_FILE_FOR_URL, objectKey);
 			}
 			reportTypeInfo.put(fileName, resourceMap);
 		}
