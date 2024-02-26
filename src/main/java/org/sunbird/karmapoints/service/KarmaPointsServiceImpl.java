@@ -97,7 +97,7 @@ public class KarmaPointsServiceImpl implements KarmaPointsService {
         edata.put(Constants.COURSE_ID, request.getCourseId());
         karmaPointsDataMap.put("edata",edata);
         kafkaProducer.push(serverProperties.getClaimKarmaPointsTopic(), karmaPointsDataMap);
-        logger.info("UserID and CourseId successfully Published to : " + serverProperties.getClaimKarmaPointsTopic());
+        logger.info("UserID and CourseId successfully Published to : {}", serverProperties.getClaimKarmaPointsTopic());
     }
 
     public Map<String, Object> userTotalKarmaPoints(String userId){

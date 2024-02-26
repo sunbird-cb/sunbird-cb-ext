@@ -179,7 +179,7 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 				}
 				if (!StringUtils.isEmpty((String) requestData.get(Constants.MAP_ID))) {
 					ObjectMapper om = new ObjectMapper();
-					logger.info("Need to update the record here... " + om.writeValueAsString(updateRequest));
+					logger.info("Need to update the record here... {}", om.writeValueAsString(updateRequest));
 					if (ObjectUtils.isEmpty(updateRequest.get(Constants.SB_ROOT_ORG_ID))) {
 						orgRepository.updateOrgIdForChannel(channelName,
 								(String) updateRequest.get(Constants.SB_ORG_ID));

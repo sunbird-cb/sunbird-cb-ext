@@ -85,11 +85,10 @@ public class UserRegistrationConsumer {
 				serverProperties.getEsProfileIndexType(), userRegistration.getRegistrationCode(),
 				mapper.convertValue(userRegistration, Map.class));
 
-		LOGGER.info("Successfully called ES update request. REST Status ? " + (status != null ? status.name() : null));
+		LOGGER.info("Successfully called ES update request. REST Status ? {}", (status != null ? status.name() : null));
 
 		if (!RestStatus.OK.equals(status)) {
-			LOGGER.info("Failed to update registration status for the document id : "
-					+ userRegistration.getRegistrationCode() + "and status : " + userRegistration.getStatus());
+			LOGGER.info("Failed to update registration status for the document id :{} and status : {}", userRegistration.getRegistrationCode(), userRegistration.getStatus());
 		}
 		// send notification
 		userRegNotificationService.sendNotification(userRegistration);
@@ -99,8 +98,8 @@ public class UserRegistrationConsumer {
 	public void processCreateUserMessage(ConsumerRecord<String, String> data) {
 		try {
 			WfRequest wfRequest = gson.fromJson(data.value(), WfRequest.class);
-			LOGGER.info("Consumed Request in Topic to create user in registration:: "
-					+ mapper.writeValueAsString(wfRequest));
+			String wfRequestData = mapper.writeValueAsString(wfRequest);
+			LOGGER.info("Consumed Request in Topic to create user in registration:: {}", wfRequestData);
 			userRegService.initiateCreateUserFlow(wfRequest.getApplicationId());
 		} catch (Exception e) {
 			LOGGER.error("Failed to process message in Topic to create user in registration.", e);
@@ -111,8 +110,8 @@ public class UserRegistrationConsumer {
 	public void processAutoCreateUserEvent(ConsumerRecord<String, String> data) {
 		try {
 			UserRegistration userRegistration = gson.fromJson(data.value(), UserRegistration.class);
-			LOGGER.info("Consumed Request in Topic to auto create user in registration:: "
-					+ mapper.writeValueAsString(userRegistration));
+			String userRegistrationRequest =mapper.writeValueAsString(userRegistration);
+			LOGGER.info("Consumed Request in Topic to auto create user in registration:: {}", userRegistrationRequest);
 			userRegService.initiateCreateUserFlow(userRegistration.getRegistrationCode());
 		} catch (Exception e) {
 			LOGGER.error("Failed to process message in Topic to auto create user in registration.", e);
