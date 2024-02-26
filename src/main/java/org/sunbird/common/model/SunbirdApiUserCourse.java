@@ -22,6 +22,12 @@ public class SunbirdApiUserCourse {
     private String userId;
     private List<Object> issuedCertificates;
     private Object completionPercentage;
+    private String courseName;
+    private List<Object> certificates;
+    private Object completedOn;
+    private int leafNodesCount;
+    private int progress;
+    private int status;
 
     public long getDateTime() {
         return dateTime;
