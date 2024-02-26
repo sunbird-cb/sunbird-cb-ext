@@ -36,10 +36,10 @@ public class NotificationUtil {
 			List<Object> notificationTosend = new ArrayList<>(Arrays.asList(
 					new Notification(Constants.EMAIL, Constants.MESSAGE, new EmailConfig(senderMail, emailSubject),
 							sendTo, new Template(null, emailTemplate, params))));
-			Map<String, List<Object>> notificationsMap = new HashMap<>();
+      Map<String, List<Object>> notificationsMap = new HashMap<>();
 			notificationsMap.put(Constants.NOTIFICATIONS, notificationTosend);
 			notificationRequest.put(Constants.REQUEST, notificationsMap);
-			logger.debug(String.format("Notification Request : %s" , notificationRequest));
+      logger.debug(String.format("Notification Request : %s" , notificationRequest));
 			HttpEntity<Object> req = new HttpEntity<>(notificationRequest, headers);
 			restTemplate.postForEntity(notificationUrl, req, String.class);
 		} catch (Exception e) {

@@ -6,8 +6,8 @@ public interface RedisCacheService {
 
     public SBApiResponse deleteCache();
 
-    public SBApiResponse getKeys() throws Exception;
+    public SBApiResponse getKeys();
 
-    public SBApiResponse getKeysAndValues() throws Exception;
+    public SBApiResponse getKeysAndValues();
 
 }

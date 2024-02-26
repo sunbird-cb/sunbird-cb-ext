@@ -145,7 +145,7 @@ public class AssessmentController {
 
 	@PostMapping("/v1/quml/question/list")
 	public ResponseEntity<SBApiResponse> readQuestionList(@Valid @RequestBody Map<String, Object> requestBody,
-			@RequestHeader("x-authenticated-user-token") String authUserToken) throws Exception {
+			@RequestHeader("x-authenticated-user-token") String authUserToken) {
 		SBApiResponse response = assessmentServiceV2.readQuestionList(requestBody, authUserToken);
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
@@ -153,7 +153,7 @@ public class AssessmentController {
 	@GetMapping("/v1/quml/assessment/retake/{assessmentIdentifier}")
 	public ResponseEntity<SBApiResponse> retakeAssessment(
 			@PathVariable("assessmentIdentifier") String assessmentIdentifier,
-			@RequestHeader(Constants.X_AUTH_TOKEN) String token) throws Exception {
+			@RequestHeader(Constants.X_AUTH_TOKEN) String token) {
 		SBApiResponse readResponse = assessmentServiceV2.retakeAssessment(assessmentIdentifier, token);
 		return new ResponseEntity<>(readResponse, readResponse.getResponseCode());
 	}
