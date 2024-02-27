@@ -38,10 +38,9 @@ public class WorkAllocationConstants {
 
 	public static final String CB_NAME = "CB";
 
-
 	public static final String TYPE = "WorkOrder";
 
-	public static List<String> PROPS = Collections.unmodifiableList(Arrays.asList("WAT"));
+	public static final List<String> PROPS = Collections.unmodifiableList(Arrays.asList("WAT"));
 
 
 }
