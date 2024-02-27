@@ -533,7 +533,7 @@ public class Constants {
 	public static final String DATE_CREATED_ON = "dateCreatedOn";
 	public static final String DATE_UPDATE_ON = "dateUpdatedOn";
 	public static final String INITIATED_CAPITAL = "INITIATED";
-	public static final List<String> COURSE_REMINDER_EMAIL_FIELDS =Collections.unmodifiableList(Arrays.asList(RATINGS_USER_ID, BATCH_ID_COLUMN,
+	public static final List<String> COURSE_REMINDER_EMAIL_FIELDS = Collections.unmodifiableList(Arrays.asList(RATINGS_USER_ID, BATCH_ID_COLUMN,
 			COURSE_ID_COLUMN, COMPLETION_PERCENTAGE_COLUMN, LAST_ACCESS_TIME));
 	public static final String BATCHES = "batches";
 	public static final String NO_OF_COURSES = "noOfCourses";
@@ -1014,11 +1014,11 @@ public class Constants {
 	public static final String FAILED_TO_DELETE_FILE = "Failed to delete file: ";
 	public static final String FAILED_TO_DOWNLOAD_FILE = "Failed to download the file: ";
 	public static final String FAILED_TO_READ_FILE ="Failed to read the downloaded file: ";
-	public static final String FAILED_USER_INFO_RETRIEVAL_MESSAGE = "Failed to get UserInfo from cassandra for userId: ";
-	public static final String UNAUTHORIZED_FILE_DOWNLOAD_FOR_OTHER_ORG = "User not authorized to download file for other org: ";
+	public static final String FAILED_USER_INFO_RETRIEVAL_MESSAGE = "Failed to get UserInfo from cassandra for userId: {}";
+	public static final String UNAUTHORIZED_FILE_DOWNLOAD_FOR_OTHER_ORG = "User not authorized to download file for other org: {}, request orgId:{}";
 	public static final String LASTMODIFIED ="lastModified";
 	public static final String FILEMETADATA ="fileMetaData";
-	public static final String FAILED_TO_READ_DOWNLOADED_FILE_FOR_URL = "Failed to read the downloaded file for URL: ";
+	public static final String FAILED_TO_READ_DOWNLOADED_FILE_FOR_URL = "Failed to read the downloaded file for URL: {}";
 	public static final String EXCEPTION_MESSAGE_FORMAT = "Exception in %s : %s";
 	public static final String SUNBIRD_SERVICE_ERROR = "Sunbird Service ERROR: ";
 	public static final String WORKORDER_ID = "workorderId";
