@@ -3,7 +3,7 @@ package org.sunbird.common.util;
 /*
  * Copyright (C) 2010 The Android Open Source Project
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
+ * Licensed under the Apache License, Version 2.0 (the "License")
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -490,6 +490,8 @@ public class Base64Util {
                             this.state = 6;
                             return false;
                         }
+                        break;
+                    default:
                         break;
                 }
             }

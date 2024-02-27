@@ -67,8 +67,7 @@ public class UserBulkUploadService {
                     e);
         }
         duration = System.currentTimeMillis() - startTime;
-        logger.info("UserBulkUploadService:: initiateUserBulkUploadProcess: Completed. Time taken: "
-                + duration + " milli-seconds");
+        logger.info("UserBulkUploadService:: initiateUserBulkUploadProcess: Completed. Time taken: {} milli-seconds", duration );
     }
 
     public void updateUserBulkUploadStatus(String rootOrgId, String identifier, String status, int totalRecordsCount,
@@ -130,7 +129,7 @@ public class UserBulkUploadService {
                 }
                 int count = 0;
                 while (rowIterator.hasNext()) {
-                    logger.info("UserBulkUploadService:: Record " + count++);
+                    logger.info("UserBulkUploadService:: Record {}" , count++);
                     long duration = 0;
                     long startTime = System.currentTimeMillis();
                     StringBuffer str = new StringBuffer();
@@ -147,7 +146,7 @@ public class UserBulkUploadService {
                                 invalidErrList.add("Invalid Full Name");
                             }
                         } else {
-                            invalidErrList.add("Invalid column type. Expecting string format");
+                            invalidErrList.add(Constants.INVALID_COL_TYPE_EXPECTING_STRING);
                         }
                     }
                     if (nextRow.getCell(1) == null || nextRow.getCell(1).getCellType() == CellType.BLANK) {
@@ -156,7 +155,7 @@ public class UserBulkUploadService {
                         if (nextRow.getCell(1).getCellType() == CellType.STRING) {
                             userRegistration.setEmail(nextRow.getCell(1).getStringCellValue().trim());
                         } else {
-                            invalidErrList.add("Invalid column type. Expecting string format");
+                            invalidErrList.add(Constants.INVALID_COL_TYPE_EXPECTING_STRING);
                         }
                     }
                     if (nextRow.getCell(2) == null || nextRow.getCell(2).getCellType() == CellType.BLANK) {
@@ -180,13 +179,13 @@ public class UserBulkUploadService {
                                 invalidErrList.add("Invalid Group : Group can be only among one of these " + serverProperties.getBulkUploadGroupValue());
                             }
                         } else {
-                            invalidErrList.add("Invalid column type. Expecting string format");
+                            invalidErrList.add(Constants.INVALID_COL_TYPE_EXPECTING_STRING);
                         }
                     }
                     if (nextRow.getCell(4) != null && nextRow.getCell(4).getCellType() != CellType.BLANK) {
                         if (nextRow.getCell(4).getCellType() == CellType.STRING) {
                             String tagStr = nextRow.getCell(4).getStringCellValue().trim();
-                            List<String> tagList = new ArrayList<String>();
+                            List<String> tagList = new ArrayList<>();
                             if (!StringUtils.isEmpty(tagStr)) {
                                 String[] tagStrList = tagStr.split(",", -1);
                                 for(String tag : tagStrList) {
@@ -198,7 +197,7 @@ public class UserBulkUploadService {
                                 invalidErrList.add("Invalid Tag : Tags are comma seperated string values. A Tag can contain only alphabets with spaces. eg: Bihar Circle, Patna Division");
                             }
                         } else {
-                            invalidErrList.add("Invalid column type. Expecting string format");
+                            invalidErrList.add(Constants.INVALID_COL_TYPE_EXPECTING_STRING);
                         }
                     }
                     if (nextRow.getCell(5) != null && nextRow.getCell(5).getCellType() != CellType.BLANK) {
@@ -223,7 +222,7 @@ public class UserBulkUploadService {
                                 invalidErrList.add("Invalid External System : External System can contain only alphabets and can have a max length of 255");
                             }
                         } else {
-                            invalidErrList.add("Invalid column type. Expecting string format");
+                            invalidErrList.add(Constants.INVALID_COL_TYPE_EXPECTING_STRING);
                         }
                     }
                     userRegistration.setOrgName(inputDataMap.get(Constants.ORG_NAME));
@@ -268,8 +267,7 @@ public class UserBulkUploadService {
                         }
                     }
                     duration = System.currentTimeMillis() - startTime;
-                    logger.info("UserBulkUploadService:: Record Completed. Time taken: "
-                            + duration + " milli-seconds");
+                    logger.info("UserBulkUploadService:: Record Completed. Time taken: {} milli-seconds", duration);
                 }
                 if (totalRecordsCount == 0) {
                     XSSFRow row = sheet.createRow(sheet.getLastRowNum() + 1);

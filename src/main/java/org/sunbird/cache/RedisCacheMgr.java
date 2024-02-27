@@ -52,7 +52,7 @@ public class RedisCacheMgr {
             String data = objectMapper.writeValueAsString(object);
             jedis.set(Constants.REDIS_COMMON_KEY + key, data);
             jedis.expire(Constants.REDIS_COMMON_KEY + key, ttl);
-            logger.debug("Cache_key_value " + Constants.REDIS_COMMON_KEY + key + " is saved in redis");
+            logger.debug(Constants.CACHE_KEY_VALUE + Constants.REDIS_COMMON_KEY + key + Constants.IS_SAVED_IN_REDIS);
         } catch (Exception e) {
             logger.error(e);
         }
@@ -65,7 +65,7 @@ public class RedisCacheMgr {
             String data = objectMapper.writeValueAsString(object);
             jedis.set(Constants.REDIS_COMMON_KEY + key, data);
             jedis.expire(Constants.REDIS_COMMON_KEY + key, questions_cache_ttl);
-            logger.debug("Cache_key_value " + Constants.REDIS_COMMON_KEY + key + " is saved in redis");
+            logger.debug(Constants.CACHE_KEY_VALUE + Constants.REDIS_COMMON_KEY + key + Constants.IS_SAVED_IN_REDIS);
         } catch (Exception e) {
             logger.error(e);
         }
@@ -74,7 +74,7 @@ public class RedisCacheMgr {
         try (Jedis jedis = jedisPool.getResource()) {
             jedis.set(Constants.REDIS_COMMON_KEY + key, value);
             jedis.expire(Constants.REDIS_COMMON_KEY + key, ttl);
-            logger.debug("Cache_key_value " + Constants.REDIS_COMMON_KEY + key + " is saved in redis");
+            logger.debug(Constants.CACHE_KEY_VALUE + Constants.REDIS_COMMON_KEY + key + Constants.IS_SAVED_IN_REDIS);
         } catch (Exception e) {
             logger.error(e);
         }
@@ -87,7 +87,7 @@ public class RedisCacheMgr {
     public boolean deleteKeyByName(String key) {
         try (Jedis jedis = jedisPool.getResource()) {
         	jedis.del(Constants.REDIS_COMMON_KEY + key);
-            logger.debug("Cache_key_value " + Constants.REDIS_COMMON_KEY + key + " is deleted from redis");
+            logger.debug(Constants.CACHE_KEY_VALUE + Constants.REDIS_COMMON_KEY + key + " is deleted from redis");
             return true;
         } catch (Exception e) {
             logger.error(e);

@@ -50,7 +50,6 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 			Integer correct = 0;
 			Integer blank = 0;
 			Integer inCorrect = 0;
-			Double result;
 			Integer total = 0;
 			Map<String, Object> resultMap = new HashMap<>();
 			Map<String, Object> answers = getQumlAnswers(originalQuestionList,questionMap);
@@ -126,12 +125,8 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 
 	private Map<String, Object> getQumlAnswers(List<String> questions,Map<String,Object> questionMap) throws Exception {
 		Map<String, Object> ret = new HashMap<>();
-
-		//Map<String, Map<String, Object>> questionMap = new HashMap<String, Map<String, Object>>();
-
 		for (String questionId : questions) {
 			List<String> correctOption = new ArrayList<>();
-			//questionMap = fetchQuestionMapDetails(questionId);
 			Map<String, Object> question = (Map<String, Object>) questionMap.get(questionId);
 			if (question.containsKey(Constants.QUESTION_TYPE)) {
 				String questionType = ((String) question.get(Constants.QUESTION_TYPE)).toLowerCase();
@@ -198,9 +193,7 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 	}
 
 	@Override
-	public String fetchQuestionIdentifierValue(List<String> identifierList, List<Object> questionList,
-			String primaryCategory)
-			throws Exception {
+	public String fetchQuestionIdentifierValue(List<String> identifierList, List<Object> questionList, String primaryCategory) {
 		List<String> newIdentifierList = new ArrayList<>();
 		newIdentifierList.addAll(identifierList);
 		String errMsg = "";
@@ -345,7 +338,7 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 			 questStr = redisCacheMgr.getCache(Constants.ASSESSMENT_ID + assessmentIdentifier + Constants.UNDER_SCORE + Constants.QUESTION_SET);		
 		}
 		if(StringUtils.isEmpty(questStr)) {
-			Map<String, Object> propertyMap = new HashMap<String, Object>();
+			Map<String, Object> propertyMap = new HashMap<>();
 		propertyMap.put(Constants.IDENTIFIER, assessmentIdentifier);
 		List<Map<String, Object>> hierarchyList = cassandraOperation.getRecordsByPropertiesWithoutFiltering(
 				serverProperties.getAssessmentHierarchyNameSpace(),
@@ -378,7 +371,7 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 	}
 
 	public List<Map<String, Object>> readUserSubmittedAssessmentRecords(String userId, String assessmentId) {
-		Map<String, Object> propertyMap = new HashMap<String, Object>();
+		Map<String, Object> propertyMap = new HashMap<>();
 		propertyMap.put(Constants.USER_ID, userId);
 		propertyMap.put(Constants.ASSESSMENT_ID_KEY, assessmentId);
 		return cassandraOperation.getRecordsByPropertiesWithoutFiltering(

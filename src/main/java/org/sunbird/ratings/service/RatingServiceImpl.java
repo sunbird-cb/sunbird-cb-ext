@@ -103,8 +103,8 @@ public class RatingServiceImpl implements RatingService {
                 ratingModelInfo.setRecommended(ratingData.get(Constants.RECOMMENDED)!=null ?(String)ratingData.get(Constants.RECOMMENDED): null);
                 if(ratingData.get(Constants.COMMENT_UPDATED_ON)!=null){
                     UUID commentupdatedOn = (UUID) ratingData.get(Constants.COMMENT_UPDATED_ON);
-                    Long CommentUpdatedTime = (commentupdatedOn.timestamp() - 0x01b21dd213814000L) / 10000L;
-                    ratingModelInfo.setCommentUpdatedOn(new Timestamp(CommentUpdatedTime));
+                    Long commentUpdatedTime = (commentupdatedOn.timestamp() - 0x01b21dd213814000L) / 10000L;
+                    ratingModelInfo.setCommentUpdatedOn(new Timestamp(commentUpdatedTime));
                 }
 
                 timeBasedUuid = (UUID) ratingData.get(Constants.UPDATED_ON);
@@ -159,7 +159,7 @@ public class RatingServiceImpl implements RatingService {
 
                     for (JsonNode jsonNode : actualObj) {
                         final SummaryNodeModel summaryModel = mapper.convertValue(jsonNode, SummaryNodeModel.class);
-                        reviewMap.put(summaryModel.getUser_id(), summaryModel);
+                        reviewMap.put(summaryModel.getUserId(), summaryModel);
                         userList.add(jsonNode.get("user_id").asText());
                     }
 
@@ -281,7 +281,7 @@ public class RatingServiceImpl implements RatingService {
             response.setResponseCode(HttpStatus.OK);
             response.getParams().setStatus(Constants.SUCCESSFUL);
             if(requestRating.getComment()==null && requestRating.getCommentBy()==null) {
-                System.out.println("Message "+mapper.writeValueAsString(ratingMessage));
+                logger.info("Message "+mapper.writeValueAsString(ratingMessage));
                 kafkaProducer.push(updateRatingTopicName, ratingMessage);
             }
         } catch (ValidationException ex) {
@@ -360,7 +360,7 @@ public class RatingServiceImpl implements RatingService {
 
                 }
                 Collections.sort(listOfLookupResponse, (l1, l2) -> {
-                    if(l1.getUpdatedon() == l2.getUpdatedon())
+                    if(l1.getUpdatedon().equals(l2.getUpdatedon()))
                         return 0;
                     return l2.getUpdatedon() < l1.getUpdatedon() ? -1 : 1;
                 });
@@ -392,11 +392,11 @@ public class RatingServiceImpl implements RatingService {
         return values;
     }
 
-    private void validateRatingsInfo(ValidationBody validationBody, String flag) throws Exception {
+    private void validateRatingsInfo(ValidationBody validationBody, String flag) throws ValidationException {
 
         List<String> errObjList = new ArrayList<>();
 
-        if (flag == Constants.RATING_UPSERT_OPERATION) {
+        if (Constants.RATING_UPSERT_OPERATION.equalsIgnoreCase(flag)) {
             if (StringUtils.isEmpty(validationBody.getRequestRating().getActivityId())) {
                 errObjList.add(ResponseMessage.Message.INVALID_INPUT);
             }
@@ -416,7 +416,7 @@ public class RatingServiceImpl implements RatingService {
             if (StringUtils.isEmpty(validationBody.getRequestRating().getUserId())) {
                 errObjList.add(ResponseMessage.Message.INVALID_USER);
             }
-        } else if (flag == Constants.RATING_LOOKUP_RATING_OPERATION) {
+        } else if (Constants.RATING_LOOKUP_RATING_OPERATION.equalsIgnoreCase(flag)) {
 
             if (StringUtils.isEmpty(validationBody.getLookupRequest().getActivityId())) {
                 errObjList.add(ResponseMessage.Message.INVALID_INPUT);
@@ -431,7 +431,7 @@ public class RatingServiceImpl implements RatingService {
             if (validationBody.getLookupRequest().getLimit() < 1) {
                 errObjList.add(ResponseMessage.Message.INVALID_LIMIT);
             }
-        } else if (flag == Constants.RATING_GET_OPERATION || flag == Constants.RATING_SUMMARY_OPERATION) {
+        } else if (Constants.RATING_GET_OPERATION.equalsIgnoreCase(flag) || Constants.RATING_SUMMARY_OPERATION.equalsIgnoreCase(flag)) {
             if (StringUtils.isEmpty(validationBody.getActivityId())) {
                 errObjList.add(ResponseMessage.Message.INVALID_INPUT);
             }
@@ -439,7 +439,7 @@ public class RatingServiceImpl implements RatingService {
                 errObjList.add(ResponseMessage.Message.INVALID_INPUT);
             }
 
-            if (flag == Constants.RATING_GET_OPERATION && StringUtils.isEmpty(validationBody.getUserId())) {
+            if (Constants.RATING_GET_OPERATION.equalsIgnoreCase(flag) && StringUtils.isEmpty(validationBody.getUserId())) {
                 errObjList.add(ResponseMessage.Message.INVALID_INPUT);
             }
         }
@@ -469,7 +469,7 @@ public class RatingServiceImpl implements RatingService {
             }
 
             Map<String, Object> requestBody = (Map<String, Object>) request.get(Constants.REQUEST);
-            Map<String, Object> compositeKey = new HashMap<String, Object>();
+            Map<String, Object> compositeKey = new HashMap<>();
 
             activityId = (String) requestBody.get(Constants.ACTIVITY_ID);
             compositeKey.put(Constants.ACTIVITY_ID, activityId);
@@ -497,7 +497,7 @@ public class RatingServiceImpl implements RatingService {
             return strBuilder.toString();
         }
 
-        List<String> missingAttrib = new ArrayList<String>();
+        List<String> missingAttrib = new ArrayList<>();
         if (!requestBody.containsKey(Constants.ACTIVITY_ID)) {
             missingAttrib.add(Constants.ACTIVITY_ID);
         }

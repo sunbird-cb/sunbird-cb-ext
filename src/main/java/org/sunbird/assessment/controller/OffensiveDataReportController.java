@@ -18,7 +18,7 @@ public class OffensiveDataReportController {
 
 	@PostMapping("/v1/offensive/data/flag")
 	public ResponseEntity<SBApiResponse> createFlag(
-			@Valid @RequestBody Map<String, Object> requestBody, @RequestHeader(Constants.X_AUTH_TOKEN) String token) throws Exception {
+			@Valid @RequestBody Map<String, Object> requestBody, @RequestHeader(Constants.X_AUTH_TOKEN) String token) {
 		SBApiResponse readResponse = offensiveDataFlagService.createFlag(requestBody, token);
 		return new ResponseEntity<>(readResponse, readResponse.getResponseCode());
 	}
@@ -31,7 +31,7 @@ public class OffensiveDataReportController {
 	}
 
 	@GetMapping("/v1/offensive/data/flag/getFlaggedData")
-	public ResponseEntity<SBApiResponse> getFlaggedData(@RequestHeader(Constants.X_AUTH_TOKEN) String token) throws Exception {
+	public ResponseEntity<SBApiResponse> getFlaggedData(@RequestHeader(Constants.X_AUTH_TOKEN) String token) {
 		SBApiResponse readResponse = offensiveDataFlagService.getFlaggedData(token);
 		return new ResponseEntity<>(readResponse, readResponse.getResponseCode());
 	}

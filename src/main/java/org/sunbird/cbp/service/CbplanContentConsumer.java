@@ -83,14 +83,13 @@ public class CbplanContentConsumer {
             mailNotificationDetails.put(Constants.DESCRIPTION , cbplanContentRequest.get(Constants.DESCRIPTION));
             mailNotificationDetails.put(Constants.COPY_EMAIL, mdoAdminEmail);
             sendNotificationToProviders(mailNotificationDetails);
-            logger.info(String.format("Completed request for content. Time taken: ", (System.currentTimeMillis() - startTime)));
+            logger.info(String.format("Completed request for content. Time taken: %d milliseconds", (System.currentTimeMillis() - startTime)));
         } catch (Exception e) {
             logger.error("Exception occurred while sending email : " + e.getMessage(), e);
         }
     }
 
     public List<String> getCBPAdminDetails(Set<String> rootOrgIds){
-        List<Map<String, String>> userRecords = new ArrayList<>();
         Map<String, Object> request = getSearchObject(rootOrgIds);
         HashMap<String, String> headersValue = new HashMap<>();
         headersValue.put("Content-Type", "application/json");

@@ -21,14 +21,14 @@ public class RedisCacheServiceImpl implements RedisCacheService {
 	private CbExtLogger logger = new CbExtLogger(getClass().getName());
 
 	@Override
-	public SBApiResponse deleteCache() throws Exception {
+	public SBApiResponse deleteCache() {
 		SBApiResponse response = new SBApiResponse(Constants.API_REDIS_DELETE);
 		boolean res = redisCache.deleteAllCBExtKey();
 		if (res) {
 			response.getParams().setStatus(Constants.SUCCESSFUL);
 			response.setResponseCode(HttpStatus.OK);
 		} else {
-			String errMsg = "No Keys found, Redis cache is empty";
+			String errMsg = Constants.NO_REDIS_CACHE_KEY_FOUND;
 			logger.info(errMsg);
 			response.getParams().setErrmsg(errMsg);
 			response.setResponseCode(HttpStatus.NOT_FOUND);
@@ -37,7 +37,7 @@ public class RedisCacheServiceImpl implements RedisCacheService {
 	}
 
 	@Override
-	public SBApiResponse getKeys() throws Exception {
+	public SBApiResponse getKeys() {
 		SBApiResponse response = new SBApiResponse(Constants.API_REDIS_GET_KEYS);
 		Set<String> res = redisCache.getAllKeyNames();
 		if (!res.isEmpty()) {
@@ -46,7 +46,7 @@ public class RedisCacheServiceImpl implements RedisCacheService {
 			response.setResponseCode(HttpStatus.OK);
 
 		} else {
-			String errMsg = "No Keys found, Redis cache is empty";
+			String errMsg = Constants.NO_REDIS_CACHE_KEY_FOUND;
 			logger.info(errMsg);
 			response.getParams().setErrmsg(errMsg);
 			response.setResponseCode(HttpStatus.NOT_FOUND);
@@ -55,7 +55,7 @@ public class RedisCacheServiceImpl implements RedisCacheService {
 	}
 
 	@Override
-	public SBApiResponse getKeysAndValues() throws Exception {
+	public SBApiResponse getKeysAndValues() {
 		SBApiResponse response = new SBApiResponse(Constants.API_REDIS_GET_KEYS_VALUE_SET);
 		List<Map<String, Object>> result = redisCache.getAllKeysAndValues();
 
@@ -65,7 +65,7 @@ public class RedisCacheServiceImpl implements RedisCacheService {
 			response.put(Constants.RESPONSE, result);
 			response.setResponseCode(HttpStatus.OK);
 		} else {
-			String errMsg = "No Keys found, Redis cache is empty";
+			String errMsg = Constants.NO_REDIS_CACHE_KEY_FOUND;
 			logger.info(errMsg);
 			response.getParams().setErrmsg(errMsg);
 			response.setResponseCode(HttpStatus.NOT_FOUND);

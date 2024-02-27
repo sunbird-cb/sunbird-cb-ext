@@ -14,7 +14,7 @@ public class InsightsController {
     private InsightsService insightsService;
 
     @PostMapping("/user/v2/insights")
-    public ResponseEntity<?> insights(
+    public ResponseEntity<SBApiResponse> insights(
             @RequestBody Map<String, Object> requestBody,@RequestHeader("x-authenticated-userid") String userId) throws Exception {
         SBApiResponse response = insightsService.insights(requestBody,userId);
         return new ResponseEntity<>(response, response.getResponseCode());

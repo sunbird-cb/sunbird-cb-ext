@@ -8,7 +8,6 @@ import java.util.Map;
 import org.codehaus.plexus.util.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.sunbird.common.model.SBApiResponse;
 
 @Component
 public class CbExtServerProperties {
@@ -462,7 +461,7 @@ public class CbExtServerProperties {
 	private String assessmentSubmitTopic;
 
 	@Value("${metaData.contextTypes}")
-	private String[] ContextTypes;
+	private String[] contextTypes;
 
 	@Value("${kafka.topics.user.bulk.upload}")
 	private String userBulkUploadTopic;
@@ -595,7 +594,7 @@ public class CbExtServerProperties {
 	private String cbPlanEndDate;
 
 	@Value("${karma.points.limit}")
-	private int KarmaPointsLimit;
+	private int karmaPointsLimit;
 	@Value("${kafka.topics.claim.acbp.karma.points}")
 	private String claimKarmaPointsTopic;
 
@@ -1292,10 +1291,6 @@ public class CbExtServerProperties {
 		this.assessmentQuestionListPath = assessmentQuestionListPath;
 	}
 
-	public String getSunbirdCbExtVersion() {
-		return sunbirdCbExtVersion;
-	}
-
 	public void setSunbirdCbExtVersion(String sunbirdCbExtVersion) {
 		this.sunbirdCbExtVersion = sunbirdCbExtVersion;
 	}
@@ -1625,7 +1620,7 @@ public class CbExtServerProperties {
 	}
 
 	public void setSbEsHostList(String sbEsHost) {
-		this.sbEsHostList = sbEsHostList;
+		this.sbEsHostList = sbEsHost;
 	}
 
 	public String getSbEsUser() {
@@ -1857,11 +1852,11 @@ public class CbExtServerProperties {
 	}
 
 	public String[] getContextTypes() {
-		return ContextTypes;
+		return contextTypes;
 	}
 
 	public void setContextTypes(String[] contextTypes) {
-		ContextTypes = contextTypes;
+		this.contextTypes = contextTypes;
 	}
 
 	public String getUserBulkUploadTopic() {
@@ -2145,11 +2140,11 @@ public class CbExtServerProperties {
 	}
 
 	public int getKarmaPointsLimit() {
-		return KarmaPointsLimit;
+		return karmaPointsLimit;
 	}
 
 	public void setKarmaPointsLimit(int karmaPointsLimit) {
-		KarmaPointsLimit = karmaPointsLimit;
+		this.karmaPointsLimit = karmaPointsLimit;
 	}
 
 	public String getClaimKarmaPointsTopic() {
@@ -2242,10 +2237,6 @@ public class CbExtServerProperties {
 
 	public String getEhrmsDetailUrl() {
 		return ehrmsDetailUrl;
-	}
-
-	public void setEhrmsDetailUrl(SBApiResponse response) {
-		this.ehrmsDetailUrl = ehrmsDetailUrl;
 	}
 
 	public void setEhrmsDetailUrl(String ehrmsDetailUrl) {

@@ -1,6 +1,5 @@
 package org.sunbird.cbp.service;
 
-import org.sunbird.cbp.model.dto.CbPlanDto;
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.model.SunbirdApiRequest;
 
