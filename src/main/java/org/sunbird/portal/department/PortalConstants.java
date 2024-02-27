@@ -1,6 +1,7 @@
 package org.sunbird.portal.department;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class PortalConstants {
@@ -18,9 +19,9 @@ public class PortalConstants {
 	public static final String CBC_ROLE_NAME = "CBC ADMIN";
 	public static final String CBC_MEMBER_NAME = "CBC_MEMBER";
 	public static final String CBC_DEPT_TYPE = "CBC";
-	public static final List<String> MDO_ROLES = Arrays.asList(MDO_ROLE_NAME, "WAT_USER");
-	public static final List<String> CBP_ROLES = Arrays.asList("EDITOR", "REVIEWER", "PUBLISHER", "CONTENT_CREATOR");
-	public static final List<String> FRAC_ROLES = Arrays.asList("IFUMember", "fracAdmin", "fracReviewerOne",
-			"fracReviewerTwo", "fracAccessCompetency", "competencyReviewer");
-	public static final List<String> CBC_ROLE_LIST = Arrays.asList(CBC_ROLE_NAME, CBC_MEMBER_NAME);
+	public static final List<String> MDO_ROLES = Collections.unmodifiableList(Arrays.asList(MDO_ROLE_NAME, "WAT_USER"));
+	public static final List<String> CBP_ROLES = Collections.unmodifiableList(Arrays.asList("EDITOR", "REVIEWER", "PUBLISHER", "CONTENT_CREATOR"));
+	public static final List<String> FRAC_ROLES =Collections.unmodifiableList( Arrays.asList("IFUMember", "fracAdmin", "fracReviewerOne",
+			"fracReviewerTwo", "fracAccessCompetency", "competencyReviewer"));
+	public static final List<String> CBC_ROLE_LIST = Collections.unmodifiableList(Arrays.asList(CBC_ROLE_NAME, CBC_MEMBER_NAME));
 }
