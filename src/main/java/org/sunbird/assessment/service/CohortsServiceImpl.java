@@ -60,10 +60,6 @@ public class CohortsServiceImpl implements CohortsService {
 	@Override
 	public List<CohortUsers> getTopPerformers(String rootOrg, String contentId, String userId, int count) {
 		// Check User exists
-// 		if (!userUtilService.validateUser(rootOrg, userId)) {
-// 			throw new BadRequestException("Invalid UserId.");
-// 		}
-
 		// This contains the list of all the children for provided course(resourceId) if
 		// it is a learning-path.
 		// Else, it will contain the parents for provided course(resourceId)
@@ -114,9 +110,9 @@ public class CohortsServiceImpl implements CohortsService {
 						&& !topLearnerUUID.equalsIgnoreCase(userId)) {
 					CohortUsers user = new CohortUsers();
 					user.setDesc("Top Learner");
-					user.setUser_id(userProfile.getPersonalDetails().getPrimaryEmail());
+					user.setUserId(userProfile.getPersonalDetails().getPrimaryEmail());
 					user.setEmail(userProfile.getPersonalDetails().getPrimaryEmail());
-					user.setFirst_name(userProfile.getPersonalDetails().getFirstname());
+					user.setFirstName(userProfile.getPersonalDetails().getFirstname());
 					userNames.add(userProfile.getPersonalDetails().getPrimaryEmail());
 					topPerformers.add(user);
 					if (counter == count)
@@ -132,7 +128,7 @@ public class CohortsServiceImpl implements CohortsService {
 	@Override
 	@SuppressWarnings("unchecked")
 	public List<CohortUsers> getActiveUsers(String xAuthUser, String rootOrgId, String rootOrg, String contentId, String userId,
-			int count, Boolean toFilter) throws Exception {
+			int count, Boolean toFilter) {
 		// Check User exists
 // 		if (!userUtilService.validateUser(rootOrg, userId)) {
 // 			throw new BadRequestException("Invalid UserId.");
@@ -154,8 +150,7 @@ public class CohortsServiceImpl implements CohortsService {
 	}
 
 	@Override
-	public SBApiResponse autoEnrollmentInCourse(String authUserToken, String rootOrgId, String rootOrg, String contentId, String userUUID)
-			throws Exception {
+	public SBApiResponse autoEnrollmentInCourse(String authUserToken, String rootOrgId, String rootOrg, String contentId, String userUUID){
 		SBApiResponse finalResponse = ProjectUtil.createDefaultResponse(Constants.API_USER_ENROLMENT);
 		try {
 			List<SunbirdApiBatchResp> batchResp = fetchBatchDetails(rootOrgId, contentId);
@@ -190,7 +185,7 @@ public class CohortsServiceImpl implements CohortsService {
 						boolean isUserEnrolled = false;
 						for (SunbirdApiBatchResp batch : batchResp) {
 							if (StringUtils.isEmpty(batch.getEndDate())) {
-								Map<String,Object> enrollResponse = new HashMap<>();
+								Map<String,Object> enrollResponse;
 								enrollResponse = enrollInCourse(contentId, userUUID, headers, batch.getBatchId());
 								if (!ObjectUtils.isEmpty(enrollResponse) && Constants.OK.equalsIgnoreCase((String) enrollResponse.get(Constants.RESPONSE_CODE))) {
 									finalResponse = constructAutoEnrollResponse(batch);
@@ -210,7 +205,7 @@ public class CohortsServiceImpl implements CohortsService {
 					boolean isUserEnrolled = false;
 					for (SunbirdApiBatchResp batch : batchResp) {
 						if (StringUtils.isEmpty(batch.getEndDate())) {
-							Map<String,Object> enrollResponse = new HashMap<>();
+							Map<String,Object> enrollResponse;
 							enrollResponse = enrollInCourse(contentId, userUUID, headers, batch.getBatchId());
 							if (!ObjectUtils.isEmpty(enrollResponse) && Constants.OK == enrollResponse.get(Constants.RESPONSE_CODE)) {
 								finalResponse = constructAutoEnrollResponse(batch);
@@ -242,8 +237,8 @@ public class CohortsServiceImpl implements CohortsService {
 		Map<String, Object> enrollResponse = new HashMap<>();
 		String date = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
 		batchObj.put("courseId", contentId);
-		batchObj.put("name", "Open Batch");
-		batchObj.put("description", "Open Batch");
+		batchObj.put("name", Constants.OPEN_BATCH);
+		batchObj.put("description", Constants.OPEN_BATCH);
 		batchObj.put("enrollmentType", "open");
 		batchObj.put("startDate", date);
 		batchObj.put("createdBy", userUUID);
@@ -262,7 +257,7 @@ public class CohortsServiceImpl implements CohortsService {
 		selectedBatch.setCreatedFor(new ArrayList<>());
 		selectedBatch.setEnrollmentEndDate(null);
 		selectedBatch.setEnrollmentType("open");
-		selectedBatch.setName("Open Batch");
+		selectedBatch.setName(Constants.OPEN_BATCH);
 		selectedBatch.setStartDate(date);
 		selectedBatch.setStatus(1);
 		selectedBatch.setBatchId(batchId);
@@ -404,9 +399,9 @@ public class CohortsServiceImpl implements CohortsService {
 						SearchUserApiContent userInfo = (SearchUserApiContent) participantMap.get(userId);
 						CohortUsers user = new CohortUsers();
 						// User Id is assigning instead of email
-						user.setUser_id(userInfo.getUserId());
+						user.setUserId(userInfo.getUserId());
 						user.setEmail(userInfo.getEmail());
-						user.setFirst_name(userInfo.getFirstName());
+						user.setFirstName(userInfo.getFirstName());
 						user.setDesc(desc);
 						user.setDepartment(userInfo.getChannel());
 						if (userInfo.getProfileDetails() != null
@@ -432,7 +427,7 @@ public class CohortsServiceImpl implements CohortsService {
 	}
 
 	@Override
-	public SBApiResponse autoEnrollmentInCourseV2(String authUserToken, String rootOrgId, String rootOrg, String contentId, String userUUID) throws Exception {
+	public SBApiResponse autoEnrollmentInCourseV2(String authUserToken, String rootOrgId, String rootOrg, String contentId, String userUUID) {
 		SBApiResponse finalResponse = ProjectUtil.createDefaultResponse(Constants.API_USER_ENROLMENT);
 		try {
 			Map<String, Object> contentResponse = contentService.readContent(contentId);

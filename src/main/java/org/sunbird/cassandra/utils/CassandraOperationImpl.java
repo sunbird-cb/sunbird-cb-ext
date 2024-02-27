@@ -132,7 +132,7 @@ public class CassandraOperationImpl implements CassandraOperation {
 		selectQuery.allowFiltering();
 		Clause lastAccessTime = QueryBuilder.lt("last_access_time", date);
 		selectWhere.and(lastAccessTime);
-		logger.debug("our query: " + selectQuery.getQueryString());
+		logger.debug("our query: {}" , selectQuery.getQueryString());
 		ResultSet resultSet = connectionManager.getSession(keyspace).execute(selectQuery);
 		return CassandraUtil.createResponse(resultSet);
 	}

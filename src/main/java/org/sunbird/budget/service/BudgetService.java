@@ -6,18 +6,18 @@ import org.sunbird.common.model.SBApiResponse;
 
 public interface BudgetService {
 
-	public SBApiResponse submitBudgetDetails(BudgetInfo data, String userId) throws Exception;
+	public SBApiResponse submitBudgetDetails(BudgetInfo data, String userId);
 
-	public SBApiResponse submitBudgetDocDetails(BudgetDocInfo docData, String userId) throws Exception;
+	public SBApiResponse submitBudgetDocDetails(BudgetDocInfo docData, String userId);
 
-	public SBApiResponse getBudgetDetails(String orgId, String budgetYear) throws Exception;
+	public SBApiResponse getBudgetDetails(String orgId, String budgetYear);
 
-	public SBApiResponse updateBudgetDetails(BudgetInfo data, String userId) throws Exception;
+	public SBApiResponse updateBudgetDetails(BudgetInfo data, String userId);
 
-	public SBApiResponse deleteBudgetDetails(String orgId, String id, String budgetYear) throws Exception;
+	public SBApiResponse deleteBudgetDetails(String orgId, String id, String budgetYear);
 
 	public SBApiResponse deleteDocBudgetDetails(String orgId, String budgetDetailsId, String budgetYear,
-			String proofDocId) throws Exception;
+			String proofDocId);
 
 	public SBApiResponse getBudgetAudit(String orgId) throws Exception;
 

@@ -83,7 +83,7 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 		}
 		String footerTemplateName = "templates/pdf-draft-footer.html";
 		Map<String, Object> headerDetails = new HashMap<>();
-		String deptId = (String) request.getTagValuePair().get("deptId");
+		String deptId = (String) request.getTagValuePair().get(Constants.DEPT_ID);
 		headerDetails.put(DEPT_NAME, request.getTagValuePair().get(DEPT_NAME));
 		headerDetails.put(DEPT_IMG_URL, request.getTagValuePair().get(DEPT_IMG_URL));
 		String headerMessage = readVm("pdf-header.vm", headerDetails);
@@ -163,12 +163,12 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 		workOrder.put("printedTime", printedTime);
 		String status = (String) workOrder.get("status");
 		String deptId = "";
-		if(workOrder.get("deptId") instanceof Integer){
-			deptId = String.valueOf(workOrder.get("deptId"));
+		if(workOrder.get(Constants.DEPT_ID) instanceof Integer){
+			deptId = String.valueOf(workOrder.get(Constants.DEPT_ID));
 		}
-		else if(workOrder.get("deptId") instanceof String)
+		else if(workOrder.get(Constants.DEPT_ID) instanceof String)
 		{
-			deptId = (String)workOrder.get("deptId");
+			deptId = (String)workOrder.get(Constants.DEPT_ID);
 		}
 		String templateName = null;
 		String footerTemplateName = null;
@@ -205,7 +205,6 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 			log.error("Exception occurred while loading the default department logo");
 		}
 		headerDetails.put(DEPT_NAME,  workOrder.get(DEPT_NAME));
-//		headerDetails.put("deptImgUrl",  (String) workOrder.get("deptImgUrl"));
 		String headerMessage = readVm("pdf-header.vm", headerDetails);
 		String headerHtmlFilePath = createHTMLFile("pdf-header", headerMessage);
 
@@ -362,7 +361,8 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 					log.info("Writing the pdf file {}", line);
 				}
 			} catch (IOException e) {
-				log.error("Exception occurred while writing the pdf file {}", e);
+				log.error("Exception occurred while writing the pdf file", e);
+
 			} finally {
 				if (brCleanUp != null) {
 					brCleanUp.close();

@@ -14,7 +14,7 @@ public class HealthController {
     private HealthService healthService;
 
     @GetMapping("/health")
-    public ResponseEntity<?> healthCheck() throws Exception {
+    public ResponseEntity<SBApiResponse> healthCheck() throws Exception {
         SBApiResponse response = healthService.checkHealthStatus();
         return new ResponseEntity<>(response, response.getResponseCode());
     }

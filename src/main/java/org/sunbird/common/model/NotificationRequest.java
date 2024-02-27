@@ -9,7 +9,7 @@ public class NotificationRequest {
     private Config config;
     private List<String> ids;
     private Template template;
-    private Map<String, String> rawData;
+    private Map rawData;
     private List<String> copyEmail;
 
     public String getMode() {

@@ -17,7 +17,6 @@ import org.springframework.util.ObjectUtils;
 import org.sunbird.cassandra.utils.CassandraOperation;
 import org.sunbird.common.model.SearchUserApiContent;
 import org.sunbird.common.model.SunbirdApiRequest;
-import org.sunbird.common.model.SunbirdApiResp;
 import org.sunbird.common.model.SunbirdUserProfileDetail;
 import org.sunbird.common.service.ContentServiceImpl;
 import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;

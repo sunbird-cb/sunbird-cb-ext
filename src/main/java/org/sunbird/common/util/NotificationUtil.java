@@ -41,7 +41,7 @@ public class NotificationUtil {
 					put(Constants.NOTIFICATIONS, notificationTosend);
 				}
 			});
-			logger.debug(String.format("Notification Request : %s", notificationRequest));
+			logger.debug(String.format("Notification Request : %s" , notificationRequest));
 			HttpEntity<Object> req = new HttpEntity<>(notificationRequest, headers);
 			restTemplate.postForEntity(notificationUrl, req, String.class);
 		} catch (Exception e) {
