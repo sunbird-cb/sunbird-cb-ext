@@ -555,8 +555,7 @@ public class Constants {
 
 	public static final String CIPHER_ALGORITHM = "AES";
     public static final byte[] CIPHER_KEY = createUnmodifiableByteArray((byte) 'T', (byte) 'h', (byte) 'i', (byte) 's', (byte) 'A', (byte) 's', (byte) 'I', (byte) 'S', (byte) 'e', (byte) 'r', (byte) 'c', (byte) 'e', (byte) 'K', (byte) 't', (byte) 'e', (byte) 'y');
-    private static byte[] createUnmodifiableByteArray(byte... values) {
-        return Arrays.copyOf(values, values.length);}
+
 	public static final List<String> DECRYPTED_FIELDS = Collections.unmodifiableList(Arrays.asList(Constants.PHONE, Constants.EMAIL));
 	public static final String CREATED_FOR = "createdFor";
 	public static final String COURSE_ORG_ID = "courseOrgId";
@@ -1030,6 +1029,8 @@ public class Constants {
 	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}
+	private static byte[] createUnmodifiableByteArray(byte... values) {
+		return Arrays.copyOf(values, values.length);}
 
 
 
