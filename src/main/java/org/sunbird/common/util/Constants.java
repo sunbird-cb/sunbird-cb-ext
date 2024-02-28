@@ -962,6 +962,7 @@ public class Constants {
 	public static final String COMPETENCY_THEME_PARAM = "competency_theme";
 	public static final String COMPETENCY_SUB_THEME_PARAM = "competency_subtheme";
 	public static final String COPY_EMAIL = "copyEmail";
+
 	public static final String USER_CONTENT_RECOMMENDATION = "user.v1.content.recommendation";
 	public static final String RECOMMEND_CONTENT_SUBJECT = " recommends this iGOT Karmayogi #primaryCategory for you!";
 	public static final String COURSE_POSTER_IMAGE_URL= "coursePosterImageUrl";
@@ -976,6 +977,7 @@ public class Constants {
 	public static final String EHRMS_AUTH_PASSWORD = "password";
 	public static final String USER_ID_LOWER = "userid";
 	public static final String EHRMS_USER_TOKEN = "ehrmsUserToken";
+	public static final String API_READ_WHEEBOX_RESULT = "api.wheebox.read.result";
 	public static final String DOC_ID = "docId";
 	public static final String DIGI_LOCKER_ID = "digiLockerId";
 	public static final String ACCESS_TOKEN = "accessToken";
@@ -985,7 +987,7 @@ public class Constants {
 	public static final String TABLE_DIGILOCKER_DOC_INFO = "test_digilocker_doc_lookup";
 	public static final String ISSUED_USER_CERTIFICATE = "issuedCertificates";
 	public static final String DOC_TYPE = "docType";
-  public static final String PRIMARY_CATEGORY_TAG = "#primaryCategory";
+    public static final String PRIMARY_CATEGORY_TAG = "#primaryCategory";
   	public static final String PASSWORD = "password";
 	public static final String STRING_FORMAT_UNZIP="%s/%s/%s/%s";
 	public static final String UNZIP_PATH="/unzippath";
@@ -994,7 +996,5 @@ public class Constants {
   private Constants() {
 		throw new IllegalStateException("Utility class");
 	}
-
-
 
 }

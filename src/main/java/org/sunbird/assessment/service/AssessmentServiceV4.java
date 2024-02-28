@@ -18,4 +18,7 @@ public interface AssessmentServiceV4 {
 	public SBApiResponse submitAssessmentAsync(Map<String, Object> data, String userAuthToken,boolean editMode);
 
 	public void handleAssessmentSubmitRequest(Map<String, Object> asyncRequest,boolean editMode,String token);
+
+	public SBApiResponse readWheebox(String userAuthToken);
+
 }

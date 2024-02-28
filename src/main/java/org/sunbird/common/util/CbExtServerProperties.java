@@ -613,19 +613,6 @@ public class CbExtServerProperties {
 
 	@Value("${user.registration.welcome.email.profileUpdateLink}")
 	private String welcomeEmailProfileUpdateLink;
-
-	@Value("${notify.service.host}")
-	private String notifyServiceHost;
-
-	@Value("${recommend.content.notification.template}")
-	private String recommendContentTemplate;
-
-	@Value("${notification.support.mail}")
-	private String supportEmail;
-
-	@Value("${notify.service.path.async}")
-	private String notifyServicePathAsync;
-
 	@Value("${ehrms.detail.url}")
 	private String ehrmsDetailUrl;
 
@@ -640,6 +627,29 @@ public class CbExtServerProperties {
 
 	@Value("${redis.ehrms.token.timeout}")
 	private Integer redisEhrmsTokenTimeOut;
+
+	@Value("${redis.wheebox.key}")
+	private String redisWheeboxKey;
+
+	public String getRedisWheeboxKey() {
+		return redisWheeboxKey;
+	}
+
+	public void setRedisWheeboxKey(String redisWheeboxKey) {
+		this.redisWheeboxKey = redisWheeboxKey;
+	}
+
+	@Value("${notify.service.host}")
+	private String notifyServiceHost;
+
+	@Value("${recommend.content.notification.template}")
+	private String recommendContentTemplate;
+
+	@Value("${notification.support.mail}")
+	private String supportEmail;
+
+	@Value("${notify.service.path.async}")
+	private String notifyServicePathAsync;
 
 	@Value("${cert-registry-service-host}")
 	private String certRegistryServiceBaseUrl;
@@ -659,6 +669,8 @@ public class CbExtServerProperties {
 	@Value("${operational.reports.unzip.password}")
 	private String unZipFilePassword;
 
+	@Value("${es.default.result.limit}")
+	private int esDefaultResultLimit;
 
 	public boolean qListFromCacheEnabled() {
 		return qListFromCacheEnabled;
@@ -2227,6 +2239,7 @@ public class CbExtServerProperties {
 		this.welcomeEmailProfileUpdateLink = welcomeEmailProfileUpdateLink;
 	}
 
+
 	public String getNotifyServiceHost() {
 		return notifyServiceHost;
 	}
@@ -2303,6 +2316,7 @@ public class CbExtServerProperties {
 		this.redisEhrmsTokenTimeOut = redisEhrmsTokenTimeOut;
 	}
 
+
 	public String getCertRegistryServiceBaseUrl() {
 		return certRegistryServiceBaseUrl;
 	}
@@ -2349,5 +2363,11 @@ public class CbExtServerProperties {
 
 	public void setUnZipFilePassword(String unZipFilePassword) {
 		this.unZipFilePassword = unZipFilePassword;
+	public int getEsDefaultResultLimit() {
+		return esDefaultResultLimit;
+	}
+
+	public void setEsDefaultResultLimit(int esDefaultResultLimit) {
+		this.esDefaultResultLimit = esDefaultResultLimit;
 	}
 }
