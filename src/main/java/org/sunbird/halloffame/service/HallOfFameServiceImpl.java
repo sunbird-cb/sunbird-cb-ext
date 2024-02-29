@@ -99,7 +99,7 @@ public class HallOfFameServiceImpl implements HallOfFameService {
                     .filter(record -> ((int) record.get(Constants.MONTH)) == pvsToLastMonth
                             && ((int) record.get(Constants.YEAR)) == pvsToLastMonthsYear)
                     .collect(Collectors.toList());
-            resultMap.put(Constants.TITLE, formattedDatePreviousToLastMonth);
+            resultMap.put(Constants.TITLE,formattedDatePreviousToLastMonth);
         }
 
         Map<String, Map<String, Object>> lastMonthWithRankList = processRankBasedOnKpPoints(lastMonthList);
