@@ -14,7 +14,7 @@ import org.sunbird.halloffame.service.HallOfFameService;
 import java.util.Map;
 
 /**
- * @author mahesh.vakkund
+ * @author mahesh.vakkund & Deepak kr Thakur
  */
 @RestController
 public class HallOfFameController {
@@ -26,6 +26,7 @@ public class HallOfFameController {
         Map<String, Object> hallOfFameDataMap = hallOfFameService.fetchHallOfFameData();
         return new ResponseEntity<>(hallOfFameDataMap, HttpStatus.OK);
     }
+
     @GetMapping("/v1/halloffame/learnerleaderboard")
     public ResponseEntity <SBApiResponse> learnerLeaderBoard
             (@RequestHeader(Constants.X_AUTH_TOKEN) String authToken,
