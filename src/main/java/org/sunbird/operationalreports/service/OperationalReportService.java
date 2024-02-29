@@ -5,8 +5,9 @@ package org.sunbird.operationalreports.service;
  */
 
 import org.sunbird.common.model.SBApiResponse;
+import org.sunbird.common.model.SunbirdApiRequest;
 
 public interface OperationalReportService {
-    public SBApiResponse grantAccessToMDOAdmin(String userOrgId, String authToken);
+    public SBApiResponse grantReportAccessToMDOAdmin(SunbirdApiRequest request, String userOrgId, String authToken);
 
 }

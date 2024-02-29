@@ -985,6 +985,13 @@ public class Constants {
 	public static final String ISSUED_USER_CERTIFICATE = "issuedCertificates";
 	public static final String DOC_TYPE = "docType";
   public static final String PRIMARY_CATEGORY_TAG = "#primaryCategory";
+	public static final String MDO_REPORT_ACCESSOR = "MDO_REPORT_ACCESSOR";
+	public static final String GRANT_REPORT_ACCESS_API ="api.grant.access.report";
+	public static final String MDO_ADMIN_ROLE = "mdoadmin";
+	public static final String MDO_ADMIN = "MDO_ADMIN";
+	public static final String REPORT_ACCESS_EXPIRY_TABLE = "report_access_expiry";
+	public static final String REPORT_EXPIRY_DATE  = "reportExpiryDate";
+
 
   private Constants() {
 		throw new IllegalStateException("Utility class");

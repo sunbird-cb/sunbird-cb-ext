@@ -641,6 +641,9 @@ public class CbExtServerProperties {
 	@Value("${redis.ehrms.token.timeout}")
 	private Integer redisEhrmsTokenTimeOut;
 
+	@Value("${sb.role.read}")
+	private String sbRoleRead;
+
 	@Value("${cert-registry-service-host}")
 	private String certRegistryServiceBaseUrl;
 
@@ -2326,5 +2329,13 @@ public class CbExtServerProperties {
 
 	public void setReportPropertyFileAllMdo(String reportPropertyFileAllMdo) {
 		this.reportPropertyFileAllMdo = reportPropertyFileAllMdo;
+	}
+
+	public String getSbRoleRead() {
+		return sbRoleRead;
+	}
+
+	public void setSbRoleRead(String sbRoleRead) {
+		this.sbRoleRead = sbRoleRead;
 	}
 }
