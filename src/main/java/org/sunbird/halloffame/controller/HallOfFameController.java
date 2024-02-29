@@ -31,7 +31,7 @@ public class HallOfFameController {
     public ResponseEntity <SBApiResponse> learnerLeaderBoard
             (@RequestHeader(Constants.X_AUTH_TOKEN) String authToken,
              @RequestHeader(Constants.X_AUTH_USER_ORG_ID) String rootOrgId) throws Exception {
-        SBApiResponse response =hallOfFameService.learnerLeaderBoard(rootOrgId, authToken);
+        SBApiResponse response = hallOfFameService.learnerLeaderBoard(rootOrgId, authToken);
         return new ResponseEntity<>(response, response.getResponseCode());
     }
 }
