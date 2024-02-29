@@ -100,7 +100,7 @@ public class OprationalReportServiceImpl implements OperationalReportService {
             // Prepare InputStreamResource for the file to be downloaded
             InputStreamResource inputStreamResource = new InputStreamResource(Files.newInputStream(Paths.get(sourceFolderPath + "/" + fileName)));
             // Clean up temporary files
-            /*removeDirectory(sourceFolderPath);*/
+            removeDirectory(sourceFolderPath);
             // Return ResponseEntity with the file for download
             return ResponseEntity.ok()
                     .headers(headers)
