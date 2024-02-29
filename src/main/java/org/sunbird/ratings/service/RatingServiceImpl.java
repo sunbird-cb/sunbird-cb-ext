@@ -677,11 +677,7 @@ public class RatingServiceImpl implements RatingService {
             updateContent.put(Constants.REQUEST, contentRequest);
             Map<String, Object> updateReadData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPatch(serverConfig.getLearningServiceBaseUrl()
                     + serverConfig.getSystemUpdateAPI() + contentId, updateContent, ProjectUtil.getDefaultHeaders());
-            if (Constants.OK.equalsIgnoreCase((String) updateReadData.get(Constants.RESPONSE_CODE))) {
-                return true;
-            } else {
-                return false;
-            }
+            return Constants.OK.equalsIgnoreCase((String) updateReadData.get(Constants.RESPONSE_CODE));
         } catch (Exception e) {
             logger.error(e);
             return false;

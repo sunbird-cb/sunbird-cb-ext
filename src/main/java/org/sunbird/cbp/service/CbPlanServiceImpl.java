@@ -778,11 +778,7 @@ public class CbPlanServiceImpl implements CbPlanService {
             compositeKey.put(Constants.CB_ASSIGNMENT_TYPE_INFO_KEY, assignmentTypeInfo);
 
             Map<String, Object> lookupInfoUpdated = new HashMap<>();
-            if (CollectionUtils.isNotEmpty(cbPlanInfoRequestUpdateAssignmentKey) && cbPlanInfoRequestUpdateAssignmentKey.contains(assignmentTypeInfo)) {
-                lookupInfoUpdated.put(Constants.CB_IS_ACTIVE, true);
-            } else {
-                lookupInfoUpdated.put(Constants.CB_IS_ACTIVE, false);
-            }
+            lookupInfoUpdated.put(Constants.CB_IS_ACTIVE, CollectionUtils.isNotEmpty(cbPlanInfoRequestUpdateAssignmentKey) && cbPlanInfoRequestUpdateAssignmentKey.contains(assignmentTypeInfo));
             lookupInfoUpdated.put(Constants.END_DATE, planDto.getEndDate());
             Map<String, Object> resp = cassandraOperation.updateRecord(Constants.KEYSPACE_SUNBIRD,
                     Constants.TABLE_CB_PLAN_LOOKUP, lookupInfoUpdated, compositeKey);
