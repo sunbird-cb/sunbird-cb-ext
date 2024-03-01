@@ -873,6 +873,8 @@ public class ProfileServiceImpl implements ProfileService {
 						updatedRequest.put(Constants.FIRSTNAME, (String) personalDetailsMap.get(paramName));
 					} else if (Constants.MOBILE.equalsIgnoreCase(paramName)) {
 						updatedRequest.put(Constants.PHONE, String.valueOf(personalDetailsMap.get(paramName)));
+					} else if (Constants.PRIMARY_EMAIL.equalsIgnoreCase(paramName)) {
+						updatedRequest.put(Constants.EMAIL, String.valueOf(personalDetailsMap.get(paramName)));
 					}
 				}
 			}
