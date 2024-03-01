@@ -370,7 +370,7 @@ public class SearchByService {
 				.get(Constants.RESPONSE_DATA);
 		if (!CollectionUtils.isEmpty(fracResponseList)) {
 			for (Map<String, Object> respObj : fracResponseList) {
-				if (!positionNameList.contains((String) respObj.get(Constants.NAME))) {
+				if (!positionNameList.contains(respObj.get(Constants.NAME))) {
 					positionList.add(new FracCommonInfo((String) respObj.get(Constants.ID),
 							(String) respObj.get(Constants.NAME), (String) respObj.get(Constants.DESCRIPTION)));
 					positionNameList.add((String) respObj.get(Constants.NAME));
