@@ -2363,6 +2363,7 @@ public class CbExtServerProperties {
 
 	public void setUnZipFilePassword(String unZipFilePassword) {
 		this.unZipFilePassword = unZipFilePassword;
+	}
 	public int getEsDefaultResultLimit() {
 		return esDefaultResultLimit;
 	}
