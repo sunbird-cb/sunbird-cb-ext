@@ -47,8 +47,8 @@ import java.util.stream.Stream;
  * @author Deepak kumar Thakur & Mahesh R V
  */
 @Service
-public class OprationalReportServiceImpl implements OperationalReportService {
-    private static final Logger logger = LoggerFactory.getLogger(OprationalReportServiceImpl.class);
+public class OperationalReportServiceImpl implements OperationalReportService {
+    private static final Logger logger = LoggerFactory.getLogger(OperationalReportServiceImpl.class);
 
     private static final String ALPHANUMERIC_CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
@@ -152,6 +152,7 @@ public class OprationalReportServiceImpl implements OperationalReportService {
         }
         return response;
     }
+
     @PostConstruct
     public void init() {
         if (storageService == null) {
