@@ -613,19 +613,6 @@ public class CbExtServerProperties {
 
 	@Value("${user.registration.welcome.email.profileUpdateLink}")
 	private String welcomeEmailProfileUpdateLink;
-
-	@Value("${notify.service.host}")
-	private String notifyServiceHost;
-
-	@Value("${recommend.content.notification.template}")
-	private String recommendContentTemplate;
-
-	@Value("${notification.support.mail}")
-	private String supportEmail;
-
-	@Value("${notify.service.path.async}")
-	private String notifyServicePathAsync;
-
 	@Value("${ehrms.detail.url}")
 	private String ehrmsDetailUrl;
 
@@ -641,6 +628,29 @@ public class CbExtServerProperties {
 	@Value("${redis.ehrms.token.timeout}")
 	private Integer redisEhrmsTokenTimeOut;
 
+	@Value("${redis.wheebox.key}")
+	private String redisWheeboxKey;
+
+	public String getRedisWheeboxKey() {
+		return redisWheeboxKey;
+	}
+
+	public void setRedisWheeboxKey(String redisWheeboxKey) {
+		this.redisWheeboxKey = redisWheeboxKey;
+	}
+
+	@Value("${notify.service.host}")
+	private String notifyServiceHost;
+
+	@Value("${recommend.content.notification.template}")
+	private String recommendContentTemplate;
+
+	@Value("${notification.support.mail}")
+	private String supportEmail;
+
+	@Value("${notify.service.path.async}")
+	private String notifyServicePathAsync;
+
 	@Value("${sb.role.read}")
 	private String sbRoleRead;
 
@@ -655,6 +665,15 @@ public class CbExtServerProperties {
 
 	@Value("${report.property.file.allMdo}")
 	private String reportPropertyFileAllMdo;
+
+	@Value("${operational.reports.passwordlength}")
+	private int zipFilePasswordLength;
+
+	@Value("${operational.reports.unzip.password}")
+	private String unZipFilePassword;
+
+	@Value("${es.default.result.limit}")
+	private int esDefaultResultLimit;
 
 	public boolean qListFromCacheEnabled() {
 		return qListFromCacheEnabled;
@@ -2329,6 +2348,29 @@ public class CbExtServerProperties {
 
 	public void setReportPropertyFileAllMdo(String reportPropertyFileAllMdo) {
 		this.reportPropertyFileAllMdo = reportPropertyFileAllMdo;
+	}
+
+	public int getZipFilePasswordLength() {
+		return zipFilePasswordLength;
+	}
+
+	public void setZipFilePasswordLength(int zipFilePasswordLength) {
+		this.zipFilePasswordLength = zipFilePasswordLength;
+	}
+
+	public String getUnZipFilePassword() {
+		return unZipFilePassword;
+	}
+
+	public void setUnZipFilePassword(String unZipFilePassword) {
+		this.unZipFilePassword = unZipFilePassword;
+	}
+	public int getEsDefaultResultLimit() {
+		return esDefaultResultLimit;
+	}
+
+	public void setEsDefaultResultLimit(int esDefaultResultLimit) {
+		this.esDefaultResultLimit = esDefaultResultLimit;
 	}
 
 	public String getSbRoleRead() {

@@ -24,6 +24,8 @@ import org.sunbird.common.util.Constants;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import static org.sunbird.common.util.Constants.INSIGHTS_LEARNING_HOURS_REDIS_KEY;
+
 @Service
 public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 
@@ -439,5 +441,16 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 		}
 		return questionIds;
 	}
-
+	public Map<String, Object> fetchWheebox(String userId) {
+		String res = redisCacheMgr.getContentFromCache(serverProperties.getRedisWheeboxKey()+"_"+userId);
+		if(!StringUtils.isEmpty(res)) {
+            try {
+               return  mapper.readValue(res, new TypeReference<Map<String, Object>>() {
+                });
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+		return new HashMap<>();
+	}
 }

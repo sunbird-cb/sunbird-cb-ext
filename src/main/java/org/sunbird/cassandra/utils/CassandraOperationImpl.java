@@ -425,7 +425,6 @@ public class CassandraOperationImpl implements CassandraOperation {
 			selectQuery = processQueryWithoutFiltering(keyspaceName, tableName, propertyMap, fields);
 			selectQuery.limit(limit);
 			selectQuery.where(QueryBuilder.lt(Constants.DB_COLUMN_CREDIT_DATE, updatedOn));
-
 			if(limitDate != null)
 			selectQuery.where(QueryBuilder.gt(Constants.DB_COLUMN_CREDIT_DATE, limitDate));
 

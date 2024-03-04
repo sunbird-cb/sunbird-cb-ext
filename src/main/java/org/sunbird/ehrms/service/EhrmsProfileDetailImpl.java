@@ -110,7 +110,7 @@ public class EhrmsProfileDetailImpl implements EhrmsService {
         body.put(Constants.EHRMS_AUTH_USERNAME, ehrmsAuthUsername);
         body.put(Constants.EHRMS_AUTH_PASSWORD, ehrmsAuthPassword);
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON); // Set Content-Type to JSON
+        headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity entity = new HttpEntity(body, headers);
         ResponseEntity<String> response = restTemplate.exchange(ehrmsAuthUrl, HttpMethod.POST, entity, String.class);
         return response.getBody();

@@ -259,7 +259,12 @@ public class StorageServiceImpl implements StorageService {
 				logger.error("Failed to read the downloaded file for url: " + objectKey);
 				LocalDateTime yesterday = now.minusDays(1);
 				String yesterdayFormattedDate = yesterday.format(dateFormat);
-				objectKey = serverProperties.getReportDownloadFolderName() + "/" + reportType + "/" + yesterdayFormattedDate + "/" + mdoId + "/" + fileName;
+				if (serverProperties.getReportPropertyFileAllMdo().contains(fileName)) {
+					String reportSubFolderName = fileName.replace(".csv", "");
+					objectKey = serverProperties.getReportDownloadFolderName() + "/" + reportType + "/" + yesterdayFormattedDate + "/" + reportSubFolderName + "/" + fileName;
+				} else {
+					objectKey = serverProperties.getReportDownloadFolderName() + "/" + reportType + "/" + yesterdayFormattedDate + "/" + mdoId + "/" + fileName;
+				}
 				try {
 					Model.Blob blob = storageService.getObject(serverProperties.getReportDownloadContainerName(), objectKey, Option.apply(Boolean.FALSE));
 					if (blob != null) {

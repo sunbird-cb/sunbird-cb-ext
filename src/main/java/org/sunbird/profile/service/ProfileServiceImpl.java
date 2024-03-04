@@ -1236,6 +1236,7 @@ public class ProfileServiceImpl implements ProfileService {
 		}
 		finalQuery.must(QueryBuilders.termQuery(Constants.STATUS_RAW, 1)).must(query);
 		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder().query(finalQuery);
+		sourceBuilder.size(serverConfig.getEsDefaultResultLimit());
 		sourceBuilder.fetchSource(serverConfig.getEsAutoCompleteIncludeFields(), new String[]{});
 		SearchResponse searchResponse = indexerService.getEsResult(serverConfig.getSbEsUserProfileIndex(),
 				serverConfig.getEsProfileIndexType(), sourceBuilder, true);

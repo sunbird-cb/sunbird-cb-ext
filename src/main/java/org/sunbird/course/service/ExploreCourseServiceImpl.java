@@ -106,7 +106,7 @@ public class ExploreCourseServiceImpl implements ExploreCourseService {
 		Map<String, Object> requestBody = new HashMap<String, Object>();
 		Map<String, Object> filters = new HashMap<String, Object>();
 		filters.put(Constants.IDENTIFIER, identifierList);
-		filters.put(Constants.PRIMARY_CATEGORY, serverProperties.getKmCompositeSearchPrimaryCategoryFilters());
+		filters.put(Constants.STATUS, Constants.LIVE);
 		requestBody.put(Constants.FILTERS, filters);
 		Map<String, Object> sortBy = new HashMap<String, Object>();
 		sortBy.put(Constants.LAST_UPDATED_ON, Constants.DESCENDING_ORDER);
@@ -114,5 +114,41 @@ public class ExploreCourseServiceImpl implements ExploreCourseService {
 		requestBody.put(Constants.FIELDS, serverProperties.getKmCompositeSearchFields());
 		request.put(Constants.REQUEST, requestBody);
 		return request;
+	}
+
+	@Override
+	public SBApiResponse getExploreCourseListV2() {
+		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_GET_EXPLORE_COURSE_DETAIL);
+		String errMsg = "";
+		try {
+			List<Map<String, Object>> courseList = cassandraOperation.getRecordsByPropertiesWithoutFiltering(
+					Constants.SUNBIRD_KEY_SPACE_NAME, Constants.TABLE_EXPLORE_COURSE_LIST_V2, MapUtils.EMPTY_MAP,
+					ListUtils.EMPTY_LIST);
+			List<String> identifierList = new ArrayList<String>();
+			for (Map<String, Object> course : courseList) {
+				identifierList.add((String) course.get(Constants.IDENTIFIER));
+			}
+			if(identifierList.isEmpty()) {
+				errMsg = "Contents are not configured in Database.";
+			} else {
+				Map<String, Object> searchResponse = searchContent(identifierList);
+				if (!Constants.OK.equalsIgnoreCase((String) searchResponse.get(Constants.RESPONSE_CODE))) {
+					errMsg = "Failed to get contant details for Identifier List from DB.";
+				} else {
+					Map<String, Object> responseCourseList = (Map<String, Object>) searchResponse.get(Constants.RESULT);
+					response.setResult(responseCourseList);
+				}
+			}
+		} catch (Exception e) {
+			errMsg = "Failed to retrieve explore course list. Exception: " + e.getMessage();
+			logger.error(errMsg, e);
+		}
+		if (StringUtils.isNotEmpty(errMsg)) {
+			logger.error("Failed to initialize the Open Course Details to Cache. ErrMsg: " + errMsg);
+			response.getParams().setErrmsg(errMsg);
+			response.getParams().setStatus(Constants.FAILED);
+			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		return response;
 	}
 }
