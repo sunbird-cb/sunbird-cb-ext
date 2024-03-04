@@ -9,6 +9,7 @@ import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.sunbird.common.model.SBApiResponse;
+import org.sunbird.common.model.SunbirdApiRequest;
 import org.sunbird.common.util.Constants;
 import org.sunbird.operationalreports.service.OperationalReportService;
 
@@ -23,9 +24,10 @@ public class OperationalReportController {
 
     @PostMapping("admin/grantaccess")
     public ResponseEntity<SBApiResponse> grantAccess
-            (@RequestHeader(Constants.X_AUTH_TOKEN) String authToken,
+            (@RequestBody SunbirdApiRequest request,
+             @RequestHeader(Constants.X_AUTH_TOKEN) String authToken,
              @RequestHeader(Constants.X_AUTH_USER_ORG_ID) String userOrgId) throws Exception {
-        SBApiResponse response = operationalReport.grantAccessToMDOAdmin(userOrgId, authToken);
+        SBApiResponse response = operationalReport.grantReportAccessToMDOAdmin(request,userOrgId, authToken);
         return new ResponseEntity<>(response, response.getResponseCode());
     }
 

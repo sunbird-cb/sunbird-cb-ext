@@ -962,7 +962,6 @@ public class Constants {
 	public static final String COMPETENCY_THEME_PARAM = "competency_theme";
 	public static final String COMPETENCY_SUB_THEME_PARAM = "competency_subtheme";
 	public static final String COPY_EMAIL = "copyEmail";
-
 	public static final String USER_CONTENT_RECOMMENDATION = "user.v1.content.recommendation";
 	public static final String RECOMMEND_CONTENT_SUBJECT = " recommends this iGOT Karmayogi #primaryCategory for you!";
 	public static final String COURSE_POSTER_IMAGE_URL= "coursePosterImageUrl";
@@ -992,6 +991,13 @@ public class Constants {
 	public static final String STRING_FORMAT_UNZIP="%s/%s/%s/%s";
 	public static final String UNZIP_PATH="/unzippath";
 	public static final String OUTPUT_PATH="/output";
+	public static final String MDO_REPORT_ACCESSOR = "MDO_REPORT_ACCESSOR";
+	public static final String GRANT_REPORT_ACCESS_API ="api.grant.access.report";
+	public static final String MDO_ADMIN_ROLE = "mdoadmin";
+	public static final String MDO_ADMIN = "MDO_ADMIN";
+	public static final String REPORT_ACCESS_EXPIRY_TABLE = "report_access_expiry";
+	public static final String REPORT_EXPIRY_DATE  = "reportExpiryDate";
+
 
   private Constants() {
 		throw new IllegalStateException("Utility class");

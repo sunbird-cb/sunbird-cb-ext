@@ -651,6 +651,9 @@ public class CbExtServerProperties {
 	@Value("${notify.service.path.async}")
 	private String notifyServicePathAsync;
 
+	@Value("${sb.role.read}")
+	private String sbRoleRead;
+
 	@Value("${cert-registry-service-host}")
 	private String certRegistryServiceBaseUrl;
 
@@ -2239,7 +2242,6 @@ public class CbExtServerProperties {
 		this.welcomeEmailProfileUpdateLink = welcomeEmailProfileUpdateLink;
 	}
 
-
 	public String getNotifyServiceHost() {
 		return notifyServiceHost;
 	}
@@ -2316,7 +2318,6 @@ public class CbExtServerProperties {
 		this.redisEhrmsTokenTimeOut = redisEhrmsTokenTimeOut;
 	}
 
-
 	public String getCertRegistryServiceBaseUrl() {
 		return certRegistryServiceBaseUrl;
 	}
@@ -2370,5 +2371,13 @@ public class CbExtServerProperties {
 
 	public void setEsDefaultResultLimit(int esDefaultResultLimit) {
 		this.esDefaultResultLimit = esDefaultResultLimit;
+	}
+
+	public String getSbRoleRead() {
+		return sbRoleRead;
+	}
+
+	public void setSbRoleRead(String sbRoleRead) {
+		this.sbRoleRead = sbRoleRead;
 	}
 }
