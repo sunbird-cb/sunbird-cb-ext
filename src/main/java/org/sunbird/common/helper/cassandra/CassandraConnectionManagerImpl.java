@@ -57,7 +57,7 @@ public class CassandraConnectionManagerImpl implements CassandraConnectionManage
                     Integer.parseInt(cache.getProperty(Constants.CORE_CONNECTIONS_PER_HOST_FOR_LOCAL)));
             poolingOptions.setMaxConnectionsPerHost(
                     HostDistance.LOCAL,
-                    Integer.parseInt(cache.getProperty(Constants.MAX_CONNECTIONS_PER_HOST_FOR_LOCAl)));
+                    Integer.parseInt(cache.getProperty(Constants.MAX_CONNECTIONS_PER_HOST_FOR_LOCAL)));
             poolingOptions.setCoreConnectionsPerHost(
                     HostDistance.REMOTE,
                     Integer.parseInt(cache.getProperty(Constants.CORE_CONNECTIONS_PER_HOST_FOR_REMOTE)));
@@ -92,7 +92,7 @@ public class CassandraConnectionManagerImpl implements CassandraConnectionManage
         } catch (Exception e) {
             logger.error(e);
             throw new ProjectCommonException(
-                    ResponseCode.internalError.getErrorCode(),
+                    ResponseCode.INTERNAL_ERROR.getErrorCode(),
                     e.getMessage(),
                     ResponseCode.SERVER_ERROR.getResponseCode());
         }

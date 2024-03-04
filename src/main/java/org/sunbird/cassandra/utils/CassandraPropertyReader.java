@@ -13,13 +13,13 @@ import java.util.Properties;
 public class CassandraPropertyReader {
 
 	private final Properties properties = new Properties();
-	  private static final String file = "cassandratablecolumn.properties";
+	  private static final String cassandraColumnProperties = "cassandratablecolumn.properties";
 	  private static CassandraPropertyReader cassandraPropertyReader = null;
 
 	  /** private default constructor 
 	 * @throws IOException */
 	  private CassandraPropertyReader() throws IOException {
-	    InputStream in = this.getClass().getClassLoader().getResourceAsStream(file);
+	    InputStream in = this.getClass().getClassLoader().getResourceAsStream(cassandraColumnProperties);
 	    try {
 	      properties.load(in);
 	    } catch (IOException e) {
