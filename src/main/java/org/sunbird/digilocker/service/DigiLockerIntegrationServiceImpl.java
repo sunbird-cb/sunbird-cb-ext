@@ -46,7 +46,7 @@ public class DigiLockerIntegrationServiceImpl implements DigiLockerIntegrationSe
 
     private Logger logger = LoggerFactory.getLogger(getClass().getName());
     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
-
+    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy");
     @Override
     public PullURIResponse generateURIResponse(PullURIRequest request) {
         PullURIResponse response = new PullURIResponse();
@@ -131,6 +131,9 @@ public class DigiLockerIntegrationServiceImpl implements DigiLockerIntegrationSe
                                     certificateAddInfoDTO.setCertificateName((String)dockerLookUpInfo.get(Constants.CERTIFICATE_NAME));
                                     certificateAddInfoDTO.setDocumentName(DocumentType.getValueForKey(request.getDocDetails().getDocType()));
                                     certificateAddInfoDTO.setCertificateIssueOn((Date)dockerLookUpInfo.get(Constants.LAST_ISSUED_ON));
+                                    certificateAddInfoDTO.setUserName((String)getUserInfo.get(Constants.FIRSTNAME));
+                                    certificateAddInfoDTO.setSwd((String)getUserInfo.get(Constants.CHANNEL));
+                                    certificateAddInfoDTO.setSwdIndicator(String.valueOf(((String)getUserInfo.get(Constants.CHANNEL)).charAt(0)));
                                     docDetails.setDataContent(encodeBytesToBase64((convertObjectToJsonBytes(addCertificateInfo(certificateAddInfoDTO)))));
                                 } else {
                                     logger.error("Not able to generate Pdf certificate for URI: " + docDetails.getURI());
@@ -183,13 +186,19 @@ public class DigiLockerIntegrationServiceImpl implements DigiLockerIntegrationSe
                     logger.error("Not able to generate Pdf certificate for URI: " + request.getDocDetails().getURI());
                     responseStatus.setStatus("0");
                 }
-                certificateAddInfoDTO.setCertificateId((String)digiLockerDocInfo.get(Constants.CERTIFICATE_ID));
-                certificateAddInfoDTO.setDocumentInfo(uri[1]);
-                certificateAddInfoDTO.setCertificateName((String)digiLockerDocInfo.get(Constants.CERTIFICATE_NAME));
-                certificateAddInfoDTO.setDocumentName(DocumentType.getValueForKey(uri[1]));
-                certificateAddInfoDTO.setCertificateIssueOn((Date)digiLockerDocInfo.get(Constants.LAST_ISSUED_ON));
-                docDetails.setDataContent(encodeBytesToBase64((convertObjectToJsonBytes(addCertificateInfo(certificateAddInfoDTO)))));
-                response.setDocDetails(docDetails);
+                Map<String, Object> getUserInfo = userUtilityService.getUserDetails(Constants.IDENTIFIER, (String)digiLockerDocInfo.get(Constants.USER_ID));
+                if (MapUtils.isNotEmpty(getUserInfo)) {
+                    certificateAddInfoDTO.setCertificateId((String)digiLockerDocInfo.get(Constants.CERTIFICATE_ID));
+                    certificateAddInfoDTO.setDocumentInfo(uri[1]);
+                    certificateAddInfoDTO.setCertificateName((String)digiLockerDocInfo.get(Constants.CERTIFICATE_NAME));
+                    certificateAddInfoDTO.setDocumentName(DocumentType.getValueForKey(uri[1]));
+                    certificateAddInfoDTO.setCertificateIssueOn((Date)digiLockerDocInfo.get(Constants.LAST_ISSUED_ON));
+                    certificateAddInfoDTO.setUserName((String)getUserInfo.get(Constants.FIRSTNAME));
+                    certificateAddInfoDTO.setSwd((String)getUserInfo.get(Constants.CHANNEL));
+                    certificateAddInfoDTO.setSwdIndicator(String.valueOf(((String)getUserInfo.get(Constants.CHANNEL)).charAt(0)));
+                    docDetails.setDataContent(encodeBytesToBase64((convertObjectToJsonBytes(addCertificateInfo(certificateAddInfoDTO)))));
+                    response.setDocDetails(docDetails);
+                }
             } else {
                 logger.error("Not able to find info at lookup for URI: " + request.getDocDetails().getURI());
                 responseStatus.setStatus("0");
@@ -288,13 +297,19 @@ public class DigiLockerIntegrationServiceImpl implements DigiLockerIntegrationSe
         return null;
     }
 
-    private CertificateInfo addCertificateInfo(CertificateAddInfoDTO certificateAddInfoDTO) {
+    private CertificateInfo addCertificateInfo(CertificateAddInfoDTO certificateAddInfoDTO) throws ParseException {
         CertificateInfo certificateInfo = new CertificateInfo();
         certificateInfo.getCertificateMetaData().setName(certificateAddInfoDTO.getDocumentName());
         certificateInfo.getCertificateMetaData().setNumber(certificateAddInfoDTO.getCertificateId());
-        certificateInfo.getCertificateMetaData().setIssueDate(certificateAddInfoDTO.getCertificateIssueOn());
+        certificateInfo.getCertificateMetaData().setIssueDate(simpleDateFormat.parse(simpleDateFormat.format(certificateAddInfoDTO.getCertificateIssueOn())));
         certificateInfo.getCertificateMetaData().setType(certificateAddInfoDTO.getDocumentInfo());
         certificateInfo.getCertificateMetaData().getCertificateData().getCertificate().setNumber(certificateAddInfoDTO.getCertificateId());
+        certificateInfo.getCertificateMetaData().getIssuedTo().getPersonInfo().setName(certificateAddInfoDTO.getUserName());
+        certificateInfo.getCertificateMetaData().getIssuedTo().getPersonInfo().setSwd(certificateAddInfoDTO.getSwd());
+        certificateInfo.getCertificateMetaData().getIssuedTo().getPersonInfo().setSwdIndicator(certificateAddInfoDTO.getSwdIndicator());
+        certificateInfo.getCertificateMetaData().getIssuedTo().getPersonInfo().setName(certificateAddInfoDTO.getUserName());
+        certificateInfo.getCertificateMetaData().getCertificateData().getCertificate().setPlace("iGOT");
+        certificateInfo.getCertificateMetaData().getCertificateData().getCertificate().setDate(simpleDateFormat.format(certificateAddInfoDTO.getCertificateIssueOn()));
         return certificateInfo;
     }
 
