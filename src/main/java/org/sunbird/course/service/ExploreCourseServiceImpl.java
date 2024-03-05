@@ -128,12 +128,16 @@ public class ExploreCourseServiceImpl implements ExploreCourseService {
 			for (Map<String, Object> course : courseList) {
 				identifierList.add((String) course.get(Constants.IDENTIFIER));
 			}
-			Map<String, Object> searchResponse = searchContent(identifierList);
-			if (!Constants.OK.equalsIgnoreCase((String) searchResponse.get(Constants.RESPONSE_CODE))) {
-				errMsg = "Failed to get contant details for Identifier List from DB.";
+			if(identifierList.isEmpty()) {
+				errMsg = "Contents are not configured in Database.";
 			} else {
-				Map<String, Object> responseCourseList = (Map<String, Object>) searchResponse.get(Constants.RESULT);
-				response.setResult(responseCourseList);
+				Map<String, Object> searchResponse = searchContent(identifierList);
+				if (!Constants.OK.equalsIgnoreCase((String) searchResponse.get(Constants.RESPONSE_CODE))) {
+					errMsg = "Failed to get contant details for Identifier List from DB.";
+				} else {
+					Map<String, Object> responseCourseList = (Map<String, Object>) searchResponse.get(Constants.RESULT);
+					response.setResult(responseCourseList);
+				}
 			}
 		} catch (Exception e) {
 			errMsg = "Failed to retrieve explore course list. Exception: " + e.getMessage();
