@@ -675,6 +675,9 @@ public class CbExtServerProperties {
 	@Value("${es.default.result.limit}")
 	private int esDefaultResultLimit;
 
+	@Value("${secret.key.primaryEmail.validation}")
+	private String secretKeyPrimaryEmailValidation;
+
 	public boolean qListFromCacheEnabled() {
 		return qListFromCacheEnabled;
 	}
@@ -2379,5 +2382,13 @@ public class CbExtServerProperties {
 
 	public void setSbRoleRead(String sbRoleRead) {
 		this.sbRoleRead = sbRoleRead;
+	}
+
+	public String getSecretKeyPrimaryEmailValidation() {
+		return secretKeyPrimaryEmailValidation;
+	}
+
+	public void setSecretKeyPrimaryEmailValidation(String secretKeyPrimaryEmailValidation) {
+		this.secretKeyPrimaryEmailValidation = secretKeyPrimaryEmailValidation;
 	}
 }
