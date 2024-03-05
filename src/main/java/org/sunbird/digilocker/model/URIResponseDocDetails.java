@@ -3,8 +3,11 @@ package org.sunbird.digilocker.model;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
 public class URIResponseDocDetails {
+
     private IssuedTo issuedTo;
     private String URI;
+    private String docContent;
+    private String dataContent;
 
     public URIResponseDocDetails() {
         this.issuedTo = new IssuedTo();
@@ -26,6 +29,24 @@ public class URIResponseDocDetails {
 
     public void setURI(String URI) {
         this.URI = URI;
+    }
+
+    @JacksonXmlProperty(localName = "DocContent", namespace = "http://tempuri.org/")
+    public String getDocContent() {
+        return docContent;
+    }
+
+    public void setDocContent(String docContent) {
+        this.docContent = docContent;
+    }
+
+    @JacksonXmlProperty(localName = "DataContent", namespace = "http://tempuri.org/")
+    public String getDataContent() {
+        return dataContent;
+    }
+
+    public void setDataContent(String dataContent) {
+        this.dataContent = dataContent;
     }
 }
 
