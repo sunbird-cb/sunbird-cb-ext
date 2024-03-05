@@ -1954,7 +1954,7 @@ public class ProfileServiceImpl implements ProfileService {
 	@Override
 	public SBApiResponse profileUpdateV2(Map<String, Object> request, String userToken, String authToken, String rootOrgId) throws Exception {
 		// Extracting the request map from the input request
-		Map<String, Object> requestMap = (Map<String, Object>) request.get("request");
+		Map<String, Object> requestMap = (Map<String, Object>) request.get(Constants.REQUEST);
 		// Validating the token from the request map
 		if (validateToken((String) requestMap.get("token"))) {
 			// If the token is valid, delegate the profile update to the profileUpdate method
@@ -1980,7 +1980,7 @@ public class ProfileServiceImpl implements ProfileService {
 			Map<String, String> parsedMap = mapper.readValue(tokens, new TypeReference<Map<String, String>>() {
 			});
 			// Checking if the 'contextType' key exists and is not empty
-			return parsedMap.get("contextType") != null && !parsedMap.get("contextType").isEmpty();
+			return parsedMap.get(Constants.CONTEXT_TYPE) != null && !parsedMap.get(Constants.CONTEXT_TYPE).isEmpty();
 		} catch (ExpiredJwtException e) {
 			// Handling ExpiredJwtException
 			throw new ProfileRequestException("ExpiredJwt exception has occurred: " + e.getMessage());
