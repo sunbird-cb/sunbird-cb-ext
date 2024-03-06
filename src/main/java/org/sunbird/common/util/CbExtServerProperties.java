@@ -675,6 +675,9 @@ public class CbExtServerProperties {
 	@Value("${es.default.result.limit}")
 	private int esDefaultResultLimit;
 
+	@Value("${secret.key.token.validation}")
+	private String secretKeyTokenValidation;
+
 	public boolean qListFromCacheEnabled() {
 		return qListFromCacheEnabled;
 	}
@@ -2379,5 +2382,13 @@ public class CbExtServerProperties {
 
 	public void setSbRoleRead(String sbRoleRead) {
 		this.sbRoleRead = sbRoleRead;
+	}
+
+	public String getSecretKeyTokenValidation() {
+		return secretKeyTokenValidation;
+	}
+
+	public void setSecretKeyTokenValidation(String secretKeyTokenValidation) {
+		this.secretKeyTokenValidation = secretKeyTokenValidation;
 	}
 }

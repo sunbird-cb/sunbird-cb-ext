@@ -1,8 +1,14 @@
 package org.sunbird.profile.service;
 
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.SignatureException;
+import io.jsonwebtoken.UnsupportedJwtException;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.ListUtils;
 import org.apache.commons.collections.MapUtils;
@@ -56,6 +62,7 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import io.jsonwebtoken.*;
 
 import static java.util.stream.Collectors.toList;
 
@@ -108,8 +115,7 @@ public class ProfileServiceImpl implements ProfileService {
 	private Logger log = LoggerFactory.getLogger(getClass().getName());
 
 	@Override
-	public SBApiResponse profileUpdate(Map<String, Object> request, String userToken, String authToken, String rootOrgId)
-			throws Exception {
+	public SBApiResponse profileUpdate(Map<String, Object> request, String userToken, String authToken, String rootOrgId) {
 		SBApiResponse response = new SBApiResponse(Constants.API_PROFILE_UPDATE);
 		try {
 			Map<String, Object> requestData = (Map<String, Object>) request.get(Constants.REQUEST);
@@ -1931,6 +1937,88 @@ public class ProfileServiceImpl implements ProfileService {
 		}
 		return new ArrayList<>();
 	}
+
+
+	/**
+	 * Updates the user profile with version 2.
+	 *
+	 * @param request   The request containing profile update data.
+	 * @param userToken The user token for authentication.
+	 * @param authToken The authentication token.
+	 * @param rootOrgId The root organization ID.
+	 * @return SBApiResponse object containing the response of the profile update.
+	 */
+	@Override
+	public SBApiResponse profileUpdateV2(Map<String, Object> request, String userToken, String authToken, String rootOrgId) {
+		SBApiResponse response = new SBApiResponse(Constants.API_PROFILE_UPDATE);
+		// Extracting the request map from the input request
+		Map<String, Object> requestMap = (Map<String, Object>) request.get(Constants.REQUEST);
+		// Validating the token from the request map
+		try {
+			String contextTokenValue=validateToken((String) requestMap.get(Constants.CONTEXT_TOKEN));
+			if(contextTokenValue.equalsIgnoreCase(Constants.CONTEXT_TYPE)){
+				return profileUpdate(request, userToken, authToken, rootOrgId);
+			}else{
+				log.error("Failed to process the request since the parameter is missing: " + Constants.CONTEXT_TYPE);
+				response.getParams().setStatus(Constants.FAILED);
+				response.getParams().setErr("Failed to process the request since the parameter is missing: " + Constants.CONTEXT_TYPE);
+				response.setResponseCode(HttpStatus.BAD_REQUEST);
+			}
+		} catch (Exception e) {
+			log.error("Failed to validate the token: ", e);
+			response.getParams().setStatus(Constants.FAILED);
+			response.getParams().setErr(e.getMessage());
+			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		return response;
+	}
+
+
+	/**
+	 * Validates the given JWT token.
+	 *
+	 * @param token The JWT token to validate.
+	 * @return True if the token is valid; false otherwise.
+	 * @throws Exception if any error occurs during token validation.
+	 */
+	public String validateToken(String token) throws Exception {
+		try {
+			// Parsing the token and extracting its subject (claims)
+			String tokens = Jwts.parser().setSigningKey(serverConfig.getSecretKeyTokenValidation()).parseClaimsJws(token).getBody().getSubject();
+			// Parsing the subject (claims) into a map using Jackson ObjectMapper
+			Map<String, String> parsedMap = mapper.readValue(tokens, new TypeReference<Map<String, String>>() {
+			});
+			if (!org.apache.commons.lang.StringUtils.isEmpty(parsedMap.get(Constants.CONTEXT_TYPE))) {
+				return Constants.CONTEXT_TYPE;
+			}else {
+				return Constants.ERROR;
+			}
+		} catch (ExpiredJwtException e) {
+			// Handling ExpiredJwtException
+			throw new Exception("ExpiredJwt exception has occurred: " , e);
+		} catch (UnsupportedJwtException e) {
+			// Handling UnsupportedJwtException
+			throw new Exception("UnsupportedJwt exception has occurred: " , e);
+		} catch (MalformedJwtException e) {
+			// Handling MalformedJwtException
+			throw new Exception("MalformedJwt exception has occurred: " , e);
+		} catch (SignatureException e) {
+			// Handling SignatureException
+			throw new Exception("Signature exception has occurred: " , e);
+		} catch (IllegalArgumentException e) {
+			// Handling IllegalArgumentException
+			throw new Exception("IllegalArgumentException has occurred: " , e);
+		} catch (JsonMappingException e) {
+			// Handling JsonMappingException
+			throw new Exception("Json Mapping exception has occurred: " , e);
+		} catch (JsonParseException e) {
+			// Handling JsonParseException
+			throw new Exception("Json Parsing exception has occurred: " , e);
+		} catch (IOException e) {
+			// Handling IOException
+			throw new Exception("IOException has occurred: " , e);
+		}
+    }
 }
 
 
