@@ -71,6 +71,13 @@ public class ExploreCourseServiceImpl implements ExploreCourseService {
 				errMsg = "Failed to get contant details for Identifier List from DB.";
 			} else {
 				Map<String, Object> responseCourseList = (Map<String, Object>) searchResponse.get(Constants.RESULT);
+				List<Map<String, Object>> contentList = (List<Map<String, Object>>) responseCourseList.get(Constants.CONTENT);
+				if (CollectionUtils.isNotEmpty(contentList)) {
+					List<Map<String, Object>> sortedContentList = identifierList.stream().map(identifier -> contentList.stream()
+							.filter(content -> identifier.equals(content.get(Constants.IDENTIFIER)))
+							.findFirst().orElse(null)).filter(Objects::nonNull).collect(Collectors.toList());
+					responseCourseList.put(Constants.CONTENT, sortedContentList);
+				}
 				response.setResult(responseCourseList);
 			}
 		} catch (Exception e) {
