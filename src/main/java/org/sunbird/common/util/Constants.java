@@ -967,7 +967,7 @@ public class Constants {
 	public static final String EHRMS_AUTH_PASSWORD = "password";
 	public static final String USER_ID_LOWER = "userid";
 	public static final String EHRMS_USER_TOKEN = "ehrmsUserToken";
-
+	public static final String SEQ_NO = "seqNo";
 
     private Constants() {
 		throw new IllegalStateException("Utility class");
