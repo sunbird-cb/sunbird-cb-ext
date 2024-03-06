@@ -115,8 +115,7 @@ public class ProfileServiceImpl implements ProfileService {
 	private Logger log = LoggerFactory.getLogger(getClass().getName());
 
 	@Override
-	public SBApiResponse profileUpdate(Map<String, Object> request, String userToken, String authToken, String rootOrgId)
-			throws Exception {
+	public SBApiResponse profileUpdate(Map<String, Object> request, String userToken, String authToken, String rootOrgId) {
 		SBApiResponse response = new SBApiResponse(Constants.API_PROFILE_UPDATE);
 		try {
 			Map<String, Object> requestData = (Map<String, Object>) request.get(Constants.REQUEST);
@@ -1956,12 +1955,17 @@ public class ProfileServiceImpl implements ProfileService {
 		Map<String, Object> requestMap = (Map<String, Object>) request.get(Constants.REQUEST);
 		// Validating the token from the request map
 		try {
-			if (validateToken((String) requestMap.get("token"))) {
-				// If the token is valid, delegate the profile update to the profileUpdate method
+			String contextTokenValue=validateToken((String) requestMap.get(Constants.CONTEXT_TOKEN));
+			if(contextTokenValue.equalsIgnoreCase(Constants.CONTEXT_TYPE)){
 				return profileUpdate(request, userToken, authToken, rootOrgId);
+			}else{
+				log.error("Failed to process the request since the parameter is missing: " + Constants.CONTEXT_TYPE);
+				response.getParams().setStatus(Constants.FAILED);
+				response.getParams().setErr("Failed to process the request since the parameter is missing: " + Constants.CONTEXT_TYPE);
+				response.setResponseCode(HttpStatus.BAD_REQUEST);
 			}
 		} catch (Exception e) {
-			log.error("Failed to process profile update. Exception: ", e);
+			log.error("Failed to validate the token: ", e);
 			response.getParams().setStatus(Constants.FAILED);
 			response.getParams().setErr(e.getMessage());
 			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -1977,41 +1981,44 @@ public class ProfileServiceImpl implements ProfileService {
 	 * @return True if the token is valid; false otherwise.
 	 * @throws Exception if any error occurs during token validation.
 	 */
-	public boolean validateToken(String token) throws Exception {
+	public String validateToken(String token) throws Exception {
 		try {
 			// Parsing the token and extracting its subject (claims)
 			String tokens = Jwts.parser().setSigningKey(serverConfig.getSecretKeyTokenValidation()).parseClaimsJws(token).getBody().getSubject();
 			// Parsing the subject (claims) into a map using Jackson ObjectMapper
 			Map<String, String> parsedMap = mapper.readValue(tokens, new TypeReference<Map<String, String>>() {
 			});
-			// Checking if the 'contextType' key exists and is not empty
-			return parsedMap.get(Constants.CONTEXT_TYPE) != null && !parsedMap.get(Constants.CONTEXT_TYPE).isEmpty();
+			if (!org.apache.commons.lang.StringUtils.isEmpty(parsedMap.get(Constants.CONTEXT_TYPE))) {
+				return Constants.CONTEXT_TYPE;
+			}else {
+				return Constants.ERROR;
+			}
 		} catch (ExpiredJwtException e) {
 			// Handling ExpiredJwtException
-			throw new Exception("ExpiredJwt exception has occurred: " + e.getMessage());
+			throw new Exception("ExpiredJwt exception has occurred: " , e);
 		} catch (UnsupportedJwtException e) {
 			// Handling UnsupportedJwtException
-			throw new Exception("UnsupportedJwt exception has occurred: " + e.getMessage());
+			throw new Exception("UnsupportedJwt exception has occurred: " , e);
 		} catch (MalformedJwtException e) {
 			// Handling MalformedJwtException
-			throw new Exception("MalformedJwt exception has occurred: " + e.getMessage());
+			throw new Exception("MalformedJwt exception has occurred: " , e);
 		} catch (SignatureException e) {
 			// Handling SignatureException
-			throw new Exception("Signature exception has occurred: " + e.getMessage());
+			throw new Exception("Signature exception has occurred: " , e);
 		} catch (IllegalArgumentException e) {
 			// Handling IllegalArgumentException
-			throw new Exception("IllegalArgumentException has occurred: " + e.getMessage());
+			throw new Exception("IllegalArgumentException has occurred: " , e);
 		} catch (JsonMappingException e) {
 			// Handling JsonMappingException
-			throw new Exception("Json Mapping exception has occurred: " + e.getMessage());
+			throw new Exception("Json Mapping exception has occurred: " , e);
 		} catch (JsonParseException e) {
 			// Handling JsonParseException
-			throw new Exception("Json Parsing exception has occurred: " + e.getMessage());
+			throw new Exception("Json Parsing exception has occurred: " , e);
 		} catch (IOException e) {
 			// Handling IOException
-			throw new Exception("IOException has occurred: " + e.getMessage());
+			throw new Exception("IOException has occurred: " , e);
 		}
-	}
+    }
 }
 
 
