@@ -48,7 +48,6 @@ import org.sunbird.common.util.*;
 import org.sunbird.core.cipher.DecryptServiceImpl;
 import org.sunbird.core.producer.Producer;
 import org.sunbird.org.service.ExtendedOrgService;
-import org.sunbird.profile.exception.ProfileRequestException;
 import org.sunbird.storage.service.StorageServiceImpl;
 import org.sunbird.user.report.UserReportService;
 import org.sunbird.user.service.UserUtilityService;
@@ -1949,19 +1948,25 @@ public class ProfileServiceImpl implements ProfileService {
 	 * @param authToken The authentication token.
 	 * @param rootOrgId The root organization ID.
 	 * @return SBApiResponse object containing the response of the profile update.
-	 * @throws Exception if any error occurs during the profile update process.
 	 */
 	@Override
-	public SBApiResponse profileUpdateV2(Map<String, Object> request, String userToken, String authToken, String rootOrgId) throws Exception {
+	public SBApiResponse profileUpdateV2(Map<String, Object> request, String userToken, String authToken, String rootOrgId) {
+		SBApiResponse response = new SBApiResponse(Constants.API_PROFILE_UPDATE);
 		// Extracting the request map from the input request
 		Map<String, Object> requestMap = (Map<String, Object>) request.get(Constants.REQUEST);
 		// Validating the token from the request map
-		if (validateToken((String) requestMap.get("token"))) {
-			// If the token is valid, delegate the profile update to the profileUpdate method
-			return profileUpdate(request, userToken, authToken, rootOrgId);
+		try {
+			if (validateToken((String) requestMap.get("token"))) {
+				// If the token is valid, delegate the profile update to the profileUpdate method
+				return profileUpdate(request, userToken, authToken, rootOrgId);
+			}
+		} catch (Exception e) {
+			log.error("Failed to process profile update. Exception: ", e);
+			response.getParams().setStatus(Constants.FAILED);
+			response.getParams().setErr(e.getMessage());
+			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		// If token validation fails, return null
-		return null;
+		return response;
 	}
 
 
@@ -1970,12 +1975,12 @@ public class ProfileServiceImpl implements ProfileService {
 	 *
 	 * @param token The JWT token to validate.
 	 * @return True if the token is valid; false otherwise.
-	 * @throws ProfileRequestException if any error occurs during token validation.
+	 * @throws Exception if any error occurs during token validation.
 	 */
-	public boolean validateToken(String token) throws ProfileRequestException {
+	public boolean validateToken(String token) throws Exception {
 		try {
 			// Parsing the token and extracting its subject (claims)
-			String tokens = Jwts.parser().setSigningKey(serverConfig.getSecretKeyPrimaryEmailValidation()).parseClaimsJws(token).getBody().getSubject();
+			String tokens = Jwts.parser().setSigningKey(serverConfig.getSecretKeyTokenValidation()).parseClaimsJws(token).getBody().getSubject();
 			// Parsing the subject (claims) into a map using Jackson ObjectMapper
 			Map<String, String> parsedMap = mapper.readValue(tokens, new TypeReference<Map<String, String>>() {
 			});
@@ -1983,28 +1988,28 @@ public class ProfileServiceImpl implements ProfileService {
 			return parsedMap.get(Constants.CONTEXT_TYPE) != null && !parsedMap.get(Constants.CONTEXT_TYPE).isEmpty();
 		} catch (ExpiredJwtException e) {
 			// Handling ExpiredJwtException
-			throw new ProfileRequestException("ExpiredJwt exception has occurred: " + e.getMessage());
+			throw new Exception("ExpiredJwt exception has occurred: " + e.getMessage());
 		} catch (UnsupportedJwtException e) {
 			// Handling UnsupportedJwtException
-			throw new ProfileRequestException("UnsupportedJwt exception has occurred: " + e.getMessage());
+			throw new Exception("UnsupportedJwt exception has occurred: " + e.getMessage());
 		} catch (MalformedJwtException e) {
 			// Handling MalformedJwtException
-			throw new ProfileRequestException("MalformedJwt exception has occurred: " + e.getMessage());
+			throw new Exception("MalformedJwt exception has occurred: " + e.getMessage());
 		} catch (SignatureException e) {
 			// Handling SignatureException
-			throw new ProfileRequestException("Signature exception has occurred: " + e.getMessage());
+			throw new Exception("Signature exception has occurred: " + e.getMessage());
 		} catch (IllegalArgumentException e) {
 			// Handling IllegalArgumentException
-			throw new ProfileRequestException("IllegalArgumentException has occurred: " + e.getMessage());
+			throw new Exception("IllegalArgumentException has occurred: " + e.getMessage());
 		} catch (JsonMappingException e) {
 			// Handling JsonMappingException
-			throw new ProfileRequestException("Json Mapping exception has occurred: " + e.getMessage());
+			throw new Exception("Json Mapping exception has occurred: " + e.getMessage());
 		} catch (JsonParseException e) {
 			// Handling JsonParseException
-			throw new ProfileRequestException("Json Parsing exception has occurred: " + e.getMessage());
+			throw new Exception("Json Parsing exception has occurred: " + e.getMessage());
 		} catch (IOException e) {
 			// Handling IOException
-			throw new ProfileRequestException("IOException has occurred: " + e.getMessage());
+			throw new Exception("IOException has occurred: " + e.getMessage());
 		}
 	}
 }

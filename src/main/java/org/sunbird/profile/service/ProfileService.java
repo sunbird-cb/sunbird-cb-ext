@@ -6,7 +6,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 import org.sunbird.common.model.SBApiResponse;
-import org.sunbird.profile.exception.ProfileRequestException;
+
 
 public interface ProfileService {
 	SBApiResponse profileUpdate(Map<String, Object> request, String XAuthToken, String AuthToken, String rootOrgId) throws Exception;
@@ -53,5 +53,5 @@ public interface ProfileService {
 	 * @return SBApiResponse object containing the response of the profile update.
 	 * @throws Exception if any error occurs during the profile update process.
 	 */
-	SBApiResponse profileUpdateV2(Map<String, Object> request, String userToken, String authToken, String rootOrgId) throws Exception;
+	SBApiResponse profileUpdateV2(Map<String, Object> request, String userToken, String authToken, String rootOrgId) ;
 }
