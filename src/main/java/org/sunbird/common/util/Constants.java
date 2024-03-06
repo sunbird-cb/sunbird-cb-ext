@@ -962,6 +962,7 @@ public class Constants {
 	public static final String COMPETENCY_THEME_PARAM = "competency_theme";
 	public static final String COMPETENCY_SUB_THEME_PARAM = "competency_subtheme";
 	public static final String COPY_EMAIL = "copyEmail";
+	public static final String SEQ_NO = "seqNo";
 	public static final String USER_CONTENT_RECOMMENDATION = "user.v1.content.recommendation";
 	public static final String RECOMMEND_CONTENT_SUBJECT = " recommends this iGOT Karmayogi #primaryCategory for you!";
 	public static final String COURSE_POSTER_IMAGE_URL= "coursePosterImageUrl";
