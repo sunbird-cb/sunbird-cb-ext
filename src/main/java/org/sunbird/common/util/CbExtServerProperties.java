@@ -675,7 +675,7 @@ public class CbExtServerProperties {
 	@Value("${es.default.result.limit}")
 	private int esDefaultResultLimit;
 
-	@Value("${secret.key.secretKeyTokenValidation}")
+	@Value("${secret.key.token.validation}")
 	private String secretKeyTokenValidation;
 
 	public boolean qListFromCacheEnabled() {
