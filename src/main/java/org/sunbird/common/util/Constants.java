@@ -987,8 +987,9 @@ public class Constants {
 	public static final String TABLE_DIGILOCKER_DOC_INFO = "digilocker_doc_lookup";
 	public static final String ISSUED_USER_CERTIFICATE = "issuedCertificates";
 	public static final String DOC_TYPE = "docType";
-    public static final String PRIMARY_CATEGORY_TAG = "#primaryCategory";
-  	public static final String PASSWORD = "password";
+	public static final String LEARNER_LEADER_BOARD = "learnerLeaderBoard";
+  public static final String PRIMARY_CATEGORY_TAG = "#primaryCategory";
+  public static final String PASSWORD = "password";
 	public static final String STRING_FORMAT_UNZIP="%s/%s/%s/%s";
 	public static final String UNZIP_PATH="/unzippath";
 	public static final String OUTPUT_PATH="/output";

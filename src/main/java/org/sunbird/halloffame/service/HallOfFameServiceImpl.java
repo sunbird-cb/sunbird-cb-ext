@@ -1,11 +1,15 @@
 package org.sunbird.halloffame.service;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.sunbird.cassandra.utils.CassandraOperation;
+import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.util.Constants;
+import org.sunbird.common.util.ProjectUtil;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -41,4 +45,25 @@ public class HallOfFameServiceImpl implements HallOfFameService {
         resultMap.put(Constants.TITLE, formattedDateLastMonth);
         return resultMap;
     }
+
+    public SBApiResponse learnerLeaderBoard(String rootOrgId, String authToken) {
+        SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.LEARNER_LEADER_BOARD);
+        try {
+            if (StringUtils.isEmpty(rootOrgId)) {
+                response.getParams().setErrmsg("Invalid Root Org Id");
+                response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+            Map<String, Object> propertiesMap = new HashMap<>();
+            propertiesMap.put("rootOrgId", rootOrgId);
+            List<Map<String, Object>> result = cassandraOperation.getRecordsByProperties(Constants.SUNBIRD_KEY_SPACE_NAME,
+                    "", propertiesMap , Arrays.asList(""));
+            response.put("result", result);
+            return response;
+        } catch (Exception e) {
+            response.getParams().setStatus(Constants.FAILED);
+            response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return response;
+    }
+
 }
