@@ -134,17 +134,13 @@ public class ProfileServiceImpl implements ProfileService {
 				return response;
 			}
 			Map<String, Object> profileDetailsMap = (Map<String, Object>) requestData.get(Constants.PROFILE_DETAILS);
-			String validatePhoneEmail = validateExistingPhoneEmail(profileDetailsMap);
-            switch (validatePhoneEmail) {
-                case Constants.EMAIL_EXIST_ERROR:
-                case Constants.PHONE_NUMBER_EXIST_ERROR:
-                    response.setResponseCode(HttpStatus.BAD_REQUEST);
-                    response.getParams().setStatus(Constants.FAILED);
-                    response.getParams().setErrmsg("Email Id or Phone Number Already Exists");
-                    return response;
-                default:
-                    break;
-            }
+			String validatePhoneEmailErrMsg = validateExistingPhoneEmail(profileDetailsMap);
+			if (!validatePhoneEmailErrMsg.isEmpty()) {
+				response.setResponseCode(HttpStatus.BAD_REQUEST);
+				response.getParams().setStatus(Constants.FAILED);
+				response.getParams().setErrmsg(validatePhoneEmailErrMsg);
+				return response;
+			}
 			List<String> approvalFieldList = approvalFields();
 			String newDeptName = checkDepartment(profileDetailsMap);
 			Map<String, Object> transitionData = new HashMap<>();
@@ -2039,25 +2035,16 @@ public class ProfileServiceImpl implements ProfileService {
 	 *         Constants.PHONE_NUMBER_EXIST_ERROR if phone number already exists.
 	 */
 	private String validateExistingPhoneEmail(Map<String, Object> profileDetailsMap) {
-		if (!profileDetailsMap.containsKey(Constants.PERSONAL_DETAILS)) {
-			return ""; // Return error message if personal details are missing
+		if (profileDetailsMap.containsKey(Constants.PERSONAL_DETAILS)) {
+			Map<String, Object> personalDetails = (Map<String, Object>) profileDetailsMap.get(Constants.PERSONAL_DETAILS);
+			if (personalDetails.containsKey(Constants.EMAIL) && (userUtilityService.isUserExist(Constants.EMAIL, (String) personalDetails.get(Constants.EMAIL)))) {
+				return Constants.EMAIL_EXIST_ERROR;
+			}
+			if (personalDetails.containsKey(Constants.PHONE) && (userUtilityService.isUserExist(Constants.PHONE, (String) personalDetails.get(Constants.PHONE)))) {
+				return Constants.PHONE_NUMBER_EXIST_ERROR;
+			}
 		}
-		// Extract personal details from the profileDetailsMap
-		Map<String, Object> personalDetails = (Map<String, Object>) profileDetailsMap.get(Constants.PERSONAL_DETAILS);
-		if (!personalDetails.containsKey(Constants.EMAIL)) {
-			return Constants.EMAIL_MISSING_ERROR; // Return error message if email is missing
-		} else if (!personalDetails.containsKey(Constants.PHONE)) {
-			return Constants.PHONE_MISSING_ERROR; // Return error message if email is missing
-		}
-		// Check if the provided email already exists in the system
-		if (userUtilityService.isUserExist(Constants.EMAIL, (String) personalDetails.get(Constants.EMAIL))) {
-			return Constants.EMAIL_EXIST_ERROR; // Return error message if email already exists
-		}
-		// Check if the provided phone number already exists in the system
-		if (userUtilityService.isUserExist(Constants.PHONE, (String) personalDetails.get(Constants.PHONE))) {
-			return Constants.PHONE_NUMBER_EXIST_ERROR; // Return error message if phone number already exists
-		}
-		return Constants.OK; // Return OK if neither email nor phone number exists
+		return "";
 	}
 
 }

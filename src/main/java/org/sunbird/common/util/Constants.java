@@ -1001,9 +1001,6 @@ public class Constants {
 	public static final String REPORT_EXPIRY_DATE  = "reportExpiryDate";
 	public static final String ERROR  = "error";
 	public static final String CONTEXT_TOKEN  = "contextToken";
-	public static final String PERSONAL_DETAILS_MISSING_ERROR= "Personal Details are missing";
-	public static final String EMAIL_MISSING_ERROR= "Email is missing";
-	public static final String PHONE_MISSING_ERROR= "Phone is missing";
 
 
   private Constants() {
