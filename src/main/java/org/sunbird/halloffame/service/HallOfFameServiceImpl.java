@@ -24,6 +24,7 @@ public class HallOfFameServiceImpl implements HallOfFameService {
         this.cassandraOperation = cassandraOperation;
     }
 
+
     @Override
     public Map<String, Object> fetchHallOfFameData() {
         Map<String, Object> resultMap = new HashMap<>();

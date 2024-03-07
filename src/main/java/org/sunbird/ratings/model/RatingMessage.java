@@ -1,7 +1,6 @@
 package org.sunbird.ratings.model;
 
 public class RatingMessage {
-    public Integer version = 1;
     private String action = "ratingUpdate";
     private String activityId;
     private String activityType;
@@ -76,9 +75,9 @@ public class RatingMessage {
     }
 
     public static class UpdatedValues {
-        public String updatedOn;
-        public Float rating;
-        public String review;
+        private String updatedOn;
+        private Float rating;
+        private String review;
 
         public String getUpdatedOn() {
             return updatedOn;
