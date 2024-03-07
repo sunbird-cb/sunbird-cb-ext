@@ -159,9 +159,13 @@ public class ExploreCourseServiceImpl implements ExploreCourseService {
 					Map<String, Object> responseCourseList = (Map<String, Object>) searchResponse.get(Constants.RESULT);
 					List<Map<String, Object>> contentList = (List<Map<String, Object>>) responseCourseList.get(Constants.CONTENT);
 					if (CollectionUtils.isNotEmpty(contentList)) {
-						List<Map<String, Object>> sortedContentList = identifierList.stream().map(identifier -> contentList.stream()
-								.filter(content -> identifier.equals(content.get(Constants.IDENTIFIER)))
-								.findFirst().orElse(null)).filter(Objects::nonNull).collect(Collectors.toList());
+						List<Map<String, Object>> sortedContentList = identifierList.stream()
+								.map(identifier -> contentList.stream()
+										.filter(content -> identifier.equals(content.get(Constants.IDENTIFIER)))
+										.findFirst().orElse(null))
+								.filter(Objects::nonNull)
+								.sorted(Comparator.comparing(content -> (String) content.get(Constants.PRIMARY_CATEGORY)))
+								.collect(Collectors.toList());
 						responseCourseList.put(Constants.CONTENT, sortedContentList);
 					}
 					response.setResult(responseCourseList);
