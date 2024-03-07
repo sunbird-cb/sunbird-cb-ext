@@ -17,17 +17,13 @@ import java.util.*;
 public class HealthServiceImpl implements HealthService {
 
 
+    @Autowired
     CassandraOperation cassandraOperation;
 
+    @Autowired
     RedisCacheService redisCacheService;
 
-    private final Logger log = LoggerFactory.getLogger(getClass().getName());
-
-    @Autowired
-    public HealthServiceImpl(CassandraOperation cassandraOperation, RedisCacheService redisCacheService, Logger log) {
-        this.cassandraOperation = cassandraOperation;
-        this.redisCacheService = redisCacheService;
-    }
+    private Logger log = LoggerFactory.getLogger(getClass().getName());
 
     @Override
     public SBApiResponse checkHealthStatus() throws Exception {

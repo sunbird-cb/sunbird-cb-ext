@@ -16,14 +16,9 @@ import org.sunbird.core.logger.CbExtLogger;
 
 @Configuration
 public class EsConfig {
-	private  final CbExtLogger logger = new CbExtLogger(getClass().getName());
-
-	CbExtServerProperties configuration;
-
+	private CbExtLogger logger = new CbExtLogger(getClass().getName());
 	@Autowired
-	public EsConfig(CbExtServerProperties configuration) {
-		this.configuration = configuration;
-	}
+	CbExtServerProperties configuration;
 
 	@Bean(name = "esClient", destroyMethod = "close")
 	public RestHighLevelClient getCbEsRestClient(CbExtServerProperties configuration) {

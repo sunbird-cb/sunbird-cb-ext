@@ -10,14 +10,11 @@ import org.sunbird.core.logger.CbExtLogger;
 @Service
 public class Producer {
 
-    private final  CbExtLogger log = new CbExtLogger(getClass().getName());
+    private CbExtLogger log = new CbExtLogger(getClass().getName());
 
-    KafkaTemplate<String, String> kafkaTemplate;
 
     @Autowired
-    public Producer(KafkaTemplate<String, String> kafkaTemplate) {
-        this.kafkaTemplate = kafkaTemplate;
-    }
+    KafkaTemplate<String, String> kafkaTemplate;
 
     public void push(String topic, Object value) {
         ObjectMapper mapper = new ObjectMapper();

@@ -1,9 +1,0 @@
-
-g
-java:S1104,"QMake PROPS a static final constant or non-public and provide accessors if needed.(¿éª¥
-A
-java:S1444,"+Make this "public static PROPS" field final(¿éª¥
-f
-java:S3008,"PRename this field "PROPS" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(¿éª¥
-U
-java:S1118":Add a private constructor to hide the implicit public one.(šÉûÿÿÿÿ

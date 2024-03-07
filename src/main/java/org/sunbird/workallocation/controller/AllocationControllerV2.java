@@ -16,13 +16,8 @@ import java.io.IOException;
 @RequestMapping("/v2/workallocation")
 public class AllocationControllerV2 {
 
-
-    private final AllocationServiceV2 allocationServiceV2;
-
     @Autowired
-    public AllocationControllerV2(AllocationServiceV2 allocationServiceV2) {
-        this.allocationServiceV2 = allocationServiceV2;
-    }
+    private AllocationServiceV2 allocationServiceV2;
 
     @PostMapping("/add")
     public ResponseEntity<Response> addWorkAllocation(@RequestHeader("x-authenticated-user-token") String authUserToken,

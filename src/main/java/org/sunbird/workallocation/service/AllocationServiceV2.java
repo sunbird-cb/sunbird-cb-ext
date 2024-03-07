@@ -67,40 +67,29 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class AllocationServiceV2 {
 
 	public static final String RESULT = "result";
-
-	private final IndexerService indexerService;
-
-
-	private final Validator validator;
-
-
-	private final AllocationService allocationService;
-
-
-	private final  EnrichmentService enrichmentService;
-
-
-	private final RestTemplate restTemplate;
-
-	private final PdfGeneratorService pdfGeneratorService;
-
-
-	private final OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
-
-
-	private final CbExtServerProperties cbExtServerProperties;
+	@Autowired
+	private IndexerService indexerService;
 
 	@Autowired
-	public AllocationServiceV2(IndexerService indexerService,Validator validator, AllocationService allocationService, EnrichmentService enrichmentService, RestTemplate restTemplate, PdfGeneratorService pdfGeneratorService, OutboundRequestHandlerServiceImpl outboundRequestHandlerService, CbExtServerProperties cbExtServerProperties) {
-		this.indexerService = indexerService;
-		this.validator=validator;
-		this.allocationService = allocationService;
-		this.enrichmentService = enrichmentService;
-		this.restTemplate = restTemplate;
-		this.pdfGeneratorService = pdfGeneratorService;
-		this.outboundRequestHandlerService = outboundRequestHandlerService;
-		this.cbExtServerProperties = cbExtServerProperties;
-	}
+	private Validator validator;
+
+	@Autowired
+	private AllocationService allocationService;
+
+	@Autowired
+	private EnrichmentService enrichmentService;
+
+	@Autowired
+	private RestTemplate restTemplate;
+
+	@Autowired
+	private PdfGeneratorService pdfGeneratorService;
+
+	@Autowired
+	private OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
+
+	@Autowired
+	private CbExtServerProperties cbExtServerProperties;
 
 	@Value("${workorder.index.name}")
 	public String workOrderIndex;

@@ -49,47 +49,36 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Service
 public class UserRegistrationServiceImpl implements UserRegistrationService {
 
-	private final  Logger logger = LoggerFactory.getLogger(UserRegistrationServiceImpl.class);
+	private Logger logger = LoggerFactory.getLogger(UserRegistrationServiceImpl.class);
 
 	ObjectMapper mapper = new ObjectMapper();
 
+	@Autowired
 	CbExtServerProperties serverProperties;
 
+	@Autowired
 	IndexerService indexerService;
 
-
+	@Autowired
 	Producer kafkaProducer;
 
-
+	@Autowired
 	OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
 
-
+	@Autowired
 	RestTemplate restTemplate;
 
-
+	@Autowired
 	UserUtilityService userUtilityService;
 
+	@Autowired
 	RedisCacheMgr redisCacheMgr;
 
-
+	@Autowired
 	ExtendedOrgService extOrgService;
 
-
-	CassandraOperation cassandraOperation;
-
-
 	@Autowired
-	public UserRegistrationServiceImpl(CbExtServerProperties serverProperties, IndexerService indexerService, Producer kafkaProducer, OutboundRequestHandlerServiceImpl outboundRequestHandlerService, RestTemplate restTemplate, UserUtilityService userUtilityService, RedisCacheMgr redisCacheMgr, ExtendedOrgService extOrgService, CassandraOperation cassandraOperation) {
-		this.serverProperties = serverProperties;
-		this.indexerService = indexerService;
-		this.kafkaProducer = kafkaProducer;
-		this.outboundRequestHandlerService = outboundRequestHandlerService;
-		this.restTemplate = restTemplate;
-		this.userUtilityService = userUtilityService;
-		this.redisCacheMgr = redisCacheMgr;
-		this.extOrgService = extOrgService;
-		this.cassandraOperation = cassandraOperation;
-	}
+	CassandraOperation cassandraOperation;
 
 	@Override
 	public SBApiResponse registerUser(UserRegistrationInfo userRegInfo) {
@@ -505,14 +494,20 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 			Map<String, Object> sortByMap = new HashMap<>();
 			sortByMap.put(Constants.CHANNEL, Constants.ASC_ORDER);
 			requestMap.put(Constants.SORT_BY, sortByMap);
-			Map<String, Object> filtersMap = new HashMap<>();
-			filtersMap.put(Constants.IS_TENANT, Boolean.TRUE);
-			requestMap.put(Constants.FILTERS, filtersMap);
+			requestMap.put(Constants.FILTERS, new HashMap<String, Object>() {
+				{
+					put(Constants.IS_TENANT, Boolean.TRUE);
+				}
+			});
+
 			String serviceURL = serverProperties.getSbUrl() + serverProperties.getSbOrgSearchPath();
-			Map<String, Object> requestBody = new HashMap<>();
-			requestBody.put(Constants.REQUEST, requestMap);
 			SunbirdApiResp orgResponse = mapper.convertValue(
-					outboundRequestHandlerService.fetchResultUsingPost(serviceURL, requestBody), SunbirdApiResp.class);
+					outboundRequestHandlerService.fetchResultUsingPost(serviceURL, new HashMap<String, Object>() {
+						{
+							put(Constants.REQUEST, requestMap);
+						}
+					}), SunbirdApiResp.class);
+
 			SunbirdApiResultResponse resultResp = orgResponse.getResult().getResponse();
 			count = resultResp.getCount();
 			iterateCount = iterateCount + resultResp.getContent().size();
@@ -523,6 +518,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 					orgNameList.add(content.getChannel());
 				}
 			}
+
 			List<String> masterOrgList = getMasterOrgList();
 			for (String orgName : masterOrgList) {
 				if (!orgNameList.contains(orgName)) {
@@ -530,9 +526,11 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 				}
 			}
 		} while (count != iterateCount);
+
 		if (CollectionUtils.isEmpty(orgList)) {
 			throw new Exception("Failed to retrieve organisation details.");
 		}
+
 		Map<String, List<DeptPublicInfo>> deptListMap = new HashMap<String, List<DeptPublicInfo>>();
 		deptListMap.put(Constants.DEPARTMENT_LIST_CACHE_NAME, orgList);
 		redisCacheMgr.putCache(Constants.DEPARTMENT_LIST_CACHE_NAME, deptListMap);

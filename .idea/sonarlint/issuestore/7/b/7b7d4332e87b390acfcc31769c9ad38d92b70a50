@@ -1,16 +1,0 @@
-
-6
-java:S1700"Rename field "responseCode"(¡ã¶Àüÿÿÿÿ
-o	java:S115
-"ZRename this constant name to match the regular expression '^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$'.(§®÷„
-o	java:S115"ZRename this constant name to match the regular expression '^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$'.(Œ± Û
-W
-java:S3066P"<Lower the visibility of this setter or remove it altogether.(‡ÏÊ¹ÿÿÿÿÿ
-W
-java:S3066^"<Lower the visibility of this setter or remove it altogether.(ÃÔóþûÿÿÿÿ
-W
-java:S3066f"<Lower the visibility of this setter or remove it altogether.(Çû¤ãûÿÿÿÿ
-T
-java:S3400C"9Remove this method and declare a constant for this value.(Ö§”Óþÿÿÿÿ
-K
-java:S1172B"0Remove this unused method parameter "errorCode".(›Àöœùÿÿÿÿ

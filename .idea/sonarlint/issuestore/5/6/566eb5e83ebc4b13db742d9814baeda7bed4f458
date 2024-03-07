@@ -1,7 +1,0 @@
-
-[
-java:S1155O">Use isEmpty() to check whether the collection is empty or not.(™‹Æ—8åŸÈÁá1
-I
-java:S1602]",Remove useless curly braces around statement(‡ªé¤8çŸÈÁá1
-‰
-java:S1130l"lRemove the declaration of thrown exception 'java.io.IOException', as it cannot be thrown from method's body.(¹£ş8çŸÈÁá1

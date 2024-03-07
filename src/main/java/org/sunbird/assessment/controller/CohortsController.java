@@ -19,11 +19,8 @@ import org.sunbird.common.util.Constants;
 @RestController
 public class CohortsController {
 
-	CohortsService cohortsServ;
 	@Autowired
-	public CohortsController(CohortsService cohortsServ) {
-		this.cohortsServ = cohortsServ;
-	}
+	CohortsService cohortsServ;
 
 	/**
 	 * gets all top-performers

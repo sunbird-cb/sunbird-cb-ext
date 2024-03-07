@@ -29,22 +29,19 @@ public class AssessmentRepositoryImpl implements AssessmentRepository {
 	public static final String RESULT = "result";
 	public static final String SOURCE_ID = "sourceId";
 	public static final String USER_ID = "userId";
-
-	UserAssessmentSummaryRepository userAssessmentSummaryRepo;
-
-	UserAssessmentMasterRepository userAssessmentMasterRepo;
-
-	UserQuizMasterRepository userQuizMasterRepo;
-
-	CassandraOperation cassandraOperation;
+	private CbExtLogger logger = new CbExtLogger(getClass().getName());
 
 	@Autowired
-	public AssessmentRepositoryImpl(UserAssessmentSummaryRepository userAssessmentSummaryRepo, UserAssessmentMasterRepository userAssessmentMasterRepo, UserQuizMasterRepository userQuizMasterRepo, CassandraOperation cassandraOperation) {
-		this.userAssessmentSummaryRepo = userAssessmentSummaryRepo;
-		this.userAssessmentMasterRepo = userAssessmentMasterRepo;
-		this.userQuizMasterRepo = userQuizMasterRepo;
-		this.cassandraOperation = cassandraOperation;
-	}
+	UserAssessmentSummaryRepository userAssessmentSummaryRepo;
+
+	@Autowired
+	UserAssessmentMasterRepository userAssessmentMasterRepo;
+
+	@Autowired
+	UserQuizMasterRepository userQuizMasterRepo;
+
+	@Autowired
+	CassandraOperation cassandraOperation;
 
 	SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 

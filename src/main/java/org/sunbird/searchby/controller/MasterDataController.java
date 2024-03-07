@@ -14,11 +14,10 @@ import java.util.Map;
 @RestController
 @RequestMapping("/masterData/v1")
 public class MasterDataController {
-	private  final MasterDataServiceImpl masterDataService;
+
 	@Autowired
-	public MasterDataController(MasterDataServiceImpl masterDataService) {
-		this.masterDataService = masterDataService;
-	}
+	private MasterDataServiceImpl masterDataService;
+
 	@GetMapping("/positions")
 	public ResponseEntity<FracApiResponse> getPositionsList() {
 		FracApiResponse response = masterDataService.getListPositions();

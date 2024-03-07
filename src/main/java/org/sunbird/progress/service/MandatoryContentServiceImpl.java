@@ -35,32 +35,24 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Service
 public class MandatoryContentServiceImpl implements MandatoryContentService {
 
-
-	private final OutboundRequestHandlerServiceImpl outboundReqService;
-
-
-	private final  CbExtServerProperties cbExtServerProperties;
-
-
-	private final CassandraOperation cassandraOperation;
-
-
-	private  final UserUtilityServiceImpl userUtilService;
-
-
-	private final  ContentServiceImpl contentService;
-
-	private final CbExtLogger logger = new CbExtLogger(getClass().getName());
-
-	private final  ObjectMapper mapper = new ObjectMapper();
 	@Autowired
-	public MandatoryContentServiceImpl(OutboundRequestHandlerServiceImpl outboundReqService, CbExtServerProperties cbExtServerProperties, CassandraOperation cassandraOperation, UserUtilityServiceImpl userUtilService, ContentServiceImpl contentService) {
-		this.outboundReqService = outboundReqService;
-		this.cbExtServerProperties = cbExtServerProperties;
-		this.cassandraOperation = cassandraOperation;
-		this.userUtilService = userUtilService;
-		this.contentService = contentService;
-	}
+	private OutboundRequestHandlerServiceImpl outboundReqService;
+
+	@Autowired
+	private CbExtServerProperties cbExtServerProperties;
+
+	@Autowired
+	private CassandraOperation cassandraOperation;
+
+	@Autowired
+	private UserUtilityServiceImpl userUtilService;
+
+	@Autowired
+	private ContentServiceImpl contentService;
+
+	private CbExtLogger logger = new CbExtLogger(getClass().getName());
+
+	private ObjectMapper mapper = new ObjectMapper();
 
 	@Override
 	public MandatoryContentResponse getMandatoryContentStatusForUser(String authUserToken, String rootOrg, String org,

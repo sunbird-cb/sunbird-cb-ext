@@ -1,9 +1,0 @@
-
-n
-java:S1104"SMake version a static final constant or non-public and provide accessors if needed.(¿ÕÜåüÿÿÿÿ
-p
-java:S1104O"UMake updatedOn a static final constant or non-public and provide accessors if needed.(Ü§»êûÿÿÿÿ
-m
-java:S1104P"RMake rating a static final constant or non-public and provide accessors if needed.(´§Úèÿÿÿÿÿ
-m
-java:S1104Q"RMake review a static final constant or non-public and provide accessors if needed.(Ø«ú‡ıÿÿÿÿ

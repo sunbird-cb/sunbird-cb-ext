@@ -32,20 +32,16 @@ import org.sunbird.org.repository.OrgHierarchyRepository;
 
 @Service
 public class ExtendedOrgServiceImpl implements ExtendedOrgService {
-	private final Logger logger = LoggerFactory.getLogger(getClass().getName());
+	private Logger logger = LoggerFactory.getLogger(getClass().getName());
 
+	@Autowired
 	OutboundRequestHandlerServiceImpl outboundService;
 
-
+	@Autowired
 	CbExtServerProperties configProperties;
 
-	OrgHierarchyRepository orgRepository;
 	@Autowired
-	public ExtendedOrgServiceImpl(OutboundRequestHandlerServiceImpl outboundService, CbExtServerProperties configProperties, OrgHierarchyRepository orgRepository) {
-		this.outboundService = outboundService;
-		this.configProperties = configProperties;
-		this.orgRepository = orgRepository;
-	}
+	OrgHierarchyRepository orgRepository;
 
 	ObjectMapper objectMapper = new ObjectMapper();
 

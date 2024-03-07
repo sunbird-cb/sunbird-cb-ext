@@ -63,58 +63,49 @@ import static java.util.stream.Collectors.toList;
 @SuppressWarnings({ "unchecked" })
 public class ProfileServiceImpl implements ProfileService {
 
-
+	@Autowired
 	CbExtServerProperties serverConfig;
 
-
+	@Autowired
 	OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
 
-
+	@Autowired
 	UserUtilityService userUtilityService;
 
+	@Autowired
 	ObjectMapper mapper;
 
+	@Autowired
 	IndexerService indexerService;
 
-
+	@Autowired
 	CassandraOperation cassandraOperation;
 
+	@Autowired
 	ExtendedOrgService extOrgService;
 
-
+	@Autowired
 	StorageServiceImpl storageService;
 
-
+	@Autowired
 	ContentService contentService;
 
+	@Autowired
 	UserReportService reportService;
 
+	@Autowired
 	DecryptServiceImpl decryptService;
+
+	@Autowired
 	Producer kafkaProducer;
 
+	@Autowired
 	DataCacheMgr dataCacheMgr;
 
-
+	@Autowired
     AccessTokenValidator accessTokenValidator;
 
-	private final Logger log = LoggerFactory.getLogger(getClass().getName());
-
-	public ProfileServiceImpl(CbExtServerProperties serverConfig, OutboundRequestHandlerServiceImpl outboundRequestHandlerService, UserUtilityService userUtilityService, ObjectMapper mapper, IndexerService indexerService, CassandraOperation cassandraOperation, ExtendedOrgService extOrgService, StorageServiceImpl storageService, ContentService contentService, UserReportService reportService, DecryptServiceImpl decryptService, Producer kafkaProducer, DataCacheMgr dataCacheMgr, AccessTokenValidator accessTokenValidator) {
-		this.serverConfig = serverConfig;
-		this.outboundRequestHandlerService = outboundRequestHandlerService;
-		this.userUtilityService = userUtilityService;
-		this.mapper = mapper;
-		this.indexerService = indexerService;
-		this.cassandraOperation = cassandraOperation;
-		this.extOrgService = extOrgService;
-		this.storageService = storageService;
-		this.contentService = contentService;
-		this.reportService = reportService;
-		this.decryptService = decryptService;
-		this.kafkaProducer = kafkaProducer;
-		this.dataCacheMgr = dataCacheMgr;
-		this.accessTokenValidator = accessTokenValidator;
-	}
+	private Logger log = LoggerFactory.getLogger(getClass().getName());
 
 	@Override
 	public SBApiResponse profileUpdate(Map<String, Object> request, String xAuthToken, String authToken, String rootOrgId) {

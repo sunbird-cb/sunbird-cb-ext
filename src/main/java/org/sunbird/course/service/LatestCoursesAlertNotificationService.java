@@ -36,18 +36,14 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 @Service
 public class LatestCoursesAlertNotificationService {
 
-
+	@Autowired
 	CbExtServerProperties serverProperties;
 
+	@Autowired
 	NotificationUtil notificationUtil;
 
-	CassandraOperation cassandraOperation;
 	@Autowired
-	public LatestCoursesAlertNotificationService(CbExtServerProperties serverProperties, NotificationUtil notificationUtil, CassandraOperation cassandraOperation) {
-		this.serverProperties = serverProperties;
-		this.notificationUtil = notificationUtil;
-		this.cassandraOperation = cassandraOperation;
-	}
+	CassandraOperation cassandraOperation;
 
 	private static final CbExtLogger logger = new CbExtLogger(LatestCoursesAlertNotificationService.class.getName());
 

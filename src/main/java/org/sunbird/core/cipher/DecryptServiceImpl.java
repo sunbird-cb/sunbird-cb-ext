@@ -23,11 +23,8 @@ public class DecryptServiceImpl {
 	private Cipher decryptCipher;
 	private Cipher encryptCipher;
 
-	private  final SecretKeySpec secretKeySpec;
 	@Autowired
-	public DecryptServiceImpl(SecretKeySpec secretKeySpec) {
-		this.secretKeySpec = secretKeySpec;
-	}
+	private SecretKeySpec secretKeySpec;
 
 	@Value("${user.report.store.path}")
 	private String userStorePath;

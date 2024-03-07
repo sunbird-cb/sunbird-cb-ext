@@ -17,11 +17,9 @@ import java.util.Collection;
 @RestController
 public class SearchByController {
 
-	private  final SearchByService searchByService;
 	@Autowired
-	public SearchByController(SearchByService searchByService) {
-		this.searchByService = searchByService;
-	}
+	private SearchByService searchByService;
+
 	@GetMapping("/v1/browseByCompetency")
 	public ResponseEntity<Collection<CompetencyInfo>> browseByCompetency(@RequestHeader(Constants.X_AUTH_TOKEN) String authUserToken)
 			throws Exception {

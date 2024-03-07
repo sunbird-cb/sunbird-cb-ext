@@ -26,30 +26,21 @@ import java.util.concurrent.CompletableFuture;
 @Component
 public class CbplanContentConsumer {
 
-    private final CbExtLogger logger = new CbExtLogger(getClass().getName());
+    private CbExtLogger logger = new CbExtLogger(getClass().getName());
 
-
+    @Autowired
     PropertiesConfig configuration;
 
-
-    private final  OutboundRequestHandlerServiceImpl outboundReqService;
+    @Autowired
+    private OutboundRequestHandlerServiceImpl outboundReqService;
 
     private ObjectMapper mapper = new ObjectMapper();
 
-
+    @Autowired
     CassandraOperation cassandraOperation;
 
-
-    UserUtilityService userService;
-
     @Autowired
-    public CbplanContentConsumer(PropertiesConfig configuration, OutboundRequestHandlerServiceImpl outboundReqService, ObjectMapper mapper, CassandraOperation cassandraOperation, UserUtilityService userService) {
-        this.configuration = configuration;
-        this.outboundReqService = outboundReqService;
-        this.mapper = mapper;
-        this.cassandraOperation = cassandraOperation;
-        this.userService = userService;
-    }
+    UserUtilityService userService;
 
     @KafkaListener(topics = "${kafka.topic.cbplan.content.request}", groupId = "${kafka.topic.cbplan.content.request.group}")
     public void cbplanContentRequestConsumer(ConsumerRecord<String, String> data) {

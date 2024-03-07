@@ -22,12 +22,8 @@ import org.sunbird.workallocation.service.AllocationService;
 @RequestMapping("/v1/workallocation")
 public class AllocationController {
 
-
-	private  final AllocationService allocationService;
 	@Autowired
-	public AllocationController(AllocationService allocationService) {
-		this.allocationService = allocationService;
-	}
+	private AllocationService allocationService;
 
 	@PostMapping("/add")
 	public ResponseEntity<Response> add(@RequestHeader("Authorization") String authUserToken,

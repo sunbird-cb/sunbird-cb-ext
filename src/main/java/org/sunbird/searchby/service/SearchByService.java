@@ -33,27 +33,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @SuppressWarnings("unchecked")
 public class SearchByService {
 
-	private final CbExtLogger logger = new CbExtLogger(getClass().getName());
-
-	CbExtServerProperties cbExtServerProperties;
-
-
-	RedisCacheMgr redisCacheMgr;
-	
-
-	ObjectMapper mapper;
-
-
-	OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
-
+	private CbExtLogger logger = new CbExtLogger(getClass().getName());
 
 	@Autowired
-	public SearchByService(CbExtServerProperties cbExtServerProperties, RedisCacheMgr redisCacheMgr, ObjectMapper mapper, OutboundRequestHandlerServiceImpl outboundRequestHandlerService) {
-		this.cbExtServerProperties = cbExtServerProperties;
-		this.redisCacheMgr = redisCacheMgr;
-		this.mapper = mapper;
-		this.outboundRequestHandlerService = outboundRequestHandlerService;
-	}
+	CbExtServerProperties cbExtServerProperties;
+
+	@Autowired
+	RedisCacheMgr redisCacheMgr;
+	
+	@Autowired
+	ObjectMapper mapper;
+
+	@Autowired
+	OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
 
 	public Collection<CompetencyInfo> getCompetencyDetails(String authUserToken) throws Exception {
 		String strCompetencyMap = redisCacheMgr.getCache(Constants.COMPETENCY_CACHE_NAME);

@@ -14,11 +14,8 @@ import org.sunbird.catalog.service.CatalogServiceImpl;
 @RestController
 @RequestMapping("/v1/catalog")
 public class CatalogController {
-	private  final CatalogServiceImpl catalogService;
 	@Autowired
-	public CatalogController(CatalogServiceImpl catalogService) {
-		this.catalogService = catalogService;
-	}
+	private CatalogServiceImpl catalogService;
 
 	@GetMapping("/")
 	public ResponseEntity<Catalog> getCatalog(@RequestHeader("x-authenticated-user-token") String authUserToken,

@@ -1,9 +1,0 @@
-
-X
-java:S1612'"=Replace this lambda with method reference 'Object::toString'.(½î¯üÿÿÿÿ
-G
-java:S1602/",Remove useless curly braces around statement(úªœşÿÿÿÿ
-^
-java:S1612/"CReplace this lambda with method reference 'contentBuilder::append'.(úªœşÿÿÿÿ
-T
-java:S4719H"9Replace charset name argument with StandardCharsets.UTF_8(‘´âˆûÿÿÿÿ

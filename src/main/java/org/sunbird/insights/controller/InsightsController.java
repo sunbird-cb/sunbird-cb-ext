@@ -10,12 +10,9 @@ import java.util.*;
 @RestController
 public class InsightsController {
 
-    private final  InsightsService insightsService;
-
     @Autowired
-    public InsightsController(InsightsService insightsService) {
-        this.insightsService = insightsService;
-    }
+    private InsightsService insightsService;
+
     @PostMapping("/user/v2/insights")
     public ResponseEntity<SBApiResponse> insights(
             @RequestBody Map<String, Object> requestBody,@RequestHeader("x-authenticated-userid") String userId) throws Exception {

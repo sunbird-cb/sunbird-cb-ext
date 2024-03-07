@@ -25,31 +25,23 @@ import java.util.stream.Collectors;
 @Service
 public class ContentProgressServiceImpl implements ContentProgressService {
 
-    private  final CbExtServerProperties cbExtServerProperties;
-
+    @Autowired
+    private CbExtServerProperties cbExtServerProperties;
+    @Autowired
     Producer kafkaProducer;
 
-    private  final CbExtLogger logger = new CbExtLogger(getClass().getName());
+    private CbExtLogger logger = new CbExtLogger(getClass().getName());
 
-    private final  ObjectMapper mapper = new ObjectMapper();
-
-
-    private final CassandraOperation cassandraOperation;
-
-
-    private final  UserUtilityService userUtilityService;
-
-    private final ObjectMapper objectMapper;
+    private ObjectMapper mapper = new ObjectMapper();
 
     @Autowired
+    private CassandraOperation cassandraOperation;
 
-    public ContentProgressServiceImpl(CbExtServerProperties cbExtServerProperties, Producer kafkaProducer, CassandraOperation cassandraOperation, UserUtilityService userUtilityService, ObjectMapper objectMapper) {
-        this.cbExtServerProperties = cbExtServerProperties;
-        this.kafkaProducer = kafkaProducer;
-        this.cassandraOperation = cassandraOperation;
-        this.userUtilityService = userUtilityService;
-        this.objectMapper = objectMapper;
-    }
+    @Autowired
+    private UserUtilityService userUtilityService;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     /**
      * Marking the attendance for offline sessions

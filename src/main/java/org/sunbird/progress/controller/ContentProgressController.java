@@ -16,12 +16,10 @@ import java.io.IOException;
 @RestController
 @RequestMapping("/content/progress")
 public class ContentProgressController {
-    private final  ContentProgressService service;
 
     @Autowired
-    public ContentProgressController(ContentProgressService service) {
-        this.service = service;
-    }
+    private ContentProgressService service;
+
     /**
      * @param requestBody   -Request body of the API which needs to be processed.
      * @param authUserToken - It's authorization token received in request header.

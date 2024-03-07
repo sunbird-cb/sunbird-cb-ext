@@ -1,9 +1,0 @@
-
-w	java:S115è"ZRename this constant name to match the regular expression '^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$'.(ÚŠÒ8ï­ÎŞ1
-w	java:S115×"ZRename this constant name to match the regular expression '^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$'.(ğšŞ³8ï­ÎŞ1
-w	java:S115ã"ZRename this constant name to match the regular expression '^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$'.(íàá¼8ï­ÎŞ1
-w	java:S115å"ZRename this constant name to match the regular expression '^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$'.(ä²¿8ï­ÎŞ1
-w	java:S115æ"ZRename this constant name to match the regular expression '^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$'.(½¹¦8ï­ÎŞ1
-|	java:S115œ"ZRename this constant name to match the regular expression '^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$'.(Å³´Îüÿÿÿÿ8ï­ÎŞ1
-^
-java:S1075–"ARefactor your code to get this URI from a customizable parameter.(…™‚W8¡ï­ÎŞ1

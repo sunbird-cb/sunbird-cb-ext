@@ -25,25 +25,23 @@ import static java.util.Objects.nonNull;
 @Service
 public class ContentServiceImpl implements ContentService {
 
-	private final CbExtLogger logger = new CbExtLogger(getClass().getName());
+	private CbExtLogger logger = new CbExtLogger(getClass().getName());
 
+	@Autowired
+	private OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
 
-	private  final OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
-
+	@Autowired
 	CbExtServerProperties serverConfig;
 
-	private final ObjectMapper mapper;
+	@Autowired
+	private ObjectMapper mapper;
+
+	@Autowired
 	RedisCacheMgr redisCacheMgr;
 
+	@Autowired
 	DataCacheMgr dataCacheMgr;
 
-	public ContentServiceImpl(OutboundRequestHandlerServiceImpl outboundRequestHandlerService, CbExtServerProperties serverConfig, ObjectMapper mapper, RedisCacheMgr redisCacheMgr, DataCacheMgr dataCacheMgr) {
-		this.outboundRequestHandlerService = outboundRequestHandlerService;
-		this.serverConfig = serverConfig;
-		this.mapper = mapper;
-		this.redisCacheMgr = redisCacheMgr;
-		this.dataCacheMgr = dataCacheMgr;
-	}
 	public SunbirdApiResp getHeirarchyResponse(String contentId) {
 		StringBuilder url = new StringBuilder();
 		url.append(serverConfig.getContentHost()).append(serverConfig.getHierarchyEndPoint()).append("/" + contentId)

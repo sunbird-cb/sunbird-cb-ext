@@ -16,15 +16,11 @@ import org.sunbird.user.registration.model.UserRegistration;
 @Service
 public class UserRegistrationNotificationServiceImpl implements UserRegistrationNotificationService {
 
+	@Autowired
 	CbExtServerProperties serverProperties;
 
-	NotificationUtil notificationUtil;
-
 	@Autowired
-	public UserRegistrationNotificationServiceImpl(CbExtServerProperties serverProperties, NotificationUtil notificationUtil) {
-		this.serverProperties = serverProperties;
-		this.notificationUtil = notificationUtil;
-	}
+	NotificationUtil notificationUtil;
 
 	@Override
 	public void sendNotification(UserRegistration userRegistration) {
@@ -35,13 +31,15 @@ public class UserRegistrationNotificationServiceImpl implements UserRegistration
 				add(userRegistration.getEmail());
 			}
 		};
-		Map<String, Object> notificationConfig = new HashMap<>();
-		notificationConfig.put(Constants.SUBJECT, serverProperties.getUserRegistrationSubject());
 
 		Map<String, Object> notificationObj = new HashMap<>();
 		notificationObj.put(Constants.MODE, Constants.EMAIL);
 		notificationObj.put(Constants.DELIVERY_TYPE, Constants.MESSAGE);
-		notificationObj.put(Constants.CONFIG, notificationConfig);
+		notificationObj.put(Constants.CONFIG, new HashMap<String, Object>() {
+			{
+				put(Constants.SUBJECT, serverProperties.getUserRegistrationSubject());
+			}
+		});
 		notificationObj.put(Constants.IDS, sendTo);
 		notificationObj.put(Constants.TEMPLATE,
 				notificationMessage(userRegistration.getStatus(), userRegistration.getRegistrationCode()));

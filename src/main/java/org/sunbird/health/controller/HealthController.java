@@ -9,11 +9,10 @@ import org.sunbird.health.service.HealthService;
 
 @RestController
 public class HealthController {
-    private final  HealthService healthService;
+
     @Autowired
-    public HealthController(HealthService healthService) {
-        this.healthService = healthService;
-    }
+    private HealthService healthService;
+
     @GetMapping("/health")
     public ResponseEntity<SBApiResponse> healthCheck() throws Exception {
         SBApiResponse response = healthService.checkHealthStatus();

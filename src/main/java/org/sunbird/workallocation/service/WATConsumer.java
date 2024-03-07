@@ -39,24 +39,17 @@ import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 @Service
 public class WATConsumer {
 
-
-	private final OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
-
-
-	private final CbExtServerProperties cbExtServerProperties;
-
-
-	private final Producer producer;
-
-
-	private final CassandraOperation cassandraOperation;
 	@Autowired
-	public WATConsumer(OutboundRequestHandlerServiceImpl outboundRequestHandlerService, CbExtServerProperties cbExtServerProperties, Producer producer, CassandraOperation cassandraOperation) {
-		this.outboundRequestHandlerService = outboundRequestHandlerService;
-		this.cbExtServerProperties = cbExtServerProperties;
-		this.producer = producer;
-		this.cassandraOperation = cassandraOperation;
-	}
+	private OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
+
+	@Autowired
+	private CbExtServerProperties cbExtServerProperties;
+
+	@Autowired
+	private Producer producer;
+
+	@Autowired
+	private CassandraOperation cassandraOperation;
 
 	@Value("${kafka.topics.parent.telemetry.event}")
 	public String telemetryEventTopicName;

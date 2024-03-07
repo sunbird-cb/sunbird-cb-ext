@@ -14,11 +14,9 @@ import java.util.Map;
  */
 @RestController
 public class HallOfFameController {
-    private final HallOfFameService hallOfFameService;
     @Autowired
-    public HallOfFameController(HallOfFameService hallOfFameService) {
-        this.hallOfFameService = hallOfFameService;
-    }
+    private HallOfFameService hallOfFameService;
+
     @PostMapping("/v1/halloffame/read")
     public ResponseEntity<Map<String, Object>> fetchHallOfFameData() {
         Map<String, Object> hallOfFameDataMap = hallOfFameService.fetchHallOfFameData();

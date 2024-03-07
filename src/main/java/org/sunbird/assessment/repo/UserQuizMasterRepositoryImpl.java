@@ -6,12 +6,8 @@ import org.springframework.data.cassandra.core.CassandraOperations;
 
 public class UserQuizMasterRepositoryImpl implements UserQuizMasterRepositoryCustom {
 
-	CassandraOperations cassandraOperations;
-
 	@Autowired
-	public UserQuizMasterRepositoryImpl(CassandraOperations cassandraOperations) {
-		this.cassandraOperations = cassandraOperations;
-	}
+	CassandraOperations cassandraOperations;
 	
 	@Override
 	public UserQuizMasterModel updateQuiz(UserQuizMasterModel quiz, UserQuizSummaryModel quizSummary) {

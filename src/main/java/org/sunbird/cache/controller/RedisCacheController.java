@@ -9,12 +9,9 @@ import org.sunbird.common.model.SBApiResponse;
 @RestController
 public class RedisCacheController {
 
-    RedisCacheService redisCacheService;
     @Autowired
+    RedisCacheService redisCacheService;
 
-    public RedisCacheController(RedisCacheService redisCacheService) {
-        this.redisCacheService = redisCacheService;
-    }
 
     @DeleteMapping("/redis")
     public ResponseEntity<SBApiResponse> deleteCache() {

@@ -1,5 +1,0 @@
-
-b	java:S101t"MRename this class name to match the regular expression '^[A-Z][a-zA-Z0-9]*$'.(ì”Ãó
-W	java:S107"BConstructor has 10 parameters, which is greater than 7 authorized.(àãý 
-[
-java:S1124t"EReorder the modifiers to comply with the Java Language Specification.(ì”Ãó

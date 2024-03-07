@@ -21,12 +21,8 @@ import org.sunbird.common.model.SBApiResponse;
 @RestController
 public class BudgetController {
 
-	BudgetService budgetService;
-
 	@Autowired
-	public BudgetController(BudgetService budgetService) {
-		this.budgetService = budgetService;
-	}
+	BudgetService budgetService;
 
 	@PostMapping("/budget/scheme")
 	public ResponseEntity<SBApiResponse> createBudgetDetails(@RequestHeader("x-authenticated-userid") String userId,

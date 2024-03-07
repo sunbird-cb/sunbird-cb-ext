@@ -44,26 +44,20 @@ import scala.Option;
 @Service
 public class StorageServiceImpl implements StorageService {
 
-	private  final Logger logger = LoggerFactory.getLogger(getClass().getName());
+	private Logger logger = LoggerFactory.getLogger(getClass().getName());
 	private BaseStorageService storageService = null;
 
+	@Autowired
 	RestTemplate restTemplate;
 
-
-	private final CbExtServerProperties serverProperties;
-
-
-	private final AccessTokenValidator accessTokenValidator;
-
-	private final  UserUtilityService userUtilityService;
+	@Autowired
+	private CbExtServerProperties serverProperties;
 
 	@Autowired
-	public StorageServiceImpl(RestTemplate restTemplate, CbExtServerProperties serverProperties, AccessTokenValidator accessTokenValidator, UserUtilityService userUtilityService) {
-		this.restTemplate = restTemplate;
-		this.serverProperties = serverProperties;
-		this.accessTokenValidator = accessTokenValidator;
-		this.userUtilityService = userUtilityService;
-	}
+	private AccessTokenValidator accessTokenValidator;
+
+	@Autowired
+	private UserUtilityService userUtilityService;
 
 	@PostConstruct
 	public void init() {

@@ -25,15 +25,11 @@ public class OffensiveDataFlagServiceImpl implements OffensiveDataFlagService {
 
     private final Logger logger = LoggerFactory.getLogger(OffensiveDataFlagServiceImpl.class);
 
+    @Autowired
     CassandraOperation cassandraOperation;
 
-    AccessTokenValidator accessTokenValidator;
-
     @Autowired
-    public OffensiveDataFlagServiceImpl(CassandraOperation cassandraOperation, AccessTokenValidator accessTokenValidator) {
-        this.cassandraOperation = cassandraOperation;
-        this.accessTokenValidator = accessTokenValidator;
-    }
+    AccessTokenValidator accessTokenValidator;
 
     @Override
     public SBApiResponse createFlag(Map<String, Object> requestBody, String token) {

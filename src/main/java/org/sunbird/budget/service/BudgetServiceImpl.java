@@ -31,14 +31,12 @@ import org.sunbird.ratings.exception.ValidationException;
 
 @Service
 public class BudgetServiceImpl implements BudgetService {
-	private final ObjectMapper mapper = new ObjectMapper();
-	private final SimpleDateFormat dateFormatter = new SimpleDateFormat(Constants.DATE_FORMAT);
-	private final Logger logger = LoggerFactory.getLogger(getClass().getName());
-	private final CassandraOperation cassandraOperation;
+	private ObjectMapper mapper = new ObjectMapper();
+	private SimpleDateFormat dateFormatter = new SimpleDateFormat(Constants.DATE_FORMAT);
+	private Logger logger = LoggerFactory.getLogger(getClass().getName());
+
 	@Autowired
-	public BudgetServiceImpl(CassandraOperation cassandraOperation) {
-		this.cassandraOperation = cassandraOperation;
-	}
+	private CassandraOperation cassandraOperation;
 
 	@Override
 	public SBApiResponse submitBudgetDetails(BudgetInfo data, String userId) {

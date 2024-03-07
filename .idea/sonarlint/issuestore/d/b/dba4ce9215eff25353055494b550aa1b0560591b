@@ -1,8 +1,0 @@
-
-a	java:S112‚"FDefine and throw a dedicated exception instead of using a generic one.(³Ö“Áþÿÿÿÿ
-:
-java:S2629d"$Invoke method(s) only conditionally.(Õº–˜
-5
-java:S3751S"Make this method non "private".(ÉÁø•
-ˆ
-java:S1130‚"lRemove the declaration of thrown exception 'java.lang.Exception', as it cannot be thrown from method's body.(³Ö“Áþÿÿÿÿ

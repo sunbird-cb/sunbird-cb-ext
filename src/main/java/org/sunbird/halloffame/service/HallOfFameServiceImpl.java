@@ -17,12 +17,10 @@ import java.util.stream.Collectors;
  */
 @Service
 public class HallOfFameServiceImpl implements HallOfFameService {
-
-    private final CassandraOperation cassandraOperation;
     @Autowired
-    public HallOfFameServiceImpl(CassandraOperation cassandraOperation) {
-        this.cassandraOperation = cassandraOperation;
-    }
+    private CassandraOperation cassandraOperation;
+
+    private Logger logger = LoggerFactory.getLogger(getClass().getName());
 
     @Override
     public Map<String, Object> fetchHallOfFameData() {

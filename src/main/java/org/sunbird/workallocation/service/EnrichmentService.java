@@ -20,13 +20,11 @@ import java.util.UUID;
 
 @Service
 public class EnrichmentService {
-    private final Logger logger = LoggerFactory.getLogger(EnrichmentService.class);
+    private Logger logger = LoggerFactory.getLogger(EnrichmentService.class);
 
-    private final AllocationServiceV2 allocationServiceV2;
     @Autowired
-    public EnrichmentService(AllocationServiceV2 allocationServiceV2) {
-        this.allocationServiceV2 = allocationServiceV2;
-    }
+    private AllocationServiceV2 allocationServiceV2;
+
     ObjectMapper mapper = new ObjectMapper();
 
 

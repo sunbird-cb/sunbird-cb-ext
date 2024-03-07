@@ -8,11 +8,8 @@ import java.util.*;
 @RestController
 public class TrendingController {
 
-    private final  TrendingService trendingService;
     @Autowired
-    public TrendingController(TrendingService trendingService) {
-        this.trendingService = trendingService;
-    }
+    private TrendingService trendingService;
 
     @PostMapping("/v2/trending/search")
     public ResponseEntity<Map<String, Object>> trendingSearch(

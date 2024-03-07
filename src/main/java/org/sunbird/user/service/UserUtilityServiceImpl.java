@@ -46,50 +46,35 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Service
 public class UserUtilityServiceImpl implements UserUtilityService {
 
-
+	@Autowired
 	RestTemplate restTemplate;
 
-
+	@Autowired
 	CbExtServerProperties props;
 
-
+	@Autowired
 	TelemetryUtils telemetryUtils;
 
-	private  final CassandraOperation cassandraOperation;
-
-
-	OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
-
-
-	CbExtServerProperties serverConfig;
-
-
-	DecryptServiceImpl decryptService;
-
-
-	IndexerService indexerService;
-
-
-	ObjectMapper objectMapper;
-
-
-	AccessTokenValidator accessTokenValidator;
-
+	@Autowired
+	private CassandraOperation cassandraOperation;
 
 	@Autowired
+	OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
 
-	public UserUtilityServiceImpl(RestTemplate restTemplate, CbExtServerProperties props, TelemetryUtils telemetryUtils, CassandraOperation cassandraOperation, OutboundRequestHandlerServiceImpl outboundRequestHandlerService, CbExtServerProperties serverConfig, DecryptServiceImpl decryptService, IndexerService indexerService, ObjectMapper objectMapper, AccessTokenValidator accessTokenValidator) {
-		this.restTemplate = restTemplate;
-		this.props = props;
-		this.telemetryUtils = telemetryUtils;
-		this.cassandraOperation = cassandraOperation;
-		this.outboundRequestHandlerService = outboundRequestHandlerService;
-		this.serverConfig = serverConfig;
-		this.decryptService = decryptService;
-		this.indexerService = indexerService;
-		this.objectMapper = objectMapper;
-		this.accessTokenValidator = accessTokenValidator;
-	}
+	@Autowired
+	CbExtServerProperties serverConfig;
+
+	@Autowired
+	DecryptServiceImpl decryptService;
+
+	@Autowired
+	IndexerService indexerService;
+
+	@Autowired
+	ObjectMapper objectMapper;
+
+	@Autowired
+	AccessTokenValidator accessTokenValidator;
 
 	private Logger logger = LoggerFactory.getLogger(UserUtilityServiceImpl.class);
 

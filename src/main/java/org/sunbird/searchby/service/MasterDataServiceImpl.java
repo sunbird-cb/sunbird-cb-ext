@@ -28,24 +28,17 @@ import java.util.stream.Collectors;
 @Service
 public class MasterDataServiceImpl implements MasterDataService {
 
-    private final  Logger logger = LoggerFactory.getLogger(getClass().getName());
-
-    CbExtServerProperties cbExtServerProperties;
-
-    ObjectMapper mapper;
-    OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
-
-    CassandraOperation cassandraOperation;
-
-    RedisCacheMgr redisCacheMgr;
+    private Logger logger = LoggerFactory.getLogger(getClass().getName());
     @Autowired
-    public MasterDataServiceImpl(CbExtServerProperties cbExtServerProperties, ObjectMapper mapper, OutboundRequestHandlerServiceImpl outboundRequestHandlerService, CassandraOperation cassandraOperation, RedisCacheMgr redisCacheMgr) {
-        this.cbExtServerProperties = cbExtServerProperties;
-        this.mapper = mapper;
-        this.outboundRequestHandlerService = outboundRequestHandlerService;
-        this.cassandraOperation = cassandraOperation;
-        this.redisCacheMgr = redisCacheMgr;
-    }
+    CbExtServerProperties cbExtServerProperties;
+    @Autowired
+    ObjectMapper mapper;
+    @Autowired
+    OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
+    @Autowired
+    CassandraOperation cassandraOperation;
+    @Autowired
+    RedisCacheMgr redisCacheMgr;
 
     @Override
 	public FracApiResponse getListPositions() {

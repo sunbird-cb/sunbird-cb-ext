@@ -1,9 +1,0 @@
-
-`	java:S112:"FDefine and throw a dedicated exception instead of using a generic one.(èİÎÑşÿÿÿÿ
-v
-java:S1488I"`Immediately return this expression instead of assigning it to the temporary variable "response".(·µùõ
-‡
-java:S1130:"lRemove the declaration of thrown exception 'java.lang.Exception', as it cannot be thrown from method's body.(èİÎÑşÿÿÿÿ
-<
-java:S14529"&Remove usage of generic wildcard type.(–÷çÜ
->	java:S108>")Either remove or fill this block of code.(”ı¾

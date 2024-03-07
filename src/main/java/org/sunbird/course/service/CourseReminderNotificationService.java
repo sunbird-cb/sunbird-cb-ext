@@ -25,23 +25,20 @@ import java.util.stream.Collectors;
 @Service
 public class CourseReminderNotificationService {
 	private static final CbExtLogger logger = new CbExtLogger(CourseReminderNotificationService.class.getName());
-	private final Map<String, CourseDetails> courseIdAndCourseNameMap = new HashMap<>();
-
-	CassandraOperation cassandraOperation;
-
-	CbExtServerProperties serverProperties;
-
-	NotificationUtil notificationUtil;
-
-	PropertiesConfig configuration;
+	private Map<String, CourseDetails> courseIdAndCourseNameMap = new HashMap<>();
 
 	@Autowired
-	public CourseReminderNotificationService(CassandraOperation cassandraOperation, CbExtServerProperties serverProperties, NotificationUtil notificationUtil, PropertiesConfig configuration) {
-		this.cassandraOperation = cassandraOperation;
-		this.serverProperties = serverProperties;
-		this.notificationUtil = notificationUtil;
-		this.configuration = configuration;
-	}
+	CassandraOperation cassandraOperation;
+
+	@Autowired
+	CbExtServerProperties serverProperties;
+
+	@Autowired
+	NotificationUtil notificationUtil;
+
+	@Autowired
+	PropertiesConfig configuration;
+
 	public void initiateCourseReminderEmail() {
 		logger.info("CourseReminderNotificationService:: initiateCourseReminderEmail: Started");
 		long duration = 0;

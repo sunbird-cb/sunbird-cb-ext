@@ -61,37 +61,28 @@ public class AllocationService {
 
 	public static final String AUTHORIZATION = "Authorization";
 	public static final String ACCEPT = "Accept";
-	private final  Logger logger = LoggerFactory.getLogger(AllocationService.class);
+	private Logger logger = LoggerFactory.getLogger(AllocationService.class);
 
 	final String[] includeFields = { "personalDetails.firstname",
 			"personalDetails.primaryEmail", "id", "professionalDetails.name", "professionalDetails.designation" };
 
-	private  final CbExtServerProperties extServerProperties;
-
-
-	private  final RestTemplate restTemplate;
-
-
-	private final  Validator validator;
-
-
-	private final CbExtServerProperties configuration;
-
-	private final IndexerService indexerService;
-
-
-	private final FRACReqBuilder fracReqBuilder;
+	@Autowired
+	private CbExtServerProperties extServerProperties;
 
 	@Autowired
+	private RestTemplate restTemplate;
 
-	public AllocationService(CbExtServerProperties extServerProperties, RestTemplate restTemplate, Validator validator, CbExtServerProperties configuration, IndexerService indexerService, FRACReqBuilder fracReqBuilder) {
-		this.extServerProperties = extServerProperties;
-		this.restTemplate = restTemplate;
-		this.validator = validator;
-		this.configuration = configuration;
-		this.indexerService = indexerService;
-		this.fracReqBuilder = fracReqBuilder;
-	}
+	@Autowired
+	private Validator validator;
+
+	@Autowired
+	private CbExtServerProperties configuration;
+
+	@Autowired
+	private IndexerService indexerService;
+
+	@Autowired
+	private FRACReqBuilder fracReqBuilder;
 
 	@Value("${workallocation.index.name}")
 	public String index;

@@ -24,12 +24,10 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 
 @Service
 public class OutboundRequestHandlerServiceImpl {
-	private  final CbExtLogger log = new CbExtLogger(getClass().getName());
-	private  final RestTemplate restTemplate;
+	private CbExtLogger log = new CbExtLogger(getClass().getName());
+
 	@Autowired
-	public OutboundRequestHandlerServiceImpl(RestTemplate restTemplate) {
-		this.restTemplate = restTemplate;
-	}
+	private RestTemplate restTemplate;
 
 	/**
 	 * @param uri
