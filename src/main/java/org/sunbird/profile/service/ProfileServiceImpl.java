@@ -142,21 +142,6 @@ public class ProfileServiceImpl implements ProfileService {
                     response.getParams().setStatus(Constants.FAILED);
                     response.getParams().setErrmsg("Email Id or Phone Number Already Exists");
                     return response;
-                case Constants.PERSONAL_DETAILS_MISSING_ERROR:
-                    response.setResponseCode(HttpStatus.BAD_REQUEST);
-                    response.getParams().setStatus(Constants.FAILED);
-                    response.getParams().setErrmsg("Personal Details are missing.");
-                    return response;
-                case Constants.EMAIL_MISSING_ERROR:
-                    response.setResponseCode(HttpStatus.BAD_REQUEST);
-                    response.getParams().setStatus(Constants.FAILED);
-                    response.getParams().setErrmsg("Email Id is missing");
-                    return response;
-                case Constants.PHONE_MISSING_ERROR:
-                    response.setResponseCode(HttpStatus.BAD_REQUEST);
-                    response.getParams().setStatus(Constants.FAILED);
-                    response.getParams().setErrmsg("Phone Number is missing");
-                    return response;
                 default:
                     break;
             }
@@ -2055,7 +2040,7 @@ public class ProfileServiceImpl implements ProfileService {
 	 */
 	private String validateExistingPhoneEmail(Map<String, Object> profileDetailsMap) {
 		if (!profileDetailsMap.containsKey(Constants.PERSONAL_DETAILS)) {
-			return Constants.PERSONAL_DETAILS_MISSING_ERROR; // Return error message if personal details are missing
+			return ""; // Return error message if personal details are missing
 		}
 		// Extract personal details from the profileDetailsMap
 		Map<String, Object> personalDetails = (Map<String, Object>) profileDetailsMap.get(Constants.PERSONAL_DETAILS);
