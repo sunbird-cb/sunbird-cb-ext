@@ -2037,7 +2037,7 @@ public class ProfileServiceImpl implements ProfileService {
 	private String validateExistingPhoneEmail(Map<String, Object> profileDetailsMap) {
 		if (profileDetailsMap.containsKey(Constants.PERSONAL_DETAILS)) {
 			Map<String, Object> personalDetails = (Map<String, Object>) profileDetailsMap.get(Constants.PERSONAL_DETAILS);
-			if (personalDetails.containsKey(Constants.EMAIL) && (userUtilityService.isUserExist(Constants.EMAIL, (String) personalDetails.get(Constants.EMAIL)))) {
+			if (personalDetails.containsKey(Constants.PRIMARY_EMAIL) && (userUtilityService.isUserExist(Constants.PRIMARY_EMAIL, (String) personalDetails.get(Constants.PRIMARY_EMAIL)))) {
 				return Constants.EMAIL_EXIST_ERROR;
 			}
 			if (personalDetails.containsKey(Constants.PHONE) && (userUtilityService.isUserExist(Constants.PHONE, (String) personalDetails.get(Constants.PHONE)))) {
