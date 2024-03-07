@@ -5,10 +5,9 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 public class DocResponseDetails {
 
     private String docContent;
-    private CertificateInfo dataContent;
+    private String dataContent;
 
     public DocResponseDetails() {
-        this.dataContent = new CertificateInfo();
     }
 
     @JacksonXmlProperty(localName = "DocContent", namespace = "http://tempuri.org/")
@@ -21,11 +20,11 @@ public class DocResponseDetails {
     }
 
     @JacksonXmlProperty(localName = "DataContent", namespace = "http://tempuri.org/")
-    public CertificateInfo getDataContent() {
+    public String getDataContent() {
         return dataContent;
     }
 
-    public void setDataContent(CertificateInfo dataContent) {
+    public void setDataContent(String dataContent) {
         this.dataContent = dataContent;
     }
 
