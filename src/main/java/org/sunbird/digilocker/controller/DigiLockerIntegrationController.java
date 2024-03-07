@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.sunbird.common.util.Constants;
 import org.sunbird.digilocker.model.PullDocRequest;
 import org.sunbird.digilocker.model.PullDocResponse;
 import org.sunbird.digilocker.model.PullURIRequest;
@@ -17,15 +18,15 @@ public class DigiLockerIntegrationController {
     DigiLockerIntegrationService digiLockerIntegrationService;
 
     @PostMapping(value = "/v1/retrieveURI", consumes = MediaType.APPLICATION_XML_VALUE, produces = MediaType.APPLICATION_XML_VALUE)
-    public @ResponseBody ResponseEntity<PullURIResponse> getURIRequestV1(@RequestBody PullURIRequest request) {
+    public @ResponseBody ResponseEntity<PullURIResponse> getURIRequestV1(@RequestHeader(value= Constants.X_DIGILOCKER_HMAC) String digiLockerHmac, @RequestBody String requestBody) {
 
-        PullURIResponse response = digiLockerIntegrationService.generateURIResponse(request);
+        PullURIResponse response = digiLockerIntegrationService.generateURIResponse(digiLockerHmac, requestBody);
         return ResponseEntity.ok().body(response);
     }
 
     @PostMapping(value = "/v1/retrieveDoc", consumes = MediaType.APPLICATION_XML_VALUE, produces = MediaType.APPLICATION_XML_VALUE)
-    public @ResponseBody ResponseEntity<PullDocResponse> getDocRequestV1(@RequestBody PullDocRequest request) {
-        PullDocResponse response = digiLockerIntegrationService.generateDocResponse(request);
+    public @ResponseBody ResponseEntity<PullDocResponse> getDocRequestV1(@RequestHeader(value= Constants.X_DIGILOCKER_HMAC) String digiLockerHmac, @RequestBody String requestBody) {
+        PullDocResponse response = digiLockerIntegrationService.generateDocResponse(digiLockerHmac, requestBody);
         return ResponseEntity.ok().body(response);
     }
 }
