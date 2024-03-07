@@ -138,6 +138,13 @@ public class ExploreCourseServiceImpl implements ExploreCourseService {
 			List<Map<String, Object>> courseList = cassandraOperation.getRecordsByPropertiesWithoutFiltering(
 					Constants.SUNBIRD_KEY_SPACE_NAME, Constants.TABLE_EXPLORE_COURSE_LIST_V2, MapUtils.EMPTY_MAP,
 					ListUtils.EMPTY_LIST);
+			if (CollectionUtils.isNotEmpty(courseList)) {
+				Comparator<Map<String, Object>> customComparator = Comparator.comparing(entry -> {
+					Integer seqNo = (Integer) entry.get(Constants.SEQ_NO);
+					return (seqNo != null) ? seqNo : Integer.MAX_VALUE;
+				});
+				courseList = courseList.stream().sorted(customComparator).collect(Collectors.toList());
+			}
 			List<String> identifierList = new ArrayList<String>();
 			for (Map<String, Object> course : courseList) {
 				identifierList.add((String) course.get(Constants.IDENTIFIER));
@@ -150,6 +157,17 @@ public class ExploreCourseServiceImpl implements ExploreCourseService {
 					errMsg = "Failed to get contant details for Identifier List from DB.";
 				} else {
 					Map<String, Object> responseCourseList = (Map<String, Object>) searchResponse.get(Constants.RESULT);
+					List<Map<String, Object>> contentList = (List<Map<String, Object>>) responseCourseList.get(Constants.CONTENT);
+					if (CollectionUtils.isNotEmpty(contentList)) {
+						List<Map<String, Object>> sortedContentList = identifierList.stream()
+								.map(identifier -> contentList.stream()
+										.filter(content -> identifier.equals(content.get(Constants.IDENTIFIER)))
+										.findFirst().orElse(null))
+								.filter(Objects::nonNull)
+								.sorted(Comparator.comparing(content -> (String) content.get(Constants.PRIMARY_CATEGORY)))
+								.collect(Collectors.toList());
+						responseCourseList.put(Constants.CONTENT, sortedContentList);
+					}
 					response.setResult(responseCourseList);
 				}
 			}
