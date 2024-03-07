@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.sunbird.cassandra.utils.CassandraOperation;
 import org.sunbird.common.model.SBApiResponse;
+import org.sunbird.common.util.AccessTokenValidator;
 import org.sunbird.common.util.Constants;
 import org.sunbird.common.util.ProjectUtil;
 
@@ -25,7 +26,8 @@ public class HallOfFameServiceImpl implements HallOfFameService {
     private CassandraOperation cassandraOperation;
 
     private Logger logger = LoggerFactory.getLogger(getClass().getName());
-
+    @Autowired
+    AccessTokenValidator accessTokenValidator;
     @Override
     public Map<String, Object> fetchHallOfFameData() {
         Map<String, Object> resultMap = new HashMap<>();
@@ -50,20 +52,72 @@ public class HallOfFameServiceImpl implements HallOfFameService {
         SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.LEARNER_LEADER_BOARD);
         try {
             if (StringUtils.isEmpty(rootOrgId)) {
-                response.getParams().setErrmsg("Invalid Root Org Id");
-                response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+                setBadRequestResponse(response, Constants.ORG_ID_MISSING);
+                return response;
             }
+
+            String userId = validateAuthTokenAndFetchUserId(authToken);
+            if (StringUtils.isBlank(userId)) {
+                setBadRequestResponse(response, Constants.USER_ID_DOESNT_EXIST);
+                return response;
+            }
+
             Map<String, Object> propertiesMap = new HashMap<>();
-            propertiesMap.put("rootOrgId", rootOrgId);
-            List<Map<String, Object>> result = cassandraOperation.getRecordsByProperties(Constants.SUNBIRD_KEY_SPACE_NAME,
-                    "", propertiesMap , Arrays.asList(""));
-            response.put("result", result);
+            propertiesMap.put(Constants.USER_ID_LOWER, userId);
+
+            List<Map<String, Object>> userRowNum = cassandraOperation.getRecordsByProperties(
+                    Constants.SUNBIRD_KEY_SPACE_NAME,
+                    Constants.TABLE_LEARNER_LEADER_BOARD_LOOK_UP,
+                    propertiesMap,
+                    null
+            );
+
+            if (userRowNum == null || userRowNum.isEmpty()) {
+                setNotFoundResponse(response, Constants.USER_ID_DOESNT_EXIST);
+                return response;
+            }
+
+            int res = (Integer) userRowNum.get(0).get(Constants.DB_COLUMN_ROW_NUM);
+            List<Integer> ranksFilter = Arrays.asList(1, 2, 3, res - 1, res, res + 1);
+            Map<String, Object> propMap = new HashMap<>();
+            propMap.put(Constants.DB_COLUMN_ROW_NUM, ranksFilter);
+            propMap.put(Constants.ORG_ID, rootOrgId);
+
+            List<Map<String, Object>> result = cassandraOperation.getRecordsByProperties(
+                    Constants.SUNBIRD_KEY_SPACE_NAME,
+                    Constants.TABLE_LEARNER_LEADER_BOARD,
+                    propMap,
+                    null
+            );
+
+            response.put(Constants.RESULT, result);
             return response;
+
         } catch (Exception e) {
-            response.getParams().setStatus(Constants.FAILED);
-            response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+            setInternalServerErrorResponse(response);
         }
+
         return response;
     }
 
+    private void setBadRequestResponse(SBApiResponse response, String errMsg) {
+        response.getParams().setStatus(Constants.FAILED);
+        response.getParams().setErrmsg(errMsg);
+        response.setResponseCode(HttpStatus.BAD_REQUEST);
+    }
+
+    private void setNotFoundResponse(SBApiResponse response, String errMsg) {
+        response.getParams().setStatus(Constants.FAILED);
+        response.getParams().setErrmsg(errMsg);
+        response.setResponseCode(HttpStatus.NOT_FOUND);
+    }
+
+    private void setInternalServerErrorResponse(SBApiResponse response) {
+        response.getParams().setStatus(Constants.FAILED);
+        response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    private String validateAuthTokenAndFetchUserId(String authUserToken) {
+        return accessTokenValidator.fetchUserIdFromAccessToken(authUserToken);
+    }
 }

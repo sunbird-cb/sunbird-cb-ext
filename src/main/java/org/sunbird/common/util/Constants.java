@@ -1001,6 +1001,9 @@ public class Constants {
 	public static final String REPORT_EXPIRY_DATE  = "reportExpiryDate";
 	public static final String ERROR  = "error";
 	public static final String CONTEXT_TOKEN  = "contextToken";
+	public static final String TABLE_LEARNER_LEADER_BOARD_LOOK_UP="learner_leaderboard_lookup";
+	public static final String TABLE_LEARNER_LEADER_BOARD="learner_leaderboard";
+	public static final String DB_COLUMN_ROW_NUM ="row_num";
   private Constants() {
 		throw new IllegalStateException("Utility class");
 	}
