@@ -22,6 +22,7 @@ public class HallOfFameServiceImpl implements HallOfFameService {
 
     private Logger logger = LoggerFactory.getLogger(getClass().getName());
 
+
     @Override
     public Map<String, Object> fetchHallOfFameData() {
         Map<String, Object> resultMap = new HashMap<>();
