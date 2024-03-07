@@ -34,7 +34,7 @@ public class ProfileController {
 			@RequestHeader(value = Constants.X_AUTH_TOKEN, required = true) String userToken,
 			@RequestHeader(value = Constants.AUTH_TOKEN, required = false) String authToken,
 			@RequestHeader(value = Constants.X_AUTH_USER_ORG_ID, required = false) String rootOrgId,
-			@RequestBody Map<String, Object> request) throws Exception {
+			@RequestBody Map<String, Object> request)  {
 		SBApiResponse response = profileService.profileUpdate(request, userToken, authToken, rootOrgId);
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
@@ -143,6 +143,16 @@ public class ProfileController {
 			@RequestHeader(value = Constants.X_AUTH_TOKEN, required = false) String userToken,
 			@RequestBody Map<String, Object> request) {
 		SBApiResponse response = profileService.profileExternalSystemUpdate(request, userToken);
+		return new ResponseEntity<>(response, response.getResponseCode());
+	}
+
+	@PostMapping("/v2/user/patch")
+	public ResponseEntity<?> profileUpdateV2(
+			@RequestHeader(value = Constants.X_AUTH_TOKEN, required = true) String userToken,
+			@RequestHeader(value = Constants.AUTH_TOKEN, required = false) String authToken,
+			@RequestHeader(value = Constants.X_AUTH_USER_ORG_ID, required = false) String rootOrgId,
+			@RequestBody Map<String, Object> request) {
+		SBApiResponse response = profileService.profileUpdateV2(request, userToken, authToken, rootOrgId);
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
 }
