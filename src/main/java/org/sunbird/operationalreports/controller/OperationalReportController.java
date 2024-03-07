@@ -39,4 +39,13 @@ public class OperationalReportController {
             @PathVariable String fileName) throws IOException {
         return operationalReport.downloadFile(reportType, date,orgId,fileName);
     }
+
+    @GetMapping("admin/readaccess")
+        public ResponseEntity<SBApiResponse> readAccess(
+                @RequestHeader(Constants.X_AUTH_TOKEN) String authToken,
+                @RequestHeader(Constants.X_AUTH_USER_ORG_ID) String userOrgId) throws Exception {
+            SBApiResponse response = operationalReport.readGrantAccess(authToken, userOrgId);
+            return new ResponseEntity<>(response, response.getResponseCode());
+        }
+
 }
