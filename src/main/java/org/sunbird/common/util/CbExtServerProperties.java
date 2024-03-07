@@ -675,6 +675,9 @@ public class CbExtServerProperties {
 	@Value("${es.default.result.limit}")
 	private int esDefaultResultLimit;
 
+	@Value("${digilocker-api-key}")
+	private String digiLockerAPIKey;
+
 	public boolean qListFromCacheEnabled() {
 		return qListFromCacheEnabled;
 	}
@@ -2379,5 +2382,13 @@ public class CbExtServerProperties {
 
 	public void setSbRoleRead(String sbRoleRead) {
 		this.sbRoleRead = sbRoleRead;
+	}
+
+	public String getDigiLockerAPIKey() {
+		return digiLockerAPIKey;
+	}
+
+	public void setDigiLockerAPIKey(String digiLockerAPIKey) {
+		this.digiLockerAPIKey = digiLockerAPIKey;
 	}
 }
