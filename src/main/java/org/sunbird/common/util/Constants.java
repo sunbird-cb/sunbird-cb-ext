@@ -1001,8 +1001,6 @@ public class Constants {
 	public static final String REPORT_EXPIRY_DATE  = "reportExpiryDate";
 	public static final String ERROR  = "error";
 	public static final String CONTEXT_TOKEN  = "contextToken";
-
-
   private Constants() {
 		throw new IllegalStateException("Utility class");
 	}
