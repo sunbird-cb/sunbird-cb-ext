@@ -14,9 +14,11 @@ import org.sunbird.user.service.UserUtilityService;
 @RestController
 public class UserUtilityController {
 
-	@Autowired
 	UserUtilityService userUtilService;
-
+	@Autowired
+	public UserUtilityController(UserUtilityService userUtilService) {
+		this.userUtilService = userUtilService;
+	}
 	@PutMapping("/user/v1/updateLogin")
 	public ResponseEntity<Map<String, Object>> updateLogin(@RequestBody LastLoginInfo userLoginInfo)
 			throws NumberFormatException {

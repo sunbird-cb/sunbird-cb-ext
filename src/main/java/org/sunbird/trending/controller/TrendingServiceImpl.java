@@ -20,17 +20,20 @@ import java.util.stream.Collectors;
 import static org.sunbird.common.util.Constants.*;
 @Service
 public class TrendingServiceImpl implements TrendingService {
-
-    @Autowired
     CbExtServerProperties serverProperties;
 
-    @Autowired
     OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
 
-    @Autowired
     RedisCacheMgr redisCacheMgr;
 
-    private Logger logger = LoggerFactory.getLogger(getClass().getName());
+    @Autowired
+    public TrendingServiceImpl(CbExtServerProperties serverProperties, OutboundRequestHandlerServiceImpl outboundRequestHandlerService, RedisCacheMgr redisCacheMgr) {
+        this.serverProperties = serverProperties;
+        this.outboundRequestHandlerService = outboundRequestHandlerService;
+        this.redisCacheMgr = redisCacheMgr;
+    }
+
+    private final Logger logger = LoggerFactory.getLogger(getClass().getName());
 
     public Map<String, Object> trendingSearch(Map<String, Object> requestBody, String token) throws Exception {
 

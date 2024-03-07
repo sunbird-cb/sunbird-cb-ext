@@ -1,0 +1,148 @@
+
+a	java:S112×"FDefine and throw a dedicated exception instead of using a generic one.(ûÅ¦çøÿÿÿÿ
+\	java:S112Ñ"FDefine and throw a dedicated exception instead of using a generic one.(—°…Ù
+a	java:S112Â	"FDefine and throw a dedicated exception instead of using a generic one.(ò¶Æûÿÿÿÿ
+[	java:S112Ö	"FDefine and throw a dedicated exception instead of using a generic one.(ÂĞÜD
+u
+java:S2293
+"YReplace the type specification in this constructor call with the diamond operator ("<>").(“ñê˜ıÿÿÿÿ
+p
+java:S2293Š"YReplace the type specification in this constructor call with the diamond operator ("<>").(ğ»Ëë
+u
+java:S2293ğ"YReplace the type specification in this constructor call with the diamond operator ("<>").(ì½±úÿÿÿÿ
+K
+java:S1066Í"/Merge this if statement with the enclosing one.(ş›’¡ıÿÿÿÿ
+E
+java:S1066­
+"/Merge this if statement with the enclosing one.(¹­ık
+Q
+java:S1141É"5Extract this nested try block into a separate method.(¡»¢üùÿÿÿÿ
+g
+java:S1301ô"KReplace this "switch" statement by "if" statements to increase readability.(Í’¤úÿÿÿÿ
+|
+java:S1488õ"`Immediately return this expression instead of assigning it to the temporary variable "esObject".(ºÑ ùÿÿÿÿ
+;
+java:S2629¯"$Invoke method(s) only conditionally.(‡ÂÕò
+@
+java:S2629ö"$Invoke method(s) only conditionally.(Û¯ªÖûÿÿÿÿ
+;
+java:S2629"$Invoke method(s) only conditionally.(î¯®
+@
+java:S2629“"$Invoke method(s) only conditionally.(•ş‹ƒøÿÿÿÿ
+:
+java:S2629™"$Invoke method(s) only conditionally.(°×ü)
+@
+java:S2629ø
+"$Invoke method(s) only conditionally.(²Öªşÿÿÿÿ
+;
+java:S2629ı
+"$Invoke method(s) only conditionally.(Åú¼œ
+;
+java:S2629ÿ
+"$Invoke method(s) only conditionally.(Ä˜·Ø
+@
+java:S2629…"$Invoke method(s) only conditionally.(¾ÛîÊûÿÿÿÿ
+@
+java:S2629‡"$Invoke method(s) only conditionally.(ßæÜ²ùÿÿÿÿ
+;
+java:S2629˜"$Invoke method(s) only conditionally.(úãœ„
+;
+java:S2629¡"$Invoke method(s) only conditionally.(úãœ„
+;
+java:S2629¨"$Invoke method(s) only conditionally.(úãœ„
+@
+java:S2629€"$Invoke method(s) only conditionally.(¿¿ç…úÿÿÿÿ
+@
+java:S2629›"$Invoke method(s) only conditionally.(·ªºİÿÿÿÿÿ
+;
+java:S2629Ã"$Invoke method(s) only conditionally.(ÁÃó
+@
+java:S2629Í"$Invoke method(s) only conditionally.(ö¿¦¢øÿÿÿÿ
+?
+java:S5411¬
+"(Use a primitive boolean expression here.(íô¬È
+W
+java:S2184Œ"@Cast one of the operands of this addition operation to a "long".(†±¤
+I
+java:S1199Í"-Extract this nested code block into a method.(ÒÌâ–øÿÿÿÿ
+i
+java:S2095"FUse try-with-resources or close this "Workbook" in a "finally" clause.(şŒÔúÿÿÿÿ8êçâ¼á1
+f
+java:S3824É"HReplace this "Map.containsKey()" with a call to "Map.computeIfAbsent()".(Æ»Âú8êçâ¼á1
+}
+java:S1149€"_Replace the synchronized class "StringBuffer" by an unsynchronized one such as "StringBuilder".(‰Ã¿Ÿ8ñçâ¼á1
+}
+java:S1149¼"_Replace the synchronized class "StringBuffer" by an unsynchronized one such as "StringBuilder".(‰Ã¿Ÿ8ñçâ¼á1
+}
+java:S1149ü"_Replace the synchronized class "StringBuffer" by an unsynchronized one such as "StringBuilder".(‰Ã¿Ÿ8òçâ¼á1
+n
+java:S3776x"RRefactor this method to reduce its Cognitive Complexity from 74 to the 15 allowed.(‡Û³k8ôçâ¼á1
+b
+java:S1854"DRemove this useless assignment to local variable "workflowResponse".(Ùéõ¢8öçâ¼á1
+_
+java:S1854"BRemove this useless assignment to local variable "updateResponse".(µÖ²H8öçâ¼á1
+`
+java:S1854å"=Remove this useless assignment to local variable "transData".(¶›Õüÿÿÿÿ8öçâ¼á1
+f
+java:S1854‰"CRemove this useless assignment to local variable "transListObject".(ìñ«Àÿÿÿÿÿ8öçâ¼á1
+Q
+java:S2864±"4Iterate over the "entrySet" instead of the "keySet".(´çµ28úçâ¼á1
+{
+java:S2139Õ"XEither log this exception and handle it, or rethrow it with some contextual information.(÷¿­¹ÿÿÿÿÿ8†èâ¼á1
+W
+java:S2864ğ"4Iterate over the "entrySet" instead of the "keySet".(ÄÆôˆÿÿÿÿÿ8‡èâ¼á1
+p
+java:S3776•"RRefactor this method to reduce its Cognitive Complexity from 18 to the 15 allowed.(øœ¡8‰èâ¼á1
+|
+java:S1171ã"YMove the contents of this initializer to a standard constructor or to field initializers.(ÒÌâ–øÿÿÿÿ8èâ¼á1
+H
+java:S1197´"*Move the array designators [] to the type.(™—¶¶8šèâ¼á1
+Š
+java:S1130Ñ"lRemove the declaration of thrown exception 'java.lang.Exception', as it cannot be thrown from method's body.(—°…Ù8›èâ¼á1
+W
+java:S2864æ"4Iterate over the "entrySet" instead of the "keySet".(¨ı÷ãıÿÿÿÿ8œèâ¼á1
+B
+java:S1168ü"$Return an empty map instead of null.(¥¹ï8èâ¼á1
+X
+java:S1854ï":Remove this useless assignment to local variable "errMsg".(§ßà8¢èâ¼á1
+|
+java:S2142û"^Either re-interrupt this method or rethrow the "InterruptedException" that can be caught here.(”ı¾8£èâ¼á1
+F	java:S108û")Either remove or fill this block of code.(”ı¾8£èâ¼á1
+F	java:S108‚")Either remove or fill this block of code.(”ı¾8£èâ¼á1
+X
+java:S1854Œ":Remove this useless assignment to local variable "errMsg".(§ßà8£èâ¼á1
+F	java:S108š")Either remove or fill this block of code.(”ı¾8¤èâ¼á1
+X
+java:S1854¡":Remove this useless assignment to local variable "errMsg".(§ßà8¥èâ¼á1
+\
+java:S1155ë">Use isEmpty() to check whether the collection is empty or not.(ş™×Ê8§èâ¼á1
+u
+java:S3776ã
+"RRefactor this method to reduce its Cognitive Complexity from 28 to the 15 allowed.(îïğ†üÿÿÿÿ8²èâ¼á1
+[
+java:S1854±"=Remove this useless assignment to local variable "strStatus".(Ê½ÌÃ8³èâ¼á1
+Y	java:S125‹"<This block of commented-out lines of code should be removed.(×Æ¬¦8µèâ¼á1
+K	java:S108Ë")Either remove or fill this block of code.(éÍ¢øÿÿÿÿ8·èâ¼á1
+a
+java:S1155ä">Use isEmpty() to check whether the collection is empty or not.(îÇÕÎûÿÿÿÿ8½èâ¼á1
+D	java:S131ô""Add a default case to this switch.(Í’¤úÿÿÿÿ8½èâ¼á1
+]	java:S899›";Do something with the "boolean" value returned by "delete".(²Œ­ûÿÿÿÿ8Àèâ¼á1
+q
+java:S4042›"NUse "java.nio.file.Files#delete" here for better messages on error conditions.(²Œ­ûÿÿÿÿ8Àèâ¼á1
+F	java:S108")Either remove or fill this block of code.(°òÒ¬8Àèâ¼á1
+p
+java:S3776±"RRefactor this method to reduce its Cognitive Complexity from 36 to the 15 allowed.(ËõÍ8Áèâ¼á1
+R
+java:S2864¾"4Iterate over the "entrySet" instead of the "keySet".(ôÙ²ˆ8Ãèâ¼á1
+Q
+java:S2864İ"4Iterate over the "entrySet" instead of the "keySet".(´çµ28Äèâ¼á1
+u
+java:S3776“"RRefactor this method to reduce its Cognitive Complexity from 21 to the 15 allowed.(ã÷øÀÿÿÿÿÿ8Æèâ¼á1
+G
+java:S1197ğ"*Move the array designators [] to the type.(åÛ®b8Êèâ¼á1
+u
+java:S1128"SRemove this unused import 'org.springframework.beans.factory.annotation.Autowired'.(¡¸Îùÿÿÿÿ8»—ã¼á1
+ã
+java:S6541x"ÆA "Brain Method" was detected. Refactor it to reduce at least one of the following metrics: LOC from 204 to 64, Complexity from 29 to 14, Nesting Level from 7 to 2, Number of Variables from 59 to 6.(‡Û³k8Ëèâ¼á1
+ä
+java:S6541±"ÅA "Brain Method" was detected. Refactor it to reduce at least one of the following metrics: LOC from 88 to 64, Complexity from 15 to 14, Nesting Level from 6 to 2, Number of Variables from 27 to 6.(ËõÍ8Ëèâ¼á1

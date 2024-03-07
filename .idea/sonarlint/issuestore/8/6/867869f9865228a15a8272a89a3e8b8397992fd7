@@ -1,0 +1,15 @@
+
+t
+java:S3776&"RRefactor this method to reduce its Cognitive Complexity from 35 to the 15 allowed.(½Ç¤¿şÿÿÿÿ8Ï¾á1
+^
+java:S1854)"<Remove this useless assignment to local variable "response".(íù±ùÿÿÿÿ8Ï¾á1
+O
+java:S1481)"-Remove this unused "response" local variable.(íù±ùÿÿÿÿ8Ï¾á1
+[
+java:S1155\">Use isEmpty() to check whether the collection is empty or not.(Êş¢Ÿ8‘Ï¾á1
+_
+java:S1612x"=Replace this lambda with method reference 'Objects::nonNull'.(çÊåøÿÿÿÿ8’Ï¾á1
+I
+java:S1172€"+Remove this unused method parameter "type".(‹½Äá8“Ï¾á1
+è
+java:S6541&"ÅA "Brain Method" was detected. Refactor it to reduce at least one of the following metrics: LOC from 79 to 64, Complexity from 20 to 14, Nesting Level from 3 to 2, Number of Variables from 30 to 6.(½Ç¤¿şÿÿÿÿ8–Ï¾á1

@@ -23,18 +23,21 @@ import javax.annotation.PostConstruct;
 @Component
 public class RedisCacheMgr {
 
-    private static int cache_ttl = 84600;
+    private static  int cache_ttl = 84600;
 
-    @Autowired
-    private JedisPool jedisPool;
+    private final JedisPool jedisPool;
 
-    @Autowired
-    private JedisPool jedisDataPopulationPool;
+    private final  JedisPool jedisDataPopulationPool;
 
-    @Autowired
     CbExtServerProperties cbExtServerProperties;
 
-    private CbExtLogger logger = new CbExtLogger(getClass().getName());
+    @Autowired
+    public RedisCacheMgr(JedisPool jedisPool, JedisPool jedisDataPopulationPool, CbExtServerProperties cbExtServerProperties) {
+        this.jedisPool = jedisPool;
+        this.jedisDataPopulationPool = jedisDataPopulationPool;
+        this.cbExtServerProperties = cbExtServerProperties;
+    }
+    private final CbExtLogger logger = new CbExtLogger(getClass().getName());
     
     ObjectMapper objectMapper = new ObjectMapper();
 

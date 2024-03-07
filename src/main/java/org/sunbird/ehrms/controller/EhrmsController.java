@@ -15,8 +15,13 @@ import org.sunbird.ehrms.service.EhrmsService;
 @RestController
 @RequestMapping("/ehrms")
 public class EhrmsController {
+
+    private final  EhrmsService ehrmsService;
+
     @Autowired
-    private EhrmsService ehrmsService;
+    public EhrmsController(EhrmsService ehrmsService) {
+        this.ehrmsService = ehrmsService;
+    }
 
     @GetMapping("/details")
     public ResponseEntity <SBApiResponse> fetchEhrmsProfileDetail

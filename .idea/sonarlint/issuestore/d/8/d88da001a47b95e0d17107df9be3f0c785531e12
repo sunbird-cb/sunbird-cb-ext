@@ -1,0 +1,6 @@
+
+o	java:S115"ZRename this constant name to match the regular expression '^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$'.(ş¶Ö
+m
+java:S2737"WAdd logic to this catch clause or eliminate it and rethrow the exception automatically.(ö™û
+T
+java:S2168 "9Remove this dangerous instance of double-checked locking.(¤–¡Ïøÿÿÿÿ

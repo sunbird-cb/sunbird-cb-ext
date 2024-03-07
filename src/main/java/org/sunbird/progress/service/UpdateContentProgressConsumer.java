@@ -33,28 +33,37 @@ import java.util.stream.Collectors;
 @Component
 public class UpdateContentProgressConsumer {
 
-    private CbExtLogger logger = new CbExtLogger(getClass().getName());
-
-    @Autowired
-    private OutboundRequestHandlerServiceImpl outboundReqService;
-
-    @Autowired
-    private CbExtServerProperties cbExtServerProperties;
-
-    private ObjectMapper mapper = new ObjectMapper();
+    private  final CbExtLogger logger = new CbExtLogger(getClass().getName());
 
 
-    @Autowired
+    private final OutboundRequestHandlerServiceImpl outboundReqService;
+
+
+    private final  CbExtServerProperties cbExtServerProperties;
+
+    private final ObjectMapper mapper = new ObjectMapper();
+
+
     CbExtServerProperties serverProperties;
 
-    @Autowired
+
     CassandraOperation cassandraOperation;
 
-    @Autowired
+
     PropertiesConfig configuration;
 
+
+    private final  RestTemplate restTemplate;
+
     @Autowired
-    private RestTemplate restTemplate;
+    public UpdateContentProgressConsumer(OutboundRequestHandlerServiceImpl outboundReqService, CbExtServerProperties cbExtServerProperties, CbExtServerProperties serverProperties, CassandraOperation cassandraOperation, PropertiesConfig configuration, RestTemplate restTemplate) {
+        this.outboundReqService = outboundReqService;
+        this.cbExtServerProperties = cbExtServerProperties;
+        this.serverProperties = serverProperties;
+        this.cassandraOperation = cassandraOperation;
+        this.configuration = configuration;
+        this.restTemplate = restTemplate;
+    }
 
     private static final String BLENDED_PROGRAM_TAG = "#blended_program_name";
 

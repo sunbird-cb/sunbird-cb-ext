@@ -1,0 +1,22 @@
+
+a	java:S112…"FDefine and throw a dedicated exception instead of using a generic one.(Ûè€Ôýÿÿÿÿ
+a	java:S112Í"FDefine and throw a dedicated exception instead of using a generic one.(ß°Ý´þÿÿÿÿ
+a	java:S112õ"FDefine and throw a dedicated exception instead of using a generic one.(Ò‚Òéüÿÿÿÿ
+K
+java:S1066Ì"/Merge this if statement with the enclosing one.(‘±Íëÿÿÿÿÿ
+s
+java:S1488Á"\Immediately return this expression instead of assigning it to the temporary variable "data".(þŸò”
+c
+java:S3973Ô"GUse indentation to denote the code conditionally executed by this "if".(¦Ÿ¤§úÿÿÿÿ
+m
+java:S37766"RRefactor this method to reduce its Cognitive Complexity from 39 to the 15 allowed.(€¯°ªþÿÿÿÿ
+n
+java:S3776…"RRefactor this method to reduce its Cognitive Complexity from 36 to the 15 allowed.(Ûè€Ôýÿÿÿÿ
+ˆ
+java:S1130…"lRemove the declaration of thrown exception 'java.lang.Exception', as it cannot be thrown from method's body.(Ûè€Ôýÿÿÿÿ
+i
+java:S3776Ë"RRefactor this method to reduce its Cognitive Complexity from 18 to the 15 allowed.(Ð¶ôê
+S
+java:S1144¶"<Remove this unused private "fetchQuestionMapDetails" method.(–ÄÍ©
+á
+java:S65416"ÅA "Brain Method" was detected. Refactor it to reduce at least one of the following metrics: LOC from 75 to 64, Complexity from 17 to 14, Nesting Level from 6 to 2, Number of Variables from 19 to 6.(€¯°ªþÿÿÿÿ

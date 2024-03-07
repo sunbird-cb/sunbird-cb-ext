@@ -1,0 +1,17 @@
+
+c
+java:S3824|"HReplace this "Map.containsKey()" with a call to "Map.computeIfAbsent()".(Ÿ¨Ó£şÿÿÿÿ
+h
+java:S3776"RRefactor this method to reduce its Cognitive Complexity from 20 to the 15 allowed.(ú©…Î
+U
+java:S62132":Rename this variable to not match a restricted identifier.(‘‚ùûÿÿÿÿ
+U
+java:S62137":Rename this variable to not match a restricted identifier.(ã°¹»ûÿÿÿÿ
+U
+java:S6213[":Rename this variable to not match a restricted identifier.(äå“ñıÿÿÿÿ
+U
+java:S6213_":Rename this variable to not match a restricted identifier.(Ù¦üğøÿÿÿÿ
+I
+java:S1128"-Remove this unused import 'org.slf4j.Logger'.(íØ®68æ¤àÁá1
+Q
+java:S1128"4Remove this unused import 'org.slf4j.LoggerFactory'.(–ÿÚŞ8æ¤àÁá1

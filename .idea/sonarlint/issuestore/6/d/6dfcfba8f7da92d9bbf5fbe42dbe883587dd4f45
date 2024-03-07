@@ -1,0 +1,21 @@
+
+Z	java:S112y"FDefine and throw a dedicated exception instead of using a generic one.(¿*
+a	java:S112‚"FDefine and throw a dedicated exception instead of using a generic one.(³âü×ùÿÿÿÿ
+\	java:S112’"FDefine and throw a dedicated exception instead of using a generic one.(ú‘·â
+p
+java:S2293“"YReplace the type specification in this constructor call with the diamond operator ("<>").(ö‡¹ä
+P
+java:S1141g"5Extract this nested try block into a separate method.(¡»¢üùÿÿÿÿ
+`
+java:S3824Ê"IReplace this "Map.containsKey()" with a call to "Map.computeIfPresent()".(ı÷Ğ²
+`
+java:S3824É"IReplace this "Map.containsKey()" with a call to "Map.computeIfPresent()".(Ä¨ê»
+g
+java:S3776y"RRefactor this method to reduce its Cognitive Complexity from 48 to the 15 allowed.(¿*
+?	java:S108ª")Either remove or fill this block of code.(”ı¾
+?	java:S108ö")Either remove or fill this block of code.(”ı¾
+n
+java:S3776‚"RRefactor this method to reduce its Cognitive Complexity from 27 to the 15 allowed.(³âü×ùÿÿÿÿ
+?	java:S108°")Either remove or fill this block of code.(”ı¾
+?	java:S108Ø")Either remove or fill this block of code.(”ı¾
+?	java:S108ˆ")Either remove or fill this block of code.(”ı¾

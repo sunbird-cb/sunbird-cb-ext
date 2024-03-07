@@ -20,13 +20,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Service
 public class CatalogServiceImpl {
 
-	private Logger log = LoggerFactory.getLogger(CatalogServiceImpl.class);
+	private final Logger log = LoggerFactory.getLogger(CatalogServiceImpl.class);
 
-	@Autowired
 	RestTemplate restTemplate;
 
+	private final CbExtServerProperties extServerProperties;
 	@Autowired
-	private CbExtServerProperties extServerProperties;
+	public CatalogServiceImpl(RestTemplate restTemplate, CbExtServerProperties extServerProperties) {
+		this.restTemplate = restTemplate;
+		this.extServerProperties = extServerProperties;
+	}
+
 
 	public Catalog getCatalog(String authUserToken, boolean isEnrichConsumption) {
 		return fetchCatalog(authUserToken, isEnrichConsumption);

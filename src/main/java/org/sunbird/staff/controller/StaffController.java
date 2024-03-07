@@ -20,8 +20,11 @@ import org.sunbird.staff.service.StaffService;
 @RestController
 public class StaffController {
 
-	@Autowired
 	StaffService staffService;
+	@Autowired
+	public StaffController(StaffService staffService) {
+		this.staffService = staffService;
+	}
 
 	@PostMapping("/staff/position")
 	public ResponseEntity<SBApiResponse> createStaffDetails(@RequestHeader("x-authenticated-userid") String userId,

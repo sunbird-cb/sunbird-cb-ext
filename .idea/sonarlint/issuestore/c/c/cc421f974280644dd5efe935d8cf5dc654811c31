@@ -1,0 +1,17 @@
+
+u
+java:S2293•"YReplace the type specification in this constructor call with the diamond operator ("<>").(ƒÉ“†şÿÿÿÿ
+v
+java:S3008"TRename this field "cache_ttl" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(™„ß½øÿÿÿÿ8§…çÀá1
+y
+java:S3008,"^Rename this field "questions_cache_ttl" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(·—åÏøÿÿÿÿ
+L
+java:S26960"6Make the enclosing method "static" or remove this set.(±‰ğÉ
+K
+java:S22090"5Change this instance-reference to a static reference.(±‰ğÉ
+K
+java:S26962"6Make the enclosing method "static" or remove this set.(›g
+B
+java:S1168‡"+Return an empty collection instead of null.(¥¹ï
+B
+java:S1168¯"+Return an empty collection instead of null.(¥¹ï

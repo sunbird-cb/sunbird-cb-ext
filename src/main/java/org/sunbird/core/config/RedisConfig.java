@@ -13,8 +13,11 @@ import redis.clients.jedis.JedisPoolConfig;
 @EnableCaching
 public class RedisConfig {
 
-	@Autowired
 	CbExtServerProperties cbProperties;
+	@Autowired
+	public RedisConfig(CbExtServerProperties cbProperties) {
+		this.cbProperties = cbProperties;
+	}
 
 	@Bean
 	public JedisPool jedisPool() {

@@ -25,10 +25,12 @@ import org.sunbird.profile.service.ProfileService;
 @RestController
 public class ProfileController {
 
+	private final ProfileService profileService;
 	@Autowired
-	private ProfileService profileService;
-
-	private Logger log = LoggerFactory.getLogger(getClass().getName());
+	public ProfileController(ProfileService profileService) {
+		this.profileService = profileService;
+	}
+	private  final Logger log = LoggerFactory.getLogger(getClass().getName());
 
 	@PostMapping("/user/patch")
 	public ResponseEntity<SBApiResponse> profileUpdate(

@@ -1,0 +1,15 @@
+
+m
+java:S3776]"RRefactor this method to reduce its Cognitive Complexity from 16 to the 15 allowed.(ãÅÅºùÿÿÿÿ
+T
+java:S1155f">Use isEmpty() to check whether the collection is empty or not.(ÀÑóé
+i
+java:S1602{"SRemove useless curly braces around statement and then remove useless return keyword(¾Ó‹¯
+Z
+java:S1155¬">Use isEmpty() to check whether the collection is empty or not.(¥ïï±þÿÿÿÿ
+o
+java:S1602Â"SRemove useless curly braces around statement and then remove useless return keyword(†Ïë¥ûÿÿÿÿ
+>
+java:S1125Ã"'Remove the unnecessary boolean literal.(È¶ÅÈ
+R
+java:S1068*"0Remove this unused "objectMapper" private field.(“»‚Šûÿÿÿÿ8Ä Š½á1

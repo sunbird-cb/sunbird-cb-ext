@@ -16,13 +16,20 @@ import java.util.*;
 
 @Service
 public class KarmaPointsServiceImpl implements KarmaPointsService {
-    @Autowired
-    private CassandraOperation cassandraOperation;
-    @Autowired
+
+    private final CassandraOperation cassandraOperation;
+
     CbExtServerProperties serverProperties;
-    @Autowired
+
     Producer kafkaProducer;
-    private Logger logger = LoggerFactory.getLogger(getClass().getName());
+    private final  Logger logger = LoggerFactory.getLogger(getClass().getName());
+
+    @Autowired
+    public KarmaPointsServiceImpl(CassandraOperation cassandraOperation, CbExtServerProperties serverProperties, Producer kafkaProducer) {
+        this.cassandraOperation = cassandraOperation;
+        this.serverProperties = serverProperties;
+        this.kafkaProducer = kafkaProducer;
+    }
 
     @Override
     public Map<String, Object> fetchKarmaPointsData(String userId, KarmaPointsRequest request) {

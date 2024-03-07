@@ -23,11 +23,14 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class CassandraOperationImpl implements CassandraOperation {
 
-	private Logger logger = LoggerFactory.getLogger(getClass().getName());
+	private final Logger logger = LoggerFactory.getLogger(getClass().getName());
+
+	CassandraConnectionManager connectionManager;
 
 	@Autowired
-  	CassandraConnectionManager connectionManager;
-
+	public CassandraOperationImpl(CassandraConnectionManager connectionManager) {
+		this.connectionManager = connectionManager;
+	}
 	@Override
 	public SBApiResponse insertRecord(String keyspaceName, String tableName, Map<String, Object> request) {
 		SBApiResponse response = new SBApiResponse();

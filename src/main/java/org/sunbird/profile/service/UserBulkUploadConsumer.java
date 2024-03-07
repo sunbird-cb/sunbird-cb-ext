@@ -12,9 +12,12 @@ import java.util.concurrent.CompletableFuture;
 
 @Component
 public class UserBulkUploadConsumer {
-    private Logger logger = LoggerFactory.getLogger(UserBulkUploadConsumer.class);
-    @Autowired
+    private final Logger logger = LoggerFactory.getLogger(UserBulkUploadConsumer.class);
     UserBulkUploadService userBulkUploadService;
+    @Autowired
+    public UserBulkUploadConsumer(UserBulkUploadService userBulkUploadService) {
+        this.userBulkUploadService = userBulkUploadService;
+    }
 
 
     @KafkaListener(topics = "${kafka.topics.user.bulk.upload}", groupId = "${kafka.topics.user.bulk.upload.group}")

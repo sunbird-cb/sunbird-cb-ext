@@ -1,0 +1,39 @@
+
+E
+java:S3740¾"/Provide the parametrized type for this generic.(ä°‰)
+„
+java:S1319Æ"mThe return type of this method should be an interface such as "Map" rather than the implementation "HashMap".(ÖŸ¥È
+d
+java:S2259Á"FA "NullPointerException" could be thrown; "getBody()" can return null.(­ì¢Ø8íëÃ¿á1
+_
+java:S6813u"BRemove this field injection and use constructor injection instead.(êæÄŞ8ïëÃ¿á1
+_
+java:S6813x"BRemove this field injection and use constructor injection instead.(êæÄŞ8ïëÃ¿á1
+{
+java:S2139•"XEither log this exception and handle it, or rethrow it with some contextual information.(±Ÿ—±ÿÿÿÿÿ8úëÃ¿á1
+{
+java:S2139Ç"XEither log this exception and handle it, or rethrow it with some contextual information.(±Ÿ—±ÿÿÿÿÿ8üëÃ¿á1
+{
+java:S2139‹"XEither log this exception and handle it, or rethrow it with some contextual information.(±Ÿ—±ÿÿÿÿÿ8ƒìÃ¿á1
+{
+java:S2139Ì"XEither log this exception and handle it, or rethrow it with some contextual information.(±Ÿ—±ÿÿÿÿÿ8‰ìÃ¿á1
+{
+java:S2139©"XEither log this exception and handle it, or rethrow it with some contextual information.(¢­§Œÿÿÿÿÿ8•ìÃ¿á1
+{
+java:S2139Õ"XEither log this exception and handle it, or rethrow it with some contextual information.(¢­§Œÿÿÿÿÿ8˜ìÃ¿á1
+Š
+java:S1130Û"lRemove the declaration of thrown exception 'java.io.IOException', as it cannot be thrown from method's body.(©Ô¡ì8˜ìÃ¿á1
+p
+java:S3776å"RRefactor this method to reduce its Cognitive Complexity from 21 to the 15 allowed.(å’Å®8™ìÃ¿á1
+p
+java:S3776Æ"RRefactor this method to reduce its Cognitive Complexity from 23 to the 15 allowed.(ÖŸ¥È8ìÃ¿á1
+]
+java:S6213É":Rename this variable to not match a restricted identifier.(µÄ²æÿÿÿÿÿ8ŸìÃ¿á1
+~
+java:S1612‹"`Replace this lambda with method reference 'UserWorkAllocationMappingModel::getWorkAllocationId'.(£ÜÕß8¢ìÃ¿á1
+t
+java:S1612œ"QReplace this lambda with method reference 'RoleCompetency::getCompetencyDetails'.(ëˆÓ¨úÿÿÿÿ8£ìÃ¿á1
+b
+java:S1612"?Replace this lambda with method reference 'Collection::stream'.(ÕÏüÖüÿÿÿÿ8£ìÃ¿á1
+`
+java:S1144å"BRemove this unused private "getSearchResponseForWorkOrder" method.(Ñ‘Òü8¤ìÃ¿á1

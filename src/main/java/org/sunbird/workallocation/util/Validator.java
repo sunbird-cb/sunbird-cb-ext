@@ -17,8 +17,12 @@ import java.util.Map;
 @Component
 public class Validator {
 
+	private  final IndexerService indexerService;
 	@Autowired
-	private IndexerService indexerService;
+	public Validator(IndexerService indexerService) {
+		this.indexerService = indexerService;
+	}
+
 
 	@Value("${workorder.index.name}")
 	public String workOrderIndex;

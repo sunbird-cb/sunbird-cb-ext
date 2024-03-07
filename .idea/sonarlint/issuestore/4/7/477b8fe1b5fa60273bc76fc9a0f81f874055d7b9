@@ -1,0 +1,26 @@
+
+F
+java:S1066µ"/Merge this if statement with the enclosing one.(çÛàõ
+d
+java:S2095W"NUse try-with-resources or close this "FileOutputStream" in a "finally" clause.(ŠÀø¯
+M
+java:S2589{"7Remove this expression which always evaluates to "true"(·è€
+\	java:S899V"BDo something with the "boolean" value returned by "createNewFile".(Ğ’Íùÿÿÿÿ
+U	java:S899c";Do something with the "boolean" value returned by "delete".(²Œ­ûÿÿÿÿ
+i
+java:S4042c"NUse "java.nio.file.Files#delete" here for better messages on error conditions.(²Œ­ûÿÿÿÿ
+E
+java:S2093T"*Change this "try" to a try-with-resources.(¡»¢üùÿÿÿÿ
+U	java:S899|";Do something with the "boolean" value returned by "delete".(²Œ­ûÿÿÿÿ
+i
+java:S4042|"NUse "java.nio.file.Files#delete" here for better messages on error conditions.(²Œ­ûÿÿÿÿ
+V	java:S899Ğ";Do something with the "boolean" value returned by "delete".(²Œ­ûÿÿÿÿ
+j
+java:S4042Ğ"NUse "java.nio.file.Files#delete" here for better messages on error conditions.(²Œ­ûÿÿÿÿ
+?	java:S108Ò")Either remove or fill this block of code.(°òÒ¬
+I
+java:S1113×"-Do not override the Object.finalize() method.(œäºÒúÿÿÿÿ
+?	java:S108İ")Either remove or fill this block of code.(”ı¾
+j
+java:S4042µ"NUse "java.nio.file.Files#delete" here for better messages on error conditions.(ã®—ôşÿÿÿÿ
+?	java:S108¸")Either remove or fill this block of code.(°òÒ¬

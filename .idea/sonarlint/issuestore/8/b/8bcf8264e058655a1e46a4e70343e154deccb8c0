@@ -1,0 +1,25 @@
+
+a	java:S112®"FDefine and throw a dedicated exception instead of using a generic one.(íõªşÿÿÿÿ
+\	java:S112”"FDefine and throw a dedicated exception instead of using a generic one.( Ÿ¿”
+a	java:S112ã"FDefine and throw a dedicated exception instead of using a generic one.(íõªşÿÿÿÿ
+a	java:S112ğ"FDefine and throw a dedicated exception instead of using a generic one.(íõªşÿÿÿÿ
+a	java:S112²"FDefine and throw a dedicated exception instead of using a generic one.(•¾¾úÿÿÿÿ
+a	java:S112Ä"FDefine and throw a dedicated exception instead of using a generic one.(íõªşÿÿÿÿ
+a	java:S112«"FDefine and throw a dedicated exception instead of using a generic one.(Üİ—Òşÿÿÿÿ
+K
+java:S1066Ö"/Merge this if statement with the enclosing one.(ÜÍé÷øÿÿÿÿ
+F
+java:S1066 "/Merge this if statement with the enclosing one.(¾ò‚“
+n
+java:S3776¸"RRefactor this method to reduce its Cognitive Complexity from 23 to the 15 allowed.(°êµ¢ùÿÿÿÿ
+i
+java:S3776¥"RRefactor this method to reduce its Cognitive Complexity from 22 to the 15 allowed.(–ù·ò
+n
+java:S3776²"RRefactor this method to reduce its Cognitive Complexity from 31 to the 15 allowed.(•¾¾úÿÿÿÿ
+i
+java:S1659¾"MDeclare "sBudgetAllocated" and all following declarations on a separate line.(íâ…şÿÿÿÿ
+R	java:S125ô"<This block of commented-out lines of code should be removed.( °”…
+d
+java:S3986•"HMake sure that week Year "YYYY" is expected here instead of Year "yyyy".(¦‰Îîüÿÿÿÿ
+p
+java:S1128"NRemove this unused import 'org.sunbird.ratings.exception.ValidationException'.(Ñ‹ŒÀøÿÿÿÿ8ŸÃ½¹á1

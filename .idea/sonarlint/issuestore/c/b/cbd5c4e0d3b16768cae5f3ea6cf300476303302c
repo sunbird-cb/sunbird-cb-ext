@@ -1,0 +1,69 @@
+
+a	java:S112™"FDefine and throw a dedicated exception instead of using a generic one.(µ¨ãœýÿÿÿÿ
+a	java:S112»"FDefine and throw a dedicated exception instead of using a generic one.(Ò‚Òéüÿÿÿÿ
+F
+java:S3740‚"/Provide the parametrized type for this generic.(Òì˜´
+K
+java:S3740ƒ"/Provide the parametrized type for this generic.(ÿÛÑ¡úÿÿÿÿ
+K
+java:S3740ƒ"/Provide the parametrized type for this generic.(ÿÛÑ¡úÿÿÿÿ
+K
+java:S3740À"/Provide the parametrized type for this generic.(¤Š£»øÿÿÿÿ
+K
+java:S3740Ó"/Provide the parametrized type for this generic.(»½Ä’ÿÿÿÿÿ
+F
+java:S3740ì"/Provide the parametrized type for this generic.(Ð¸Ë£
+K
+java:S3740€"/Provide the parametrized type for this generic.(ò°ªãüÿÿÿÿ
+F
+java:S3740"/Provide the parametrized type for this generic.(Íú’¤
+ƒ
+java:S1319À"gThe type of "pdfDetails" should be an interface such as "Map" rather than the implementation "HashMap".(¤Š£»øÿÿÿÿ
+
+java:S1319À"cThe type of "params" should be an interface such as "Map" rather than the implementation "HashMap".(¤Š£»øÿÿÿÿ
+z
+java:S1319ì"cThe type of "params" should be an interface such as "Map" rather than the implementation "HashMap".(Ð¸Ë£
+8
+java:S1643Ö"Use a StringBuilder instead.(èœÌüÿÿÿÿ
+
+java:S1488—"jImmediately return this expression instead of assigning it to the temporary variable "compositeSearchRes".(½‡£©
+c
+java:S3973¡"GUse indentation to denote the code conditionally executed by this "if".(Ú„èÞûÿÿÿÿ
+X
+java:S6813;"BRemove this field injection and use constructor injection instead.(êæÄÞ
+X
+java:S6813>"BRemove this field injection and use constructor injection instead.(êæÄÞ
+X
+java:S6813A"BRemove this field injection and use constructor injection instead.(êæÄÞ
+X
+java:S6813G"BRemove this field injection and use constructor injection instead.(êæÄÞ
+X
+java:S6813J"BRemove this field injection and use constructor injection instead.(êæÄÞ
+X
+java:S6813M"BRemove this field injection and use constructor injection instead.(êæÄÞ
+e
+java:S2674f"JCheck the return value of the "read" call to see how many bytes were read.(òÒ»§ùÿÿÿÿ
+`
+java:S2674w"JCheck the return value of the "read" call to see how many bytes were read.(µÄŸª
+a
+java:S2674ƒ"JCheck the return value of the "read" call to see how many bytes were read.(µÄŸª
+f
+java:S2674Ý"JCheck the return value of the "read" call to see how many bytes were read.(òÒ»§ùÿÿÿÿ
+=
+java:S1075ú"&Remove this hard-coded path-delimiter.(Ì•²Œ
+ƒ
+java:S5854€"gUse the CANON_EQ flag with "Pattern.compile(pattern, CANON_EQ).matcher(input).replaceAll(replacement)".(êÁœïüÿÿÿÿ
+d
+java:S5361€"HReplace this call to "replaceAll()" by a call to the "replace()" method.(êÁœïüÿÿÿÿ
+ƒ
+java:S5854ƒ"gUse the CANON_EQ flag with "Pattern.compile(pattern, CANON_EQ).matcher(input).replaceAll(replacement)".(Ž­ÃÛüÿÿÿÿ
+d
+java:S5361ƒ"HReplace this call to "replaceAll()" by a call to the "replace()" method.(Ž­ÃÛüÿÿÿÿ
+F
+java:S2093¤"*Change this "try" to a try-with-resources.(¡»¢üùÿÿÿÿ
+i
+java:S3776¹"RRefactor this method to reduce its Cognitive Complexity from 16 to the 15 allowed.(ÌòõÝ
+F
+java:S2093â"*Change this "try" to a try-with-resources.(¡»¢üùÿÿÿÿ
+a
+java:S2674è"JCheck the return value of the "read" call to see how many bytes were read.(µÄŸª

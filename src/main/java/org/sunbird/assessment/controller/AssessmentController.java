@@ -19,14 +19,18 @@ import org.sunbird.common.util.Constants;
 @RestController
 public class AssessmentController {
 
-	@Autowired
 	AssessmentService assessmentService;
 
-	@Autowired
 	AssessmentServiceV2 assessmentServiceV2;
 
-	@Autowired
 	AssessmentServiceV4 assessmentServiceV4;
+
+	@Autowired
+	public AssessmentController(AssessmentService assessmentService, AssessmentServiceV2 assessmentServiceV2, AssessmentServiceV4 assessmentServiceV4) {
+		this.assessmentService = assessmentService;
+		this.assessmentServiceV2 = assessmentServiceV2;
+		this.assessmentServiceV4 = assessmentServiceV4;
+	}
 
 	/**
 	 * validates, submits and inserts assessments and quizzes into the db

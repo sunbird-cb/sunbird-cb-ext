@@ -17,8 +17,11 @@ import java.util.Map;
 @RestController
 public class UserRegistrationController {
 
-	@Autowired
 	UserRegistrationService userRegService;
+	@Autowired
+	public UserRegistrationController(UserRegistrationService userRegService) {
+		this.userRegService = userRegService;
+	}
 
 	@PostMapping("/user/registration/v1/register")
 	public ResponseEntity<SBApiResponse> registerUser(@RequestBody UserRegistrationInfo userRegIno) {

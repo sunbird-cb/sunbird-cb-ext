@@ -1,0 +1,10 @@
+
+`	java:S112"FDefine and throw a dedicated exception instead of using a generic one.(ĞÚøùÿÿÿÿ
+W
+java:S1596-"<Replace "Collections.EMPTY_MAP" by "Collections.emptyMap()".(•Âß„ıÿÿÿÿ
+W
+java:S15962"<Replace "Collections.EMPTY_MAP" by "Collections.emptyMap()".(•Âß„ıÿÿÿÿ
+W
+java:S15964"<Replace "Collections.EMPTY_MAP" by "Collections.emptyMap()".(•Âß„ıÿÿÿÿ
+X
+java:S6813"BRemove this field injection and use constructor injection instead.(êæÄŞ

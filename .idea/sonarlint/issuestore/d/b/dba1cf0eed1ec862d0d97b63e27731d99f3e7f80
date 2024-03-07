@@ -1,0 +1,19 @@
+
+m
+java:S1104"RMake logger a static final constant or non-public and provide accessors if needed.(æçüèúÿÿÿÿ
+ˆ
+java:S1104"rMake DEFAULT_BULK_UPLOAD_VERIFICATION_REGEX a static final constant or non-public and provide accessors if needed.(Ô†÷º
+G
+java:S1444",Make this "public static logger" field final(æçüèúÿÿÿÿ
+b
+java:S1444"LMake this "public static DEFAULT_BULK_UPLOAD_VERIFICATION_REGEX" field final(Ô†÷º
+‡
+java:S3008"qRename this field "DEFAULT_BULK_UPLOAD_VERIFICATION_REGEX" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(Ô†÷º
+g
+java:S5998p"LRefactor this repetition that can lead to a stack overflow for large inputs.(õÿŒúÿÿÿÿ
+h
+java:S5998Š"LRefactor this repetition that can lead to a stack overflow for large inputs.(ˆè®•úÿÿÿÿ
+L
+java:S6035Š"0Replace this alternation with a character class.(ˆè®•úÿÿÿÿ
+c
+java:S5998›"LRefactor this repetition that can lead to a stack overflow for large inputs.(Æ–àñ

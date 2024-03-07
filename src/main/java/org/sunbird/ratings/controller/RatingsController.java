@@ -15,8 +15,11 @@ import org.sunbird.ratings.service.RatingService;
 @RestController
 public class RatingsController {
 
-    @Autowired
     RatingService ratingService;
+    @Autowired
+    public RatingsController(RatingService ratingService) {
+        this.ratingService = ratingService;
+    }
 
     // ----------------- Public APIs --------------------
 

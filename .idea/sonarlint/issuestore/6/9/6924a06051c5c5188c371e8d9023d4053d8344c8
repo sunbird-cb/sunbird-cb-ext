@@ -1,0 +1,14 @@
+
+c	java:S112"FDefine and throw a dedicated exception instead of using a generic one.(Ê­Òó8ÄĞÎÎß1
+D
+java:S1125€"'Remove the unnecessary boolean literal.(­ºÉB8ÏĞÎÎß1
+Š
+java:S1130"lRemove the declaration of thrown exception 'java.lang.Exception', as it cannot be thrown from method's body.(Ê­Òó8ĞĞÎÎß1
+D
+java:S1125«"'Remove the unnecessary boolean literal.(­ºÉB8ÑĞÎÎß1
+D
+java:S1125¼"'Remove the unnecessary boolean literal.(­ºÉB8ÑĞÎÎß1
+D
+java:S1125Ä"'Remove the unnecessary boolean literal.(­ºÉB8ÒĞÎÎß1
+D
+java:S1125Í"'Remove the unnecessary boolean literal.(­ºÉB8ÒĞÎÎß1

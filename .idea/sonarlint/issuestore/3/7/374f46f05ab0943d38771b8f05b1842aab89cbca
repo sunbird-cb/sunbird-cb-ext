@@ -1,0 +1,43 @@
+
+|
+java:S2293¨"YReplace the type specification in this constructor call with the diamond operator ("<>").(“ñê˜ıÿÿÿÿ8¢ş†ÎŞ1
+w
+java:S2293½"YReplace the type specification in this constructor call with the diamond operator ("<>").(‹»Ÿ8¢ş†ÎŞ1
+|
+java:S2293ö"YReplace the type specification in this constructor call with the diamond operator ("<>").(“ñê˜ıÿÿÿÿ8£ş†ÎŞ1
+M
+java:S1066"/Merge this if statement with the enclosing one.(õàîÎ8¤ş†ÎŞ1
+R
+java:S1066‘"/Merge this if statement with the enclosing one.(Úá±åüÿÿÿÿ8¤ş†ÎŞ1
+
+java:S1488x"bImmediately return this expression instead of assigning it to the temporary variable "expression".(ºÛ¬Á8§ş†ÎŞ1
+†
+java:S1488é"cImmediately return this expression instead of assigning it to the temporary variable "responseMap".(Ü¥éùÿÿÿÿ8§ş†ÎŞ1
+B
+java:S2629Å"$Invoke method(s) only conditionally.(ç‡á8©ş†ÎŞ1
+B
+java:S2629§"$Invoke method(s) only conditionally.(„‰¤ò8©ş†ÎŞ1
+G
+java:S2629ø"$Invoke method(s) only conditionally.(š€º“üÿÿÿÿ8©ş†ÎŞ1
+G
+java:S2629¯"$Invoke method(s) only conditionally.(‡ÂÂ„ûÿÿÿÿ8ªş†ÎŞ1
+^
+java:S2184¹"@Cast one of the operands of this addition operation to a "long".(†±¤8­ş†ÎŞ1
+}
+java:S1149Ì"_Replace the synchronized class "StringBuffer" by an unsynchronized one such as "StringBuilder".(‰Ã¿Ÿ8ª‚‡ÎŞ1
+u
+java:S3776«"RRefactor this method to reduce its Cognitive Complexity from 16 to the 15 allowed.(°Ä„×üÿÿÿÿ8Û‚‡ÎŞ1
+]
+java:S6213Ç":Rename this variable to not match a restricted identifier.(üì¥êÿÿÿÿÿ8ß‚‡ÎŞ1
+p
+java:S3776Ş"RRefactor this method to reduce its Cognitive Complexity from 33 to the 15 allowed.(ÂÔ•È8à‚‡ÎŞ1
+u
+java:S3776‰"RRefactor this method to reduce its Cognitive Complexity from 21 to the 15 allowed.(ãÉŠÿÿÿÿÿ8ã‚‡ÎŞ1
+E
+java:S1125»"'Remove the unnecessary boolean literal.(éåù˜8è‚‡ÎŞ1
+‰
+java:S1130È"lRemove the declaration of thrown exception 'java.io.IOException', as it cannot be thrown from method's body.(‚õóB8õ‚‡ÎŞ1
+u
+java:S3776Ë"RRefactor this method to reduce its Cognitive Complexity from 20 to the 15 allowed.(ƒ’äíÿÿÿÿÿ8ÿ‚‡ÎŞ1
+6
+java:S2129­" Remove this "String" constructor(éÕá

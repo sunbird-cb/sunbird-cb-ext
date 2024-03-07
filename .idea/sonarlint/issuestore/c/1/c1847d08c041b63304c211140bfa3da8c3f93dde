@@ -1,0 +1,11 @@
+
+m
+java:S3776!"RRefactor this method to reduce its Cognitive Complexity from 41 to the 15 allowed.(Ά‰ωÿÿÿÿ
+m
+java:S3776O"RRefactor this method to reduce its Cognitive Complexity from 57 to the 15 allowed.(ξ΄ δωÿÿÿÿ
+i
+java:S3776"RRefactor this method to reduce its Cognitive Complexity from 60 to the 15 allowed.(Ξ¨ΰΈ
+;
+java:S1168έ"$Return an empty map instead of null.(¥Ήο
+α
+java:S6541O"ΕA "Brain Method" was detected. Refactor it to reduce at least one of the following metrics: LOC from 68 to 64, Complexity from 21 to 14, Nesting Level from 6 to 2, Number of Variables from 16 to 6.(ξ΄ δωÿÿÿÿ

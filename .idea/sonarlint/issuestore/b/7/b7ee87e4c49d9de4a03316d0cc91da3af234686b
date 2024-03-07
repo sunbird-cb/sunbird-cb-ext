@@ -1,0 +1,28 @@
+
+:
+java:S2629t"$Invoke method(s) only conditionally.(“¨ýž
+?
+java:S5411œ"(Use a primitive boolean expression here.(«¸„•
+X
+java:S6813<"BRemove this field injection and use constructor injection instead.(êæÄÞ
+R	java:S107¾"<Method has 8 parameters, which is greater than 7 authorized.(«òŒ
+h
+java:S3776j"RRefactor this method to reduce its Cognitive Complexity from 25 to the 15 allowed.(Õî¸á
+i
+java:S3776«"RRefactor this method to reduce its Cognitive Complexity from 31 to the 15 allowed.(™¡ÁÄ
+i
+java:S3776Ÿ"RRefactor this method to reduce its Cognitive Complexity from 38 to the 15 allowed.(Ž«÷Ž
+n
+java:S3776ß"RRefactor this method to reduce its Cognitive Complexity from 16 to the 15 allowed.(®ê˜âúÿÿÿÿ
+i
+java:S3776÷"RRefactor this method to reduce its Cognitive Complexity from 19 to the 15 allowed.(¶Óƒý
+W
+java:S1172÷"@Remove these unused method parameters "submitRequest", "userId".(¶Óƒý
+n
+java:S3776Ñ"RRefactor this method to reduce its Cognitive Complexity from 23 to the 15 allowed.(ñÌÉ¯ÿÿÿÿÿ
+Ý
+java:S6541j"ÆA "Brain Method" was detected. Refactor it to reduce at least one of the following metrics: LOC from 100 to 64, Complexity from 16 to 14, Nesting Level from 4 to 2, Number of Variables from 22 to 6.(Õî¸á
+Þ
+java:S6541«"ÆA "Brain Method" was detected. Refactor it to reduce at least one of the following metrics: LOC from 110 to 64, Complexity from 18 to 14, Nesting Level from 6 to 2, Number of Variables from 33 to 6.(™¡ÁÄ
+Þ
+java:S6541Ÿ"ÆA "Brain Method" was detected. Refactor it to reduce at least one of the following metrics: LOC from 113 to 64, Complexity from 20 to 14, Nesting Level from 6 to 2, Number of Variables from 30 to 6.(Ž«÷Ž

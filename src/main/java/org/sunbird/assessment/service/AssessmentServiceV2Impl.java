@@ -39,29 +39,33 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
 
     private final Logger logger = LoggerFactory.getLogger(AssessmentServiceV2Impl.class);
 
-    @Autowired
     AssessmentUtilServiceV2 assessUtilServ;
 
-    @Autowired
     CbExtServerProperties serverProperties;
 
-    @Autowired
     Producer kafkaProducer;
 
-    @Autowired
     AssessmentRepository assessmentRepository;
 
-    @Autowired
     RedisCacheMgr redisCacheMgr;
 
-    @Autowired
     OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
 
-    @Autowired
     ObjectMapper mapper;
 
-    @Autowired
     AccessTokenValidator accessTokenValidator;
+    @Autowired
+    public AssessmentServiceV2Impl(AssessmentUtilServiceV2 assessUtilServ, CbExtServerProperties serverProperties, Producer kafkaProducer, AssessmentRepository assessmentRepository, RedisCacheMgr redisCacheMgr, OutboundRequestHandlerServiceImpl outboundRequestHandlerService, ObjectMapper mapper, AccessTokenValidator accessTokenValidator) {
+        this.assessUtilServ = assessUtilServ;
+        this.serverProperties = serverProperties;
+        this.kafkaProducer = kafkaProducer;
+        this.assessmentRepository = assessmentRepository;
+        this.redisCacheMgr = redisCacheMgr;
+        this.outboundRequestHandlerService = outboundRequestHandlerService;
+        this.mapper = mapper;
+        this.accessTokenValidator = accessTokenValidator;
+    }
+
 
     public SBApiResponse readAssessment(String assessmentIdentifier, String token) {
         logger.info("AssessmentServiceV2Impl::readAssessment... Started");
