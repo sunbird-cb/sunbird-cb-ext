@@ -135,12 +135,31 @@ public class ProfileServiceImpl implements ProfileService {
 			}
 			Map<String, Object> profileDetailsMap = (Map<String, Object>) requestData.get(Constants.PROFILE_DETAILS);
 			String validatePhoneEmail = validateExistingPhoneEmail(profileDetailsMap);
-			if (validatePhoneEmail.equals(Constants.EMAIL_EXIST_ERROR) || validatePhoneEmail.equals(Constants.PHONE_NUMBER_EXIST_ERROR)) {
-				response.setResponseCode(HttpStatus.BAD_REQUEST);
-				response.getParams().setStatus(Constants.FAILED);
-				response.getParams().setErrmsg("Email Id or Phone Number Already Exists");
-				return response;
-			}
+            switch (validatePhoneEmail) {
+                case Constants.EMAIL_EXIST_ERROR:
+                case Constants.PHONE_NUMBER_EXIST_ERROR:
+                    response.setResponseCode(HttpStatus.BAD_REQUEST);
+                    response.getParams().setStatus(Constants.FAILED);
+                    response.getParams().setErrmsg("Email Id or Phone Number Already Exists");
+                    return response;
+                case Constants.PERSONAL_DETAILS_MISSING_ERROR:
+                    response.setResponseCode(HttpStatus.BAD_REQUEST);
+                    response.getParams().setStatus(Constants.FAILED);
+                    response.getParams().setErrmsg("Personal Details are missing.");
+                    return response;
+                case Constants.EMAIL_MISSING_ERROR:
+                    response.setResponseCode(HttpStatus.BAD_REQUEST);
+                    response.getParams().setStatus(Constants.FAILED);
+                    response.getParams().setErrmsg("Email Id is missing");
+                    return response;
+                case Constants.PHONE_MISSING_ERROR:
+                    response.setResponseCode(HttpStatus.BAD_REQUEST);
+                    response.getParams().setStatus(Constants.FAILED);
+                    response.getParams().setErrmsg("Phone Number is missing");
+                    return response;
+                default:
+                    break;
+            }
 			List<String> approvalFieldList = approvalFields();
 			String newDeptName = checkDepartment(profileDetailsMap);
 			Map<String, Object> transitionData = new HashMap<>();
@@ -2035,8 +2054,16 @@ public class ProfileServiceImpl implements ProfileService {
 	 *         Constants.PHONE_NUMBER_EXIST_ERROR if phone number already exists.
 	 */
 	private String validateExistingPhoneEmail(Map<String, Object> profileDetailsMap) {
+		if (!profileDetailsMap.containsKey(Constants.PERSONAL_DETAILS)) {
+			return Constants.PERSONAL_DETAILS_MISSING_ERROR; // Return error message if personal details are missing
+		}
 		// Extract personal details from the profileDetailsMap
 		Map<String, Object> personalDetails = (Map<String, Object>) profileDetailsMap.get(Constants.PERSONAL_DETAILS);
+		if (!personalDetails.containsKey(Constants.EMAIL)) {
+			return Constants.EMAIL_MISSING_ERROR; // Return error message if email is missing
+		} else if (!personalDetails.containsKey(Constants.PHONE)) {
+			return Constants.PHONE_MISSING_ERROR; // Return error message if email is missing
+		}
 		// Check if the provided email already exists in the system
 		if (userUtilityService.isUserExist(Constants.EMAIL, (String) personalDetails.get(Constants.EMAIL))) {
 			return Constants.EMAIL_EXIST_ERROR; // Return error message if email already exists
@@ -2047,6 +2074,7 @@ public class ProfileServiceImpl implements ProfileService {
 		}
 		return Constants.OK; // Return OK if neither email nor phone number exists
 	}
+
 }
 
 
