@@ -2414,6 +2414,7 @@ public class CbExtServerProperties {
 
 	public void setOperationReportFileName(String operationReportFileName) {
 		this.operationReportFileName = operationReportFileName;
+	}
 	public String getDigiLockerAPIKey() {
 		return digiLockerAPIKey;
 	}
