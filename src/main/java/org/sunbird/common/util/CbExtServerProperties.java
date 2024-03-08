@@ -678,6 +678,9 @@ public class CbExtServerProperties {
 	@Value("${secret.key.token.validation}")
 	private String secretKeyTokenValidation;
 
+	@Value("${digilocker-api-key}")
+	private String digiLockerAPIKey;
+
 	public boolean qListFromCacheEnabled() {
 		return qListFromCacheEnabled;
 	}
@@ -2390,5 +2393,13 @@ public class CbExtServerProperties {
 
 	public void setSecretKeyTokenValidation(String secretKeyTokenValidation) {
 		this.secretKeyTokenValidation = secretKeyTokenValidation;
+	}
+
+	public String getDigiLockerAPIKey() {
+		return digiLockerAPIKey;
+	}
+
+	public void setDigiLockerAPIKey(String digiLockerAPIKey) {
+		this.digiLockerAPIKey = digiLockerAPIKey;
 	}
 }

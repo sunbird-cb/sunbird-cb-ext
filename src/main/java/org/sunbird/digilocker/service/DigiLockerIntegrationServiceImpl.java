@@ -1,6 +1,8 @@
 package org.sunbird.digilocker.service;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import org.apache.batik.transcoder.TranscoderException;
 import org.apache.batik.transcoder.TranscoderInput;
 import org.apache.batik.transcoder.TranscoderOutput;
@@ -20,10 +22,15 @@ import org.sunbird.common.util.Constants;
 import org.sunbird.digilocker.model.*;
 import org.sunbird.user.service.UserUtilityService;
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -44,16 +51,33 @@ public class DigiLockerIntegrationServiceImpl implements DigiLockerIntegrationSe
     @Autowired
     CbExtServerProperties serverProperties;
 
+    @Autowired
+    ObjectMapper objectMapper;
     private Logger logger = LoggerFactory.getLogger(getClass().getName());
     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy");
     @Override
-    public PullURIResponse generateURIResponse(PullURIRequest request) {
+    public PullURIResponse generateURIResponse(String digiLockerHmac, String requestBody) {
         PullURIResponse response = new PullURIResponse();
         ResponseStatus responseStatus = response.getResponseStatus();
+        responseStatus.setTs(dateFormat.format(new Date()));
+        if (!validateRequest(digiLockerHmac, requestBody)) {
+            responseStatus.setStatus("0");
+            logger.error("Not able to validate the request for hmac: " + digiLockerHmac + " requestBody:" + requestBody);
+            return response;
+        }
+        PullURIRequest request = null;
+        try {
+            objectMapper = new XmlMapper();
+            objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+            request = objectMapper.readValue(requestBody, PullURIRequest.class);
+        } catch (IOException e) {
+            logger.error("Not able to process the request requestBody: " + requestBody, e);
+            responseStatus.setStatus("0");
+            return response;
+        }
         CertificateAddInfoDTO certificateAddInfoDTO = new CertificateAddInfoDTO();
         try {
-            responseStatus.setTs(dateFormat.format(new Date()));
             responseStatus.setTxn(request.getTxn());
             Map<String, Object> getUserInfo = userUtilityService.getUserDetails(Constants.PHONE, request.getDocDetails().getMobile());
             String certificateAccessCode = request.getDocDetails().getCertificateAccessCode();
@@ -167,9 +191,24 @@ public class DigiLockerIntegrationServiceImpl implements DigiLockerIntegrationSe
     }
 
     @Override
-    public PullDocResponse generateDocResponse(PullDocRequest request) {
+    public PullDocResponse generateDocResponse(String digiLockerHmac, String requestBody) {
         PullDocResponse response = new PullDocResponse();
         ResponseStatus responseStatus = response.getResponseStatus();
+        if (!validateRequest(digiLockerHmac, requestBody)) {
+            responseStatus.setStatus("0");
+            logger.error("Not able to validate the request for hmac: " + digiLockerHmac + " requestBody:" + requestBody);
+            return response;
+        }
+        PullDocRequest request = null;
+        try {
+            objectMapper = new XmlMapper();
+            objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+            request = objectMapper.readValue(requestBody, PullDocRequest.class);
+        } catch (IOException e) {
+            logger.error("Not able to process the request requestBody: " + requestBody, e);
+            responseStatus.setStatus("0");
+            return response;
+        }
         CertificateAddInfoDTO certificateAddInfoDTO = new CertificateAddInfoDTO();
         try {
             DocResponseDetails docDetails = response.getDocDetails();
@@ -313,8 +352,42 @@ public class DigiLockerIntegrationServiceImpl implements DigiLockerIntegrationSe
         return certificateInfo;
     }
 
-    public static byte[] convertObjectToJsonBytes(Object object) throws Exception {
-        ObjectMapper objectMapper = new ObjectMapper();
+    public byte[] convertObjectToJsonBytes(Object object) throws Exception {
         return objectMapper.writeValueAsBytes(object);
+    }
+
+    private boolean validateRequest(String digiLockerHmac, String request) {
+        logger.info("The digiLocker Hmac shared: " + digiLockerHmac);
+        String hmacRequestValue = calculateHMACSHA256(request, serverProperties.getDigiLockerAPIKey());
+        logger.info("The hmacRequestValue is: "+ hmacRequestValue);
+        if (hmacRequestValue.equals(digiLockerHmac)) {
+            return true;
+        }
+        return false;
+    }
+
+    private String calculateHMACSHA256(String requestBody, String apiKey) {
+        try {
+            logger.info("The API key is: " + apiKey);
+            Mac sha256Hmac = Mac.getInstance("HmacSHA256");
+            SecretKeySpec secretKey = new SecretKeySpec(apiKey.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
+            sha256Hmac.init(secretKey);
+            byte[] hmacBytes = sha256Hmac.doFinal(requestBody.getBytes());
+
+            // Convert bytes to hexadecimal string
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : hmacBytes) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) hexString.append('0');
+                hexString.append(hex);
+            }
+            byte[] base64EncodedHmacBytes = Base64.getEncoder().encode(hexString.toString().getBytes(StandardCharsets.UTF_8));
+            return new String(base64EncodedHmacBytes);
+        } catch (NoSuchAlgorithmException ex) {
+            logger.error("Not able to convert SHA256: ", ex);
+        } catch (InvalidKeyException e) {
+            logger.error("Invalid Key for converting: ", e);
+        }
+        return "";
     }
 }
