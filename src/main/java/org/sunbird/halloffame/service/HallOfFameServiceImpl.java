@@ -81,7 +81,7 @@ public class HallOfFameServiceImpl implements HallOfFameService {
             List<Integer> ranksFilter = Arrays.asList(1, 2, 3, res - 1, res, res + 1);
             Map<String, Object> propMap = new HashMap<>();
             propMap.put(Constants.DB_COLUMN_ROW_NUM, ranksFilter);
-            propMap.put(Constants.ORG_ID, rootOrgId);
+            propMap.put(Constants.ORGID, rootOrgId);
 
             List<Map<String, Object>> result = cassandraOperation.getRecordsByProperties(
                     Constants.SUNBIRD_KEY_SPACE_NAME,
