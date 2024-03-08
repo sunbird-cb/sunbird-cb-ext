@@ -1004,6 +1004,8 @@ public class Constants {
 	public static final String TABLE_LEARNER_LEADER_BOARD_LOOK_UP="learner_leaderboard_lookup";
 	public static final String TABLE_LEARNER_LEADER_BOARD="learner_leaderboard";
 	public static final String DB_COLUMN_ROW_NUM ="row_num";
+	public static final String X_DIGILOCKER_HMAC = "x-digilocker-hmac";
+
   private Constants() {
 		throw new IllegalStateException("Utility class");
 	}
