@@ -1004,7 +1004,10 @@ public class Constants {
 	public static final String TABLE_LEARNER_LEADER_BOARD_LOOK_UP="learner_leaderboard_lookup";
 	public static final String TABLE_LEARNER_LEADER_BOARD="learner_leaderboard";
 	public static final String DB_COLUMN_ROW_NUM ="row_num";
+	public static final String GET_FILE_INFO_OPERATIONAL_REPORTS ="api.getfileinfo.report";
 	public static final String X_DIGILOCKER_HMAC = "x-digilocker-hmac";
+	public static final String LAST_MODIFIED="lastModified";
+	public static final String FILE_METADATA="fileMetaData";
 
   private Constants() {
 		throw new IllegalStateException("Utility class");

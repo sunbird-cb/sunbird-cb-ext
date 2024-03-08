@@ -39,4 +39,10 @@ public class OperationalReportController {
             @PathVariable String fileName) throws IOException {
         return operationalReport.downloadFile(reportType, date,orgId,fileName);
     }
+
+    @GetMapping("/v1/reportInfo")
+    public SBApiResponse getFileInfo(
+            @RequestHeader(Constants.X_AUTH_TOKEN) String authToken)  {
+        return operationalReport.getFileInfo(authToken);
+    }
 }

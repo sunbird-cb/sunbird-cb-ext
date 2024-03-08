@@ -18,6 +18,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.sunbird.cassandra.utils.CassandraOperation;
 import org.sunbird.cloud.storage.BaseStorageService;
+import org.sunbird.cloud.storage.Model;
 import org.sunbird.cloud.storage.factory.StorageConfig;
 import org.sunbird.cloud.storage.factory.StorageServiceFactory;
 import org.sunbird.common.model.SBApiResponse;
@@ -29,6 +30,7 @@ import org.sunbird.common.util.Constants;
 import org.sunbird.common.util.ProjectUtil;
 import org.sunbird.core.config.PropertiesConfig;
 import org.sunbird.operationalreports.exception.ZipProcessingException;
+import org.sunbird.user.service.UserUtilityService;
 import scala.Option;
 
 import javax.annotation.PostConstruct;
@@ -72,6 +74,9 @@ public class OperationalReportServiceImpl implements OperationalReportService {
 
     @Autowired
     private CbExtServerProperties serverConfig;
+
+    @Autowired
+    private UserUtilityService userUtilityService;
 
     private BaseStorageService storageService = null;
 
@@ -367,6 +372,40 @@ public class OperationalReportServiceImpl implements OperationalReportService {
         return reportExpiryDateMillis;
     }
 
+
+    public SBApiResponse getFileInfo(String authToken) {
+        SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.GET_FILE_INFO_OPERATIONAL_REPORTS);
+        try {
+            logger.info("Inside the getFileInfo()");
+            String userId = accessTokenValidator.fetchUserIdFromAccessToken(authToken);
+            if (null == userId) {
+                response.setResponseCode(HttpStatus.BAD_REQUEST);
+                response.getParams().setStatus(Constants.FAILED);
+                response.getParams().setErrmsg("User Id does not exist");
+                return response;
+            }
+            Map<String, Map<String, String>> userInfoMap = new HashMap<>();
+            userUtilityService.getUserDetailsFromDB(
+                    Collections.singletonList(userId), Arrays.asList(Constants.ROOT_ORG_ID, Constants.USER_ID), userInfoMap);
+            Map<String, String> userDetailsMap = userInfoMap.get(userId);
+            String rootOrg = userDetailsMap.get(Constants.ROOT_ORG_ID);
+            String objectKey = serverProperties.getOperationalReportFolderName() + "/" + rootOrg + "/" + serverProperties.getOperationReportFileName();
+            logger.info("Object key for the operational Reports : " + objectKey);
+            Model.Blob blob = storageService.getObject(serverProperties.getOperationalReportFolderName(), objectKey, Option.apply(Boolean.FALSE));
+            if (blob != null) {
+                logger.info("File details" + blob.lastModified());
+                logger.info("File details" + blob.metadata());
+                response.put(Constants.LAST_MODIFIED, blob.lastModified());
+                response.put(Constants.FILE_METADATA, blob.metadata());
+            }
+        } catch (Exception e) {
+            response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+            response.getParams().setStatus(Constants.FAILED);
+            response.getParams().setErrmsg("Unable to process the request with the provided authToken");
+            return response;
+        }
+        return response;
+    }
 }
 
 
