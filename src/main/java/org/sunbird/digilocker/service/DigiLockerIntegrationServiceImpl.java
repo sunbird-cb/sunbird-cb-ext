@@ -357,9 +357,9 @@ public class DigiLockerIntegrationServiceImpl implements DigiLockerIntegrationSe
     }
 
     private boolean validateRequest(String digiLockerHmac, String request) {
-        logger.info("The digiLocker Hmac shared: " + digiLockerHmac);
+        logger.debug("The digiLocker Hmac shared: " + digiLockerHmac);
         String hmacRequestValue = calculateHMACSHA256(request, serverProperties.getDigiLockerAPIKey());
-        logger.info("The hmacRequestValue is: "+ hmacRequestValue);
+        logger.debug("The hmacRequestValue is: "+ hmacRequestValue);
         if (hmacRequestValue.equals(digiLockerHmac)) {
             return true;
         }
@@ -368,7 +368,7 @@ public class DigiLockerIntegrationServiceImpl implements DigiLockerIntegrationSe
 
     private String calculateHMACSHA256(String requestBody, String apiKey) {
         try {
-            logger.info("The API key is: " + apiKey);
+            logger.debug("The API key is: " + apiKey);
             Mac sha256Hmac = Mac.getInstance("HmacSHA256");
             SecretKeySpec secretKey = new SecretKeySpec(apiKey.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
             sha256Hmac.init(secretKey);
