@@ -391,7 +391,7 @@ public class OperationalReportServiceImpl implements OperationalReportService {
             String rootOrg = userDetailsMap.get(Constants.ROOT_ORG_ID);
             String objectKey = serverProperties.getOperationalReportFolderName() + "/" + rootOrg + "/" + serverProperties.getOperationReportFileName();
             logger.info("Object key for the operational Reports : " + objectKey);
-            Model.Blob blob = storageService.getObject(serverProperties.getOperationalReportFolderName(), objectKey, Option.apply(Boolean.FALSE));
+            Model.Blob blob = storageService.getObject(serverProperties.getReportDownloadContainerName(), objectKey, Option.apply(Boolean.FALSE));
             if (blob != null) {
                 logger.info("File details" + blob.lastModified());
                 logger.info("File details" + blob.metadata());
