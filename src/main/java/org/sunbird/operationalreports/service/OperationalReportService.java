@@ -14,7 +14,7 @@ import java.io.IOException;
 public interface OperationalReportService {
     public SBApiResponse grantReportAccessToMDOAdmin(SunbirdApiRequest request, String userOrgId, String authToken);
 
-    public ResponseEntity<InputStreamResource> downloadFile(String reportType, String date, String orgId, String fileName) throws IOException;
+    public ResponseEntity<InputStreamResource> downloadFile(String authToken);
 
     SBApiResponse getFileInfo(String authToken);
 }

@@ -31,13 +31,10 @@ public class OperationalReportController {
         return new ResponseEntity<>(response, response.getResponseCode());
     }
 
-    @GetMapping("/download/{reportType}/{date}/{orgId}/{fileName}")
+    @GetMapping("/download")
     public ResponseEntity<InputStreamResource> downloadFile(
-            @PathVariable String reportType,
-            @PathVariable String date,
-            @PathVariable String orgId,
-            @PathVariable String fileName) throws IOException {
-        return operationalReport.downloadFile(reportType, date,orgId,fileName);
+            @RequestHeader(Constants.X_AUTH_TOKEN) String authToken)  {
+        return operationalReport.downloadFile(authToken);
     }
 
     @GetMapping("/v1/reportInfo")
