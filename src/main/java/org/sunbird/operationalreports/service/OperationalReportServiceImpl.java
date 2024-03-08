@@ -374,25 +374,34 @@ public class OperationalReportServiceImpl implements OperationalReportService {
 
 
     public SBApiResponse getFileInfo(String authToken) {
-        logger.info("Inside the getFileInfo()");
-        String userId = accessTokenValidator.fetchUserIdFromAccessToken(authToken);
-        if (null == userId) {
-            throw new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "UserId Couldn't fetch from auth token");
-        }
-        Map<String, Map<String, String>> userInfoMap = new HashMap<>();
-        userUtilityService.getUserDetailsFromDB(
-                Collections.singletonList(userId), Arrays.asList("rootOrgId", "userId"), userInfoMap);
-        Map<String, String> userDetailsMap = userInfoMap.get(userId);
-        String rootOrg = userDetailsMap.get("rootOrgId");
         SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.GET_FILE_INFO_OPERATIONAL_REPORTS);
-        String objectKey = serverProperties.getOperationalReportFolderName() + "/" + rootOrg + "/" + serverProperties.getOperationReportFileName();
-        logger.info("Object key for the operational Reports : " + objectKey);
-        Model.Blob blob = storageService.getObject(serverProperties.getOperationalReportFolderName(), objectKey, Option.apply(Boolean.FALSE));
-        if (blob != null) {
-            logger.info("File details" + blob.lastModified());
-            logger.info("File details" + blob.metadata());
-            response.put("lastModified", blob.lastModified());
-            response.put("fileMetaData", blob.metadata());
+        try {
+            logger.info("Inside the getFileInfo()");
+            String userId = accessTokenValidator.fetchUserIdFromAccessToken(authToken);
+            if (null == userId) {
+                response.setResponseCode(HttpStatus.BAD_REQUEST);
+                response.getParams().setStatus(Constants.FAILED);
+                response.getParams().setErrmsg("User Id does not exist");
+            }
+            Map<String, Map<String, String>> userInfoMap = new HashMap<>();
+            userUtilityService.getUserDetailsFromDB(
+                    Collections.singletonList(userId), Arrays.asList("rootOrgId", "userId"), userInfoMap);
+            Map<String, String> userDetailsMap = userInfoMap.get(userId);
+            String rootOrg = userDetailsMap.get("rootOrgId");
+            String objectKey = serverProperties.getOperationalReportFolderName() + "/" + rootOrg + "/" + serverProperties.getOperationReportFileName();
+            logger.info("Object key for the operational Reports : " + objectKey);
+            Model.Blob blob = storageService.getObject(serverProperties.getOperationalReportFolderName(), objectKey, Option.apply(Boolean.FALSE));
+            if (blob != null) {
+                logger.info("File details" + blob.lastModified());
+                logger.info("File details" + blob.metadata());
+                response.put("lastModified", blob.lastModified());
+                response.put("fileMetaData", blob.metadata());
+            }
+        } catch (Exception e) {
+            response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+            response.getParams().setStatus(Constants.FAILED);
+            response.getParams().setErrmsg("Unable to process the request with the provided authToken");
+            return response;
         }
         return response;
     }
