@@ -4,6 +4,7 @@ package org.sunbird.operationalreports.service;
 import net.lingala.zip4j.ZipFile;
 import net.lingala.zip4j.model.ZipParameters;
 import net.lingala.zip4j.model.enums.EncryptionMethod;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.HttpServerErrorException;
 import org.sunbird.cassandra.utils.CassandraOperation;
 import org.sunbird.cloud.storage.BaseStorageService;
 import org.sunbird.cloud.storage.factory.StorageConfig;
@@ -43,7 +43,6 @@ import java.text.ParseException;
 import java.util.*;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
 import java.util.stream.Stream;
 
 /**
@@ -84,24 +83,33 @@ public class OperationalReportServiceImpl implements OperationalReportService {
     @Override
     public SBApiResponse grantReportAccessToMDOAdmin(SunbirdApiRequest request, String userOrgId, String authToken) {
         SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.GRANT_REPORT_ACCESS_API);
-        while (true) {
-            try {
+           try {
+               String mdoLeaderUserId = accessTokenValidator.fetchUserIdFromAccessToken(authToken);
+               if (StringUtils.isBlank(mdoLeaderUserId)) {
+                    response.setResponseCode(HttpStatus.BAD_REQUEST);
+                    response.getParams().setStatus(Constants.FAILED);
+                    response.getParams().setErrmsg("Invalid UserId in the request");
+                    return response;
+                }
                 Map<String, Object> mdoAdminDetails = (Map<String, Object>) request.getRequest();
                 String mdoAdminUserId = (String) mdoAdminDetails.get(Constants.USER_ID);
                 String reportExpiryDateRequest = (String) mdoAdminDetails.get(Constants.REPORT_EXPIRY_DATE);
                 Map<String, String> headersValue = new HashMap<>();
                 headersValue.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
-                String mdoLeaderUserId = accessTokenValidator.fetchUserIdFromAccessToken(authToken);
-                if (null == mdoLeaderUserId) {
-                    throw new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "UserId Couldn't fetch from auth token");
-                }
+                Map<String, Map<String, String>> userInfoMap = new HashMap<>();
+                userUtilityService.getUserDetailsFromDB(
+                       Arrays.asList(mdoLeaderUserId, mdoAdminUserId), Arrays.asList("rootOrgId","userId"),userInfoMap );
                 logger.info("MDO Leader User ID : {}", mdoLeaderUserId);
-                StringBuilder url = new StringBuilder(configuration.getLmsServiceHost()).append(configuration.getLmsUserSearchEndPoint());//call sunbird user table =>rootorg set against the incoming rqst body.
-                Map<String, Object> userSearchRequest = getSearchObject(Arrays.asList(mdoLeaderUserId, mdoAdminUserId));
-                Map<String, Object> searchProfileApiResp = outboundReqService.fetchResultUsingPost(url.toString(), userSearchRequest, headersValue);
+                String mdoLeaderOrgId = userInfoMap.get(mdoLeaderUserId).get("rootOrgId");
+                String mdoAdminOrgId = userInfoMap.get(mdoAdminUserId).get("rootOrgId");
+                if(!mdoLeaderOrgId.equalsIgnoreCase(mdoAdminOrgId)) {
+                        response.setResponseCode(HttpStatus.BAD_REQUEST);
+                        response.getParams().setStatus(Constants.FAILED);
+                        response.getParams().setErrmsg("Invalid UserId in the request");
+                        return response;
+                }
+                Map<String, Object> searchProfileApiResp = new HashMap<>();
                 if (searchProfileApiResp != null) {
-                    String mdoUserOrgId = (String) searchProfileApiResp.get(Constants.ROOT_ORG_ID);
-                    logger.info("User Org ID : {}", mdoUserOrgId);
                     Map<String, Object> map = (Map<String, Object>) searchProfileApiResp.get(Constants.RESULT);
                     Map<String, Object> userSearchResponse = (Map<String, Object>) map.get(Constants.RESPONSE);
                     List<Map<String, Object>> contents = (List<Map<String, Object>>) userSearchResponse.get(Constants.CONTENT);
@@ -117,7 +125,7 @@ public class OperationalReportServiceImpl implements OperationalReportService {
                         logger.error("Failed to grant access due to different org.");
                         throw new HttpClientErrorException(HttpStatus.BAD_REQUEST, "Failed to grant access due to different org.");
                     }
-                    Map<String, Object> mdoAdminData = userUtilityService.getUsersReadData(mdoLeaderUserId, null, null);
+                    Map<String, Object> mdoAdminData = userUtilityService.getUsersReadData(mdoAdminUserId, null, null);
                     List<String> mdoAdminRoles = (List<String>) mdoAdminData.get(Constants.ROLES);
                     if (!mdoAdminRoles.contains(Constants.MDO_ADMIN)) {
                         throw new HttpClientErrorException(HttpStatus.BAD_REQUEST, "The Grantee doesn't have MDO_ADMIN role");
@@ -128,10 +136,10 @@ public class OperationalReportServiceImpl implements OperationalReportService {
                         if (expiryDate.compareTo(parseDateFromString(reportExpiryDateRequest)) == 0) {
                             throw new HttpClientErrorException(HttpStatus.BAD_REQUEST, "The Grantee already has MDO_REPORT_ACCESSOR role till : " + reportExpiryDateRequest);
                         }
-                        this.updateReportAccessExpiry(mdoAdminUserId, rootOrgId, reportExpiryDateRequest);
+                        this.upsertReportAccessExpiry(mdoAdminUserId, rootOrgId, reportExpiryDateRequest);
                         response.getResult().put(Constants.STATUS, Constants.SUCCESS);
                         response.getResult().put(Constants.MESSAGE, "Report access has been granted successfully");
-                        break;
+                        return response;
                     }
                     mdoAdminRoles.add(Constants.MDO_REPORT_ACCESSOR);
                     Map<String, Object> assignRoleReq = new HashMap<>();
@@ -152,21 +160,21 @@ public class OperationalReportServiceImpl implements OperationalReportService {
                     response.getResult().put(Constants.STATUS, Constants.SUCCESS);
                     response.getResult().put(Constants.MESSAGE, "Report access has been granted successfully");
                 }
-                break;
+
             } catch (HttpClientErrorException e) {
                 logger.error("An exception occurred {}", e.getMessage(), e);
                 response.getParams().setStatus(Constants.FAILED);
                 response.getParams().setErrmsg(e.getMessage());
                 response.setResponseCode(HttpStatus.BAD_REQUEST);
-                break;
+
             } catch (ParseException | RuntimeException e) {
                 logger.error("An exception occurred {}", e.getMessage(), e);
                 response.getParams().setStatus(Constants.FAILED);
                 response.getParams().setErrmsg(e.getMessage());
                 response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
-                break;
+
             }
-        }
+
         return response;
     }
 
@@ -400,7 +408,7 @@ public class OperationalReportServiceImpl implements OperationalReportService {
                 Constants.REPORT_ACCESS_EXPIRY_TABLE, primaryKeyMap, Arrays.asList(Constants.USER_REPORT_EXPIRY_DATE, Constants.USER_ID), Constants.USER_ID);
     }
 
-    private void updateReportAccessExpiry(String mdoAdminUserId, String rootOrgId, String reportExpiryDate) throws ParseException {
+    private void upsertReportAccessExpiry(String mdoAdminUserId, String rootOrgId, String reportExpiryDate) throws ParseException {
         Map<String, Object> primaryKeyMap = new HashMap<>();
         primaryKeyMap.put(Constants.USER_ID_LOWER, mdoAdminUserId);
         primaryKeyMap.put(Constants.USER_ORG_ID, rootOrgId);
