@@ -678,6 +678,12 @@ public class CbExtServerProperties {
 	@Value("${secret.key.token.validation}")
 	private String secretKeyTokenValidation;
 
+	@Value("${operational.report.folder.name}")
+	private String operationalReportFolderName;
+
+	@Value("${operational.report.file.name}")
+	private String operationReportFileName;
+
 	public boolean qListFromCacheEnabled() {
 		return qListFromCacheEnabled;
 	}
@@ -2390,5 +2396,21 @@ public class CbExtServerProperties {
 
 	public void setSecretKeyTokenValidation(String secretKeyTokenValidation) {
 		this.secretKeyTokenValidation = secretKeyTokenValidation;
+	}
+
+	public String getOperationalReportFolderName() {
+		return operationalReportFolderName;
+	}
+
+	public void setOperationalReportFolderName(String operationalReportFolderName) {
+		this.operationalReportFolderName = operationalReportFolderName;
+	}
+
+	public String getOperationReportFileName() {
+		return operationReportFileName;
+	}
+
+	public void setOperationReportFileName(String operationReportFileName) {
+		this.operationReportFileName = operationReportFileName;
 	}
 }

@@ -18,6 +18,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.sunbird.cassandra.utils.CassandraOperation;
 import org.sunbird.cloud.storage.BaseStorageService;
+import org.sunbird.cloud.storage.Model;
 import org.sunbird.cloud.storage.factory.StorageConfig;
 import org.sunbird.cloud.storage.factory.StorageServiceFactory;
 import org.sunbird.common.model.SBApiResponse;
@@ -29,6 +30,7 @@ import org.sunbird.common.util.Constants;
 import org.sunbird.common.util.ProjectUtil;
 import org.sunbird.core.config.PropertiesConfig;
 import org.sunbird.operationalreports.exception.ZipProcessingException;
+import org.sunbird.user.service.UserUtilityService;
 import scala.Option;
 
 import javax.annotation.PostConstruct;
@@ -72,6 +74,9 @@ public class OperationalReportServiceImpl implements OperationalReportService {
 
     @Autowired
     private CbExtServerProperties serverConfig;
+
+    @Autowired
+    private UserUtilityService userUtilityService;
 
     private BaseStorageService storageService = null;
 
@@ -367,6 +372,30 @@ public class OperationalReportServiceImpl implements OperationalReportService {
         return reportExpiryDateMillis;
     }
 
+
+    public SBApiResponse getFileInfo(String authToken) {
+        logger.info("Inside the getFileInfo()");
+        String userId = accessTokenValidator.fetchUserIdFromAccessToken(authToken);
+        if (null == userId) {
+            throw new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "UserId Couldn't fetch from auth token");
+        }
+        Map<String, Map<String, String>> userInfoMap = new HashMap<>();
+        userUtilityService.getUserDetailsFromDB(
+                Collections.singletonList(userId), Arrays.asList("rootOrgId", "userId"), userInfoMap);
+        Map<String, String> userDetailsMap = userInfoMap.get(userId);
+        String rootOrg = userDetailsMap.get("rootOrgId");
+        SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.GET_FILE_INFO_OPERATIONAL_REPORTS);
+        String objectKey = serverProperties.getOperationalReportFolderName() + "/" + rootOrg + "/" + serverProperties.getOperationReportFileName();
+        logger.info("Object key for the operational Reports : " + objectKey);
+        Model.Blob blob = storageService.getObject(serverProperties.getOperationalReportFolderName(), objectKey, Option.apply(Boolean.FALSE));
+        if (blob != null) {
+            logger.info("File details" + blob.lastModified());
+            logger.info("File details" + blob.metadata());
+            response.put("lastModified", blob.lastModified());
+            response.put("fileMetaData", blob.metadata());
+        }
+        return response;
+    }
 }
 
 
