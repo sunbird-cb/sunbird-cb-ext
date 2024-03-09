@@ -992,7 +992,7 @@ public class Constants {
   public static final String PASSWORD = "password";
 	public static final String STRING_FORMAT_UNZIP="%s/%s/%s/%s";
 	public static final String UNZIP_PATH="/unzippath";
-	public static final String OUTPUT_PATH="/output";
+	public static final String OUTPUT_PATH="output";
 	public static final String MDO_REPORT_ACCESSOR = "MDO_REPORT_ACCESSOR";
 	public static final String GRANT_REPORT_ACCESS_API ="api.grant.access.report";
 	public static final String MDO_ADMIN_ROLE = "mdoadmin";

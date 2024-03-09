@@ -168,42 +168,40 @@ public class OperationalReportServiceImpl implements OperationalReportService {
     }
 
 
-    /**
-     * Downloads a file from storage, processes it, and prepares it for download.
-     *
-     * @param reportType The type of report.
-     * @param date       The date of the report.
-     * @param orgId      The organization ID.
-     * @param fileName   The name of the file to be downloaded.
-     * @return A ResponseEntity containing the file for download.
-     * @throws IOException If an I/O error occurs.
-     */
     @Override
-    public ResponseEntity<InputStreamResource> downloadFile(String reportType, String date, String orgId, String fileName) throws IOException {
+    public ResponseEntity<InputStreamResource> downloadFile(String authToken) {
         HttpHeaders headers = new HttpHeaders();
         try {
-            // Construct the object key for downloading from storage
-            String objectKey = serverProperties.getReportDownloadFolderName() + "/" + reportType + "/" + date + "/" + orgId + "/" + fileName;
+            String userId = accessTokenValidator.fetchUserIdFromAccessToken(authToken);
+            if (null == userId) {
+                ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User Id does not exist");
+            }
+            Map<String, Map<String, String>> userInfoMap = new HashMap<>();
+            userUtilityService.getUserDetailsFromDB(
+                    Collections.singletonList(userId), Arrays.asList(Constants.ROOT_ORG_ID, Constants.USER_ID), userInfoMap);
+            Map<String, String> userDetailsMap = userInfoMap.get(userId);
+            String rootOrg = userDetailsMap.get(Constants.ROOT_ORG_ID);
+            String objectKey = serverProperties.getOperationalReportFolderName() + "/" + rootOrg + "/" + serverProperties.getOperationReportFileName();
             // Download the file from storage
             storageService.download(serverProperties.getReportDownloadContainerName(), objectKey, Constants.LOCAL_BASE_PATH, Option.apply(Boolean.FALSE));
             // Set the file path
-            Path filePath = Paths.get(String.format("%s/%s", Constants.LOCAL_BASE_PATH, fileName));
+            Path filePath = Paths.get(Constants.LOCAL_BASE_PATH+serverProperties.getOperationReportFileName());
             // Set headers for the response
-            headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"");
+            headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + serverProperties.getOperationReportFileName() + "\"");
             headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
             // Prepare password for encryption
             int passwordLength = serverProperties.getZipFilePasswordLength();
             String password = generateAlphanumericPassword(passwordLength);
             headers.add(Constants.PASSWORD, password);
             // Unzip the downloaded file
-            String sourceFolderPath = String.format(Constants.STRING_FORMAT_UNZIP, Constants.LOCAL_BASE_PATH, reportType, date, orgId + Constants.OUTPUT_PATH + UUID.randomUUID());
+            String sourceFolderPath = String.format("%s/%s/%s/%s", Constants.LOCAL_BASE_PATH, rootOrg, Constants.OUTPUT_PATH, UUID.randomUUID());
             String destinationFolderPath = sourceFolderPath + Constants.UNZIP_PATH;
             String zipFilePath = String.valueOf(filePath);
             unlockZipFolder(zipFilePath, destinationFolderPath, serverProperties.getUnZipFilePassword());
             // Encrypt the unzipped files and create a new zip file
-            createZipFolder(sourceFolderPath, fileName, password);
+            createZipFolder(sourceFolderPath, serverProperties.getOperationReportFileName(), password);
             // Prepare InputStreamResource for the file to be downloaded
-            InputStreamResource inputStreamResource = new InputStreamResource(Files.newInputStream(Paths.get(sourceFolderPath + "/" + fileName)));
+            InputStreamResource inputStreamResource = new InputStreamResource(Files.newInputStream(Paths.get(sourceFolderPath + "/" + serverProperties.getOperationReportFileName())));
             // Clean up temporary files
             removeDirectory(sourceFolderPath);
             // Return ResponseEntity with the file for download
@@ -212,7 +210,7 @@ public class OperationalReportServiceImpl implements OperationalReportService {
                     .contentLength(Files.size(filePath))
                     .body(inputStreamResource);
         } catch (Exception e) {
-            logger.error("Failed to read the downloaded file: " + fileName + ", Exception: ", e);
+            logger.error("Failed to read the downloaded file: " + serverProperties.getOperationReportFileName() + ", Exception: ", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
