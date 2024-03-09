@@ -997,7 +997,7 @@ public class Constants {
 	public static final String GRANT_REPORT_ACCESS_API ="api.grant.access.report";
 	public static final String MDO_ADMIN_ROLE = "mdoadmin";
 	public static final String MDO_ADMIN = "MDO_ADMIN";
-	public static final String REPORT_ACCESS_EXPIRY_TABLE = "report_access_expiry";
+	public static final String REPORT_ACCESS_EXPIRY_TABLE = "user_report_expiry";
 	public static final String REPORT_EXPIRY_DATE  = "reportExpiryDate";
 	public static final String ERROR  = "error";
 	public static final String CONTEXT_TOKEN  = "contextToken";
