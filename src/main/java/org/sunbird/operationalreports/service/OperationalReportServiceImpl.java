@@ -410,9 +410,10 @@ public class OperationalReportServiceImpl implements OperationalReportService {
                 response.put(Constants.FILE_METADATA, blob.metadata());
             }
         } catch (Exception e) {
+            logger.error("Failed to get the report file information. Exception: ", e);
             response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
             response.getParams().setStatus(Constants.FAILED);
-            response.getParams().setErrmsg("Unable to process the request with the provided authToken");
+            response.getParams().setErrmsg("Failed to get the report file information");
             return response;
         }
         return response;
