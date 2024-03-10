@@ -41,6 +41,19 @@ public class HallOfFameServiceImpl implements HallOfFameService {
 
         List<Map<String, Object>> dptList = cassandraOperation.getRecordsByPropertiesWithoutFiltering(
                 Constants.KEYSPACE_SUNBIRD, Constants.MDO_KARMA_POINTS, propertymap, null);
+        if(dptList.isEmpty()){
+            int previousToLastMonth = currentDate.minusMonths(2).getMonthValue();
+            int previousToLastMonthsYearValue = currentDate.minusMonths(2).getYear();
+            String formattedDatePreviousLastMonth = currentDate.minusMonths(2).format(DateTimeFormatter.ofPattern("MMMM yyyy"));
+            Map<String, Object> propertyMap = new HashMap<>();
+            propertyMap.put(Constants.MONTH, previousToLastMonth);
+            propertyMap.put(Constants.YEAR, previousToLastMonthsYearValue);
+            List<Map<String, Object>> departmentList = cassandraOperation.getRecordsByPropertiesWithoutFiltering(
+                    Constants.KEYSPACE_SUNBIRD, Constants.MDO_KARMA_POINTS, propertyMap, null);
+            resultMap.put(Constants.MDO_LIST, departmentList);
+            resultMap.put(Constants.TITLE, formattedDatePreviousLastMonth);
+            return resultMap;
+        }
         resultMap.put(Constants.MDO_LIST, dptList);
         resultMap.put(Constants.TITLE, formattedDateLastMonth);
         return resultMap;
