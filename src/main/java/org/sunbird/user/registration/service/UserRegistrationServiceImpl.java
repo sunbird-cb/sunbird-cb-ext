@@ -49,36 +49,49 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Service
 public class UserRegistrationServiceImpl implements UserRegistrationService {
 
-	private Logger logger = LoggerFactory.getLogger(UserRegistrationServiceImpl.class);
+	private  final Logger logger = LoggerFactory.getLogger(UserRegistrationServiceImpl.class);
 
 	ObjectMapper mapper = new ObjectMapper();
 
-	@Autowired
+
 	CbExtServerProperties serverProperties;
 
-	@Autowired
+
 	IndexerService indexerService;
 
-	@Autowired
+
 	Producer kafkaProducer;
 
-	@Autowired
+
 	OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
 
-	@Autowired
+
 	RestTemplate restTemplate;
 
-	@Autowired
+
 	UserUtilityService userUtilityService;
 
-	@Autowired
+
 	RedisCacheMgr redisCacheMgr;
 
-	@Autowired
+
 	ExtendedOrgService extOrgService;
 
-	@Autowired
+
 	CassandraOperation cassandraOperation;
+
+	@Autowired
+	public UserRegistrationServiceImpl(CbExtServerProperties serverProperties, IndexerService indexerService, Producer kafkaProducer, OutboundRequestHandlerServiceImpl outboundRequestHandlerService, RestTemplate restTemplate, UserUtilityService userUtilityService, RedisCacheMgr redisCacheMgr, ExtendedOrgService extOrgService, CassandraOperation cassandraOperation) {
+		this.serverProperties = serverProperties;
+		this.indexerService = indexerService;
+		this.kafkaProducer = kafkaProducer;
+		this.outboundRequestHandlerService = outboundRequestHandlerService;
+		this.restTemplate = restTemplate;
+		this.userUtilityService = userUtilityService;
+		this.redisCacheMgr = redisCacheMgr;
+		this.extOrgService = extOrgService;
+		this.cassandraOperation = cassandraOperation;
+	}
 
 	@Override
 	public SBApiResponse registerUser(UserRegistrationInfo userRegInfo) {
@@ -494,20 +507,14 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 			Map<String, Object> sortByMap = new HashMap<>();
 			sortByMap.put(Constants.CHANNEL, Constants.ASC_ORDER);
 			requestMap.put(Constants.SORT_BY, sortByMap);
-			requestMap.put(Constants.FILTERS, new HashMap<String, Object>() {
-				{
-					put(Constants.IS_TENANT, Boolean.TRUE);
-				}
-			});
-
+			Map<String, Object> filtersMap = new HashMap<>();
+			filtersMap.put(Constants.IS_TENANT, Boolean.TRUE);
+			requestMap.put(Constants.FILTERS, filtersMap);
 			String serviceURL = serverProperties.getSbUrl() + serverProperties.getSbOrgSearchPath();
+			Map<String, Object> requestBody = new HashMap<>();
+			requestBody.put(Constants.REQUEST, requestMap);
 			SunbirdApiResp orgResponse = mapper.convertValue(
-					outboundRequestHandlerService.fetchResultUsingPost(serviceURL, new HashMap<String, Object>() {
-						{
-							put(Constants.REQUEST, requestMap);
-						}
-					}), SunbirdApiResp.class);
-
+					outboundRequestHandlerService.fetchResultUsingPost(serviceURL, requestBody), SunbirdApiResp.class);
 			SunbirdApiResultResponse resultResp = orgResponse.getResult().getResponse();
 			count = resultResp.getCount();
 			iterateCount = iterateCount + resultResp.getContent().size();

@@ -15,8 +15,12 @@ import java.util.Map;
 
 @RestController
 public class KarmaPointsController {
+
+    private  final KarmaPointsService karmaPointsService;
     @Autowired
-    private KarmaPointsService karmaPointsService;
+    public KarmaPointsController(KarmaPointsService karmaPointsService) {
+        this.karmaPointsService = karmaPointsService;
+    }
 
     @PostMapping("/v1/karmapoints/read")
     public ResponseEntity<Map<String, Object>> fetchKarmaPointsData(@RequestBody KarmaPointsRequest request,

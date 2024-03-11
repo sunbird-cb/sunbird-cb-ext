@@ -18,8 +18,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 @RestController
 @RequestMapping("/masterData/v2")
 public class MasterDataControllerV2 {
+
+    private  final MasterDataServiceImpl masterDataService;
     @Autowired
-    private MasterDataServiceImpl masterDataService;
+    public MasterDataControllerV2(MasterDataServiceImpl masterDataService) {
+        this.masterDataService = masterDataService;
+    }
 
     @GetMapping("/deptPosition")
     public ResponseEntity<SBApiResponse> getDeptPositionsList(@RequestHeader(Constants.X_AUTH_USER_ORG_ID) String userOrgId) {

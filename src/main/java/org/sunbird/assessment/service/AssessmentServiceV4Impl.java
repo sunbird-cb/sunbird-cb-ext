@@ -34,26 +34,36 @@ import com.google.gson.reflect.TypeToken;
 public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
 
     private final Logger logger = LoggerFactory.getLogger(AssessmentServiceV4Impl.class);
-    @Autowired
+
     CbExtServerProperties serverProperties;
 
-    @Autowired
+
     Producer kafkaProducer;
 
-    @Autowired
+
     OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
 
-    @Autowired
+
     AssessmentUtilServiceV2 assessUtilServ;
 
-    @Autowired
+
     ObjectMapper mapper;
 
-    @Autowired
+
     AssessmentRepository assessmentRepository;
 
-    @Autowired
+
     AccessTokenValidator accessTokenValidator;
+    @Autowired
+    public AssessmentServiceV4Impl(CbExtServerProperties serverProperties, Producer kafkaProducer, OutboundRequestHandlerServiceImpl outboundRequestHandlerService, AssessmentUtilServiceV2 assessUtilServ, ObjectMapper mapper, AssessmentRepository assessmentRepository, AccessTokenValidator accessTokenValidator) {
+        this.serverProperties = serverProperties;
+        this.kafkaProducer = kafkaProducer;
+        this.outboundRequestHandlerService = outboundRequestHandlerService;
+        this.assessUtilServ = assessUtilServ;
+        this.mapper = mapper;
+        this.assessmentRepository = assessmentRepository;
+        this.accessTokenValidator = accessTokenValidator;
+    }
 
     @Override
     public SBApiResponse retakeAssessment(String assessmentIdentifier, String token,Boolean editMode) {

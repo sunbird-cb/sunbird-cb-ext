@@ -15,10 +15,14 @@ import org.sunbird.ratings.service.RatingService;
 @RestController
 public class RatingsController {
 
-    @Autowired
     RatingService ratingService;
 
-    // ----------------- Public APIs --------------------
+
+    @Autowired
+    public RatingsController(RatingService ratingService) {
+        this.ratingService = ratingService;
+    }
+// ----------------- Public APIs --------------------
 
     @PostMapping("/ratings/v1/upsert")
     public ResponseEntity<SBApiResponse> upsertRating(@Valid @RequestBody RequestRating requestRatingBody) {

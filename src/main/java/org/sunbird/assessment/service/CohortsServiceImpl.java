@@ -37,25 +37,33 @@ import com.fasterxml.jackson.databind.type.CollectionType;
 public class CohortsServiceImpl implements CohortsService {
 
 	public static final String TS_CREATED = "ts_created";
-	private CbExtLogger logger = new CbExtLogger(getClass().getName());
+	private  final CbExtLogger logger = new CbExtLogger(getClass().getName());
 
-	@Autowired
+
 	UserUtilityService userUtilService;
 
-	@Autowired
+
 	ContentService contentService;
 
-	@Autowired
+
 	UserAssessmentTopPerformerRepository userAssessmentTopPerformerRepo;
 
-	@Autowired
+
 	OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
 
-	@Autowired
+
 	CbExtServerProperties cbExtServerProperties;
 
-	@Autowired
 	CassandraOperation cassandraOperation;
+	@Autowired
+	public CohortsServiceImpl(UserUtilityService userUtilService, ContentService contentService, UserAssessmentTopPerformerRepository userAssessmentTopPerformerRepo, OutboundRequestHandlerServiceImpl outboundRequestHandlerService, CbExtServerProperties cbExtServerProperties, CassandraOperation cassandraOperation) {
+		this.userUtilService = userUtilService;
+		this.contentService = contentService;
+		this.userAssessmentTopPerformerRepo = userAssessmentTopPerformerRepo;
+		this.outboundRequestHandlerService = outboundRequestHandlerService;
+		this.cbExtServerProperties = cbExtServerProperties;
+		this.cassandraOperation = cassandraOperation;
+	}
 
 	@Override
 	public List<CohortUsers> getTopPerformers(String rootOrg, String contentId, String userId, int count) {

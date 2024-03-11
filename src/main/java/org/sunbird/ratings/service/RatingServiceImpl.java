@@ -51,26 +51,35 @@ public class RatingServiceImpl implements RatingService {
     private CbExtLogger logger = new CbExtLogger(getClass().getName());
     private ValidationBody validationBody;
 
-    @Autowired
+
     CassandraOperation cassandraOperation;
 
-    @Autowired
+
     Producer kafkaProducer;
 
     @Value("${kafka.topics.parent.rating.event}")
     public String updateRatingTopicName;
 
-    @Autowired
+
     ContentService contentService;
 
-    @Autowired
+
     OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
 
-    @Autowired
+
     CbExtServerProperties serverConfig;
 
-    @Autowired
     RedisCacheMgr redisCacheMgr;
+    @Autowired
+    public RatingServiceImpl(CassandraOperation cassandraOperation, Producer kafkaProducer, String updateRatingTopicName, ContentService contentService, OutboundRequestHandlerServiceImpl outboundRequestHandlerService, CbExtServerProperties serverConfig, RedisCacheMgr redisCacheMgr) {
+        this.cassandraOperation = cassandraOperation;
+        this.kafkaProducer = kafkaProducer;
+        this.updateRatingTopicName = updateRatingTopicName;
+        this.contentService = contentService;
+        this.outboundRequestHandlerService = outboundRequestHandlerService;
+        this.serverConfig = serverConfig;
+        this.redisCacheMgr = redisCacheMgr;
+    }
 
     @Override
     public SBApiResponse getRatings(String activityId, String activityType, String userId) {

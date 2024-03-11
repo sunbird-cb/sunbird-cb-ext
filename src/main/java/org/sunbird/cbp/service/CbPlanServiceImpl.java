@@ -41,30 +41,41 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Service
 public class CbPlanServiceImpl implements CbPlanService {
 
-    private Logger logger = LoggerFactory.getLogger(getClass().getName());
+    private  final Logger logger = LoggerFactory.getLogger(getClass().getName());
 
-    @Autowired
+
     AccessTokenValidator accessTokenValidator;
 
-    @Autowired
+
     CassandraOperation cassandraOperation;
 
-    @Autowired
+
     UserUtilityService userUtilityService;
 
-    @Autowired
+
     ContentService contentService;
 
-    @Autowired
+
     CbExtServerProperties serverProperties;
 
     ObjectMapper mapper = new ObjectMapper();
 
-    @Autowired
+
     Producer kafkaProducer;
 
+
+    private final CbExtServerProperties cbExtServerProperties;
     @Autowired
-    private CbExtServerProperties cbExtServerProperties;
+    public CbPlanServiceImpl(AccessTokenValidator accessTokenValidator, CassandraOperation cassandraOperation, UserUtilityService userUtilityService, ContentService contentService, CbExtServerProperties serverProperties, ObjectMapper mapper, Producer kafkaProducer, CbExtServerProperties cbExtServerProperties) {
+        this.accessTokenValidator = accessTokenValidator;
+        this.cassandraOperation = cassandraOperation;
+        this.userUtilityService = userUtilityService;
+        this.contentService = contentService;
+        this.serverProperties = serverProperties;
+        this.mapper = mapper;
+        this.kafkaProducer = kafkaProducer;
+        this.cbExtServerProperties = cbExtServerProperties;
+    }
 
     @Override
     public SBApiResponse createCbPlan(SunbirdApiRequest request, String userOrgId, String authUserToken) {

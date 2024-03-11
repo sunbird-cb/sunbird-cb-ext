@@ -13,8 +13,11 @@ import java.util.Map;
 @RestController
 public class OffensiveDataReportController {
 
-	@Autowired
 	OffensiveDataFlagService offensiveDataFlagService;
+	@Autowired
+	public OffensiveDataReportController(OffensiveDataFlagService offensiveDataFlagService) {
+		this.offensiveDataFlagService = offensiveDataFlagService;
+	}
 
 	@PostMapping("/v1/offensive/data/flag")
 	public ResponseEntity<SBApiResponse> createFlag(

@@ -15,8 +15,13 @@ import java.util.Map;
 @Component
 public class AccessTokenValidator {
 
-    @Autowired
+
     KeyManager keyManager;
+    @Autowired
+    public AccessTokenValidator(KeyManager keyManager) {
+        this.keyManager = keyManager;
+    }
+
     private static Logger logger = LoggerFactory.getLogger(AccessTokenValidator.class.getName());
     private static ObjectMapper mapper = new ObjectMapper();
     private static PropertiesCache cache = PropertiesCache.getInstance();

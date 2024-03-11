@@ -28,7 +28,7 @@ import net.glxn.qrgen.javase.QRCode;
 @SuppressWarnings("unchecked")
 public class PdfGenerationService {
 
-	private CbExtLogger logger = new CbExtLogger(getClass().getName());
+	private  final CbExtLogger logger = new CbExtLogger(getClass().getName());
 
 	@Value("${domain.host.name}")
 	public String baseUrl;

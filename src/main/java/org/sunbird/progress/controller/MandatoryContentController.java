@@ -18,8 +18,12 @@ import org.sunbird.progress.service.MandatoryContentService;
 @RestController
 public class MandatoryContentController {
 
+
+	private final  MandatoryContentService service;
 	@Autowired
-	private MandatoryContentService service;
+	public MandatoryContentController(MandatoryContentService service) {
+		this.service = service;
+	}
 
 	/**
 	 * @param rootOrg

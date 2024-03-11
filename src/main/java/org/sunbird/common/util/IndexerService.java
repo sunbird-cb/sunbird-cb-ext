@@ -31,15 +31,19 @@ import org.springframework.util.StringUtils;
 @Service
 public class IndexerService {
 
-	private Logger logger = LoggerFactory.getLogger(IndexerService.class);
+	private final Logger logger = LoggerFactory.getLogger(IndexerService.class);
 
-	@Autowired
+
 	@Qualifier("esClient")
-	private RestHighLevelClient esClient;
+	private  final RestHighLevelClient esClient;
 
-	@Autowired
 	@Qualifier("sbEsClient")
-	private RestHighLevelClient sbEsClient;
+	private final  RestHighLevelClient sbEsClient;
+	@Autowired
+	public IndexerService(RestHighLevelClient esClient, RestHighLevelClient sbEsClient) {
+		this.esClient = esClient;
+		this.sbEsClient = sbEsClient;
+	}
 
 	/**
 	 * @param index         name of index

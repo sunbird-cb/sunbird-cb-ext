@@ -33,19 +33,26 @@ import org.sunbird.core.exception.ApplicationLogicError;
 @SuppressWarnings("unchecked")
 public class ExploreCourseServiceImpl implements ExploreCourseService {
 
-	private Logger logger = LoggerFactory.getLogger(ExploreCourseServiceImpl.class);
+	private  final Logger logger = LoggerFactory.getLogger(ExploreCourseServiceImpl.class);
 
-	@Autowired
+
 	CassandraOperation cassandraOperation;
 
-	@Autowired
+
 	RedisCacheMgr redisCacheMgr;
 
-	@Autowired
+
 	CbExtServerProperties serverProperties;
 
-	@Autowired
+
 	OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
+	@Autowired
+	public ExploreCourseServiceImpl(CassandraOperation cassandraOperation, RedisCacheMgr redisCacheMgr, CbExtServerProperties serverProperties, OutboundRequestHandlerServiceImpl outboundRequestHandlerService) {
+		this.cassandraOperation = cassandraOperation;
+		this.redisCacheMgr = redisCacheMgr;
+		this.serverProperties = serverProperties;
+		this.outboundRequestHandlerService = outboundRequestHandlerService;
+	}
 
 	@Override
 	public SBApiResponse getExploreCourseList() {

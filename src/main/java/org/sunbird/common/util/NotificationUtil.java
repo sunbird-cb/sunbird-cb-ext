@@ -23,8 +23,11 @@ public class NotificationUtil {
 	private static final Logger logger = LoggerFactory.getLogger(NotificationUtil.class);
 	private static final String EXCEPTION = "Exception in Send Notification %s";
 
-	@Autowired
 	RestTemplate restTemplate;
+	@Autowired
+	public NotificationUtil(RestTemplate restTemplate) {
+		this.restTemplate = restTemplate;
+	}
 
 	public void sendNotification(List<String> sendTo, Map<String, Object> params, String senderMail,
 			String notificationUrl, String emailTemplate, String emailSubject) {
@@ -36,11 +39,9 @@ public class NotificationUtil {
 			List<Object> notificationTosend = new ArrayList<>(Arrays.asList(
 					new Notification(Constants.EMAIL, Constants.MESSAGE, new EmailConfig(senderMail, emailSubject),
 							sendTo, new Template(null, emailTemplate, params))));
-			notificationRequest.put(Constants.REQUEST, new HashMap<String, List<Object>>() {
-				{
-					put(Constants.NOTIFICATIONS, notificationTosend);
-				}
-			});
+			Map<String, List<Object>> notificationsMap = new HashMap<>();
+			notificationsMap.put(Constants.NOTIFICATIONS, notificationTosend);
+			notificationRequest.put(Constants.REQUEST, notificationsMap);
 			logger.debug(String.format("Notification Request : %s" , notificationRequest));
 			HttpEntity<Object> req = new HttpEntity<>(notificationRequest, headers);
 			restTemplate.postForEntity(notificationUrl, req, String.class);
@@ -58,12 +59,9 @@ public class NotificationUtil {
 				HttpHeaders headers = new HttpHeaders();
 				headers.setContentType(MediaType.APPLICATION_JSON);
 				Map<String, Object> notificationRequest = new HashMap<>();
-				notificationRequest.put(Constants.REQUEST, new HashMap<String, Object>() {
-					{
-						put(Constants.NOTIFICATIONS, notifications);
-					}
-				});
-
+				Map<String, Object> notificationsMap = new HashMap<>();
+				notificationsMap.put(Constants.NOTIFICATIONS, notifications);
+				notificationRequest.put(Constants.REQUEST, notificationsMap);
 				HttpEntity<Object> req = new HttpEntity<>(notificationRequest, headers);
 				logger.info(String.format("Notification Request : %s", notificationRequest));
 				restTemplate.postForEntity(notificationUrl, req, Object.class);

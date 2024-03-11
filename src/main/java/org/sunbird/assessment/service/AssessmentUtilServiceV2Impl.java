@@ -27,22 +27,29 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Service
 public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 
-	@Autowired
+
 	CbExtServerProperties serverProperties;
 
-	@Autowired
+
 	OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
 
-	@Autowired
+
 	ObjectMapper mapper;
 
-	@Autowired
+
 	CassandraOperation cassandraOperation;
 
-	private Logger logger = LoggerFactory.getLogger(AssessmentUtilServiceV2Impl.class);
+	private  final Logger logger = LoggerFactory.getLogger(AssessmentUtilServiceV2Impl.class);
 
-	@Autowired
 	RedisCacheMgr redisCacheMgr;
+	@Autowired
+	public AssessmentUtilServiceV2Impl(CbExtServerProperties serverProperties, OutboundRequestHandlerServiceImpl outboundRequestHandlerService, ObjectMapper mapper, CassandraOperation cassandraOperation, RedisCacheMgr redisCacheMgr) {
+		this.serverProperties = serverProperties;
+		this.outboundRequestHandlerService = outboundRequestHandlerService;
+		this.mapper = mapper;
+		this.cassandraOperation = cassandraOperation;
+		this.redisCacheMgr = redisCacheMgr;
+	}
 
 	public Map<String, Object> validateQumlAssessment(List<String> originalQuestionList,
 													  List<Map<String, Object>> userQuestionList,Map<String,Object> questionMap) {

@@ -35,15 +35,21 @@ import java.util.*;
 public class UserBulkUploadService {
     private Logger logger = LoggerFactory.getLogger(UserBulkUploadService.class);
     ObjectMapper objectMapper = new ObjectMapper();
-    @Autowired
+
     CbExtServerProperties serverProperties;
-    @Autowired
+
     UserUtilityService userUtilityService;
-    @Autowired
+
     CassandraOperation cassandraOperation;
 
-    @Autowired
     StorageService storageService;
+    @Autowired
+    public UserBulkUploadService(CbExtServerProperties serverProperties, UserUtilityService userUtilityService, CassandraOperation cassandraOperation, StorageService storageService) {
+        this.serverProperties = serverProperties;
+        this.userUtilityService = userUtilityService;
+        this.cassandraOperation = cassandraOperation;
+        this.storageService = storageService;
+    }
 
     public void initiateUserBulkUploadProcess(String inputData) {
         logger.info("UserBulkUploadService:: initiateUserBulkUploadProcess: Started");

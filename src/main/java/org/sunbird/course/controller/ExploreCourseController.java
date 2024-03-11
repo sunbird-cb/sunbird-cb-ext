@@ -17,8 +17,12 @@ import org.sunbird.course.service.ExploreCourseService;
 @RestController
 public class ExploreCourseController {
 
-	@Autowired
+
 	ExploreCourseService courseService;
+	@Autowired
+	public ExploreCourseController(ExploreCourseService courseService) {
+		this.courseService = courseService;
+	}
 
 	@GetMapping("/course/v1/explore")
 	public ResponseEntity<SBApiResponse> getPublicCourseList() {

@@ -10,8 +10,11 @@ import java.util.*;
 @RestController
 public class InsightsController {
 
+    private  final InsightsService insightsService;
     @Autowired
-    private InsightsService insightsService;
+    public InsightsController(InsightsService insightsService) {
+        this.insightsService = insightsService;
+    }
 
     @PostMapping("/user/v2/insights")
     public ResponseEntity<SBApiResponse> insights(

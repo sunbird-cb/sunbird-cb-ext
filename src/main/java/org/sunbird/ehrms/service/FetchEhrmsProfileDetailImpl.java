@@ -28,20 +28,28 @@ public class FetchEhrmsProfileDetailImpl implements EhrmsService {
     private final Logger logger = LoggerFactory.getLogger(getClass().getName());
     private final ObjectMapper mapper = new ObjectMapper();
 
-    @Autowired
-    private AccessTokenValidator accessTokenValidator;
 
-    @Autowired
-    private CbExtServerProperties serverConfig;
+    private  final AccessTokenValidator accessTokenValidator;
 
-    @Autowired
-    private RedisCacheMgr redisCacheMgr;
 
-    @Autowired
-    private RestTemplate restTemplate;
+    private final  CbExtServerProperties serverConfig;
 
+
+    private final RedisCacheMgr redisCacheMgr;
+
+
+    private  final RestTemplate restTemplate;
+
+    private final CassandraOperation cassandraOperation;
     @Autowired
-    private CassandraOperation cassandraOperation;
+
+    public FetchEhrmsProfileDetailImpl(AccessTokenValidator accessTokenValidator, CbExtServerProperties serverConfig, RedisCacheMgr redisCacheMgr, RestTemplate restTemplate, CassandraOperation cassandraOperation) {
+        this.accessTokenValidator = accessTokenValidator;
+        this.serverConfig = serverConfig;
+        this.redisCacheMgr = redisCacheMgr;
+        this.restTemplate = restTemplate;
+        this.cassandraOperation = cassandraOperation;
+    }
 
     private String validateAuthTokenAndFetchUserId(String authUserToken) {
         return accessTokenValidator.fetchUserIdFromAccessToken(authUserToken);
