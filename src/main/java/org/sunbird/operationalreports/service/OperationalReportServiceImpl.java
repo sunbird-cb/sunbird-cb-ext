@@ -2,6 +2,7 @@ package org.sunbird.operationalreports.service;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -33,6 +34,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import org.sunbird.cassandra.utils.CassandraOperation;
 import org.sunbird.cloud.storage.BaseStorageService;
 import org.sunbird.cloud.storage.Model;
@@ -481,5 +483,65 @@ public class OperationalReportServiceImpl implements OperationalReportService {
     private Date parseDateFromString(String dateString) {
         OffsetDateTime offsetDateTime = OffsetDateTime.parse(dateString, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
         return Date.from(offsetDateTime.toInstant());
+    }
+
+    @Override
+    public ResponseEntity<StreamingResponseBody> downloadFileV1(String authToken) {
+        HttpHeaders headers = new HttpHeaders();
+        try {
+            String userId = accessTokenValidator.fetchUserIdFromAccessToken(authToken);
+            if (null == userId) {
+                throw new Exception("User Id does not exist");
+            }
+            Map<String, Map<String, String>> userInfoMap = new HashMap<>();
+            userUtilityService.getUserDetailsFromDB(
+                    Collections.singletonList(userId), Arrays.asList(Constants.ROOT_ORG_ID, Constants.USER_ID),
+                    userInfoMap);
+            Map<String, String> userDetailsMap = userInfoMap.get(userId);
+            String rootOrg = userDetailsMap.get(Constants.ROOT_ORG_ID);
+            String objectKey = serverProperties.getOperationalReportFolderName() + "/" + rootOrg + "/"
+                    + serverProperties.getOperationReportFileName();
+            // Download the file from storage
+            storageService.download(serverProperties.getReportDownloadContainerName(), objectKey,
+                    Constants.LOCAL_BASE_PATH, Option.apply(Boolean.FALSE));
+            // Set the file path
+            Path filePath = Paths.get(Constants.LOCAL_BASE_PATH + serverProperties.getOperationReportFileName());
+            // Set headers for the response
+            headers.add(HttpHeaders.CONTENT_DISPOSITION,
+                    "attachment; filename=\"" + serverProperties.getOperationReportFileName() + "\"");
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            // Prepare password for encryption
+            int passwordLength = serverProperties.getZipFilePasswordLength();
+            String password = generateAlphanumericPassword(passwordLength);
+            headers.add(Constants.PASSWORD, password);
+            // Unzip the downloaded file
+            String sourceFolderPath = String.format("%s/%s/%s/%s", Constants.LOCAL_BASE_PATH, rootOrg,
+                    Constants.OUTPUT_PATH, UUID.randomUUID());
+            String destinationFolderPath = sourceFolderPath + Constants.UNZIP_PATH;
+            String zipFilePath = String.valueOf(filePath);
+            unlockZipFolder(zipFilePath, destinationFolderPath, serverProperties.getUnZipFilePassword());
+            // Encrypt the unzipped files and create a new zip file
+            createZipFolder(sourceFolderPath, serverProperties.getOperationReportFileName(), password);
+            // Prepare InputStreamResource for the file to be downloaded
+            StreamingResponseBody responseBody = outputStream -> {
+                try (InputStream inputStream = Files.newInputStream(Paths.get(sourceFolderPath + "/" + serverProperties.getOperationReportFileName()))) {
+                    byte[] buffer = new byte[8192]; // Adjust buffer size as needed
+                    int bytesRead;
+                    while ((bytesRead = inputStream.read(buffer)) != -1) {
+                        outputStream.write(buffer, 0, bytesRead);
+                    }
+                } catch (IOException e) {
+                    logger.error("Failed to downloaded file: " + serverProperties.getOperationReportFileName()
+                            + ", Exception: ", e);
+                }
+            };
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(responseBody);
+        } catch (Exception e) {
+            logger.error("Failed to read the downloaded file: " + serverProperties.getOperationReportFileName()
+                    + ", Exception: ", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 }

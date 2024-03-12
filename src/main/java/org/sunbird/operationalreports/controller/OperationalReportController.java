@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.util.Constants;
 import org.sunbird.operationalreports.service.OperationalReportService;
@@ -56,5 +57,11 @@ public class OperationalReportController {
             @RequestHeader(Constants.X_AUTH_TOKEN) String authToken) throws Exception {
         SBApiResponse response = operationalReport.readGrantAccess(authToken, false);
         return new ResponseEntity<>(response, response.getResponseCode());
+    }
+
+    @GetMapping("/v1/download")
+    public ResponseEntity<StreamingResponseBody> downloadFileV1(
+            @RequestHeader(Constants.X_AUTH_TOKEN) String authToken) {
+        return operationalReport.downloadFileV1(authToken);
     }
 }
