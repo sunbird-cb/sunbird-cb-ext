@@ -215,12 +215,10 @@ public class OperationalReportServiceImpl implements OperationalReportService {
             // Prepare InputStreamResource for the file to be downloaded
             InputStreamResource inputStreamResource = new InputStreamResource(Files
                     .newInputStream(Paths.get(sourceFolderPath + "/" + serverProperties.getOperationReportFileName())));
-            // Clean up temporary files
-            removeDirectory(sourceFolderPath);
             // Return ResponseEntity with the file for download
             return ResponseEntity.ok()
                     .headers(headers)
-                    .contentLength(Files.size(filePath))
+                    .contentLength(Files.size(Paths.get(sourceFolderPath + "/" + serverProperties.getOperationReportFileName())))
                     .body(inputStreamResource);
         } catch (Exception e) {
             logger.error("Failed to read the downloaded file: " + serverProperties.getOperationReportFileName()
