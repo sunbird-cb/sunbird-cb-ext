@@ -93,10 +93,11 @@ public class ProfileController {
 	public ResponseEntity<?> bulkUpload(@RequestParam(value = "file", required = true) MultipartFile multipartFile,
 			@RequestHeader(Constants.X_AUTH_USER_ORG_ID) String rootOrgId,
 			@RequestHeader(Constants.X_AUTH_USER_CHANNEL) String channel,
-			@RequestHeader(Constants.X_AUTH_USER_ID) String userId) throws UnsupportedEncodingException {
+			@RequestHeader(Constants.X_AUTH_USER_ID) String userId,
+            @RequestHeader(Constants.X_AUTH_TOKEN) String userAuthToken) throws UnsupportedEncodingException {
 		log.info(String.format("bulkupload channel name:%s,OrgId:%s",
 				URLDecoder.decode(channel, "UTF-8"), rootOrgId));
-		SBApiResponse uploadResponse = profileService.bulkUpload(multipartFile, rootOrgId, URLDecoder.decode(channel, "UTF-8"), userId);
+		SBApiResponse uploadResponse = profileService.bulkUpload(multipartFile, rootOrgId, URLDecoder.decode(channel, "UTF-8"), userId, userAuthToken);
 		return new ResponseEntity<>(uploadResponse, uploadResponse.getResponseCode());
 	}
 

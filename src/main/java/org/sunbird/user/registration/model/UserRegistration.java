@@ -20,6 +20,7 @@ public class UserRegistration extends UserRegistrationInfo {
 	private String userId;
 	private String userName;
 	private String proposedDeptName;
+	private String userAuthToken;
 
 	public String getWfId() {
 		return wfId;
@@ -99,6 +100,14 @@ public class UserRegistration extends UserRegistrationInfo {
 
 	public void setProposedDeptName(String proposedDeptName) {
 		this.proposedDeptName = proposedDeptName;
+	}
+
+	public String getUserAuthToken() {
+		return userAuthToken;
+	}
+
+	public void setUserAuthToken(String userAuthToken) {
+		this.userAuthToken = userAuthToken;
 	}
 
 	public String toMininumString() {
