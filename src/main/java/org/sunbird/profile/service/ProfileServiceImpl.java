@@ -738,7 +738,7 @@ public class ProfileServiceImpl implements ProfileService {
 	}
 
 	@Override
-	public SBApiResponse bulkUpload(MultipartFile mFile, String orgId, String channel, String userId) {
+	public SBApiResponse bulkUpload(MultipartFile mFile, String orgId, String channel, String userId, String userAuthToken) {
 		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_USER_BULK_UPLOAD);
 		try {
 			SBApiResponse uploadResponse = storageService.uploadFile(mFile, serverConfig.getBulkUploadContainerName());
@@ -770,6 +770,7 @@ public class ProfileServiceImpl implements ProfileService {
 			response.setResponseCode(HttpStatus.OK);
 			response.getResult().putAll(uploadedFile);
 			uploadedFile.put(Constants.ORG_NAME, channel);
+			uploadedFile.put(Constants.X_AUTH_TOKEN, userAuthToken);
 			kafkaProducer.push(serverConfig.getUserBulkUploadTopic(), uploadedFile);
 			sendBulkUploadNotification(orgId, channel, (String) uploadResponse.getResult().get(Constants.URL));
 		} catch (Exception e) {
