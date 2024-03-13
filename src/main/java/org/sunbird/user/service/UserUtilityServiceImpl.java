@@ -590,7 +590,9 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		requestBody.put(Constants.ROLES, Arrays.asList(Constants.PUBLIC));
 		request.put(Constants.REQUEST, requestBody);
 		Map<String, String> headerValues = ProjectUtil.getDefaultHeaders();
-		headerValues.put(Constants.X_AUTH_TOKEN, userRegistration.getUserAuthToken());
+		if (StringUtils.isNotEmpty(userRegistration.getUserAuthToken())) {
+			headerValues.put(Constants.X_AUTH_TOKEN, userRegistration.getUserAuthToken());
+		}
 		try {
 			Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPost(
 					props.getSbUrl() + props.getLmsUserCreatePath(), request, headerValues);
