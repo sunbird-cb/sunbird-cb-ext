@@ -35,24 +35,19 @@ public class HallOfFameServiceImpl implements HallOfFameService {
         int lastMonthYearValue = lastMonthDate.getYear();
 
         String formattedDateLastMonth = currentDate.minusMonths(1).format(DateTimeFormatter.ofPattern("MMMM yyyy"));
-        Map<String, Object> propertymap = new HashMap<>();
-        propertymap.put(Constants.MONTH, lastMonthValue);
-        propertymap.put(Constants.YEAR, lastMonthYearValue);
+        Map<String, Object> propertyMap = new HashMap<>();
+        propertyMap.put(Constants.MONTH, lastMonthValue);
+        propertyMap.put(Constants.YEAR, lastMonthYearValue);
 
         List<Map<String, Object>> dptList = cassandraOperation.getRecordsByPropertiesWithoutFiltering(
-                Constants.KEYSPACE_SUNBIRD, Constants.MDO_KARMA_POINTS, propertymap, null);
+                Constants.KEYSPACE_SUNBIRD, Constants.MDO_KARMA_POINTS, propertyMap, null);
         if(dptList.isEmpty()){
-            int previousToLastMonth = currentDate.minusMonths(2).getMonthValue();
-            int previousToLastMonthsYearValue = currentDate.minusMonths(2).getYear();
-            String formattedDatePreviousLastMonth = currentDate.minusMonths(2).format(DateTimeFormatter.ofPattern("MMMM yyyy"));
-            Map<String, Object> propertyMap = new HashMap<>();
-            propertyMap.put(Constants.MONTH, previousToLastMonth);
-            propertyMap.put(Constants.YEAR, previousToLastMonthsYearValue);
-            List<Map<String, Object>> departmentList = cassandraOperation.getRecordsByPropertiesWithoutFiltering(
+            formattedDateLastMonth = currentDate.minusMonths(2).format(DateTimeFormatter.ofPattern("MMMM yyyy"));
+            propertyMap.clear();
+            propertyMap.put(Constants.MONTH, currentDate.minusMonths(2).getMonthValue());
+            propertyMap.put(Constants.YEAR, currentDate.minusMonths(2).getYear());
+            dptList = cassandraOperation.getRecordsByPropertiesWithoutFiltering(
                     Constants.KEYSPACE_SUNBIRD, Constants.MDO_KARMA_POINTS, propertyMap, null);
-            resultMap.put(Constants.MDO_LIST, departmentList);
-            resultMap.put(Constants.TITLE, formattedDatePreviousLastMonth);
-            return resultMap;
         }
         resultMap.put(Constants.MDO_LIST, dptList);
         resultMap.put(Constants.TITLE, formattedDateLastMonth);
