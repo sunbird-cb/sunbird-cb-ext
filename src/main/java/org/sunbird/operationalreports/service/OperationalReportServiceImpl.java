@@ -3,6 +3,7 @@ package org.sunbird.operationalreports.service;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.SecureRandom;
@@ -225,8 +226,14 @@ public class OperationalReportServiceImpl implements OperationalReportService {
             logger.error("Failed to read the downloaded file: " + serverProperties.getOperationReportFileName()
                     + ", Exception: ", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        } finally {
-            removeDirectory(String.valueOf(Paths.get(sourceFolderPath)));
+        }  finally {
+            if (sourceFolderPath != null) {
+                try {
+                    removeDirectory(String.valueOf(Paths.get(sourceFolderPath)));
+                } catch (InvalidPathException e) {
+                    logger.error("Failed to delete the file: " + sourceFolderPath + ", Exception: ", e);
+                }
+            }
         }
     }
 
