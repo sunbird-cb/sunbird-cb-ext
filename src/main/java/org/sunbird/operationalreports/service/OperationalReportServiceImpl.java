@@ -3,6 +3,7 @@ package org.sunbird.operationalreports.service;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.SecureRandom;
@@ -178,6 +179,7 @@ public class OperationalReportServiceImpl implements OperationalReportService {
     @Override
     public ResponseEntity<InputStreamResource> downloadFile(String authToken) throws Exception {
         HttpHeaders headers = new HttpHeaders();
+        String sourceFolderPath = null;
         try {
             String userId = accessTokenValidator.fetchUserIdFromAccessToken(authToken);
             if (null == userId) {
@@ -205,7 +207,7 @@ public class OperationalReportServiceImpl implements OperationalReportService {
             String password = generateAlphanumericPassword(passwordLength);
             headers.add(Constants.PASSWORD, password);
             // Unzip the downloaded file
-            String sourceFolderPath = String.format("%s/%s/%s/%s", Constants.LOCAL_BASE_PATH, rootOrg,
+            sourceFolderPath = String.format("%s/%s/%s/%s", Constants.LOCAL_BASE_PATH, rootOrg,
                     Constants.OUTPUT_PATH, UUID.randomUUID());
             String destinationFolderPath = sourceFolderPath + Constants.UNZIP_PATH;
             String zipFilePath = String.valueOf(filePath);
@@ -224,6 +226,14 @@ public class OperationalReportServiceImpl implements OperationalReportService {
             logger.error("Failed to read the downloaded file: " + serverProperties.getOperationReportFileName()
                     + ", Exception: ", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }  finally {
+            if (sourceFolderPath != null) {
+                try {
+                    removeDirectory(String.valueOf(Paths.get(sourceFolderPath)));
+                } catch (InvalidPathException e) {
+                    logger.error("Failed to delete the file: " + sourceFolderPath + ", Exception: ", e);
+                }
+            }
         }
     }
 
