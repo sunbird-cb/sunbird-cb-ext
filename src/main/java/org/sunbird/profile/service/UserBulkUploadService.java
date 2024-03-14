@@ -93,6 +93,13 @@ public class UserBulkUploadService {
             fieldsToBeUpdated.put(Constants.DATE_UPDATE_ON, new Timestamp(System.currentTimeMillis()));
             cassandraOperation.updateRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_USER_BULK_UPLOAD,
                     fieldsToBeUpdated, compositeKeys);
+
+            fieldsToBeUpdated.put(Constants.AUDIT_TIME, new Timestamp(System.currentTimeMillis()));
+            SBApiResponse insertResponse = cassandraOperation.insertRecord(Constants.DATABASE,
+                    Constants.TABLE_USER_BULK_UPLOAD_AUDIT, fieldsToBeUpdated);
+            if (!Constants.SUCCESS.equalsIgnoreCase((String) insertResponse.get(Constants.RESPONSE))) {
+                logger.error("Error in Updating User Bulk Upload Audit table in Cassandra");
+            }
         } catch (Exception e) {
             logger.error(String.format("Error in Updating User Bulk Upload Status in Cassandra %s", e.getMessage()), e);
         }
