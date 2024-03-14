@@ -245,16 +245,9 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 					LOGGER.info(String.format("Auto on-boarded organisation with Name: %s, MapId: %s, OrgId: %s",
 							userReg.getOrgName(), userReg.getMapId(), userReg.getSbOrgId()));
 					// TODO - Need to find a best way to give time for org creation takes effect.
-					try {
-						Thread.sleep(1000);
-					} catch (Exception e) {
-					}
+					threadSleep();
 				} else {
-					try {
-						LOGGER.error("Failed to auto onboard organisation. Error: "
-								+ (new ObjectMapper()).writeValueAsString(orgResponse));
-					} catch (Exception e) {
-					}
+					errorHandlingOrgOnboard(orgResponse);
 					return;
 				}
 			}
@@ -567,5 +560,22 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 		List<Map<String, Object>> listOfDomains = cassandraOperation.getRecordsByPropertiesWithoutFiltering(
 				Constants.KEYSPACE_SUNBIRD, Constants.TABLE_MASTER_DATA, propertyMap, Arrays.asList(Constants.CONTEXT_TYPE, Constants.CONTEXT_NAME));
 		return CollectionUtils.isNotEmpty(listOfDomains);
+	}
+
+	private void threadSleep() {
+		try {
+			Thread.sleep(1000);
+		} catch (Exception e) {
+			LOGGER.error("An error occured while called Thread.sleep()", e);
+		}
+	}
+
+	private void errorHandlingOrgOnboard(SBApiResponse orgResponse) {
+		try {
+			LOGGER.error("Failed to auto onboard organisation. Error: "
+					+ (new ObjectMapper()).writeValueAsString(orgResponse));
+		} catch (Exception e) {
+			LOGGER.error("Failed to handle the auto onboard organisation. Error", e);
+		}
 	}
 }

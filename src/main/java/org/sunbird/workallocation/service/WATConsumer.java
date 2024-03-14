@@ -88,13 +88,7 @@ public class WATConsumer {
 
 					List<WorkAllocationDTOV2> workAllocations = new ArrayList<>();
 					for (Map<String, Object> workAllocationCassandraModel : workAllocationList) {
-						try {
-							workAllocations
-									.add(mapper.readValue((String) workAllocationCassandraModel.get(Constants.DATA),
-											WorkAllocationDTOV2.class));
-						} catch (IOException e) {
-							logger.error(e);
-						}
+						parseWorkAllocationDetails(workAllocationCassandraModel, workAllocations, mapper);
 					}
 					watObj.put("users", workAllocations);
 
@@ -196,4 +190,22 @@ public class WATConsumer {
 		}
 	}
 
+	/**
+	 * Parses work allocation details from a Cassandra model and adds them to a list of WorkAllocationDTOV2 objects.
+	 *
+	 * @param workAllocationCassandraModel The Cassandra model containing work allocation details.
+	 * @param workAllocations              The list to which parsed work allocation DTOs will be added.
+	 * @param mapper                       The ObjectMapper used for deserialization.
+	 */
+	private void parseWorkAllocationDetails(Map<String, Object> workAllocationCassandraModel, List<WorkAllocationDTOV2> workAllocations, ObjectMapper mapper) {
+		try {
+			// Read the data from the Cassandra model and deserialize it into a WorkAllocationDTOV2 object
+			workAllocations
+					.add(mapper.readValue((String) workAllocationCassandraModel.get(Constants.DATA),
+							WorkAllocationDTOV2.class));
+		} catch (IOException e) {
+			// If an IOException occurs during deserialization, log the error
+			logger.error(e);
+		}
+	}
 }

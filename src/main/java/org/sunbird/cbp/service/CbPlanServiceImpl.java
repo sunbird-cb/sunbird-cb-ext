@@ -93,24 +93,7 @@ public class CbPlanServiceImpl implements CbPlanService {
                 response.setResponseCode(HttpStatus.BAD_REQUEST);
                 return response;
             }
-            try {
-                requestMap.put(Constants.DRAFT_DATA, mapper.writeValueAsString(cbPlanDto));
-                requestMap.put(Constants.STATUS, Constants.DRAFT);
-                SBApiResponse resp = cassandraOperation.insertRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_CB_PLAN, requestMap);
-                if (Constants.SUCCESS.equals(resp.get(Constants.RESPONSE))) {
-                    response.getResult().put(Constants.STATUS, Constants.CREATED);
-                    response.getResult().put(Constants.ID, cbPlanId);
-                } else {
-                    response.getParams().setStatus(Constants.FAILED);
-                    response.getParams().setErrmsg("Failed to Create CB Plan for OrgId: " + userOrgId + " message: " + resp.getParams().getErrmsg());
-                    response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
-                }
-            } catch (JsonProcessingException e) {
-                logger.error("Failed to Create CB Plan for OrgId: " + userOrgId, e);
-                response.getParams().setStatus(Constants.FAILED);
-                response.getParams().setErrmsg(e.getMessage());
-                response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
-            }
+            insertCBPPlanDetailsToDB(userOrgId, requestMap, cbPlanDto, response, cbPlanId);
         } catch (Exception e) {
             logger.error("Failed to Create CB Plan for OrgId: " + userOrgId, e);
             response.getParams().setStatus(Constants.FAILED);
@@ -266,12 +249,7 @@ public class CbPlanServiceImpl implements CbPlanService {
                     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
                     Date endDate = null;
-                    try {
-                        endDate = dateFormat.parse(String.valueOf(
-                                cbPlanDtoMap.getOrDefault(Constants.END_DATE, publishCbPlan.get(Constants.END_DATE))));
-                    } catch (ParseException e) {
-                        e.printStackTrace(); // Handle the exception appropriately
-                    }
+                    endDate = endDateParsing(endDate, dateFormat, cbPlanDtoMap, publishCbPlan);
                     cbPlan.put(Constants.END_DATE, endDate);
                     cbPlan.put(Constants.DRAFT_DATA, null);
                 }
@@ -1105,4 +1083,62 @@ public class CbPlanServiceImpl implements CbPlanService {
         }
         return isUpdatedLookup;
     }
+
+    /**
+     * Inserts CB plan details into the database.
+     *
+     * @param userOrgId  The organization ID of the user.
+     * @param requestMap A map containing request data.
+     * @param cbPlanDto  The DTO (Data Transfer Object) representing the CB plan.
+     * @param response   The response object to be updated based on the operation.
+     * @param cbPlanId   The UUID representing the CB plan ID.
+     */
+    private void insertCBPPlanDetailsToDB(String userOrgId, Map<String, Object> requestMap, CbPlanDto cbPlanDto, SBApiResponse response, UUID cbPlanId) {
+        try {
+            // Convert CB plan DTO to JSON string and add to request map
+            requestMap.put(Constants.DRAFT_DATA, mapper.writeValueAsString(cbPlanDto));
+            // Set status of CB plan to DRAFT
+            requestMap.put(Constants.STATUS, Constants.DRAFT);
+            // Insert record into Cassandra database
+            SBApiResponse resp = cassandraOperation.insertRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_CB_PLAN, requestMap);
+            // If record insertion is successful
+            if (Constants.SUCCESS.equals(resp.get(Constants.RESPONSE))) {
+                // Update response object with success status and CB plan ID
+                response.getResult().put(Constants.STATUS, Constants.CREATED);
+                response.getResult().put(Constants.ID, cbPlanId);
+            } else {
+                // If insertion fails, update response object with error details
+                response.getParams().setStatus(Constants.FAILED);
+                response.getParams().setErrmsg("Failed to Create CB Plan for OrgId: " + userOrgId + " message: " + resp.getParams().getErrmsg());
+                response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        } catch (JsonProcessingException e) {
+            logger.error("Failed to Create CB Plan for OrgId: " + userOrgId, e);
+            response.getParams().setStatus(Constants.FAILED);
+            response.getParams().setErrmsg(e.getMessage());
+            response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+    /**
+     * Parses the end date using the provided date format and updates it based on the values from the CB plan DTO map and publish CB plan map.
+     *
+     * @param endDate       The end date to be parsed.
+     * @param dateFormat    The date format to be used for parsing.
+     * @param cbPlanDtoMap  A map containing CB plan DTO data.
+     * @param publishCbPlan A map containing data of the published CB plan.
+     * @return The parsed end date.
+     */
+    private Date endDateParsing(Date endDate, SimpleDateFormat dateFormat, Map<String, Object> cbPlanDtoMap, Map<String, Object> publishCbPlan) {
+        try {
+            // Parse end date from CB plan DTO map, if not available, fallback to publish CB plan map
+            endDate = dateFormat.parse(String.valueOf(
+                    cbPlanDtoMap.getOrDefault(Constants.END_DATE, publishCbPlan.get(Constants.END_DATE))));
+        } catch (ParseException e) {
+            logger.error("Failed to parese the end date ", e);
+        }
+        return endDate;
+    }
+
 }

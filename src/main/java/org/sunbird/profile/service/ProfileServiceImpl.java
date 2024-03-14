@@ -1506,10 +1506,7 @@ public class ProfileServiceImpl implements ProfileService {
 					if (courseInfoMap.containsKey(courseId)) {
 						String strLeafNode = courseInfoMap.get(courseId).get(Constants.LEAF_NODES_COUNT);
 						if (StringUtils.isNotBlank(strLeafNode)) {
-							try {
-								leafNodeCount = Integer.parseInt(strLeafNode);
-							} catch (NumberFormatException nfe) {
-							}
+							leafNodeCount = getLeafNodeCount(leafNodeCount, strLeafNode);
 						}
 					}
 
@@ -2046,6 +2043,23 @@ public class ProfileServiceImpl implements ProfileService {
 			}
 		}
 		return "";
+	}
+
+	/**
+	 * Gets the count of leaf nodes from the provided string representation.
+	 *
+	 * @param leafNodeCount The current count of leaf nodes.
+	 * @param strLeafNode   The string representation of leaf node count.
+	 * @return The count of leaf nodes after parsing.
+	 */
+	private int getLeafNodeCount(int leafNodeCount, String strLeafNode) {
+		try {
+			// Attempt to parse the string representation of leaf node count to an integer
+			leafNodeCount = Integer.parseInt(strLeafNode);
+		} catch (NumberFormatException nfe) {
+			log.error("Failed to get the leafnode count: ", nfe);
+		}
+		return leafNodeCount;
 	}
 
 }
