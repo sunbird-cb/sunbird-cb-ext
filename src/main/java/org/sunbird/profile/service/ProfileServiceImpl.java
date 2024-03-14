@@ -865,12 +865,8 @@ public class ProfileServiceImpl implements ProfileService {
 	}
 
 	public boolean validateRequest(Map<String, Object> requestBody) {
-		if (!(ObjectUtils.isEmpty(requestBody.get(Constants.USER_ID)))
-				&& !(ObjectUtils.isEmpty(requestBody.get(Constants.PROFILE_DETAILS)))) {
-			return true;
-		} else {
-			return false;
-		}
+        return !(ObjectUtils.isEmpty(requestBody.get(Constants.USER_ID)))
+                && !(ObjectUtils.isEmpty(requestBody.get(Constants.PROFILE_DETAILS)));
 	}
 
 	private void getModifiedPersonalDetails(Object personalDetailsObj, Map<String, Object> updatedRequest) {
@@ -1906,12 +1902,8 @@ public class ProfileServiceImpl implements ProfileService {
 	}
 
 	private boolean validateSystemUpdateRequest(Map<String, Object> requestBody) {
-		if (ObjectUtils.isEmpty(requestBody.get(Constants.EMAIL))
-				 || ObjectUtils.isEmpty(requestBody.get(Constants.EXTERNAL_SYSTEM))  || ObjectUtils.isEmpty(requestBody.get(Constants.EXTERNAL_SYSTEM_ID))) {
-			return false;
-		} else {
-			return true;
-		}
+        return !ObjectUtils.isEmpty(requestBody.get(Constants.EMAIL))
+                && !ObjectUtils.isEmpty(requestBody.get(Constants.EXTERNAL_SYSTEM)) && !ObjectUtils.isEmpty(requestBody.get(Constants.EXTERNAL_SYSTEM_ID));
 	}
 
 	public List<String> adminApprovalFields() {

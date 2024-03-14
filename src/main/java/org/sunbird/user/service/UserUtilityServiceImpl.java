@@ -560,10 +560,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 				if (map.get("response") != null) {
 					Map<String, Object> responseObj = (Map<String, Object>) map.get("response");
 					int count = (int) responseObj.get(Constants.COUNT);
-					if (count == 0)
-						return false;
-					else
-						return true;
+                    return count != 0;
 				}
 			}
 		} catch (Exception e) {
