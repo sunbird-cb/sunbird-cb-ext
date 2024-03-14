@@ -1763,64 +1763,8 @@ public class ProfileServiceImpl implements ProfileService {
 					StringUtils.EMPTY);
 			Map<String, Object> existingProfileDetails = (Map<String, Object>) responseMap.get(Constants.PROFILE_DETAILS);
 			if (!profileDetailsMap.isEmpty()) {
-				{
-					List<String> listOfChangedDetails = new ArrayList<>();
-					for (String keys : profileDetailsMap.keySet()) {
-						listOfChangedDetails.add(keys);
-					}
-					for (String changedObj : listOfChangedDetails) {
-						if (profileDetailsMap.get(changedObj) instanceof ArrayList) {
-							existingProfileDetails.put(changedObj, profileDetailsMap.get(changedObj));
-						} else if (profileDetailsMap.get(changedObj) instanceof Boolean) {
-							existingProfileDetails.put(changedObj, profileDetailsMap.get(changedObj));
-						} else {
-							if (existingProfileDetails.containsKey(changedObj)) {
-								Map<String, Object> existingProfileChild = (Map<String, Object>) existingProfileDetails
-										.get(changedObj);
-								Map<String, Object> requestedProfileChild = (Map<String, Object>) profileDetailsMap
-										.get(changedObj);
-								for (String childKey : requestedProfileChild.keySet()) {
-									existingProfileChild.put(childKey, requestedProfileChild.get(childKey));
-								}
-							} else {
-								existingProfileDetails.put(changedObj, profileDetailsMap.get(changedObj));
-							}
-						}
-
-						// Additional Condition for updating personal Details directly to user object
-						if (Constants.PERSONAL_DETAILS.equalsIgnoreCase(changedObj)) {
-							getModifiedPersonalDetails(profileDetailsMap.get(changedObj), requestData);
-						}
-					}
-
-					HashMap<String, String> headerValue = new HashMap<>();
-					headerValues.put(Constants.AUTH_TOKEN, authToken);
-					headerValues.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
-					String updatedUrl = serverConfig.getSbUrl() + serverConfig.getLmsUserUpdatePrivatePath();
-					Map<String, Object> updateRequestValue = requestData;
-					updateRequestValue.put(Constants.PROFILE_DETAILS, existingProfileDetails);
-					Map<String, Object> updateRequest = new HashMap<>();
-					updateRequest.put(Constants.REQUEST, updateRequestValue);
-					Map<String, Object> updateResponse = outboundRequestHandlerService.fetchResultUsingPatch(updatedUrl, updateRequest, headerValue);
-
-					if (Constants.OK.equalsIgnoreCase((String) updateResponse.get(Constants.RESPONSE_CODE))) {
-						response.setResponseCode(HttpStatus.OK);
-						response.getResult().put(Constants.RESPONSE, Constants.SUCCESS);
-						response.getParams().setStatus(Constants.SUCCESS);
-					} else {
-						if (updateResponse != null && Constants.CLIENT_ERROR.equalsIgnoreCase((String) updateResponse.get(Constants.RESPONSE_CODE))) {
-							response.setResponseCode(HttpStatus.BAD_REQUEST);
-						} else {
-							response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
-						}
-						response.getParams().setStatus(Constants.FAILED);
-						String errMsg = (String) ((Map<String, Object>) updateResponse.get(Constants.PARAMS)).get(Constants.ERROR_MESSAGE);
-						errMsg = PropertiesCache.getInstance().readCustomError(errMsg);
-						response.getParams().setErrmsg(errMsg);
-						log.error(errMsg, new Exception(errMsg));
-						return response;
-					}
-				}
+				SBApiResponse response1 = processProfileUpdateForMdoAdmin(authToken, profileDetailsMap, existingProfileDetails, requestData, headerValues, response);
+				if (response1 != null) return response1;
 			}
 		} catch (Exception e) {
 			log.error("Failed to process profile update. Exception: ", e);
@@ -1830,6 +1774,66 @@ public class ProfileServiceImpl implements ProfileService {
 		}
 		return response;
 
+	}
+
+	private SBApiResponse processProfileUpdateForMdoAdmin(String authToken, Map<String, Object> profileDetailsMap, Map<String, Object> existingProfileDetails, Map<String, Object> requestData, Map<String, String> headerValues, SBApiResponse response) {
+		List<String> listOfChangedDetails = new ArrayList<>();
+		for (String keys : profileDetailsMap.keySet()) {
+			listOfChangedDetails.add(keys);
+		}
+		for (String changedObj : listOfChangedDetails) {
+			if (profileDetailsMap.get(changedObj) instanceof ArrayList) {
+				existingProfileDetails.put(changedObj, profileDetailsMap.get(changedObj));
+			} else if (profileDetailsMap.get(changedObj) instanceof Boolean) {
+				existingProfileDetails.put(changedObj, profileDetailsMap.get(changedObj));
+			} else {
+				if (existingProfileDetails.containsKey(changedObj)) {
+					Map<String, Object> existingProfileChild = (Map<String, Object>) existingProfileDetails
+							.get(changedObj);
+					Map<String, Object> requestedProfileChild = (Map<String, Object>) profileDetailsMap
+							.get(changedObj);
+					for (String childKey : requestedProfileChild.keySet()) {
+						existingProfileChild.put(childKey, requestedProfileChild.get(childKey));
+					}
+				} else {
+					existingProfileDetails.put(changedObj, profileDetailsMap.get(changedObj));
+				}
+			}
+
+			// Additional Condition for updating personal Details directly to user object
+			if (Constants.PERSONAL_DETAILS.equalsIgnoreCase(changedObj)) {
+				getModifiedPersonalDetails(profileDetailsMap.get(changedObj), requestData);
+			}
+		}
+
+		HashMap<String, String> headerValue = new HashMap<>();
+		headerValues.put(Constants.AUTH_TOKEN, authToken);
+		headerValues.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
+		String updatedUrl = serverConfig.getSbUrl() + serverConfig.getLmsUserUpdatePrivatePath();
+		Map<String, Object> updateRequestValue = requestData;
+		updateRequestValue.put(Constants.PROFILE_DETAILS, existingProfileDetails);
+		Map<String, Object> updateRequest = new HashMap<>();
+		updateRequest.put(Constants.REQUEST, updateRequestValue);
+		Map<String, Object> updateResponse = outboundRequestHandlerService.fetchResultUsingPatch(updatedUrl, updateRequest, headerValue);
+
+		if (Constants.OK.equalsIgnoreCase((String) updateResponse.get(Constants.RESPONSE_CODE))) {
+			response.setResponseCode(HttpStatus.OK);
+			response.getResult().put(Constants.RESPONSE, Constants.SUCCESS);
+			response.getParams().setStatus(Constants.SUCCESS);
+		} else {
+			if (updateResponse != null && Constants.CLIENT_ERROR.equalsIgnoreCase((String) updateResponse.get(Constants.RESPONSE_CODE))) {
+				response.setResponseCode(HttpStatus.BAD_REQUEST);
+			} else {
+				response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+			}
+			response.getParams().setStatus(Constants.FAILED);
+			String errMsg = (String) ((Map<String, Object>) updateResponse.get(Constants.PARAMS)).get(Constants.ERROR_MESSAGE);
+			errMsg = PropertiesCache.getInstance().readCustomError(errMsg);
+			response.getParams().setErrmsg(errMsg);
+			log.error(errMsg, new Exception(errMsg));
+			return response;
+		}
+		return null;
 	}
 
 	@Override
