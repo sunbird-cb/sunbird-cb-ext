@@ -52,7 +52,6 @@ import org.sunbird.storage.service.StorageServiceImpl;
 import org.sunbird.user.report.UserReportService;
 import org.sunbird.user.service.UserUtilityService;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -62,6 +61,7 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
 import io.jsonwebtoken.*;
 
 import static java.util.stream.Collectors.toList;
@@ -1698,9 +1698,10 @@ public class ProfileServiceImpl implements ProfileService {
 
 	@Override
 	public ResponseEntity<Resource> downloadFile(String fileName) {
+		Path tmpPath = null;
 		try {
 			storageService.downloadFile(fileName);
-			Path tmpPath = Paths.get(Constants.LOCAL_BASE_PATH + fileName);
+			tmpPath = Paths.get(Constants.LOCAL_BASE_PATH + fileName);
 			ByteArrayResource resource = new ByteArrayResource(Files.readAllBytes(tmpPath));
 			HttpHeaders headers = new HttpHeaders();
 			headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"");
@@ -1714,9 +1715,8 @@ public class ProfileServiceImpl implements ProfileService {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 		} finally {
 			try {
-				File file = new File(Constants.LOCAL_BASE_PATH + fileName);
-				if(file.exists()) {
-					file.delete();
+				if(tmpPath != null ) {
+					Files.delete(tmpPath);
 				}
 			} catch(Exception e1) {
 			}

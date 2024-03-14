@@ -28,6 +28,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.util.*;
 
@@ -301,7 +303,7 @@ public class UserBulkUploadService {
             if (fis != null)
                 fis.close();
             if (file != null)
-                file.delete();
+                Files.delete(Paths.get(Constants.LOCAL_BASE_PATH + inputDataMap.get(Constants.FILE_NAME)));
         }
     }
 

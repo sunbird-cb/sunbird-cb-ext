@@ -90,7 +90,7 @@ public class StorageServiceImpl implements StorageService {
 			return response;
 		} finally {
 			if (file != null) {
-				file.delete();
+				Files.delete(file.toPath());
 			}
 		}
 	}
@@ -115,8 +115,12 @@ public class StorageServiceImpl implements StorageService {
 			return response;
 		} finally {
 			if (file != null) {
-				file.delete();
-			}
+                try {
+                    Files.delete(file.toPath());
+                } catch (IOException e) {
+					logger.error("Failed to delete file. Exception: ", e);
+                }
+            }
 		}
 	}
 
@@ -205,10 +209,11 @@ public class StorageServiceImpl implements StorageService {
 		} finally {
 			try {
 				File file = new File(Constants.LOCAL_BASE_PATH + fileName);
-				if(file.exists()) {
-					file.delete();
+				if (file.exists()) {
+					Files.delete(file.toPath());
 				}
-			} catch(Exception e1) {
+			} catch (IOException e) {
+				logger.error("Failed to delete file. Exception: ", e);
 			}
 		}
 	}
@@ -326,10 +331,12 @@ public class StorageServiceImpl implements StorageService {
 			try {
 				File file = new File(Constants.LOCAL_BASE_PATH + fileName);
 				if (file.exists()) {
-					file.delete();
+					Files.delete(file.toPath());
 				}
-			} catch (Exception e1) {
+			} catch (IOException e) {
+				logger.error("Failed to delete file. Exception: ", e);
 			}
+
 		}
 
 	}
