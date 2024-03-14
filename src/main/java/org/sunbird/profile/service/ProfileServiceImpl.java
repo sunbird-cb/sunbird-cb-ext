@@ -177,11 +177,8 @@ public class ProfileServiceImpl implements ProfileService {
 						if (existingProfileDetails.containsKey(changedObj)) {
 							Map<String, Object> existingProfileChild = (Map<String, Object>) existingProfileDetails
 									.get(changedObj);
-							Map<String, Object> requestedProfileChild = (Map<String, Object>) profileDetailsMap
-									.get(changedObj);
-							for (String childKey : requestedProfileChild.keySet()) {
-								existingProfileChild.put(childKey, requestedProfileChild.get(childKey));
-							}
+							Map<String, Object> requestedProfileChild = (Map<String, Object>) profileDetailsMap.get(changedObj);
+                            existingProfileChild.putAll(requestedProfileChild);
 						} else {
 							existingProfileDetails.put(changedObj, profileDetailsMap.get(changedObj));
 						}
@@ -375,9 +372,7 @@ public class ProfileServiceImpl implements ProfileService {
 
 				Map<String, Object> orgProfileDetailsMap = (Map<String, Object>) requestData
 						.get(Constants.PROFILE_DETAILS);
-				for (String keys : orgProfileDetailsMap.keySet()) {
-					esOrgProfileMap.put(keys, orgProfileDetailsMap.get(keys));
-				}
+                esOrgProfileMap.putAll(orgProfileDetailsMap);
 				RestStatus status = null;
 				if (isOrgProfileExist) {
 					status = indexerService.updateEntity(serverConfig.getOrgOnboardingIndex(),
@@ -882,15 +877,16 @@ public class ProfileServiceImpl implements ProfileService {
 		try {
 			Map<String, Object> personalDetailsMap = (Map<String, Object>) personalDetailsObj;
 			if (!ObjectUtils.isEmpty(personalDetailsMap)) {
-				for (String paramName : personalDetailsMap.keySet()) {
-					if (Constants.FIRST_NAME_LOWER_CASE.equalsIgnoreCase(paramName)) {
-						updatedRequest.put(Constants.FIRSTNAME, (String) personalDetailsMap.get(paramName));
-					} else if (Constants.MOBILE.equalsIgnoreCase(paramName)) {
-						updatedRequest.put(Constants.PHONE, String.valueOf(personalDetailsMap.get(paramName)));
-					} else if (Constants.PRIMARY_EMAIL.equalsIgnoreCase(paramName)) {
-						updatedRequest.put(Constants.EMAIL, String.valueOf(personalDetailsMap.get(paramName)));
+				for (Map.Entry<String, Object> entry : personalDetailsMap.entrySet()) {
+					if (Constants.FIRST_NAME_LOWER_CASE.equalsIgnoreCase(entry.getKey())) {
+						updatedRequest.put(Constants.FIRSTNAME, entry.getValue());
+					} else if (Constants.MOBILE.equalsIgnoreCase(entry.getKey())) {
+						updatedRequest.put(Constants.PHONE, String.valueOf(entry.getValue()));
+					} else if (Constants.PRIMARY_EMAIL.equalsIgnoreCase(entry.getKey())) {
+						updatedRequest.put(Constants.EMAIL, String.valueOf(entry.getValue()));
 					}
 				}
+
 			}
 		} catch (Exception e) {
 			log.error("Exception while verifying profile details. ", e);
@@ -1748,9 +1744,9 @@ public class ProfileServiceImpl implements ProfileService {
 			Map<String, Object> profileDetailsMap = (Map<String, Object>) requestData.get(Constants.PROFILE_DETAILS);
 			List<String> allowedAdminUpdateFields = adminApprovalFields();
 			Map<String, Object> adminUpdateMap = new HashMap<>();
-			for (String key : profileDetailsMap.keySet()) {
-				if (allowedAdminUpdateFields.contains(key)) {
-					adminUpdateMap.put(key, profileDetailsMap.get(key));
+			for (Map.Entry<String, Object> entry : profileDetailsMap.entrySet()) {
+				if (allowedAdminUpdateFields.contains(entry.getKey())) {
+					adminUpdateMap.put(entry.getKey(),  entry.getValue());
 				}
 			}
 
@@ -1792,9 +1788,7 @@ public class ProfileServiceImpl implements ProfileService {
 							.get(changedObj);
 					Map<String, Object> requestedProfileChild = (Map<String, Object>) profileDetailsMap
 							.get(changedObj);
-					for (String childKey : requestedProfileChild.keySet()) {
-						existingProfileChild.put(childKey, requestedProfileChild.get(childKey));
-					}
+                    existingProfileChild.putAll(requestedProfileChild);
 				} else {
 					existingProfileDetails.put(changedObj, profileDetailsMap.get(changedObj));
 				}
