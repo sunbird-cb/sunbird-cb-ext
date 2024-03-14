@@ -952,7 +952,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 	}
 
 	private String constructEmailTemplate(String templateName, Map<String, Object> params) {
-		String replacedHTML = new String();
+		String replacedHTML = "";
 		try {
 			Map<String, Object> propertyMap = new HashMap<>();
 			propertyMap.put(Constants.NAME, templateName);
