@@ -18,7 +18,7 @@ public class BASE64Decoder extends CharacterDecoder {
 	/**
 	 * This character array provides the character to value map based on RFC1521.
 	 */
-	private static final char pem_array[] = {
+	private static final char[] pem_array = {
 			// 0 1 2 3 4 5 6 7
 			'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', // 0
 			'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', // 1
@@ -30,7 +30,7 @@ public class BASE64Decoder extends CharacterDecoder {
 			'4', '5', '6', '7', '8', '9', '+', '/' // 7
 	};
 
-	private static final byte pem_convert_array[] = new byte[256];
+	private static final byte[] pem_convert_array = new byte[256];
 
 	static {
 		for (int i = 0; i < 255; i++) {
@@ -41,7 +41,7 @@ public class BASE64Decoder extends CharacterDecoder {
 		}
 	}
 
-	byte decode_buffer[] = new byte[4];
+	byte[] decode_buffer = new byte[4];
 
 	/** Decode one BASE64 atom into 1, 2, or 3 bytes of data. */
 	@SuppressWarnings("fallthrough")

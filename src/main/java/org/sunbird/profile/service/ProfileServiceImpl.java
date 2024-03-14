@@ -828,7 +828,7 @@ public class ProfileServiceImpl implements ProfileService {
 				String strApprovalFields = (String) data.get(Constants.VALUE);
 
 				if (StringUtils.isNotBlank(strApprovalFields)) {
-					String strArray[] = strApprovalFields.split(",", -1);
+					String[] strArray = strApprovalFields.split(",", -1);
 					approvalFields = Arrays.asList(strArray);
 					dataCacheMgr.putObjectInCache(Constants.PROFILE_APPROVAL_FIELDS_KEY, approvalFields);
 					return approvalFields;
@@ -1934,7 +1934,7 @@ public class ProfileServiceImpl implements ProfileService {
 				String strAdminApprovalFields = (String) data.get(Constants.VALUE);
 
 				if (StringUtils.isNotBlank(strAdminApprovalFields)) {
-					String strArray[] = strAdminApprovalFields.split(",", -1);
+					String[] strArray = strAdminApprovalFields.split(",", -1);
 					adminApprovalFields = Arrays.asList(strArray);
 					dataCacheMgr.putObjectInCache(serverConfig.getMdoAdminUpdateUsers(), adminApprovalFields);
 					return adminApprovalFields;
