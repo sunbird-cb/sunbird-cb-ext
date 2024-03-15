@@ -2,10 +2,12 @@ package org.sunbird.assessment.repo;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.Map;
 
 import org.springframework.data.cassandra.core.mapping.Column;
 import org.springframework.data.cassandra.core.mapping.PrimaryKey;
 import org.springframework.data.cassandra.core.mapping.Table;
+import org.sunbird.common.util.Constants;
 
 @Table("user_assessment_master")
 public class UserAssessmentMasterModel {
@@ -112,20 +114,18 @@ public class UserAssessmentMasterModel {
 		this.userId = userId;
 	}
 
-	public UserAssessmentMasterModel(UserAssessmentMasterPrimaryKeyModel primaryKey, Integer correctCount,
-									 Date dateCreated, Integer incorrectCount, Integer notAnsweredCount, String parentContentType,
-									 BigDecimal passPercent, String sourceId, String sourceTitle, String userId) {
+	public UserAssessmentMasterModel(Map<String, Object> userAssessmentMasterModelData) {
 		super();
-		this.primaryKey = primaryKey;
-		this.correctCount = correctCount;
-		this.dateCreated = dateCreated;
-		this.incorrectCount = incorrectCount;
-		this.notAnsweredCount = notAnsweredCount;
-		this.parentContentType = parentContentType;
-		this.passPercent = passPercent;
-		this.sourceId = sourceId;
-		this.sourceTitle = sourceTitle;
-		this.userId = userId;
+		this.primaryKey = (UserAssessmentMasterPrimaryKeyModel) userAssessmentMasterModelData.get("primaryKey");
+		this.correctCount = (java.lang.Integer) userAssessmentMasterModelData.get("correctCount");
+		this.dateCreated = (Date) userAssessmentMasterModelData.get(Constants.DATE_CREATED_ON);
+		this.incorrectCount = (java.lang.Integer) userAssessmentMasterModelData.get(Constants.INCORRECT_COUNT);
+		this.notAnsweredCount = (java.lang.Integer) userAssessmentMasterModelData.get(Constants.NOT_ANSWERED_COUNT);
+		this.parentContentType = (String) userAssessmentMasterModelData.get(Constants.PARENT_CONTENT_TYPE);
+		this.passPercent = (BigDecimal) userAssessmentMasterModelData.get(Constants.PASS_PERCENTAGE);
+		this.sourceId = (String) userAssessmentMasterModelData.get(Constants.SOURCE_ID);
+		this.sourceTitle = (String) userAssessmentMasterModelData.get("sourceTitle");
+		this.userId = (String) userAssessmentMasterModelData.get("userId");
 	}
 
 	public UserAssessmentMasterModel() {
