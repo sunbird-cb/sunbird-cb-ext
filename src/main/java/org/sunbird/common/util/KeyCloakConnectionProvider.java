@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
  *     other operations.
  */
 public class KeyCloakConnectionProvider {
+  private KeyCloakConnectionProvider() {}
 
   private static Logger logger = LoggerFactory.getLogger(KeyCloakConnectionProvider.class.getName());
 

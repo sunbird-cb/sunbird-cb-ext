@@ -4,6 +4,8 @@ import java.nio.charset.Charset;
 import java.security.*;
 
 public class CryptoUtil {
+    private CryptoUtil() {}
+
     private static final Charset US_ASCII = Charset.forName("US-ASCII");
 
     public static boolean verifyRSASign(String payLoad, byte[] signature, PublicKey key, String algorithm) {

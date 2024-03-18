@@ -184,7 +184,7 @@ public class ContentProgressServiceImpl implements ContentProgressService {
         // Stream to filter and collect only non-null "endDate" maps
         return list.stream()
                 .filter(item -> {
-                    return item != null && item.containsKey("active") && (boolean) item.get("active") == true;
+                    return item != null && item.containsKey("active") && (boolean) item.get("active") == Boolean.TRUE;
                 })
                 .collect(Collectors.toList());
     }

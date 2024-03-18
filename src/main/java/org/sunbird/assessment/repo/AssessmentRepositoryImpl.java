@@ -46,13 +46,11 @@ public class AssessmentRepositoryImpl implements AssessmentRepository {
 
 	@Override
 	public Map<String, Object> getAssessmentAnswerKey(String artifactUrl) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public Map<String, Object> getQuizAnswerKey(AssessmentSubmissionDTO quizMap) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -129,7 +127,6 @@ public class AssessmentRepositoryImpl implements AssessmentRepository {
 
 	@Override
 	public List<Map<String, Object>> getAssessmentbyContentUser(String rootOrg, String courseId, String userId) {
-		// TODO Auto-generated method stub
 		return Collections.emptyList();
 	}
 
