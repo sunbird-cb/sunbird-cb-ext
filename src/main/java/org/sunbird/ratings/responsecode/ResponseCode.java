@@ -22,7 +22,7 @@ public enum ResponseCode {
     SERVICE_UNAVAILABLE(503),
     PARTIAL_SUCCESS_RESPONSE(206);
 
-    private int responseCode;
+    private int responseCodes;
     /**
      * error code contains String value
      */
@@ -40,7 +40,7 @@ public enum ResponseCode {
     private ResponseCode(String errorCode, String errorMessage, int responseCode) {
         this.errorCode = errorCode;
         this.errorMessage = errorMessage;
-        this.responseCode = responseCode;
+        this.responseCodes = responseCode;
     }
 
     /**
@@ -99,15 +99,15 @@ public enum ResponseCode {
     }
 
     private ResponseCode(int responseCode) {
-        this.responseCode = responseCode;
+        this.responseCodes = responseCode;
     }
 
     public int getResponseCode() {
-        return responseCode;
+        return responseCodes;
     }
 
     public void setResponseCode(int responseCode) {
-        this.responseCode = responseCode;
+        this.responseCodes = responseCode;
     }
 
 

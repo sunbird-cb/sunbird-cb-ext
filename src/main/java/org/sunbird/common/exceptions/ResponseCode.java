@@ -13,7 +13,7 @@ public enum ResponseCode {
     OK(200),
     CLIENT_ERROR(400),
     SERVER_ERROR(500);
-    private int responseCode;
+    private int responseCodes;
     /**
      * error code contains String value
      */
@@ -33,7 +33,7 @@ public enum ResponseCode {
     }
 
     ResponseCode(int responseCode) {
-        this.responseCode = responseCode;
+        this.responseCodes = responseCode;
     }
 
     /**
@@ -96,10 +96,10 @@ public enum ResponseCode {
     }
 
     public int getResponseCode() {
-        return responseCode;
+        return responseCodes;
     }
 
     public void setResponseCode(int responseCode) {
-        this.responseCode = responseCode;
+        this.responseCodes = responseCode;
     }
 }
