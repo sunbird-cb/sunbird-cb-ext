@@ -7,6 +7,8 @@ import java.util.Properties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 /**
  * This class will be used to read cassandratablecolumn properties file.
  * @author fathima
@@ -19,13 +21,16 @@ public class CassandraPropertyReader {
 	  private static final String file = "cassandratablecolumn.properties";
 	  private static CassandraPropertyReader cassandraPropertyReader = null;
 
-	  /** private default constructor 
+	private Logger logger = LoggerFactory.getLogger(getClass().getName());
+
+	  /** private default constructor
 	 * @throws IOException */
 	  private CassandraPropertyReader() throws IOException {
 	    InputStream in = this.getClass().getClassLoader().getResourceAsStream(file);
 	    try {
 	      properties.load(in);
 	    } catch (IOException e) {
+			logger.error("Error while reading properties from file:  "  + e.getMessage(), e);
 	    	throw e;
 	    }
 	  }
