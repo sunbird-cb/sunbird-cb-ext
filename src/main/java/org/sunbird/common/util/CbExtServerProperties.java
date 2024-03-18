@@ -678,6 +678,12 @@ public class CbExtServerProperties {
 	@Value("${digilocker-api-key}")
 	private String digiLockerAPIKey;
 
+	@Value("${pdf-generator-service-host}")
+	private String pdfGeneratorServiceBaseUrl;
+
+	@Value("${pdf-generator-svg-to-pdf-url}")
+	private String pdfGeneratorSvgToPdfUrl;
+
 	public boolean qListFromCacheEnabled() {
 		return qListFromCacheEnabled;
 	}
@@ -2390,5 +2396,21 @@ public class CbExtServerProperties {
 
 	public void setDigiLockerAPIKey(String digiLockerAPIKey) {
 		this.digiLockerAPIKey = digiLockerAPIKey;
+	}
+
+	public String getPdfGeneratorServiceBaseUrl() {
+		return pdfGeneratorServiceBaseUrl;
+	}
+
+	public void setPdfGeneratorServiceBaseUrl(String pdfGeneratorServiceBaseUrl) {
+		this.pdfGeneratorServiceBaseUrl = pdfGeneratorServiceBaseUrl;
+	}
+
+	public String getPdfGeneratorSvgToPdfUrl() {
+		return pdfGeneratorSvgToPdfUrl;
+	}
+
+	public void setPdfGeneratorSvgToPdfUrl(String pdfGeneratorSvgToPdfUrl) {
+		this.pdfGeneratorSvgToPdfUrl = pdfGeneratorSvgToPdfUrl;
 	}
 }
