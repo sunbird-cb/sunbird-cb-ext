@@ -686,6 +686,9 @@ public class CbExtServerProperties {
 	@Value("${digilocker-api-key}")
 	private String digiLockerAPIKey;
 
+	@Value("${cipher.algorithm}")
+	private String cipherAlogrithm;
+
 	public boolean qListFromCacheEnabled() {
 		return qListFromCacheEnabled;
 	}
@@ -2421,5 +2424,13 @@ public class CbExtServerProperties {
 
 	public void setDigiLockerAPIKey(String digiLockerAPIKey) {
 		this.digiLockerAPIKey = digiLockerAPIKey;
+	}
+
+	public String getCipherAlogrithm() {
+		return cipherAlogrithm;
+	}
+
+	public void setCipherAlogrithm(String cipherAlogrithm) {
+		this.cipherAlogrithm = cipherAlogrithm;
 	}
 }
