@@ -1011,6 +1011,7 @@ public class Constants {
 	public static final String USER_REPORT_EXPIRY_DATE = "report_expiry_date";
 	public static final String REPORT_ACCESS_EXPIRY = "reportAccessExpiry";
 	public static final String READ_REPORT_ACCESS_API = "api.read.access.report";
+	public static final String X_DIGILOCKER_HMAC = "x-digilocker-hmac";
 
   private Constants() {
 		throw new IllegalStateException("Utility class");

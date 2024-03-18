@@ -683,6 +683,7 @@ public class CbExtServerProperties {
 
 	@Value("${operational.report.file.name}")
 	private String operationReportFileName;
+
 	@Value("${digilocker-api-key}")
 	private String digiLockerAPIKey;
 
@@ -2415,6 +2416,7 @@ public class CbExtServerProperties {
 	public void setOperationReportFileName(String operationReportFileName) {
 		this.operationReportFileName = operationReportFileName;
 	}
+
 	public String getDigiLockerAPIKey() {
 		return digiLockerAPIKey;
 	}
