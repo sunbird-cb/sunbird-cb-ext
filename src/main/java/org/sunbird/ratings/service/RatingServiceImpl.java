@@ -281,7 +281,7 @@ public class RatingServiceImpl implements RatingService {
             response.setResponseCode(HttpStatus.OK);
             response.getParams().setStatus(Constants.SUCCESSFUL);
             if(requestRating.getComment()==null && requestRating.getCommentBy()==null) {
-                System.out.println("Message "+mapper.writeValueAsString(ratingMessage));
+                logger.info("Message "+mapper.writeValueAsString(ratingMessage));
                 kafkaProducer.push(updateRatingTopicName, ratingMessage);
             }
         } catch (ValidationException ex) {
@@ -392,7 +392,7 @@ public class RatingServiceImpl implements RatingService {
         return values;
     }
 
-    private void validateRatingsInfo(ValidationBody validationBody, String flag) throws Exception {
+    private void validateRatingsInfo(ValidationBody validationBody, String flag) throws ValidationException {
 
         List<String> errObjList = new ArrayList<>();
 

@@ -25,13 +25,13 @@ public class PortalController {
 	}
 
 	@GetMapping("/portal/getAllDept")
-	public ResponseEntity<List<DeptPublicInfo>> getAllDepartment() throws Exception {
+	public ResponseEntity<List<DeptPublicInfo>> getAllDepartment() {
 		return new ResponseEntity<>(portalService.getAllDept(), HttpStatus.OK);
 	}
 
 	@GetMapping("/portal/deptSearch")
 	public ResponseEntity<DeptPublicInfo> searchDepartment(
-			@RequestParam(name = "friendlyName", required = true) String deptName) throws Exception {
+			@RequestParam(name = "friendlyName", required = true) String deptName) {
 		return new ResponseEntity<>(portalService.searchDept(deptName), HttpStatus.OK);
 	}
 	// ----------------- END of Public APIs --------------------

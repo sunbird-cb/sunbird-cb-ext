@@ -71,7 +71,7 @@ public class AssessmentServiceImpl implements AssessmentService {
 
 		Map<String, Object> ret = new HashMap<>();
 
-		// TODO - Need to get the Assessment ContentMeta Data
+		// Need to get the Assessment ContentMeta Data
 		// Get the assessment-key.json file. Current version has both the answers
 
 		Map<String, Object> resultMap = assessUtilServ.validateAssessment(data.getQuestions());
@@ -117,8 +117,7 @@ public class AssessmentServiceImpl implements AssessmentService {
 	}
 
 	@Override
-	public Map<String, Object> getAssessmentByContentUser(String rootOrg, String courseId, String userId)
-			throws Exception {
+	public Map<String, Object> getAssessmentByContentUser(String rootOrg, String courseId, String userId) throws ApplicationLogicError {
 		Map<String, Object> result = new TreeMap<>();
 		try {
 			// get all submission data from cassandra
@@ -185,7 +184,6 @@ public class AssessmentServiceImpl implements AssessmentService {
 
 	@Override
 	public Map<String, Object> submitAssessmentByIframe(String rootOrg, Map<String, Object> request) throws Exception {
-		// TODO Auto-generated method stub
 		return null;
 	}
 

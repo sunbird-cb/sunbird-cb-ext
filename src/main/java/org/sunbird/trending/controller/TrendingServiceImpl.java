@@ -65,14 +65,7 @@ public class TrendingServiceImpl implements TrendingService {
                 redisKeyNameMap.put(org + COLON + contextType, contextType);
             }
         }
-        
         int limit = Optional.ofNullable(request.get(Constants.LIMIT)).map(l -> (Integer) l).orElse(0);
-        /*List<String> fieldList = updatedContextTypeList.stream()
-                .map(type -> org + COLON + type)
-                .collect(Collectors.toList());
-        
-        String[] fieldsArray = fieldList.toArray(new String[fieldList.size()]);
-        */
         String[] newFieldsArray = redisKeyNameMap.keySet().toArray(new String[0]);
         // Fetch trending Ids for requested type of courses
         List<String> trendingCoursesAndPrograms = redisCacheMgr.hget(redisKey, serverProperties.getRedisInsightIndex(),newFieldsArray);
@@ -89,14 +82,6 @@ public class TrendingServiceImpl implements TrendingService {
                 }
             }
         }
-
-        /* if(trendingCoursesAndPrograms == null)
-             trendingCoursesAndPrograms = new ArrayList<>();
-       
-        for(int i=0;i<fieldsArray.length;i++){
-            if(updatedContextTypeList.size() > i && trendingCoursesAndPrograms.size() > 0 )
-            typeList.put(updatedContextTypeList.get(i),fetchIds(trendingCoursesAndPrograms.get(i), limit, fieldList.get(i)));
-        } */
         List<String> searchIds = typeList.values().stream().flatMap(List::stream).collect(Collectors.toList());
         Map<String, Object> compositeSearchRes ;
         List<Map<String, Object>> contentList = new ArrayList<>();

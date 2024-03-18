@@ -14,19 +14,19 @@ public class RedisCacheController {
 
 
     @DeleteMapping("/redis")
-    public ResponseEntity<SBApiResponse> deleteCache() throws Exception {
+    public ResponseEntity<SBApiResponse> deleteCache() {
         SBApiResponse response = redisCacheService.deleteCache();
         return new ResponseEntity<>(response, response.getResponseCode());
     }
 
     @GetMapping("/redis")
-    public ResponseEntity<SBApiResponse> getKeys() throws Exception {
+    public ResponseEntity<SBApiResponse> getKeys() {
         SBApiResponse response = redisCacheService.getKeys();
         return new ResponseEntity<>(response, response.getResponseCode());
     }
 
     @GetMapping("/redis/values")
-    public ResponseEntity<SBApiResponse> getKeysAndValues() throws Exception {
+    public ResponseEntity<SBApiResponse> getKeysAndValues() {
         SBApiResponse response = redisCacheService.getKeysAndValues();
         return new ResponseEntity<>(response, response.getResponseCode());
     }

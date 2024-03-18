@@ -5,23 +5,25 @@ import java.sql.Timestamp;
 public class SummaryModel {
     private String activityId;
     private String activityType;
-    private Float totalcount1stars;
-    private Float totalcount2stars;
-    private Float totalcount3stars;
-    private Float totalcount4stars;
-    private Float totalcount5stars;
+    private Float totalCount1Stars;
+    private Float totalCount2Stars;
+    private Float totalCount3Stars;
+    private Float totalCount4Stars;
+    private Float totalCount5Stars;
     private Float totalNumberOfRatings;
     private Float sumOfTotalRatings;
     private String latest50Reviews;
 
-    public SummaryModel(String activityId, String activityType, Float totalcount1stars, Float totalcount2stars, Float totalcount3stars, Float totalcount4stars, Float totalcount5stars, Float totalNumberOfRatings, Float sumOfTotalRatings, String latest50Reviews) {
+
+
+    public SummaryModel(String activityId, String activityType, Float totalCount1Stars, Float totalCount2Stars, Float totalCount3Stars, Float totalCount4Stars, Float totalCount5Stars, Float totalNumberOfRatings, Float sumOfTotalRatings, String latest50Reviews) {
         this.activityId = activityId;
         this.activityType = activityType;
-        this.totalcount1stars = totalcount1stars;
-        this.totalcount2stars = totalcount2stars;
-        this.totalcount3stars = totalcount3stars;
-        this.totalcount4stars = totalcount4stars;
-        this.totalcount5stars = totalcount5stars;
+        this.totalCount1Stars = totalCount1Stars;
+        this.totalCount2Stars = totalCount2Stars;
+        this.totalCount3Stars = totalCount3Stars;
+        this.totalCount4Stars = totalCount4Stars;
+        this.totalCount5Stars = totalCount5Stars;
         this.totalNumberOfRatings = totalNumberOfRatings;
         this.sumOfTotalRatings = sumOfTotalRatings;
         this.latest50Reviews = latest50Reviews;
@@ -39,36 +41,36 @@ public class SummaryModel {
         this.activityId = activityId;
     }
 
-    public Float getTotalcount3stars() {
-        return totalcount3stars;
+    public Float getTotalCount3Stars() {
+        return totalCount3Stars;
     }
 
-    public void setTotalcount3stars(Float totalcount3stars) {
-        this.totalcount3stars = totalcount3stars;
+    public void setTotalCount3Stars(Float totalCount3Stars) {
+        this.totalCount3Stars = totalCount3Stars;
     }
 
-    public Float getTotalcount1stars() {
-        return totalcount1stars;
+    public Float getTotalCount1Stars() {
+        return totalCount1Stars;
     }
 
-    public void setTotalcount1stars(Float totalcount1stars) {
-        this.totalcount1stars = totalcount1stars;
+    public void setTotalCount1Stars(Float totalCount1Stars) {
+        this.totalCount1Stars = totalCount1Stars;
     }
 
-    public Float getTotalcount4stars() {
-        return totalcount4stars;
+    public Float getTotalCount4Stars() {
+        return totalCount4Stars;
     }
 
-    public void setTotalcount4stars(Float totalcount4stars) {
-        this.totalcount4stars = totalcount4stars;
+    public void setTotalCount4Stars(Float totalCount4Stars) {
+        this.totalCount4Stars = totalCount4Stars;
     }
 
-    public Float getTotalcount5stars() {
-        return totalcount5stars;
+    public Float getTotalCount5Stars() {
+        return totalCount5Stars;
     }
 
-    public void setTotalcount5stars(Float totalcount5stars) {
-        this.totalcount5stars = totalcount5stars;
+    public void setTotalCount5Stars(Float totalCount5Stars) {
+        this.totalCount5Stars = totalCount5Stars;
     }
 
     public Float getTotalNumberOfRatings() {
@@ -79,12 +81,12 @@ public class SummaryModel {
         this.totalNumberOfRatings = totalNumberOfRatings;
     }
 
-    public Float getTotalcount2stars() {
-        return totalcount2stars;
+    public Float getTotalCount2Stars() {
+        return totalCount2Stars;
     }
 
-    public void setTotalcount2stars(Float totalcount2stars) {
-        this.totalcount2stars = totalcount2stars;
+    public void setTotalCount2Stars(Float totalCount2Stars) {
+        this.totalCount2Stars = totalCount2Stars;
     }
 
     public Float getSumOfTotalRatings() {

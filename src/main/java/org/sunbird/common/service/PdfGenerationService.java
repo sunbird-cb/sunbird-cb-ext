@@ -1,6 +1,5 @@
 package org.sunbird.common.service;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -49,15 +48,6 @@ public class PdfGenerationService {
 		pageTable.add(getUserRoleActivities(wa, statusSelected));
 
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
-//		try {
-//			JsonPDF.writeToStream((new ByteArrayInputStream(pageTable.toJSONString().getBytes())), out, null);
-//		} catch (Exception e) {
-//			String errorMessage = "Failed to generate PDF from JSON Object. Exception: " + e.getMessage();
-//			logger.warn(errorMessage);
-//			logger.error(e);
-//			return getWaErrorPdf(errorMessage);
-//		}
-//
 		return out.toByteArray();
 	}
 
@@ -65,7 +55,7 @@ public class PdfGenerationService {
 		if (ObjectUtils.isEmpty(wa.getActiveWAObject())) {
 			// There is no active WA object found. We can not create QR Code for
 			// redirection.
-			// TODO - Construct Error pdf and return.
+			// Construct Error pdf and return.
 		}
 
 		return null;
@@ -92,7 +82,6 @@ public class PdfGenerationService {
 		
 		try {
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
-//			JsonPDF.writeToStream((new ByteArrayInputStream(pageTable.toJSONString().getBytes())), out, null);
 			return out.toByteArray();
 		} catch (Exception e) {
 			logger.error(e);
@@ -165,7 +154,7 @@ public class PdfGenerationService {
 				deptLogoArray.add(firstColProperties);
 				// Add image
 				{
-					// TODO check the DeptRepo for Dept Image details.
+					// check the DeptRepo for Dept Image details.
 					JSONArray deptLogoImage = new JSONArray();
 					deptLogoImage.add("image");
 					JSONObject imageProperties = new JSONObject();

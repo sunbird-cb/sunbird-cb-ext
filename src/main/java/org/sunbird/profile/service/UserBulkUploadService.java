@@ -130,7 +130,7 @@ public class UserBulkUploadService {
                 }
                 int count = 0;
                 while (rowIterator.hasNext()) {
-                    logger.info("UserBulkUploadService:: Record " + count++);
+                    logger.info("UserBulkUploadService:: Record {}" , count++);
                     long duration = 0;
                     long startTime = System.currentTimeMillis();
                     StringBuffer str = new StringBuffer();

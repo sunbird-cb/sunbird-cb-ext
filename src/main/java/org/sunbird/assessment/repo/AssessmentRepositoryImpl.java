@@ -29,7 +29,6 @@ public class AssessmentRepositoryImpl implements AssessmentRepository {
 	public static final String RESULT = "result";
 	public static final String SOURCE_ID = "sourceId";
 	public static final String USER_ID = "userId";
-	private CbExtLogger logger = new CbExtLogger(getClass().getName());
 
 	@Autowired
 	UserAssessmentSummaryRepository userAssessmentSummaryRepo;
@@ -129,8 +128,7 @@ public class AssessmentRepositoryImpl implements AssessmentRepository {
 	}
 
 	@Override
-	public List<Map<String, Object>> getAssessmentbyContentUser(String rootOrg, String courseId, String userId)
-			throws Exception {
+	public List<Map<String, Object>> getAssessmentbyContentUser(String rootOrg, String courseId, String userId) {
 		// TODO Auto-generated method stub
 		return Collections.emptyList();
 	}

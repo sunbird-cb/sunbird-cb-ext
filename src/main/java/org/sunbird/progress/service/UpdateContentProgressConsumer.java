@@ -209,7 +209,6 @@ public class UpdateContentProgressConsumer {
     }
 
     public Map<String, String> getUserDetails(Set<String> userIds){
-        HashMap<String, Object> userResult = new HashMap<>();
         Map<String, Object> request = getSearchObject(userIds);
         HashMap<String, String> headersValue = new HashMap<>();
         headersValue.put("Content-Type", "application/json");

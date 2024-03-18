@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 public class CassandraConnectionManagerImpl implements CassandraConnectionManager {
     private static Cluster cluster;
     private static Map<String, Session> cassandraSessionMap = new ConcurrentHashMap<>(2);
-    public static CbExtLogger logger = new CbExtLogger(CassandraConnectionManagerImpl.class.getName());
+    public static final CbExtLogger logger = new CbExtLogger(CassandraConnectionManagerImpl.class.getName());
     List<String> keyspaces = Arrays.asList(Constants.KEYSPACE_SUNBIRD, Constants.KEYSPACE_SUNBIRD_COURSES);
 
     @PostConstruct

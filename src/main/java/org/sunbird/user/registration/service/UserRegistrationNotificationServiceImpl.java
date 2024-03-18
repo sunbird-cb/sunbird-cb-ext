@@ -31,15 +31,13 @@ public class UserRegistrationNotificationServiceImpl implements UserRegistration
 				add(userRegistration.getEmail());
 			}
 		};
+		Map<String, Object> notificationConfig = new HashMap<>();
+		notificationConfig.put(Constants.SUBJECT, serverProperties.getUserRegistrationSubject());
 
 		Map<String, Object> notificationObj = new HashMap<>();
 		notificationObj.put(Constants.MODE, Constants.EMAIL);
 		notificationObj.put(Constants.DELIVERY_TYPE, Constants.MESSAGE);
-		notificationObj.put(Constants.CONFIG, new HashMap<String, Object>() {
-			{
-				put(Constants.SUBJECT, serverProperties.getUserRegistrationSubject());
-			}
-		});
+		notificationObj.put(Constants.CONFIG, notificationConfig);
 		notificationObj.put(Constants.IDS, sendTo);
 		notificationObj.put(Constants.TEMPLATE,
 				notificationMessage(userRegistration.getStatus(), userRegistration.getRegistrationCode()));

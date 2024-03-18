@@ -35,19 +35,19 @@ public class ProfileController {
 			@RequestHeader(value = Constants.X_AUTH_TOKEN, required = true) String userToken,
 			@RequestHeader(value = Constants.AUTH_TOKEN, required = false) String authToken,
 			@RequestHeader(value = Constants.X_AUTH_USER_ORG_ID, required = false) String rootOrgId,
-			@RequestBody Map<String, Object> request) throws Exception {
+			@RequestBody Map<String, Object> request) {
 		SBApiResponse response = profileService.profileUpdate(request, userToken, authToken, rootOrgId);
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
 
 	@PatchMapping("/org/v1/profile/patch")
-	public ResponseEntity<SBApiResponse> orgProfileUpdate(@RequestBody Map<String, Object> request) throws Exception {
+	public ResponseEntity<SBApiResponse> orgProfileUpdate(@RequestBody Map<String, Object> request) {
 		SBApiResponse response = profileService.orgProfileUpdate(request);
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
 
 	@GetMapping("/org/v1/profile/read")
-	public ResponseEntity<SBApiResponse> orgProfileRead(@RequestParam String orgId) throws Exception {
+	public ResponseEntity<SBApiResponse> orgProfileRead(@RequestParam String orgId) {
 		SBApiResponse response = profileService.orgProfileRead(orgId);
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}

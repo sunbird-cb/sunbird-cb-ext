@@ -71,7 +71,7 @@ public class UserRegistrationConsumer {
 		 * notification to user mentioning the registration request failed and try again
 		 * later. And also update in the ES doc status value.
 		 * 
-		 * 4. TODO - In case of transition request created but failed to send email
+		 * 4. In case of transition request created but failed to send email
 		 * notification.
 		 */
 		if (wfTransitionData != null) {

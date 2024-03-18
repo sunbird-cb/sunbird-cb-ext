@@ -3,7 +3,6 @@ package org.sunbird.assessment.service;
 import java.util.List;
 
 import org.sunbird.assessment.repo.CohortUsers;
-import org.sunbird.common.model.Response;
 import org.sunbird.common.model.SBApiResponse;
 
 public interface CohortsService {

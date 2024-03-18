@@ -74,7 +74,6 @@ public class UserAssessmentTopPerformerPrimaryKeyModel implements Serializable {
 
 	public UserAssessmentTopPerformerPrimaryKeyModel(String rootOrg, String parentSourceId, Date tsCreated,
 			BigDecimal resultPercent, UUID id) {
-		this.rootOrg = rootOrg;
 		this.parentSourceId = parentSourceId;
 		this.tsCreated = tsCreated;
 		this.resultPercent = resultPercent;

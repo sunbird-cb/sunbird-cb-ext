@@ -37,7 +37,7 @@ public class RedisCacheServiceImpl implements RedisCacheService {
 	}
 
 	@Override
-	public SBApiResponse getKeys() throws Exception {
+	public SBApiResponse getKeys() {
 		SBApiResponse response = new SBApiResponse(Constants.API_REDIS_GET_KEYS);
 		Set<String> res = redisCache.getAllKeyNames();
 		if (!res.isEmpty()) {
@@ -55,7 +55,7 @@ public class RedisCacheServiceImpl implements RedisCacheService {
 	}
 
 	@Override
-	public SBApiResponse getKeysAndValues() throws Exception {
+	public SBApiResponse getKeysAndValues() {
 		SBApiResponse response = new SBApiResponse(Constants.API_REDIS_GET_KEYS_VALUE_SET);
 		List<Map<String, Object>> result = redisCache.getAllKeysAndValues();
 
