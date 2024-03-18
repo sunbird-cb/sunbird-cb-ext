@@ -1,6 +1,4 @@
-package org.sunbird.workallocation.model.telemetryEvent;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
+package org.sunbird.workallocation.model.telemetryevent;
 
 import java.util.Map;
 

@@ -1,4 +1,4 @@
-package org.sunbird.workallocation.model.telemetryEvent;
+package org.sunbird.workallocation.model.telemetryevent;
 
 public class Flags {
     private boolean pp_duplicate_skipped;
