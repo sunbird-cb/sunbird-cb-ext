@@ -132,9 +132,7 @@ public class OutboundRequestHandlerServiceImpl {
 			HttpEntity entity = new HttpEntity(headers);
 			response = restTemplate.exchange(uri, HttpMethod.GET, entity, Map.class);
 			return response.getBody();
-		} catch (HttpClientErrorException e) {
-			log.error(e);
-		} catch (Exception e) {
+		}catch (Exception e) {
 			log.error(e);
 		}
 		return null;
