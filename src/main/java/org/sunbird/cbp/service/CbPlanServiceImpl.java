@@ -437,7 +437,7 @@ public class CbPlanServiceImpl implements CbPlanService {
                 userId = authTokenOrUserId;
             else
                 userId = validateAuthTokenAndFetchUserId(authTokenOrUserId);
-            logger.info("UserId of the User : " + userId + "User org ID : " + userOrgId);
+            logger.info("UserId of the User : {}, User org ID : {}", userId, userOrgId);
             List<String> fields = Arrays.asList(Constants.PROFILE_DETAILS, Constants.ROOT_ORG_ID);
             Map<String, Object> propertiesMap = new HashMap<>();
             propertiesMap.put(Constants.ID, userId);
@@ -468,7 +468,7 @@ public class CbPlanServiceImpl implements CbPlanService {
             }
             List<String> assignmentTypeInfoKeyQueryList = new ArrayList<>(Arrays.asList(userId, Constants.ALL_USER));
             if (StringUtils.isNotEmpty(userDesignation)) {
-                logger.info("User Designation : " + userDesignation);
+                logger.info("User Designation : {}", userDesignation);
                 assignmentTypeInfoKeyQueryList.add(userDesignation);
             }
             propertiesMap.clear();
@@ -517,7 +517,7 @@ public class CbPlanServiceImpl implements CbPlanService {
                             }
                             //}
                         } else {
-                            logger.error("Failed to read course details for Id: " + courseId);
+                            logger.error("Failed to read course details for Id: {}", courseId);
                         }
                     } else {
                         continue;
@@ -529,7 +529,7 @@ public class CbPlanServiceImpl implements CbPlanService {
                 cbPlanDetails.put(Constants.CB_CONTENT_LIST, courseList);
                 resultMap.add(cbPlanDetails);
             }
-            logger.info("Number of CB Plan Available for the user is " + resultMap.size());
+            logger.info("Number of CB Plan Available for the user is {}", resultMap.size());
             response.getResult().put(Constants.COUNT, resultMap.size());
             response.getResult().put(Constants.CONTENT, resultMap);
         } catch (Exception e) {

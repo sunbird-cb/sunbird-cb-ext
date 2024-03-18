@@ -138,7 +138,7 @@ public class InsightsServiceImpl implements InsightsService {
         return local;
     }
     public static double roundToTwoDecimals(double value) {
-        BigDecimal bd = new BigDecimal(value);
+        BigDecimal bd = BigDecimal.valueOf(value);
         bd = bd.setScale(2, RoundingMode.HALF_UP);
         return bd.doubleValue();
     }

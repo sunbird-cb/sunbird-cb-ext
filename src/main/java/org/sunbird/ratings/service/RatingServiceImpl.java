@@ -360,7 +360,7 @@ public class RatingServiceImpl implements RatingService {
 
                 }
                 Collections.sort(listOfLookupResponse, (l1, l2) -> {
-                    if(l1.getUpdatedon() == l2.getUpdatedon())
+                    if(l1.getUpdatedon().equals(l2.getUpdatedon()))
                         return 0;
                     return l2.getUpdatedon() < l1.getUpdatedon() ? -1 : 1;
                 });
@@ -396,7 +396,7 @@ public class RatingServiceImpl implements RatingService {
 
         List<String> errObjList = new ArrayList<>();
 
-        if (flag == Constants.RATING_UPSERT_OPERATION) {
+        if (Constants.RATING_UPSERT_OPERATION.equalsIgnoreCase(flag)) {
             if (StringUtils.isEmpty(validationBody.getRequestRating().getActivityId())) {
                 errObjList.add(ResponseMessage.Message.INVALID_INPUT);
             }
@@ -416,7 +416,7 @@ public class RatingServiceImpl implements RatingService {
             if (StringUtils.isEmpty(validationBody.getRequestRating().getUserId())) {
                 errObjList.add(ResponseMessage.Message.INVALID_USER);
             }
-        } else if (flag == Constants.RATING_LOOKUP_RATING_OPERATION) {
+        } else if (Constants.RATING_LOOKUP_RATING_OPERATION.equalsIgnoreCase(flag)) {
 
             if (StringUtils.isEmpty(validationBody.getLookupRequest().getActivityId())) {
                 errObjList.add(ResponseMessage.Message.INVALID_INPUT);
@@ -431,7 +431,7 @@ public class RatingServiceImpl implements RatingService {
             if (validationBody.getLookupRequest().getLimit() < 1) {
                 errObjList.add(ResponseMessage.Message.INVALID_LIMIT);
             }
-        } else if (flag == Constants.RATING_GET_OPERATION || flag == Constants.RATING_SUMMARY_OPERATION) {
+        } else if (Constants.RATING_GET_OPERATION.equalsIgnoreCase(flag) || Constants.RATING_SUMMARY_OPERATION.equalsIgnoreCase(flag)) {
             if (StringUtils.isEmpty(validationBody.getActivityId())) {
                 errObjList.add(ResponseMessage.Message.INVALID_INPUT);
             }
@@ -439,7 +439,7 @@ public class RatingServiceImpl implements RatingService {
                 errObjList.add(ResponseMessage.Message.INVALID_INPUT);
             }
 
-            if (flag == Constants.RATING_GET_OPERATION && StringUtils.isEmpty(validationBody.getUserId())) {
+            if (Constants.RATING_GET_OPERATION.equalsIgnoreCase(flag) && StringUtils.isEmpty(validationBody.getUserId())) {
                 errObjList.add(ResponseMessage.Message.INVALID_INPUT);
             }
         }
