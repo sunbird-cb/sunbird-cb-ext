@@ -114,13 +114,11 @@ public class StorageServiceImpl implements StorageService {
 			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
 			return response;
 		} finally {
-			if (file != null) {
-                try {
-                    Files.delete(file.toPath());
-                } catch (IOException e) {
-					logger.error("Failed to delete file. Exception: ", e);
-                }
-            }
+			try {
+				Files.delete(file.toPath());
+			} catch (IOException e) {
+				logger.error("Failed to delete file. Exception: ", e);
+			}
 		}
 	}
 

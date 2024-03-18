@@ -108,7 +108,7 @@ public class CohortsServiceImpl implements CohortsService {
 			// Same Logic as before
 			String topLearnerUUID = topLearnerRow.get("user_id").toString();
 
-			if (learnerUUIDEmailMap != null && learnerUUIDEmailMap.containsKey(topLearnerUUID)) {
+			if (learnerUUIDEmailMap.containsKey(topLearnerUUID)) {
 				OpenSaberApiUserProfile userProfile = (OpenSaberApiUserProfile) learnerUUIDEmailMap.get(topLearnerUUID);
 				if (!userNames.contains(userProfile.getPersonalDetails().getPrimaryEmail())
 						&& !topLearnerUUID.equalsIgnoreCase(userId)) {
