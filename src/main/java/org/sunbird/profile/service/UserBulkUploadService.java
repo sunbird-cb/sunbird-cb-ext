@@ -101,19 +101,14 @@ public class UserBulkUploadService {
     }
 
     private void processBulkUpload(HashMap<String, String> inputDataMap) throws IOException {
-        File file = null;
-        FileInputStream fis = null;
-        XSSFWorkbook wb = null;
         int totalRecordsCount = 0;
         int noOfSuccessfulRecords = 0;
         int failedRecordsCount = 0;
         String status = "";
         String phone = "";
-        try {
-            file = new File(Constants.LOCAL_BASE_PATH + inputDataMap.get(Constants.FILE_NAME));
+        File file = new File(Constants.LOCAL_BASE_PATH + inputDataMap.get(Constants.FILE_NAME));
+        try (FileInputStream fis = new FileInputStream(file); XSSFWorkbook wb = new XSSFWorkbook(fis)) {
             if (file.exists() && file.length() > 0) {
-                fis = new FileInputStream(file);
-                wb = new XSSFWorkbook(fis);
                 XSSFSheet sheet = wb.getSheetAt(0);
                 Iterator<Row> rowIterator = sheet.iterator();
                 // incrementing the iterator inorder to skip the headers in the first row
@@ -298,11 +293,7 @@ public class UserBulkUploadService {
             updateUserBulkUploadStatus(inputDataMap.get(Constants.ROOT_ORG_ID), inputDataMap.get(Constants.IDENTIFIER),
                     Constants.FAILED_UPPERCASE, 0, 0, 0);
         } finally {
-            if (wb != null)
-                wb.close();
-            if (fis != null)
-                fis.close();
-            if (file != null)
+            if (file.exists() && file.length() > 0)
                 Files.delete(Paths.get(Constants.LOCAL_BASE_PATH + inputDataMap.get(Constants.FILE_NAME)));
         }
     }

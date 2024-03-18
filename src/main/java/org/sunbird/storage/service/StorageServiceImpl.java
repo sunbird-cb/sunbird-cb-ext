@@ -74,14 +74,20 @@ public class StorageServiceImpl implements StorageService {
 	}
 	public SBApiResponse uploadFile(MultipartFile mFile, String cloudFolderName, String containerName) throws IOException {
 		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_FILE_UPLOAD);
-		File file = null;
-		try {
-			file = new File(System.currentTimeMillis() + "_" + mFile.getOriginalFilename());
-			file.createNewFile();
-			FileOutputStream fos = new FileOutputStream(file);
-			fos.write(mFile.getBytes());
-			fos.close();
-			return uploadFile(file, cloudFolderName,containerName);
+		File file = new File(System.currentTimeMillis() + "_" + mFile.getOriginalFilename());;
+		try(FileOutputStream fos = new FileOutputStream(file)) {
+			if (file.exists() && file.length() > 0) {
+				file.createNewFile();
+				fos.write(mFile.getBytes());
+				fos.close();
+				return uploadFile(file, cloudFolderName, containerName);
+			} else {
+				logger.error("Failed to process file. Exception: ");
+				response.getParams().setStatus(Constants.FAILED);
+				response.getParams().setErrmsg("Failed to process file. Exception: ");
+				response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+				return response;
+			}
 		} catch (Exception e) {
 			logger.error("Failed to upload file. Exception: ", e);
 			response.getParams().setStatus(Constants.FAILED);
