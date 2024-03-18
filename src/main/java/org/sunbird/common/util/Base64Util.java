@@ -630,7 +630,6 @@ public class Base64Util {
                                 (input[p++] & 0xff);
                         tailLen = 0;
                     }
-                    ;
                     break;
 
                 case 2:

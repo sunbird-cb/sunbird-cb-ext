@@ -784,7 +784,7 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 
 			if (!StringUtils.isEmpty(orgId)) {
 				String sbRootOrgId = orgRepository.getSbOrgIdFromMapId(parentOrg.getParentMapId());
-				;
+
 				if (StringUtils.isBlank(parentOrg.getSbRootOrgId())) {
 					sbRootOrgId = orgRepository.getSbOrgIdFromMapId(parentOrg.getParentMapId());
 				}
