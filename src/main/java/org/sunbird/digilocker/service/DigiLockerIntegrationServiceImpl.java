@@ -3,17 +3,15 @@ package org.sunbird.digilocker.service;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import org.apache.batik.transcoder.TranscoderException;
-import org.apache.batik.transcoder.TranscoderInput;
-import org.apache.batik.transcoder.TranscoderOutput;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.fop.svg.PDFTranscoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import org.sunbird.cassandra.utils.CassandraOperation;
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
@@ -24,10 +22,7 @@ import org.sunbird.user.service.UserUtilityService;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -44,6 +39,8 @@ public class DigiLockerIntegrationServiceImpl implements DigiLockerIntegrationSe
 
     @Autowired
     CassandraOperation cassandraOperation;
+    @Autowired
+    private RestTemplate restTemplate;
 
     @Autowired
     OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
@@ -258,7 +255,7 @@ public class DigiLockerIntegrationServiceImpl implements DigiLockerIntegrationSe
             if (MapUtils.isNotEmpty(certificateInfo)) {
                 byte[] out = null;
                 try {
-                    out = generatePdfFromSvg(decodeUrl((String) certificateInfo.get("printUri")));
+                    out = generatePdfFromSvg((String) certificateInfo.get("printUri"));
                     if (out != null)
                         return encodeBytesToBase64(out);
                     else {
@@ -276,35 +273,32 @@ public class DigiLockerIntegrationServiceImpl implements DigiLockerIntegrationSe
         return Base64.getEncoder().encodeToString(bytes);
     }
 
-    public byte[] generatePdfFromSvg(String svgContent) throws IOException, TranscoderException {
-        String svgContentDecode = svgContent.replace("data:image/svg+xml,", "");
-        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
-            TranscoderInput input = new TranscoderInput(new ByteArrayInputStream(svgContentDecode.getBytes()));
-            TranscoderOutput output = new TranscoderOutput(outputStream);
-            PDFTranscoder transcoder = new PDFTranscoder();
-            transcoder.transcode(input, output);
-            return outputStream.toByteArray();
+    public byte[] generatePdfFromSvg(String svgContent) throws IOException {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            Map<String, Object> request = new HashMap<>();
+            request.put("inputFormat", "svg");
+            request.put("outputFormat", "pdf");
+            request.put("printUri", svgContent);
+
+            HttpEntity<Object> entity = new HttpEntity<>(request, headers);
+            ResponseEntity<byte[]> responseEntity = restTemplate.exchange(
+                    serverProperties.getPdfGeneratorServiceBaseUrl() + serverProperties.getPdfGeneratorSvgToPdfUrl(),
+                    HttpMethod.POST,
+                    entity,
+                    byte[].class);
+
+            if (responseEntity.getStatusCode() == HttpStatus.OK) {
+                return responseEntity.getBody();
+            } else {
+                logger.error("Issue while get the data and response is: ", responseEntity);
+            }
         } catch (Exception e) {
-            logger.error("Error while generating pdf from svg: ", e);
+            logger.error("Issue while get the data from pdf generator repo", e);
         }
         return null;
-    }
-
-    private static String decodeUrl(String encodedUrl) throws UnsupportedEncodingException {
-        StringBuilder decodedUrl = new StringBuilder();
-        int index = 0;
-        while (index < encodedUrl.length()) {
-            char currentChar = encodedUrl.charAt(index);
-            if (currentChar == '%') {
-                String hex = encodedUrl.substring(index + 1, index + 3);
-                decodedUrl.append((char) Integer.parseInt(hex, 16));
-                index += 3;
-            } else {
-                decodedUrl.append(currentChar);
-                index++;
-            }
-        }
-        return decodedUrl.toString();
     }
 
     private boolean addUpdateDigiLockerLookup(Map<String, Object> userDocInfo) {
