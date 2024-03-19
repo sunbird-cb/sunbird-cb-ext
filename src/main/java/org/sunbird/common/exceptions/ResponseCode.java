@@ -60,14 +60,6 @@ public enum ResponseCode {
     }
 
     /**
-     * @param errorCode
-     * @return
-     */
-    public String getMessage(int errorCode) {
-        return "";
-    }
-
-    /**
      * @return
      */
     public String getErrorCode() {

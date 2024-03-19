@@ -43,13 +43,6 @@ public enum ResponseCode {
         this.responseCodes = responseCode;
     }
 
-    /**
-     * @param errorCode
-     * @return
-     */
-    public String getMessage(int errorCode) {
-        return "";
-    }
 
     /**
      * @return
