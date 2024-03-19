@@ -1,12 +1,13 @@
 package org.sunbird.common.util;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.*;
 
 public class CryptoUtil {
     private CryptoUtil() {}
 
-    private static final Charset US_ASCII = Charset.forName("US-ASCII");
+    private static final Charset US_ASCII = StandardCharsets.US_ASCII;
 
     public static boolean verifyRSASign(String payLoad, byte[] signature, PublicKey key, String algorithm) {
         Signature sign;
