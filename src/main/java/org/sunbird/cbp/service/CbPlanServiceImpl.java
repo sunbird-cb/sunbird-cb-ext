@@ -477,7 +477,6 @@ public class CbPlanServiceImpl implements CbPlanService {
                     if (!courseDetailsMap.containsKey(courseId)) {
                         contentDetails = contentService.readContentFromCache(courseId, null);
                         if (MapUtils.isNotEmpty(contentDetails)) {
-                            //if (Constants.LIVE.equalsIgnoreCase((String) contentDetails.get(Constants.STATUS))) {
                             if (courseId.contains("_rc")) {
                                 if (isVerifiedKaramyogi != null && isVerifiedKaramyogi) {
                                     Map<String, Object> secureSettings = (Map<String, Object>) contentDetails.get(Constants.SECURE_SETTINGS);
@@ -494,7 +493,6 @@ public class CbPlanServiceImpl implements CbPlanService {
                             } else {
                                 courseDetailsMap.put(courseId, contentDetails);
                             }
-                            //}
                         } else {
                             logger.error("Failed to read course details for Id: " + courseId);
                         }
@@ -884,7 +882,8 @@ public class CbPlanServiceImpl implements CbPlanService {
                     cbPlan.remove(Constants.DRAFT_DATA);
                 }
 
-                // these values could be null if plan is draft. set to empty string if so;
+
+                // if the plan is draft these values could be null so setting empty string if so.
                 String assignmentType = (String) cbPlan.get(Constants.CB_ASSIGNMENT_TYPE);
                 assignmentType = (assignmentType == null) ? "" : assignmentType;
                 String contentType = (String) cbPlan.get(Constants.CB_CONTENT_TYPE);

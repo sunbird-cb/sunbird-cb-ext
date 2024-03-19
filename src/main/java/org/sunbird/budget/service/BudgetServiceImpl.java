@@ -494,20 +494,6 @@ public class BudgetServiceImpl implements BudgetService {
 		}
 	}
 
-	// private List<Object> getAllBudgetYearDetails(String orgId) {
-	// List<BudgetInfoModel> budgetDetails =
-	// budgetRepository.getDistinctBudgetYear();
-	// if (CollectionUtils.isEmpty(budgetDetails)) {
-	// return Collections.emptyList();
-	// }
-	// List<Object> budgetResponse = new ArrayList<>();
-	// for (BudgetInfoModel budget : budgetDetails) {
-	// if (budget.getPrimaryKey().getOrgId().equals(orgId)) {
-	// budgetResponse.add(budget.getPrimaryKey().getBudgetYear());
-	// }
-	// }
-	// return budgetResponse;
-	// }
 
 	private List<Map<String, Object>> getSpecificBudgetYearDetails(String orgId, String budgetYear) {
 		Map<String, Object> propertyMap = new HashMap<>();

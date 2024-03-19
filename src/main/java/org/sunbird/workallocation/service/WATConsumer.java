@@ -98,7 +98,6 @@ public class WATConsumer {
 				Event event = getTelemetryEvent(watObj);
 				logger.info("Posting WAT event to telemetry ...");
 				logger.info(mapper.writeValueAsString(event));
-				// postTelemetryEvent(event);
 				producer.push(telemetryEventTopicName, event);
 			}
 		} catch (IOException e) {
@@ -158,7 +157,6 @@ public class WATConsumer {
 		objectData.setId((String) watObject.get("id"));
 		objectData.setType(WorkAllocationConstants.WORK_ORDER_ID_CONST);
 		event.setObject(objectData);
-		// event.setType(WorkAllocationConstants.EVENTS_NAME);
 		return event;
 	}
 

@@ -1436,7 +1436,7 @@ public class ProfileServiceImpl implements ProfileService {
 					orgInfoMap.size()));
 
 			Map<String, Map<String, String>> userEnrolmentMap = new HashMap<String, Map<String, String>>();
-			// Construct the userEnrolment Map;
+			//UserEnrolment map is constructed here.
 			for (Map<String, Object> enrolment : userEnrolmentList) {
 				Map<String, String> enrolmentReport = new HashMap<String, String>();
 				// Get user details

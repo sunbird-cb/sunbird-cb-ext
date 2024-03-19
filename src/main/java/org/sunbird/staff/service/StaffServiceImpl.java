@@ -248,7 +248,6 @@ public class StaffServiceImpl implements StaffService {
 	@Override
 	public SBApiResponse getStaffAudit(String orgId) throws Exception {
 		SBApiResponse response = new SBApiResponse(Constants.API_STAFF_POSITION_HISTORY_READ);
-		// List<Audit> auditDetails = auditRepository.getAudit(orgId, Constants.STAFF);
 
 		Map<String, Object> propertyMap = new HashMap<>();
 		propertyMap.put(Constants.ORG_ID, orgId);

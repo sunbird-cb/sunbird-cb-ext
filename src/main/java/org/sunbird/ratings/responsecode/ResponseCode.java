@@ -114,7 +114,6 @@ public enum ResponseCode {
         if (StringUtils.isBlank(errorCode)) {
             return null;
         } else {
-           // ResponseCode value = null;
             ResponseCode responseCodes[] = ResponseCode.values();
             for (ResponseCode response : responseCodes) {
                 if (response.getErrorCode().equals(errorCode)) {
