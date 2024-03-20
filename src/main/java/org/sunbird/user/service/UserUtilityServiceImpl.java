@@ -682,7 +682,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 			backupUserInfoMap.putAll(userInfoMap);
 			resultArray.clear();
 
-			index = (int) Math.min(userCount, index + size);
+			index = (int) Math.min(userCount,(long) index + size);
 			if (index == userCount) {
 				isCompleted = true;
 			}

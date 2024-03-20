@@ -286,7 +286,7 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 			} else {
 				Map<String, Object> responseMap = new HashMap<>();
 				responseMap.put(Constants.COUNT, 0);
-				responseMap.put(Constants.CONTENT, Collections.EMPTY_LIST);
+				responseMap.put(Constants.CONTENT, Collections.emptyList());
 				response.put(Constants.RESPONSE, responseMap);
 			}
 		} catch (Exception e) {
@@ -734,7 +734,7 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 			return channelName;
 		}
 		List<OrgHierarchy> parentList = orgRepository.findAllByMapId(parentMapId);
-		if (!ObjectUtils.isEmpty(parentList) && parentList.size() > 0) {
+		if (!ObjectUtils.isEmpty(parentList) && !parentList.isEmpty()) {
 			OrgHierarchy parent = parentList.get(0);
 			if (!Constants.SPV.equalsIgnoreCase(parent.getParentMapId())) {
 				prepareChannelName(parent.getParentMapId(), requestData);
@@ -783,7 +783,6 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 
 			if (!StringUtils.isEmpty(orgId)) {
 				String sbRootOrgId = orgRepository.getSbOrgIdFromMapId(parentOrg.getParentMapId());
-				;
 				if (StringUtils.isBlank(parentOrg.getSbRootOrgId())) {
 					sbRootOrgId = orgRepository.getSbOrgIdFromMapId(parentOrg.getParentMapId());
 				}

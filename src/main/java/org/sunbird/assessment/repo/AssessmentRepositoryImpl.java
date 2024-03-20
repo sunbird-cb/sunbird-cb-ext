@@ -17,7 +17,6 @@ import org.sunbird.assessment.dto.AssessmentSubmissionDTO;
 import org.sunbird.cassandra.utils.CassandraOperation;
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.util.Constants;
-import org.sunbird.core.logger.CbExtLogger;
 
 import com.datastax.driver.core.utils.UUIDs;
 import com.google.gson.Gson;

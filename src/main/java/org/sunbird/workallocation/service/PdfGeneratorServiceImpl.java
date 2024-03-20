@@ -463,16 +463,16 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 					pdfData.put(UD_HTML_HEADER_FILE_PATH,file);
 					break;
 				default:
-					String body ="";
+					StringBuilder body = new StringBuilder();
 					for (Map.Entry<String, HashMap> entry1 : params.entrySet()) {
 						String key1 = entry1.getKey();
 						if (key1.startsWith(Constants.SESSION)) {
-							body=	body+readVm(value.get(Constants.BUDGET_DOC_FILE_NAME)+ Constants.DOT_SEPARATOR+Constants.VM, params.get(key1)) ;
+							body.append(readVm(value.get(Constants.BUDGET_DOC_FILE_NAME) + Constants.DOT_SEPARATOR + Constants.VM, params.get(key1)));
 						}
 					}
-					body= createHTMLFile(key, body);
-					pdfData.put(UD_HTML_FILE_PATH, body);
-					pdfData.put(UD_FILE_NAME, body.replace(HTML, Constants.DOT_SEPARATOR+Constants.PDF));
+					body = new StringBuilder(createHTMLFile(key, body.toString()));
+					pdfData.put(UD_HTML_FILE_PATH, body.toString());
+					pdfData.put(UD_FILE_NAME, body.toString().replace(HTML, Constants.DOT_SEPARATOR+Constants.PDF));
 					break;
 			}
 		}

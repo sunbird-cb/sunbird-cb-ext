@@ -808,7 +808,7 @@ public class ProfileServiceImpl implements ProfileService {
 				String strApprovalFields = (String) data.get(Constants.VALUE);
 
 				if (StringUtils.isNotBlank(strApprovalFields)) {
-					String strArray[] = strApprovalFields.split(",", -1);
+					String[] strArray = strApprovalFields.split(",", -1);
 					approvalFields = Arrays.asList(strArray);
 					dataCacheMgr.putObjectInCache(Constants.PROFILE_APPROVAL_FIELDS_KEY, approvalFields);
 					return approvalFields;
@@ -1123,7 +1123,7 @@ public class ProfileServiceImpl implements ProfileService {
 		if (existingRoles == null) {
 			existingRoles = new ArrayList<>();
 		}
-		if (existingRoles.size() == 0) {
+		if (existingRoles.isEmpty()) {
 			existingRoles.add(Constants.PUBLIC);
 		}
 		assignRoleReqBody.put(Constants.ROLES, existingRoles);
@@ -1540,7 +1540,7 @@ public class ProfileServiceImpl implements ProfileService {
 				resultArray.clear();
 				userInfoMap.clear();
 
-				index = (int) Math.min(userCount, index + size);
+				index = (int) Math.min(userCount, (long) index + size);
 
 				if (index == userCount) {
 					isCompleted = true;
@@ -1628,7 +1628,7 @@ public class ProfileServiceImpl implements ProfileService {
 			}
 		}
 
-		if (orgIdList.size() > 0) {
+		if (!orgIdList.isEmpty()) {
 			extOrgService.getOrgDetailsFromDB(orgIdList, orgInfoMap);
 			it = courseInfoMap.entrySet().iterator();
 			while (it.hasNext()) {
@@ -1900,7 +1900,7 @@ public class ProfileServiceImpl implements ProfileService {
 				String strAdminApprovalFields = (String) data.get(Constants.VALUE);
 
 				if (StringUtils.isNotBlank(strAdminApprovalFields)) {
-					String strArray[] = strAdminApprovalFields.split(",", -1);
+					String[] strArray = strAdminApprovalFields.split(",", -1);
 					adminApprovalFields = Arrays.asList(strArray);
 					dataCacheMgr.putObjectInCache(serverConfig.getMdoAdminUpdateUsers(), adminApprovalFields);
 					return adminApprovalFields;

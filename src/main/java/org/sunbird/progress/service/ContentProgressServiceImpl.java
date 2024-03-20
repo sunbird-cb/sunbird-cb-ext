@@ -91,7 +91,7 @@ public class ContentProgressServiceImpl implements ContentProgressService {
                 contentProgressInfo = mapper.convertValue(requestBody.getRequest(), ContentProgressInfo.class);
                 validateContentProgressInfo(contentProgressInfo);
             }
-            if (contentProgressInfo.getUserId() != null && contentProgressInfo.getUserId().size() > 0) {
+            if (contentProgressInfo.getUserId() != null && !contentProgressInfo.getUserId().isEmpty()) {
                 usersList.addAll(contentProgressInfo.getUserId());
             } else {
                 List<Map<String, Object>> enrollmentBatchLookupList = getEnrollmentBatchLookupDetails(contentProgressInfo);
@@ -161,7 +161,7 @@ public class ContentProgressServiceImpl implements ContentProgressService {
         propertyMap.put(Constants.BATCH_ID, contentProgressInfo.getBatchId());
         propertyMap.put(Constants.COURSE_ID, contentProgressInfo.getCourseId());
         propertyMap.put(Constants.USER_ID, usersList);
-        if (contentProgressInfo.getContentId() != null && contentProgressInfo.getContentId().size() > 0) {
+        if (contentProgressInfo.getContentId() != null && !contentProgressInfo.getContentId().isEmpty()) {
             propertyMap.put(Constants.CONTENT_ID_KEY, contentProgressInfo.getContentId());
         }
         return cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD_COURSES,
