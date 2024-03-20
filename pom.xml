@@ -129,16 +129,6 @@
 			<groupId>com.github.kenglxn.qrgen</groupId>
 			<artifactId>javase</artifactId>
 			<version>2.6.0</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.apache.xmlgraphics</groupId>
-					<artifactId>batik-svggen</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.apache.xmlgraphics</groupId>
-					<artifactId>batik-dom</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.velocity</groupId>
@@ -150,29 +140,6 @@
 			<artifactId>velocity-tools</artifactId>
 			<version>2.0</version>
 		</dependency>
-		<!-- https://mvnrepository.com/artifact/com.guicedee.services/org.apache.fop -->
-		<dependency>
-			<groupId>com.guicedee.services</groupId>
-			<artifactId>org.apache.fop</artifactId>
-			<version>1.1.1.7</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.xmlgraphics</groupId>
-			<artifactId>batik-svg-dom</artifactId>
-			<version>1.14</version> <!-- Or the latest version -->
-		</dependency>
-		<!-- https://mvnrepository.com/artifact/org.apache.xmlgraphics/batik-util -->
-		<dependency>
-			<groupId>org.apache.xmlgraphics</groupId>
-			<artifactId>batik-util</artifactId>
-			<version>1.14</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.xmlgraphics</groupId>
-			<artifactId>batik-transcoder</artifactId>
-			<version>1.14</version>
-		</dependency>
-		<!-- End of PDF and QR Code dependency -->
 		<dependency>
 			<groupId>org.sunbird</groupId>
 			<artifactId>cloud-store-sdk</artifactId>
