@@ -63,7 +63,7 @@ public class Organization {
         this.type = type;
     }
 
-    @JacksonXmlProperty(localName = "Address", namespace = "http://tempuri.org/")
+    @JacksonXmlProperty(localName = "Address")
     public Address getAddress() {
         return address;
     }

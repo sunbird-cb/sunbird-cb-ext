@@ -45,7 +45,7 @@ public class ParticipationCertificate {
         this.tournamentName = tournamentName;
     }
 
-    @JacksonXmlProperty(localName = "Participant",  namespace = "http://tempuri.org/")
+    @JacksonXmlProperty(localName = "Participant")
     public Participant getParticipant() {
         return participant;
     }
@@ -54,7 +54,7 @@ public class ParticipationCertificate {
         this.participant = participant;
     }
 
-    @JacksonXmlProperty(localName = "Tournament",  namespace = "http://tempuri.org/")
+    @JacksonXmlProperty(localName = "Tournament")
     public Tournament getTournament() {
         return tournament;
     }
