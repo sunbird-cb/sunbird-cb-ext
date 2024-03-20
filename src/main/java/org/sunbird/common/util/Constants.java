@@ -987,19 +987,31 @@ public class Constants {
 	public static final String TABLE_DIGILOCKER_DOC_INFO = "digilocker_doc_lookup";
 	public static final String ISSUED_USER_CERTIFICATE = "issuedCertificates";
 	public static final String DOC_TYPE = "docType";
-    public static final String PRIMARY_CATEGORY_TAG = "#primaryCategory";
-  	public static final String PASSWORD = "password";
+	public static final String LEARNER_LEADER_BOARD = "learnerLeaderBoard";
+  public static final String PRIMARY_CATEGORY_TAG = "#primaryCategory";
+  public static final String PASSWORD = "password";
 	public static final String STRING_FORMAT_UNZIP="%s/%s/%s/%s";
 	public static final String UNZIP_PATH="/unzippath";
-	public static final String OUTPUT_PATH="/output";
+	public static final String OUTPUT_PATH="output";
 	public static final String MDO_REPORT_ACCESSOR = "MDO_REPORT_ACCESSOR";
 	public static final String GRANT_REPORT_ACCESS_API ="api.grant.access.report";
 	public static final String MDO_ADMIN_ROLE = "mdoadmin";
 	public static final String MDO_ADMIN = "MDO_ADMIN";
-	public static final String REPORT_ACCESS_EXPIRY_TABLE = "report_access_expiry";
+	public static final String REPORT_ACCESS_EXPIRY_TABLE = "user_report_expiry";
 	public static final String REPORT_EXPIRY_DATE  = "reportExpiryDate";
+	public static final String ERROR  = "error";
+	public static final String CONTEXT_TOKEN  = "contextToken";
+	public static final String TABLE_LEARNER_LEADER_BOARD_LOOK_UP="learner_leaderboard_lookup";
+	public static final String TABLE_LEARNER_LEADER_BOARD="learner_leaderboard";
+	public static final String DB_COLUMN_ROW_NUM ="row_num";
+	public static final String GET_FILE_INFO_OPERATIONAL_REPORTS ="api.getfileinfo.report";
 	public static final String X_DIGILOCKER_HMAC = "x-digilocker-hmac";
-
+	public static final String LAST_MODIFIED="lastModified";
+	public static final String FILE_METADATA="fileMetaData";
+	public static final String USER_REPORT_EXPIRY_DATE = "report_expiry_date";
+	public static final String REPORT_ACCESS_EXPIRY = "reportAccessExpiry";
+	public static final String READ_REPORT_ACCESS_API = "api.read.access.report";
+	public static final String X_DIGILOCKER_HMAC = "x-digilocker-hmac";
 
   private Constants() {
 		throw new IllegalStateException("Utility class");

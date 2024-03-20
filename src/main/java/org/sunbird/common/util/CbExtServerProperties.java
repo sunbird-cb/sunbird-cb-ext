@@ -675,6 +675,15 @@ public class CbExtServerProperties {
 	@Value("${es.default.result.limit}")
 	private int esDefaultResultLimit;
 
+	@Value("${secret.key.token.validation}")
+	private String secretKeyTokenValidation;
+
+	@Value("${operational.report.folder.name}")
+	private String operationalReportFolderName;
+
+	@Value("${operational.report.file.name}")
+	private String operationReportFileName;
+
 	@Value("${digilocker-api-key}")
 	private String digiLockerAPIKey;
 
@@ -2388,6 +2397,30 @@ public class CbExtServerProperties {
 
 	public void setSbRoleRead(String sbRoleRead) {
 		this.sbRoleRead = sbRoleRead;
+	}
+
+	public String getSecretKeyTokenValidation() {
+		return secretKeyTokenValidation;
+	}
+
+	public void setSecretKeyTokenValidation(String secretKeyTokenValidation) {
+		this.secretKeyTokenValidation = secretKeyTokenValidation;
+	}
+
+	public String getOperationalReportFolderName() {
+		return operationalReportFolderName;
+	}
+
+	public void setOperationalReportFolderName(String operationalReportFolderName) {
+		this.operationalReportFolderName = operationalReportFolderName;
+	}
+
+	public String getOperationReportFileName() {
+		return operationReportFileName;
+	}
+
+	public void setOperationReportFileName(String operationReportFileName) {
+		this.operationReportFileName = operationReportFileName;
 	}
 
 	public String getDigiLockerAPIKey() {

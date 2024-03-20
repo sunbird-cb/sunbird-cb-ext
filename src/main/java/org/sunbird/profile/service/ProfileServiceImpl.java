@@ -1,8 +1,14 @@
 package org.sunbird.profile.service;
 
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.SignatureException;
+import io.jsonwebtoken.UnsupportedJwtException;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.ListUtils;
 import org.apache.commons.collections.MapUtils;
@@ -56,6 +62,7 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import io.jsonwebtoken.*;
 
 import static java.util.stream.Collectors.toList;
 
@@ -108,8 +115,7 @@ public class ProfileServiceImpl implements ProfileService {
 	private Logger log = LoggerFactory.getLogger(getClass().getName());
 
 	@Override
-	public SBApiResponse profileUpdate(Map<String, Object> request, String userToken, String authToken, String rootOrgId)
-			throws Exception {
+	public SBApiResponse profileUpdate(Map<String, Object> request, String userToken, String authToken, String rootOrgId) {
 		SBApiResponse response = new SBApiResponse(Constants.API_PROFILE_UPDATE);
 		try {
 			Map<String, Object> requestData = (Map<String, Object>) request.get(Constants.REQUEST);
@@ -128,6 +134,13 @@ public class ProfileServiceImpl implements ProfileService {
 				return response;
 			}
 			Map<String, Object> profileDetailsMap = (Map<String, Object>) requestData.get(Constants.PROFILE_DETAILS);
+			String validatePhoneEmailErrMsg = validateExistingPhoneEmail(profileDetailsMap);
+			if (!validatePhoneEmailErrMsg.isEmpty()) {
+				response.setResponseCode(HttpStatus.BAD_REQUEST);
+				response.getParams().setStatus(Constants.FAILED);
+				response.getParams().setErrmsg(validatePhoneEmailErrMsg);
+				return response;
+			}
 			List<String> approvalFieldList = approvalFields();
 			String newDeptName = checkDepartment(profileDetailsMap);
 			Map<String, Object> transitionData = new HashMap<>();
@@ -874,6 +887,8 @@ public class ProfileServiceImpl implements ProfileService {
 						updatedRequest.put(Constants.FIRSTNAME, (String) personalDetailsMap.get(paramName));
 					} else if (Constants.MOBILE.equalsIgnoreCase(paramName)) {
 						updatedRequest.put(Constants.PHONE, String.valueOf(personalDetailsMap.get(paramName)));
+					} else if (Constants.PRIMARY_EMAIL.equalsIgnoreCase(paramName)) {
+						updatedRequest.put(Constants.EMAIL, String.valueOf(personalDetailsMap.get(paramName)));
 					}
 				}
 			}
@@ -1930,6 +1945,109 @@ public class ProfileServiceImpl implements ProfileService {
 		}
 		return new ArrayList<>();
 	}
+
+
+	/**
+	 * Updates the user profile with version 2.
+	 *
+	 * @param request   The request containing profile update data.
+	 * @param userToken The user token for authentication.
+	 * @param authToken The authentication token.
+	 * @param rootOrgId The root organization ID.
+	 * @return SBApiResponse object containing the response of the profile update.
+	 */
+	@Override
+	public SBApiResponse profileUpdateV2(Map<String, Object> request, String userToken, String authToken, String rootOrgId) {
+		SBApiResponse response = new SBApiResponse(Constants.API_PROFILE_UPDATE);
+		// Extracting the request map from the input request
+		Map<String, Object> requestMap = (Map<String, Object>) request.get(Constants.REQUEST);
+		// Validating the token from the request map
+		try {
+			String contextTokenValue=validateToken((String) requestMap.get(Constants.CONTEXT_TOKEN));
+			if(contextTokenValue.equalsIgnoreCase(Constants.CONTEXT_TYPE)){
+				return profileUpdate(request, userToken, authToken, rootOrgId);
+			}else{
+				log.error("Failed to process the request since the parameter is missing: " + Constants.CONTEXT_TYPE);
+				response.getParams().setStatus(Constants.FAILED);
+				response.getParams().setErr("Failed to process the request since the parameter is missing: " + Constants.CONTEXT_TYPE);
+				response.setResponseCode(HttpStatus.BAD_REQUEST);
+			}
+		} catch (Exception e) {
+			log.error("Failed to validate the token: ", e);
+			response.getParams().setStatus(Constants.FAILED);
+			response.getParams().setErr(e.getMessage());
+			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		return response;
+	}
+
+
+	/**
+	 * Validates the given JWT token.
+	 *
+	 * @param token The JWT token to validate.
+	 * @return True if the token is valid; false otherwise.
+	 * @throws Exception if any error occurs during token validation.
+	 */
+	public String validateToken(String token) throws Exception {
+		try {
+			// Parsing the token and extracting its subject (claims)
+			String tokens = Jwts.parser().setSigningKey(serverConfig.getSecretKeyTokenValidation()).parseClaimsJws(token).getBody().getSubject();
+			// Parsing the subject (claims) into a map using Jackson ObjectMapper
+			Map<String, String> parsedMap = mapper.readValue(tokens, new TypeReference<Map<String, String>>() {
+			});
+			if (!org.apache.commons.lang.StringUtils.isEmpty(parsedMap.get(Constants.CONTEXT_TYPE))) {
+				return Constants.CONTEXT_TYPE;
+			}else {
+				return Constants.ERROR;
+			}
+		} catch (ExpiredJwtException e) {
+			// Handling ExpiredJwtException
+			throw new Exception("ExpiredJwt exception has occurred: " , e);
+		} catch (UnsupportedJwtException e) {
+			// Handling UnsupportedJwtException
+			throw new Exception("UnsupportedJwt exception has occurred: " , e);
+		} catch (MalformedJwtException e) {
+			// Handling MalformedJwtException
+			throw new Exception("MalformedJwt exception has occurred: " , e);
+		} catch (SignatureException e) {
+			// Handling SignatureException
+			throw new Exception("Signature exception has occurred: " , e);
+		} catch (IllegalArgumentException e) {
+			// Handling IllegalArgumentException
+			throw new Exception("IllegalArgumentException has occurred: " , e);
+		} catch (JsonMappingException e) {
+			// Handling JsonMappingException
+			throw new Exception("Json Mapping exception has occurred: " , e);
+		} catch (JsonParseException e) {
+			// Handling JsonParseException
+			throw new Exception("Json Parsing exception has occurred: " , e);
+		} catch (IOException e) {
+			// Handling IOException
+			throw new Exception("IOException has occurred: " , e);
+		}
+    }
+
+	/**
+	 * Method to validate if the provided email or phone number already exists in the system.
+	 *
+	 * @param profileDetailsMap A map containing the profile details.
+	 * @return Constants.OK if neither email nor phone number exists, Constants.EMAIL_EXIST_ERROR if email already exists,
+	 *         Constants.PHONE_NUMBER_EXIST_ERROR if phone number already exists.
+	 */
+	private String validateExistingPhoneEmail(Map<String, Object> profileDetailsMap) {
+		if (profileDetailsMap.containsKey(Constants.PERSONAL_DETAILS)) {
+			Map<String, Object> personalDetails = (Map<String, Object>) profileDetailsMap.get(Constants.PERSONAL_DETAILS);
+			if (personalDetails.containsKey(Constants.PRIMARY_EMAIL) && (userUtilityService.isUserExist(Constants.EMAIL, (String) personalDetails.get(Constants.PRIMARY_EMAIL)))) {
+				return Constants.EMAIL_EXIST_ERROR;
+			}
+			if (personalDetails.containsKey(Constants.PHONE) && (userUtilityService.isUserExist(Constants.PHONE, (String) personalDetails.get(Constants.PHONE)))) {
+				return Constants.PHONE_NUMBER_EXIST_ERROR;
+			}
+		}
+		return "";
+	}
+
 }
 
 
