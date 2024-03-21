@@ -51,12 +51,6 @@ public enum ResponseCode {
         return errorCode;
     }
 
-    /**
-     * @param errorCode
-     */
-    public void setErrorCode(String errorCode) {
-        this.errorCode = errorCode;
-    }
 
     /**
      * @return
@@ -65,12 +59,6 @@ public enum ResponseCode {
         return errorMessage;
     }
 
-    /**
-     * @param errorMessage
-     */
-    public void setErrorMessage(String errorMessage) {
-        this.errorMessage = errorMessage;
-    }
 
     /**
      * This method will provide status message based on code
@@ -99,9 +87,6 @@ public enum ResponseCode {
         return responseCodes;
     }
 
-    public void setResponseCode(int responseCode) {
-        this.responseCodes = responseCode;
-    }
 
 
     /**
