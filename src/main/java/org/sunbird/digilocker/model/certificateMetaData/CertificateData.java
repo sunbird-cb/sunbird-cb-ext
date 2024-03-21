@@ -12,7 +12,7 @@ public class CertificateData {
         this.certificate = new Certificate();
         this.participationCertificate = new ParticipationCertificate();
     }
-    @JacksonXmlProperty(localName = "Certificate", namespace = "http://tempuri.org/")
+    @JacksonXmlProperty(localName = "Certificate")
     public Certificate getCertificate() {
         return certificate;
     }
@@ -21,7 +21,7 @@ public class CertificateData {
         this.certificate = certificate;
     }
 
-    @JacksonXmlProperty(localName = "ParticipationCertificate", namespace = "http://tempuri.org/")
+    @JacksonXmlProperty(localName = "ParticipationCertificate")
     public ParticipationCertificate getParticipationCertificate() {
         return participationCertificate;
     }

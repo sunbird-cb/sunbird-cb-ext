@@ -3,9 +3,7 @@ package org.sunbird.digilocker.model.certificateMetaData;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
-import java.util.Date;
-
-@JacksonXmlRootElement(localName = "Certificate", namespace = "http://tempuri.org/")
+@JacksonXmlRootElement(localName = "Certificate")
 public class CertificateMetaData {
     private String language;
     private String name;
@@ -15,7 +13,7 @@ public class CertificateMetaData {
     private String expiryDate;
     private String validFromDate;
     private String issuedAt;
-    private Date issueDate;
+    private String issueDate;
     private String status;
     private CertificateIssuedBy issuedBy;
     private CertificateIssuedTo issuedTo;
@@ -112,11 +110,11 @@ public class CertificateMetaData {
     }
 
     @JacksonXmlProperty(isAttribute = true)
-    public Date getIssueDate() {
+    public String getIssueDate() {
         return issueDate;
     }
 
-    public void setIssueDate(Date issueDate) {
+    public void setIssueDate(String issueDate) {
         this.issueDate = issueDate;
     }
 
@@ -129,7 +127,7 @@ public class CertificateMetaData {
         this.status = status;
     }
 
-    @JacksonXmlProperty(localName = "IssuedBy", namespace = "http://tempuri.org/")
+    @JacksonXmlProperty(localName = "IssuedBy")
     public CertificateIssuedBy getIssuedBy() {
         return issuedBy;
     }
@@ -138,7 +136,7 @@ public class CertificateMetaData {
         this.issuedBy = issuedBy;
     }
 
-    @JacksonXmlProperty(localName = "IssuedTo", namespace = "http://tempuri.org/")
+    @JacksonXmlProperty(localName = "IssuedTo")
     public CertificateIssuedTo getIssuedTo() {
         return issuedTo;
     }
@@ -147,7 +145,7 @@ public class CertificateMetaData {
         this.issuedTo = issuedTo;
     }
 
-    @JacksonXmlProperty(localName = "CertificateData", namespace = "http://tempuri.org/")
+    @JacksonXmlProperty(localName = "CertificateData")
     public CertificateData getCertificateData() {
         return certificateData;
     }
@@ -156,7 +154,7 @@ public class CertificateMetaData {
         this.certificateData = certificateData;
     }
 
-    @JacksonXmlProperty(localName = "Signature", namespace = "http://tempuri.org/")
+    @JacksonXmlProperty(localName = "Signature")
     public String getSignature() {
         return signature;
     }

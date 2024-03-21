@@ -9,7 +9,7 @@ public class CertificateIssuedTo {
     public CertificateIssuedTo() {
         this.personInfo = new PersonInfo();
     }
-    @JacksonXmlProperty(localName = "Person",  namespace = "http://tempuri.org/")
+    @JacksonXmlProperty(localName = "Person")
     public PersonInfo getPersonInfo() {
         return personInfo;
     }
