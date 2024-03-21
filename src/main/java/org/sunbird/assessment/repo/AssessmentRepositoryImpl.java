@@ -17,7 +17,6 @@ import org.sunbird.assessment.dto.AssessmentSubmissionDTO;
 import org.sunbird.cassandra.utils.CassandraOperation;
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.util.Constants;
-
 import com.datastax.driver.core.utils.UUIDs;
 import com.google.gson.Gson;
 
@@ -45,12 +44,12 @@ public class AssessmentRepositoryImpl implements AssessmentRepository {
 
 	@Override
 	public Map<String, Object> getAssessmentAnswerKey(String artifactUrl) {
-		return null;
+		return new HashMap<>();
 	}
 
 	@Override
 	public Map<String, Object> getQuizAnswerKey(AssessmentSubmissionDTO quizMap) {
-		return null;
+		return new HashMap<>();
 	}
 
 	@Override
@@ -149,9 +148,8 @@ public class AssessmentRepositoryImpl implements AssessmentRepository {
 		Map<String, Object> request = new HashMap<>();
 		request.put(Constants.USER_ID, userId);
 		request.put(Constants.ASSESSMENT_ID_KEY, assessmentIdentifier);
-		List<Map<String, Object>> existingDataList = cassandraOperation.getRecordsByProperties(
+		return cassandraOperation.getRecordsByProperties(
 				Constants.KEYSPACE_SUNBIRD, Constants.TABLE_USER_ASSESSMENT_DATA, request, null);
-		return existingDataList;
 	}
 
 	@Override

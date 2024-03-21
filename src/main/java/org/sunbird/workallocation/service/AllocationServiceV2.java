@@ -696,7 +696,7 @@ public class AllocationServiceV2 {
 		return downloadableLink;
 	}
 
-	public HashMap<String, Object> getUsersResult(Set<String> userIds) {
+	public Map<String, Object> getUsersResult(Set<String> userIds) {
 		HashMap<String, Object> userResult = new HashMap<>();
 		Map<String, Object> request = getSearchObject(userIds);
 		Map<String, Object> record;

@@ -290,10 +290,9 @@ public class CohortsServiceImpl implements CohortsService {
 		enrollObj.put("courseId", contentId);
 		enrollObj.put("batchId", batchId);
 		req.put("request", enrollObj);
-		Map<String, Object> enrollMentResponse = outboundRequestHandlerService.fetchResultUsingPost(
+		return outboundRequestHandlerService.fetchResultUsingPost(
 				cbExtServerProperties.getCourseServiceHost() + cbExtServerProperties.getUserCourseEnroll(), req,
 				headers);
-		return enrollMentResponse;
 	}
 
 	private void processChildContentId(String givenContentId, List<String> assessmentIdList) {

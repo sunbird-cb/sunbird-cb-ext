@@ -660,7 +660,7 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
                 // Fetching all the remaining questions details from the Redis
                 questionsFromAssessment.addAll((List<String>) section.get(Constants.CHILD_NODES));
             }
-            if (validateQuestionListRequest(identifierList, questionsFromAssessment)) {
+            if (Boolean.TRUE.equals(validateQuestionListRequest(identifierList, questionsFromAssessment))) {
                 result.put(Constants.ERROR_MESSAGE, StringUtils.EMPTY);
             } else {
                 result.put(Constants.ERROR_MESSAGE, Constants.THE_QUESTIONS_IDS_PROVIDED_DONT_MATCH);

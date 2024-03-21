@@ -877,14 +877,13 @@ public class ProfileServiceImpl implements ProfileService {
 
 	public Map<String, Object> getOrgProfileForOrgId(String registrationCode) {
 		try {
-			Map<String, Object> esObject = indexerService.readEntity(serverConfig.getOrgOnboardingIndex(),
+			return indexerService.readEntity(serverConfig.getOrgOnboardingIndex(),
 					serverConfig.getEsProfileIndexType(), registrationCode);
-			return esObject;
 		} catch (Exception e) {
 			log.error("Failed to get Org Profile. Exception: ", e);
 			log.warn(String.format("Exception in %s : %s", "getUserRegistrationDetails", e.getMessage()));
 		}
-		return null;
+		return Collections.emptyMap();
 	}
 
 	private String validateOrgProfilePayload(Map<String, Object> orgProfileInfo) {
@@ -1316,7 +1315,7 @@ public class ProfileServiceImpl implements ProfileService {
 		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPost(
 				serverConfig.getSbUrl() + serverConfig.getSbAssignRolePath(), requestObj,
 				ProjectUtil.getDefaultHeaders());
-		if (readData.isEmpty() == Boolean.FALSE) {
+		if (!readData.isEmpty()) {
 			if (Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE)))
 				retValue = Boolean.TRUE;
 		}

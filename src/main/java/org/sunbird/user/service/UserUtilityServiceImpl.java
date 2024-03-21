@@ -102,9 +102,8 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 
 			SunbirdApiResp sunbirdApiResp = restTemplate.postForObject(serverUrl, requestEnty, SunbirdApiResp.class);
 
-			boolean expression = (sunbirdApiResp != null && "OK".equalsIgnoreCase(sunbirdApiResp.getResponseCode())
+			return (sunbirdApiResp != null && "OK".equalsIgnoreCase(sunbirdApiResp.getResponseCode())
 					&& sunbirdApiResp.getResult().getResponse().getCount() >= 1);
-			return expression;
 
 		} catch (Exception e) {
 			throw new ApplicationLogicError(Constants.SUNBIRD_SERVICE_ERROR, e);

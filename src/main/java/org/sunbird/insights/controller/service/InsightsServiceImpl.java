@@ -94,7 +94,7 @@ public class InsightsServiceImpl implements InsightsService {
 
 
     }
-    public void populateIfNudgeExist(List<String> data, ArrayList<Object> nudges, String type, List<String> organizations, String[] labels) {
+    public void populateIfNudgeExist(List<String> data, List<Object> nudges, String type, List<String> organizations, String[] labels) {
         for (int i = 0, j = 0; i < data.size(); i += 2, j++) {
             double yesterday = StringUtils.isNotBlank(data.get(i)) ? Double.parseDouble(data.get(i)) : 0.0;
             double today = StringUtils.isNotBlank(data.get(i+1)) ? Double.parseDouble(data.get(i+1)) : 0.0;

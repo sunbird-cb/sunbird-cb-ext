@@ -118,7 +118,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 						}
 
 						if (status.equals(RestStatus.CREATED) || status.equals(RestStatus.OK)) {
-							if (isPreApprovedDomain(regDocument.getEmail())) {
+							if (Boolean.TRUE.equals(isPreApprovedDomain(regDocument.getEmail()))) {
 								// Fire createUser event
 								kafkaProducer.push(serverProperties.getUserRegistrationAutoCreateUserTopic(),
 										regDocument);
@@ -330,7 +330,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 				str.append(validateErr);
 			}
 		}
-		if(StringUtils.isNotBlank(userRegInfo.getPhone()) && !ProjectUtil.validateContactPattern(userRegInfo.getPhone())) {
+		if(StringUtils.isNotBlank(userRegInfo.getPhone()) && Boolean.TRUE.equals(!ProjectUtil.validateContactPattern(userRegInfo.getPhone()))) {
 			str.setLength(0);
 			str.append("Invalid phone number");
 		}
@@ -437,7 +437,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 			String emailDomain = email.split("@")[1];
 			Boolean retValue = isApprovedDomains(emailDomain, Constants.USER_REGISTRATION_DOMAIN)
 					|| isApprovedDomains(emailDomain, Constants.USER_REGISTRATION_PRE_APPROVED_DOMAIN);
-			if (!retValue) {
+			if (Boolean.FALSE.equals(retValue)) {
 				str.append("Email domain of this email address is not approved. Please use Request for help.");
 			}
 		} else {

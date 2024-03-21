@@ -38,8 +38,7 @@ public class PdfGeneratorController {
 		headers.setContentType(MediaType.APPLICATION_PDF);
 		headers.add("Content-Disposition", "inline; filename=wo_report.pdf");
 
-		ResponseEntity<?> response = new ResponseEntity<>(out, headers, HttpStatus.OK);
-		return response;
+		return new ResponseEntity<>(out, headers, HttpStatus.OK);
 	}
 
 	@GetMapping(value = "/getWOPublishedPdf/{woId}")
