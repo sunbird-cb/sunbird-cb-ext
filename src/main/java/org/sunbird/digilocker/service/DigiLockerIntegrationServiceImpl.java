@@ -147,7 +147,7 @@ public class DigiLockerIntegrationServiceImpl implements DigiLockerIntegrationSe
                                 String content = getCertificate((String) dockerLookUpInfo.get(Constants.CERTIFICATE_ID));
                                 if (StringUtils.isNotEmpty(content)) {
                                     docDetails.setDocContent(content.toString());
-                                    certificateAddInfoDTO.setCertificateId((String)dockerLookUpInfo.get(Constants.CERTIFICATE_ID));
+                                    certificateAddInfoDTO.setCertificateId(certificateAccessCode);
                                     certificateAddInfoDTO.setDocumentInfo(request.getDocDetails().getDocType());
                                     certificateAddInfoDTO.setCertificateName((String)dockerLookUpInfo.get(Constants.CERTIFICATE_NAME));
                                     certificateAddInfoDTO.setDocumentName(DocumentType.getValueForKey(request.getDocDetails().getDocType()));
@@ -224,7 +224,7 @@ public class DigiLockerIntegrationServiceImpl implements DigiLockerIntegrationSe
                     docDetails.setDocContent(content.toString());
                     Map<String, Object> getUserInfo = userUtilityService.getUserDetails(Constants.IDENTIFIER, (String)digiLockerDocInfo.get(Constants.USER_ID));
                     if (MapUtils.isNotEmpty(getUserInfo)) {
-                        certificateAddInfoDTO.setCertificateId((String)digiLockerDocInfo.get(Constants.CERTIFICATE_ID));
+                        certificateAddInfoDTO.setCertificateId((String)digiLockerDocInfo.get(Constants.ACCESS_TOKEN));
                         certificateAddInfoDTO.setDocumentInfo(uri[1]);
                         certificateAddInfoDTO.setCertificateName((String)digiLockerDocInfo.get(Constants.CERTIFICATE_NAME));
                         certificateAddInfoDTO.setDocumentName(DocumentType.getValueForKey(uri[1]));
