@@ -72,6 +72,7 @@ public class DigiLockerIntegrationServiceImpl implements DigiLockerIntegrationSe
         } catch (IOException e) {
             logger.error("Not able to process the request requestBody: " + requestBody, e);
             responseStatus.setStatus("0");
+            response.getDocDetails().setDocContent("Document is not available.");
             return response;
         }
         CertificateAddInfoDTO certificateAddInfoDTO = new CertificateAddInfoDTO();
@@ -105,6 +106,7 @@ public class DigiLockerIntegrationServiceImpl implements DigiLockerIntegrationSe
                         if ((CollectionUtils.isEmpty(userEnrollmentInfo)) || (CollectionUtils.isNotEmpty(userEnrollmentInfo) && userEnrollmentInfo.size() > 1)) {
                             logger.error("Issue with getting the userEnrollment List" + userEnrollmentInfo);
                             response.setResponseStatus(new ResponseStatus("0", dateFormat.format(new Date()), request.getTxn()));
+                            response.getDocDetails().setDocContent("Document is not available.");
                             return response;
                         } else {
                             URIResponseDocDetails docDetails = response.getDocDetails();
@@ -209,6 +211,7 @@ public class DigiLockerIntegrationServiceImpl implements DigiLockerIntegrationSe
         } catch (IOException e) {
             logger.error("Not able to process the request requestBody: " + requestBody, e);
             responseStatus.setStatus("0");
+            response.getDocDetails().setDocContent("Document is not available.");
             return response;
         }
         CertificateAddInfoDTO certificateAddInfoDTO = new CertificateAddInfoDTO();
