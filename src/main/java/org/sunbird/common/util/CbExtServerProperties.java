@@ -689,6 +689,13 @@ public class CbExtServerProperties {
 	@Value("${cipher.algorithm}")
 	private String cipherAlogrithm;
 
+	@Value("${pdf-generator-service-host}")
+	private String pdfGeneratorServiceBaseUrl;
+
+	@Value("${pdf-generator-svg-to-pdf-url}")
+	private String pdfGeneratorSvgToPdfUrl;
+
+
 	public boolean qListFromCacheEnabled() {
 		return qListFromCacheEnabled;
 	}
@@ -2432,5 +2439,21 @@ public class CbExtServerProperties {
 
 	public void setCipherAlogrithm(String cipherAlogrithm) {
 		this.cipherAlogrithm = cipherAlogrithm;
+	}
+
+	public String getPdfGeneratorServiceBaseUrl() {
+		return pdfGeneratorServiceBaseUrl;
+	}
+
+	public void setPdfGeneratorServiceBaseUrl(String pdfGeneratorServiceBaseUrl) {
+		this.pdfGeneratorServiceBaseUrl = pdfGeneratorServiceBaseUrl;
+	}
+
+	public String getPdfGeneratorSvgToPdfUrl() {
+		return pdfGeneratorSvgToPdfUrl;
+	}
+
+	public void setPdfGeneratorSvgToPdfUrl(String pdfGeneratorSvgToPdfUrl) {
+		this.pdfGeneratorSvgToPdfUrl = pdfGeneratorSvgToPdfUrl;
 	}
 }
