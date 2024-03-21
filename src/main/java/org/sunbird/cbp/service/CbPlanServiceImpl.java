@@ -744,7 +744,7 @@ public class CbPlanServiceImpl implements CbPlanService {
             cbPlanInfoUpdateAssignmentKey = assignmentKeyInfoList.stream()
                     .filter(key -> !planDto.getAssignmentTypeInfo().contains(key)).collect(Collectors.toList());
             cbPlanInfoRequestUpdateAssignmentKey = cbPlanMap.stream().filter(key -> (planDto.getAssignmentTypeInfo().contains((String)key.get(Constants.CB_ASSIGNMENT_TYPE_INFO_KEY))
-                                                  && (Boolean)key.get(Constants.CB_IS_ACTIVE) == Boolean.TRUE))
+                                                  && (Boolean)key.get(Constants.CB_IS_ACTIVE) == Boolean.FALSE))
                                                     .map(key -> (String) key.get(Constants.CB_ASSIGNMENT_TYPE_INFO_KEY))
                                                     .collect(Collectors.toList());
             cbPlanInfoUpdateAssignmentKey.addAll(cbPlanInfoRequestUpdateAssignmentKey);
