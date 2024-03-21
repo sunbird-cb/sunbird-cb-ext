@@ -1,14 +1,12 @@
 package org.sunbird.digilocker.model;
 
-import java.util.Date;
-
 public class CertificateAddInfoDTO {
 
     private String certificateName;
     private String documentName;
     private String documentInfo;
     private String certificateId;
-    private Date certificateIssueOn;
+    private String certificateIssueOn;
 
     private String userName;
 
@@ -58,11 +56,11 @@ public class CertificateAddInfoDTO {
         this.certificateId = certificateId;
     }
 
-    public Date getCertificateIssueOn() {
+    public String getCertificateIssueOn() {
         return certificateIssueOn;
     }
 
-    public void setCertificateIssueOn(Date certificateIssueOn) {
+    public void setCertificateIssueOn(String certificateIssueOn) {
         this.certificateIssueOn = certificateIssueOn;
     }
 

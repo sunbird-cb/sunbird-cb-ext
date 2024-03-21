@@ -1,10 +1,12 @@
 package org.sunbird.digilocker.model;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.sunbird.digilocker.model.certificateMetaData.CertificateMetaData;
 
 import java.io.Serializable;
 
+@JacksonXmlRootElement(localName = "CertificateInfo")
 public class CertificateInfo implements Serializable {
 
     private CertificateMetaData certificateMetaData;
@@ -13,7 +15,7 @@ public class CertificateInfo implements Serializable {
         this.certificateMetaData = new CertificateMetaData();
     }
 
-    @JacksonXmlProperty(localName = "Certificate", namespace = "http://tempuri.org/")
+    @JacksonXmlProperty(localName = "Certificate")
     public CertificateMetaData getCertificateMetaData() {
         return certificateMetaData;
     }

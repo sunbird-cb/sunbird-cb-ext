@@ -188,7 +188,7 @@ public class PersonInfo {
         this.email = email;
     }
 
-    @JacksonXmlProperty(localName = "Address", namespace = "http://tempuri.org/")
+    @JacksonXmlProperty(localName = "Address")
     public Address getAddress() {
         return address;
     }
@@ -197,7 +197,7 @@ public class PersonInfo {
         this.address = address;
     }
 
-    @JacksonXmlProperty(localName = "Photo", namespace = "http://tempuri.org/")
+    @JacksonXmlProperty(localName = "Photo")
     public Photo getPhoto() {
         return photo;
     }
