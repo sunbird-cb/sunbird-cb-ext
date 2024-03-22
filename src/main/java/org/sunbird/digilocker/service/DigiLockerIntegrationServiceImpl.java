@@ -136,7 +136,7 @@ public class DigiLockerIntegrationServiceImpl implements DigiLockerIntegrationSe
                             userEnrollment = userEnrollment.stream().filter(enroll -> ((String) enroll.get("token")).equalsIgnoreCase(certificateAccessCode)).collect(Collectors.toList());
                             dockerLookUpInfo.put(Constants.CERTIFICATE_ID, userEnrollment.get(0).get(Constants.IDENTIFIER));
                             try {
-                                dockerLookUpInfo.put(Constants.LAST_ISSUED_ON, simpleDateFormat.format(dateFormat.parse((String) userEnrollment.get(0).get(Constants.LAST_ISSUED_ON))));
+                                dockerLookUpInfo.put(Constants.LAST_ISSUED_ON, dateFormat.parse((String) userEnrollment.get(0).get(Constants.LAST_ISSUED_ON)));
                             } catch (ParseException e) {
                                 responseStatus.setStatus("0");
                                 logger.error("Not able to parse date");
@@ -153,7 +153,7 @@ public class DigiLockerIntegrationServiceImpl implements DigiLockerIntegrationSe
                                     certificateAddInfoDTO.setDocumentInfo(request.getDocDetails().getDocType());
                                     certificateAddInfoDTO.setCertificateName((String)dockerLookUpInfo.get(Constants.CERTIFICATE_NAME));
                                     certificateAddInfoDTO.setDocumentName(DocumentType.getValueForKey(request.getDocDetails().getDocType()));
-                                    certificateAddInfoDTO.setCertificateIssueOn((String)dockerLookUpInfo.get(Constants.LAST_ISSUED_ON));
+                                    certificateAddInfoDTO.setCertificateIssueOn(simpleDateFormat.format((Date)dockerLookUpInfo.get(Constants.LAST_ISSUED_ON)));
                                     certificateAddInfoDTO.setUserName((String)getUserInfo.get(Constants.FIRSTNAME));
                                     certificateAddInfoDTO.setSwd((String)getUserInfo.get(Constants.CHANNEL));
                                     certificateAddInfoDTO.setSwdIndicator(String.valueOf(((String)getUserInfo.get(Constants.CHANNEL)).charAt(0)));
