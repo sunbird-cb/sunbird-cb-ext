@@ -72,6 +72,7 @@ public class DigiLockerIntegrationServiceImpl implements DigiLockerIntegrationSe
         } catch (IOException e) {
             logger.error("Not able to process the request requestBody: " + requestBody, e);
             responseStatus.setStatus("0");
+            response.getDocDetails().setDocContent("Document is not available.");
             return response;
         }
         CertificateAddInfoDTO certificateAddInfoDTO = new CertificateAddInfoDTO();
@@ -105,6 +106,7 @@ public class DigiLockerIntegrationServiceImpl implements DigiLockerIntegrationSe
                         if ((CollectionUtils.isEmpty(userEnrollmentInfo)) || (CollectionUtils.isNotEmpty(userEnrollmentInfo) && userEnrollmentInfo.size() > 1)) {
                             logger.error("Issue with getting the userEnrollment List" + userEnrollmentInfo);
                             response.setResponseStatus(new ResponseStatus("0", dateFormat.format(new Date()), request.getTxn()));
+                            response.getDocDetails().setDocContent("Document is not available.");
                             return response;
                         } else {
                             URIResponseDocDetails docDetails = response.getDocDetails();
@@ -134,7 +136,7 @@ public class DigiLockerIntegrationServiceImpl implements DigiLockerIntegrationSe
                             userEnrollment = userEnrollment.stream().filter(enroll -> ((String) enroll.get("token")).equalsIgnoreCase(certificateAccessCode)).collect(Collectors.toList());
                             dockerLookUpInfo.put(Constants.CERTIFICATE_ID, userEnrollment.get(0).get(Constants.IDENTIFIER));
                             try {
-                                dockerLookUpInfo.put(Constants.LAST_ISSUED_ON, simpleDateFormat.format(dateFormat.parse((String) userEnrollment.get(0).get(Constants.LAST_ISSUED_ON))));
+                                dockerLookUpInfo.put(Constants.LAST_ISSUED_ON, dateFormat.parse((String) userEnrollment.get(0).get(Constants.LAST_ISSUED_ON)));
                             } catch (ParseException e) {
                                 responseStatus.setStatus("0");
                                 logger.error("Not able to parse date");
@@ -151,7 +153,7 @@ public class DigiLockerIntegrationServiceImpl implements DigiLockerIntegrationSe
                                     certificateAddInfoDTO.setDocumentInfo(request.getDocDetails().getDocType());
                                     certificateAddInfoDTO.setCertificateName((String)dockerLookUpInfo.get(Constants.CERTIFICATE_NAME));
                                     certificateAddInfoDTO.setDocumentName(DocumentType.getValueForKey(request.getDocDetails().getDocType()));
-                                    certificateAddInfoDTO.setCertificateIssueOn((String)dockerLookUpInfo.get(Constants.LAST_ISSUED_ON));
+                                    certificateAddInfoDTO.setCertificateIssueOn(simpleDateFormat.format((Date)dockerLookUpInfo.get(Constants.LAST_ISSUED_ON)));
                                     certificateAddInfoDTO.setUserName((String)getUserInfo.get(Constants.FIRSTNAME));
                                     certificateAddInfoDTO.setSwd((String)getUserInfo.get(Constants.CHANNEL));
                                     certificateAddInfoDTO.setSwdIndicator(String.valueOf(((String)getUserInfo.get(Constants.CHANNEL)).charAt(0)));
@@ -209,6 +211,7 @@ public class DigiLockerIntegrationServiceImpl implements DigiLockerIntegrationSe
         } catch (IOException e) {
             logger.error("Not able to process the request requestBody: " + requestBody, e);
             responseStatus.setStatus("0");
+            response.getDocDetails().setDocContent("Document is not available.");
             return response;
         }
         CertificateAddInfoDTO certificateAddInfoDTO = new CertificateAddInfoDTO();
