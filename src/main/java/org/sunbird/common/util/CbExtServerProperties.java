@@ -683,15 +683,18 @@ public class CbExtServerProperties {
 
 	@Value("${operational.report.file.name}")
 	private String operationReportFileName;
-
 	@Value("${digilocker-api-key}")
 	private String digiLockerAPIKey;
+
+	@Value("${cipher.algorithm}")
+	private String cipherAlogrithm;
 
 	@Value("${pdf-generator-service-host}")
 	private String pdfGeneratorServiceBaseUrl;
 
 	@Value("${pdf-generator-svg-to-pdf-url}")
 	private String pdfGeneratorSvgToPdfUrl;
+
 
 	public boolean qListFromCacheEnabled() {
 		return qListFromCacheEnabled;
@@ -2422,13 +2425,20 @@ public class CbExtServerProperties {
 	public void setOperationReportFileName(String operationReportFileName) {
 		this.operationReportFileName = operationReportFileName;
 	}
-
 	public String getDigiLockerAPIKey() {
 		return digiLockerAPIKey;
 	}
 
 	public void setDigiLockerAPIKey(String digiLockerAPIKey) {
 		this.digiLockerAPIKey = digiLockerAPIKey;
+	}
+
+	public String getCipherAlogrithm() {
+		return cipherAlogrithm;
+	}
+
+	public void setCipherAlogrithm(String cipherAlogrithm) {
+		this.cipherAlogrithm = cipherAlogrithm;
 	}
 
 	public String getPdfGeneratorServiceBaseUrl() {

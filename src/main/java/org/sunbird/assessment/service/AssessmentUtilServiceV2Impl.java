@@ -339,8 +339,8 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 
 	public Map<String, Object> readAssessmentHierarchyFromCache(String assessmentIdentifier,boolean editMode,String token) {
 
-		if(editMode)
-		return fetchHierarchyFromAssessServc(assessmentIdentifier,token);
+		if (editMode)
+			return fetchHierarchyFromAssessServc(assessmentIdentifier, token);
 
 		String questStr = Constants.EMPTY;
 		if(serverProperties.qListFromCacheEnabled()) {

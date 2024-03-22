@@ -23,7 +23,7 @@ import javax.annotation.PostConstruct;
 @Component
 public class RedisCacheMgr {
 
-    private static int cache_ttl = 84600;
+    private static int cacheTtl = 84600;
 
     @Autowired
     private JedisPool jedisPool;
@@ -38,13 +38,13 @@ public class RedisCacheMgr {
     
     ObjectMapper objectMapper = new ObjectMapper();
 
-    private static int questions_cache_ttl = 84600;
+    private static int questionsCacheTtl = 84600;
 
     @PostConstruct
     public void postConstruct() {
-        this.questions_cache_ttl = cbExtServerProperties.getRedisQuestionsReadTimeOut().intValue();
+        this.questionsCacheTtl = cbExtServerProperties.getRedisQuestionsReadTimeOut().intValue();
         if (!StringUtils.isEmpty(cbExtServerProperties.getRedisTimeout())) {
-            cache_ttl = Integer.parseInt(cbExtServerProperties.getRedisTimeout());
+            cacheTtl = Integer.parseInt(cbExtServerProperties.getRedisTimeout());
         }
     }
     public void putCache(String key, Object object, int ttl) {
@@ -58,13 +58,13 @@ public class RedisCacheMgr {
         }
     }
     public void putCache(String key, Object object) {
-        putCache(key,object,cache_ttl);
+        putCache(key,object, cacheTtl);
     }
     public void putInQuestionCache(String key, Object object) {
         try (Jedis jedis = jedisPool.getResource()) {
             String data = objectMapper.writeValueAsString(object);
             jedis.set(Constants.REDIS_COMMON_KEY + key, data);
-            jedis.expire(Constants.REDIS_COMMON_KEY + key, questions_cache_ttl);
+            jedis.expire(Constants.REDIS_COMMON_KEY + key, questionsCacheTtl);
             logger.debug("Cache_key_value " + Constants.REDIS_COMMON_KEY + key + " is saved in redis");
         } catch (Exception e) {
             logger.error(e);
@@ -81,7 +81,7 @@ public class RedisCacheMgr {
     }
 
     public void putStringInCache(String key, String value) {
-        putStringInCache(key, value, cache_ttl);
+        putStringInCache(key, value, cacheTtl);
     }
 
     public boolean deleteKeyByName(String key) {

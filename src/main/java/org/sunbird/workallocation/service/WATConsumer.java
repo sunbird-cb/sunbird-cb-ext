@@ -13,7 +13,6 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.annotation.TopicPartition;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -25,11 +24,11 @@ import org.sunbird.core.logger.CbExtLogger;
 import org.sunbird.core.producer.Producer;
 import org.sunbird.workallocation.model.PropertyFilterMixIn;
 import org.sunbird.workallocation.model.WorkAllocationDTOV2;
-import org.sunbird.workallocation.model.telemetryEvent.Actor;
-import org.sunbird.workallocation.model.telemetryEvent.Context;
-import org.sunbird.workallocation.model.telemetryEvent.Event;
-import org.sunbird.workallocation.model.telemetryEvent.ObjectData;
-import org.sunbird.workallocation.model.telemetryEvent.Pdata;
+import org.sunbird.workallocation.model.telemetryevent.Actor;
+import org.sunbird.workallocation.model.telemetryevent.Context;
+import org.sunbird.workallocation.model.telemetryevent.Event;
+import org.sunbird.workallocation.model.telemetryevent.ObjectData;
+import org.sunbird.workallocation.model.telemetryevent.Pdata;
 import org.sunbird.workallocation.util.WorkAllocationConstants;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -88,13 +87,7 @@ public class WATConsumer {
 
 					List<WorkAllocationDTOV2> workAllocations = new ArrayList<>();
 					for (Map<String, Object> workAllocationCassandraModel : workAllocationList) {
-						try {
-							workAllocations
-									.add(mapper.readValue((String) workAllocationCassandraModel.get(Constants.DATA),
-											WorkAllocationDTOV2.class));
-						} catch (IOException e) {
-							logger.error(e);
-						}
+						parseWorkAllocationDetails(workAllocationCassandraModel, workAllocations, mapper);
 					}
 					watObj.put("users", workAllocations);
 
@@ -105,7 +98,6 @@ public class WATConsumer {
 				Event event = getTelemetryEvent(watObj);
 				logger.info("Posting WAT event to telemetry ...");
 				logger.info(mapper.writeValueAsString(event));
-				// postTelemetryEvent(event);
 				producer.push(telemetryEventTopicName, event);
 			}
 		} catch (IOException e) {
@@ -165,7 +157,6 @@ public class WATConsumer {
 		objectData.setId((String) watObject.get("id"));
 		objectData.setType(WorkAllocationConstants.WORK_ORDER_ID_CONST);
 		event.setObject(objectData);
-		// event.setType(WorkAllocationConstants.EVENTS_NAME);
 		return event;
 	}
 
@@ -196,4 +187,22 @@ public class WATConsumer {
 		}
 	}
 
+	/**
+	 * Parses work allocation details from a Cassandra model and adds them to a list of WorkAllocationDTOV2 objects.
+	 *
+	 * @param workAllocationCassandraModel The Cassandra model containing work allocation details.
+	 * @param workAllocations              The list to which parsed work allocation DTOs will be added.
+	 * @param mapper                       The ObjectMapper used for deserialization.
+	 */
+	private void parseWorkAllocationDetails(Map<String, Object> workAllocationCassandraModel, List<WorkAllocationDTOV2> workAllocations, ObjectMapper mapper) {
+		try {
+			// Read the data from the Cassandra model and deserialize it into a WorkAllocationDTOV2 object
+			workAllocations
+					.add(mapper.readValue((String) workAllocationCassandraModel.get(Constants.DATA),
+							WorkAllocationDTOV2.class));
+		} catch (IOException e) {
+			// If an IOException occurs during deserialization, log the error
+			logger.error(e);
+		}
+	}
 }

@@ -560,10 +560,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 				if (map.get("response") != null) {
 					Map<String, Object> responseObj = (Map<String, Object>) map.get("response");
 					int count = (int) responseObj.get(Constants.COUNT);
-					if (count == 0)
-						return false;
-					else
-						return true;
+                    return count != 0;
 				}
 			}
 		} catch (Exception e) {
@@ -955,7 +952,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 	}
 
 	private String constructEmailTemplate(String templateName, Map<String, Object> params) {
-		String replacedHTML = new String();
+		String replacedHTML = "";
 		try {
 			Map<String, Object> propertyMap = new HashMap<>();
 			propertyMap.put(Constants.NAME, templateName);

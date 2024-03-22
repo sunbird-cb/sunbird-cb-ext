@@ -92,14 +92,7 @@ public class SearchByService {
 			if (ObjectUtils.isEmpty(positionMap)
 					|| CollectionUtils.isEmpty(positionMap.get(Constants.POSITIONS_CACHE_NAME))) {
 				logger.info("Initializing / Refreshing the Cache value for key : " + Constants.POSITIONS_CACHE_NAME);
-				try {
-					positionMap = updateDesignationDetails(userToken);
-					response.setResponseData(positionMap.get(Constants.POSITIONS_CACHE_NAME));
-				} catch (Exception e) {
-					logger.error(e);
-					response.getStatusInfo().setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
-					response.getStatusInfo().setErrorMessage(e.getMessage());
-				}
+				getPositionData(userToken, response);
 			} else {
 				response.setResponseData(positionMap.get(Constants.POSITIONS_CACHE_NAME));
 			}
@@ -407,5 +400,17 @@ public class SearchByService {
 					position.get(Constants.NAME).asText(), position.get(Constants.DESCRIPTION).asText()));
 		}
 		return positionList;
+	}
+
+	private void getPositionData(String userToken, FracApiResponse response) {
+		Map<String, List<FracCommonInfo>> positionMap;
+		try {
+			positionMap = updateDesignationDetails(userToken);
+			response.setResponseData(positionMap.get(Constants.POSITIONS_CACHE_NAME));
+		} catch (Exception e) {
+			logger.error(e);
+			response.getStatusInfo().setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+			response.getStatusInfo().setErrorMessage(e.getMessage());
+		}
 	}
 }

@@ -22,7 +22,7 @@ public enum ResponseCode {
     SERVICE_UNAVAILABLE(503),
     PARTIAL_SUCCESS_RESPONSE(206);
 
-    private int responseCode;
+    private int responseCodes;
     /**
      * error code contains String value
      */
@@ -40,16 +40,9 @@ public enum ResponseCode {
     private ResponseCode(String errorCode, String errorMessage, int responseCode) {
         this.errorCode = errorCode;
         this.errorMessage = errorMessage;
-        this.responseCode = responseCode;
+        this.responseCodes = responseCode;
     }
 
-    /**
-     * @param errorCode
-     * @return
-     */
-    public String getMessage(int errorCode) {
-        return "";
-    }
 
     /**
      * @return
@@ -58,12 +51,6 @@ public enum ResponseCode {
         return errorCode;
     }
 
-    /**
-     * @param errorCode
-     */
-    public void setErrorCode(String errorCode) {
-        this.errorCode = errorCode;
-    }
 
     /**
      * @return
@@ -72,12 +59,6 @@ public enum ResponseCode {
         return errorMessage;
     }
 
-    /**
-     * @param errorMessage
-     */
-    public void setErrorMessage(String errorMessage) {
-        this.errorMessage = errorMessage;
-    }
 
     /**
      * This method will provide status message based on code
@@ -99,16 +80,13 @@ public enum ResponseCode {
     }
 
     private ResponseCode(int responseCode) {
-        this.responseCode = responseCode;
+        this.responseCodes = responseCode;
     }
 
     public int getResponseCode() {
-        return responseCode;
+        return responseCodes;
     }
 
-    public void setResponseCode(int responseCode) {
-        this.responseCode = responseCode;
-    }
 
 
     /**
@@ -121,7 +99,6 @@ public enum ResponseCode {
         if (StringUtils.isBlank(errorCode)) {
             return null;
         } else {
-           // ResponseCode value = null;
             ResponseCode responseCodes[] = ResponseCode.values();
             for (ResponseCode response : responseCodes) {
                 if (response.getErrorCode().equals(errorCode)) {

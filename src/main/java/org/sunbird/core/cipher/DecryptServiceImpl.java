@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 
 @Component
@@ -26,6 +27,9 @@ public class DecryptServiceImpl {
 	@Autowired
 	private SecretKeySpec secretKeySpec;
 
+	@Autowired
+	CbExtServerProperties serverConfig;
+
 	@Value("${user.report.store.path}")
 	private String userStorePath;
 
@@ -34,9 +38,9 @@ public class DecryptServiceImpl {
 	@PostConstruct
 	private void postConstruct() {
 		try {
-			decryptCipher = Cipher.getInstance(Constants.CIPHER_ALGORITHM);
+			decryptCipher = Cipher.getInstance(serverConfig.getCipherAlogrithm());
 			decryptCipher.init(Cipher.DECRYPT_MODE, secretKeySpec);
-			encryptCipher = Cipher.getInstance(Constants.CIPHER_ALGORITHM);
+			encryptCipher = Cipher.getInstance(serverConfig.getCipherAlogrithm());
 			encryptCipher.init(Cipher.ENCRYPT_MODE, secretKeySpec);
 		} catch (Exception e) {
 			log.error("Failed to construct DecryptServiceImpl object.");

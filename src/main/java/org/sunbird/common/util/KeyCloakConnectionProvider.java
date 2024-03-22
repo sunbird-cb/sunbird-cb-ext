@@ -17,9 +17,9 @@ public class KeyCloakConnectionProvider {
 
   private static Keycloak keycloak;
   private static PropertiesCache cache = PropertiesCache.getInstance();
-  public static String SSO_URL = null;
-  public static String SSO_REALM = null;
-  public static String CLIENT_ID = null;
+  public static String ssoUrl = null;
+  public static String ssoRealm = null;
+  public static String clientId = null;
 
   static {
     try {
@@ -56,9 +56,9 @@ public class KeyCloakConnectionProvider {
         && !(cache.getProperty(Constants.SSO_CLIENT_SECRET).equals(Constants.SSO_CLIENT_SECRET))) {
       keycloakBuilder.clientSecret(cache.getProperty(Constants.SSO_CLIENT_SECRET));
     }
-    SSO_URL = cache.getProperty(Constants.SSO_URL);
-    SSO_REALM = cache.getProperty(Constants.SSO_REALM);
-    CLIENT_ID = cache.getProperty(Constants.SSO_CLIENT_ID);
+    ssoUrl = cache.getProperty(Constants.SSO_URL);
+    ssoRealm = cache.getProperty(Constants.SSO_REALM);
+    clientId = cache.getProperty(Constants.SSO_CLIENT_ID);
     keycloak = keycloakBuilder.build();
 
     logger.info("key cloak instance is created successfully.");
@@ -86,9 +86,9 @@ public class KeyCloakConnectionProvider {
       logger.info("key cloak connection is not provided by Environment variable.");
       return null;
     }
-    SSO_URL = url;
-    SSO_REALM = relam;
-    CLIENT_ID = cleintId;
+    ssoUrl = url;
+    ssoRealm = relam;
+    clientId = cleintId;
     KeycloakBuilder keycloakBuilder =
         KeycloakBuilder.builder()
             .serverUrl(url)

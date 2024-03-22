@@ -558,26 +558,19 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 		return StringUtils.EMPTY;
 	}
 
+
+
 	private void fetchMapIdFromDB(Map<String, Object> requestData) {
-		List<OrgHierarchy> orgList = orgRepository.findAllByOrgName((String) requestData.get(Constants.ORG_NAME));
-		if (ObjectUtils.isEmpty(orgList) || orgList.size() > 1) {
-			// There are no args or multiple orgs. return from here.
+		String orgName = (String) requestData.get(Constants.ORG_NAME);
+		List<OrgHierarchy> orgList = orgRepository.findAllByOrgName(orgName);
+		if (orgList.size() != 1 || requestData.get(Constants.PARENT_MAP_ID) == null) {
+			// Either no org found or multiple orgs found, or parentMapId is empty
 			return;
-		} else {
-			// There is one org exist with the given name.
-			// Otherwise this new dept name which already exist in someother ministry /
-			// state / department.
-			if (ObjectUtils.isEmpty(requestData.get(Constants.PARENT_MAP_ID))) {
-				// ParentMapId is empty -- we are trying to create dept / state with same name.
-				// Return simply.
-				return;
-			} else {
-				OrgHierarchy existingOrg = orgList.get(0);
-				// Check given parentMapId is same as existing record parentMapId.
-				if (existingOrg.getParentMapId().equalsIgnoreCase((String) requestData.get(Constants.PARENT_MAP_ID))) {
-					requestData.put(Constants.MAP_ID, existingOrg.getMapId());
-				}
-			}
+		}
+		OrgHierarchy existingOrg = orgList.get(0);
+		String parentMapId = (String) requestData.get(Constants.PARENT_MAP_ID);
+		if (existingOrg.getParentMapId().equalsIgnoreCase(parentMapId)) {
+			requestData.put(Constants.MAP_ID, existingOrg.getMapId());
 		}
 	}
 
@@ -784,7 +777,7 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 
 			if (!StringUtils.isEmpty(orgId)) {
 				String sbRootOrgId = orgRepository.getSbOrgIdFromMapId(parentOrg.getParentMapId());
-				;
+
 				if (StringUtils.isBlank(parentOrg.getSbRootOrgId())) {
 					sbRootOrgId = orgRepository.getSbOrgIdFromMapId(parentOrg.getParentMapId());
 				}

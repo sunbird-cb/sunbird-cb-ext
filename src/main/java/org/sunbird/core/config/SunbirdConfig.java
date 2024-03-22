@@ -14,6 +14,10 @@ import org.springframework.data.cassandra.repository.config.EnableCassandraRepos
 
 import com.datastax.driver.core.AuthProvider;
 import com.datastax.driver.core.PlainTextAuthProvider;
+import org.springframework.lang.NonNull;
+
+import java.util.Objects;
+
 
 @Configuration
 @ConfigurationProperties("spring.data.cassandra.sb")
@@ -31,8 +35,9 @@ public class SunbirdConfig extends CassandraConfig {
 	@Override
 	@Primary
 	@Bean(name = "sunbirdTemplate")
+	@NonNull
 	public CassandraAdminTemplate cassandraTemplate() throws Exception {
-		return new CassandraAdminTemplate(session().getObject(), cassandraConverter());
+		return new CassandraAdminTemplate(Objects.requireNonNull(session().getObject()), cassandraConverter());
 	}
 
 	@Override
@@ -54,7 +59,7 @@ public class SunbirdConfig extends CassandraConfig {
 		}
 
 		CassandraSessionFactoryBean session = new CassandraSessionFactoryBean();
-		session.setCluster(cluster.getObject());
+		session.setCluster(Objects.requireNonNull(cluster.getObject()));
 		session.setConverter(cassandraConverter());
 		session.setKeyspaceName(getKeyspaceName());
 		session.setSchemaAction(getSchemaAction());

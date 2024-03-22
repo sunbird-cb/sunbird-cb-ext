@@ -245,6 +245,7 @@ public class CassandraOperationImpl implements CassandraOperation {
 			Row row = connectionManager.getSession(keyspace).execute(selectQuery).one();
 			return row.getLong(0);
 		} catch (Exception e) {
+			logger.error(Constants.EXCEPTION_MSG_FETCH + table + " : " + e.getMessage(), e);
 			throw e;
 		}
 	}

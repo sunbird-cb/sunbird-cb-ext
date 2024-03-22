@@ -22,7 +22,9 @@ import org.sunbird.cassandra.utils.CassandraOperation;
 import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
+import org.sunbird.core.exception.ApplicationLogicError;
 import org.sunbird.core.exception.BadRequestException;
+import org.sunbird.core.exception.InvalidDataInputException;
 import org.sunbird.workallocation.model.PdfGeneratorRequest;
 import org.sunbird.workallocation.util.WorkAllocationConstants;
 
@@ -99,8 +101,11 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 		InputStream inputStream = getClass().getClassLoader().getResourceAsStream(footerTemplateName);
 
 		byte[] buffer = new byte[inputStream.available()];
-		inputStream.read(buffer);
-
+		int readValue = inputStream.read(buffer);
+		if (readValue == -1) {
+			log.error(Constants.ERROR_READING_EMPTY_FILE);
+			throw new InvalidDataInputException(Constants.ERROR_READING_EMPTY_FILE);
+		}
 		File htmlFooterPath = new File("/tmp/" + deptId + "pdf-draft-footer.html");
 		try(OutputStream outStream = new FileOutputStream(htmlFooterPath)){
 			outStream.write(buffer);
@@ -116,7 +121,11 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 		File file = new File(pdfFilePath);
 		byte[] bytes = new byte[(int) file.length()];
 		try (FileInputStream fis = new FileInputStream(file)) {
-			fis.read(bytes);
+			int readFisValue = fis.read(bytes);
+			if (readFisValue == -1) {
+				log.error(Constants.ERROR_READING_EMPTY_FILE);
+				throw new InvalidDataInputException(Constants.ERROR_READING_EMPTY_FILE);
+			}
 		}
 		return bytes;
 	}
@@ -128,7 +137,11 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 			File file = new File(pdfFilePath);
 			byte[] bytes = new byte[(int) file.length()];
 			try (FileInputStream fis = new FileInputStream(file)) {
-				fis.read(bytes);
+				int readFisValue = fis.read(bytes);
+				if (readFisValue == -1) {
+					log.error(Constants.ERROR_READING_EMPTY_FILE);
+					throw new InvalidDataInputException(Constants.ERROR_READING_EMPTY_FILE);
+				}
 			}
 			return bytes;
 
@@ -219,7 +232,11 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 		InputStream inputStream = getClass().getClassLoader().getResourceAsStream(footerTemplateName);
 
 		byte[] buffer = new byte[inputStream.available()];
-		inputStream.read(buffer);
+		int readValue=inputStream.read(buffer);
+		if (readValue == -1) {
+			log.error(Constants.ERROR_READING_EMPTY_FILE);
+			throw new InvalidDataInputException(Constants.ERROR_READING_EMPTY_FILE);
+		}
 
 		File htmlFooterPath = new File("/tmp/" + deptId + "pdf-draft-footer.html");
 		try(OutputStream outStream = new FileOutputStream(htmlFooterPath)){
@@ -288,24 +305,16 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 		p.setProperty("resource.loader", "class");
 		p.setProperty("class.resource.loader.class",
 				"org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
-		StringWriter writer = null;
+
 		String body = null;
-		try {
+		try(StringWriter writer = new StringWriter();) {
 			engine.init(p);
 			Template template = engine.getTemplate(TEMPLATE_PATH + templateName);
-			writer = new StringWriter();
+
 			template.merge(context, writer);
 			body = writer.toString();
 		} catch (Exception e) {
 			log.error("Exception occurred while loading the template file", e);
-		} finally {
-			if (writer != null) {
-				try {
-					writer.close();
-				} catch (IOException e) {
-					log.error(e.toString());
-				}
-			}
 		}
 		log.info("Read the template successfully!");
 		return body;
@@ -350,26 +359,25 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 			commandLine.append(" " + htmlFilePath);
 			commandLine.append(" " + pdfFilePath + " \n");
 			String command = commandLine.toString();
-			BufferedReader brCleanUp = null;
 			Process process = null;
 			try {
 				process = Runtime.getRuntime().exec(command);
-				InputStream stderr = process.getErrorStream();
-
-				String line;
-				brCleanUp = new BufferedReader(new InputStreamReader(stderr));
-				while ((line = brCleanUp.readLine()) != null) {
-					log.info("Writing the pdf file {}", line);
-				}
 			} catch (IOException e) {
 				log.error("Exception occurred while writing the pdf file {}", e);
-			} finally {
-				if (brCleanUp != null) {
-					brCleanUp.close();
-				}
-				if (process != null) {
+			}
+			if (process != null) {
+				try (InputStream stderr = process.getErrorStream(); BufferedReader brCleanUp = new BufferedReader(new InputStreamReader(stderr));) {
+					String line;
+					while ((line = brCleanUp.readLine()) != null) {
+						log.info("Writing the pdf file {}", line);
+					}
+				} catch (IOException e) {
+					log.error("Exception occurred while writing the pdf file {}", e);
+				} finally {
 					process.destroy();
 				}
+			}else {
+				log.error("Exception occurred while writing the pdf file");
 			}
 		} else {
 			log.info("Failed to create PDF file for filename ===> {}", htmlFilePath);
@@ -414,8 +422,8 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 		int count = 0;
 		for(HashMap<String,Object> session:sessionDetails )
 		{
-			if(Constants.SESSION_TYPE_OFFLINE.equals(session.get(Constants.SESSION_TYPE)))
-			pdfParams.put(Constants.SESSION+count++,populateSession(session,blendedProgramName,batchName,batchId));
+			if (Constants.SESSION_TYPE_OFFLINE.equals(session.get(Constants.SESSION_TYPE)))
+				pdfParams.put(Constants.SESSION + count++, populateSession(session, blendedProgramName, batchName, batchId));
 		}
 		return generatePdf(pdfDetails,pdfParams);
 	}
@@ -485,7 +493,11 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 		File file = new File(pdfFilePath);
 		byte[] bytes = new byte[(int) file.length()];
 		try (FileInputStream fis = new FileInputStream(file)) {
-			fis.read(bytes);
+			int readFisValue = fis.read(bytes);
+			if (readFisValue == -1) {
+				log.error(Constants.ERROR_READING_EMPTY_FILE);
+				throw new InvalidDataInputException(Constants.ERROR_READING_EMPTY_FILE);
+			}
 		}
 		return bytes;
 	}

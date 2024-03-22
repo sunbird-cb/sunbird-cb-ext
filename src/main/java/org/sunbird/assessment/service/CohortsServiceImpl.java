@@ -108,7 +108,7 @@ public class CohortsServiceImpl implements CohortsService {
 			// Same Logic as before
 			String topLearnerUUID = topLearnerRow.get("user_id").toString();
 
-			if (learnerUUIDEmailMap != null && learnerUUIDEmailMap.containsKey(topLearnerUUID)) {
+			if (learnerUUIDEmailMap.containsKey(topLearnerUUID)) {
 				OpenSaberApiUserProfile userProfile = (OpenSaberApiUserProfile) learnerUUIDEmailMap.get(topLearnerUUID);
 				if (!userNames.contains(userProfile.getPersonalDetails().getPrimaryEmail())
 						&& !topLearnerUUID.equalsIgnoreCase(userId)) {
@@ -133,16 +133,11 @@ public class CohortsServiceImpl implements CohortsService {
 	@SuppressWarnings("unchecked")
 	public List<CohortUsers> getActiveUsers(String xAuthUser, String rootOrgId, String rootOrg, String contentId, String userId,
 			int count, Boolean toFilter) throws Exception {
-		// Check User exists
-// 		if (!userUtilService.validateUser(rootOrg, userId)) {
-// 			throw new BadRequestException("Invalid UserId.");
-// 		}
 		List<String> batchIdList = null;
 		try {
 			List<SunbirdApiBatchResp> batches = fetchBatchDetails(rootOrgId, contentId);
 			if (!CollectionUtils.isEmpty(batches)) {
 				batchIdList = batches.stream().map(SunbirdApiBatchResp::getBatchId).collect(Collectors.toList());
-				//List<String> batchIdList = fetchBatchIdDetails(contentId);
 				if (!CollectionUtils.isEmpty(batchIdList)) {
 					return fetchParticipantsList(xAuthUser, rootOrg, batchIdList, count);
 				}

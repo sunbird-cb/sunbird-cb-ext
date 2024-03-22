@@ -52,7 +52,6 @@ import org.sunbird.storage.service.StorageServiceImpl;
 import org.sunbird.user.report.UserReportService;
 import org.sunbird.user.service.UserUtilityService;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -62,6 +61,8 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import io.jsonwebtoken.*;
+
 import io.jsonwebtoken.*;
 
 import static java.util.stream.Collectors.toList;
@@ -177,11 +178,8 @@ public class ProfileServiceImpl implements ProfileService {
 						if (existingProfileDetails.containsKey(changedObj)) {
 							Map<String, Object> existingProfileChild = (Map<String, Object>) existingProfileDetails
 									.get(changedObj);
-							Map<String, Object> requestedProfileChild = (Map<String, Object>) profileDetailsMap
-									.get(changedObj);
-							for (String childKey : requestedProfileChild.keySet()) {
-								existingProfileChild.put(childKey, requestedProfileChild.get(childKey));
-							}
+							Map<String, Object> requestedProfileChild = (Map<String, Object>) profileDetailsMap.get(changedObj);
+                            existingProfileChild.putAll(requestedProfileChild);
 						} else {
 							existingProfileDetails.put(changedObj, profileDetailsMap.get(changedObj));
 						}
@@ -375,9 +373,7 @@ public class ProfileServiceImpl implements ProfileService {
 
 				Map<String, Object> orgProfileDetailsMap = (Map<String, Object>) requestData
 						.get(Constants.PROFILE_DETAILS);
-				for (String keys : orgProfileDetailsMap.keySet()) {
-					esOrgProfileMap.put(keys, orgProfileDetailsMap.get(keys));
-				}
+                esOrgProfileMap.putAll(orgProfileDetailsMap);
 				RestStatus status = null;
 				if (isOrgProfileExist) {
 					status = indexerService.updateEntity(serverConfig.getOrgOnboardingIndex(),
@@ -828,7 +824,7 @@ public class ProfileServiceImpl implements ProfileService {
 				String strApprovalFields = (String) data.get(Constants.VALUE);
 
 				if (StringUtils.isNotBlank(strApprovalFields)) {
-					String strArray[] = strApprovalFields.split(",", -1);
+					String[] strArray = strApprovalFields.split(",", -1);
 					approvalFields = Arrays.asList(strArray);
 					dataCacheMgr.putObjectInCache(Constants.PROFILE_APPROVAL_FIELDS_KEY, approvalFields);
 					return approvalFields;
@@ -870,27 +866,24 @@ public class ProfileServiceImpl implements ProfileService {
 	}
 
 	public boolean validateRequest(Map<String, Object> requestBody) {
-		if (!(ObjectUtils.isEmpty(requestBody.get(Constants.USER_ID)))
-				&& !(ObjectUtils.isEmpty(requestBody.get(Constants.PROFILE_DETAILS)))) {
-			return true;
-		} else {
-			return false;
-		}
+        return !(ObjectUtils.isEmpty(requestBody.get(Constants.USER_ID)))
+                && !(ObjectUtils.isEmpty(requestBody.get(Constants.PROFILE_DETAILS)));
 	}
 
 	private void getModifiedPersonalDetails(Object personalDetailsObj, Map<String, Object> updatedRequest) {
 		try {
 			Map<String, Object> personalDetailsMap = (Map<String, Object>) personalDetailsObj;
 			if (!ObjectUtils.isEmpty(personalDetailsMap)) {
-				for (String paramName : personalDetailsMap.keySet()) {
-					if (Constants.FIRST_NAME_LOWER_CASE.equalsIgnoreCase(paramName)) {
-						updatedRequest.put(Constants.FIRSTNAME, (String) personalDetailsMap.get(paramName));
-					} else if (Constants.MOBILE.equalsIgnoreCase(paramName)) {
-						updatedRequest.put(Constants.PHONE, String.valueOf(personalDetailsMap.get(paramName)));
-					} else if (Constants.PRIMARY_EMAIL.equalsIgnoreCase(paramName)) {
-						updatedRequest.put(Constants.EMAIL, String.valueOf(personalDetailsMap.get(paramName)));
+				for (Map.Entry<String, Object> entry : personalDetailsMap.entrySet()) {
+					if (Constants.FIRST_NAME_LOWER_CASE.equalsIgnoreCase(entry.getKey())) {
+						updatedRequest.put(Constants.FIRSTNAME, entry.getValue());
+					} else if (Constants.MOBILE.equalsIgnoreCase(entry.getKey())) {
+						updatedRequest.put(Constants.PHONE, String.valueOf(entry.getValue()));
+					} else if (Constants.PRIMARY_EMAIL.equalsIgnoreCase(entry.getKey())) {
+						updatedRequest.put(Constants.EMAIL, String.valueOf(entry.getValue()));
 					}
 				}
+
 			}
 		} catch (Exception e) {
 			log.error("Exception while verifying profile details. ", e);
@@ -1444,7 +1437,7 @@ public class ProfileServiceImpl implements ProfileService {
 					orgInfoMap.size()));
 
 			Map<String, Map<String, String>> userEnrolmentMap = new HashMap<String, Map<String, String>>();
-			// Construct the userEnrolment Map;
+			//UserEnrolment map is constructed here.
 			for (Map<String, Object> enrolment : userEnrolmentList) {
 				Map<String, String> enrolmentReport = new HashMap<String, String>();
 				// Get user details
@@ -1506,10 +1499,7 @@ public class ProfileServiceImpl implements ProfileService {
 					if (courseInfoMap.containsKey(courseId)) {
 						String strLeafNode = courseInfoMap.get(courseId).get(Constants.LEAF_NODES_COUNT);
 						if (StringUtils.isNotBlank(strLeafNode)) {
-							try {
-								leafNodeCount = Integer.parseInt(strLeafNode);
-							} catch (NumberFormatException nfe) {
-							}
+							leafNodeCount = getLeafNodeCount(leafNodeCount, strLeafNode);
 						}
 					}
 
@@ -1698,9 +1688,10 @@ public class ProfileServiceImpl implements ProfileService {
 
 	@Override
 	public ResponseEntity<Resource> downloadFile(String fileName) {
+		Path tmpPath = null;
 		try {
 			storageService.downloadFile(fileName);
-			Path tmpPath = Paths.get(Constants.LOCAL_BASE_PATH + fileName);
+			tmpPath = Paths.get(Constants.LOCAL_BASE_PATH + fileName);
 			ByteArrayResource resource = new ByteArrayResource(Files.readAllBytes(tmpPath));
 			HttpHeaders headers = new HttpHeaders();
 			headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"");
@@ -1714,9 +1705,8 @@ public class ProfileServiceImpl implements ProfileService {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 		} finally {
 			try {
-				File file = new File(Constants.LOCAL_BASE_PATH + fileName);
-				if(file.exists()) {
-					file.delete();
+				if(tmpPath != null ) {
+					Files.delete(tmpPath);
 				}
 			} catch(Exception e1) {
 			}
@@ -1751,9 +1741,9 @@ public class ProfileServiceImpl implements ProfileService {
 			Map<String, Object> profileDetailsMap = (Map<String, Object>) requestData.get(Constants.PROFILE_DETAILS);
 			List<String> allowedAdminUpdateFields = adminApprovalFields();
 			Map<String, Object> adminUpdateMap = new HashMap<>();
-			for (String key : profileDetailsMap.keySet()) {
-				if (allowedAdminUpdateFields.contains(key)) {
-					adminUpdateMap.put(key, profileDetailsMap.get(key));
+			for (Map.Entry<String, Object> entry : profileDetailsMap.entrySet()) {
+				if (allowedAdminUpdateFields.contains(entry.getKey())) {
+					adminUpdateMap.put(entry.getKey(),  entry.getValue());
 				}
 			}
 
@@ -1766,64 +1756,8 @@ public class ProfileServiceImpl implements ProfileService {
 					StringUtils.EMPTY);
 			Map<String, Object> existingProfileDetails = (Map<String, Object>) responseMap.get(Constants.PROFILE_DETAILS);
 			if (!profileDetailsMap.isEmpty()) {
-				{
-					List<String> listOfChangedDetails = new ArrayList<>();
-					for (String keys : profileDetailsMap.keySet()) {
-						listOfChangedDetails.add(keys);
-					}
-					for (String changedObj : listOfChangedDetails) {
-						if (profileDetailsMap.get(changedObj) instanceof ArrayList) {
-							existingProfileDetails.put(changedObj, profileDetailsMap.get(changedObj));
-						} else if (profileDetailsMap.get(changedObj) instanceof Boolean) {
-							existingProfileDetails.put(changedObj, profileDetailsMap.get(changedObj));
-						} else {
-							if (existingProfileDetails.containsKey(changedObj)) {
-								Map<String, Object> existingProfileChild = (Map<String, Object>) existingProfileDetails
-										.get(changedObj);
-								Map<String, Object> requestedProfileChild = (Map<String, Object>) profileDetailsMap
-										.get(changedObj);
-								for (String childKey : requestedProfileChild.keySet()) {
-									existingProfileChild.put(childKey, requestedProfileChild.get(childKey));
-								}
-							} else {
-								existingProfileDetails.put(changedObj, profileDetailsMap.get(changedObj));
-							}
-						}
-
-						// Additional Condition for updating personal Details directly to user object
-						if (Constants.PERSONAL_DETAILS.equalsIgnoreCase(changedObj)) {
-							getModifiedPersonalDetails(profileDetailsMap.get(changedObj), requestData);
-						}
-					}
-
-					HashMap<String, String> headerValue = new HashMap<>();
-					headerValues.put(Constants.AUTH_TOKEN, authToken);
-					headerValues.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
-					String updatedUrl = serverConfig.getSbUrl() + serverConfig.getLmsUserUpdatePrivatePath();
-					Map<String, Object> updateRequestValue = requestData;
-					updateRequestValue.put(Constants.PROFILE_DETAILS, existingProfileDetails);
-					Map<String, Object> updateRequest = new HashMap<>();
-					updateRequest.put(Constants.REQUEST, updateRequestValue);
-					Map<String, Object> updateResponse = outboundRequestHandlerService.fetchResultUsingPatch(updatedUrl, updateRequest, headerValue);
-
-					if (Constants.OK.equalsIgnoreCase((String) updateResponse.get(Constants.RESPONSE_CODE))) {
-						response.setResponseCode(HttpStatus.OK);
-						response.getResult().put(Constants.RESPONSE, Constants.SUCCESS);
-						response.getParams().setStatus(Constants.SUCCESS);
-					} else {
-						if (updateResponse != null && Constants.CLIENT_ERROR.equalsIgnoreCase((String) updateResponse.get(Constants.RESPONSE_CODE))) {
-							response.setResponseCode(HttpStatus.BAD_REQUEST);
-						} else {
-							response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
-						}
-						response.getParams().setStatus(Constants.FAILED);
-						String errMsg = (String) ((Map<String, Object>) updateResponse.get(Constants.PARAMS)).get(Constants.ERROR_MESSAGE);
-						errMsg = PropertiesCache.getInstance().readCustomError(errMsg);
-						response.getParams().setErrmsg(errMsg);
-						log.error(errMsg, new Exception(errMsg));
-						return response;
-					}
-				}
+				SBApiResponse response1 = processProfileUpdateForMdoAdmin(authToken, profileDetailsMap, existingProfileDetails, requestData, headerValues, response);
+				if (response1 != null) return response1;
 			}
 		} catch (Exception e) {
 			log.error("Failed to process profile update. Exception: ", e);
@@ -1833,6 +1767,64 @@ public class ProfileServiceImpl implements ProfileService {
 		}
 		return response;
 
+	}
+
+	private SBApiResponse processProfileUpdateForMdoAdmin(String authToken, Map<String, Object> profileDetailsMap, Map<String, Object> existingProfileDetails, Map<String, Object> requestData, Map<String, String> headerValues, SBApiResponse response) {
+		List<String> listOfChangedDetails = new ArrayList<>();
+		for (String keys : profileDetailsMap.keySet()) {
+			listOfChangedDetails.add(keys);
+		}
+		for (String changedObj : listOfChangedDetails) {
+			if (profileDetailsMap.get(changedObj) instanceof ArrayList) {
+				existingProfileDetails.put(changedObj, profileDetailsMap.get(changedObj));
+			} else if (profileDetailsMap.get(changedObj) instanceof Boolean) {
+				existingProfileDetails.put(changedObj, profileDetailsMap.get(changedObj));
+			} else {
+				if (existingProfileDetails.containsKey(changedObj)) {
+					Map<String, Object> existingProfileChild = (Map<String, Object>) existingProfileDetails
+							.get(changedObj);
+					Map<String, Object> requestedProfileChild = (Map<String, Object>) profileDetailsMap
+							.get(changedObj);
+                    existingProfileChild.putAll(requestedProfileChild);
+				} else {
+					existingProfileDetails.put(changedObj, profileDetailsMap.get(changedObj));
+				}
+			}
+
+			// Additional Condition for updating personal Details directly to user object
+			if (Constants.PERSONAL_DETAILS.equalsIgnoreCase(changedObj)) {
+				getModifiedPersonalDetails(profileDetailsMap.get(changedObj), requestData);
+			}
+		}
+
+		HashMap<String, String> headerValue = new HashMap<>();
+		headerValues.put(Constants.AUTH_TOKEN, authToken);
+		headerValues.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
+		String updatedUrl = serverConfig.getSbUrl() + serverConfig.getLmsUserUpdatePrivatePath();
+		Map<String, Object> updateRequestValue = requestData;
+		updateRequestValue.put(Constants.PROFILE_DETAILS, existingProfileDetails);
+		Map<String, Object> updateRequest = new HashMap<>();
+		updateRequest.put(Constants.REQUEST, updateRequestValue);
+		Map<String, Object> updateResponse = outboundRequestHandlerService.fetchResultUsingPatch(updatedUrl, updateRequest, headerValue);
+
+		if (Constants.OK.equalsIgnoreCase((String) updateResponse.get(Constants.RESPONSE_CODE))) {
+			response.setResponseCode(HttpStatus.OK);
+			response.getResult().put(Constants.RESPONSE, Constants.SUCCESS);
+			response.getParams().setStatus(Constants.SUCCESS);
+		} else {
+			if (updateResponse != null && Constants.CLIENT_ERROR.equalsIgnoreCase((String) updateResponse.get(Constants.RESPONSE_CODE))) {
+				response.setResponseCode(HttpStatus.BAD_REQUEST);
+			} else {
+				response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+			}
+			response.getParams().setStatus(Constants.FAILED);
+			String errMsg = (String) ((Map<String, Object>) updateResponse.get(Constants.PARAMS)).get(Constants.ERROR_MESSAGE);
+			errMsg = PropertiesCache.getInstance().readCustomError(errMsg);
+			response.getParams().setErrmsg(errMsg);
+			log.error(errMsg, new Exception(errMsg));
+			return response;
+		}
+		return null;
 	}
 
 	@Override
@@ -1911,12 +1903,8 @@ public class ProfileServiceImpl implements ProfileService {
 	}
 
 	private boolean validateSystemUpdateRequest(Map<String, Object> requestBody) {
-		if (ObjectUtils.isEmpty(requestBody.get(Constants.EMAIL))
-				 || ObjectUtils.isEmpty(requestBody.get(Constants.EXTERNAL_SYSTEM))  || ObjectUtils.isEmpty(requestBody.get(Constants.EXTERNAL_SYSTEM_ID))) {
-			return false;
-		} else {
-			return true;
-		}
+        return !ObjectUtils.isEmpty(requestBody.get(Constants.EMAIL))
+                && !ObjectUtils.isEmpty(requestBody.get(Constants.EXTERNAL_SYSTEM)) && !ObjectUtils.isEmpty(requestBody.get(Constants.EXTERNAL_SYSTEM_ID));
 	}
 
 	public List<String> adminApprovalFields() {
@@ -1933,7 +1921,7 @@ public class ProfileServiceImpl implements ProfileService {
 				String strAdminApprovalFields = (String) data.get(Constants.VALUE);
 
 				if (StringUtils.isNotBlank(strAdminApprovalFields)) {
-					String strArray[] = strAdminApprovalFields.split(",", -1);
+					String[] strArray = strAdminApprovalFields.split(",", -1);
 					adminApprovalFields = Arrays.asList(strArray);
 					dataCacheMgr.putObjectInCache(serverConfig.getMdoAdminUpdateUsers(), adminApprovalFields);
 					return adminApprovalFields;
@@ -2046,6 +2034,23 @@ public class ProfileServiceImpl implements ProfileService {
 			}
 		}
 		return "";
+	}
+
+	/**
+	 * Gets the count of leaf nodes from the provided string representation.
+	 *
+	 * @param leafNodeCount The current count of leaf nodes.
+	 * @param strLeafNode   The string representation of leaf node count.
+	 * @return The count of leaf nodes after parsing.
+	 */
+	private int getLeafNodeCount(int leafNodeCount, String strLeafNode) {
+		try {
+			// Attempt to parse the string representation of leaf node count to an integer
+			leafNodeCount = Integer.parseInt(strLeafNode);
+		} catch (NumberFormatException nfe) {
+			log.error("Failed to get the leafnode count: ", nfe);
+		}
+		return leafNodeCount;
 	}
 
 }
