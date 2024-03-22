@@ -242,7 +242,7 @@ public class Base64Util {
         return encoder.output;
     }
 
-    /* package */ static abstract class Coder {
+    /* package */ abstract static class Coder {
         public byte[] output;
         public int op;
 
@@ -435,7 +435,6 @@ public class Base64Util {
                             value = (value << 6) | d;
                             ++state;
                         } else if (d == EQUALS) {
-                            // Emit the last (partial) output tuple;
                             // expect exactly one more padding character.
                             output[op++] = (byte) (value >> 4);
                             state = 4;
@@ -455,7 +454,6 @@ public class Base64Util {
                             op += 3;
                             state = 0;
                         } else if (d == EQUALS) {
-                            // Emit the last (partial) output tuple;
                             // expect no further data or padding characters.
                             output[op + 1] = (byte) (value >> 2);
                             output[op] = (byte) (value >> 10);
@@ -564,11 +562,11 @@ public class Base64Util {
                 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
                 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '-', '_',
         };
-        final public boolean do_padding;
-        final public boolean do_newline;
-        final public boolean do_cr;
-        final private byte[] tail;
-        final private byte[] alphabet;
+        public final boolean do_padding;
+        public final boolean do_newline;
+        public final boolean do_cr;
+        private final byte[] tail;
+        private final byte[] alphabet;
         /* package */ int tailLen;
         private int count;
 

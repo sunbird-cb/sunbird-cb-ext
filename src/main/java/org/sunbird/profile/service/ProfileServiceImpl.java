@@ -1010,7 +1010,8 @@ public class ProfileServiceImpl implements ProfileService {
 				// We got the orgId successfully... let's migrate the user to this org.
 				try {
 					Thread.sleep(1000);
-				} catch (Exception e) {
+				} catch (InterruptedException e) {
+					Thread.currentThread().interrupt();
 				}
 				errMsg = executeSelfMigrateUser(requestBody);
 			} else {
@@ -1600,9 +1601,7 @@ public class ProfileServiceImpl implements ProfileService {
 		while (it.hasNext()) {
 			Entry<String, Map<String, String>> item = it.next();
 			String orgId = item.getValue().get(Constants.ROOT_ORG_ID);
-			if (!orgInfoMap.containsKey(orgId)) {
-				orgInfoMap.put(orgId, item.getValue().get(Constants.CHANNEL));
-			}
+			orgInfoMap.computeIfAbsent(orgId, k -> item.getValue().get(Constants.CHANNEL));
 		}
 		log.info(String.format("Org enrichment took %s seconds", (System.currentTimeMillis() - startTime) / 1000));
 	}

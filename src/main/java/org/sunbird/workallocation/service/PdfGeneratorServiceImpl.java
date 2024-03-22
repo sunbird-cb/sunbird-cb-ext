@@ -29,6 +29,7 @@ import org.sunbird.workallocation.util.WorkAllocationConstants;
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.regex.Pattern;
 
 @Service
 public class PdfGeneratorServiceImpl implements PdfGeneratorService {
@@ -253,10 +254,10 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 			theDir.mkdirs();
 		}
 		if (htmlContent.contains("â€˜")) {
-			htmlContent = htmlContent.replaceAll("â€˜", "'");
+			htmlContent = Pattern.compile("â€˜", Pattern.CANON_EQ).matcher(htmlContent).replaceAll("'");
 		}
 		if (htmlContent.contains("â€™")) {
-			htmlContent = htmlContent.replaceAll("â€™", "'");
+			htmlContent = Pattern.compile("â€™", Pattern.CANON_EQ).matcher(htmlContent).replaceAll("'");
 		}
 		BufferedWriter out = null;
 		try (FileWriter fstream = new FileWriter(htmlFilePath)){

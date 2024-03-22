@@ -246,7 +246,8 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 							userReg.getOrgName(), userReg.getMapId(), userReg.getSbOrgId()));
 					try {
 						Thread.sleep(1000);
-					} catch (Exception e) {
+					} catch (InterruptedException e) {
+						Thread.currentThread().interrupt();
 					}
 				} else {
 					try {
