@@ -10,7 +10,6 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
-import org.sunbird.cassandra.utils.CassandraOperation;
 import org.sunbird.common.model.SunbirdApiResp;
 import org.sunbird.common.model.SunbirdApiRespContent;
 import org.sunbird.common.model.SunbirdApiResultResponse;
@@ -32,9 +31,6 @@ public class PortalServiceImpl implements PortalService {
 	CbExtServerProperties serverConfig;
 
 	@Autowired
-	CassandraOperation cassandraOperation;
-
-	@Autowired
 	OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
 
 	@Override
@@ -50,21 +46,16 @@ public class PortalServiceImpl implements PortalService {
 				requestMap.put(Constants.LIMIT, 100);
 				requestMap.put(Constants.FIELDS,
 						new ArrayList<>(Arrays.asList(Constants.CHANNEL, Constants.IS_MDO, Constants.IS_CBP)));
-				requestMap.put(Constants.FILTERS, new HashMap<String, Object>() {
-					{
-						put(Constants.IS_TENANT, Boolean.TRUE);
-						put(Constants.STATUS, 1);
-					}
-				});
+				Map<String, Object> deptFilterMap = new HashMap<>();
+				deptFilterMap.put(Constants.IS_TENANT, Boolean.TRUE);
+				deptFilterMap.put(Constants.STATUS, 1);
+				requestMap.put(Constants.FILTERS,deptFilterMap);
 
 				String serviceURL = serverConfig.getSbUrl() + serverConfig.getSbOrgSearchPath();
+				Map<String, Object> requestBody = new HashMap<>();
+				requestBody.put(Constants.REQUEST, requestMap);
 				SunbirdApiResp orgResponse = mapper.convertValue(
-						outboundRequestHandlerService.fetchResultUsingPost(serviceURL, new HashMap<String, Object>() {
-							{
-								put(Constants.REQUEST, requestMap);
-							}
-						}), SunbirdApiResp.class);
-
+						outboundRequestHandlerService.fetchResultUsingPost(serviceURL, requestBody), SunbirdApiResp.class);
 				SunbirdApiResultResponse resultResp = orgResponse.getResult().getResponse();
 				count = resultResp.getCount();
 				iterateCount = iterateCount + resultResp.getContent().size();
@@ -113,21 +104,15 @@ public class PortalServiceImpl implements PortalService {
 				requestMap.put(Constants.LIMIT, 100);
 				requestMap.put(Constants.FIELDS,
 						new ArrayList<>(Arrays.asList(Constants.CHANNEL, Constants.IS_MDO, Constants.IS_CBP, Constants.ID)));
-				requestMap.put(Constants.FILTERS, new HashMap<String, Object>() {
-					{
-						put(Constants.IS_TENANT, Boolean.TRUE);
-						put(Constants.STATUS, 1);
-					}
-				});
-
+				Map<String, Object> filtersMap = new HashMap<>();
+				filtersMap.put(Constants.IS_TENANT, Boolean.TRUE);
+				filtersMap.put(Constants.STATUS, 1);
+				requestMap.put(Constants.FILTERS, filtersMap);
 				String serviceURL = serverConfig.getSbUrl() + serverConfig.getSbOrgSearchPath();
+				Map<String, Object> request = new HashMap<>();
+				requestMap.put(Constants.REQUEST, request);
 				SunbirdApiResp orgResponse = mapper.convertValue(
-						outboundRequestHandlerService.fetchResultUsingPost(serviceURL, new HashMap<String, Object>() {
-							{
-								put(Constants.REQUEST, requestMap);
-							}
-						}), SunbirdApiResp.class);
-
+						outboundRequestHandlerService.fetchResultUsingPost(serviceURL, request), SunbirdApiResp.class);
 				SunbirdApiResultResponse resultResp = orgResponse.getResult().getResponse();
 				count = resultResp.getCount();
 				iterateCount = iterateCount + resultResp.getContent().size();
