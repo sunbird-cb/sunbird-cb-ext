@@ -1026,6 +1026,10 @@ public class Constants {
 	public static final String X_CHANNEL_ID = "x-channel-id";
 	public static final String WORK_ALLOCATION_SAVE_EXCEPTION = "Exception occurred while saving the work allocation!!";
 	public static final String DEPT_ID = "deptId";
+	public static final String CORRECT_COUNT = "correctCount";
+	public static final String INCORRECT_COUNT = "incorrectCount";
+	public static final String NOT_ANSWERED_COUNT = "notAnsweredCount";
+	public static final String SOURCE_TITLE = "sourceTitle";
 
 	private Constants() {
 		throw new IllegalStateException("Utility class");

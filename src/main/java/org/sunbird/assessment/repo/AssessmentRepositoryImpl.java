@@ -2,6 +2,7 @@ package org.sunbird.assessment.repo;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
@@ -47,13 +48,13 @@ public class AssessmentRepositoryImpl implements AssessmentRepository {
 	@Override
 	public Map<String, Object> getAssessmentAnswerKey(String artifactUrl) {
 		// TODO Auto-generated method stub
-		return null;
+		return new HashMap<>();
 	}
 
 	@Override
 	public Map<String, Object> getQuizAnswerKey(AssessmentSubmissionDTO quizMap) {
 		// TODO Auto-generated method stub
-		return null;
+		return new HashMap<>();
 	}
 
 	@Override
@@ -64,15 +65,8 @@ public class AssessmentRepositoryImpl implements AssessmentRepository {
 
 		// insert assessment and assessment summary
 		if (Boolean.TRUE.equals(isAssessment)) {
-			UserAssessmentMasterModel assessment = new UserAssessmentMasterModel(
-					new UserAssessmentMasterPrimaryKeyModel(persist.get(ROOT_ORG).toString(), date,
-							persist.get("parent").toString(), BigDecimal.valueOf((Double) persist.get(RESULT)),
-							UUIDs.timeBased()),
-					Integer.parseInt(persist.get("correct").toString()), formatter.parse(formatter.format(date)),
-					Integer.parseInt(persist.get("incorrect").toString()),
-					Integer.parseInt(persist.get("blank").toString()), persist.get("parentContentType").toString(),
-					new BigDecimal(60), persist.get(SOURCE_ID).toString(), persist.get("title").toString(),
-					persist.get(USER_ID).toString());
+			Map<String, Object> userAssessmentMasterModelDate = this.getUserAssessmentMasterModelData(persist, date);
+			UserAssessmentMasterModel assessment = new UserAssessmentMasterModel();
 			UserAssessmentSummaryModel summary = new UserAssessmentSummaryModel();
 			UserAssessmentSummaryModel data = userAssessmentSummaryRepo
 					.findById(new UserAssessmentSummaryPrimaryKeyModel(persist.get(ROOT_ORG).toString(),
@@ -179,5 +173,22 @@ public class AssessmentRepositoryImpl implements AssessmentRepository {
 		cassandraOperation.updateRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_USER_ASSESSMENT_DATA,
 				fieldsToBeUpdated, compositeKeys);
 		return true;
+	}
+
+
+	private Map<String, Object> getUserAssessmentMasterModelData(Map<String, Object> persist, Date date) throws ParseException {
+		Map<String, Object> userAssessmentMasterModelData = new HashMap<>();
+		userAssessmentMasterModelData.put("primaryKey", new UserAssessmentMasterPrimaryKeyModel(persist.get(ROOT_ORG).toString(), date,
+				persist.get("parent").toString(), BigDecimal.valueOf((Double) persist.get(RESULT)), UUIDs.timeBased()));
+		userAssessmentMasterModelData.put(Constants.CORRECT_COUNT, Integer.parseInt(persist.get(Constants.CORRECT).toString()));
+		userAssessmentMasterModelData.put(Constants.DATE_CREATED_ON, formatter.parse(formatter.format(date)));
+		userAssessmentMasterModelData.put(Constants.INCORRECT_COUNT, Integer.parseInt(persist.get(Constants.INCORRECT).toString()));
+		userAssessmentMasterModelData.put(Constants.NOT_ANSWERED_COUNT, Integer.parseInt(persist.get(Constants.BLANK).toString()));
+		userAssessmentMasterModelData.put(Constants.PARENT_CONTENT_TYPE, persist.get(Constants.PARENT_CONTENT_TYPE).toString());
+		userAssessmentMasterModelData.put(Constants.PASS_PERCENTAGE, new BigDecimal(60));
+		userAssessmentMasterModelData.put(Constants.SOURCE_ID, persist.get(SOURCE_ID).toString());
+		userAssessmentMasterModelData.put(Constants.SOURCE_TITLE, persist.get(Constants.TITLE).toString());
+		userAssessmentMasterModelData.put(Constants.USER_ID, persist.get(USER_ID).toString());
+		return userAssessmentMasterModelData;
 	}
 }
