@@ -1,6 +1,7 @@
 package org.sunbird.assessment.service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -71,7 +72,7 @@ public class AssessmentServiceImpl implements AssessmentService {
 
 		Map<String, Object> ret = new HashMap<>();
 
-		// TODO - Need to get the Assessment ContentMeta Data
+		// Need to get the Assessment ContentMeta Data
 		// Get the assessment-key.json file. Current version has both the answers
 
 		Map<String, Object> resultMap = assessUtilServ.validateAssessment(data.getQuestions());
@@ -117,8 +118,7 @@ public class AssessmentServiceImpl implements AssessmentService {
 	}
 
 	@Override
-	public Map<String, Object> getAssessmentByContentUser(String rootOrg, String courseId, String userId)
-			throws Exception {
+	public Map<String, Object> getAssessmentByContentUser(String rootOrg, String courseId, String userId) throws ApplicationLogicError {
 		Map<String, Object> result = new TreeMap<>();
 		try {
 			// get all submission data from cassandra
@@ -185,8 +185,7 @@ public class AssessmentServiceImpl implements AssessmentService {
 
 	@Override
 	public Map<String, Object> submitAssessmentByIframe(String rootOrg, Map<String, Object> request) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
+		return new HashMap<>();
 	}
 
 	// A method to Format Data in the FrontEndFormat
@@ -195,7 +194,7 @@ public class AssessmentServiceImpl implements AssessmentService {
 		for (Map<String, Object> map : result) {
 			Map<String, Object> assessmentData = new HashMap<>();
 			String res = map.get("result_percent").toString();
-			assessmentData.put(RESULT, new BigDecimal(res).setScale(2, BigDecimal.ROUND_UP));
+			assessmentData.put(RESULT, new BigDecimal(res).setScale(2, RoundingMode.UP));
 			assessmentData.put("correctlyAnswered", map.get("correct_count"));
 			assessmentData.put("wronglyAnswered", map.get("incorrect_count"));
 			assessmentData.put("notAttempted", map.get("not_answered_count"));

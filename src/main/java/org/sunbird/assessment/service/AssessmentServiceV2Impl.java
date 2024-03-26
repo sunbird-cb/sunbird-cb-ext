@@ -70,11 +70,11 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
         try {
             String userId = validateAuthTokenAndFetchUserId(token);
             if (userId != null) {
-                logger.info("readAssessment.. userId :" + userId);
+                logger.info("readAssessment.. userId : {}" , userId);
                 Map<String, Object> assessmentAllDetail = new HashMap<>();
                 errMsg = fetchReadHierarchyDetails(assessmentAllDetail, token, assessmentIdentifier);
                 if (errMsg.isEmpty() && !((String) assessmentAllDetail.get(Constants.PRIMARY_CATEGORY)).equalsIgnoreCase(Constants.PRACTICE_QUESTION_SET)) {
-                    logger.info("Fetched assessment Details... for : " + assessmentIdentifier);
+                    logger.info("Fetched assessment Details... for : {}" ,assessmentIdentifier);
                     List<Map<String, Object>> existingDataList = assessmentRepository.fetchUserAssessmentDataFromDB(userId, assessmentIdentifier);
                     Timestamp assessmentStartTime = new Timestamp(new java.util.Date().getTime());
                     if (existingDataList.isEmpty()) {
@@ -148,7 +148,6 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
     public SBApiResponse readQuestionList(Map<String, Object> requestBody, String authUserToken) {
         SBApiResponse response = createDefaultResponse(Constants.API_SUBMIT_ASSESSMENT);
         String errMsg;
-        String primaryCategory = "";
         Map<String, String> result = new HashMap<>();
         try {
             List<String> identifierList = new ArrayList<>();
@@ -222,7 +221,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                 redisCacheMgr.putCache(Constants.ASSESSMENT_ID + assessmentIdentifier, ((Map<String, Object>) readHierarchyApiResponse.get(Constants.RESULT)).get(Constants.QUESTION_SET));
             }
         } catch (Exception e) {
-            logger.info("Error while fetching or mapping read hierarchy data" + e.getMessage());
+            logger.info("Error while fetching or mapping read hierarchy data : {}" , e.getMessage());
             return Constants.ASSESSMENT_HIERARCHY_READ_FAILED;
         }
         return StringUtils.EMPTY;
@@ -285,7 +284,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                 // Fetching all the remaining questions details from the Redis
                 questionsFromAssessment.addAll((List<String>) section.get(Constants.CHILD_NODES));
             }
-            if (validateQuestionListRequest(identifierList, questionsFromAssessment)) {
+            if (Boolean.TRUE.equals(validateQuestionListRequest(identifierList, questionsFromAssessment))) {
 				result.put(Constants.ERROR_MESSAGE, StringUtils.EMPTY);
 			} else {
 				result.put(Constants.ERROR_MESSAGE, Constants.THE_QUESTIONS_IDS_PROVIDED_DONT_MATCH);
@@ -310,7 +309,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
         if (errMsg.isEmpty()) {
             String userId = validateAuthTokenAndFetchUserId(authUserToken);
             String scoreCutOffType = ((String) assessmentHierarchy.get(Constants.SCORE_CUTOFF_TYPE)).toLowerCase();
-            List<Map<String, Object>> existingDataList = new ArrayList<>();
+            List<Map<String, Object>> existingDataList;
             List<Map<String, Object>> sectionLevelsResults = new ArrayList<>();
             Map<String, Object> questionSetFromAssessment = new HashMap<>();
             for (Map<String, Object> hierarchySection : hierarchySectionList) {
@@ -426,17 +425,14 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
                     kafkaResult.put(Constants.ASSESSMENT_ID_KEY, submitRequest.get(Constants.IDENTIFIER));
                     kafkaResult.put(Constants.PRIMARY_CATEGORY, primaryCategory);
                     kafkaResult.put(Constants.TOTAL_SCORE, result.get(Constants.OVERALL_RESULT));
-                    if ((primaryCategory.equalsIgnoreCase("Competency Assessment") && submitRequest.containsKey("competencies_v3") && submitRequest.get("competencies_v3") != null)) {
-                        Object[] obj = (Object[]) JSON.parse((String) submitRequest.get("competencies_v3"));
+                    if ((primaryCategory.equalsIgnoreCase("Competency Assessment") && submitRequest.containsKey(Constants.COMPETENCIES_V3) && submitRequest.get(Constants.COMPETENCIES_V3) != null)) {
+                        Object[] obj = (Object[]) JSON.parse((String) submitRequest.get(Constants.COMPETENCIES_V3));
                         if (obj != null) {
                             Object map = obj[0];
                             ObjectMapper m = new ObjectMapper();
                             Map<String, Object> props = m.convertValue(map, Map.class);
                             kafkaResult.put(Constants.COMPETENCY, props.isEmpty() ? "" : props);
-                            System.out.println(obj);
-
                         }
-                        System.out.println(obj);
                     }
                     logger.info(kafkaResult.toString());
                     kafkaProducer.push(serverProperties.getAssessmentSubmitTopic(), kafkaResult);
@@ -703,7 +699,7 @@ public class AssessmentServiceV2Impl implements AssessmentServiceV2 {
         return (new HashSet<>(questionsFromAssessment).containsAll(identifierList)) ? Boolean.TRUE : Boolean.FALSE;
     }
 
-    public SBApiResponse retakeAssessment(String assessmentIdentifier, String token) throws Exception {
+    public SBApiResponse retakeAssessment(String assessmentIdentifier, String token) {
         logger.info("AssessmentServiceV2Impl::retakeAssessment... Started");
         SBApiResponse response = createDefaultResponse(Constants.API_RETAKE_ASSESSMENT_GET);
         String errMsg = "";

@@ -46,8 +46,7 @@ public interface AssessmentRepository {
 	 * @return
 	 * @throws Exception
 	 */
-	public List<Map<String, Object>> getAssessmentbyContentUser(String rootOrg, String courseId, String userId)
-			throws Exception;
+	public List<Map<String, Object>> getAssessmentbyContentUser(String rootOrg, String courseId, String userId);
 
 	List<Map<String, Object>> fetchUserAssessmentDataFromDB(String userId, String assessmentIdentifier);
 

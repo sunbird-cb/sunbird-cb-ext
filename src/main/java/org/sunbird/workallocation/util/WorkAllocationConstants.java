@@ -1,11 +1,11 @@
 package org.sunbird.workallocation.util;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 public class WorkAllocationConstants {
+	private WorkAllocationConstants() {}
 	public static final String ALLOCATION_DETAILS = "allocationDetails";
 	public static final String USER_DETAILS = "userDetails";
 
@@ -39,10 +39,9 @@ public class WorkAllocationConstants {
 
 	public static final String CB_NAME = "CB";
 
-
 	public static final String TYPE = "WorkOrder";
 
-	public static List<String> PROPS = Collections.unmodifiableList(Arrays.asList("WAT"));
+	public static final List<String> PROPS = Collections.unmodifiableList(Arrays.asList("WAT"));
 
 
 }

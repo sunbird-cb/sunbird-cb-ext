@@ -12,11 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.sunbird.common.util.CbExtServerProperties;
-import org.springframework.util.StringUtils;
 import org.sunbird.core.logger.CbExtLogger;
-
-import java.util.List;
-
 
 @Configuration
 public class EsConfig {

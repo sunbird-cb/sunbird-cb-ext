@@ -35,21 +35,20 @@ public class CassandraPropertyReader {
 	    }
 	  }
 
-	  public static CassandraPropertyReader getInstance() {
-	    if (null == cassandraPropertyReader) {
-	      synchronized (CassandraPropertyReader.class) {
-	        if (null == cassandraPropertyReader) {
-	          try {
-				cassandraPropertyReader = new CassandraPropertyReader();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+	public static CassandraPropertyReader getInstance() {
+		if (null == cassandraPropertyReader) {
+			synchronized (CassandraPropertyReader.class) {
+				if (null == cassandraPropertyReader) {
+					try {
+						cassandraPropertyReader = new CassandraPropertyReader();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
 			}
-	        }
-	      }
-	    }
-	    return cassandraPropertyReader;
-	  }
+		}
+		return cassandraPropertyReader;
+	}
 
 	  /**
 	   * Method to read value from resource file .

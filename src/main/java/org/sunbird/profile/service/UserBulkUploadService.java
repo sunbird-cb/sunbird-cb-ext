@@ -69,8 +69,7 @@ public class UserBulkUploadService {
                     e);
         }
         duration = System.currentTimeMillis() - startTime;
-        logger.info("UserBulkUploadService:: initiateUserBulkUploadProcess: Completed. Time taken: "
-                + duration + " milli-seconds");
+        logger.info("UserBulkUploadService:: initiateUserBulkUploadProcess: Completed. Time taken: {} milli-seconds", duration );
     }
 
     public void updateUserBulkUploadStatus(String rootOrgId, String identifier, String status, int totalRecordsCount,
@@ -127,7 +126,7 @@ public class UserBulkUploadService {
                 }
                 int count = 0;
                 while (rowIterator.hasNext()) {
-                    logger.info("UserBulkUploadService:: Record " + count++);
+                    logger.info("UserBulkUploadService:: Record {}" , count++);
                     long duration = 0;
                     long startTime = System.currentTimeMillis();
                     StringBuffer str = new StringBuffer();
@@ -140,11 +139,11 @@ public class UserBulkUploadService {
                     } else {
                         if (nextRow.getCell(0).getCellType() == CellType.STRING) {
                             userRegistration.setFirstName(nextRow.getCell(0).getStringCellValue().trim());
-                            if (!ProjectUtil.validateFullName(userRegistration.getFirstName())) {
+                            if (Boolean.FALSE.equals(ProjectUtil.validateFullName(userRegistration.getFirstName()))) {
                                 invalidErrList.add("Invalid Full Name");
                             }
                         } else {
-                            invalidErrList.add("Invalid column type. Expecting string format");
+                            invalidErrList.add(Constants.INVALID_COL_TYPE_EXPECTING_STRING);
                         }
                     }
                     if (nextRow.getCell(1) == null || nextRow.getCell(1).getCellType() == CellType.BLANK) {
@@ -153,7 +152,7 @@ public class UserBulkUploadService {
                         if (nextRow.getCell(1).getCellType() == CellType.STRING) {
                             userRegistration.setEmail(nextRow.getCell(1).getStringCellValue().trim());
                         } else {
-                            invalidErrList.add("Invalid column type. Expecting string format");
+                            invalidErrList.add(Constants.INVALID_COL_TYPE_EXPECTING_STRING);
                         }
                     }
                     if (nextRow.getCell(2) == null || nextRow.getCell(2).getCellType() == CellType.BLANK) {
@@ -177,13 +176,13 @@ public class UserBulkUploadService {
                                 invalidErrList.add("Invalid Group : Group can be only among one of these " + serverProperties.getBulkUploadGroupValue());
                             }
                         } else {
-                            invalidErrList.add("Invalid column type. Expecting string format");
+                            invalidErrList.add(Constants.INVALID_COL_TYPE_EXPECTING_STRING);
                         }
                     }
                     if (nextRow.getCell(4) != null && nextRow.getCell(4).getCellType() != CellType.BLANK) {
                         if (nextRow.getCell(4).getCellType() == CellType.STRING) {
                             String tagStr = nextRow.getCell(4).getStringCellValue().trim();
-                            List<String> tagList = new ArrayList<String>();
+                            List<String> tagList = new ArrayList<>();
                             if (!StringUtils.isEmpty(tagStr)) {
                                 String[] tagStrList = tagStr.split(",", -1);
                                 for(String tag : tagStrList) {
@@ -191,22 +190,22 @@ public class UserBulkUploadService {
                                 }
                             }
                             userRegistration.setTag(tagList);
-                            if (!ProjectUtil.validateTag(userRegistration.getTag())) {
+                            if (Boolean.FALSE.equals(ProjectUtil.validateTag(userRegistration.getTag()))) {
                                 invalidErrList.add("Invalid Tag : Tags are comma seperated string values. A Tag can contain only alphabets with spaces. eg: Bihar Circle, Patna Division");
                             }
                         } else {
-                            invalidErrList.add("Invalid column type. Expecting string format");
+                            invalidErrList.add(Constants.INVALID_COL_TYPE_EXPECTING_STRING);
                         }
                     }
                     if (nextRow.getCell(5) != null && nextRow.getCell(5).getCellType() != CellType.BLANK) {
                         if (nextRow.getCell(5).getCellType() == CellType.NUMERIC) {
                             userRegistration.setExternalSystemId(NumberToTextConverter.toText(nextRow.getCell(5).getNumericCellValue()).trim());
-                            if (!ProjectUtil.validateExternalSystemId(userRegistration.getExternalSystemId())) {
+                            if (Boolean.FALSE.equals(ProjectUtil.validateExternalSystemId(userRegistration.getExternalSystemId()))) {
                                 invalidErrList.add("Invalid External System ID : External System Id can contain alphanumeric characters and have a max length of 30");
                             }
                         } else if (nextRow.getCell(5).getCellType() == CellType.STRING) {
                             userRegistration.setExternalSystemId(nextRow.getCell(5).getStringCellValue().trim());
-                            if (!ProjectUtil.validateExternalSystemId(userRegistration.getExternalSystemId())) {
+                            if (Boolean.FALSE.equals(ProjectUtil.validateExternalSystemId(userRegistration.getExternalSystemId()))) {
                                 invalidErrList.add("Invalid External System ID : External System Id can contain alphanumeric characters and have a max length of 30");
                             }
                         } else {
@@ -216,11 +215,11 @@ public class UserBulkUploadService {
                     if (nextRow.getCell(6) != null && !StringUtils.isBlank(nextRow.getCell(6).toString())) {
                         if (nextRow.getCell(6).getCellType() == CellType.STRING) {
                             userRegistration.setExternalSystem(nextRow.getCell(6).getStringCellValue().trim());
-                            if (!ProjectUtil.validateExternalSystem(userRegistration.getExternalSystem())) {
+                            if (Boolean.FALSE.equals(ProjectUtil.validateExternalSystem(userRegistration.getExternalSystem()))) {
                                 invalidErrList.add("Invalid External System : External System can contain only alphabets and can have a max length of 255");
                             }
                         } else {
-                            invalidErrList.add("Invalid column type. Expecting string format");
+                            invalidErrList.add(Constants.INVALID_COL_TYPE_EXPECTING_STRING);
                         }
                     }
                     userRegistration.setOrgName(inputDataMap.get(Constants.ORG_NAME));
@@ -266,8 +265,7 @@ public class UserBulkUploadService {
                         }
                     }
                     duration = System.currentTimeMillis() - startTime;
-                    logger.info("UserBulkUploadService:: Record Completed. Time taken: "
-                            + duration + " milli-seconds");
+                    logger.info("UserBulkUploadService:: Record Completed. Time taken: {} milli-seconds", duration);
                 }
                 if (totalRecordsCount == 0) {
                     XSSFRow row = sheet.createRow(sheet.getLastRowNum() + 1);
@@ -321,10 +319,10 @@ public class UserBulkUploadService {
     private List<String> validateEmailContactAndDomain(UserRegistration userRegistration) {
         StringBuffer str = new StringBuffer();
         List<String> errList = new ArrayList<>();
-        if (!ProjectUtil.validateEmailPattern(userRegistration.getEmail())) {
+        if (Boolean.FALSE.equals(ProjectUtil.validateEmailPattern(userRegistration.getEmail()))) {
             errList.add("Invalid Email Id");
         }
-        if (!ProjectUtil.validateContactPattern(userRegistration.getPhone())) {
+        if (Boolean.FALSE.equals(ProjectUtil.validateContactPattern(userRegistration.getPhone()))) {
             errList.add("Invalid Mobile Number");
         }
         if (!errList.isEmpty()) {

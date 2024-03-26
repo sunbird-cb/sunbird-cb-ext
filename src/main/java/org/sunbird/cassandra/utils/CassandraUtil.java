@@ -18,6 +18,7 @@ import com.datastax.driver.core.Row;
  * @desc This class will provide all required helper method for cassandra db operation.
  */
 public final class CassandraUtil {
+    private CassandraUtil() {}
 
     private static CassandraPropertyReader propertiesCache = CassandraPropertyReader.getInstance();
 

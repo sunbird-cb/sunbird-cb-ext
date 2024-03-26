@@ -218,7 +218,7 @@ public class AssessmentUtilServiceImpl implements AssessmentUtilService {
 	@SuppressWarnings("unchecked")
 	@Override
 	public Map<String, Object> getAnswerKeyForAssessmentAuthoringPreview(Map<String, Object> contentMeta) {
-		return null;
+		return new HashMap<>();
 	}
 
 	/**

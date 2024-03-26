@@ -89,9 +89,9 @@ public class StorageServiceImpl implements StorageService {
 				return response;
 			}
 		} catch (Exception e) {
-			logger.error("Failed to upload file. Exception: ", e);
+			logger.error(Constants.FAILED_TO_UPLOAD_FILE_EXCEPTION, e);
 			response.getParams().setStatus(Constants.FAILED);
-			response.getParams().setErrmsg("Failed to upload file. Exception: " + e.getMessage());
+			response.getParams().setErrmsg(Constants.FAILED_TO_UPLOAD_FILE_EXCEPTION + e.getMessage());
 			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
 			return response;
 		} finally {
@@ -114,9 +114,9 @@ public class StorageServiceImpl implements StorageService {
 			response.getResult().putAll(uploadedFile);
 			return response;
 		} catch (Exception e) {
-			logger.error("Failed to upload file. Exception: ", e);
+			logger.error(Constants.FAILED_TO_UPLOAD_FILE_EXCEPTION, e);
 			response.getParams().setStatus(Constants.FAILED);
-			response.getParams().setErrmsg("Failed to upload file. Exception: " + e.getMessage());
+			response.getParams().setErrmsg(Constants.FAILED_TO_UPLOAD_FILE_EXCEPTION + e.getMessage());
 			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
 			return response;
 		} finally {
@@ -140,9 +140,9 @@ public class StorageServiceImpl implements StorageService {
 			response.setResponseCode(HttpStatus.OK);
 			return response;
 		} catch (Exception e) {
-			logger.error("Failed to delete file: " + fileName + ", Exception: ", e);
+			logger.error(Constants.FAILED_TO_DELETE_FILE + fileName + Constants.EXCEPTION, e);
 			response.getParams().setStatus(Constants.FAILED);
-			response.getParams().setErrmsg("Failed to delete file. Exception: " + e.getMessage());
+			response.getParams().setErrmsg(Constants.FAILED_TO_DELETE_FILE_EXCEPTION_MESSAGE + e.getMessage());
 			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
 			return response;
 		}
@@ -156,9 +156,9 @@ public class StorageServiceImpl implements StorageService {
 					Option.apply(Boolean.FALSE));
 			return response;
 		} catch (Exception e) {
-			logger.error("Failed to download the file: " + fileName + ", Exception: ", e);
+			logger.error(Constants.FAILED_TO_DOWNLOAD_FILE + fileName + Constants.EXCEPTION, e);
 			response.getParams().setStatus(Constants.FAILED);
-			response.getParams().setErrmsg("Failed to download the file. Exception: " + e.getMessage());
+			response.getParams().setErrmsg(Constants.FAILED_TO_DOWNLOAD_FILE_EXCEPTION_MESSAGE + e.getMessage());
 			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
 			return response;
 		}
@@ -169,13 +169,13 @@ public class StorageServiceImpl implements StorageService {
 		try {
 			String userId = accessTokenValidator.fetchUserIdFromAccessToken(userToken);
 			if (StringUtils.isEmpty(userId)) {
-				logger.error("Failed to get UserId for orgId: " + orgId);
+				logger.error("Failed to get UserId for orgId: {}", orgId);
 				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 			}
 			Map<String, Map<String, String>> userInfoMap = new HashMap<>();
 			userUtilityService.getUserDetailsFromDB(Arrays.asList(userId), Arrays.asList(Constants.USER_ID, Constants.ROOT_ORG_ID), userInfoMap);
 			if (MapUtils.isEmpty(userInfoMap)) {
-				logger.error("Failed to get UserInfo from cassandra for userId: " + userId);
+				logger.error(Constants.FAILED_USER_INFO_RETRIEVAL_MESSAGE, userId);
 				return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 			}
 			String rootOrgId = userInfoMap.get(userId).get(Constants.ROOT_ORG_ID);
@@ -185,7 +185,7 @@ public class StorageServiceImpl implements StorageService {
 				}
 			}
 			if (!rootOrgId.equalsIgnoreCase(orgId)) {
-				logger.error("User is not authorized to download the file for other org: " + rootOrgId + ", request orgId " + orgId);
+				logger.error(Constants.UNAUTHORIZED_FILE_DOWNLOAD_FOR_OTHER_ORG, rootOrgId, orgId);
 				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 			}
 			String objectKey = "";
@@ -242,14 +242,6 @@ public class StorageServiceImpl implements StorageService {
 			DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 			String todayFormattedDate = now.format(dateFormat);
 			String mdoId = "mdoid=" + orgId;
-				/*if (orgId != null && !orgId.isEmpty()) {
-					if (orgId.contains("=")) {
-						String[] array = orgId.split("=");
-						mdoId = array[1];
-					} else {
-						mdoId = orgId;
-					}
-				}*/
 			String fileName = reportFileNameMap.get(reportType);
 			String objectKey = "";
 			if (serverProperties.getReportPropertyFileAllMdo().contains(fileName)) {
@@ -261,11 +253,11 @@ public class StorageServiceImpl implements StorageService {
 			try {
 				Model.Blob blob = storageService.getObject(serverProperties.getReportDownloadContainerName(), objectKey, Option.apply(Boolean.FALSE));
 				if (blob != null) {
-					resourceMap.put("lastModified", blob.lastModified());
-					resourceMap.put("fileMetaData", blob.metadata());
+					resourceMap.put(Constants.LASTMODIFIED, blob.lastModified());
+					resourceMap.put(Constants.FILEMETADATA, blob.metadata());
 				}
 			} catch (Exception e) {
-				logger.error("Failed to read the downloaded file for url: " + objectKey);
+				logger.error(Constants.FAILED_TO_READ_DOWNLOADED_FILE_FOR_URL, objectKey);
 				LocalDateTime yesterday = now.minusDays(1);
 				String yesterdayFormattedDate = yesterday.format(dateFormat);
 				if (serverProperties.getReportPropertyFileAllMdo().contains(fileName)) {
@@ -277,14 +269,14 @@ public class StorageServiceImpl implements StorageService {
 				try {
 					Model.Blob blob = storageService.getObject(serverProperties.getReportDownloadContainerName(), objectKey, Option.apply(Boolean.FALSE));
 					if (blob != null) {
-						resourceMap.put("lastModified", blob.lastModified());
-						resourceMap.put("fileMetaData", blob.metadata());
+						resourceMap.put(Constants.LASTMODIFIED, blob.lastModified());
+						resourceMap.put(Constants.FILEMETADATA, blob.metadata());
 					} else {
 						resourceMap.put("msg", "No Report Available");
 						logger.info("Unable to fetch fileInfo");
 					}
 				} catch (Exception ex) {
-					logger.error("Failed to read the downloaded file for url: " + objectKey);
+					logger.error(Constants.FAILED_TO_READ_DOWNLOADED_FILE_FOR_URL, objectKey);
 				}
 			}
 			reportTypeInfo.put(fileName, resourceMap);
@@ -306,13 +298,13 @@ public class StorageServiceImpl implements StorageService {
 			Map<String, Map<String, String>> userInfoMap = new HashMap<>();
 			userUtilityService.getUserDetailsFromDB(Arrays.asList(userId), Arrays.asList(Constants.USER_ID, Constants.CHANNEL), userInfoMap);
 			if (MapUtils.isEmpty(userInfoMap)) {
-				logger.error("Failed to get UserInfo from cassandra for userId: " + userId);
+				logger.error(Constants.FAILED_USER_INFO_RETRIEVAL_MESSAGE, userId);
 				return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 			}
 			String channel = userInfoMap.get(userId).get(Constants.CHANNEL);
 
 			if (!serverProperties.getSpvChannelName().equalsIgnoreCase(channel)) {
-				logger.error("User is not authorized to download the file for other org: ");
+				logger.error(Constants.UNAUTHORIZED_FILE_DOWNLOAD_FOR_OTHER_ORG);
 				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 			}
 			Map<String, String> spvReportSubFolderTypeMap = serverProperties.getSpvReportSubFolderTypeMap();
@@ -329,7 +321,7 @@ public class StorageServiceImpl implements StorageService {
 					.contentType(MediaType.parseMediaType(MediaType.MULTIPART_FORM_DATA_VALUE))
 					.body(resource);
 		} catch (Exception e) {
-			logger.error("Failed to read the downloaded file: " + fileName + ", Exception: ", e);
+			logger.error(Constants.FAILED_TO_READ_FILE + fileName + Constants.EXCEPTION, e);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 		} finally {
 			try {
@@ -355,13 +347,13 @@ public class StorageServiceImpl implements StorageService {
 		Map<String, Map<String, String>> userInfoMap = new HashMap<>();
 		userUtilityService.getUserDetailsFromDB(Arrays.asList(userId), Arrays.asList(Constants.USER_ID, Constants.CHANNEL), userInfoMap);
 		if (MapUtils.isEmpty(userInfoMap)) {
-			logger.error("Failed to get UserInfo from cassandra for userId: " + userId);
+			logger.error(Constants.FAILED_USER_INFO_RETRIEVAL_MESSAGE, userId);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 		}
 		String channel = userInfoMap.get(userId).get(Constants.CHANNEL);
 
 		if (!serverProperties.getSpvChannelName().equalsIgnoreCase(channel)) {
-			logger.error("User is not authorized to download the file for other org: ");
+			logger.error(Constants.UNAUTHORIZED_FILE_DOWNLOAD_FOR_OTHER_ORG);
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 		}
 		Map<String, String> reportFileNameMap = serverProperties.getSpvReportMap();
@@ -375,11 +367,11 @@ public class StorageServiceImpl implements StorageService {
 			try {
 				Model.Blob blob = storageService.getObject(serverProperties.getReportDownloadContainerName(), objectKey, Option.apply(Boolean.FALSE));
 				if (blob != null) {
-					resourceMap.put("lastModified", blob.lastModified());
-					resourceMap.put("fileMetaData", blob.metadata());
+					resourceMap.put(Constants.LASTMODIFIED, blob.lastModified());
+					resourceMap.put(Constants.FILEMETADATA, blob.metadata());
 				}
 			} catch (Exception e) {
-				logger.error("Failed to read the downloaded file for url: " + objectKey);
+				logger.error(Constants.FAILED_TO_READ_DOWNLOADED_FILE_FOR_URL, objectKey);
 			}
 			reportTypeInfo.put(fileName, resourceMap);
 		}

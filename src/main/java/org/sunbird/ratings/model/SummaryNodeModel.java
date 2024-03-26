@@ -1,10 +1,8 @@
 package org.sunbird.ratings.model;
 
-import java.util.UUID;
-
 public class SummaryNodeModel {
     private String objectType;
-    private String user_id;
+    private String userId;
     private String date;
     private Double rating;
     private String review;
@@ -12,9 +10,9 @@ public class SummaryNodeModel {
     public SummaryNodeModel() {
 
     }
-    public SummaryNodeModel(String objectType, String user_id, String date, Double rating, String review) {
+    public SummaryNodeModel(String objectType, String userId, String date, Double rating, String review) {
         this.objectType = objectType;
-        this.user_id = user_id;
+        this.userId = userId;
         this.date = date;
         this.rating = rating;
         this.review = review;
@@ -28,12 +26,12 @@ public class SummaryNodeModel {
         this.objectType = objectType;
     }
 
-    public String getUser_id() {
-        return user_id;
+    public String getUserId() {
+        return userId;
     }
 
-    public void setUser_id(String user_id) {
-        this.user_id = user_id;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public String getDate() {

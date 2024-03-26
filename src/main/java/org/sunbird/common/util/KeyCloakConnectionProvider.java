@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
  *     other operations.
  */
 public class KeyCloakConnectionProvider {
+  private KeyCloakConnectionProvider() {}
 
   private static Logger logger = LoggerFactory.getLogger(KeyCloakConnectionProvider.class.getName());
 
@@ -36,7 +37,7 @@ public class KeyCloakConnectionProvider {
    *
    * @return Keycloak connection
    */
-  public static Keycloak initialiseConnection() throws Exception {
+  public static Keycloak initialiseConnection() {
     keycloak = initialiseEnvConnection();
     if (keycloak != null) {
       return keycloak;
@@ -71,7 +72,7 @@ public class KeyCloakConnectionProvider {
    *
    * @return Keycloak
    */
-  private static Keycloak initialiseEnvConnection() throws Exception {
+  private static Keycloak initialiseEnvConnection() {
     String url = System.getenv(Constants.SUNBIRD_SSO_URL);
     String username = System.getenv(Constants.SUNBIRD_SSO_USERNAME);
     String password = System.getenv(Constants.SUNBIRD_SSO_PASSWORD);
@@ -136,6 +137,7 @@ public class KeyCloakConnectionProvider {
    * @author Manzarul
    */
   static class ResourceCleanUp extends Thread {
+    @Override
     public void run() {
       if (null != keycloak) {
         keycloak.close();

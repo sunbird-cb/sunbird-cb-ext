@@ -31,6 +31,7 @@ import org.sunbird.workallocation.util.WorkAllocationConstants;
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.regex.Pattern;
 
 @Service
 public class PdfGeneratorServiceImpl implements PdfGeneratorService {
@@ -85,7 +86,7 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 		}
 		String footerTemplateName = "templates/pdf-draft-footer.html";
 		Map<String, Object> headerDetails = new HashMap<>();
-		String deptId = (String) request.getTagValuePair().get("deptId");
+		String deptId = (String) request.getTagValuePair().get(Constants.DEPT_ID);
 		headerDetails.put(DEPT_NAME, request.getTagValuePair().get(DEPT_NAME));
 		headerDetails.put(DEPT_IMG_URL, request.getTagValuePair().get(DEPT_IMG_URL));
 		String headerMessage = readVm("pdf-header.vm", headerDetails);
@@ -176,12 +177,12 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 		workOrder.put("printedTime", printedTime);
 		String status = (String) workOrder.get("status");
 		String deptId = "";
-		if(workOrder.get("deptId") instanceof Integer){
-			deptId = String.valueOf(workOrder.get("deptId"));
+		if(workOrder.get(Constants.DEPT_ID) instanceof Integer){
+			deptId = String.valueOf(workOrder.get(Constants.DEPT_ID));
 		}
-		else if(workOrder.get("deptId") instanceof String)
+		else if(workOrder.get(Constants.DEPT_ID) instanceof String)
 		{
-			deptId = (String)workOrder.get("deptId");
+			deptId = (String)workOrder.get(Constants.DEPT_ID);
 		}
 		String templateName = null;
 		String footerTemplateName = null;
@@ -271,10 +272,10 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 			theDir.mkdirs();
 		}
 		if (htmlContent.contains("â€˜")) {
-			htmlContent = htmlContent.replaceAll("â€˜", "'");
+			htmlContent = Pattern.compile("â€˜", Pattern.CANON_EQ).matcher(htmlContent).replaceAll("'");
 		}
 		if (htmlContent.contains("â€™")) {
-			htmlContent = htmlContent.replaceAll("â€™", "'");
+			htmlContent = Pattern.compile("â€™", Pattern.CANON_EQ).matcher(htmlContent).replaceAll("'");
 		}
 		BufferedWriter out = null;
 		try (FileWriter fstream = new FileWriter(htmlFilePath)){
@@ -453,7 +454,7 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 		File qrCodeFile = QRCode.from(qrCodeBody).to(ImageType.PNG).file(sessionId);
 		return qrCodeFile.getAbsolutePath();
 	}
-	public byte[] generatePdf(HashMap<String,HashMap<String,String>> pdfDetails ,HashMap<String,HashMap> params  ) throws IOException {
+	public byte[] generatePdf(Map<String,HashMap<String,String>> pdfDetails , Map<String,HashMap> params  ) throws IOException {
 		Map<String, String> pdfData = new HashMap<>();
 		for (Map.Entry<String, HashMap<String,String>> pdf : pdfDetails.entrySet()) {
 			String key = pdf.getKey();
@@ -471,16 +472,16 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 					pdfData.put(UD_HTML_HEADER_FILE_PATH,file);
 					break;
 				default:
-					String body ="";
+					StringBuilder body = new StringBuilder();
 					for (Map.Entry<String, HashMap> entry1 : params.entrySet()) {
 						String key1 = entry1.getKey();
 						if (key1.startsWith(Constants.SESSION)) {
-							body=	body+readVm(value.get(Constants.BUDGET_DOC_FILE_NAME)+ Constants.DOT_SEPARATOR+Constants.VM, params.get(key1)) ;
+							body.append(readVm(value.get(Constants.BUDGET_DOC_FILE_NAME) + Constants.DOT_SEPARATOR + Constants.VM, params.get(key1)));
 						}
 					}
-					body= createHTMLFile(key, body);
-					pdfData.put(UD_HTML_FILE_PATH, body);
-					pdfData.put(UD_FILE_NAME, body.replace(HTML, Constants.DOT_SEPARATOR+Constants.PDF));
+					body = new StringBuilder(createHTMLFile(key, body.toString()));
+					pdfData.put(UD_HTML_FILE_PATH, body.toString());
+					pdfData.put(UD_FILE_NAME, body.toString().replace(HTML, Constants.DOT_SEPARATOR+Constants.PDF));
 					break;
 			}
 		}
@@ -501,7 +502,7 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 		}
 		return bytes;
 	}
-	public String generateHTMLfrmVM(String vmFName,HashMap params ) throws IOException {
+	public String generateHTMLfrmVM(String vmFName, Map<String, Object> params) throws IOException {
 		String message = readVm(vmFName+ Constants.DOT_SEPARATOR+Constants.VM, params);
 		return createHTMLFile(vmFName, message);
 	}
@@ -544,9 +545,8 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 		filters.put(Constants.IDENTIFIER, courseId);
 		req.put(Constants.FILTERS, filters);
 		reqBody.put(Constants.REQUEST, req);
-		Map<String, Object> compositeSearchRes = outboundRequestHandlerService.fetchResultUsingPost(
+		return outboundRequestHandlerService.fetchResultUsingPost(
 				serverProperties.getKmBaseHost() + serverProperties.getKmCompositeSearchPath(), reqBody,
 				headers);
-		return compositeSearchRes;
 	}
 }

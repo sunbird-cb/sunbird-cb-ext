@@ -70,9 +70,6 @@ public class AuditModel {
 		this.trainingBudgetUtilization = trainingBudgetUtilization;
 	}
 
-//	public void setTransactionDetails(StaffInfo transactionDetails) {
-//		this.transactionDetails = transactionDetails;
-//	}
 	public String getPosition() {
 		return position;
 	}

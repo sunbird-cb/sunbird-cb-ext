@@ -73,7 +73,7 @@ public class CourseReminderNotificationService {
 			Map.Entry<String, UserCourseProgressDetails> userCourseProgressDetailsEntry) {
 		try {
 			if (!StringUtils.isEmpty(userCourseProgressDetailsEntry.getValue().getEmail())
-					&& userCourseProgressDetailsEntry.getValue().getIncompleteCourses().size() > 0) {
+					&& !userCourseProgressDetailsEntry.getValue().getIncompleteCourses().isEmpty()) {
 				Map<String, Object> params = new HashMap<>();
 				for (int i = 0; i < userCourseProgressDetailsEntry.getValue().getIncompleteCourses().size(); i++) {
 					String courseId = Constants.COURSE_KEYWORD + (i + 1);
@@ -103,9 +103,8 @@ public class CourseReminderNotificationService {
 
 	private void fetchCourseIdsAndSetCourseNameAndThumbnail(List<Map<String, Object>> userCoursesList)
 			throws IOException {
-		Set<Object> courseIds = new HashSet<>();
 		List<String> desiredKeys = Collections.singletonList(Constants.COURSE_ID);
-		courseIds = userCoursesList.stream()
+		Set<Object> courseIds = userCoursesList.stream()
 				.flatMap(x -> desiredKeys.stream().filter(x::containsKey).distinct().map(x::get))
 				.collect(Collectors.toSet());
 		getAndSetCourseName(courseIds);

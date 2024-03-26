@@ -139,7 +139,7 @@ public class SearchByService {
 					if (!CollectionUtils.isEmpty(facetValueList)) {
 						for (Map<String, Object> facetValueObj : facetValueList) {
 							CompetencyInfo compInfo = new CompetencyInfo();
-							// TODO - Make sure which competency field is unique
+							// Make sure which competency field is unique
 							compInfo.setName((String) facetValueObj.get(Constants.NAME));
 							compInfo.setContentCount((int) facetValueObj.get(Constants.COUNT));
 							competencyMap.put((String) facetValueObj.get(Constants.NAME), compInfo);
@@ -151,7 +151,7 @@ public class SearchByService {
 			Exception err = new Exception("Failed to get facets value from Composite Search API.");
 			logger.error(err);
 			try {
-				logger.info("Received Response: " + (new ObjectMapper()).writeValueAsString(compositeSearchResult));
+				logger.info(Constants.RECEIVED_RESPONSE + (new ObjectMapper()).writeValueAsString(compositeSearchResult));
 			} catch (Exception e) {
 			}
 			throw err;
@@ -227,7 +227,7 @@ public class SearchByService {
 			Exception err = new Exception("Failed to get competency info from FRAC API.");
 			logger.error(err);
 			try {
-				logger.info("Received Response: " + (new ObjectMapper()).writeValueAsString(fracSearchRes));
+				logger.info(Constants.RECEIVED_RESPONSE + (new ObjectMapper()).writeValueAsString(fracSearchRes));
 			} catch (Exception e) {
 			}
 			throw err;
@@ -265,7 +265,7 @@ public class SearchByService {
 		Map<String, Object> compositeSearchResult = (Map<String, Object>) compositeSearchRes.get(Constants.RESULT);
 		List<Map<String, Object>> facetsList = (List<Map<String, Object>>) compositeSearchResult.get(Constants.FACETS);
 		if (!CollectionUtils.isEmpty(facetsList)) {
-			providerMap = new HashMap<String, ProviderInfo>();
+			providerMap = new HashMap<>();
 			for (Map<String, Object> facetObj : facetsList) {
 				String name = (String) facetObj.get(Constants.NAME);
 				if (Constants.SOURCE.equalsIgnoreCase(name)) {
@@ -285,7 +285,7 @@ public class SearchByService {
 			Exception err = new Exception("Failed to get facets value from Composite Search API.");
 			logger.error(err);
 			try {
-				logger.info("Received Response: " + (new ObjectMapper()).writeValueAsString(compositeSearchResult));
+				logger.info(Constants.RECEIVED_RESPONSE + (new ObjectMapper()).writeValueAsString(compositeSearchResult));
 			} catch (Exception e) {
 			}
 			throw err;
@@ -325,7 +325,7 @@ public class SearchByService {
 			Exception err = new Exception("Failed to get competency info from FRAC API.");
 			logger.error(err);
 			try {
-				logger.info("Received Response: " + (new ObjectMapper()).writeValueAsString(orgSearchRes));
+				logger.info(Constants.RECEIVED_RESPONSE + (new ObjectMapper()).writeValueAsString(orgSearchRes));
 			} catch (Exception e) {
 			}
 			throw err;
@@ -338,9 +338,7 @@ public class SearchByService {
 	private Map<String, List<FracCommonInfo>> updateDesignationDetails(String authUserToken) throws Exception {
 		Map<String, String> headers = new HashMap<>();
 		HashMap<String, Object> reqBody = new HashMap<>();
-		headers = new HashMap<>();
 		headers.put(Constants.AUTHORIZATION, Constants.BEARER + authUserToken);
-		reqBody = new HashMap<>();
 		List<Map<String, Object>> searchList = new ArrayList<>();
 		Map<String, Object> compSearchObj = new HashMap<>();
 		compSearchObj.put(Constants.TYPE, Constants.POSITION.toUpperCase());
@@ -348,7 +346,7 @@ public class SearchByService {
 		compSearchObj.put(Constants.KEYWORD, StringUtils.EMPTY);
 		searchList.add(compSearchObj);
 
-		compSearchObj = new HashMap<String, Object>();
+		compSearchObj = new HashMap<>();
 		compSearchObj.put(Constants.TYPE, Constants.POSITION.toUpperCase());
 		compSearchObj.put(Constants.KEYWORD, Constants.VERIFIED);
 		compSearchObj.put(Constants.FIELD, Constants.STATUS);
@@ -356,7 +354,7 @@ public class SearchByService {
 
 		reqBody.put(Constants.SEARCHES, searchList);
 
-		List<String> positionNameList = new ArrayList<String>();
+		List<String> positionNameList = new ArrayList<>();
 		List<FracCommonInfo> positionList = getMasterPositionList(positionNameList);
 
 		Map<String, Object> fracSearchRes = outboundRequestHandlerService.fetchResultUsingPost(
@@ -365,7 +363,8 @@ public class SearchByService {
 				.get(Constants.RESPONSE_DATA);
 		if (!CollectionUtils.isEmpty(fracResponseList)) {
 			for (Map<String, Object> respObj : fracResponseList) {
-				if (!positionNameList.contains((String) respObj.get(Constants.NAME))) {
+				String name = (String) respObj.get(Constants.NAME);
+				if (!positionNameList.contains(name)) {
 					positionList.add(new FracCommonInfo((String) respObj.get(Constants.ID),
 							(String) respObj.get(Constants.NAME), (String) respObj.get(Constants.DESCRIPTION)));
 					positionNameList.add((String) respObj.get(Constants.NAME));
@@ -375,12 +374,12 @@ public class SearchByService {
 			Exception err = new Exception("Failed to get position info from FRAC API.");
 			logger.error(err);
 			try {
-				logger.info("Received Response: " + (new ObjectMapper()).writeValueAsString(fracSearchRes));
+				logger.info(Constants.RECEIVED_RESPONSE + (new ObjectMapper()).writeValueAsString(fracSearchRes));
 			} catch (Exception e) {
 			}
 			throw err;
 		}
-		Map<String, List<FracCommonInfo>> positionMap = new HashMap<String, List<FracCommonInfo>>();
+		Map<String, List<FracCommonInfo>> positionMap = new HashMap<>();
 		positionMap.put(Constants.POSITIONS_CACHE_NAME, positionList);
 		redisCacheMgr.putCache(Constants.POSITIONS_CACHE_NAME, positionMap);
 		return positionMap;

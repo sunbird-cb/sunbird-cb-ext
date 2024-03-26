@@ -3,7 +3,7 @@ package org.sunbird.common.util;
 /*
  * Copyright (C) 2010 The Android Open Source Project
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
+ * Licensed under the Apache License, Version 2.0 (the "License")
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -16,6 +16,7 @@ package org.sunbird.common.util;
  * limitations under the License.
  */
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Utilities for encoding and decoding the Base64 representation of
@@ -155,12 +156,7 @@ public class Base64Util {
      *              adheres to RFC 2045.
      */
     public static String encodeToString(byte[] input, int flags) {
-        try {
-            return new String(encode(input, flags), "US-ASCII");
-        } catch (UnsupportedEncodingException e) {
-            // US-ASCII is guaranteed to be available.
-            throw new AssertionError(e);
-        }
+        return new String(encode(input, flags), StandardCharsets.US_ASCII);
     }
 
     //  --------------------------------------------------------
@@ -180,12 +176,7 @@ public class Base64Util {
      *               adheres to RFC 2045.
      */
     public static String encodeToString(byte[] input, int offset, int len, int flags) {
-        try {
-            return new String(encode(input, offset, len, flags), "US-ASCII");
-        } catch (UnsupportedEncodingException e) {
-            // US-ASCII is guaranteed to be available.
-            throw new AssertionError(e);
-        }
+        return new String(encode(input, offset, len, flags), StandardCharsets.US_ASCII);
     }
 
     /**
@@ -251,7 +242,7 @@ public class Base64Util {
         return encoder.output;
     }
 
-    /* package */ static abstract class Coder {
+    /* package */ abstract static class Coder {
         public byte[] output;
         public int op;
 
@@ -329,7 +320,7 @@ public class Base64Util {
          */
         private static final int SKIP = -1;
         private static final int EQUALS = -2;
-        final private int[] alphabet;
+        private final int[] alphabet;
         /**
          * States 0-3 are reading through the next input tuple.
          * State 4 is having read one '=' and expecting exactly
@@ -444,7 +435,6 @@ public class Base64Util {
                             value = (value << 6) | d;
                             ++state;
                         } else if (d == EQUALS) {
-                            // Emit the last (partial) output tuple;
                             // expect exactly one more padding character.
                             output[op++] = (byte) (value >> 4);
                             state = 4;
@@ -464,7 +454,6 @@ public class Base64Util {
                             op += 3;
                             state = 0;
                         } else if (d == EQUALS) {
-                            // Emit the last (partial) output tuple;
                             // expect no further data or padding characters.
                             output[op + 1] = (byte) (value >> 2);
                             output[op] = (byte) (value >> 10);
@@ -490,6 +479,8 @@ public class Base64Util {
                             this.state = 6;
                             return false;
                         }
+                        break;
+                    default:
                         break;
                 }
             }
@@ -571,11 +562,11 @@ public class Base64Util {
                 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
                 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '-', '_',
         };
-        final public boolean do_padding;
-        final public boolean do_newline;
-        final public boolean do_cr;
-        final private byte[] tail;
-        final private byte[] alphabet;
+        public final boolean do_padding;
+        public final boolean do_newline;
+        public final boolean do_cr;
+        private final byte[] tail;
+        private final byte[] alphabet;
         /* package */ int tailLen;
         private int count;
 
@@ -641,6 +632,8 @@ public class Base64Util {
                         tailLen = 0;
                     }
                     break;
+                default:
+                    throw new IllegalStateException("Unexpected value: " + tailLen);
             }
 
             if (v != -1) {
