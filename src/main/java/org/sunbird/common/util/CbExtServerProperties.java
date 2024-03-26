@@ -1291,10 +1291,6 @@ public class CbExtServerProperties {
 		this.assessmentQuestionListPath = assessmentQuestionListPath;
 	}
 
-	public void setSunbirdCbExtVersion(String sunbirdCbExtVersion) {
-		this.sunbirdCbExtVersion = sunbirdCbExtVersion;
-	}
-
 	public List<String> getAssessmentLevelParams() {
 		return Arrays.asList(assessmentLevelParams.split(",", -1));
 	}

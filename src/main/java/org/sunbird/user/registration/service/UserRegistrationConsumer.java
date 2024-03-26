@@ -1,6 +1,7 @@
 package org.sunbird.user.registration.service;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -149,6 +150,6 @@ public class UserRegistrationConsumer {
 		} catch (Exception e) {
 			LOGGER.error(String.format("Exception in %s : %s", "workflowTransition", e.getMessage()));
 		}
-		return null;
+		return Collections.emptyMap();
 	}
 }

@@ -308,7 +308,9 @@ public class StaffServiceImpl implements StaffService {
 		if (StringUtils.isEmpty(staffInfo.getId())) {
 			errObjList.add(Constants.ID);
 		}
-		boolean position = false, filled = false, vacant = false;
+		boolean position = false;
+		boolean filled = false;
+		boolean vacant = false;
 		if (staffInfo.getPosition() != null) {
 			if (StringUtils.isEmpty(staffInfo.getPosition())) {
 				errObjList.add(Constants.POSITION);

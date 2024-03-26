@@ -89,7 +89,7 @@ public enum ResponseCode {
         if (StringUtils.isBlank(code)) {
             return "";
         }
-        ResponseCode responseCodes[] = ResponseCode.values();
+        ResponseCode[] responseCodes = ResponseCode.values();
         for (ResponseCode actionState : responseCodes) {
             if (actionState.getErrorCode().equals(code)) {
                 return actionState.getErrorMessage();
@@ -121,8 +121,7 @@ public enum ResponseCode {
         if (StringUtils.isBlank(errorCode)) {
             return null;
         } else {
-           // ResponseCode value = null;
-            ResponseCode responseCodes[] = ResponseCode.values();
+            ResponseCode[] responseCodes = ResponseCode.values();
             for (ResponseCode response : responseCodes) {
                 if (response.getErrorCode().equals(errorCode)) {
                     return response;

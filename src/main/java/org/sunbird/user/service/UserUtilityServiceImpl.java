@@ -102,9 +102,8 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 
 			SunbirdApiResp sunbirdApiResp = restTemplate.postForObject(serverUrl, requestEnty, SunbirdApiResp.class);
 
-			boolean expression = (sunbirdApiResp != null && "OK".equalsIgnoreCase(sunbirdApiResp.getResponseCode())
+			return (sunbirdApiResp != null && "OK".equalsIgnoreCase(sunbirdApiResp.getResponseCode())
 					&& sunbirdApiResp.getResult().getResponse().getCount() >= 1);
-			return expression;
 
 		} catch (Exception e) {
 			throw new ApplicationLogicError(Constants.SUNBIRD_SERVICE_ERROR, e);
@@ -556,7 +555,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 
 	@Override
 	public boolean validateGroup(String group) {
-		return (!CollectionUtils.isEmpty(serverConfig.getBulkUploadGroupValue())) ? serverConfig.getBulkUploadGroupValue().stream().anyMatch(group::equalsIgnoreCase) : false;
+		return (!CollectionUtils.isEmpty(serverConfig.getBulkUploadGroupValue())) ? serverConfig.getBulkUploadGroupValue().stream().anyMatch(group::equalsIgnoreCase) : Boolean.FALSE;
 	}
 
 	@Override
@@ -682,7 +681,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 			backupUserInfoMap.putAll(userInfoMap);
 			resultArray.clear();
 
-			index = (int) Math.min(userCount, index + size);
+			index = (int) Math.min(userCount,(long) index + size);
 			if (index == userCount) {
 				isCompleted = true;
 			}

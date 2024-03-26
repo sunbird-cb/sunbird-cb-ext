@@ -82,7 +82,7 @@ public class InsightsServiceImpl implements InsightsService {
         List<Map<String, Object>>  result=  cassandraOperation.getRecordsByProperties(KEYSPACE_SUNBIRD,
                 LEARNER_STATS, userRequest, fields);
         LocalDate[]  dates = populateDate();
-        if (result ==null || result.size() < 1) {
+        if (result ==null || result.isEmpty()) {
             result = new ArrayList<>();
             HashMap m = new HashMap();
             result.add(m);
@@ -94,9 +94,8 @@ public class InsightsServiceImpl implements InsightsService {
 
 
     }
-    public void populateIfNudgeExist(List<String> data, ArrayList<Object> nudges, String type, List<String> organizations,String labels[]) {
+    public void populateIfNudgeExist(List<String> data, List<Object> nudges, String type, List<String> organizations, String[] labels) {
         for (int i = 0, j = 0; i < data.size(); i += 2, j++) {
-           // String label = data.get(i);
             double yesterday = StringUtils.isNotBlank(data.get(i)) ? Double.parseDouble(data.get(i)) : 0.0;
             double today = StringUtils.isNotBlank(data.get(i+1)) ? Double.parseDouble(data.get(i+1)) : 0.0;
             double change;

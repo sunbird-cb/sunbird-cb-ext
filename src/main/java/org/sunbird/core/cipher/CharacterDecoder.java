@@ -56,7 +56,7 @@ public abstract class CharacterDecoder {
 	 * This method works around the bizarre semantics of BufferedInputStream's read
 	 * method.
 	 */
-	protected int readFully(InputStream in, byte buffer[], int offset, int len) throws java.io.IOException {
+	protected int readFully(InputStream in, byte[] buffer, int offset, int len) throws java.io.IOException {
 		for (int i = 0; i < len; i++) {
 			int q = in.read();
 			if (q == -1)
@@ -110,7 +110,7 @@ public abstract class CharacterDecoder {
 	 * @exception IOException An error has occurred while decoding
 	 */
 	public byte decodeBuffer(String inputString)[] throws IOException {
-		byte inputBuffer[] = new byte[inputString.length()];
+		byte[] inputBuffer = new byte[inputString.length()];
 		ByteArrayInputStream inStream;
 		ByteArrayOutputStream outStream;
 
@@ -122,7 +122,7 @@ public abstract class CharacterDecoder {
 	}
 
 	/** Decode the contents of the inputstream into a buffer. */
-	public byte decodeBuffer(InputStream in)[] throws IOException {
+	public byte[] decodeBuffer(InputStream in) throws IOException {
 		ByteArrayOutputStream outStream = new ByteArrayOutputStream();
 		decodeBuffer(in, outStream);
 		return (outStream.toByteArray());

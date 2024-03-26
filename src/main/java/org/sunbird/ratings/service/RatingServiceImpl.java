@@ -509,7 +509,7 @@ public class RatingServiceImpl implements RatingService {
             missingAttrib.add(Constants.USER_ID);
         }
 
-        if (missingAttrib.size() > 0) {
+        if (!missingAttrib.isEmpty()) {
             strBuilder.append("The following parameter(s) are missing. Missing params - [")
                     .append(missingAttrib.toString()).append("]");
         }
@@ -660,7 +660,7 @@ public class RatingServiceImpl implements RatingService {
             }
             if (isRemove) {
 
-                if (additionalTags.size() == 0)
+                if (additionalTags.isEmpty())
                     return false;
                 additionalTags.remove(tag);
             } else {

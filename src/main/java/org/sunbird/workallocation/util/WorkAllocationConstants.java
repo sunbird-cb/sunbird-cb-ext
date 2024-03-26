@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class WorkAllocationConstants {
+	private WorkAllocationConstants() {}
 	public static final String ALLOCATION_DETAILS = "allocationDetails";
 	public static final String USER_DETAILS = "userDetails";
 
