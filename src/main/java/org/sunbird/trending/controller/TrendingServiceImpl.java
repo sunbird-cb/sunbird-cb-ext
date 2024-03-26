@@ -43,7 +43,7 @@ public class TrendingServiceImpl implements TrendingService {
         String org = ((String) (filter).get(Constants.ORGANISATION)) == null ? "" : ((String) (filter).get(Constants.ORGANISATION))  ;
         String designation = ((String) filter.get(Constants.DESIGNATION));
         String redisKey = TRENDING_COURSES_REDIS_KEY;
-        Map<String, String> redisKeyNameMap = new HashMap<String, String>();
+        Map<String, String> redisKeyNameMap = new HashMap<>();
         if (StringUtils.isBlank(designation)) {
             designation = "";
         } else {
@@ -51,7 +51,7 @@ public class TrendingServiceImpl implements TrendingService {
         }
 
         boolean isAcbpEnabled = false;
-        List<String> updatedContextTypeList = new ArrayList<String>();
+        List<String> updatedContextTypeList = new ArrayList<>();
         for (String contextType : contextTypeList) {
             if (Constants.ACBP_KEY.equalsIgnoreCase(contextType)) {
                 isAcbpEnabled = true;
@@ -65,14 +65,7 @@ public class TrendingServiceImpl implements TrendingService {
                 redisKeyNameMap.put(org + COLON + contextType, contextType);
             }
         }
-        
         int limit = Optional.ofNullable(request.get(Constants.LIMIT)).map(l -> (Integer) l).orElse(0);
-        /*List<String> fieldList = updatedContextTypeList.stream()
-                .map(type -> org + COLON + type)
-                .collect(Collectors.toList());
-        
-        String[] fieldsArray = fieldList.toArray(new String[fieldList.size()]);
-        */
         String[] newFieldsArray = redisKeyNameMap.keySet().toArray(new String[0]);
         // Fetch trending Ids for requested type of courses
         List<String> trendingCoursesAndPrograms = redisCacheMgr.hget(redisKey, serverProperties.getRedisInsightIndex(),newFieldsArray);
@@ -89,19 +82,11 @@ public class TrendingServiceImpl implements TrendingService {
                 }
             }
         }
-
-        /* if(trendingCoursesAndPrograms == null)
-             trendingCoursesAndPrograms = new ArrayList<>();
-       
-        for(int i=0;i<fieldsArray.length;i++){
-            if(updatedContextTypeList.size() > i && trendingCoursesAndPrograms.size() > 0 )
-            typeList.put(updatedContextTypeList.get(i),fetchIds(trendingCoursesAndPrograms.get(i), limit, fieldList.get(i)));
-        } */
         List<String> searchIds = typeList.values().stream().flatMap(List::stream).collect(Collectors.toList());
         Map<String, Object> compositeSearchRes ;
         List<Map<String, Object>> contentList = new ArrayList<>();
         Map<String, Object> resultMap = new HashMap<>();
-        if(searchIds != null && searchIds.size() > 0) {
+        if(searchIds != null && !searchIds.isEmpty()) {
              compositeSearchRes = compositeSearch(searchIds, token);
              if(null == compositeSearchRes)
                  compositeSearchRes = new HashMap<>();

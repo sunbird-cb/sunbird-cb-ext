@@ -3,9 +3,6 @@ package org.sunbird.workallocation.model;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -130,24 +127,6 @@ public class CompetencyDetails {
                 }
             }
         }
-
-//				if (req.getChildren() != null && req.getChildren().size() < 5) {
-//					Set<String> levelSet = children.stream().map(Child::getLevel).collect(Collectors.toSet());
-//					// We need to add more children
-//					for (int i = 1; i <= 5; i++) {
-//						String level = "Level "  + i;
-//						if(levelSet.contains(level)) {
-//							continue;
-//						}
-//						ChildNode newCN = new ChildNode();
-//						newCN.setLevel(level);
-//						newCN.setName(level);
-//						newCN.setType("COMPETENCIESLEVEL");
-//						newCN.setSource(source);
-//						childNodeList.add(newCN);
-//					}
-//				}
-
         req.setChildren(childNodeList);
 
         return req;

@@ -49,7 +49,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Service
 public class UserRegistrationServiceImpl implements UserRegistrationService {
 
-	private Logger LOGGER = LoggerFactory.getLogger(UserRegistrationServiceImpl.class);
+	private Logger logger = LoggerFactory.getLogger(UserRegistrationServiceImpl.class);
 
 	ObjectMapper mapper = new ObjectMapper();
 
@@ -118,7 +118,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 						}
 
 						if (status.equals(RestStatus.CREATED) || status.equals(RestStatus.OK)) {
-							if (isPreApprovedDomain(regDocument.getEmail())) {
+							if (Boolean.TRUE.equals(isPreApprovedDomain(regDocument.getEmail()))) {
 								// Fire createUser event
 								kafkaProducer.push(serverProperties.getUserRegistrationAutoCreateUserTopic(),
 										regDocument);
@@ -137,7 +137,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 					}
 				}
 			} catch (Exception e) {
-				LOGGER.error(String.format("Exception in %s : %s", "registerUser", e.getMessage()), e);
+				logger.error(String.format(Constants.EXCEPTION_MESSAGE_FORMAT, "registerUser", e.getMessage()), e);
 				errMsg = "Failed to process message. Exception: " + e.getMessage();
 			}
 		}
@@ -186,7 +186,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 			response.getResult().put(Constants.COUNT, orgList.size());
 			response.getResult().put(Constants.CONTENT, orgList);
 		} catch (Exception e) {
-			LOGGER.error("Exception occurred in getDeptDetails", e);
+			logger.error("Exception occurred in getDeptDetails", e);
 			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
 			response.getParams().setErrmsg("Exception occurred in getDeptDetails. Exception: " + e.getMessage());
 		}
@@ -215,7 +215,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 					errMsg = (String) ((Map<String, Object>)apiResponse.get(Constants.PARAMS)).get(Constants.ERROR_MESSAGE);
 				}
 			} catch (Exception e) {
-				LOGGER.error(String.format("Exception in %s : %s", "generateOTP", e.getMessage()), e);
+				logger.error(String.format(Constants.EXCEPTION_MESSAGE_FORMAT, "generateOTP", e.getMessage()), e);
 				errMsg = "Failed to process message. Exception: " + e.getMessage();
 			}
 		}
@@ -233,7 +233,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 			 * 1. Create User 2. Read created User 3. Update User 4. Create NodeBB user Id
 			 * 5. Assign Role 6. Reset Password and get activation link
 			 */
-			LOGGER.info("Initiated User Creation flow for Reg. Code :: " + registrationCode);
+			logger.info("Initiated User Creation flow for Reg. Code :: {}", registrationCode);
 			UserRegistration userReg = getUserRegistrationForRegCode(registrationCode);
 
 			// Create the org if it's not already onboarded.
@@ -242,21 +242,28 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 				if (orgResponse.getResponseCode() == HttpStatus.OK) {
 					String orgId = (String) orgResponse.getResult().get(Constants.ORGANIZATION_ID);
 					userReg.setSbOrgId(orgId);
-					LOGGER.info(String.format("Auto on-boarded organisation with Name: %s, MapId: %s, OrgId: %s",
+					logger.info(String.format("Auto on-boarded organisation with Name: %s, MapId: %s, OrgId: %s",
 							userReg.getOrgName(), userReg.getMapId(), userReg.getSbOrgId()));
-					// TODO - Need to find a best way to give time for org creation takes effect.
-					threadSleep();
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+						Thread.currentThread().interrupt();
+					}
 				} else {
-					errorHandlingOrgOnboard(orgResponse);
+					try {
+						logger.error("Failed to auto onboard organisation. Error: "
+								+ (new ObjectMapper()).writeValueAsString(orgResponse));
+					} catch (Exception e) {
+					}
 					return;
 				}
 			}
 
 			UserRegistrationStatus regStatus = UserRegistrationStatus.WF_APPROVED;
 			if (userUtilityService.createUser(userReg)) {
-				LOGGER.info("Successfully completed user creation flow.");
+				logger.info("Successfully completed user creation flow.");
 			} else {
-				LOGGER.error("Failed to create user for Reg.Code :: " + registrationCode);
+				logger.error("Failed to create user for Reg.Code :: {}", registrationCode);
 				regStatus = UserRegistrationStatus.FAILED;
 			}
 
@@ -272,9 +279,9 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 			strBuilder.append(". ES object update operation is ")
 					.append(status == RestStatus.OK ? " successful." : " failed.");
 
-			LOGGER.info(strBuilder.toString());
+			logger.info(strBuilder.toString());
 		} catch (Exception e) {
-			LOGGER.error("Failed to process user create flow.", e);
+			logger.error("Failed to process user create flow.", e);
 		}
 	}
 
@@ -291,7 +298,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 
 	private String validateRegisterationPayload(UserRegistrationInfo userRegInfo) {
 		StringBuffer str = new StringBuffer();
-		List<String> errList = new ArrayList<String>();
+		List<String> errList = new ArrayList<>();
 		if (StringUtils.isBlank(userRegInfo.getFirstName())) {
 			errList.add("FirstName");
 		}
@@ -324,7 +331,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 				str.append(validateErr);
 			}
 		}
-		if(StringUtils.isNotBlank(userRegInfo.getPhone()) && !ProjectUtil.validateContactPattern(userRegInfo.getPhone())) {
+		if(StringUtils.isNotBlank(userRegInfo.getPhone()) && Boolean.TRUE.equals(!ProjectUtil.validateContactPattern(userRegInfo.getPhone()))) {
 			str.setLength(0);
 			str.append("Invalid phone number");
 		}
@@ -339,7 +346,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 	private String validateOTPPayload(Map<String,Object> otpRequest) {
 		StringBuffer str = new StringBuffer();
 		Map<String,Object> request = (Map<String, Object>) otpRequest.get("request");
-		List<String> errList = new ArrayList<String>();
+		List<String> errList = new ArrayList<>();
 		if (ObjectUtils.isEmpty(request.get(Constants.KEY))) {
 			errList.add(Constants.KEY);
 		}
@@ -431,7 +438,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 			String emailDomain = email.split("@")[1];
 			Boolean retValue = isApprovedDomains(emailDomain, Constants.USER_REGISTRATION_DOMAIN)
 					|| isApprovedDomains(emailDomain, Constants.USER_REGISTRATION_PRE_APPROVED_DOMAIN);
-			if (!retValue) {
+			if (Boolean.FALSE.equals(retValue)) {
 				str.append("Email domain of this email address is not approved. Please use Request for help.");
 			}
 		} else {
@@ -450,13 +457,13 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 					serverProperties.getEsProfileIndexType(), registrationCode);
 			return mapper.convertValue(esObject, UserRegistration.class);
 		} catch (Exception e) {
-			LOGGER.error(String.format("Exception in %s : %s", "getUserRegistrationDetails", e.getMessage()));
+			logger.error(String.format(Constants.EXCEPTION_MESSAGE_FORMAT, "getUserRegistrationDetails", e.getMessage()));
 		}
 		return null;
 	}
 
 	private List<String> getMasterOrgList() {
-		List<String> orgList = new ArrayList<String>();
+		List<String> orgList = new ArrayList<>();
 		// read file into stream, try-with-resources
 
 		InputStream in = this.getClass().getClassLoader()
@@ -467,7 +474,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 				orgList.add(line.trim());
 			}
 		} catch (Exception e) {
-			LOGGER.error("Failed to read the master org list. Exception: ", e);
+			logger.error("Failed to read the master org list. Exception: ", e);
 		}
 
 		return orgList;
@@ -484,23 +491,17 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 			requestMap.put(Constants.OFFSET, iterateCount);
 			requestMap.put(Constants.LIMIT, 1000);
 			requestMap.put(Constants.FIELDS, new ArrayList<>(Arrays.asList(Constants.CHANNEL, Constants.IDENTIFIER)));
-			Map<String, Object> sortByMap = new HashMap<String, Object>();
+			Map<String, Object> sortByMap = new HashMap<>();
 			sortByMap.put(Constants.CHANNEL, Constants.ASC_ORDER);
 			requestMap.put(Constants.SORT_BY, sortByMap);
-			requestMap.put(Constants.FILTERS, new HashMap<String, Object>() {
-				{
-					put(Constants.IS_TENANT, Boolean.TRUE);
-				}
-			});
-
+			Map<String, Object> filtersMap = new HashMap<>();
+			filtersMap.put(Constants.IS_TENANT, Boolean.TRUE);
+			requestMap.put(Constants.FILTERS, filtersMap);
 			String serviceURL = serverProperties.getSbUrl() + serverProperties.getSbOrgSearchPath();
+			Map<String, Object> requestBody = new HashMap<>();
+			requestBody.put(Constants.REQUEST, requestMap);
 			SunbirdApiResp orgResponse = mapper.convertValue(
-					outboundRequestHandlerService.fetchResultUsingPost(serviceURL, new HashMap<String, Object>() {
-						{
-							put(Constants.REQUEST, requestMap);
-						}
-					}), SunbirdApiResp.class);
-
+					outboundRequestHandlerService.fetchResultUsingPost(serviceURL, requestBody), SunbirdApiResp.class);
 			SunbirdApiResultResponse resultResp = orgResponse.getResult().getResponse();
 			count = resultResp.getCount();
 			iterateCount = iterateCount + resultResp.getContent().size();
@@ -511,7 +512,6 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 					orgNameList.add(content.getChannel());
 				}
 			}
-
 			List<String> masterOrgList = getMasterOrgList();
 			for (String orgName : masterOrgList) {
 				if (!orgNameList.contains(orgName)) {
@@ -519,11 +519,9 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 				}
 			}
 		} while (count != iterateCount);
-
 		if (CollectionUtils.isEmpty(orgList)) {
 			throw new Exception("Failed to retrieve organisation details.");
 		}
-
 		Map<String, List<DeptPublicInfo>> deptListMap = new HashMap<String, List<DeptPublicInfo>>();
 		deptListMap.put(Constants.DEPARTMENT_LIST_CACHE_NAME, orgList);
 		redisCacheMgr.putCache(Constants.DEPARTMENT_LIST_CACHE_NAME, deptListMap);
@@ -531,8 +529,8 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 	}
 
 	private Map<String, Object> getOrgCreateRequest(UserRegistration userReg) {
-		Map<String, Object> orgRequestBody = new HashMap<String, Object>();
-		Map<String, Object> orgRequest = new HashMap<String, Object>();
+		Map<String, Object> orgRequestBody = new HashMap<>();
+		Map<String, Object> orgRequest = new HashMap<>();
 		orgRequest.put(Constants.ORG_NAME, userReg.getOrgName());
 		orgRequest.put(Constants.CHANNEL, userReg.getChannel());
 		orgRequest.put(Constants.ORGANIZATION_TYPE, userReg.getOrganisationType());
@@ -566,16 +564,16 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 		try {
 			Thread.sleep(1000);
 		} catch (Exception e) {
-			LOGGER.error("An error occured while called Thread.sleep()", e);
+			logger.error("An error occured while called Thread.sleep()", e);
 		}
 	}
 
 	private void errorHandlingOrgOnboard(SBApiResponse orgResponse) {
 		try {
-			LOGGER.error("Failed to auto onboard organisation. Error: "
+			logger.error("Failed to auto onboard organisation. Error: "
 					+ (new ObjectMapper()).writeValueAsString(orgResponse));
 		} catch (Exception e) {
-			LOGGER.error("Failed to handle the auto onboard organisation. Error", e);
+			logger.error("Failed to handle the auto onboard organisation. Error", e);
 		}
 	}
 }

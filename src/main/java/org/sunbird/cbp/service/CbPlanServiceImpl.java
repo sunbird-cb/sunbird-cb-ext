@@ -95,7 +95,7 @@ public class CbPlanServiceImpl implements CbPlanService {
             }
             insertCBPPlanDetailsToDB(userOrgId, requestMap, cbPlanDto, response, cbPlanId);
         } catch (Exception e) {
-            logger.error("Failed to Create CB Plan for OrgId: " + userOrgId, e);
+            logger.error(Constants.FAILED_TO_CREATE_CBLAN_FOR_ORGID + userOrgId, e);
             response.getParams().setStatus(Constants.FAILED);
             response.getParams().setErrmsg(e.getMessage());
             response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -164,7 +164,7 @@ public class CbPlanServiceImpl implements CbPlanService {
                     } else {
                         response.getParams().setStatus(Constants.FAILED);
                         response.getParams()
-                                .setErrmsg((String) resp.get(Constants.ERROR_MESSAGE) + "for cbPlanId: " + cbPlanId);
+                                .setErrmsg((String) resp.get(Constants.ERROR_MESSAGE) + Constants.FOR_CBPLANID + cbPlanId);
                         response.setResponseCode(HttpStatus.BAD_REQUEST);
                     }
                 } else {
@@ -202,7 +202,7 @@ public class CbPlanServiceImpl implements CbPlanService {
             String comment = (String) requestData.get(Constants.COMMENT);
             if (cbPlanId == null) {
                 response.getParams().setStatus(Constants.FAILED);
-                response.getParams().setErrmsg("CbPlanId is missing.");
+                response.getParams().setErrmsg(Constants.CB_PLANID_MISSING);
                 response.setResponseCode(HttpStatus.BAD_REQUEST);
                 return response;
             }
@@ -272,12 +272,12 @@ public class CbPlanServiceImpl implements CbPlanService {
                 } else {
                     response.getParams().setStatus(Constants.FAILED);
                     response.getParams()
-                            .setErrmsg((String) resp.get(Constants.ERROR_MESSAGE) + "for cbPlanId: " + cbPlanId);
+                            .setErrmsg((String) resp.get(Constants.ERROR_MESSAGE) + Constants.FOR_CBPLANID + cbPlanId);
                     response.setResponseCode(HttpStatus.BAD_REQUEST);
                 }
             } else {
                 response.getParams().setStatus(Constants.FAILED);
-                response.getParams().setErrmsg("CbPlan is not exist for ID: " + cbPlanId);
+                response.getParams().setErrmsg(Constants.CBPLAN_NOT_EXIST_FOR_ID + cbPlanId);
                 response.setResponseCode(HttpStatus.BAD_REQUEST);
             }
         } catch (Exception e) {
@@ -305,7 +305,7 @@ public class CbPlanServiceImpl implements CbPlanService {
             String comment = (String) requestData.get(Constants.COMMENT);
             if (cbPlanId == null) {
                 response.getParams().setStatus(Constants.FAILED);
-                response.getParams().setErrmsg("CbPlanId is missing.");
+                response.getParams().setErrmsg(Constants.CB_PLANID_MISSING);
                 response.setResponseCode(HttpStatus.BAD_REQUEST);
                 return response;
             }
@@ -349,12 +349,12 @@ public class CbPlanServiceImpl implements CbPlanService {
                 } else {
                     response.getParams().setStatus(Constants.FAILED);
                     response.getParams()
-                            .setErrmsg((String) resp.get(Constants.ERROR_MESSAGE) + "for cbPlanId: " + cbPlanId);
+                            .setErrmsg((String) resp.get(Constants.ERROR_MESSAGE) + Constants.FOR_CBPLANID + cbPlanId);
                     response.setResponseCode(HttpStatus.BAD_REQUEST);
                 }
             } else {
                 response.getParams().setStatus(Constants.FAILED);
-                response.getParams().setErrmsg("CbPlan is not exist for ID: " + cbPlanId);
+                response.getParams().setErrmsg(Constants.CBPLAN_NOT_EXIST_FOR_ID + cbPlanId);
                 response.setResponseCode(HttpStatus.BAD_REQUEST);
             }
         } catch (Exception e) {
@@ -373,7 +373,7 @@ public class CbPlanServiceImpl implements CbPlanService {
             UUID cbPlanUUID = UUID.fromString(cbPlanId);
             if (cbPlanId == null) {
                 response.getParams().setStatus(Constants.FAILED);
-                response.getParams().setErrmsg("CbPlanId is missing.");
+                response.getParams().setErrmsg(Constants.CB_PLANID_MISSING);
                 response.setResponseCode(HttpStatus.BAD_REQUEST);
                 return response;
             }
@@ -389,7 +389,7 @@ public class CbPlanServiceImpl implements CbPlanService {
                 response.getResult().put(Constants.CONTENT, enrichData);
             } else {
                 response.getParams().setStatus(Constants.FAILED);
-                response.getParams().setErrmsg("CbPlan is not exist for ID: " + cbPlanId);
+                response.getParams().setErrmsg(Constants.CBPLAN_NOT_EXIST_FOR_ID + cbPlanId);
                 response.setResponseCode(HttpStatus.BAD_REQUEST);
             }
         } catch (Exception e) {
@@ -415,7 +415,7 @@ public class CbPlanServiceImpl implements CbPlanService {
                 userId = authTokenOrUserId;
             else
                 userId = validateAuthTokenAndFetchUserId(authTokenOrUserId);
-            logger.info("UserId of the User : " + userId + "User org ID : " + userOrgId);
+            logger.info("UserId of the User : {}, User org ID : {}", userId, userOrgId);
             List<String> fields = Arrays.asList(Constants.PROFILE_DETAILS, Constants.ROOT_ORG_ID);
             Map<String, Object> propertiesMap = new HashMap<>();
             propertiesMap.put(Constants.ID, userId);
@@ -446,7 +446,7 @@ public class CbPlanServiceImpl implements CbPlanService {
             }
             List<String> assignmentTypeInfoKeyQueryList = new ArrayList<>(Arrays.asList(userId, Constants.ALL_USER));
             if (StringUtils.isNotEmpty(userDesignation)) {
-                logger.info("User Designation : " + userDesignation);
+                logger.info("User Designation : {}", userDesignation);
                 assignmentTypeInfoKeyQueryList.add(userDesignation);
             }
             propertiesMap.clear();
@@ -462,7 +462,7 @@ public class CbPlanServiceImpl implements CbPlanService {
             }
             List<Map<String, Object>> resultMap = new ArrayList<>();
             Map<String, Object> courseDetailsMap = new HashMap<>();
-            cbplanResult = cbplanResult.stream().filter(userCbPlan -> (Boolean)userCbPlan.get(Constants.CB_IS_ACTIVE) == true)
+            cbplanResult = cbplanResult.stream().filter(userCbPlan -> (Boolean)userCbPlan.get(Constants.CB_IS_ACTIVE) == Boolean.TRUE)
                     .sorted(Comparator.comparing(m -> (Date) ((Map<String, Object>) m).get(Constants.END_DATE)).reversed()).collect(Collectors.toList());
             for (Map<String, Object> cbPlan : cbplanResult) {
                 Map<String, Object> cbPlanDetails = new HashMap<>();
@@ -494,7 +494,7 @@ public class CbPlanServiceImpl implements CbPlanService {
                                 courseDetailsMap.put(courseId, contentDetails);
                             }
                         } else {
-                            logger.error("Failed to read course details for Id: " + courseId);
+                            logger.error("Failed to read course details for Id: {}", courseId);
                         }
                     } else {
                         continue;
@@ -506,7 +506,7 @@ public class CbPlanServiceImpl implements CbPlanService {
                 cbPlanDetails.put(Constants.CB_CONTENT_LIST, courseList);
                 resultMap.add(cbPlanDetails);
             }
-            logger.info("Number of CB Plan Available for the user is " + resultMap.size());
+            logger.info("Number of CB Plan Available for the user is {}", resultMap.size());
             response.getResult().put(Constants.COUNT, resultMap.size());
             response.getResult().put(Constants.CONTENT, resultMap);
         } catch (Exception e) {
@@ -639,8 +639,9 @@ public class CbPlanServiceImpl implements CbPlanService {
             enrichUserInfo(userInfoMap);
         }
 
+        String createdBy = (String) cbPlan.get(Constants.CREATED_BY);
         enrichData.put(Constants.CREATED_BY_NAME,
-                userInfoMap.get((String) cbPlan.get(Constants.CREATED_BY)).get(Constants.FIRSTNAME));
+                userInfoMap.get(createdBy).get(Constants.FIRSTNAME));
         enrichData.put(Constants.CREATED_BY, cbPlan.get(Constants.CREATED_BY));
         List<Map<String, Object>> enrichContentInfoMap = new ArrayList<>();
         for (String contentId : contentTypeInfo) {
@@ -709,7 +710,7 @@ public class CbPlanServiceImpl implements CbPlanService {
         boolean isUpdatedLookup = false;
         List<Map<String, Object>> cbPlanMap = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD,
                 Constants.TABLE_CB_PLAN_LOOKUP, cbPlanInfo, null);
-        List<String> cbPlanInfoInsertAssignmentKey = new ArrayList<>();
+        List<String> cbPlanInfoInsertAssignmentKey;
         List<String> cbPlanInfoUpdateAssignmentKey = new ArrayList<>();
         List<String> cbPlanInfoRequestUpdateAssignmentKey = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(cbPlanMap)) {
@@ -721,7 +722,7 @@ public class CbPlanServiceImpl implements CbPlanService {
             cbPlanInfoUpdateAssignmentKey = assignmentKeyInfoList.stream()
                     .filter(key -> !planDto.getAssignmentTypeInfo().contains(key)).collect(Collectors.toList());
             cbPlanInfoRequestUpdateAssignmentKey = cbPlanMap.stream().filter(key -> (planDto.getAssignmentTypeInfo().contains((String)key.get(Constants.CB_ASSIGNMENT_TYPE_INFO_KEY))
-                                                  && (Boolean)key.get(Constants.CB_IS_ACTIVE) == false))
+                                                  && (Boolean)key.get(Constants.CB_IS_ACTIVE) == Boolean.FALSE))
                                                     .map(key -> (String) key.get(Constants.CB_ASSIGNMENT_TYPE_INFO_KEY))
                                                     .collect(Collectors.toList());
             cbPlanInfoUpdateAssignmentKey.addAll(cbPlanInfoRequestUpdateAssignmentKey);
@@ -839,7 +840,7 @@ public class CbPlanServiceImpl implements CbPlanService {
                 return response;
             }
 
-            Map<String, Object> cbPlanPrimaryKey = new HashMap<String, Object>();
+            Map<String, Object> cbPlanPrimaryKey = new HashMap<>();
             cbPlanPrimaryKey.put(Constants.ORG_ID, userOrgId);
             List<String> fields = Arrays.asList(Constants.ORG_ID, Constants.ID, Constants.NAME,
                     Constants.CB_CONTENT_TYPE, Constants.CB_CONTENT_LIST, Constants.CB_ASSIGNMENT_TYPE,
@@ -935,7 +936,7 @@ public class CbPlanServiceImpl implements CbPlanService {
                     cbPlan.put(Constants.USER_DETAILS, enrichUserInfoList);
 
                 } else if (Constants.CB_DESIGNATION_TYPE.equalsIgnoreCase(assignmentType)) {
-                    cbPlan.put(Constants.USER_DETAILS, (List<String>) cbPlan.get(Constants.CB_ASSIGNMENT_TYPE_INFO));
+                    cbPlan.put(Constants.USER_DETAILS, Collections.singletonList((String) cbPlan.get(Constants.CB_ASSIGNMENT_TYPE_INFO)));
                 }
 
                 userUtilityService.getUserDetailsFromDB(Arrays.asList((String) cbPlan.get(Constants.CREATED_BY)),
@@ -986,7 +987,8 @@ public class CbPlanServiceImpl implements CbPlanService {
             return errMsg;
         }
 
-        String contentType, assignmentType;
+        String contentType;
+        String assignmentType;
         contentType = (String) searchReq.getFilters().get(Constants.CONTENT_TYPE);
         assignmentType = (String) searchReq.getFilters().get(Constants.CB_ASSIGNMENT_TYPE);
 

@@ -132,7 +132,7 @@ public class CassandraOperationImpl implements CassandraOperation {
 		selectQuery.allowFiltering();
 		Clause lastAccessTime = QueryBuilder.lt("last_access_time", date);
 		selectWhere.and(lastAccessTime);
-		logger.debug("our query: " + selectQuery.getQueryString());
+		logger.debug("our query: {}" , selectQuery.getQueryString());
 		ResultSet resultSet = connectionManager.getSession(keyspace).execute(selectQuery);
 		return CassandraUtil.createResponse(resultSet);
 	}
@@ -264,7 +264,7 @@ public class CassandraOperationImpl implements CassandraOperation {
 					rowMap.put(entry.getKey(), (String) row.getObject(entry.getValue()));
 				});
 
-				objectInfo.put((String) rowMap.get(key), rowMap);
+				objectInfo.put(rowMap.get(key), rowMap);
 			});
 		} catch (Exception e) {
 			logger.error(Constants.EXCEPTION_MSG_FETCH + table + " : " + e.getMessage(), e);
@@ -300,7 +300,7 @@ public class CassandraOperationImpl implements CassandraOperation {
 					rowMap.put(entry.getKey(), (String) row.getObject(entry.getValue()));
 				});
 
-				objectInfo.put((String) rowMap.get(key), rowMap);
+				objectInfo.put(rowMap.get(key), rowMap);
 			});
 		}
 		logger.info(String.format("Competed Oeration in %s seconds",

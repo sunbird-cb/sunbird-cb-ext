@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +34,7 @@ public class StaffServiceImpl implements StaffService {
 	private CassandraOperation cassandraOperation;
 
 	@Override
-	public SBApiResponse submitStaffDetails(StaffInfo data, String userId) throws Exception {
+	public SBApiResponse submitStaffDetails(StaffInfo data, String userId) {
 		SBApiResponse response = new SBApiResponse(Constants.API_STAFF_POSITION_ADD);
 		try {
 			validateAddStaffInfo(data);
@@ -42,7 +43,7 @@ public class StaffServiceImpl implements StaffService {
 					data.getPosition());
 			if (!CollectionUtils.isEmpty(existingList)) {
 				String errMsg = "Position exist for given name. Failed to create StaffInfo for OrgId: "
-						+ data.getOrgId() + ", Position: " + data.getPosition();
+						+ data.getOrgId() + Constants.STAFF_SERVICE_POSITION + data.getPosition();
 				logger.error(errMsg);
 				response.getParams().setErrmsg(errMsg);
 				response.setResponseCode(HttpStatus.BAD_REQUEST);
@@ -76,7 +77,7 @@ public class StaffServiceImpl implements StaffService {
 	}
 
 	@Override
-	public SBApiResponse updateStaffDetails(StaffInfo data, String userId) throws Exception {
+	public SBApiResponse updateStaffDetails(StaffInfo data, String userId) {
 		SBApiResponse response = new SBApiResponse(Constants.API_STAFF_POSITION_UPDATE);
 		try {
 			validateUpdateStaffInfo(data);
@@ -84,7 +85,7 @@ public class StaffServiceImpl implements StaffService {
 			List<StaffInfo> existingStaffList = getStaffListByProperty(data.getOrgId(), data.getId(),
 					StringUtils.EMPTY);
 
-			StaffInfo existingStaffInfo = new StaffInfo();
+			StaffInfo existingStaffInfo;
 			if (!existingStaffList.isEmpty()) {
 				existingStaffInfo = existingStaffList.get(0);
 			} else {
@@ -111,7 +112,7 @@ public class StaffServiceImpl implements StaffService {
 					if (isAnyOtherRecordExist) {
 						// Return error
 						String errMsg = "Position exist for given name. Failed to update StaffInfo for OrgId: "
-								+ data.getOrgId() + ", Position: " + data.getPosition();
+								+ data.getOrgId() + Constants.STAFF_SERVICE_POSITION + data.getPosition();
 						logger.error(errMsg);
 						response.getParams().setErrmsg(errMsg);
 						response.setResponseCode(HttpStatus.BAD_REQUEST);
@@ -186,7 +187,7 @@ public class StaffServiceImpl implements StaffService {
 	 *            String
 	 * @throws Exception
 	 */
-	private void saveAuditDetails(StaffInfo data, String userId) throws Exception {
+	private void saveAuditDetails(StaffInfo data, String userId) throws JsonProcessingException {
 		Map<String, Object> auditMap = new HashMap<>();
 		auditMap.put(Constants.ORG_ID, data.getOrgId());
 		auditMap.put(Constants.AUDIT_TYPE, Constants.STAFF);
@@ -199,7 +200,7 @@ public class StaffServiceImpl implements StaffService {
 	}
 
 	@Override
-	public SBApiResponse getStaffDetails(String orgId) throws Exception {
+	public SBApiResponse getStaffDetails(String orgId) {
 		SBApiResponse response = new SBApiResponse(Constants.API_STAFF_POSITION_READ);
 		List<StaffInfo> staffDetails = getStaffListByProperty(orgId, StringUtils.EMPTY, StringUtils.EMPTY);
 
@@ -218,7 +219,7 @@ public class StaffServiceImpl implements StaffService {
 	}
 
 	@Override
-	public SBApiResponse deleteStaffDetails(String orgId, String staffInfoId) throws Exception {
+	public SBApiResponse deleteStaffDetails(String orgId, String staffInfoId) {
 		SBApiResponse response = new SBApiResponse(Constants.API_STAFF_POSITION_DELETE);
 		try {
 			List<StaffInfo> existingStaffList = getStaffListByProperty(orgId, staffInfoId, StringUtils.EMPTY);
@@ -231,7 +232,7 @@ public class StaffServiceImpl implements StaffService {
 				response.getParams().setStatus(Constants.SUCCESSFUL);
 				response.setResponseCode(HttpStatus.OK);
 			} else {
-				String errMsg = "Staff Position doesn't exist for OrgId: " + orgId + ", Position: " + staffInfoId;
+				String errMsg = "Staff Position doesn't exist for OrgId: " + orgId + Constants.STAFF_SERVICE_POSITION + staffInfoId;
 				logger.error(errMsg);
 				response.getParams().setErrmsg(errMsg);
 				response.setResponseCode(HttpStatus.BAD_REQUEST);
@@ -279,7 +280,7 @@ public class StaffServiceImpl implements StaffService {
 	}
 
 	private void validateAddStaffInfo(StaffInfo staffInfo) throws Exception {
-		List<String> errObjList = new ArrayList<String>();
+		List<String> errObjList = new ArrayList<>();
 		if (StringUtils.isEmpty(staffInfo.getOrgId())) {
 			errObjList.add(Constants.ORG_ID);
 		}
@@ -294,19 +295,21 @@ public class StaffServiceImpl implements StaffService {
 		}
 
 		if (!CollectionUtils.isEmpty(errObjList)) {
-			throw new Exception("One or more required fields are empty. Empty fields " + errObjList.toString());
+			throw new Exception(Constants.EMPTY_FIELDS_EXCEPTION + errObjList.toString());
 		}
 	}
 
 	private void validateUpdateStaffInfo(StaffInfo staffInfo) throws Exception {
-		List<String> errObjList = new ArrayList<String>();
+		List<String> errObjList = new ArrayList<>();
 		if (StringUtils.isEmpty(staffInfo.getOrgId())) {
 			errObjList.add(Constants.ORG_ID);
 		}
 		if (StringUtils.isEmpty(staffInfo.getId())) {
 			errObjList.add(Constants.ID);
 		}
-		boolean position = false, filled = false, vacant = false;
+		boolean position = false;
+		boolean filled = false;
+		boolean vacant = false;
 		if (staffInfo.getPosition() != null) {
 			if (StringUtils.isEmpty(staffInfo.getPosition())) {
 				errObjList.add(Constants.POSITION);
@@ -334,7 +337,7 @@ public class StaffServiceImpl implements StaffService {
 		}
 
 		if (position && filled && vacant) {
-			throw new Exception("One or more required fields are empty. Empty fields " + errObjList.toString());
+			throw new Exception(Constants.EMPTY_FIELDS_EXCEPTION + errObjList.toString());
 		} else {
 			if (position)
 				errObjList.remove(Constants.POSITION);
@@ -345,7 +348,7 @@ public class StaffServiceImpl implements StaffService {
 		}
 
 		if (!CollectionUtils.isEmpty(errObjList)) {
-			throw new Exception("One or more required fields are empty. Empty fields " + errObjList.toString());
+			throw new Exception(Constants.EMPTY_FIELDS_EXCEPTION + errObjList.toString());
 		}
 	}
 }

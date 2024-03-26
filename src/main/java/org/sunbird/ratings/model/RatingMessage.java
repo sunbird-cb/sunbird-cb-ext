@@ -1,30 +1,29 @@
 package org.sunbird.ratings.model;
 
 public class RatingMessage {
-    public Integer version = 1;
     private String action = "ratingUpdate";
-    private String activity_id;
-    private String activity_Type;
-    private String user_id;
-    private String created_Date;
+    private String activityId;
+    private String activityType;
+    private String userId;
+    private String createdDate;
     private UpdatedValues prevValues;
     private UpdatedValues updatedValues;
 
-    public RatingMessage(String action, String activity_id, String activity_Type, String user_id, String created_Date) {
+    public RatingMessage(String action, String activityId, String activityType, String userId, String createdDate) {
         this.action = action;
-        this.activity_id = activity_id;
-        this.activity_Type = activity_Type;
-        this.user_id = user_id;
-        this.created_Date = created_Date;
+        this.activityId = activityId;
+        this.activityType = activityType;
+        this.userId = userId;
+        this.createdDate = createdDate;
     }
 
 
-    public String getActivity_id() {
-        return activity_id;
+    public String getActivityId() {
+        return activityId;
     }
 
-    public void setActivity_id(String activity_id) {
-        this.activity_id = activity_id;
+    public void setActivityId(String activityId) {
+        this.activityId = activityId;
     }
 
     public String getAction() {
@@ -35,28 +34,28 @@ public class RatingMessage {
         this.action = action;
     }
 
-    public String getActivity_Type() {
-        return activity_Type;
+    public String getActivityType() {
+        return activityType;
     }
 
-    public void setActivity_Type(String activity_Type) {
-        this.activity_Type = activity_Type;
+    public void setActivityType(String activityType) {
+        this.activityType = activityType;
     }
 
-    public String getUser_id() {
-        return user_id;
+    public String getUserId() {
+        return userId;
     }
 
-    public void setUser_id(String user_id) {
-        this.user_id = user_id;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
-    public String getCreated_Date() {
-        return created_Date;
+    public String getCreatedDate() {
+        return createdDate;
     }
 
-    public void setCreated_Date(String created_Date) {
-        this.created_Date = created_Date;
+    public void setCreatedDate(String createdDate) {
+        this.createdDate = createdDate;
     }
 
     public UpdatedValues getPrevValues() {
@@ -76,9 +75,9 @@ public class RatingMessage {
     }
 
     public static class UpdatedValues {
-        public String updatedOn;
-        public Float rating;
-        public String review;
+        private String updatedOn;
+        private Float rating;
+        private String review;
 
         public String getUpdatedOn() {
             return updatedOn;

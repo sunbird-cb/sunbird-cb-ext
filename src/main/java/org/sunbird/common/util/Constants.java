@@ -106,8 +106,8 @@ public class Constants {
 	public static final boolean FETCH_ON_LEVEL = false;
 	public static final boolean SKIP_ACCESS_CHECK = true;
 	public static final List<String> MINIMUL_FIELDS = Collections
-			.unmodifiableList(Arrays.asList("identifier", "duration", "downloadUrl", "description", "mimeType",
-					"artifactUrl", "name", STATUS, "resourceType", "categoryType", "category"));
+			.unmodifiableList(Arrays.asList(Constants.IDENTIFIER, Constants.DURATION, "downloadUrl", Constants.DESCRIPTION, "mimeType",
+					"artifactUrl", "name", STATUS, "resourceType", "categoryType", Constants.CATEGORY));
 	public static final String FETCH_RESULT_CONSTANT = ".fetchResult:";
 	public static final String URI_CONSTANT = "URI: ";
 	public static final String REQUEST_CONSTANT = "Request: ";
@@ -558,7 +558,7 @@ public class Constants {
 	public static final String CIPHER_ALGORITHM = "AES";
 	public static final byte[] CIPHER_KEY = new byte[] { 'T', 'h', 'i', 's', 'A', 's', 'I', 'S', 'e', 'r', 'c', 'e',
 			'K', 't', 'e', 'y' };
-	public static final List<String> DECRYPTED_FIELDS = Arrays.asList("phone", "email");
+	public static final List<String> DECRYPTED_FIELDS = Arrays.asList(Constants.PHONE, Constants.EMAIL);
 	public static final String CREATED_FOR = "createdFor";
 	public static final String COURSE_ORG_ID = "courseOrgId";
 	public static final String COURSE_ORG_NAME = "courseOrgName";
@@ -977,6 +977,61 @@ public class Constants {
 	public static final String EHRMS_AUTH_PASSWORD = "password";
 	public static final String USER_ID_LOWER = "userid";
 	public static final String EHRMS_USER_TOKEN = "ehrmsUserToken";
+	public static final String BUDGET_YEAR_CONSTANT = ", BudgetYear: ";
+	public static final String FAILED_BUDGET_SCHEME_FOR_ORGID = "Failed to find BudgetScheme for OrgId: ";
+	public static final String ID_CONSTANT = ", Id: ";
+	public static final String OPEN_BATCH = "Open Batch";
+	public static final String ONE_OR_MORE_ERROR_FIELD_VALIDATION = "One or more required fields are empty. Empty fields ";
+	public static final String CACHE_KEY_VALUE = "Cache_key_value ";
+	public static final String IS_SAVED_IN_REDIS = " is saved in redis";
+	public static final String NO_REDIS_CACHE_KEY_FOUND = "No Keys found, Redis cache is empty";
+	public static final String FAILED_TO_CREATE_CBLAN_FOR_ORGID = "Failed to Create CB Plan for OrgId: ";
+	public static final String FOR_CBPLANID = "for cbPlanId: ";
+	public static final String CB_PLANID_MISSING = "CbPlanId is missing.";
+	public static final String CBPLAN_NOT_EXIST_FOR_ID = "CbPlan is not exist for ID: ";
+	public static final String ERROR_RECEIVED = "Error received: ";
+	public static final String ERROR_RESPONSE = "Error Response: ";
+	public static final String SPACING_AFTER = "spacing-after";
+	public static final String PARAGRAPH = "paragraph";
+	public static final String PDF_TABLE = "pdf-table";
+	public static final String WIDTH_PERCENT = "width-percent";
+	public static final String CELL_BORDER = "cell-border";
+	public static final String PDF_CELL = "pdf-cell";
+	public static final String ALIGN = "align";
+	public static final String BOTTOM = "bottom";
+	public static final String BACKGROUND_COLOR = "background-color";
+	public static final String TRIPLE_DES = "TripleDES";
+	public static final String NULL_CONSTANT = "<null>";
+	public static final String FAILED_CREATING_ORG_IN_SUNBIRD = "Failed to create organisation in Sunbird.";
+	public static final String FAILED_PROFILE_UPDATE_PROCESS = "Failed to process profile update. Exception: ";
+	public static final String INVALID_COL_TYPE_EXPECTING_STRING = "Invalid column type. Expecting string format";
+	public static final String PROGRESS_DETAILS = "progressDetails";
+	public static final String RECEIVED_RESPONSE = "Received Response: ";
+	public static final String STAFF_SERVICE_POSITION = ", Position: ";
+	public static final String EMPTY_FIELDS_EXCEPTION = "One or more required fields are empty. Empty fields ";
+	public static final String FAILED_TO_UPLOAD_FILE_EXCEPTION = "Failed to upload file. Exception: ";
+	public static final String FAILED_TO_DELETE_FILE_EXCEPTION_MESSAGE = "Failed to delete file. Exception: ";
+	public static final String FAILED_TO_DOWNLOAD_FILE_EXCEPTION_MESSAGE ="Failed to download the file. Exception: ";
+	public static final String EXCEPTION = ", Exception: ";
+	public static final String FAILED_TO_DELETE_FILE = "Failed to delete file: ";
+	public static final String FAILED_TO_DOWNLOAD_FILE = "Failed to download the file: ";
+	public static final String FAILED_TO_READ_FILE ="Failed to read the downloaded file: ";
+	public static final String FAILED_USER_INFO_RETRIEVAL_MESSAGE = "Failed to get UserInfo from cassandra for userId: {}";
+	public static final String UNAUTHORIZED_FILE_DOWNLOAD_FOR_OTHER_ORG = "User not authorized to download file for other org: {}, request orgId:{}";
+	public static final String LASTMODIFIED ="lastModified";
+	public static final String FILEMETADATA ="fileMetaData";
+	public static final String FAILED_TO_READ_DOWNLOADED_FILE_FOR_URL = "Failed to read the downloaded file for URL: {}";
+	public static final String EXCEPTION_MESSAGE_FORMAT = "Exception in %s : %s";
+	public static final String SUNBIRD_SERVICE_ERROR = "Sunbird Service ERROR: ";
+	public static final String WORKORDER_ID = "workorderId";
+	public static final String X_AUTHENTICATED_USER_TOKEN = "X-Authenticated-User-Token";
+	public static final String X_CHANNEL_ID = "x-channel-id";
+	public static final String WORK_ALLOCATION_SAVE_EXCEPTION = "Exception occurred while saving the work allocation!!";
+	public static final String DEPT_ID = "deptId";
+	public static final String CORRECT_COUNT = "correctCount";
+	public static final String INCORRECT_COUNT = "incorrectCount";
+	public static final String NOT_ANSWERED_COUNT = "notAnsweredCount";
+	public static final String SOURCE_TITLE = "sourceTitle";
 	public static final String API_READ_WHEEBOX_RESULT = "api.wheebox.read.result";
 	public static final String DOC_ID = "docId";
 	public static final String DIGI_LOCKER_ID = "digiLockerId";
@@ -988,8 +1043,8 @@ public class Constants {
 	public static final String ISSUED_USER_CERTIFICATE = "issuedCertificates";
 	public static final String DOC_TYPE = "docType";
 	public static final String LEARNER_LEADER_BOARD = "learnerLeaderBoard";
-  public static final String PRIMARY_CATEGORY_TAG = "#primaryCategory";
-  public static final String PASSWORD = "password";
+    public static final String PRIMARY_CATEGORY_TAG = "#primaryCategory";
+    public static final String PASSWORD = "password";
 	public static final String STRING_FORMAT_UNZIP="%s/%s/%s/%s";
 	public static final String UNZIP_PATH="/unzippath";
 	public static final String OUTPUT_PATH="output";
@@ -1013,7 +1068,7 @@ public class Constants {
 	public static final String READ_REPORT_ACCESS_API = "api.read.access.report";
 	public static final String ERROR_READING_EMPTY_FILE = "Error while reading the file since its empty";
 
-  private Constants() {
+	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}
 

@@ -26,9 +26,9 @@ import org.sunbird.core.logger.CbExtLogger;
  */
 public class ProjectUtil {
 
-	public static CbExtLogger logger = new CbExtLogger(ProjectUtil.class.getName());
+	public static final CbExtLogger logger = new CbExtLogger(ProjectUtil.class.getName());
 
-	public static String DEFAULT_BULK_UPLOAD_VERIFICATION_REGEX = "^[a-zA-Z\\s,]+$";
+	public static String  DEFAULT_BULK_UPLOAD_VERIFICATION_REGEX = "^[a-zA-Z\\s,]+$";
 
 	/**
 	 * This method will check incoming value is null or empty it will do empty check
@@ -70,7 +70,7 @@ public class ProjectUtil {
 	}
 
 	public static Map<String, String> getDefaultHeaders() {
-		Map<String, String> headers = new HashMap<String, String>();
+		Map<String, String> headers = new HashMap<>();
 		headers.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
 		return headers;
 	}

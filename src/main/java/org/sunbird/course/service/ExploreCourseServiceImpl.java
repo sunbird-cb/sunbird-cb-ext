@@ -85,7 +85,7 @@ public class ExploreCourseServiceImpl implements ExploreCourseService {
 			logger.error(errMsg, e);
 		}
 		if (StringUtils.isNotEmpty(errMsg)) {
-			logger.error("Failed to initialize the Open Course Details to Cache. ErrMsg: " + errMsg);
+			logger.error("Failed to initialize the Open Course Details to Cache. ErrMsg: {}" , errMsg);
 			response.getParams().setErrmsg(errMsg);
 			response.getParams().setStatus(Constants.FAILED);
 			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -105,7 +105,7 @@ public class ExploreCourseServiceImpl implements ExploreCourseService {
 		try {
 			StringBuilder sbUrl = new StringBuilder(serverProperties.getKmBaseHost());
 			sbUrl.append(serverProperties.getKmBaseContentSearch());
-			Map<String, String> headers = new HashMap<String, String>();
+			Map<String, String> headers = new HashMap<>();
 			headers.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
 			return outboundRequestHandlerService.fetchResultUsingPost(sbUrl.toString(),
 					getContentSearchRequest(identifierList), headers);
@@ -117,12 +117,12 @@ public class ExploreCourseServiceImpl implements ExploreCourseService {
 
 	private Map<String, Object> getContentSearchRequest(List<String> identifierList) {
 		Map<String, Object> request = new HashMap<>();
-		Map<String, Object> requestBody = new HashMap<String, Object>();
-		Map<String, Object> filters = new HashMap<String, Object>();
+		Map<String, Object> requestBody = new HashMap<>();
+		Map<String, Object> filters = new HashMap<>();
 		filters.put(Constants.IDENTIFIER, identifierList);
 		filters.put(Constants.STATUS, Constants.LIVE);
 		requestBody.put(Constants.FILTERS, filters);
-		Map<String, Object> sortBy = new HashMap<String, Object>();
+		Map<String, Object> sortBy = new HashMap<>();
 		sortBy.put(Constants.LAST_UPDATED_ON, Constants.DESCENDING_ORDER);
 		requestBody.put(Constants.SORT_BY, sortBy);
 		requestBody.put(Constants.FIELDS, serverProperties.getKmCompositeSearchFields());

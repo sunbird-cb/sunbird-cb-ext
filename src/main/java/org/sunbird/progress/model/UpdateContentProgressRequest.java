@@ -3,6 +3,7 @@ package org.sunbird.progress.model;
 import org.sunbird.common.model.SunbirdApiRequest;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class UpdateContentProgressRequest {
 
@@ -18,12 +19,12 @@ public class UpdateContentProgressRequest {
         this.requestBody = requestBody;
     }
 
-    public HashMap<String, String> getHeadersValues() {
+    public Map<String, String> getHeadersValues() {
         return headersValues;
     }
 
-    public void setHeadersValues(HashMap<String, String> headerValues) {
-        this.headersValues = headerValues;
+    public void setHeadersValues(Map<String, String> headerValues) {
+        this.headersValues = (HashMap<String, String>) headerValues;
     }
 }
 

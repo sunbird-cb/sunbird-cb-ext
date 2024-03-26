@@ -1,8 +1,10 @@
 package org.sunbird.storage.controller;
 
 import java.io.IOException;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,35 +26,35 @@ public class StorageController {
 	CbExtServerProperties serverConfig;
 
 	@PostMapping("/upload")
-	public ResponseEntity<?> upload(@RequestParam(value = "file", required = true) MultipartFile multipartFile)
+	public ResponseEntity<SBApiResponse> upload(@RequestParam(value = "file", required = true) MultipartFile multipartFile)
 			throws IOException {
 		SBApiResponse uploadResponse = storageService.uploadFile(multipartFile, serverConfig.getCloudContainerName());
 		return new ResponseEntity<>(uploadResponse, uploadResponse.getResponseCode());
 	}
 
 	@DeleteMapping("/delete")
-	public ResponseEntity<?> deleteCloudFile(@RequestParam(value = "fileName", required = true) String fileName)
+	public ResponseEntity<SBApiResponse> deleteCloudFile(@RequestParam(value = "fileName", required = true) String fileName)
 			throws JsonProcessingException {
 		SBApiResponse deleteResponse = storageService.deleteFile(fileName, serverConfig.getCloudContainerName());
 		return new ResponseEntity<>(deleteResponse, deleteResponse.getResponseCode());
 	}
 
 	@GetMapping("/v1/report/{reportType}/{date}/{orgId}/{fileName}")
-	public ResponseEntity<?> downloadFile(@PathVariable("reportType") String reportType,
-										  @PathVariable("date") String date,
-										  @PathVariable("orgId") String orgId,
-										  @RequestHeader(Constants.X_AUTH_TOKEN) String userToken,
-										  @PathVariable("fileName") String fileName) {
+	public ResponseEntity<Resource> downloadFile(@PathVariable("reportType") String reportType,
+												 @PathVariable("date") String date,
+												 @PathVariable("orgId") String orgId,
+												 @RequestHeader(Constants.X_AUTH_TOKEN) String userToken,
+												 @PathVariable("fileName") String fileName) {
 		return storageService.downloadFile(reportType, date, orgId, fileName, userToken);
 	}
 
 	@GetMapping("/v1/reportInfo/{orgId}")
-	public ResponseEntity<?> getFileInfo(@PathVariable("orgId") String orgId) {
+	public ResponseEntity<Map<String, Map<String, Object>>> getFileInfo(@PathVariable("orgId") String orgId) {
 		return storageService.getFileInfo(orgId);
 	}
 
 	@PostMapping("/profilePhotoUpload/{cloudFolderName}")
-	public ResponseEntity<?> profileUpload(@PathVariable("cloudFolderName") String cloudFolderName,@RequestParam(value = "file", required = true) MultipartFile multipartFile)
+	public ResponseEntity<SBApiResponse> profileUpload(@PathVariable("cloudFolderName") String cloudFolderName,@RequestParam(value = "file", required = true) MultipartFile multipartFile)
 			throws IOException {
 		SBApiResponse uploadResponse = storageService.uploadFile(multipartFile, cloudFolderName, serverConfig.getCloudProfileImageContainerName());
 		return new ResponseEntity<>(uploadResponse, uploadResponse.getResponseCode());

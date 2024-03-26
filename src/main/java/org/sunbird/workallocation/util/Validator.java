@@ -12,8 +12,6 @@ import org.sunbird.workallocation.model.WorkAllocationDTO;
 import org.sunbird.workallocation.model.WorkAllocationDTOV2;
 import org.sunbird.workallocation.model.WorkOrderDTO;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 
 @Component

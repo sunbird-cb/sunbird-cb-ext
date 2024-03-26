@@ -42,6 +42,7 @@ public class ValidationException extends RuntimeException {
         this.responseCode = responseCode;
     }
 
+    @Override
     public String getMessage() {
         return message.toString();
     }

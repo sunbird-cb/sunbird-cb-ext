@@ -21,7 +21,7 @@ public class UserBulkUploadConsumer {
     public void processUserBulkUploadMessage(ConsumerRecord<String, String> data) {
         logger.info(
                 "UserBulkUploadConsumer::processMessage: Received event to initiate User Bulk Upload Process...");
-        logger.info("Received message:: " + data.value());
+        logger.info("Received message:: {}" , data.value());
         try {
             if (StringUtils.isNoneBlank(data.value())) {
                 CompletableFuture.runAsync(() -> {

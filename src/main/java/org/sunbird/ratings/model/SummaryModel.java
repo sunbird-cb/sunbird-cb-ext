@@ -5,25 +5,27 @@ import java.sql.Timestamp;
 public class SummaryModel {
     private String activityId;
     private String activityType;
-    private Float totalcount1stars;
-    private Float totalcount2stars;
-    private Float totalcount3stars;
-    private Float totalcount4stars;
-    private Float totalcount5stars;
-    private Float total_number_of_ratings;
-    private Float sum_of_total_ratings;
+    private Float totalCount1Stars;
+    private Float totalCount2Stars;
+    private Float totalCount3Stars;
+    private Float totalCount4Stars;
+    private Float totalCount5Stars;
+    private Float totalNumberOfRatings;
+    private Float sumOfTotalRatings;
     private String latest50Reviews;
 
-    public SummaryModel(String activityId, String activityType, Float totalcount1stars, Float totalcount2stars, Float totalcount3stars, Float totalcount4stars, Float totalcount5stars, Float total_number_of_ratings, Float sum_of_total_ratings, String latest50Reviews) {
+
+
+    public SummaryModel(String activityId, String activityType, Float totalCount1Stars, Float totalCount2Stars, Float totalCount3Stars, Float totalCount4Stars, Float totalCount5Stars, Float totalNumberOfRatings, Float sumOfTotalRatings, String latest50Reviews) {
         this.activityId = activityId;
         this.activityType = activityType;
-        this.totalcount1stars = totalcount1stars;
-        this.totalcount2stars = totalcount2stars;
-        this.totalcount3stars = totalcount3stars;
-        this.totalcount4stars = totalcount4stars;
-        this.totalcount5stars = totalcount5stars;
-        this.total_number_of_ratings = total_number_of_ratings;
-        this.sum_of_total_ratings = sum_of_total_ratings;
+        this.totalCount1Stars = totalCount1Stars;
+        this.totalCount2Stars = totalCount2Stars;
+        this.totalCount3Stars = totalCount3Stars;
+        this.totalCount4Stars = totalCount4Stars;
+        this.totalCount5Stars = totalCount5Stars;
+        this.totalNumberOfRatings = totalNumberOfRatings;
+        this.sumOfTotalRatings = sumOfTotalRatings;
         this.latest50Reviews = latest50Reviews;
     }
 
@@ -39,60 +41,60 @@ public class SummaryModel {
         this.activityId = activityId;
     }
 
-    public Float getTotalcount3stars() {
-        return totalcount3stars;
+    public Float getTotalCount3Stars() {
+        return totalCount3Stars;
     }
 
-    public void setTotalcount3stars(Float totalcount3stars) {
-        this.totalcount3stars = totalcount3stars;
+    public void setTotalCount3Stars(Float totalCount3Stars) {
+        this.totalCount3Stars = totalCount3Stars;
     }
 
-    public Float getTotalcount1stars() {
-        return totalcount1stars;
+    public Float getTotalCount1Stars() {
+        return totalCount1Stars;
     }
 
-    public void setTotalcount1stars(Float totalcount1stars) {
-        this.totalcount1stars = totalcount1stars;
+    public void setTotalCount1Stars(Float totalCount1Stars) {
+        this.totalCount1Stars = totalCount1Stars;
     }
 
-    public Float getTotalcount4stars() {
-        return totalcount4stars;
+    public Float getTotalCount4Stars() {
+        return totalCount4Stars;
     }
 
-    public void setTotalcount4stars(Float totalcount4stars) {
-        this.totalcount4stars = totalcount4stars;
+    public void setTotalCount4Stars(Float totalCount4Stars) {
+        this.totalCount4Stars = totalCount4Stars;
     }
 
-    public Float getTotalcount5stars() {
-        return totalcount5stars;
+    public Float getTotalCount5Stars() {
+        return totalCount5Stars;
     }
 
-    public void setTotalcount5stars(Float totalcount5stars) {
-        this.totalcount5stars = totalcount5stars;
+    public void setTotalCount5Stars(Float totalCount5Stars) {
+        this.totalCount5Stars = totalCount5Stars;
     }
 
-    public Float getTotal_number_of_ratings() {
-        return total_number_of_ratings;
+    public Float getTotalNumberOfRatings() {
+        return totalNumberOfRatings;
     }
 
-    public void setTotal_number_of_ratings(Float total_number_of_ratings) {
-        this.total_number_of_ratings = total_number_of_ratings;
+    public void setTotalNumberOfRatings(Float totalNumberOfRatings) {
+        this.totalNumberOfRatings = totalNumberOfRatings;
     }
 
-    public Float getTotalcount2stars() {
-        return totalcount2stars;
+    public Float getTotalCount2Stars() {
+        return totalCount2Stars;
     }
 
-    public void setTotalcount2stars(Float totalcount2stars) {
-        this.totalcount2stars = totalcount2stars;
+    public void setTotalCount2Stars(Float totalCount2Stars) {
+        this.totalCount2Stars = totalCount2Stars;
     }
 
-    public Float getSum_of_total_ratings() {
-        return sum_of_total_ratings;
+    public Float getSumOfTotalRatings() {
+        return sumOfTotalRatings;
     }
 
-    public void setSum_of_total_ratings(Float sum_of_total_ratings) {
-        this.sum_of_total_ratings = sum_of_total_ratings;
+    public void setSumOfTotalRatings(Float sumOfTotalRatings) {
+        this.sumOfTotalRatings = sumOfTotalRatings;
     }
 
     public String getActivityType() {
@@ -111,17 +113,17 @@ public class SummaryModel {
         this.latest50Reviews = latest50Reviews;
     }
 
-    static public class latestReviews {
+    public static class latestReviews {
         private String objectType;
-        private String user_id;
+        private String userId;
         private Timestamp date;
         private Float rating;
         private String review;
         private String firstName;
 
-        public latestReviews(String objectType, String user_id, Timestamp date, Float rating, String review, String firstName) {
+        public latestReviews(String objectType, String userId, Timestamp date, Float rating, String review, String firstName) {
             this.objectType = objectType;
-            this.user_id = user_id;
+            this.userId = userId;
             this.date = date;
             this.rating = rating;
             this.review = review;
@@ -136,12 +138,12 @@ public class SummaryModel {
             this.objectType = objectType;
         }
 
-        public String getUser_id() {
-            return user_id;
+        public String getUserId() {
+            return userId;
         }
 
-        public void setUser_id(String user_id) {
-            this.user_id = user_id;
+        public void setUserId(String userId) {
+            this.userId = userId;
         }
 
         public Timestamp getDate() {

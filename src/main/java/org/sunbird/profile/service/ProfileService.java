@@ -9,11 +9,11 @@ import org.sunbird.common.model.SBApiResponse;
 
 
 public interface ProfileService {
-	SBApiResponse profileUpdate(Map<String, Object> request, String XAuthToken, String AuthToken, String rootOrgId) ;
+	SBApiResponse profileUpdate(Map<String, Object> request, String XAuthToken, String AuthToken, String rootOrgId);
 
-	SBApiResponse orgProfileUpdate(Map<String, Object> request) throws Exception;
+	SBApiResponse orgProfileUpdate(Map<String, Object> request);
 
-	SBApiResponse orgProfileRead(String orgId) throws Exception;
+	SBApiResponse orgProfileRead(String orgId);
 
 	SBApiResponse userBasicInfo(String userId);
 

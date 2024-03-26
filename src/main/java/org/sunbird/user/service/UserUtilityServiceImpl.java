@@ -7,7 +7,6 @@ import java.util.*;
 import java.util.Map.Entry;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.jcraft.jsch.UserInfo;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.velocity.VelocityContext;
@@ -103,12 +102,11 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 
 			SunbirdApiResp sunbirdApiResp = restTemplate.postForObject(serverUrl, requestEnty, SunbirdApiResp.class);
 
-			boolean expression = (sunbirdApiResp != null && "OK".equalsIgnoreCase(sunbirdApiResp.getResponseCode())
+			return (sunbirdApiResp != null && "OK".equalsIgnoreCase(sunbirdApiResp.getResponseCode())
 					&& sunbirdApiResp.getResult().getResponse().getCount() >= 1);
-			return expression;
 
 		} catch (Exception e) {
-			throw new ApplicationLogicError("Sunbird Service ERROR: ", e);
+			throw new ApplicationLogicError(Constants.SUNBIRD_SERVICE_ERROR, e);
 		}
 	}
 
@@ -137,7 +135,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 				}
 			}
 		} catch (Exception e) {
-			throw new ApplicationLogicError("Sunbird Service ERROR: ", e);
+			throw new ApplicationLogicError(Constants.SUNBIRD_SERVICE_ERROR, e);
 		}
 
 		return result;
@@ -149,16 +147,13 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		// headers
 		HttpHeaders headers = new HttpHeaders();
 		// request body
+		Map<String, Object> filtersMap = new HashMap<>();
+		filtersMap.put(Constants.USER_ID, userIds);
 		SunbirdApiRequest requestObj = new SunbirdApiRequest();
 		Map<String, Object> reqMap = new HashMap<>();
-		reqMap.put(Constants.FILTERS, new HashMap<String, Object>() {
-			{
-				put(Constants.USER_ID, userIds);
-			}
-		});
+		reqMap.put(Constants.FILTERS, filtersMap);
 		reqMap.put(Constants.FIELDS_CONSTANT, fields);
 		requestObj.setRequest(reqMap);
-
 		try {
 			String url = props.getSbUrl() + props.getUserSearchEndPoint();
 			HttpEntity<?> requestEnty = new HttpEntity<>(requestObj, headers);
@@ -174,7 +169,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 				}
 			}
 		} catch (Exception e) {
-			throw new ApplicationLogicError("Sunbird Service ERROR: ", e);
+			throw new ApplicationLogicError(Constants.SUNBIRD_SERVICE_ERROR, e);
 		}
 
 		return result;
@@ -200,20 +195,20 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 						serverConfig.getUserUtilityTopic());
 			}
 		} catch (Exception e) {
-			throw new ApplicationLogicError("Sunbird Service ERROR: ", e);
+			throw new ApplicationLogicError(Constants.SUNBIRD_SERVICE_ERROR, e);
 		}
 		response.put(userLoginInfo.getUserId(), Boolean.TRUE);
 		return response;
 	}
 
 	@Override
-	public Map<String, Object> getUsersReadData(String userId, String authToken, String userAuthToken) {
+	public Map<String, Object> getUsersReadData(String userId, String authToken, String xauthToken) {
 		Map<String, String> header = new HashMap<>();
 		if (StringUtils.isNotEmpty(authToken)) {
 			header.put(Constants.AUTH_TOKEN, authToken);
 		}
-		if (StringUtils.isNotEmpty(userAuthToken)) {
-			header.put(Constants.X_AUTH_TOKEN, userAuthToken);
+		if (StringUtils.isNotEmpty(xauthToken)) {
+			header.put(Constants.X_AUTH_TOKEN, xauthToken);
 		}
 		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService
 				.fetchUsingGetWithHeadersProfile(serverConfig.getSbUrl() + serverConfig.getLmsUserReadPath() + userId,
@@ -227,7 +222,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 	public boolean createUser(UserRegistration userRegistration) {
 		boolean retValue = false;
 		Map<String, Object> request = new HashMap<>();
-		Map<String, Object> requestBody = new HashMap<String, Object>();
+		Map<String, Object> requestBody = new HashMap<>();
 		requestBody.put(Constants.EMAIL, userRegistration.getEmail());
 		requestBody.put(Constants.CHANNEL, userRegistration.getChannel());
 		requestBody.put(Constants.FIRSTNAME, userRegistration.getFirstName());
@@ -236,7 +231,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		requestBody.put(Constants.PHONE_VERIFIED, true);
 		request.put(Constants.REQUEST, requestBody);
 		try {
-			Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPost(
+			Map<String, Object> readData = outboundRequestHandlerService.fetchResultUsingPost(
 					props.getSbUrl() + props.getLmsUserCreatePath(), request, ProjectUtil.getDefaultHeaders());
 			if (Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
 				Map<String, Object> result = (Map<String, Object>) readData.get(Constants.RESULT);
@@ -261,20 +256,20 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 	public boolean updateUser(UserRegistration userRegistration) {
 		boolean retValue = false;
 		Map<String, Object> request = new HashMap<>();
-		Map<String, Object> requestBody = new HashMap<String, Object>();
+		Map<String, Object> requestBody = new HashMap<>();
 		requestBody.put(Constants.USER_ID, userRegistration.getUserId());
-		Map<String, Object> profileDetails = new HashMap<String, Object>();
+		Map<String, Object> profileDetails = new HashMap<>();
 		profileDetails.put(Constants.MANDATORY_FIELDS_EXISTS, false);
-		Map<String, Object> employementDetails = new HashMap<String, Object>();
+		Map<String, Object> employementDetails = new HashMap<>();
 		employementDetails.put(Constants.DEPARTMENTNAME, userRegistration.getOrgName());
 		profileDetails.put(Constants.EMPLOYMENTDETAILS, employementDetails);
-		Map<String, Object> personalDetails = new HashMap<String, Object>();
+		Map<String, Object> personalDetails = new HashMap<>();
 		personalDetails.put(Constants.FIRSTNAME.toLowerCase(), userRegistration.getFirstName());
 		personalDetails.put(Constants.PRIMARY_EMAIL, userRegistration.getEmail());
 		personalDetails.put(Constants.MOBILE, userRegistration.getPhone());
 		personalDetails.put(Constants.PHONE_VERIFIED, true);
 		profileDetails.put(Constants.PERSONAL_DETAILS, personalDetails);
-		Map<String, Object> professionDetailObj = new HashMap<String, Object>();
+		Map<String, Object> professionDetailObj = new HashMap<>();
 		professionDetailObj.put(Constants.ORGANIZATION_TYPE, Constants.GOVERNMENT);
 		if (StringUtils.isNotEmpty(userRegistration.getPosition())) {
 			professionDetailObj.put(Constants.DESIGNATION, userRegistration.getPosition());
@@ -285,7 +280,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		List<Map<String, Object>> professionalDetailsList = new ArrayList<Map<String, Object>>();
 		professionalDetailsList.add(professionDetailObj);
 		profileDetails.put(Constants.PROFESSIONAL_DETAILS, professionalDetailsList);
-		Map<String, Object> additionalProperties = new HashMap<String, Object>();
+		Map<String, Object> additionalProperties = new HashMap<>();
 		if (!StringUtils.isEmpty(userRegistration.getGroup())) {
 			additionalProperties.put(Constants.GROUP, userRegistration.getGroup());
 		}
@@ -301,7 +296,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		profileDetails.put(Constants.ADDITIONAL_PROPERTIES, additionalProperties);
 		requestBody.put(Constants.PROFILE_DETAILS, profileDetails);
 		request.put(Constants.REQUEST, requestBody);
-		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPatch(
+		Map<String, Object> readData = outboundRequestHandlerService.fetchResultUsingPatch(
 				props.getSbUrl() + props.getLmsUserUpdatePrivatePath(), request, ProjectUtil.getDefaultHeaders());
 		if (Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
 			retValue = assignRole(userRegistration.getSbOrgId(), userRegistration.getUserId(),
@@ -317,12 +312,12 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 	public boolean assignRole(String sbOrgId, String userId, String objectDetails) {
 		boolean retValue = false;
 		Map<String, Object> request = new HashMap<>();
-		Map<String, Object> requestBody = new HashMap<String, Object>();
+		Map<String, Object> requestBody = new HashMap<>();
 		requestBody.put(Constants.ORGANIZATION_ID, sbOrgId);
 		requestBody.put(Constants.USER_ID, userId);
 		requestBody.put(Constants.ROLES, Arrays.asList(Constants.PUBLIC));
 		request.put(Constants.REQUEST, requestBody);
-		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPost(
+		Map<String, Object> readData = outboundRequestHandlerService.fetchResultUsingPost(
 				props.getSbUrl() + props.getSbAssignRolePath(), request, ProjectUtil.getDefaultHeaders());
 		if (Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
 			retValue = true;
@@ -335,7 +330,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 	public boolean createNodeBBUser(UserRegistration userRegistration) {
 		boolean retValue = false;
 		Map<String, Object> request = new HashMap<>();
-		Map<String, Object> requestBody = new HashMap<String, Object>();
+		Map<String, Object> requestBody = new HashMap<>();
 		requestBody.put(Constants.USER_NAME.toLowerCase(), userRegistration.getUserName());
 		requestBody.put(Constants.IDENTIFIER, userRegistration.getUserId());
 		requestBody.put(Constants.USER_FULL_NAME.toLowerCase(),
@@ -343,12 +338,6 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		request.put(Constants.REQUEST, requestBody);
 
 		retValue = getActivationLink(userRegistration);
-		/*Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPost(
-				props.getDiscussionHubHost() + props.getDiscussionHubCreateUserPath(), request,
-				ProjectUtil.getDefaultHeaders());
-		if (Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
-			retValue = getActivationLink(userRegistration);
-		}*/
 		printMethodExecutionResult("Create NodeBB User", userRegistration.toMininumString(), retValue);
 		return retValue;
 	}
@@ -356,13 +345,13 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 	@Override
 	public boolean getActivationLink(UserRegistration userRegistration) {
 		boolean retValue = false;
-		Map<String, Object> request = new HashMap<String, Object>();
-		Map<String, Object> requestBody = new HashMap<String, Object>();
+		Map<String, Object> request = new HashMap<>();
+		Map<String, Object> requestBody = new HashMap<>();
 		requestBody.put(Constants.USER_ID, userRegistration.getUserId());
 		requestBody.put(Constants.KEY, Constants.EMAIL);
 		requestBody.put(Constants.TYPE, Constants.EMAIL);
 		request.put(Constants.REQUEST, requestBody);
-		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPost(
+		Map<String, Object> readData = outboundRequestHandlerService.fetchResultUsingPost(
 				props.getSbUrl() + props.getSbResetPasswordPath(), request, ProjectUtil.getDefaultHeaders());
 		if (Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
 			Map<String, Object> result = (Map<String, Object>) readData.get(Constants.RESULT);
@@ -377,7 +366,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 	public boolean sendWelcomeEmail(String activationLink, UserRegistration userRegistration) {
 		boolean retValue = false;
 		Map<String, Object> request = new HashMap<>();
-		Map<String, Object> requestBody = new HashMap<String, Object>();
+		Map<String, Object> requestBody = new HashMap<>();
 		requestBody.put(Constants.ALLOWED_LOGGING, "You can use your email to Login");
 		requestBody.put(Constants.BODY, Constants.HELLO);
 		requestBody.put(Constants.EMAIL_TEMPLATE_TYPE, props.getWelcomeEmailTemplate());
@@ -396,7 +385,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 
 		request.put(Constants.REQUEST, requestBody);
 
-		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPost(
+		Map<String, Object> readData = outboundRequestHandlerService.fetchResultUsingPost(
 				props.getSbUrl() + props.getSbSendNotificationEmailPath(), request, ProjectUtil.getDefaultHeaders());
 		if (Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
 			retValue = true;
@@ -421,16 +410,13 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 	@Override
 	public Map<String, Map<String, String>> getUserDetails(List<String> userIds, List<String> fields) {
 		// request body
+		Map<String, Object> filtersMap = new HashMap<>();
+		filtersMap.put(Constants.USER_ID, userIds);
 		SunbirdApiRequest requestObj = new SunbirdApiRequest();
 		Map<String, Object> reqMap = new HashMap<>();
-		reqMap.put(Constants.FILTERS, new HashMap<String, Object>() {
-			{
-				put(Constants.USER_ID, userIds);
-			}
-		});
+		reqMap.put(Constants.FILTERS, filtersMap);
 		reqMap.put(Constants.FIELDS_CONSTANT, fields);
 		requestObj.setRequest(reqMap);
-
 		try {
 			String url = props.getSbUrl() + props.getUserSearchEndPoint();
 			Map<String, Object> apiResponse = outboundRequestHandlerService.fetchResultUsingPost(url, requestObj, null);
@@ -485,7 +471,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 				List<Map<String, Object>> userInfoList = cassandraOperation
 						.getRecordsByPropertiesWithoutFiltering(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_USER, propertyMap, fields);
 				for (Map<String, Object> user : userInfoList) {
-					Map<String, String> userMap = new HashMap<String, String>();
+					Map<String, String> userMap = new HashMap<>();
 					String userId = (String) user.get(Constants.USER_ID);
 
 					if (userInfoMap.containsKey(userId)) {
@@ -537,22 +523,17 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 	@Override
 	public boolean isUserExist(String key, String value) {
 		// request body
+		Map<String, Object> filtersMap = new HashMap<>();
+		filtersMap.put(key, value);
 		SunbirdApiRequest requestObj = new SunbirdApiRequest();
 		Map<String, Object> reqMap = new HashMap<>();
-		reqMap.put(Constants.FILTERS, new HashMap<String, Object>() {
-			{
-				put(key, value);
-			}
-		});
+		reqMap.put(Constants.FILTERS, filtersMap);
 		requestObj.setRequest(reqMap);
-
 		HashMap<String, String> headersValue = new HashMap<>();
 		headersValue.put(Constants.CONTENT_TYPE, "application/json");
 		headersValue.put(Constants.AUTHORIZATION, props.getSbApiKey());
-
 		try {
 			String url = props.getSbUrl() + props.getUserSearchEndPoint();
-
 			Map<String, Object> response = outboundRequestHandlerService.fetchResultUsingPost(url, requestObj,
 					headersValue);
 			if (response != null && "OK".equalsIgnoreCase((String) response.get("responseCode"))) {
@@ -560,24 +541,27 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 				if (map.get("response") != null) {
 					Map<String, Object> responseObj = (Map<String, Object>) map.get("response");
 					int count = (int) responseObj.get(Constants.COUNT);
-                    return count != 0;
+					if (count == 0)
+						return false;
+					else
+						return true;
 				}
 			}
 		} catch (Exception e) {
-			throw new ApplicationLogicError("Sunbird Service ERROR: ", e);
+			throw new ApplicationLogicError(Constants.SUNBIRD_SERVICE_ERROR, e);
 		}
 		return true;
 	}
 
 	@Override
 	public boolean validateGroup(String group) {
-		return (!CollectionUtils.isEmpty(serverConfig.getBulkUploadGroupValue())) ? serverConfig.getBulkUploadGroupValue().stream().anyMatch(group::equalsIgnoreCase) : false;
+		return (!CollectionUtils.isEmpty(serverConfig.getBulkUploadGroupValue())) ? serverConfig.getBulkUploadGroupValue().stream().anyMatch(group::equalsIgnoreCase) : Boolean.FALSE;
 	}
 
 	@Override
 	public String createBulkUploadUser(UserRegistration userRegistration) {
 		Map<String, Object> request = new HashMap<>();
-		Map<String, Object> requestBody = new HashMap<String, Object>();
+		Map<String, Object> requestBody = new HashMap<>();
 		requestBody.put(Constants.EMAIL, userRegistration.getEmail());
 		requestBody.put(Constants.CHANNEL, userRegistration.getChannel());
 		requestBody.put(Constants.FIRSTNAME, userRegistration.getFirstName());
@@ -591,8 +575,8 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 			headerValues.put(Constants.X_AUTH_TOKEN, userRegistration.getUserAuthToken());
 		}
 		try {
-			Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPost(
-					props.getSbUrl() + props.getLmsUserCreatePath(), request, headerValues);
+			Map<String, Object> readData = outboundRequestHandlerService.fetchResultUsingPost(
+					props.getSbUrl() + props.getLmsUserCreatePath(), request, ProjectUtil.getDefaultHeaders());
 			if (readData != null && !Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
 				Map<String, Object> params = (Map<String, Object>) readData.get(Constants.PARAMS);
 				if (!MapUtils.isEmpty(params)) {
@@ -613,20 +597,20 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 	@Override
 	public String updateBulkUploadUser(UserRegistration userRegistration) {
 		Map<String, Object> request = new HashMap<>();
-		Map<String, Object> requestBody = new HashMap<String, Object>();
+		Map<String, Object> requestBody = new HashMap<>();
 		requestBody.put(Constants.USER_ID, userRegistration.getUserId());
-		Map<String, Object> profileDetails = new HashMap<String, Object>();
+		Map<String, Object> profileDetails = new HashMap<>();
 		profileDetails.put(Constants.MANDATORY_FIELDS_EXISTS, false);
-		Map<String, Object> employementDetails = new HashMap<String, Object>();
+		Map<String, Object> employementDetails = new HashMap<>();
 		employementDetails.put(Constants.DEPARTMENTNAME, userRegistration.getOrgName());
 		profileDetails.put(Constants.EMPLOYMENTDETAILS, employementDetails);
-		Map<String, Object> personalDetails = new HashMap<String, Object>();
+		Map<String, Object> personalDetails = new HashMap<>();
 		personalDetails.put(Constants.FIRSTNAME.toLowerCase(), userRegistration.getFirstName());
 		personalDetails.put(Constants.PRIMARY_EMAIL, userRegistration.getEmail());
 		personalDetails.put(Constants.MOBILE, userRegistration.getPhone());
 		personalDetails.put(Constants.PHONE_VERIFIED, true);
 		profileDetails.put(Constants.PERSONAL_DETAILS, personalDetails);
-		Map<String, Object> professionDetailObj = new HashMap<String, Object>();
+		Map<String, Object> professionDetailObj = new HashMap<>();
 		professionDetailObj.put(Constants.ORGANIZATION_TYPE, Constants.GOVERNMENT);
 		if (StringUtils.isNotEmpty(userRegistration.getPosition())) {
 			professionDetailObj.put(Constants.DESIGNATION, userRegistration.getPosition());
@@ -637,7 +621,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		List<Map<String, Object>> professionalDetailsList = new ArrayList<Map<String, Object>>();
 		professionalDetailsList.add(professionDetailObj);
 		profileDetails.put(Constants.PROFESSIONAL_DETAILS, professionalDetailsList);
-		Map<String, Object> additionalProperties = new HashMap<String, Object>();
+		Map<String, Object> additionalProperties = new HashMap<>();
 		if (!CollectionUtils.isEmpty(userRegistration.getTag())) {
 			additionalProperties.put(Constants.TAG, userRegistration.getTag());
 		}
@@ -652,7 +636,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		profileDetails.put(Constants.MANDATORY_FIELDS_EXISTS, false);
 		requestBody.put(Constants.PROFILE_DETAILS, profileDetails);
 		request.put(Constants.REQUEST, requestBody);
-		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPatch(
+		Map<String, Object> readData = outboundRequestHandlerService.fetchResultUsingPatch(
 				props.getSbUrl() + props.getLmsUserUpdatePrivatePath(), request, ProjectUtil.getDefaultHeaders());
 		if (readData != null && !Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
 			Map<String, Object> params = (Map<String, Object>) readData.get(Constants.PARAMS);
@@ -660,9 +644,8 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 				return (String) params.get(Constants.ERROR_MESSAGE);
 			}
 		} else if (readData != null && Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
-			//	if (getActivationLink(userRegistration)) {
 			return (String) readData.get(Constants.RESPONSE_CODE);
-			//	}
+
 		}
 		return Constants.BULK_USER_UPDATE_API_FAILED;
 	}
@@ -702,7 +685,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 			backupUserInfoMap.putAll(userInfoMap);
 			resultArray.clear();
 
-			index = (int) Math.min(userCount, index + size);
+			index = (int) Math.min(userCount,(long) index + size);
 			if (index == userCount) {
 				isCompleted = true;
 			}
@@ -720,12 +703,11 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 									Map<String, Map<String, Object>> userInfoMap) throws IOException{
 		for (Map<String, Object> user : userMapList) {
 			Map<String, Object> userInfo = new HashMap<>();
-			userInfo.put(Constants.USER_ID, (String) user.get(Constants.USER_ID));
-			userInfo.put(Constants.FIRSTNAME, (String) user.get(Constants.USER_FIRST_NAME));
-			userInfo.put(Constants.ROOT_ORG_ID, (String) user.get(Constants.ROOT_ORG_ID));
-			userInfo.put(Constants.CHANNEL, (String) user.get(Constants.CHANNEL));
-			userInfo.put(Constants.DESIGNATION, (String) user.get(Constants.PROFILE_DETAILS_DESIGNATION));
-			//userInfo.put(Constants.DEPARTMENTNAME, (String) user.get(Constants.EMPLOYMENT_DETAILS_DEPARTMENT_NAME));
+			userInfo.put(Constants.USER_ID, user.get(Constants.USER_ID));
+			userInfo.put(Constants.FIRSTNAME, user.get(Constants.USER_FIRST_NAME));
+			userInfo.put(Constants.ROOT_ORG_ID, user.get(Constants.ROOT_ORG_ID));
+			userInfo.put(Constants.CHANNEL, user.get(Constants.CHANNEL));
+			userInfo.put(Constants.DESIGNATION, user.get(Constants.PROFILE_DETAILS_DESIGNATION));
 			JsonNode jsonNode = objectMapper.convertValue(user, JsonNode.class);
 			JsonNode primaryEmailNode = jsonNode.at("/profileDetails/personalDetails/primaryEmail");
 			String primaryEmail = primaryEmailNode.asText();
@@ -749,11 +731,11 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 			header.put(Constants.AUTH_TOKEN, authToken);
 		}
 		Map<String, Object> request = new HashMap<>();
-		Map<String, Object> requestBody = new HashMap<String, Object>();
+		Map<String, Object> requestBody = new HashMap<>();
 		requestBody.put(Constants.KEY, Constants.EMAIL);
 		requestBody.put(Constants.VALUE, email);
 		request.put(Constants.REQUEST, requestBody);
-		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPost(
+		Map<String, Object> readData = outboundRequestHandlerService.fetchResultUsingPost(
 				props.getSbUrl() + props.getLmsUserLookupPath(), request, ProjectUtil.getDefaultHeaders());
 		if (readData != null && Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
 			Map<String, Object> result = (Map<String, Object>) readData.get(Constants.RESULT);
@@ -852,7 +834,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 
 	private String validateRequest(Map<String, Object> request, String userId) {
 		StringBuffer str = new StringBuffer();
-		List<String> errList = new ArrayList<String>();
+		List<String> errList = new ArrayList<>();
 		Map<String, Object> requestData = (Map<String, Object>) request.get(Constants.REQUEST);
 		if (StringUtils.isBlank(userId)) {
 			str.append(Constants.USER_ID_DOESNT_EXIST);
@@ -945,7 +927,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		builder.append(props.getNotifyServiceHost()).append(props.getNotifyServicePathAsync());
 		try {
 			Map<String, Object> response = outboundRequestHandlerService.fetchResultUsingPost(builder.toString(), request, null);
-			logger.debug("The email notification is successfully sent, response is: " + response);
+			logger.debug("The email notification is successfully sent, response is: {}" , response);
 		} catch (Exception e) {
 			logger.error("Exception while posting the data in notification service: ", e);
 		}

@@ -18,12 +18,12 @@ public class SecretKeySpec implements KeySpec, SecretKey {
 
 	@PostConstruct
 	public void postConstruct() {
-		this.key = (byte[]) Constants.CIPHER_KEY.clone();
+		this.key = Constants.CIPHER_KEY.clone();
 		this.algorithm = Constants.CIPHER_ALGORITHM;
 	}
 
 	public String getAlgorithm() {
-		return Constants.CIPHER_ALGORITHM;
+		return this.algorithm;
 	}
 
 	public String getFormat() {
@@ -31,7 +31,7 @@ public class SecretKeySpec implements KeySpec, SecretKey {
 	}
 
 	public byte[] getEncoded() {
-		return (byte[]) this.key.clone();
+		return  this.key.clone();
 	}
 
 	public int hashCode() {
@@ -41,7 +41,7 @@ public class SecretKeySpec implements KeySpec, SecretKey {
 			retval += this.key[i] * i;
 		}
 
-		return this.algorithm.equalsIgnoreCase("TripleDES") ? retval ^ "desede".hashCode()
+		return this.algorithm.equalsIgnoreCase(Constants.TRIPLE_DES) ? retval ^ "desede".hashCode()
 				: retval ^ this.algorithm.toLowerCase(Locale.ENGLISH).hashCode();
 	}
 
@@ -53,8 +53,8 @@ public class SecretKeySpec implements KeySpec, SecretKey {
 		} else {
 			String thatAlg = ((SecretKey) obj).getAlgorithm();
 			if (thatAlg.equalsIgnoreCase(this.algorithm)
-					|| thatAlg.equalsIgnoreCase("DESede") && this.algorithm.equalsIgnoreCase("TripleDES")
-					|| thatAlg.equalsIgnoreCase("TripleDES") && this.algorithm.equalsIgnoreCase("DESede")) {
+					|| thatAlg.equalsIgnoreCase("DESede") && this.algorithm.equalsIgnoreCase(Constants.TRIPLE_DES)
+					|| thatAlg.equalsIgnoreCase(Constants.TRIPLE_DES) && this.algorithm.equalsIgnoreCase("DESede")) {
 				byte[] thatKey = ((SecretKey) obj).getEncoded();
 				return MessageDigest.isEqual(this.key, thatKey);
 			} else {
