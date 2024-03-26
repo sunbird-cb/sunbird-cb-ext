@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.sunbird.cache.RedisCacheMgr;
 import org.sunbird.cassandra.utils.CassandraOperation;
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.util.CbExtServerProperties;
@@ -44,6 +45,9 @@ public class UserBulkUploadService {
 
     @Autowired
     StorageService storageService;
+
+    @Autowired
+    RedisCacheMgr redisCacheMgr;
 
     public void initiateUserBulkUploadProcess(String inputData) {
         logger.info("UserBulkUploadService:: initiateUserBulkUploadProcess: Started");
@@ -251,16 +255,22 @@ public class UserBulkUploadService {
                     } else {
                         invalidErrList.addAll(validateEmailContactAndDomain(userRegistration));
                         if (invalidErrList.isEmpty()) {
-                            userRegistration.setUserAuthToken(inputDataMap.get(Constants.X_AUTH_TOKEN));
-                            String responseCode = userUtilityService.createBulkUploadUser(userRegistration);
-                            if (!responseCode.equalsIgnoreCase(Constants.OK)) {
-                                failedRecordsCount++;
-                                statusCell.setCellValue(Constants.FAILED_UPPERCASE);
-                                errorDetails.setCellValue(responseCode);
+                            if (StringUtils.isBlank(redisCacheMgr.getCache(userRegistration.getPhone()+ "" +userRegistration.getEmail()))) {
+                                redisCacheMgr.putCache(userRegistration.getPhone().trim()+ "" +userRegistration.getEmail(),
+                                        userRegistration);
+                                userRegistration.setUserAuthToken(inputDataMap.get(Constants.X_AUTH_TOKEN));
+                                String responseCode = userUtilityService.createBulkUploadUser(userRegistration);
+                                if (!responseCode.equalsIgnoreCase(Constants.OK)) {
+                                    failedRecordsCount++;
+                                    statusCell.setCellValue(Constants.FAILED_UPPERCASE);
+                                    errorDetails.setCellValue(responseCode);
+                                } else {
+                                    noOfSuccessfulRecords++;
+                                    statusCell.setCellValue(Constants.SUCCESS_UPPERCASE);
+                                    errorDetails.setCellValue("");
+                                }
                             } else {
-                                noOfSuccessfulRecords++;
-                                statusCell.setCellValue(Constants.SUCCESS_UPPERCASE);
-                                errorDetails.setCellValue("");
+                                logger.error("Key is already present in Redis Key: " + userRegistration.getPhone()+ "" +userRegistration.getEmail());
                             }
                         } else {
                             failedRecordsCount++;
