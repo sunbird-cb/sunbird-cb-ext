@@ -213,7 +213,7 @@ public class ContentServiceImpl implements ContentService {
 		if (null != response && Constants.OK.equalsIgnoreCase((String) response.get(Constants.RESPONSE_CODE))) {
 			return response;
 		}
-		return null;
+		return Collections.emptyMap();
 	}
 
 	public Map<String, Object> searchLiveContent(String contentId) {
@@ -286,7 +286,7 @@ public class ContentServiceImpl implements ContentService {
 		if (null != response && Constants.OK.equalsIgnoreCase((String) response.get(Constants.RESPONSE_CODE))) {
 			return response;
 		}
-		return null;
+		return Collections.emptyMap();
 	}
 
 	public void getLiveContentDetails(List<String> contentIdList, List<String> fields,
@@ -369,7 +369,7 @@ public class ContentServiceImpl implements ContentService {
 			Map<String, Object> contentResult = (Map<String, Object>) response.get(Constants.RESULT);
 			return (Map<String, Object>) contentResult.get(Constants.CONTENT);
 		}
-		return null;
+		return Collections.emptyMap();
 	}
 
 	public List<Map<String, Object>> searchContent(String tag) {

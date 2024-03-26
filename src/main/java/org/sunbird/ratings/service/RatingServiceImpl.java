@@ -473,8 +473,8 @@ public class RatingServiceImpl implements RatingService {
 
             activityId = (String) requestBody.get(Constants.ACTIVITY_ID);
             compositeKey.put(Constants.ACTIVITY_ID, activityId);
-            compositeKey.put(Constants.ACTIVITY_TYPE, (String) requestBody.get(Constants.ACTIVITY_TYPE));
-            compositeKey.put(Constants.RATINGS_USER_ID, (List<String>) requestBody.get(Constants.USER_ID));
+            compositeKey.put(Constants.ACTIVITY_TYPE, requestBody.get(Constants.ACTIVITY_TYPE));
+            compositeKey.put(Constants.RATINGS_USER_ID, requestBody.get(Constants.USER_ID));
             List<Map<String, Object>> existingDataList = cassandraOperation.getRecordsByPropertiesWithoutFiltering(
                     Constants.KEYSPACE_SUNBIRD,
                     Constants.TABLE_RATINGS, compositeKey, null);
@@ -509,7 +509,7 @@ public class RatingServiceImpl implements RatingService {
             missingAttrib.add(Constants.USER_ID);
         }
 
-        if (missingAttrib.size() > 0) {
+        if (!missingAttrib.isEmpty()) {
             strBuilder.append("The following parameter(s) are missing. Missing params - [")
                     .append(missingAttrib.toString()).append("]");
         }
@@ -560,7 +560,7 @@ public class RatingServiceImpl implements RatingService {
                     contentRequest.put(Constants.CONTENT, updateRatingValues);
                     Map<String, Object> updateContent = new HashMap<>();
                     updateContent.put(Constants.REQUEST, contentRequest);
-                    Map<String, Object> updateReadData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPatch(
+                    Map<String, Object> updateReadData = outboundRequestHandlerService.fetchResultUsingPatch(
                             serverConfig.getLearningServiceBaseUrl() + serverConfig.getSystemUpdateAPI() + contentId, updateContent,
                             ProjectUtil.getDefaultHeaders());
                     if (Constants.OK.equalsIgnoreCase((String) updateReadData.get(Constants.RESPONSE_CODE))) {
@@ -660,7 +660,7 @@ public class RatingServiceImpl implements RatingService {
             }
             if (isRemove) {
 
-                if (additionalTags.size() == 0)
+                if (additionalTags.isEmpty())
                     return false;
                 additionalTags.remove(tag);
             } else {
@@ -675,7 +675,7 @@ public class RatingServiceImpl implements RatingService {
             contentRequest.put(Constants.CONTENT, updatedValues);
             Map<String, Object> updateContent = new HashMap<>();
             updateContent.put(Constants.REQUEST, contentRequest);
-            Map<String, Object> updateReadData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPatch(serverConfig.getLearningServiceBaseUrl()
+            Map<String, Object> updateReadData = outboundRequestHandlerService.fetchResultUsingPatch(serverConfig.getLearningServiceBaseUrl()
                     + serverConfig.getSystemUpdateAPI() + contentId, updateContent, ProjectUtil.getDefaultHeaders());
             if (Constants.OK.equalsIgnoreCase((String) updateReadData.get(Constants.RESPONSE_CODE))) {
                 return true;

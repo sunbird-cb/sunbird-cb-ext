@@ -121,7 +121,7 @@ public class AssessmentController {
 	public ResponseEntity<SBApiResponse> submitUserAssessmentV3(@Valid @RequestBody Map<String, Object> requestBody,
 													@RequestHeader("x-authenticated-user-token") String authUserToken , @RequestParam(name = "editMode" ,required = false) String editMode) throws Exception {
 
-		Boolean edit = StringUtils.isEmpty(editMode)  ? false : Boolean.parseBoolean(editMode);
+		Boolean edit = StringUtils.isEmpty(editMode)  ? Boolean.FALSE : Boolean.parseBoolean(editMode);
 		SBApiResponse submitResponse = assessmentServiceV2.submitAssessment(requestBody, authUserToken,edit);
 		return new ResponseEntity<>(submitResponse, submitResponse.getResponseCode());
 	}
@@ -164,7 +164,7 @@ public class AssessmentController {
 	@PostMapping("/v4/user/assessment/submit")
 	public ResponseEntity<SBApiResponse> submitUserAssessmentV4(@Valid @RequestBody Map<String, Object> requestBody,
 			@RequestHeader("x-authenticated-user-token") String authUserToken,@RequestParam(name = "editMode" ,required = false) String editMode) {
-		Boolean edit = StringUtils.isEmpty(editMode)  ? false : Boolean.parseBoolean(editMode);
+		Boolean edit = StringUtils.isEmpty(editMode)  ? Boolean.FALSE : Boolean.parseBoolean(editMode);
 		SBApiResponse submitResponse = assessmentServiceV4.submitAssessmentAsync(requestBody, authUserToken,edit);
 		return new ResponseEntity<>(submitResponse, submitResponse.getResponseCode());
 	}
@@ -181,7 +181,7 @@ public class AssessmentController {
 	public ResponseEntity<SBApiResponse> readAssessmentV4(
 			@PathVariable("assessmentIdentifier") String assessmentIdentifier,
 			@RequestHeader(Constants.X_AUTH_TOKEN) String token,@RequestParam(name = "editMode" ,required = false) String editMode) {
-		Boolean edit = StringUtils.isEmpty(editMode)  ? false : Boolean.parseBoolean(editMode);
+		Boolean edit = StringUtils.isEmpty(editMode)  ? Boolean.FALSE: Boolean.parseBoolean(editMode);
 		SBApiResponse readResponse = assessmentServiceV4.readAssessment(assessmentIdentifier, token,edit);
 		return new ResponseEntity<>(readResponse, readResponse.getResponseCode());
 	}
@@ -189,7 +189,7 @@ public class AssessmentController {
 	@PostMapping("/v4/quml/question/list")
 	public ResponseEntity<SBApiResponse> readQuestionListV4(@Valid @RequestBody Map<String, Object> requestBody,
 			@RequestHeader("x-authenticated-user-token") String authUserToken,@RequestParam(name = "editMode" ,required = false) String editMode) {
-		Boolean edit = StringUtils.isEmpty(editMode)  ? false : Boolean.parseBoolean(editMode);
+		Boolean edit = StringUtils.isEmpty(editMode)  ? Boolean.FALSE: Boolean.parseBoolean(editMode);
 		SBApiResponse response = assessmentServiceV4.readQuestionList(requestBody, authUserToken,edit);
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
@@ -198,7 +198,7 @@ public class AssessmentController {
 	public ResponseEntity<SBApiResponse> retakeAssessmentV4(
 			@PathVariable("assessmentIdentifier") String assessmentIdentifier,
 			@RequestHeader(Constants.X_AUTH_TOKEN) String token,@RequestParam(name = "editMode" ,required = false) String editMode) {
-		Boolean edit = StringUtils.isEmpty(editMode)  ? false : Boolean.parseBoolean(editMode);
+		Boolean edit = StringUtils.isEmpty(editMode)  ? Boolean.FALSE: Boolean.parseBoolean(editMode);
 		SBApiResponse readResponse = assessmentServiceV4.retakeAssessment(assessmentIdentifier, token,edit);
 		return new ResponseEntity<>(readResponse, readResponse.getResponseCode());
 	}

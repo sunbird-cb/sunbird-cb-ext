@@ -1,6 +1,7 @@
 package org.sunbird.common.util;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -103,7 +104,7 @@ public class IndexerService {
 			logger.error("Exception in getting the record from ElasticSearch", e);
 		}
 		if (null == response)
-			return null;
+			return Collections.emptyMap();
 		return response.getSourceAsMap();
 	}
 

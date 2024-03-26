@@ -484,7 +484,7 @@ public class CbPlanServiceImpl implements CbPlanService {
             }
             List<Map<String, Object>> resultMap = new ArrayList<>();
             Map<String, Object> courseDetailsMap = new HashMap<>();
-            cbplanResult = cbplanResult.stream().filter(userCbPlan -> (Boolean)userCbPlan.get(Constants.CB_IS_ACTIVE) == true)
+            cbplanResult = cbplanResult.stream().filter(userCbPlan -> (Boolean)userCbPlan.get(Constants.CB_IS_ACTIVE) == Boolean.TRUE)
                     .sorted(Comparator.comparing(m -> (Date) ((Map<String, Object>) m).get(Constants.END_DATE)).reversed()).collect(Collectors.toList());
             for (Map<String, Object> cbPlan : cbplanResult) {
                 Map<String, Object> cbPlanDetails = new HashMap<>();
@@ -662,8 +662,9 @@ public class CbPlanServiceImpl implements CbPlanService {
             enrichUserInfo(userInfoMap);
         }
 
+        String createdBy = (String) cbPlan.get(Constants.CREATED_BY);
         enrichData.put(Constants.CREATED_BY_NAME,
-                userInfoMap.get((String) cbPlan.get(Constants.CREATED_BY)).get(Constants.FIRSTNAME));
+                userInfoMap.get(createdBy).get(Constants.FIRSTNAME));
         enrichData.put(Constants.CREATED_BY, cbPlan.get(Constants.CREATED_BY));
         List<Map<String, Object>> enrichContentInfoMap = new ArrayList<>();
         for (String contentId : contentTypeInfo) {
@@ -744,7 +745,7 @@ public class CbPlanServiceImpl implements CbPlanService {
             cbPlanInfoUpdateAssignmentKey = assignmentKeyInfoList.stream()
                     .filter(key -> !planDto.getAssignmentTypeInfo().contains(key)).collect(Collectors.toList());
             cbPlanInfoRequestUpdateAssignmentKey = cbPlanMap.stream().filter(key -> (planDto.getAssignmentTypeInfo().contains((String)key.get(Constants.CB_ASSIGNMENT_TYPE_INFO_KEY))
-                                                  && (Boolean)key.get(Constants.CB_IS_ACTIVE) == false))
+                                                  && (Boolean)key.get(Constants.CB_IS_ACTIVE) == Boolean.FALSE))
                                                     .map(key -> (String) key.get(Constants.CB_ASSIGNMENT_TYPE_INFO_KEY))
                                                     .collect(Collectors.toList());
             cbPlanInfoUpdateAssignmentKey.addAll(cbPlanInfoRequestUpdateAssignmentKey);
@@ -965,7 +966,7 @@ public class CbPlanServiceImpl implements CbPlanService {
                     cbPlan.put(Constants.USER_DETAILS, enrichUserInfoList);
 
                 } else if (Constants.CB_DESIGNATION_TYPE.equalsIgnoreCase(assignmentType)) {
-                    cbPlan.put(Constants.USER_DETAILS, (List<String>) cbPlan.get(Constants.CB_ASSIGNMENT_TYPE_INFO));
+                    cbPlan.put(Constants.USER_DETAILS, Collections.singletonList((String) cbPlan.get(Constants.CB_ASSIGNMENT_TYPE_INFO)));
                 }
 
                 userUtilityService.getUserDetailsFromDB(Arrays.asList((String) cbPlan.get(Constants.CREATED_BY)),

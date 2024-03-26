@@ -290,10 +290,9 @@ public class CohortsServiceImpl implements CohortsService {
 		enrollObj.put("courseId", contentId);
 		enrollObj.put("batchId", batchId);
 		req.put("request", enrollObj);
-		Map<String, Object> enrollMentResponse = outboundRequestHandlerService.fetchResultUsingPost(
+		return outboundRequestHandlerService.fetchResultUsingPost(
 				cbExtServerProperties.getCourseServiceHost() + cbExtServerProperties.getUserCourseEnroll(), req,
 				headers);
-		return enrollMentResponse;
 	}
 
 	private void processChildContentId(String givenContentId, List<String> assessmentIdList) {
@@ -382,7 +381,7 @@ public class CohortsServiceImpl implements CohortsService {
 		List<CohortUsers> activeUserCollection = new ArrayList<>();
 		if (participantList.size() > count) {
 			participantList = participantList.stream().limit(count).collect(Collectors.toList());
-		} else if (participantList.size() == 0) {
+		} else if (participantList.isEmpty()) {
 			return activeUserCollection;
 		}
 		try {
@@ -461,7 +460,7 @@ public class CohortsServiceImpl implements CohortsService {
 			List<String> batchIdList = batchDetails.stream().map(batchDetail -> batchDetail.getBatchId()).collect(Collectors.toList());
 			List<Map<String, Object>> userActiveEnrollmentForBatch = getActiveEnrollmentForUser(batchIdList, userUUID);
 			boolean isEnrolledWithBatch = false;
-			if (userActiveEnrollmentForBatch.size() > 0) {
+			if (!userActiveEnrollmentForBatch.isEmpty()) {
 				ProjectUtil.updateErrorDetails(finalResponse, Constants.BATCH_ALREADY_ENROLLED_MSG, HttpStatus.BAD_REQUEST);
 				return finalResponse;
 			}

@@ -18,7 +18,7 @@ public class BASE64Decoder extends CharacterDecoder {
 	/**
 	 * This character array provides the character to value map based on RFC1521.
 	 */
-	private static final char pemArray[] = {
+	private static final char[] pemArray = {
 			// 0 1 2 3 4 5 6 7
 			'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', // 0
 			'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', // 1
@@ -30,7 +30,7 @@ public class BASE64Decoder extends CharacterDecoder {
 			'4', '5', '6', '7', '8', '9', '+', '/' // 7
 	};
 
-	private static final byte pemConvertArray[] = new byte[256];
+	private static final byte[] pemConvertArray = new byte[256];
 
 	static {
 		for (int i = 0; i < 255; i++) {
@@ -41,7 +41,7 @@ public class BASE64Decoder extends CharacterDecoder {
 		}
 	}
 
-	byte decodeBuffer[] = new byte[4];
+	byte[] decodeBuffer = new byte[4];
 
 	/** Decode one BASE64 atom into 1, 2, or 3 bytes of data. */
 	@Override
@@ -49,7 +49,10 @@ public class BASE64Decoder extends CharacterDecoder {
 	protected void decodeAtom(PushbackInputStream inStream, OutputStream outStream, int rem)
 			throws java.io.IOException {
 		int i;
-		byte a = -1, b = -1, c = -1, d = -1;
+		byte a = -1;
+		byte b = -1;
+		byte c = -1;
+		byte d = -1;
 
 		if (rem < 2) {
 			throw new IOException("BASE64Decoder: Not enough bytes for an atom.");

@@ -141,7 +141,7 @@ public class MasterDataServiceImpl implements MasterDataService {
                 Map<String, Object> propertyMap = new HashMap<>();
                 propertyMap.put(Constants.CONTEXT_TYPE.toLowerCase(), masterData.get(Constants.CONTEXT_TYPE));
                 List<Map<String, Object>> totalMasterData = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_MASTER_DATA, propertyMap, new ArrayList<>());
-                request.put(Constants.ID, Long.toString(totalMasterData.size() + 1));
+                request.put(Constants.ID, Long.toString((long)totalMasterData.size() + 1));
                 request.put(Constants.CONTEXT_DATA, masterData.get(Constants.CONTEXT_DATA));
                 response = cassandraOperation.insertRecord(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_MASTER_DATA, request);
                 if (!Constants.SUCCESS.equalsIgnoreCase((String) response.get(Constants.RESPONSE))) {
@@ -300,7 +300,8 @@ public class MasterDataServiceImpl implements MasterDataService {
 				.get(Constants.RESPONSE_DATA);
 		if (!CollectionUtils.isEmpty(fracResponseList)) {
 			for (Map<String, Object> respObj : fracResponseList) {
-				if (!positionNameList.contains((String) respObj.get(Constants.CONTEXT_NAME.toLowerCase()))) {
+               String contextName= (String) respObj.get(Constants.CONTEXT_NAME.toLowerCase());
+				if (!positionNameList.contains(contextName)) {
 					positionList.add(new MasterData((String) respObj.get(Constants.ID), Constants.POSITION,
 							(String) respObj.get(Constants.NAME), (String) respObj.get(Constants.DESCRIPTION)));
 					positionNameList.add((String) respObj.get(Constants.NAME));

@@ -113,7 +113,7 @@ public class SummaryModel {
         this.latest50Reviews = latest50Reviews;
     }
 
-    static public class latestReviews {
+    public static class latestReviews {
         private String objectType;
         private String userId;
         private Timestamp date;
