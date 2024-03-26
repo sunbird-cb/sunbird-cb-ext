@@ -31,7 +31,7 @@ public class SecretKeySpec implements KeySpec, SecretKey {
 	}
 
 	public byte[] getEncoded() {
-		return (byte[]) this.key.clone();
+		return  this.key.clone();
 	}
 
 	public int hashCode() {

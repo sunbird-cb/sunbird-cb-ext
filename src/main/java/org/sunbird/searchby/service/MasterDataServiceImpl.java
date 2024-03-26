@@ -300,7 +300,8 @@ public class MasterDataServiceImpl implements MasterDataService {
 				.get(Constants.RESPONSE_DATA);
 		if (!CollectionUtils.isEmpty(fracResponseList)) {
 			for (Map<String, Object> respObj : fracResponseList) {
-				if (!positionNameList.contains((String) respObj.get(Constants.CONTEXT_NAME.toLowerCase()))) {
+               String contextName= (String) respObj.get(Constants.CONTEXT_NAME.toLowerCase());
+				if (!positionNameList.contains(contextName)) {
 					positionList.add(new MasterData((String) respObj.get(Constants.ID), Constants.POSITION,
 							(String) respObj.get(Constants.NAME), (String) respObj.get(Constants.DESCRIPTION)));
 					positionNameList.add((String) respObj.get(Constants.NAME));

@@ -263,7 +263,7 @@ public class CassandraOperationImpl implements CassandraOperation {
 					rowMap.put(entry.getKey(), (String) row.getObject(entry.getValue()));
 				});
 
-				objectInfo.put((String) rowMap.get(key), rowMap);
+				objectInfo.put(rowMap.get(key), rowMap);
 			});
 		} catch (Exception e) {
 			logger.error(Constants.EXCEPTION_MSG_FETCH + table + " : " + e.getMessage(), e);
@@ -299,7 +299,7 @@ public class CassandraOperationImpl implements CassandraOperation {
 					rowMap.put(entry.getKey(), (String) row.getObject(entry.getValue()));
 				});
 
-				objectInfo.put((String) rowMap.get(key), rowMap);
+				objectInfo.put(rowMap.get(key), rowMap);
 			});
 		}
 		logger.info(String.format("Competed Oeration in %s seconds",

@@ -662,8 +662,9 @@ public class CbPlanServiceImpl implements CbPlanService {
             enrichUserInfo(userInfoMap);
         }
 
+        String createdBy = (String) cbPlan.get(Constants.CREATED_BY);
         enrichData.put(Constants.CREATED_BY_NAME,
-                userInfoMap.get((String) cbPlan.get(Constants.CREATED_BY)).get(Constants.FIRSTNAME));
+                userInfoMap.get(createdBy).get(Constants.FIRSTNAME));
         enrichData.put(Constants.CREATED_BY, cbPlan.get(Constants.CREATED_BY));
         List<Map<String, Object>> enrichContentInfoMap = new ArrayList<>();
         for (String contentId : contentTypeInfo) {
@@ -965,7 +966,7 @@ public class CbPlanServiceImpl implements CbPlanService {
                     cbPlan.put(Constants.USER_DETAILS, enrichUserInfoList);
 
                 } else if (Constants.CB_DESIGNATION_TYPE.equalsIgnoreCase(assignmentType)) {
-                    cbPlan.put(Constants.USER_DETAILS, (List<String>) cbPlan.get(Constants.CB_ASSIGNMENT_TYPE_INFO));
+                    cbPlan.put(Constants.USER_DETAILS, Collections.singletonList((String) cbPlan.get(Constants.CB_ASSIGNMENT_TYPE_INFO)));
                 }
 
                 userUtilityService.getUserDetailsFromDB(Arrays.asList((String) cbPlan.get(Constants.CREATED_BY)),
