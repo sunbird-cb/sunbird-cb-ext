@@ -262,7 +262,7 @@ public class UserBulkUploadService {
                                         "");
                                 userRegistration.setUserAuthToken(inputDataMap.get(Constants.X_AUTH_TOKEN));
                                 String responseCode = userUtilityService.createBulkUploadUser(userRegistration);
-                                if (!responseCode.equalsIgnoreCase(Constants.OK)) {
+                                if (!Constants.OK.equalsIgnoreCase(responseCode)) {
                                     failedRecordsCount++;
                                     statusCell.setCellValue(Constants.FAILED_UPPERCASE);
                                     errorDetails.setCellValue(responseCode);
