@@ -91,7 +91,7 @@ public class TrendingServiceImpl implements TrendingService {
         Map<String, Object> compositeSearchRes ;
         List<Map<String, Object>> contentList = new ArrayList<>();
         Map<String, Object> resultMap = new HashMap<>();
-        if(searchIds != null && searchIds.size() > 0) {
+        if(searchIds != null && !searchIds.isEmpty()) {
              compositeSearchRes = compositeSearch(searchIds, token);
              if(null == compositeSearchRes)
                  compositeSearchRes = new HashMap<>();

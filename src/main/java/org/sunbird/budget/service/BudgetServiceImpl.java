@@ -443,7 +443,10 @@ public class BudgetServiceImpl implements BudgetService {
 			errObjList.add(Constants.BUDGET_YEAR);
 		}
 
-		boolean schemeName = false, sBudgetAllocated = false, tBudgetAllocated = false, tBudgetUtilization = false;
+		boolean schemeName = false;
+		boolean sBudgetAllocated = false;
+		boolean tBudgetAllocated = false;
+		boolean tBudgetUtilization = false;
 		if (budgetInfo.getSchemeName() != null) {
 			if (StringUtils.isEmpty(budgetInfo.getSchemeName())) {
 				errObjList.add(Constants.SCHEME_NAME);

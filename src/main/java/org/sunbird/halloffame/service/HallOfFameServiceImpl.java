@@ -120,9 +120,7 @@ public class HallOfFameServiceImpl implements HallOfFameService {
                     return trialmap;
                 })
                 .collect(Collectors.toList());
-        if (!resultMap.containsKey(Constants.TITLE)) {
-            resultMap.put(Constants.TITLE, formattedDateLastMonth);
-        }
+        resultMap.computeIfAbsent(Constants.TITLE, k -> formattedDateLastMonth);
         resultMap.put(Constants.MDO_LIST, trialmapList);
         return resultMap;
     }

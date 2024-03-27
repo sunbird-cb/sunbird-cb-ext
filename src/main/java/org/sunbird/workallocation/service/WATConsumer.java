@@ -74,7 +74,11 @@ public class WATConsumer {
 			Map<String, Object> workAllocationObj = mapper.readValue(String.valueOf(data.value()), Map.class);
 
 			Map<String, Object> workOrderMap = new HashMap<>();
+
 			workOrderMap.put(Constants.ID,workAllocationObj.get("workorderId"));
+
+			workOrderMap.put(Constants.ID, workAllocationObj.get("workorderId"));
+
 			List<Map<String, Object>> workOrderCassandraModelOptional = cassandraOperation
 					.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_WORK_ORDER, workOrderMap, new ArrayList<>());
 

@@ -58,7 +58,7 @@ public class PdfGenerationService {
 			// Construct Error pdf and return.
 		}
 
-		return null;
+		return new byte[0];
 	}
 
 	public byte[] getWaErrorPdf(String errorMessage) {
@@ -86,7 +86,7 @@ public class PdfGenerationService {
 		} catch (Exception e) {
 			logger.error(e);
 		}
-		return null;
+		return new byte[0];
 	}
 
 	/**

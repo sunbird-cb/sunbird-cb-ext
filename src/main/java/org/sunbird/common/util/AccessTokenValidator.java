@@ -47,14 +47,14 @@ public class AccessTokenValidator {
                         mapper.readValue(new String(decodeFromBase64(body)), Map.class);
                 boolean isExp = isExpired((Integer) tokenBody.get("exp"));
                 if (isExp) {
-                    return Collections.EMPTY_MAP;
+                    return Collections.emptyMap();
                 }
                 return tokenBody;
             }
         } catch (IOException e) {
-            return Collections.EMPTY_MAP;
+            return Collections.emptyMap();
         }
-        return Collections.EMPTY_MAP;
+        return Collections.emptyMap();
     }
 
 

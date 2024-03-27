@@ -1,5 +1,6 @@
 package org.sunbird.cache;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -43,6 +44,6 @@ public class DataCacheMgr {
         if (contentCacheMap.containsKey(key)) {
             return contentCacheMap.get(key);
         }
-        return null;
+        return Collections.emptyMap();
     }
 }

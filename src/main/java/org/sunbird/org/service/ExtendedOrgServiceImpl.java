@@ -142,6 +142,7 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 			if (orgCreatedWithNewChannel) {
 				Map<String, Object> updateRequest = new HashMap<>();
 				String orgName = (String) requestData.get(Constants.ORG_NAME);
+
 				updateRequest.put(Constants.CHANNEL,  requestData.get(Constants.CHANNEL));
 				updateRequest.put(Constants.SB_ORG_ID, orgId);
 				updateRequest.put(Constants.ORG_NAME, orgName);
@@ -150,6 +151,16 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 				updateRequest.put(Constants.L2_MAP_ID,  requestData.get(Constants.L2_MAP_ID));
 				updateRequest.put(Constants.L1_ORG_NAME,  requestData.get(Constants.L1_ORG_NAME));
 				updateRequest.put(Constants.L2_ORG_NAME,  requestData.get(Constants.L2_ORG_NAME));
+
+				updateRequest.put(Constants.CHANNEL, requestData.get(Constants.CHANNEL));
+				updateRequest.put(Constants.SB_ORG_ID, orgId);
+				updateRequest.put(Constants.ORG_NAME, orgName);
+				updateRequest.put(Constants.SB_ORG_TYPE, orgType);
+				updateRequest.put(Constants.L1_MAP_ID, requestData.get(Constants.L1_MAP_ID));
+				updateRequest.put(Constants.L2_MAP_ID, requestData.get(Constants.L2_MAP_ID));
+				updateRequest.put(Constants.L1_ORG_NAME, requestData.get(Constants.L1_ORG_NAME));
+				updateRequest.put(Constants.L2_ORG_NAME, requestData.get(Constants.L2_ORG_NAME));
+
 
 				String mapId = (String) requestData.get(Constants.MAP_ID);
 				if (StringUtils.isEmpty(mapId)) {
@@ -280,6 +291,9 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 				String url = configProperties.getSbUrl() + configProperties.getSbOrgSearchPath();
 
 				Map<String, Object> apiResponse =outboundService.fetchResultUsingPost(url,
+
+				Map<String, Object> apiResponse = outboundService.fetchResultUsingPost(url,
+
 						orgSearchRequestBody, headers);
 				if (Constants.OK.equalsIgnoreCase((String) apiResponse.get(Constants.RESPONSE_CODE))) {
 					Map<String, Object> apiResponseResult = (Map<String, Object>) apiResponse.get(Constants.RESULT);
@@ -291,7 +305,7 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 			} else {
 				Map<String, Object> responseMap = new HashMap<>();
 				responseMap.put(Constants.COUNT, 0);
-				responseMap.put(Constants.CONTENT, Collections.EMPTY_LIST);
+				responseMap.put(Constants.CONTENT, Collections.emptyList());
 				response.put(Constants.RESPONSE, responseMap);
 			}
 		} catch (Exception e) {
@@ -316,7 +330,11 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 		}
 
 		String orgType = (String) requestData.get(Constants.ORGANIZATION_TYPE);
+
 		if (StringUtils.isEmpty((orgType))) {
+
+		if (StringUtils.isEmpty(orgType)) {
+
 			params.add(Constants.ORGANIZATION_TYPE);
 		} else if (!Constants.STATE.equalsIgnoreCase(orgType) && !Constants.MINISTRY.equalsIgnoreCase(orgType)) {
 			if (StringUtils.isEmpty((String) requestData.get(Constants.PARENT_MAP_ID))) {
@@ -391,7 +409,11 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 			}
 		};
 		String url = configProperties.getSbUrl() + configProperties.getSbOrgSearchPath();
+
 		Map<String, Object> apiResponse =outboundService.fetchResultUsingPost(url,
+
+		Map<String, Object> apiResponse = outboundService.fetchResultUsingPost(url,
+
 				searchRequestBody, headers);
 		if (Constants.OK.equalsIgnoreCase((String) apiResponse.get(Constants.RESPONSE_CODE))) {
 			Map<String, Object> result = (Map<String, Object>) apiResponse.get(Constants.RESULT);
@@ -416,7 +438,11 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 			headers.put(Constants.X_AUTH_TOKEN, userToken);
 		}
 
+
 		Map<String, Object> apiResponse =outboundService.fetchResultUsingPost(url, request,
+
+		Map<String, Object> apiResponse = outboundService.fetchResultUsingPost(url, request,
+
 				headers);
 		if (Constants.OK.equalsIgnoreCase((String) apiResponse.get(Constants.RESPONSE_CODE))) {
 			Map<String, Object> result = (Map<String, Object>) apiResponse.get(Constants.RESULT);
@@ -437,7 +463,11 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 		request.put(Constants.REQUEST, requestBody);
 		Map<String, String> headers = new HashMap<>();
 		headers.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
+
 		Map<String, Object> apiResponse =outboundService.fetchResultUsingPost(
+
+		Map<String, Object> apiResponse = outboundService.fetchResultUsingPost(
+
 				configProperties.getSbUrl() + configProperties.getSbOrgSearchPath(), request, headers);
 		Map<String, Object> orgMap = new HashMap<>();
 		if (Constants.OK.equalsIgnoreCase((String) apiResponse.get(Constants.RESPONSE_CODE))) {
@@ -739,7 +769,7 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 			return channelName;
 		}
 		List<OrgHierarchy> parentList = orgRepository.findAllByMapId(parentMapId);
-		if (!ObjectUtils.isEmpty(parentList) && parentList.size() > 0) {
+		if (!ObjectUtils.isEmpty(parentList) && !parentList.isEmpty()) {
 			OrgHierarchy parent = parentList.get(0);
 			if (!Constants.SPV.equalsIgnoreCase(parent.getParentMapId())) {
 				prepareChannelName(parent.getParentMapId(), requestData);
@@ -788,7 +818,6 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 
 			if (!StringUtils.isEmpty(orgId)) {
 				String sbRootOrgId = orgRepository.getSbOrgIdFromMapId(parentOrg.getParentMapId());
-				;
 				if (StringUtils.isBlank(parentOrg.getSbRootOrgId())) {
 					sbRootOrgId = orgRepository.getSbOrgIdFromMapId(parentOrg.getParentMapId());
 				}

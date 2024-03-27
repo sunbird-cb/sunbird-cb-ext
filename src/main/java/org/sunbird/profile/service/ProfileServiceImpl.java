@@ -458,7 +458,11 @@ public class ProfileServiceImpl implements ProfileService {
 			if (profileDetails.containsKey(Constants.EMPLOYMENT_DETAILS)) {
 				Map<String, Object> empDetails = (Map<String, Object>) profileDetails.get(Constants.EMPLOYMENT_DETAILS);
 				empDetails.put(Constants.DEPARTMENTNAME, orgName);
+
 				empDetails.put(Constants.DEPARTMENT_ID,userData.get(Constants.ROOT_ORG_ID_LOWER));
+
+				empDetails.put(Constants.DEPARTMENT_ID, userData.get(Constants.ROOT_ORG_ID_LOWER));
+
 				profileDetails.put(Constants.EMPLOYMENT_DETAILS, empDetails);
 			}
 
@@ -473,7 +477,11 @@ public class ProfileServiceImpl implements ProfileService {
 			}
 
 			professionalDetail.put(Constants.NAME, orgName);
+
 			professionalDetail.put(Constants.ID,userData.get(Constants.ROOT_ORG_ID_LOWER));
+
+			professionalDetail.put(Constants.ID,  userData.get(Constants.ROOT_ORG_ID_LOWER));
+
 			profileDetails.put(Constants.PROFESSIONAL_DETAILS, Arrays.asList(professionalDetail));
 
 			updateDBRequest.put(Constants.PROFILE_DETAILS_LOWER, mapper.writeValueAsString(profileDetails));
@@ -711,7 +719,11 @@ public class ProfileServiceImpl implements ProfileService {
 		try {
 			Map<String, Object> requestBody = (Map<String, Object>) request.get(Constants.REQUEST);
 			requestBody.put(Constants.EMAIL_VERIFIED, true);
+
 			Map<String, Object> readData =outboundRequestHandlerService.fetchResultUsingPost(
+
+			Map<String, Object> readData =  outboundRequestHandlerService.fetchResultUsingPost(
+
 					serverConfig.getSbUrl() + serverConfig.getLmsUserSignUpPath(), request,
 					ProjectUtil.getDefaultHeaders());
 			if (Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
@@ -754,7 +766,11 @@ public class ProfileServiceImpl implements ProfileService {
 			SBApiResponse uploadResponse = storageService.uploadFile(mFile, serverConfig.getBulkUploadContainerName());
 			if (!HttpStatus.OK.equals(uploadResponse.getResponseCode())) {
 				setErrorData(response, String.format("Failed to upload file. Error: %s",
+
 						uploadResponse.getParams().getErrmsg()));
+
+						 uploadResponse.getParams().getErrmsg()));
+
 				return response;
 			}
 
@@ -824,7 +840,7 @@ public class ProfileServiceImpl implements ProfileService {
 				String strApprovalFields = (String) data.get(Constants.VALUE);
 
 				if (StringUtils.isNotBlank(strApprovalFields)) {
-					String strArray[] = strApprovalFields.split(",", -1);
+					String[] strArray = strApprovalFields.split(",", -1);
 					approvalFields = Arrays.asList(strArray);
 					dataCacheMgr.putObjectInCache(Constants.PROFILE_APPROVAL_FIELDS_KEY, approvalFields);
 					return approvalFields;
@@ -889,14 +905,13 @@ public class ProfileServiceImpl implements ProfileService {
 
 	public Map<String, Object> getOrgProfileForOrgId(String registrationCode) {
 		try {
-			Map<String, Object> esObject = indexerService.readEntity(serverConfig.getOrgOnboardingIndex(),
+			return indexerService.readEntity(serverConfig.getOrgOnboardingIndex(),
 					serverConfig.getEsProfileIndexType(), registrationCode);
-			return esObject;
 		} catch (Exception e) {
 			log.error("Failed to get Org Profile. Exception: ", e);
 			log.warn(String.format("Exception in %s : %s", "getUserRegistrationDetails", e.getMessage()));
 		}
-		return null;
+		return Collections.emptyMap();
 	}
 
 	private String validateOrgProfilePayload(Map<String, Object> orgProfileInfo) {
@@ -1023,7 +1038,8 @@ public class ProfileServiceImpl implements ProfileService {
 				// We got the orgId successfully... let's migrate the user to this org.
 				try {
 					Thread.sleep(1000);
-				} catch (Exception e) {
+				} catch (InterruptedException e) {
+					Thread.currentThread().interrupt();
 				}
 				errMsg = executeSelfMigrateUser(requestBody);
 			} else {
@@ -1041,14 +1057,23 @@ public class ProfileServiceImpl implements ProfileService {
 
 	private String executeSelfMigrateUser(Map<String, Object> requestBody) {
 		String errMsg = StringUtils.EMPTY;
+
 		Map<String, Object> migrateResponse =outboundRequestHandlerService.fetchResultUsingPatch(
+
+		Map<String, Object> migrateResponse = outboundRequestHandlerService.fetchResultUsingPatch(
+
 				serverConfig.getSbUrl() + serverConfig.getLmsUserMigratePath(),
 				getUserMigrateRequest((String) requestBody.get(Constants.USER_ID),
 						(String) requestBody.get(Constants.CHANNEL), true),
 				MapUtils.EMPTY_MAP);
 		if (Constants.OK.equalsIgnoreCase((String) migrateResponse.get(Constants.RESPONSE_CODE))) {
+
 			log.info(String.format("Successfully self migrated user. UserId: %s, Channel: %s",
 					 requestBody.get(Constants.USER_ID),requestBody.get(Constants.CHANNEL)));
+
+			log.info("Successfully self migrated user. UserId: {}, Channel: {}",
+					requestBody.get(Constants.USER_ID), requestBody.get(Constants.CHANNEL));
+
 			errMsg = updateUserProfile(requestBody);
 		} else {
 			try {
@@ -1135,13 +1160,17 @@ public class ProfileServiceImpl implements ProfileService {
 		if (existingRoles == null) {
 			existingRoles = new ArrayList<>();
 		}
-		if (existingRoles.size() == 0) {
+		if (existingRoles.isEmpty()) {
 			existingRoles.add(Constants.PUBLIC);
 		}
 		assignRoleReqBody.put(Constants.ROLES, existingRoles);
 		assignRoleReq.put(Constants.REQUEST, assignRoleReqBody);
 
+
 		Map<String, Object> assignRoleResponse =outboundRequestHandlerService
+
+		Map<String, Object> assignRoleResponse = outboundRequestHandlerService
+
 				.fetchResultUsingPost(serverConfig.getSbUrl() + serverConfig.getSbAssignRolePath(), assignRoleReq,
 						MapUtils.EMPTY_MAP);
 		if (!Constants.OK.equalsIgnoreCase((String) assignRoleResponse.get(Constants.RESPONSE_CODE))) {
@@ -1181,7 +1210,11 @@ public class ProfileServiceImpl implements ProfileService {
 
 	private String executeMigrateUser(Map<String, Object> request, Map<String, String> headers) {
 		String errMsg = StringUtils.EMPTY;
+
 		Map<String, Object> migrateResponse =outboundRequestHandlerService.fetchResultUsingPatch(
+
+		Map<String, Object> migrateResponse = outboundRequestHandlerService.fetchResultUsingPatch(
+
 				serverConfig.getSbUrl() + serverConfig.getLmsUserMigratePath(), request, headers);
 		if (migrateResponse == null
 				|| !Constants.OK.equalsIgnoreCase((String) migrateResponse.get(Constants.RESPONSE_CODE))) {
@@ -1213,7 +1246,11 @@ public class ProfileServiceImpl implements ProfileService {
 		request.put(Constants.OBJECT_TYPE, Constants.USER);
 		requestBody.put(Constants.REQUEST, request);
 
+
 		Map<String, Object> syncDataResp =outboundRequestHandlerService.fetchResultUsingPost(
+
+		Map<String, Object> syncDataResp = outboundRequestHandlerService.fetchResultUsingPost(
+
 				serverConfig.getSbUrl() + serverConfig.getLmsDataSyncPath(), requestBody, MapUtils.EMPTY_MAP);
 		if (syncDataResp == null
 				|| !Constants.OK.equalsIgnoreCase((String) syncDataResp.get(Constants.RESPONSE_CODE))) {
@@ -1305,7 +1342,11 @@ public class ProfileServiceImpl implements ProfileService {
 
 		updateRequestBody.put(Constants.PROFILE_DETAILS, profileDetails);
 		updateRequest.put(Constants.REQUEST, updateRequestBody);
+
 		Map<String, Object> updateReadData =outboundRequestHandlerService.fetchResultUsingPatch(
+
+		Map<String, Object> updateReadData = outboundRequestHandlerService.fetchResultUsingPatch(
+
 				serverConfig.getSbUrl() + serverConfig.getLmsUserUpdatePrivatePath(), updateRequest,
 				ProjectUtil.getDefaultHeaders());
 		if (Constants.OK.equalsIgnoreCase((String) updateReadData.get(Constants.RESPONSE_CODE))) {
@@ -1325,10 +1366,14 @@ public class ProfileServiceImpl implements ProfileService {
 		requestBody.put(Constants.USER_ID, request.get(Constants.USER_ID));
 		requestBody.put(Constants.ROLES, Arrays.asList(Constants.PUBLIC));
 		requestObj.put(Constants.REQUEST, requestBody);
+
 		Map<String, Object> readData =outboundRequestHandlerService.fetchResultUsingPost(
+
+		Map<String, Object> readData =  outboundRequestHandlerService.fetchResultUsingPost(
+
 				serverConfig.getSbUrl() + serverConfig.getSbAssignRolePath(), requestObj,
 				ProjectUtil.getDefaultHeaders());
-		if (readData.isEmpty() == Boolean.FALSE) {
+		if (!readData.isEmpty()) {
 			if (Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE)))
 				retValue = Boolean.TRUE;
 		}
@@ -1552,7 +1597,7 @@ public class ProfileServiceImpl implements ProfileService {
 				resultArray.clear();
 				userInfoMap.clear();
 
-				index = (int) Math.min(userCount, index + size);
+				index = (int) Math.min(userCount, (long) index + size);
 
 				if (index == userCount) {
 					isCompleted = true;
@@ -1613,9 +1658,7 @@ public class ProfileServiceImpl implements ProfileService {
 		while (it.hasNext()) {
 			Entry<String, Map<String, String>> item = it.next();
 			String orgId = item.getValue().get(Constants.ROOT_ORG_ID);
-			if (!orgInfoMap.containsKey(orgId)) {
-				orgInfoMap.put(orgId, item.getValue().get(Constants.CHANNEL));
-			}
+			orgInfoMap.computeIfAbsent(orgId, k -> item.getValue().get(Constants.CHANNEL));
 		}
 		log.info(String.format("Org enrichment took %s seconds", (System.currentTimeMillis() - startTime) / 1000));
 	}
@@ -1640,7 +1683,7 @@ public class ProfileServiceImpl implements ProfileService {
 			}
 		}
 
-		if (orgIdList.size() > 0) {
+		if (!orgIdList.isEmpty()) {
 			extOrgService.getOrgDetailsFromDB(orgIdList, orgInfoMap);
 			it = courseInfoMap.entrySet().iterator();
 			while (it.hasNext()) {
@@ -1839,7 +1882,11 @@ public class ProfileServiceImpl implements ProfileService {
 				userUtilityService.getUserDetailsFromDB(Arrays.asList(userId), Arrays.asList(Constants.PROFILE_DETAILS_LOWER, Constants.USER_ID), userInfoMap);
 				if (!(ObjectUtils.isEmpty(userInfoMap))) {
 					Map<String, String> userInfo = userInfoMap.get(userId);
+
 					String profileDetails =userInfo.get(Constants.PROFILE_DETAILS_LOWER);
+
+					String profileDetails =  userInfo.get(Constants.PROFILE_DETAILS_LOWER);
+
 					Map<String, Object> profileDetailsMap = new HashMap<>();
 					if (StringUtils.isNotEmpty(profileDetails)) {
 						profileDetailsMap = mapper.readValue(profileDetails, new TypeReference<HashMap<String, Object>>() {
@@ -1908,7 +1955,7 @@ public class ProfileServiceImpl implements ProfileService {
 				String strAdminApprovalFields = (String) data.get(Constants.VALUE);
 
 				if (StringUtils.isNotBlank(strAdminApprovalFields)) {
-					String strArray[] = strAdminApprovalFields.split(",", -1);
+					String[] strArray = strAdminApprovalFields.split(",", -1);
 					adminApprovalFields = Arrays.asList(strArray);
 					dataCacheMgr.putObjectInCache(serverConfig.getMdoAdminUpdateUsers(), adminApprovalFields);
 					return adminApprovalFields;

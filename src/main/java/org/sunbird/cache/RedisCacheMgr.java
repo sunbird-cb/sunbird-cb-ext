@@ -134,7 +134,7 @@ public class RedisCacheMgr {
         } catch (Exception e) {
             logger.error(e);
         }
-        return null;
+        return Collections.emptyList();
     }
 
     public Set<String> getAllKeyNames() {
@@ -174,7 +174,7 @@ public class RedisCacheMgr {
             return jedis.hmget(key, fields);
         } catch (Exception e) {
             logger.error(e);
-            return null;
+            return Collections.emptyList();
         }
     }
 

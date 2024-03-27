@@ -78,7 +78,7 @@ public class CourseReminderNotificationService {
 			Map.Entry<String, UserCourseProgressDetails> userCourseProgressDetailsEntry) {
 		try {
 			if (!StringUtils.isEmpty(userCourseProgressDetailsEntry.getValue().getEmail())
-					&& userCourseProgressDetailsEntry.getValue().getIncompleteCourses().size() > 0) {
+					&& !userCourseProgressDetailsEntry.getValue().getIncompleteCourses().isEmpty()) {
 				Map<String, Object> params = new HashMap<>();
 				for (int i = 0; i < userCourseProgressDetailsEntry.getValue().getIncompleteCourses().size(); i++) {
 					String courseId = Constants.COURSE_KEYWORD + (i + 1);

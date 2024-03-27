@@ -1,6 +1,7 @@
 package org.sunbird.assessment.service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -191,7 +192,7 @@ public class AssessmentServiceImpl implements AssessmentService {
 
 	@Override
 	public Map<String, Object> submitAssessmentByIframe(String rootOrg, Map<String, Object> request) throws Exception {
-		return null;
+		return new HashMap<>();
 	}
 
 	// A method to Format Data in the FrontEndFormat
@@ -200,7 +201,7 @@ public class AssessmentServiceImpl implements AssessmentService {
 		for (Map<String, Object> map : result) {
 			Map<String, Object> assessmentData = new HashMap<>();
 			String res = map.get("result_percent").toString();
-			assessmentData.put(RESULT, new BigDecimal(res).setScale(2, BigDecimal.ROUND_UP));
+			assessmentData.put(RESULT, new BigDecimal(res).setScale(2, RoundingMode.UP));
 			assessmentData.put("correctlyAnswered", map.get("correct_count"));
 			assessmentData.put("wronglyAnswered", map.get("incorrect_count"));
 			assessmentData.put("notAttempted", map.get("not_answered_count"));
