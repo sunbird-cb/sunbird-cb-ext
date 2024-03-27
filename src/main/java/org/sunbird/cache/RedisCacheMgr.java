@@ -205,4 +205,13 @@ public class RedisCacheMgr {
             return null;
         }
     }
+
+    public Boolean isKeyExist(String key) {
+        try (Jedis jedis = jedisPool.getResource()) {
+            return jedis.exists(Constants.REDIS_COMMON_KEY + key);
+        } catch (Exception e) {
+            logger.error(e);
+            return null;
+        }
+    }
 }
