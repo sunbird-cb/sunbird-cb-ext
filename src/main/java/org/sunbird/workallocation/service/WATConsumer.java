@@ -39,17 +39,22 @@ import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 @Service
 public class WATConsumer {
 
-	@Autowired
-	private OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
+	private final OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
+
+
+	private final CbExtServerProperties cbExtServerProperties;
+
+	private final  Producer producer;
+
+	private  final CassandraOperation cassandraOperation;
 
 	@Autowired
-	private CbExtServerProperties cbExtServerProperties;
-
-	@Autowired
-	private Producer producer;
-
-	@Autowired
-	private CassandraOperation cassandraOperation;
+	public WATConsumer(OutboundRequestHandlerServiceImpl outboundRequestHandlerService, CbExtServerProperties cbExtServerProperties, Producer producer, CassandraOperation cassandraOperation) {
+		this.outboundRequestHandlerService = outboundRequestHandlerService;
+		this.cbExtServerProperties = cbExtServerProperties;
+		this.producer = producer;
+		this.cassandraOperation = cassandraOperation;
+	}
 
 	@Value("${kafka.topics.parent.telemetry.event}")
 	public String telemetryEventTopicName;
@@ -69,7 +74,11 @@ public class WATConsumer {
 			Map<String, Object> workAllocationObj = mapper.readValue(String.valueOf(data.value()), Map.class);
 
 			Map<String, Object> workOrderMap = new HashMap<>();
+
+			workOrderMap.put(Constants.ID,workAllocationObj.get("workorderId"));
+
 			workOrderMap.put(Constants.ID, workAllocationObj.get("workorderId"));
+
 			List<Map<String, Object>> workOrderCassandraModelOptional = cassandraOperation
 					.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_WORK_ORDER, workOrderMap, new ArrayList<>());
 

@@ -33,19 +33,25 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @SuppressWarnings("unchecked")
 public class SearchByService {
 
-	private CbExtLogger logger = new CbExtLogger(getClass().getName());
+	private  final CbExtLogger logger = new CbExtLogger(getClass().getName());
 
-	@Autowired
+
 	CbExtServerProperties cbExtServerProperties;
 
-	@Autowired
 	RedisCacheMgr redisCacheMgr;
 	
-	@Autowired
+
 	ObjectMapper mapper;
 
-	@Autowired
+
 	OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
+	@Autowired
+	public SearchByService(CbExtServerProperties cbExtServerProperties, RedisCacheMgr redisCacheMgr, ObjectMapper mapper, OutboundRequestHandlerServiceImpl outboundRequestHandlerService) {
+		this.cbExtServerProperties = cbExtServerProperties;
+		this.redisCacheMgr = redisCacheMgr;
+		this.mapper = mapper;
+		this.outboundRequestHandlerService = outboundRequestHandlerService;
+	}
 
 	public Collection<CompetencyInfo> getCompetencyDetails(String authUserToken) throws Exception {
 		String strCompetencyMap = redisCacheMgr.getCache(Constants.COMPETENCY_CACHE_NAME);
@@ -370,8 +376,12 @@ public class SearchByService {
 				.get(Constants.RESPONSE_DATA);
 		if (!CollectionUtils.isEmpty(fracResponseList)) {
 			for (Map<String, Object> respObj : fracResponseList) {
+
+				if (!positionNameList.contains(respObj.get(Constants.NAME))) {
+
 				String name = (String) respObj.get(Constants.NAME);
 				if (!positionNameList.contains(name)) {
+
 					positionList.add(new FracCommonInfo((String) respObj.get(Constants.ID),
 							(String) respObj.get(Constants.NAME), (String) respObj.get(Constants.DESCRIPTION)));
 					positionNameList.add((String) respObj.get(Constants.NAME));

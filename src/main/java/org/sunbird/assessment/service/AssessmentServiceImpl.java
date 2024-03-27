@@ -39,27 +39,34 @@ public class AssessmentServiceImpl implements AssessmentService {
 
 	private CbExtLogger logger = new CbExtLogger(getClass().getName());
 	private ObjectMapper mapper = new ObjectMapper();
-
-	@Autowired
 	AssessmentRepository repository;
 
-	@Autowired
+
 	ContentService contentService;
 
-	@Autowired
+
 	UserUtilityService userUtilService;
 
-	@Autowired
+
 	AssessmentUtilService assessUtilServ;
 
-	@Autowired
+
 	OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
 
-	@Autowired
+
 	CbExtServerProperties extServerProperties;
 
-	@Autowired
 	RedisCacheMgr redisCacheMgr;
+	@Autowired
+	public AssessmentServiceImpl(AssessmentRepository repository, ContentService contentService, UserUtilityService userUtilService, AssessmentUtilService assessUtilServ, OutboundRequestHandlerServiceImpl outboundRequestHandlerService, CbExtServerProperties extServerProperties, RedisCacheMgr redisCacheMgr) {
+		this.repository = repository;
+		this.contentService = contentService;
+		this.userUtilService = userUtilService;
+		this.assessUtilServ = assessUtilServ;
+		this.outboundRequestHandlerService = outboundRequestHandlerService;
+		this.extServerProperties = extServerProperties;
+		this.redisCacheMgr = redisCacheMgr;
+	}
 
 	@Override
 	public Map<String, Object> submitAssessment(String rootOrg, AssessmentSubmissionDTO data, String userId)

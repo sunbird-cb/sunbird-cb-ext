@@ -16,11 +16,18 @@ import org.sunbird.user.registration.model.UserRegistration;
 @Service
 public class UserRegistrationNotificationServiceImpl implements UserRegistrationNotificationService {
 
-	@Autowired
+
 	CbExtServerProperties serverProperties;
 
-	@Autowired
+
 	NotificationUtil notificationUtil;
+
+	@Autowired
+
+	public UserRegistrationNotificationServiceImpl(CbExtServerProperties serverProperties, NotificationUtil notificationUtil) {
+		this.serverProperties = serverProperties;
+		this.notificationUtil = notificationUtil;
+	}
 
 	@Override
 	public void sendNotification(UserRegistration userRegistration) {

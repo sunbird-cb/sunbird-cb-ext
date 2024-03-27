@@ -16,11 +16,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class AssessmentAsyncSubmitConsumer {
     private static final Logger LOGGER = LoggerFactory.getLogger(AssessmentAsyncSubmitConsumer.class);
 
-    @Autowired
     AssessmentServiceV4 assessmentServiceV4;
 
-    @Autowired
     ObjectMapper mapper;
+    @Autowired
+    public AssessmentAsyncSubmitConsumer(AssessmentServiceV4 assessmentServiceV4, ObjectMapper mapper) {
+        this.assessmentServiceV4 = assessmentServiceV4;
+        this.mapper = mapper;
+    }
 
     @KafkaListener(topics = "${kafka.topics.user.assessment.async.submit.handler}", groupId = "${kafka.topics.user.assessment.async.submit.handler.group}")
     public void processMessage(ConsumerRecord<String, String> data) {

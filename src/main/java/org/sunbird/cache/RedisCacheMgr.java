@@ -25,16 +25,21 @@ public class RedisCacheMgr {
 
     private static int cache_ttl = 84600;
 
-    @Autowired
-    private JedisPool jedisPool;
 
-    @Autowired
-    private JedisPool jedisDataPopulationPool;
+    private  final JedisPool jedisPool;
 
-    @Autowired
+
+    private final JedisPool jedisDataPopulationPool;
+
     CbExtServerProperties cbExtServerProperties;
+    @Autowired
+    public RedisCacheMgr(JedisPool jedisPool, JedisPool jedisDataPopulationPool, CbExtServerProperties cbExtServerProperties) {
+        this.jedisPool = jedisPool;
+        this.jedisDataPopulationPool = jedisDataPopulationPool;
+        this.cbExtServerProperties = cbExtServerProperties;
+    }
 
-    private CbExtLogger logger = new CbExtLogger(getClass().getName());
+    private final CbExtLogger logger = new CbExtLogger(getClass().getName());
     
     ObjectMapper objectMapper = new ObjectMapper();
 

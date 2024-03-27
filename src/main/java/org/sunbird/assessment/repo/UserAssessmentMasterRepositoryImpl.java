@@ -6,8 +6,11 @@ import org.springframework.data.cassandra.core.CassandraOperations;
 
 public class UserAssessmentMasterRepositoryImpl implements UserAssessmentMasterRepositoryCustom {
 
-	@Autowired
 	CassandraOperations cassandraOperations;
+	@Autowired
+	public UserAssessmentMasterRepositoryImpl(CassandraOperations cassandraOperations) {
+		this.cassandraOperations = cassandraOperations;
+	}
 
 	/*
 	 * (non-Javadoc)

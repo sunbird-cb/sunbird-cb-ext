@@ -19,11 +19,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 @RequestMapping("/storage")
 public class StorageController {
 
-	@Autowired
 	StorageService storageService;
-	
-	@Autowired
 	CbExtServerProperties serverConfig;
+	@Autowired
+	public StorageController(StorageService storageService, CbExtServerProperties serverConfig) {
+		this.storageService = storageService;
+		this.serverConfig = serverConfig;
+	}
 
 	@PostMapping("/upload")
 	public ResponseEntity<SBApiResponse> upload(@RequestParam(value = "file", required = true) MultipartFile multipartFile)

@@ -67,29 +67,26 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class AllocationServiceV2 {
 
 	public static final String RESULT = "result";
-	@Autowired
-	private IndexerService indexerService;
 
-	@Autowired
-	private Validator validator;
+	private  final IndexerService indexerService;
 
-	@Autowired
-	private AllocationService allocationService;
 
-	@Autowired
-	private EnrichmentService enrichmentService;
+	private  final Validator validator;
 
-	@Autowired
-	private RestTemplate restTemplate;
+	private final  AllocationService allocationService;
 
-	@Autowired
-	private PdfGeneratorService pdfGeneratorService;
 
-	@Autowired
-	private OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
+	private  final EnrichmentService enrichmentService;
 
-	@Autowired
-	private CbExtServerProperties cbExtServerProperties;
+	private  final RestTemplate restTemplate;
+
+	private  final PdfGeneratorService pdfGeneratorService;
+
+
+	private  final OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
+
+
+	private final  CbExtServerProperties cbExtServerProperties;
 
 	@Value("${workorder.index.name}")
 	public String workOrderIndex;
@@ -103,15 +100,29 @@ public class AllocationServiceV2 {
 	@Value("${workallocation.index.type}")
 	public String workAllocationIndexType;
 
-	@Autowired
+
 	Producer producer;
 
-	@Autowired
+
 	CassandraOperation cassandraOperation;
+
+	@Autowired
+	public AllocationServiceV2(IndexerService indexerService, Validator validator, AllocationService allocationService, EnrichmentService enrichmentService, RestTemplate restTemplate, PdfGeneratorService pdfGeneratorService, OutboundRequestHandlerServiceImpl outboundRequestHandlerService, CbExtServerProperties cbExtServerProperties, Producer producer, CassandraOperation cassandraOperation) {
+		this.indexerService = indexerService;
+		this.validator = validator;
+		this.allocationService = allocationService;
+		this.enrichmentService = enrichmentService;
+		this.restTemplate = restTemplate;
+		this.pdfGeneratorService = pdfGeneratorService;
+		this.outboundRequestHandlerService = outboundRequestHandlerService;
+		this.cbExtServerProperties = cbExtServerProperties;
+		this.producer = producer;
+		this.cassandraOperation = cassandraOperation;
+	}
 
 	ObjectMapper mapper = new ObjectMapper();
 
-	private Logger logger = LoggerFactory.getLogger(AllocationServiceV2.class);
+	private  final Logger logger = LoggerFactory.getLogger(AllocationServiceV2.class);
 
 	final String[] includeFields = { "roleCompetencyList.competencyDetails" };
 

@@ -46,37 +46,48 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Service
 public class UserUtilityServiceImpl implements UserUtilityService {
 
-	@Autowired
+
 	RestTemplate restTemplate;
 
-	@Autowired
 	CbExtServerProperties props;
 
-	@Autowired
+
 	TelemetryUtils telemetryUtils;
 
-	@Autowired
-	private CassandraOperation cassandraOperation;
 
-	@Autowired
+	private final  CassandraOperation cassandraOperation;
+
+
 	OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
 
-	@Autowired
+
 	CbExtServerProperties serverConfig;
 
-	@Autowired
+
 	DecryptServiceImpl decryptService;
 
-	@Autowired
+
 	IndexerService indexerService;
 
-	@Autowired
+
 	ObjectMapper objectMapper;
 
-	@Autowired
 	AccessTokenValidator accessTokenValidator;
+	@Autowired
+	public UserUtilityServiceImpl(RestTemplate restTemplate, CbExtServerProperties props, TelemetryUtils telemetryUtils, CassandraOperation cassandraOperation, OutboundRequestHandlerServiceImpl outboundRequestHandlerService, CbExtServerProperties serverConfig, DecryptServiceImpl decryptService, IndexerService indexerService, ObjectMapper objectMapper, AccessTokenValidator accessTokenValidator) {
+		this.restTemplate = restTemplate;
+		this.props = props;
+		this.telemetryUtils = telemetryUtils;
+		this.cassandraOperation = cassandraOperation;
+		this.outboundRequestHandlerService = outboundRequestHandlerService;
+		this.serverConfig = serverConfig;
+		this.decryptService = decryptService;
+		this.indexerService = indexerService;
+		this.objectMapper = objectMapper;
+		this.accessTokenValidator = accessTokenValidator;
+	}
 
-	private Logger logger = LoggerFactory.getLogger(UserUtilityServiceImpl.class);
+	private  final Logger logger = LoggerFactory.getLogger(UserUtilityServiceImpl.class);
 
 	public boolean validateUser(String userId) {
 		return validateUser(StringUtils.EMPTY, userId);
@@ -231,7 +242,11 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		requestBody.put(Constants.PHONE_VERIFIED, true);
 		request.put(Constants.REQUEST, requestBody);
 		try {
+
+			Map<String, Object> readData =outboundRequestHandlerService.fetchResultUsingPost(
+
 			Map<String, Object> readData = outboundRequestHandlerService.fetchResultUsingPost(
+
 					props.getSbUrl() + props.getLmsUserCreatePath(), request, ProjectUtil.getDefaultHeaders());
 			if (Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
 				Map<String, Object> result = (Map<String, Object>) readData.get(Constants.RESULT);
@@ -296,7 +311,11 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		profileDetails.put(Constants.ADDITIONAL_PROPERTIES, additionalProperties);
 		requestBody.put(Constants.PROFILE_DETAILS, profileDetails);
 		request.put(Constants.REQUEST, requestBody);
+
+		Map<String, Object> readData =  outboundRequestHandlerService.fetchResultUsingPatch(
+
 		Map<String, Object> readData = outboundRequestHandlerService.fetchResultUsingPatch(
+
 				props.getSbUrl() + props.getLmsUserUpdatePrivatePath(), request, ProjectUtil.getDefaultHeaders());
 		if (Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
 			retValue = assignRole(userRegistration.getSbOrgId(), userRegistration.getUserId(),
@@ -317,7 +336,11 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		requestBody.put(Constants.USER_ID, userId);
 		requestBody.put(Constants.ROLES, Arrays.asList(Constants.PUBLIC));
 		request.put(Constants.REQUEST, requestBody);
+
+		Map<String, Object> readData =outboundRequestHandlerService.fetchResultUsingPost(
+
 		Map<String, Object> readData = outboundRequestHandlerService.fetchResultUsingPost(
+
 				props.getSbUrl() + props.getSbAssignRolePath(), request, ProjectUtil.getDefaultHeaders());
 		if (Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
 			retValue = true;
@@ -351,7 +374,11 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		requestBody.put(Constants.KEY, Constants.EMAIL);
 		requestBody.put(Constants.TYPE, Constants.EMAIL);
 		request.put(Constants.REQUEST, requestBody);
+
+		Map<String, Object> readData =outboundRequestHandlerService.fetchResultUsingPost(
+
 		Map<String, Object> readData = outboundRequestHandlerService.fetchResultUsingPost(
+
 				props.getSbUrl() + props.getSbResetPasswordPath(), request, ProjectUtil.getDefaultHeaders());
 		if (Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
 			Map<String, Object> result = (Map<String, Object>) readData.get(Constants.RESULT);
@@ -385,7 +412,11 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 
 		request.put(Constants.REQUEST, requestBody);
 
+
+		Map<String, Object> readData =outboundRequestHandlerService.fetchResultUsingPost(
+
 		Map<String, Object> readData = outboundRequestHandlerService.fetchResultUsingPost(
+
 				props.getSbUrl() + props.getSbSendNotificationEmailPath(), request, ProjectUtil.getDefaultHeaders());
 		if (Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
 			retValue = true;
@@ -510,8 +541,8 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 			for (String field : fields) {
 				if (item.getValue().containsKey(field)) {
 					if (Constants.DECRYPTED_FIELDS.contains(field)) {
-						if (StringUtils.isNotBlank((String) item.getValue().get(field))) {
-							String value = decryptService.decryptString((String) item.getValue().get(field));
+						if (StringUtils.isNotBlank(item.getValue().get(field))) {
+							String value = decryptService.decryptString( item.getValue().get(field));
 							item.getValue().put(field, StringUtils.isNotBlank(value) ? value : StringUtils.EMPTY);
 						}
 					}
@@ -541,10 +572,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 				if (map.get("response") != null) {
 					Map<String, Object> responseObj = (Map<String, Object>) map.get("response");
 					int count = (int) responseObj.get(Constants.COUNT);
-					if (count == 0)
-						return false;
-					else
-						return true;
+                    return count != 0;
 				}
 			}
 		} catch (Exception e) {
@@ -571,7 +599,11 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		requestBody.put(Constants.ROLES, Arrays.asList(Constants.PUBLIC));
 		request.put(Constants.REQUEST, requestBody);
 		try {
+
+			Map<String, Object> readData =outboundRequestHandlerService.fetchResultUsingPost(
+
 			Map<String, Object> readData = outboundRequestHandlerService.fetchResultUsingPost(
+
 					props.getSbUrl() + props.getLmsUserCreatePath(), request, ProjectUtil.getDefaultHeaders());
 			if (readData != null && !Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
 				Map<String, Object> params = (Map<String, Object>) readData.get(Constants.PARAMS);
@@ -699,11 +731,19 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 									Map<String, Map<String, Object>> userInfoMap) throws IOException{
 		for (Map<String, Object> user : userMapList) {
 			Map<String, Object> userInfo = new HashMap<>();
+
+			userInfo.put(Constants.USER_ID,user.get(Constants.USER_ID));
+			userInfo.put(Constants.FIRSTNAME,user.get(Constants.USER_FIRST_NAME));
+			userInfo.put(Constants.ROOT_ORG_ID,user.get(Constants.ROOT_ORG_ID));
+			userInfo.put(Constants.CHANNEL,user.get(Constants.CHANNEL));
+			userInfo.put(Constants.DESIGNATION,user.get(Constants.PROFILE_DETAILS_DESIGNATION));
+
 			userInfo.put(Constants.USER_ID, user.get(Constants.USER_ID));
 			userInfo.put(Constants.FIRSTNAME, user.get(Constants.USER_FIRST_NAME));
 			userInfo.put(Constants.ROOT_ORG_ID, user.get(Constants.ROOT_ORG_ID));
 			userInfo.put(Constants.CHANNEL, user.get(Constants.CHANNEL));
 			userInfo.put(Constants.DESIGNATION, user.get(Constants.PROFILE_DETAILS_DESIGNATION));
+
 			JsonNode jsonNode = objectMapper.convertValue(user, JsonNode.class);
 			JsonNode primaryEmailNode = jsonNode.at("/profileDetails/personalDetails/primaryEmail");
 			String primaryEmail = primaryEmailNode.asText();
@@ -731,7 +771,11 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		requestBody.put(Constants.KEY, Constants.EMAIL);
 		requestBody.put(Constants.VALUE, email);
 		request.put(Constants.REQUEST, requestBody);
+
+		Map<String, Object> readData =outboundRequestHandlerService.fetchResultUsingPost(
+
 		Map<String, Object> readData = outboundRequestHandlerService.fetchResultUsingPost(
+
 				props.getSbUrl() + props.getLmsUserLookupPath(), request, ProjectUtil.getDefaultHeaders());
 		if (readData != null && Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
 			Map<String, Object> result = (Map<String, Object>) readData.get(Constants.RESULT);

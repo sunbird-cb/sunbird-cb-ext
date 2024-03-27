@@ -35,23 +35,33 @@ public class UserRegistrationConsumer {
 
 	ObjectMapper mapper = new ObjectMapper();
 
-	@Autowired
+
 	OutboundRequestHandlerServiceImpl outboundHandlerService;
 
-	@Autowired
+
 	CbExtServerProperties serverProperties;
 
-	@Autowired
+
 	NotificationUtil notificationUtil;
 
-	@Autowired
+
 	IndexerService indexerService;
 
-	@Autowired
 	UserRegistrationService userRegService;
 
-	@Autowired
+
 	UserRegistrationNotificationService userRegNotificationService;
+
+
+	@Autowired
+	public UserRegistrationConsumer(OutboundRequestHandlerServiceImpl outboundHandlerService, CbExtServerProperties serverProperties, NotificationUtil notificationUtil, IndexerService indexerService, UserRegistrationService userRegService, UserRegistrationNotificationService userRegNotificationService) {
+		this.outboundHandlerService = outboundHandlerService;
+		this.serverProperties = serverProperties;
+		this.notificationUtil = notificationUtil;
+		this.indexerService = indexerService;
+		this.userRegService = userRegService;
+		this.userRegNotificationService = userRegNotificationService;
+	}
 
 	@SuppressWarnings("unchecked")
 	@KafkaListener(topics = "${kafka.topics.user.registration.register.event}",groupId = "${kafka.topics.user.registration.register.event.consumer.group}" )

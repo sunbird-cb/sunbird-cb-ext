@@ -13,10 +13,14 @@ import java.io.IOException;
 
 @RestController
 public class PdfGeneratorController {
-    @Autowired
-    private PdfGeneratorService pdfGeneratorService;
-    
-    @PostMapping("/generatePdf")
+    private final PdfGeneratorService pdfGeneratorService;
+
+	@Autowired
+	public PdfGeneratorController(PdfGeneratorService pdfGeneratorService) {
+		this.pdfGeneratorService = pdfGeneratorService;
+	}
+
+	@PostMapping("/generatePdf")
     public ResponseEntity<byte[]> generatePdf(@RequestBody PdfGeneratorRequest request) throws Exception {
         return new ResponseEntity<>(pdfGeneratorService.generatePdf(request), HttpStatus.OK);
     }

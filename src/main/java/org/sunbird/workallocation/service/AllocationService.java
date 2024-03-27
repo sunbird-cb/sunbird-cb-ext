@@ -66,23 +66,23 @@ public class AllocationService {
 	final String[] includeFields = { "personalDetails.firstname",
 			"personalDetails.primaryEmail", "id", "professionalDetails.name", "professionalDetails.designation" };
 
-	@Autowired
-	private CbExtServerProperties extServerProperties;
 
-	@Autowired
-	private RestTemplate restTemplate;
+	private  final CbExtServerProperties extServerProperties;
 
-	@Autowired
-	private Validator validator;
 
-	@Autowired
-	private CbExtServerProperties configuration;
+	private  final RestTemplate restTemplate;
 
-	@Autowired
-	private IndexerService indexerService;
 
-	@Autowired
-	private FRACReqBuilder fracReqBuilder;
+	private final Validator validator;
+
+
+	private  final CbExtServerProperties configuration;
+
+
+	private  final IndexerService indexerService;
+
+
+	private  final FRACReqBuilder fracReqBuilder;
 
 	@Value("${workallocation.index.name}")
 	public String index;
@@ -90,8 +90,18 @@ public class AllocationService {
 	@Value("${workallocation.index.type}")
 	public String indexType;
 
+	private  final PdfGenerationService pdfService;
+
 	@Autowired
-	private PdfGenerationService pdfService;
+	public AllocationService(CbExtServerProperties extServerProperties, RestTemplate restTemplate, Validator validator, CbExtServerProperties configuration, IndexerService indexerService, FRACReqBuilder fracReqBuilder, PdfGenerationService pdfService) {
+		this.extServerProperties = extServerProperties;
+		this.restTemplate = restTemplate;
+		this.validator = validator;
+		this.configuration = configuration;
+		this.indexerService = indexerService;
+		this.fracReqBuilder = fracReqBuilder;
+		this.pdfService = pdfService;
+	}
 
 	ObjectMapper mapper = new ObjectMapper();
 

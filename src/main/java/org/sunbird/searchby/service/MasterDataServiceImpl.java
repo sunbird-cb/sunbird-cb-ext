@@ -28,17 +28,26 @@ import java.util.stream.Collectors;
 @Service
 public class MasterDataServiceImpl implements MasterDataService {
 
-    private Logger logger = LoggerFactory.getLogger(getClass().getName());
-    @Autowired
+    private final Logger logger = LoggerFactory.getLogger(getClass().getName());
+
     CbExtServerProperties cbExtServerProperties;
-    @Autowired
+
     ObjectMapper mapper;
-    @Autowired
+
     OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
-    @Autowired
+
     CassandraOperation cassandraOperation;
-    @Autowired
+
     RedisCacheMgr redisCacheMgr;
+
+    @Autowired
+    public MasterDataServiceImpl(CbExtServerProperties cbExtServerProperties, ObjectMapper mapper, OutboundRequestHandlerServiceImpl outboundRequestHandlerService, CassandraOperation cassandraOperation, RedisCacheMgr redisCacheMgr) {
+        this.cbExtServerProperties = cbExtServerProperties;
+        this.mapper = mapper;
+        this.outboundRequestHandlerService = outboundRequestHandlerService;
+        this.cassandraOperation = cassandraOperation;
+        this.redisCacheMgr = redisCacheMgr;
+    }
 
     @Override
 	public FracApiResponse getListPositions() {
@@ -300,8 +309,12 @@ public class MasterDataServiceImpl implements MasterDataService {
 				.get(Constants.RESPONSE_DATA);
 		if (!CollectionUtils.isEmpty(fracResponseList)) {
 			for (Map<String, Object> respObj : fracResponseList) {
+
+				if (!positionNameList.contains(respObj.get(Constants.CONTEXT_NAME.toLowerCase()))) {
+
                String contextName= (String) respObj.get(Constants.CONTEXT_NAME.toLowerCase());
 				if (!positionNameList.contains(contextName)) {
+
 					positionList.add(new MasterData((String) respObj.get(Constants.ID), Constants.POSITION,
 							(String) respObj.get(Constants.NAME), (String) respObj.get(Constants.DESCRIPTION)));
 					positionNameList.add((String) respObj.get(Constants.NAME));

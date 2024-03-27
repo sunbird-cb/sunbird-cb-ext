@@ -49,36 +49,49 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Service
 public class UserRegistrationServiceImpl implements UserRegistrationService {
 
-	private Logger logger = LoggerFactory.getLogger(UserRegistrationServiceImpl.class);
+	private  final Logger logger = LoggerFactory.getLogger(UserRegistrationServiceImpl.class);
 
 	ObjectMapper mapper = new ObjectMapper();
 
-	@Autowired
+
 	CbExtServerProperties serverProperties;
 
-	@Autowired
+
 	IndexerService indexerService;
 
-	@Autowired
+
 	Producer kafkaProducer;
 
-	@Autowired
+
 	OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
 
-	@Autowired
+
 	RestTemplate restTemplate;
 
-	@Autowired
+
 	UserUtilityService userUtilityService;
 
-	@Autowired
+
 	RedisCacheMgr redisCacheMgr;
 
-	@Autowired
+
 	ExtendedOrgService extOrgService;
 
-	@Autowired
+
 	CassandraOperation cassandraOperation;
+
+	@Autowired
+	public UserRegistrationServiceImpl(CbExtServerProperties serverProperties, IndexerService indexerService, Producer kafkaProducer, OutboundRequestHandlerServiceImpl outboundRequestHandlerService, RestTemplate restTemplate, UserUtilityService userUtilityService, RedisCacheMgr redisCacheMgr, ExtendedOrgService extOrgService, CassandraOperation cassandraOperation) {
+		this.serverProperties = serverProperties;
+		this.indexerService = indexerService;
+		this.kafkaProducer = kafkaProducer;
+		this.outboundRequestHandlerService = outboundRequestHandlerService;
+		this.restTemplate = restTemplate;
+		this.userUtilityService = userUtilityService;
+		this.redisCacheMgr = redisCacheMgr;
+		this.extOrgService = extOrgService;
+		this.cassandraOperation = cassandraOperation;
+	}
 
 	@Override
 	public SBApiResponse registerUser(UserRegistrationInfo userRegInfo) {
@@ -512,6 +525,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 					orgNameList.add(content.getChannel());
 				}
 			}
+
 			List<String> masterOrgList = getMasterOrgList();
 			for (String orgName : masterOrgList) {
 				if (!orgNameList.contains(orgName)) {
@@ -519,9 +533,11 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 				}
 			}
 		} while (count != iterateCount);
+
 		if (CollectionUtils.isEmpty(orgList)) {
 			throw new Exception("Failed to retrieve organisation details.");
 		}
+
 		Map<String, List<DeptPublicInfo>> deptListMap = new HashMap<String, List<DeptPublicInfo>>();
 		deptListMap.put(Constants.DEPARTMENT_LIST_CACHE_NAME, orgList);
 		redisCacheMgr.putCache(Constants.DEPARTMENT_LIST_CACHE_NAME, deptListMap);

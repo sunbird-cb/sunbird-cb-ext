@@ -51,26 +51,35 @@ public class RatingServiceImpl implements RatingService {
     private CbExtLogger logger = new CbExtLogger(getClass().getName());
     private ValidationBody validationBody;
 
-    @Autowired
+
     CassandraOperation cassandraOperation;
 
-    @Autowired
+
     Producer kafkaProducer;
 
     @Value("${kafka.topics.parent.rating.event}")
     public String updateRatingTopicName;
 
-    @Autowired
+
     ContentService contentService;
 
-    @Autowired
+
     OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
 
-    @Autowired
+
     CbExtServerProperties serverConfig;
 
-    @Autowired
     RedisCacheMgr redisCacheMgr;
+    @Autowired
+    public RatingServiceImpl(CassandraOperation cassandraOperation, Producer kafkaProducer, String updateRatingTopicName, ContentService contentService, OutboundRequestHandlerServiceImpl outboundRequestHandlerService, CbExtServerProperties serverConfig, RedisCacheMgr redisCacheMgr) {
+        this.cassandraOperation = cassandraOperation;
+        this.kafkaProducer = kafkaProducer;
+        this.updateRatingTopicName = updateRatingTopicName;
+        this.contentService = contentService;
+        this.outboundRequestHandlerService = outboundRequestHandlerService;
+        this.serverConfig = serverConfig;
+        this.redisCacheMgr = redisCacheMgr;
+    }
 
     @Override
     public SBApiResponse getRatings(String activityId, String activityType, String userId) {
@@ -473,8 +482,13 @@ public class RatingServiceImpl implements RatingService {
 
             activityId = (String) requestBody.get(Constants.ACTIVITY_ID);
             compositeKey.put(Constants.ACTIVITY_ID, activityId);
+
+            compositeKey.put(Constants.ACTIVITY_TYPE,requestBody.get(Constants.ACTIVITY_TYPE));
+            compositeKey.put(Constants.RATINGS_USER_ID,requestBody.get(Constants.USER_ID));
+
             compositeKey.put(Constants.ACTIVITY_TYPE, requestBody.get(Constants.ACTIVITY_TYPE));
             compositeKey.put(Constants.RATINGS_USER_ID, requestBody.get(Constants.USER_ID));
+
             List<Map<String, Object>> existingDataList = cassandraOperation.getRecordsByPropertiesWithoutFiltering(
                     Constants.KEYSPACE_SUNBIRD,
                     Constants.TABLE_RATINGS, compositeKey, null);
@@ -560,7 +574,11 @@ public class RatingServiceImpl implements RatingService {
                     contentRequest.put(Constants.CONTENT, updateRatingValues);
                     Map<String, Object> updateContent = new HashMap<>();
                     updateContent.put(Constants.REQUEST, contentRequest);
+
+                    Map<String, Object> updateReadData =outboundRequestHandlerService.fetchResultUsingPatch(
+
                     Map<String, Object> updateReadData = outboundRequestHandlerService.fetchResultUsingPatch(
+
                             serverConfig.getLearningServiceBaseUrl() + serverConfig.getSystemUpdateAPI() + contentId, updateContent,
                             ProjectUtil.getDefaultHeaders());
                     if (Constants.OK.equalsIgnoreCase((String) updateReadData.get(Constants.RESPONSE_CODE))) {
@@ -677,11 +695,7 @@ public class RatingServiceImpl implements RatingService {
             updateContent.put(Constants.REQUEST, contentRequest);
             Map<String, Object> updateReadData = outboundRequestHandlerService.fetchResultUsingPatch(serverConfig.getLearningServiceBaseUrl()
                     + serverConfig.getSystemUpdateAPI() + contentId, updateContent, ProjectUtil.getDefaultHeaders());
-            if (Constants.OK.equalsIgnoreCase((String) updateReadData.get(Constants.RESPONSE_CODE))) {
-                return true;
-            } else {
-                return false;
-            }
+            return Constants.OK.equalsIgnoreCase((String) updateReadData.get(Constants.RESPONSE_CODE));
         } catch (Exception e) {
             logger.error(e);
             return false;

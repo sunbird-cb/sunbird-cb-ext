@@ -18,8 +18,12 @@ import org.sunbird.org.service.ExtendedOrgService;
 @RestController
 public class ExtendedOrgController {
 
+
+	private final  ExtendedOrgService orgService;
 	@Autowired
-	private ExtendedOrgService orgService;
+	public ExtendedOrgController(ExtendedOrgService orgService) {
+		this.orgService = orgService;
+	}
 
 	@PostMapping("/org/ext/v1/create")
 	public ResponseEntity<SBApiResponse> createOrg(@RequestBody Map<String, Object> orgRequest,

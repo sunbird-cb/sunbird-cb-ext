@@ -20,6 +20,9 @@ public class HallOfFameServiceImpl implements HallOfFameService {
     @Autowired
     private CassandraOperation cassandraOperation;
 
+    private Logger logger = LoggerFactory.getLogger(getClass().getName());
+
+
     @Override
     public Map<String, Object> fetchHallOfFameData() {
         Map<String, Object> resultMap = new HashMap<>();

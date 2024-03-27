@@ -27,17 +27,22 @@ public class CourseReminderNotificationService {
 	private static final CbExtLogger logger = new CbExtLogger(CourseReminderNotificationService.class.getName());
 	private Map<String, CourseDetails> courseIdAndCourseNameMap = new HashMap<>();
 
-	@Autowired
 	CassandraOperation cassandraOperation;
 
-	@Autowired
+
 	CbExtServerProperties serverProperties;
 
-	@Autowired
+
 	NotificationUtil notificationUtil;
 
-	@Autowired
 	PropertiesConfig configuration;
+	@Autowired
+	public CourseReminderNotificationService(CassandraOperation cassandraOperation, CbExtServerProperties serverProperties, NotificationUtil notificationUtil, PropertiesConfig configuration) {
+		this.cassandraOperation = cassandraOperation;
+		this.serverProperties = serverProperties;
+		this.notificationUtil = notificationUtil;
+		this.configuration = configuration;
+	}
 
 	public void initiateCourseReminderEmail() {
 		logger.info("CourseReminderNotificationService:: initiateCourseReminderEmail: Started");

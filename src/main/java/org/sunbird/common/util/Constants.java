@@ -1,8 +1,7 @@
 package org.sunbird.common.util;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+
+import java.util.*;
 
 public class Constants {
 	public static final String UUID = "wid";
@@ -534,8 +533,8 @@ public class Constants {
 	public static final String DATE_CREATED_ON = "dateCreatedOn";
 	public static final String DATE_UPDATE_ON = "dateUpdatedOn";
 	public static final String INITIATED_CAPITAL = "INITIATED";
-	public static final List<String> COURSE_REMINDER_EMAIL_FIELDS = Arrays.asList(RATINGS_USER_ID, BATCH_ID_COLUMN,
-			COURSE_ID_COLUMN, COMPLETION_PERCENTAGE_COLUMN, LAST_ACCESS_TIME);
+	public static final List<String> COURSE_REMINDER_EMAIL_FIELDS = Collections.unmodifiableList(Arrays.asList(RATINGS_USER_ID, BATCH_ID_COLUMN,
+			COURSE_ID_COLUMN, COMPLETION_PERCENTAGE_COLUMN, LAST_ACCESS_TIME));
 	public static final String BATCHES = "batches";
 	public static final String NO_OF_COURSES = "noOfCourses";
 	public static final String _DESCRIPTION = "_description";
@@ -555,9 +554,9 @@ public class Constants {
 	public static final String ORGANISATIONS = "organisations";
 
 	public static final String CIPHER_ALGORITHM = "AES";
-	public static final byte[] CIPHER_KEY = new byte[] { 'T', 'h', 'i', 's', 'A', 's', 'I', 'S', 'e', 'r', 'c', 'e',
-			'K', 't', 'e', 'y' };
-	public static final List<String> DECRYPTED_FIELDS = Arrays.asList(Constants.PHONE, Constants.EMAIL);
+    public static final byte[] CIPHER_KEY = createUnmodifiableByteArray((byte) 'T', (byte) 'h', (byte) 'i', (byte) 's', (byte) 'A', (byte) 's', (byte) 'I', (byte) 'S', (byte) 'e', (byte) 'r', (byte) 'c', (byte) 'e', (byte) 'K', (byte) 't', (byte) 'e', (byte) 'y');
+
+	public static final List<String> DECRYPTED_FIELDS = Collections.unmodifiableList(Arrays.asList(Constants.PHONE, Constants.EMAIL));
 	public static final String CREATED_FOR = "createdFor";
 	public static final String COURSE_ORG_ID = "courseOrgId";
 	public static final String COURSE_ORG_NAME = "courseOrgName";
@@ -626,13 +625,13 @@ public class Constants {
 	public static final String RETAKE_ATTEMPTS_CONSUMED = "attemptsMade";
 	public static final String API_RETAKE_ASSESSMENT_GET = "api.assessmment.attempt";
 
-	public static final List<String> USER_ENROLMENT_REPORT_FIELDS = Arrays.asList(USER_ID, FIRSTNAME, EMAIL,
-			PHONE, ROOT_ORG_ID, CHANNEL);
+	public static final List<String> USER_ENROLMENT_REPORT_FIELDS = Collections.unmodifiableList(Arrays.asList(USER_ID, FIRSTNAME, EMAIL,
+			PHONE, ROOT_ORG_ID, CHANNEL));
 
-	public static final List<String> COURSE_ENROLMENT_REPORT_FIELDS = Arrays.asList(COURSE_ID, NAME, COURSE_ORG_ID,
-			COURSE_ORG_NAME);
+	public static final List<String> COURSE_ENROLMENT_REPORT_FIELDS = Collections.unmodifiableList(Arrays.asList(COURSE_ID, NAME, COURSE_ORG_ID,
+			COURSE_ORG_NAME));
 
-	public static final List<String> USER_ENROLMENT_COMMON_FIELDS = Arrays.asList(STATUS, COMPLETION_PERCENTAGE);
+	public static final List<String> USER_ENROLMENT_COMMON_FIELDS = Collections.unmodifiableList(Arrays.asList(STATUS, COMPLETION_PERCENTAGE));
 
 	public static final String CONTEXT_TYPE = "contextType";
 	public static final String CONTEXT_NAME = "contextName";
@@ -1034,6 +1033,8 @@ public class Constants {
 	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}
+	private static byte[] createUnmodifiableByteArray(byte... values) {
+		return Arrays.copyOf(values, values.length);}
 
 
 

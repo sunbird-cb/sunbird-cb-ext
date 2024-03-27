@@ -15,8 +15,12 @@ import java.util.Map;
 @RequestMapping("/masterData/v1")
 public class MasterDataController {
 
+
+	private final  MasterDataServiceImpl masterDataService;
 	@Autowired
-	private MasterDataServiceImpl masterDataService;
+	public MasterDataController(MasterDataServiceImpl masterDataService) {
+		this.masterDataService = masterDataService;
+	}
 
 	@GetMapping("/positions")
 	public ResponseEntity<FracApiResponse> getPositionsList() {

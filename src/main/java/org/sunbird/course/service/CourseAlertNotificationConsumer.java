@@ -14,14 +14,18 @@ import org.sunbird.core.logger.CbExtLogger;
 public class CourseAlertNotificationConsumer {
 	private static final CbExtLogger logger = new CbExtLogger(CourseAlertNotificationConsumer.class.getName());
 
-	@Autowired
 	CbExtServerProperties serverProperties;
 
-	@Autowired
+
 	CourseReminderNotificationService incompleteCourseService;
 
-	@Autowired
 	LatestCoursesAlertNotificationService latestCourseService;
+	@Autowired
+	public CourseAlertNotificationConsumer(CbExtServerProperties serverProperties, CourseReminderNotificationService incompleteCourseService, LatestCoursesAlertNotificationService latestCourseService) {
+		this.serverProperties = serverProperties;
+		this.incompleteCourseService = incompleteCourseService;
+		this.latestCourseService = latestCourseService;
+	}
 
 	@KafkaListener(topics = "${kafka.topics.course.reminder.notification.event}", groupId = "${kafka.topics.course.reminder.notification.event.consumer.group}")
 	public void processCourseReminderMessage(ConsumerRecord<String, String> data) {

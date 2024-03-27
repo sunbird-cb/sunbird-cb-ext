@@ -14,8 +14,12 @@ import java.util.List;
 @RequestMapping("cbplan")
 public class CbPlanController {
 
+
+    private final CbPlanService cbPlanService;
     @Autowired
-    private CbPlanService cbPlanService;
+    public CbPlanController(CbPlanService cbPlanService) {
+        this.cbPlanService = cbPlanService;
+    }
 
     @PostMapping("/v1/create")
     public ResponseEntity<SBApiResponse> createCbPlan(

@@ -41,30 +41,41 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Service
 public class CbPlanServiceImpl implements CbPlanService {
 
-    private Logger logger = LoggerFactory.getLogger(getClass().getName());
+    private  final Logger logger = LoggerFactory.getLogger(getClass().getName());
 
-    @Autowired
+
     AccessTokenValidator accessTokenValidator;
 
-    @Autowired
+
     CassandraOperation cassandraOperation;
 
-    @Autowired
+
     UserUtilityService userUtilityService;
 
-    @Autowired
+
     ContentService contentService;
 
-    @Autowired
+
     CbExtServerProperties serverProperties;
 
     ObjectMapper mapper = new ObjectMapper();
 
-    @Autowired
+
     Producer kafkaProducer;
 
+
+    private final CbExtServerProperties cbExtServerProperties;
     @Autowired
-    private CbExtServerProperties cbExtServerProperties;
+    public CbPlanServiceImpl(AccessTokenValidator accessTokenValidator, CassandraOperation cassandraOperation, UserUtilityService userUtilityService, ContentService contentService, CbExtServerProperties serverProperties, ObjectMapper mapper, Producer kafkaProducer, CbExtServerProperties cbExtServerProperties) {
+        this.accessTokenValidator = accessTokenValidator;
+        this.cassandraOperation = cassandraOperation;
+        this.userUtilityService = userUtilityService;
+        this.contentService = contentService;
+        this.serverProperties = serverProperties;
+        this.mapper = mapper;
+        this.kafkaProducer = kafkaProducer;
+        this.cbExtServerProperties = cbExtServerProperties;
+    }
 
     @Override
     public SBApiResponse createCbPlan(SunbirdApiRequest request, String userOrgId, String authUserToken) {
@@ -664,7 +675,11 @@ public class CbPlanServiceImpl implements CbPlanService {
 
         String createdBy = (String) cbPlan.get(Constants.CREATED_BY);
         enrichData.put(Constants.CREATED_BY_NAME,
+
+                userInfoMap.get(cbPlan.get(Constants.CREATED_BY)).get(Constants.FIRSTNAME));
+
                 userInfoMap.get(createdBy).get(Constants.FIRSTNAME));
+
         enrichData.put(Constants.CREATED_BY, cbPlan.get(Constants.CREATED_BY));
         List<Map<String, Object>> enrichContentInfoMap = new ArrayList<>();
         for (String contentId : contentTypeInfo) {
@@ -744,8 +759,13 @@ public class CbPlanServiceImpl implements CbPlanService {
                     .collect(Collectors.toList());
             cbPlanInfoUpdateAssignmentKey = assignmentKeyInfoList.stream()
                     .filter(key -> !planDto.getAssignmentTypeInfo().contains(key)).collect(Collectors.toList());
+
+            cbPlanInfoRequestUpdateAssignmentKey = cbPlanMap.stream().filter(key -> (planDto.getAssignmentTypeInfo().contains(key.get(Constants.CB_ASSIGNMENT_TYPE_INFO_KEY))
+                                                  && (Boolean)key.get(Constants.CB_IS_ACTIVE) == false))
+
             cbPlanInfoRequestUpdateAssignmentKey = cbPlanMap.stream().filter(key -> (planDto.getAssignmentTypeInfo().contains((String)key.get(Constants.CB_ASSIGNMENT_TYPE_INFO_KEY))
                                                   && (Boolean)key.get(Constants.CB_IS_ACTIVE) == Boolean.FALSE))
+
                                                     .map(key -> (String) key.get(Constants.CB_ASSIGNMENT_TYPE_INFO_KEY))
                                                     .collect(Collectors.toList());
             cbPlanInfoUpdateAssignmentKey.addAll(cbPlanInfoRequestUpdateAssignmentKey);
@@ -779,11 +799,7 @@ public class CbPlanServiceImpl implements CbPlanService {
             compositeKey.put(Constants.CB_ASSIGNMENT_TYPE_INFO_KEY, assignmentTypeInfo);
 
             Map<String, Object> lookupInfoUpdated = new HashMap<>();
-            if (CollectionUtils.isNotEmpty(cbPlanInfoRequestUpdateAssignmentKey) && cbPlanInfoRequestUpdateAssignmentKey.contains(assignmentTypeInfo)) {
-                lookupInfoUpdated.put(Constants.CB_IS_ACTIVE, true);
-            } else {
-                lookupInfoUpdated.put(Constants.CB_IS_ACTIVE, false);
-            }
+            lookupInfoUpdated.put(Constants.CB_IS_ACTIVE, CollectionUtils.isNotEmpty(cbPlanInfoRequestUpdateAssignmentKey) && cbPlanInfoRequestUpdateAssignmentKey.contains(assignmentTypeInfo));
             lookupInfoUpdated.put(Constants.END_DATE, planDto.getEndDate());
             Map<String, Object> resp = cassandraOperation.updateRecord(Constants.KEYSPACE_SUNBIRD,
                     Constants.TABLE_CB_PLAN_LOOKUP, lookupInfoUpdated, compositeKey);
@@ -966,7 +982,11 @@ public class CbPlanServiceImpl implements CbPlanService {
                     cbPlan.put(Constants.USER_DETAILS, enrichUserInfoList);
 
                 } else if (Constants.CB_DESIGNATION_TYPE.equalsIgnoreCase(assignmentType)) {
+
+                    cbPlan.put(Constants.USER_DETAILS,  cbPlan.get(Constants.CB_ASSIGNMENT_TYPE_INFO));
+
                     cbPlan.put(Constants.USER_DETAILS, Collections.singletonList((String) cbPlan.get(Constants.CB_ASSIGNMENT_TYPE_INFO)));
+
                 }
 
                 userUtilityService.getUserDetailsFromDB(Arrays.asList((String) cbPlan.get(Constants.CREATED_BY)),
@@ -974,7 +994,7 @@ public class CbPlanServiceImpl implements CbPlanService {
                         userInfoMap);
                 enrichUserInfo(userInfoMap);
                 cbPlan.put(Constants.CREATED_BY_NAME,
-                        userInfoMap.get((String) cbPlan.get(Constants.CREATED_BY)).get(Constants.FIRSTNAME));
+                        userInfoMap.get(cbPlan.get(Constants.CREATED_BY)).get(Constants.FIRSTNAME));
                 cbPlan.remove(Constants.CB_ASSIGNMENT_TYPE_INFO);
                 cbPlan.put(Constants.USER_TYPE, assignmentType);
                 cbPlan.remove(Constants.CB_ASSIGNMENT_TYPE);

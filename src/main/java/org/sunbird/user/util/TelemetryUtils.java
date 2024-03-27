@@ -27,13 +27,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Service
 public class TelemetryUtils {
 
-	@Autowired
-	private CbExtServerProperties cbExtServerProperties;
 
-	@Autowired
-	private Producer producer;
+	private final CbExtServerProperties cbExtServerProperties;
 
-	private CbExtLogger logger = new CbExtLogger(getClass().getName());
+	private  final Producer producer;
+	@Autowired
+	public TelemetryUtils(CbExtServerProperties cbExtServerProperties, Producer producer) {
+		this.cbExtServerProperties = cbExtServerProperties;
+		this.producer = producer;
+	}
+
+	private  final CbExtLogger logger = new CbExtLogger(getClass().getName());
 
 	public AuditEvents getUserslastLoginTelemetryEventData(LastLoginInfo userLoginInfo) {
 		AuditEvents event = new AuditEvents();
