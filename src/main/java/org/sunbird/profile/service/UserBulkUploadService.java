@@ -255,9 +255,11 @@ public class UserBulkUploadService {
                     } else {
                         invalidErrList.addAll(validateEmailContactAndDomain(userRegistration));
                         if (invalidErrList.isEmpty()) {
-                            if (StringUtils.isBlank(redisCacheMgr.getCache(userRegistration.getPhone()+ "" +userRegistration.getEmail()))) {
+                            if (redisCacheMgr.isKeyExist(userRegistration.getPhone()+ "" +userRegistration.getEmail())) {
+                                logger.error("Key is already present in Redis Key: " + userRegistration.getPhone()+ "" +userRegistration.getEmail());
+                            } else {
                                 redisCacheMgr.putCache(userRegistration.getPhone().trim()+ "" +userRegistration.getEmail(),
-                                        userRegistration);
+                                        "");
                                 userRegistration.setUserAuthToken(inputDataMap.get(Constants.X_AUTH_TOKEN));
                                 String responseCode = userUtilityService.createBulkUploadUser(userRegistration);
                                 if (!responseCode.equalsIgnoreCase(Constants.OK)) {
@@ -269,8 +271,6 @@ public class UserBulkUploadService {
                                     statusCell.setCellValue(Constants.SUCCESS_UPPERCASE);
                                     errorDetails.setCellValue("");
                                 }
-                            } else {
-                                logger.error("Key is already present in Redis Key: " + userRegistration.getPhone()+ "" +userRegistration.getEmail());
                             }
                         } else {
                             failedRecordsCount++;

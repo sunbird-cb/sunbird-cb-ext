@@ -26,4 +26,15 @@ public class Producer {
             log.error(e);
         }
     }
+
+    public void pushWithKey(String topic, Object value, String key) {
+        ObjectMapper mapper = new ObjectMapper();
+        String message = null;
+        try {
+            message = mapper.writeValueAsString(value);
+            kafkaTemplate.send(topic, key, message);
+        } catch (JsonProcessingException e) {
+            log.error(e);
+        }
+    }
 }
