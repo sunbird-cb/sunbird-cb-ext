@@ -360,10 +360,9 @@ public class StorageServiceImpl implements StorageService {
 			Map<String, Object> resourceMap = new HashMap<>();
 			String fileName = entry.getValue();
 			String reportType = "";
-			if (fileName.contains(".csv")) {
-				reportType = entry.getValue().replace(".csv", "");
-			} else if (fileName.contains(".zip")) {
-				reportType = entry.getValue().replace(".zip", "");
+			if (fileName.contains(".")) {
+				String fileExtension = fileName.substring(fileName.lastIndexOf(".") + 1);
+				reportType = entry.getValue().replace("." + fileExtension, "");
 			}
 
 			String objectKey = serverProperties.getReportDownloadFolderName() + "/" + spvReportSubFolderTypeMap.get(fileName) + "/" + date + "/" + reportType + "/" + fileName;
