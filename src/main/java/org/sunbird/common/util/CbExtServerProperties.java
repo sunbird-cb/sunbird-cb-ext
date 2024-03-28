@@ -631,6 +631,12 @@ public class CbExtServerProperties {
 	@Value("${redis.wheebox.key}")
 	private String redisWheeboxKey;
 
+	@Value("${sector.category.fields}")
+	private String sectorFields;
+
+	@Value("${sub.sector.category.fields}")
+	private String subSectorFields;
+
 	public String getRedisWheeboxKey() {
 		return redisWheeboxKey;
 	}
@@ -692,6 +698,12 @@ public class CbExtServerProperties {
 
 	@Value("${pdf-generator-svg-to-pdf-url}")
 	private String pdfGeneratorSvgToPdfUrl;
+
+	@Value("${km.framework.term.search.path}")
+	private String kmFrameworkTermSearchPath;
+
+	@Value("${sector.category.name}")
+	private String sectorCategoryName;
 
 	public boolean qListFromCacheEnabled() {
 		return qListFromCacheEnabled;
@@ -2445,5 +2457,37 @@ public class CbExtServerProperties {
 
 	public void setPdfGeneratorSvgToPdfUrl(String pdfGeneratorSvgToPdfUrl) {
 		this.pdfGeneratorSvgToPdfUrl = pdfGeneratorSvgToPdfUrl;
+	}
+
+	public String getKmFrameworkTermSearchPath() {
+		return kmFrameworkTermSearchPath;
+	}
+
+	public void setKmFrameworkTermSearchPath(String kmFrameworkTermSearchPath) {
+		this.kmFrameworkTermSearchPath = kmFrameworkTermSearchPath;
+	}
+
+	public String getSectorCategoryName() {
+		return sectorCategoryName;
+	}
+
+	public void setSectorCategoryName(String sectorCategoryName) {
+		this.sectorCategoryName = sectorCategoryName;
+	}
+
+	public List<String> getSectorFields() {
+		return Arrays.asList(sectorFields.split(",", -1));
+	}
+
+	public void setSectorFields(String sectorFields) {
+		this.sectorFields = sectorFields;
+	}
+
+	public List<String> getSubSectorFields() {
+		return Arrays.asList(subSectorFields.split(",", -1));
+	}
+
+	public void setSubSectorFields(String subSectorFields) {
+		this.subSectorFields = subSectorFields;
 	}
 }

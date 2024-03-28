@@ -1,5 +1,6 @@
 package org.sunbird.catalog.controller;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.sunbird.catalog.model.Catalog;
 import org.sunbird.catalog.service.CatalogServiceImpl;
+import org.sunbird.common.model.SBApiResponse;
 
 @RestController
 @RequestMapping("/v1/catalog")
@@ -19,7 +21,13 @@ public class CatalogController {
 
 	@GetMapping("/")
 	public ResponseEntity<Catalog> getCatalog(@RequestHeader("x-authenticated-user-token") String authUserToken,
-											  @RequestParam(name = "consumption", required = false) boolean isEnrichConsumption){
+			@RequestParam(name = "consumption", required = false) boolean isEnrichConsumption) {
 		return new ResponseEntity<>(catalogService.getCatalog(authUserToken, isEnrichConsumption), HttpStatus.OK);
+	}
+
+	@GetMapping("/sector")
+	public ResponseEntity<SBApiResponse> getSectors() {
+		SBApiResponse response = catalogService.getSectors();
+		return new ResponseEntity<>(response, response.getResponseCode());
 	}
 }
