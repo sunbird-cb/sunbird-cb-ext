@@ -2,8 +2,10 @@ package org.sunbird.catalog.service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
@@ -139,11 +141,17 @@ public class CatalogServiceImpl {
 
 	private void processSubSector(Map<String, Object> sector, Map<String, Object> newSector) {
 		List<Map<String, Object>> subSectorList = (List<Map<String, Object>>) sector.get(Constants.CHILDREN);
+		Set<String> uniqueSubSector = new HashSet<String>();
 		for (Map<String, Object> subSector : subSectorList) {
+			if (uniqueSubSector.contains((String) subSector.get(Constants.CODE))) {
+				continue;
+			} else {
+				uniqueSubSector.add((String) subSector.get(Constants.CODE));
+			}
 			Map<String, Object> newSubSector = new HashMap<String, Object>();
 			for (String field : extServerProperties.getSubSectorFields()) {
 				if (subSector.containsKey(field)) {
-					newSubSector.put(field, sector.get(field));
+					newSubSector.put(field, subSector.get(field));
 				}
 			}
 			((List) newSector.get(Constants.CHILDREN)).add(newSubSector);
