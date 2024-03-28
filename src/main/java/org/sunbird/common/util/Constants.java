@@ -1014,7 +1014,6 @@ public class Constants {
 	public static final String API_SECTOR_LIST = "api.sector.list";
 	public static final String TERMS = "terms";
 	public static final String SECTORS = "sectors";
-	public static final String CODE = "code";
 
   private Constants() {
 		throw new IllegalStateException("Utility class");

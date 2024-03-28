@@ -143,10 +143,10 @@ public class CatalogServiceImpl {
 		List<Map<String, Object>> subSectorList = (List<Map<String, Object>>) sector.get(Constants.CHILDREN);
 		Set<String> uniqueSubSector = new HashSet<String>();
 		for (Map<String, Object> subSector : subSectorList) {
-			if (uniqueSubSector.contains((String) subSector.get(Constants.CODE))) {
+			if (uniqueSubSector.contains((String) subSector.get(Constants.IDENTIFIER))) {
 				continue;
 			} else {
-				uniqueSubSector.add((String) subSector.get(Constants.CODE));
+				uniqueSubSector.add((String) subSector.get(Constants.IDENTIFIER));
 			}
 			Map<String, Object> newSubSector = new HashMap<String, Object>();
 			for (String field : extServerProperties.getSubSectorFields()) {
