@@ -93,7 +93,7 @@ public class CatalogServiceImpl {
 			request.put(Constants.SEARCH, search);
 			requestBody.put(Constants.REQUEST, request);
 
-			StringBuilder strUrl = new StringBuilder(extServerProperties.getKmFrameWorkPath());
+			StringBuilder strUrl = new StringBuilder(extServerProperties.getKmBaseHost());
 			strUrl.append(extServerProperties.getKmFrameworkTermSearchPath()).append("?framework=")
 					.append(extServerProperties.getTaxonomyFrameWorkName()).append("&category=")
 					.append(extServerProperties.getSectorCategoryName());

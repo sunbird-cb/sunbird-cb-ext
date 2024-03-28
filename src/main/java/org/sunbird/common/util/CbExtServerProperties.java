@@ -699,10 +699,10 @@ public class CbExtServerProperties {
 	@Value("${pdf-generator-svg-to-pdf-url}")
 	private String pdfGeneratorSvgToPdfUrl;
 
-	@Value("km.framework.term.search.path")
+	@Value("${km.framework.term.search.path}")
 	private String kmFrameworkTermSearchPath;
 
-	@Value("sector.category.name")
+	@Value("${sector.category.name}")
 	private String sectorCategoryName;
 
 	public boolean qListFromCacheEnabled() {
