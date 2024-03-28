@@ -359,7 +359,13 @@ public class StorageServiceImpl implements StorageService {
 		for (Map.Entry<String, String> entry : reportFileNameMap.entrySet()) {
 			Map<String, Object> resourceMap = new HashMap<>();
 			String fileName = entry.getValue();
-			String reportType = entry.getValue().replace(".csv", "");
+			String reportType = "";
+			if (fileName.contains(".csv")) {
+				reportType = entry.getValue().replace(".csv", "");
+			} else if (fileName.contains(".zip")) {
+				reportType = entry.getValue().replace(".zip", "");
+			}
+
 			String objectKey = serverProperties.getReportDownloadFolderName() + "/" + spvReportSubFolderTypeMap.get(fileName) + "/" + date + "/" + reportType + "/" + fileName;
 			try {
 				Model.Blob blob = storageService.getObject(serverProperties.getReportDownloadContainerName(), objectKey, Option.apply(Boolean.FALSE));
