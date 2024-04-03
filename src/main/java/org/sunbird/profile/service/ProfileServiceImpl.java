@@ -1943,7 +1943,7 @@ public class ProfileServiceImpl implements ProfileService {
 		List<Map<String, Object>> bulkUploadMdoList = cassandraOperation.getRecordsByPropertiesWithoutFiltering(
 				Constants.KEYSPACE_SUNBIRD, Constants.TABLE_USER_BULK_UPLOAD, bulkUplaodPrimaryKey, fields);
 		if (CollectionUtils.isEmpty(bulkUploadMdoList)) {
-			return true;
+			return false;
 		}
 		return bulkUploadMdoList.stream()
 				.anyMatch(entry -> Constants.STATUS_IN_PROGRESS_UPPERCASE.equalsIgnoreCase((String) entry.get(Constants.STATUS)));
