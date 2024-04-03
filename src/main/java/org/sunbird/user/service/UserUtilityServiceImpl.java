@@ -574,7 +574,8 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 
 	@Override
 	public boolean validateGroup(String group) {
-		return (!CollectionUtils.isEmpty(serverConfig.getBulkUploadGroupValue())) ? serverConfig.getBulkUploadGroupValue().stream().anyMatch(group::equalsIgnoreCase) : false;
+		List<String> groupValues = serverConfig.getBulkUploadGroupValue();
+		return groupValues != null && groupValues.contains(group);
 	}
 
 	@Override

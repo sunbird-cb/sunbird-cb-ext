@@ -741,6 +741,10 @@ public class ProfileServiceImpl implements ProfileService {
 	public SBApiResponse bulkUpload(MultipartFile mFile, String orgId, String channel, String userId, String userAuthToken) {
 		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_USER_BULK_UPLOAD);
 		try {
+			if (isFileExistForProcessingForMDO(orgId)) {
+				setErrorDataForMdo(response, "Failed to upload for another request as previous request is in processing state, please try after some time.");
+				return response;
+			}
 			SBApiResponse uploadResponse = storageService.uploadFile(mFile, serverConfig.getBulkUploadContainerName());
 			if (!HttpStatus.OK.equals(uploadResponse.getResponseCode())) {
 				setErrorData(response, String.format("Failed to upload file. Error: %s",
@@ -1929,6 +1933,26 @@ public class ProfileServiceImpl implements ProfileService {
 			return adminApprovalFields;
 		}
 		return new ArrayList<>();
+	}
+
+	private boolean isFileExistForProcessingForMDO(String mdoId) {
+		Map<String, Object> bulkUplaodPrimaryKey = new HashMap<String, Object>();
+		bulkUplaodPrimaryKey.put(Constants.ROOT_ORG_ID, mdoId);
+		List<String> fields = Arrays.asList(Constants.ROOT_ORG_ID, Constants.IDENTIFIER, Constants.STATUS);
+
+		List<Map<String, Object>> bulkUploadMdoList = cassandraOperation.getRecordsByPropertiesWithoutFiltering(
+				Constants.KEYSPACE_SUNBIRD, Constants.TABLE_USER_BULK_UPLOAD, bulkUplaodPrimaryKey, fields);
+		if (CollectionUtils.isEmpty(bulkUploadMdoList)) {
+			return true;
+		}
+		return bulkUploadMdoList.stream()
+				.anyMatch(entry -> Constants.STATUS_IN_PROGRESS_UPPERCASE.equalsIgnoreCase((String) entry.get(Constants.STATUS)));
+	}
+
+	private void setErrorDataForMdo(SBApiResponse response, String errMsg) {
+		response.getParams().setStatus(Constants.FAILED);
+		response.getParams().setErrmsg(errMsg);
+		response.setResponseCode(HttpStatus.TOO_MANY_REQUESTS);
 	}
 }
 
