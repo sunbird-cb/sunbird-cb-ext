@@ -230,7 +230,7 @@ public class ContentServiceImpl implements ContentService {
 				.append("?hierarchyType=detail");
 		Map<String, Object> response = (Map<String, Object>) outboundRequestHandlerService.fetchResult(url.toString());
 		if (ObjectUtils.isEmpty(response)) {
-			return Collections.EMPTY_MAP;
+			return Collections.emptyMap();
 		}
 
 		return response;

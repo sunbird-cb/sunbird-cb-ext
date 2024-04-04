@@ -219,12 +219,10 @@ public class CassandraOperationImpl implements CassandraOperation {
 			Update update = QueryBuilder.update(keyspaceName, tableName);
 			Assignments assignments = update.with();
 			Update.Where where = update.where();
-			updateAttributes.entrySet().stream().forEach(x -> {
-				assignments.and(QueryBuilder.set(x.getKey(), x.getValue()));
-			});
-			compositeKey.entrySet().stream().forEach(x -> {
-				where.and(QueryBuilder.eq(x.getKey(), x.getValue()));
-			});
+			updateAttributes.entrySet().stream().forEach(x ->
+				assignments.and(QueryBuilder.set(x.getKey(), x.getValue())));
+			compositeKey.entrySet().stream().forEach(x ->
+				where.and(QueryBuilder.eq(x.getKey(), x.getValue())));
 			updateQuery = where;
 			session.execute(updateQuery);
 			response.put(Constants.RESPONSE, Constants.SUCCESS);
@@ -260,9 +258,9 @@ public class CassandraOperationImpl implements CassandraOperation {
 			Iterator<Row> rowIterator = results.iterator();
 			rowIterator.forEachRemaining(row -> {
 				Map<String, String> rowMap = new HashMap<>();
-				columnsMapping.entrySet().stream().forEach(entry -> {
-					rowMap.put(entry.getKey(), (String) row.getObject(entry.getValue()));
-				});
+				columnsMapping.entrySet().stream().forEach(entry ->
+					rowMap.put(entry.getKey(), (String) row.getObject(entry.getValue()))
+				);
 
 				objectInfo.put(rowMap.get(key), rowMap);
 			});
@@ -278,7 +276,7 @@ public class CassandraOperationImpl implements CassandraOperation {
 
 		int n = 0;
 		PagingState pageStates = null;
-		Map<Integer, PagingState> stringMap = new HashMap<Integer, PagingState>();
+		Map<Integer, PagingState> stringMap = new HashMap<>();
 		do {
 			Statement select = selectQuery.setFetchSize(100).setPagingState(pageStates);
 			ResultSet resultSet = connectionManager.getSession(keyspace).execute(select);
@@ -296,9 +294,9 @@ public class CassandraOperationImpl implements CassandraOperation {
 			Iterator<Row> rowIterator = resultSet.iterator();
 			rowIterator.forEachRemaining(row -> {
 				Map<String, String> rowMap = new HashMap<>();
-				columnsMapping.entrySet().stream().forEach(entry -> {
-					rowMap.put(entry.getKey(), (String) row.getObject(entry.getValue()));
-				});
+				columnsMapping.entrySet().stream().forEach(entry ->
+					rowMap.put(entry.getKey(), (String) row.getObject(entry.getValue()))
+				);
 
 				objectInfo.put(rowMap.get(key), rowMap);
 			});

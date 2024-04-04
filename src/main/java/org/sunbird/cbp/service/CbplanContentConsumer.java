@@ -47,9 +47,8 @@ public class CbplanContentConsumer {
     public void cbplanContentRequestConsumer(ConsumerRecord<String, String> data) {
         try {
             Map<String, Object> cbplanContentRequest = mapper.readValue(data.value(), HashMap.class);
-            CompletableFuture.runAsync(() -> {
-                processKafkaMessage(cbplanContentRequest);
-            });
+            CompletableFuture.runAsync(() ->
+                processKafkaMessage(cbplanContentRequest));
         } catch(Exception e) {           
             logger.error("Failed to process content request. Message received : " + data.value(), e);
         }

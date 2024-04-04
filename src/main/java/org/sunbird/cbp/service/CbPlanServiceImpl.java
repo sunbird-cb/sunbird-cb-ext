@@ -855,9 +855,9 @@ public class CbPlanServiceImpl implements CbPlanService {
                 return response;
             }
 
-            Map<String, Map<String, Object>> courseInfoMap = new HashMap<String, Map<String, Object>>();
-            Map<String, Map<String, String>> userInfoMap = new HashMap<String, Map<String, String>>();
-            List<Map<String, Object>> filteredCbPlanList = new ArrayList<Map<String, Object>>();
+            Map<String, Map<String, Object>> courseInfoMap = new HashMap<>();
+            Map<String, Map<String, String>> userInfoMap = new HashMap<>();
+            List<Map<String, Object>> filteredCbPlanList = new ArrayList<>();
             for (Map<String, Object> cbPlan : cbPlanList) {
                 String status = (String) cbPlan.get(Constants.STATUS);
                 if (StringUtils.isBlank(status)) {
@@ -905,7 +905,7 @@ public class CbPlanServiceImpl implements CbPlanService {
 
                 // enrich course information
                 List<String> contentIdList = (List<String>) cbPlan.get(Constants.CB_CONTENT_LIST);
-                List<Map<String, Object>> courseMapList = new ArrayList<Map<String, Object>>();
+                List<Map<String, Object>> courseMapList = new ArrayList<>();
                 for (String contentId : contentIdList) {
                     if (!courseInfoMap.containsKey(contentId)) {
                         Map<String, Object> courseInfo = contentService.readContentFromCache(contentId,
