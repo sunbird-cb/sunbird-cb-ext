@@ -111,93 +111,18 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
                 return response;
             }
             logger.info(String.format("ReadAssessment... UserId: %s, AssessmentIdentifier: %s", userId, assessmentIdentifier));
-
             Map<String, Object> assessmentAllDetail = null ;
-
-            if(editMode) {
-                assessmentAllDetail = assessUtilServ.fetchHierarchyFromAssessServc(assessmentIdentifier,token);
-            }
-            else {
-                assessmentAllDetail = assessUtilServ
-                        .readAssessmentHierarchyFromCache(assessmentIdentifier,editMode,token);
-            }
-
+            assessmentAllDetail = fetchAssessmentDetails(assessmentIdentifier, token, editMode);
             if (MapUtils.isEmpty(assessmentAllDetail)) {
                 updateErrorDetails(response, Constants.ASSESSMENT_HIERARCHY_READ_FAILED,
                         HttpStatus.INTERNAL_SERVER_ERROR);
                 return response;
             }
-
-            if (Constants.PRACTICE_QUESTION_SET
-                    .equalsIgnoreCase((String) assessmentAllDetail.get(Constants.PRIMARY_CATEGORY))||editMode) {
+            if (isPracticeQuestionSet(assessmentAllDetail, editMode)) {
                 response.getResult().put(Constants.QUESTION_SET, readAssessmentLevelData(assessmentAllDetail));
                 return response;
             }
-
-            List<Map<String, Object>> existingDataList = assessUtilServ.readUserSubmittedAssessmentRecords(
-                    userId, assessmentIdentifier);
-            Timestamp assessmentStartTime = new Timestamp(new java.util.Date().getTime());
-            if (existingDataList.isEmpty()) {
-                logger.info("Assessment read first time for user.");
-                // Add Null check for expectedDuration.throw bad questionSet Assessment Exam
-                if(null == assessmentAllDetail.get(Constants.EXPECTED_DURATION)){
-                    errMsg = Constants.ASSESSMENT_INVALID; }
-                else {
-                    int expectedDuration = (Integer) assessmentAllDetail.get(Constants.EXPECTED_DURATION);
-                    Timestamp assessmentEndTime = calculateAssessmentSubmitTime(expectedDuration,
-                            assessmentStartTime, 0);
-                    Map<String, Object> assessmentData = readAssessmentLevelData(assessmentAllDetail);
-                    assessmentData.put(Constants.START_TIME, assessmentStartTime.getTime());
-                    assessmentData.put(Constants.END_TIME, assessmentEndTime.getTime());
-                    response.getResult().put(Constants.QUESTION_SET, assessmentData);
-                    Boolean isAssessmentUpdatedToDB = assessmentRepository.addUserAssesmentDataToDB(userId,
-                            assessmentIdentifier, assessmentStartTime, assessmentEndTime,
-                            (Map<String, Object>) (response.getResult().get(Constants.QUESTION_SET)),
-                            Constants.NOT_SUBMITTED);
-                    if (Boolean.FALSE.equals(isAssessmentUpdatedToDB)) {
-                        errMsg = Constants.ASSESSMENT_DATA_START_TIME_NOT_UPDATED;
-                    }
-                }
-            } else {
-                logger.info("Assessment read... user has details... ");
-                java.util.Date existingAssessmentEndTime = (java.util.Date) (existingDataList.get(0)
-                        .get(Constants.END_TIME));
-                Timestamp existingAssessmentEndTimeTimestamp = new Timestamp(
-                        existingAssessmentEndTime.getTime());
-                if (assessmentStartTime.compareTo(existingAssessmentEndTimeTimestamp) < 0
-                        && Constants.NOT_SUBMITTED.equalsIgnoreCase((String) existingDataList.get(0).get(Constants.STATUS))) {
-                    String questionSetFromAssessmentString = (String) existingDataList.get(0)
-                            .get(Constants.ASSESSMENT_READ_RESPONSE_KEY);
-                    Map<String, Object> questionSetFromAssessment = new Gson().fromJson(
-                            questionSetFromAssessmentString, new TypeToken<HashMap<String, Object>>() {
-                            }.getType());
-                    questionSetFromAssessment.put(Constants.START_TIME, assessmentStartTime.getTime());
-                    questionSetFromAssessment.put(Constants.END_TIME,
-                            existingAssessmentEndTimeTimestamp.getTime());
-                    response.getResult().put(Constants.QUESTION_SET, questionSetFromAssessment);
-                } else if ((assessmentStartTime.compareTo(existingAssessmentEndTime) < 0
-                        && ((String) existingDataList.get(0).get(Constants.STATUS))
-                                .equalsIgnoreCase(Constants.SUBMITTED))
-                        || assessmentStartTime.compareTo(existingAssessmentEndTime) > 0) {
-                    logger.info(
-                            "Incase the assessment is submitted before the end time, or the endtime has exceeded, read assessment freshly ");
-                    Map<String, Object> assessmentData = readAssessmentLevelData(assessmentAllDetail);
-                    int expectedDuration = (Integer) assessmentAllDetail.get(Constants.EXPECTED_DURATION);
-                    assessmentStartTime = new Timestamp(new java.util.Date().getTime());
-                    Timestamp assessmentEndTime = calculateAssessmentSubmitTime(expectedDuration,
-                            assessmentStartTime, 0);
-                    assessmentData.put(Constants.START_TIME, assessmentStartTime.getTime());
-                    assessmentData.put(Constants.END_TIME, assessmentEndTime.getTime());
-                    response.getResult().put(Constants.QUESTION_SET, assessmentData);
-
-                    Boolean isAssessmentUpdatedToDB = assessmentRepository.addUserAssesmentDataToDB(userId,
-                            assessmentIdentifier, assessmentStartTime, assessmentEndTime,
-                            assessmentData, Constants.NOT_SUBMITTED);
-                    if (Boolean.FALSE.equals(isAssessmentUpdatedToDB)) {
-                        errMsg = Constants.ASSESSMENT_DATA_START_TIME_NOT_UPDATED;
-                    }
-                }
-            }
+            errMsg=handleExistingAssessmentData(response, assessmentAllDetail, userId,assessmentIdentifier,errMsg);
         } catch (Exception e) {
             errMsg = String.format("Error while reading assessment. Exception: %s", e.getMessage());
             logger.error(errMsg, e);
@@ -969,5 +894,110 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
             updateErrorDetails(response, errMsg, HttpStatus.INTERNAL_SERVER_ERROR);
         }
         return response;
+    }
+
+
+    private Map<String, Object> fetchAssessmentDetails(String assessmentIdentifier, String token, boolean editMode) {
+        Map<String, Object> assessmentAllDetail;
+        if (editMode) {
+            assessmentAllDetail = assessUtilServ.fetchHierarchyFromAssessServc(assessmentIdentifier, token);
+        } else {
+            assessmentAllDetail = assessUtilServ
+                    .readAssessmentHierarchyFromCache(assessmentIdentifier, editMode, token);
+        }
+        return assessmentAllDetail;
+    }
+
+    private boolean isPracticeQuestionSet(Map<String, Object> assessmentAllDetail, boolean editMode) {
+        return Constants.PRACTICE_QUESTION_SET.equalsIgnoreCase((String) assessmentAllDetail.get(Constants.PRIMARY_CATEGORY)) || editMode;
+    }
+
+    private String handleExistingAssessmentData(SBApiResponse response, Map<String, Object> assessmentAllDetail, String userId, String assessmentIdentifier, String errMsg) {
+        List<Map<String, Object>> existingDataList = assessUtilServ.readUserSubmittedAssessmentRecords(
+                userId, assessmentIdentifier);
+        Timestamp assessmentStartTime = new Timestamp(new java.util.Date().getTime());
+        if (existingDataList.isEmpty()) {
+            errMsg = handleNewAssessment(response, assessmentAllDetail, userId, assessmentIdentifier, errMsg, assessmentStartTime);
+        } else {
+            errMsg = handleExistingAssessment(response, assessmentAllDetail, userId, assessmentIdentifier, errMsg, existingDataList, assessmentStartTime);
+        }
+        return errMsg;
+    }
+
+    private String handleNewAssessment(SBApiResponse response, Map<String, Object> assessmentAllDetail, String userId, String assessmentIdentifier, String errMsg, Timestamp assessmentStartTime) {
+        logger.info("Assessment read first time for user.");
+        // Add Null check for expectedDuration.throw bad questionSet Assessment Exam
+        if (null == assessmentAllDetail.get(Constants.EXPECTED_DURATION)) {
+            errMsg = Constants.ASSESSMENT_INVALID;
+        } else {
+            int expectedDuration = (Integer) assessmentAllDetail.get(Constants.EXPECTED_DURATION);
+            Timestamp assessmentEndTime = calculateAssessmentSubmitTime(expectedDuration,
+                    assessmentStartTime, 0);
+            Map<String, Object> assessmentData = readAssessmentLevelData(assessmentAllDetail);
+            assessmentData.put(Constants.START_TIME, assessmentStartTime.getTime());
+            assessmentData.put(Constants.END_TIME, assessmentEndTime.getTime());
+            response.getResult().put(Constants.QUESTION_SET, assessmentData);
+            Boolean isAssessmentUpdatedToDB = assessmentRepository.addUserAssesmentDataToDB(userId,
+                    assessmentIdentifier, assessmentStartTime, assessmentEndTime,
+                    (Map<String, Object>) (response.getResult().get(Constants.QUESTION_SET)),
+                    Constants.NOT_SUBMITTED);
+            if (Boolean.FALSE.equals(isAssessmentUpdatedToDB)) {
+                errMsg = Constants.ASSESSMENT_DATA_START_TIME_NOT_UPDATED;
+            }
+        }
+        return errMsg;
+    }
+
+    private String handleExistingAssessment(SBApiResponse response, Map<String, Object> assessmentAllDetail, String userId, String assessmentIdentifier, String errMsg, List<Map<String, Object>> existingDataList, Timestamp assessmentStartTime) {
+        logger.info("Assessment read... user has details... ");
+        Date existingAssessmentEndTime = (Date) (existingDataList.get(0)
+                .get(Constants.END_TIME));
+        Timestamp existingAssessmentEndTimeTimestamp = new Timestamp(
+                existingAssessmentEndTime.getTime());
+        if (assessmentStartTime.compareTo(existingAssessmentEndTimeTimestamp) < 0
+                && Constants.NOT_SUBMITTED.equalsIgnoreCase((String) existingDataList.get(0).get(Constants.STATUS))) {
+            handleAssessmentBeforeEndTime(response, existingDataList, assessmentStartTime, existingAssessmentEndTimeTimestamp);
+        } else if ((assessmentStartTime.compareTo(existingAssessmentEndTime) < 0
+                && ((String) existingDataList.get(0).get(Constants.STATUS))
+                .equalsIgnoreCase(Constants.SUBMITTED))
+                || assessmentStartTime.compareTo(existingAssessmentEndTime) > 0) {
+            errMsg = handleSubmittedOrExpiredAssessment(response, assessmentAllDetail, userId, assessmentIdentifier, errMsg);
+        }
+        return errMsg;
+    }
+
+
+    private static void handleAssessmentBeforeEndTime(SBApiResponse response, List<Map<String, Object>> existingDataList, Timestamp assessmentStartTime, Timestamp existingAssessmentEndTimeTimestamp) {
+        String questionSetFromAssessmentString = (String) existingDataList.get(0)
+                .get(Constants.ASSESSMENT_READ_RESPONSE_KEY);
+        Map<String, Object> questionSetFromAssessment = new Gson().fromJson(
+                questionSetFromAssessmentString, new TypeToken<HashMap<String, Object>>() {
+                }.getType());
+        questionSetFromAssessment.put(Constants.START_TIME, assessmentStartTime.getTime());
+        questionSetFromAssessment.put(Constants.END_TIME,
+                existingAssessmentEndTimeTimestamp.getTime());
+        response.getResult().put(Constants.QUESTION_SET, questionSetFromAssessment);
+    }
+
+    private String handleSubmittedOrExpiredAssessment(SBApiResponse response, Map<String, Object> assessmentAllDetail, String userId, String assessmentIdentifier, String errMsg) {
+        Timestamp assessmentStartTime;
+        logger.info(
+                "Incase the assessment is submitted before the end time, or the endtime has exceeded, read assessment freshly ");
+        Map<String, Object> assessmentData = readAssessmentLevelData(assessmentAllDetail);
+        int expectedDuration = (Integer) assessmentAllDetail.get(Constants.EXPECTED_DURATION);
+        assessmentStartTime = new Timestamp(new Date().getTime());
+        Timestamp assessmentEndTime = calculateAssessmentSubmitTime(expectedDuration,
+                assessmentStartTime, 0);
+        assessmentData.put(Constants.START_TIME, assessmentStartTime.getTime());
+        assessmentData.put(Constants.END_TIME, assessmentEndTime.getTime());
+        response.getResult().put(Constants.QUESTION_SET, assessmentData);
+
+        Boolean isAssessmentUpdatedToDB = assessmentRepository.addUserAssesmentDataToDB(userId,
+                assessmentIdentifier, assessmentStartTime, assessmentEndTime,
+                assessmentData, Constants.NOT_SUBMITTED);
+        if (Boolean.FALSE.equals(isAssessmentUpdatedToDB)) {
+            errMsg = Constants.ASSESSMENT_DATA_START_TIME_NOT_UPDATED;
+        }
+        return errMsg;
     }
 }
