@@ -1,7 +1,6 @@
 package org.sunbird.assessment.service;
 
 import static java.util.stream.Collectors.toList;
-import static org.sunbird.common.util.Constants.API_USER_INSIGHTS;
 import static org.sunbird.common.util.Constants.RESPONSE;
 
 import java.io.IOException;
@@ -242,61 +241,31 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
                 return outgoingResponse;
             }
             String assessmentPrimaryCategory = (String) assessmentHierarchy.get(Constants.PRIMARY_CATEGORY);
-
                 String scoreCutOffType = ((String) assessmentHierarchy.get(Constants.SCORE_CUTOFF_TYPE)).toLowerCase();
                 List<Map<String, Object>> sectionLevelsResults = new ArrayList<>();
                 boolean assessmentLevelScoreCutOff = false;
                 for (Map<String, Object> hierarchySection : hierarchySectionList) {
                     String hierarchySectionId = (String) hierarchySection.get(Constants.IDENTIFIER);
-                    String userSectionId = "";
-                    Map<String, Object> userSectionData = new HashMap<>();
-                    for (Map<String, Object> sectionFromSubmitRequest : sectionListFromSubmitRequest) {
-                        userSectionId = (String) sectionFromSubmitRequest.get(Constants.IDENTIFIER);
-                        if (userSectionId.equalsIgnoreCase(hierarchySectionId)) {
-                            userSectionData = sectionFromSubmitRequest;
-                            break;
-                        }
-                    }
-
+                    Map<String, Object> userSectionData = getUserSectionDataByIdentifier(sectionListFromSubmitRequest, hierarchySectionId);
                     hierarchySection.put(Constants.SCORE_CUTOFF_TYPE, scoreCutOffType);
-                    List<Map<String, Object>> questionsListFromSubmitRequest = new ArrayList<>();
-                    if (userSectionData.containsKey(Constants.CHILDREN)
-                            && !ObjectUtils.isEmpty(userSectionData.get(Constants.CHILDREN))) {
-                        questionsListFromSubmitRequest = (List<Map<String, Object>>) userSectionData
-                                .get(Constants.CHILDREN);
-                    }
-                    List<String> desiredKeys = Lists.newArrayList(Constants.IDENTIFIER);
-                    List<Object> questionsList = questionsListFromSubmitRequest.stream()
-                            .flatMap(x -> desiredKeys.stream().filter(x::containsKey).map(x::get)).collect(toList());
+                    List<Map<String, Object>> questionsListFromSubmitRequest = getQuestionsListFromSubmitRequest(userSectionData);
+                    List<Object> questionsList = getQuestionsListFromAssessmentHierarchy(questionsListFromSubmitRequest);
                     List<String> questionsListFromAssessmentHierarchy = questionsList.stream()
                             .map(object -> Objects.toString(object, null)).collect(Collectors.toList());
                     Map<String, Object> result = new HashMap<>();
                     switch (scoreCutOffType) {
                         case Constants.ASSESSMENT_LEVEL_SCORE_CUTOFF:
-                            result.putAll(createResponseMapWithProperStructure(hierarchySection,
-                                    assessUtilServ.validateQumlAssessment(questionsListFromAssessmentHierarchy,
-                                            questionsListFromSubmitRequest, assessUtilServ.readQListfromCache(questionsListFromAssessmentHierarchy, assessmentIdFromRequest, editMode, userAuthToken))));
+                            result.putAll(createAssessmentLevelResult(userAuthToken, editMode, hierarchySection, questionsListFromAssessmentHierarchy, questionsListFromSubmitRequest, assessmentIdFromRequest));
                             Map<String, Object> finalRes = calculateAssessmentFinalResults(result);
                             outgoingResponse.getResult().putAll(finalRes);
                             outgoingResponse.getResult().put(Constants.PRIMARY_CATEGORY, assessmentPrimaryCategory);
-                            if (!Constants.PRACTICE_QUESTION_SET.equalsIgnoreCase(assessmentPrimaryCategory) && !editMode) {
-                                String questionSetFromAssessmentString = (String) existingAssessmentData
-                                        .get(Constants.ASSESSMENT_READ_RESPONSE_KEY);
-                                Map<String, Object> questionSetFromAssessment = null;
-                                if (StringUtils.isNotBlank(questionSetFromAssessmentString)) {
-                                    questionSetFromAssessment = mapper.readValue(questionSetFromAssessmentString,
-                                            new TypeReference<Map<String, Object>>() {
-                                            });
-                                }
-                                writeDataToDatabaseAndTriggerKafkaEvent(submitRequest, userId, questionSetFromAssessment, finalRes,
-                                        (String) assessmentHierarchy.get(Constants.PRIMARY_CATEGORY));
+                            if (isNotPracticeQuestionSet(editMode, assessmentPrimaryCategory)) {
+                                triggerEvents(submitRequest, existingAssessmentData, userId, finalRes, assessmentHierarchy);
                             }
                             assessmentLevelScoreCutOff = true;
                             break;
                         case Constants.SECTION_LEVEL_SCORE_CUTOFF:
-                            result.putAll(createResponseMapWithProperStructure(hierarchySection,
-                                    assessUtilServ.validateQumlAssessment(questionsListFromAssessmentHierarchy,
-                                            questionsListFromSubmitRequest, assessUtilServ.readQListfromCache(questionsListFromAssessmentHierarchy, assessmentIdFromRequest, editMode, userAuthToken))));
+                            result.putAll(createSectionLevelResult(userAuthToken, editMode, hierarchySection, questionsListFromAssessmentHierarchy, questionsListFromSubmitRequest, assessmentIdFromRequest));
                             sectionLevelsResults.add(result);
                             break;
                         default:
@@ -311,17 +280,8 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
                     outgoingResponse.getParams().setStatus(Constants.SUCCESS);
                     outgoingResponse.setResponseCode(HttpStatus.OK);
                     outgoingResponse.getResult().put(Constants.PRIMARY_CATEGORY, assessmentPrimaryCategory);
-                    if (!Constants.PRACTICE_QUESTION_SET.equalsIgnoreCase(assessmentPrimaryCategory) && !editMode) {
-                        String questionSetFromAssessmentString = (String) existingAssessmentData
-                                .get(Constants.ASSESSMENT_READ_RESPONSE_KEY);
-                        Map<String,Object> questionSetFromAssessment = null;
-                        if (StringUtils.isNotBlank(questionSetFromAssessmentString)) {
-                            questionSetFromAssessment = mapper.readValue(questionSetFromAssessmentString,
-                                    new TypeReference<Map<String, Object>>() {
-                                    });
-                        }
-                        writeDataToDatabaseAndTriggerKafkaEvent(submitRequest, userId, questionSetFromAssessment, result,
-                                (String) assessmentHierarchy.get(Constants.PRIMARY_CATEGORY));
+                    if (isNotPracticeQuestionSet(editMode, assessmentPrimaryCategory)) {
+                        triggerEvents(submitRequest, existingAssessmentData, userId, result, assessmentHierarchy);
                     }
                     return outgoingResponse;
                 }
@@ -414,12 +374,7 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
                     }
 
                     hierarchySection.put(Constants.SCORE_CUTOFF_TYPE, scoreCutOffType);
-                    List<Map<String, Object>> questionsListFromSubmitRequest = new ArrayList<>();
-                    if (userSectionData.containsKey(Constants.CHILDREN)
-                            && !ObjectUtils.isEmpty(userSectionData.get(Constants.CHILDREN))) {
-                        questionsListFromSubmitRequest = (List<Map<String, Object>>) userSectionData
-                                .get(Constants.CHILDREN);
-                    }
+                    List<Map<String, Object>> questionsListFromSubmitRequest = getQuestionsListFromSubmitRequest(userSectionData);
                     Map<String, Object> result = new HashMap<>();
                     switch (scoreCutOffType) {
                         case Constants.ASSESSMENT_LEVEL_SCORE_CUTOFF: {
@@ -999,5 +954,69 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
             errMsg = Constants.ASSESSMENT_DATA_START_TIME_NOT_UPDATED;
         }
         return errMsg;
+    }
+
+    private static List<Map<String, Object>> getChildrenData(Map<String, Object> userSectionData, List<Map<String, Object>> questionsListFromSubmitRequest) {
+        if (userSectionData.containsKey(Constants.CHILDREN)
+                && !ObjectUtils.isEmpty(userSectionData.get(Constants.CHILDREN))) {
+            questionsListFromSubmitRequest = (List<Map<String, Object>>) userSectionData
+                    .get(Constants.CHILDREN);
+        }
+        return questionsListFromSubmitRequest;
+    }
+
+
+    private static boolean isNotPracticeQuestionSet(boolean editMode, String assessmentPrimaryCategory) {
+        return !Constants.PRACTICE_QUESTION_SET.equalsIgnoreCase(assessmentPrimaryCategory) && !editMode;
+    }
+
+    private void triggerEvents(Map<String, Object> submitRequest, Map<String, Object> existingAssessmentData, String userId, Map<String, Object> finalRes, Map<String, Object> assessmentHierarchy) throws IOException {
+        String questionSetFromAssessmentString = (String) existingAssessmentData
+                .get(Constants.ASSESSMENT_READ_RESPONSE_KEY);
+        Map<String, Object> questionSetFromAssessment = null;
+        if (StringUtils.isNotBlank(questionSetFromAssessmentString)) {
+            questionSetFromAssessment = mapper.readValue(questionSetFromAssessmentString,
+                    new TypeReference<Map<String, Object>>() {
+                    });
+        }
+        writeDataToDatabaseAndTriggerKafkaEvent(submitRequest, userId, questionSetFromAssessment, finalRes,
+                (String) assessmentHierarchy.get(Constants.PRIMARY_CATEGORY));
+    }
+
+    private static Map<String, Object> getUserSectionDataByIdentifier(List<Map<String, Object>> sectionListFromSubmitRequest, String hierarchySectionId) {
+        String userSectionId = "";
+        Map<String, Object> userSectionData = new HashMap<>();
+        for (Map<String, Object> sectionFromSubmitRequest : sectionListFromSubmitRequest) {
+            userSectionId = (String) sectionFromSubmitRequest.get(Constants.IDENTIFIER);
+            if (userSectionId.equalsIgnoreCase(hierarchySectionId)) {
+                userSectionData = sectionFromSubmitRequest;
+                break;
+            }
+        }
+        return userSectionData;
+    }
+
+    private Map<String, Object> createSectionLevelResult(String userAuthToken, boolean editMode, Map<String, Object> hierarchySection, List<String> questionsListFromAssessmentHierarchy, List<Map<String, Object>> questionsListFromSubmitRequest, String assessmentIdFromRequest) throws IOException {
+        return createResponseMapWithProperStructure(hierarchySection,
+                assessUtilServ.validateQumlAssessment(questionsListFromAssessmentHierarchy,
+                        questionsListFromSubmitRequest, assessUtilServ.readQListfromCache(questionsListFromAssessmentHierarchy, assessmentIdFromRequest, editMode, userAuthToken)));
+    }
+
+    private Map<String, Object> createAssessmentLevelResult(String userAuthToken, boolean editMode, Map<String, Object> hierarchySection, List<String> questionsListFromAssessmentHierarchy, List<Map<String, Object>> questionsListFromSubmitRequest, String assessmentIdFromRequest) throws IOException {
+        return createResponseMapWithProperStructure(hierarchySection,
+                assessUtilServ.validateQumlAssessment(questionsListFromAssessmentHierarchy,
+                        questionsListFromSubmitRequest, assessUtilServ.readQListfromCache(questionsListFromAssessmentHierarchy, assessmentIdFromRequest, editMode, userAuthToken)));
+    }
+
+    private static List<Object> getQuestionsListFromAssessmentHierarchy(List<Map<String, Object>> questionsListFromSubmitRequest) {
+        List<String> desiredKeys = Lists.newArrayList(Constants.IDENTIFIER);
+        return  questionsListFromSubmitRequest.stream()
+                .flatMap(x -> desiredKeys.stream().filter(x::containsKey).map(x::get)).collect(toList());
+    }
+
+    private static List<Map<String, Object>> getQuestionsListFromSubmitRequest(Map<String, Object> userSectionData) {
+        List<Map<String, Object>> questionsListFromSubmitRequest = new ArrayList<>();
+        questionsListFromSubmitRequest = getChildrenData(userSectionData, questionsListFromSubmitRequest);
+        return questionsListFromSubmitRequest;
     }
 }
