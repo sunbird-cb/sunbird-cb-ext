@@ -125,7 +125,7 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 		return new HashMap<>();
 	}
 
-	private Map<String, Object> getQumlAnswers(List<String> questions,Map<String,Object> questionMap) throws Exception {
+	private Map<String, Object> getQumlAnswers(List<String> questions,Map<String,Object> questionMap) {
 		Map<String, Object> ret = new HashMap<>();
 		for (String questionId : questions) {
 			List<String> correctOption = new ArrayList<>();

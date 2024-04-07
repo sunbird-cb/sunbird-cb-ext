@@ -45,7 +45,7 @@ public class StaffController {
 
 	@DeleteMapping("/staff/position")
 	public ResponseEntity<SBApiResponse> deleteStaffDetails(@RequestParam String orgId,
-			@RequestParam(name = "id", required = true) String staffDetailsId) throws Exception {
+			@RequestParam(name = "id", required = true) String staffDetailsId) {
 		SBApiResponse response = staffService.deleteStaffDetails(orgId, staffDetailsId);
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}

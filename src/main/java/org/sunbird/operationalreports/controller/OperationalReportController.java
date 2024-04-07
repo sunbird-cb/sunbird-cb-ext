@@ -46,14 +46,14 @@ public class OperationalReportController {
 
     @GetMapping("/admin/readaccess")
     public ResponseEntity<SBApiResponse> readAccess(
-            @RequestHeader(Constants.X_AUTH_TOKEN) String authToken) throws Exception {
+            @RequestHeader(Constants.X_AUTH_TOKEN) String authToken) {
         SBApiResponse response = operationalReport.readGrantAccess(authToken, true);
         return new ResponseEntity<>(response, response.getResponseCode());
     }
 
     @GetMapping("/leader/readaccess")
     public ResponseEntity<SBApiResponse> mdoLeaderReadAccess(
-            @RequestHeader(Constants.X_AUTH_TOKEN) String authToken) throws Exception {
+            @RequestHeader(Constants.X_AUTH_TOKEN) String authToken) {
         SBApiResponse response = operationalReport.readGrantAccess(authToken, false);
         return new ResponseEntity<>(response, response.getResponseCode());
     }

@@ -31,7 +31,7 @@ public abstract class CharacterDecoder {
 	 * decoded. Many formats such as uuencoding provide this information. By default
 	 * we return the maximum bytes that could have been encoded on the line.
 	 */
-	protected int decodeLinePrefix(PushbackInputStream aStream, OutputStream bStream) throws IOException {
+	protected int decodeLinePrefix(PushbackInputStream aStream, OutputStream bStream) {
 		return (bytesPerLine());
 	}
 

@@ -468,8 +468,7 @@ public class OperationalReportServiceImpl implements OperationalReportService {
     }
 
     private Map<String, Object> upsertReportAccessExpiry(String mdoAdminUserId, String rootOrgId,
-            String reportExpiryDate)
-            throws ParseException {
+            String reportExpiryDate) {
         Map<String, Object> primaryKeyMap = new HashMap<>();
         primaryKeyMap.put(Constants.USER_ID_LOWER, mdoAdminUserId);
         primaryKeyMap.put(Constants.ORG_ID, rootOrgId);

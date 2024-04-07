@@ -277,7 +277,7 @@ public class DigiLockerIntegrationServiceImpl implements DigiLockerIntegrationSe
         return Base64.getEncoder().encodeToString(bytes);
     }
 
-    public byte[] generatePdfFromSvg(String svgContent) throws IOException {
+    public byte[] generatePdfFromSvg(String svgContent) {
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);

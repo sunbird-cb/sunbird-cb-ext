@@ -589,7 +589,7 @@ public class AllocationServiceV2 {
 		}
 	}
 
-	public Response getUserBasicDetails(String userId) throws IOException {
+	public Response getUserBasicDetails(String userId) {
 		Response response = new Response();
 		response.put(Constants.MESSAGE, Constants.SUCCESSFUL);
 		Set<String> userIds = new HashSet<>();

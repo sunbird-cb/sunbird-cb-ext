@@ -37,7 +37,7 @@ public class SbCbExtApplication {
 	 */
 
 	@Bean
-	public RestTemplate restTemplate() throws Exception {
+	public RestTemplate restTemplate() {
 		return new RestTemplate(getClientHttpRequestFactory());
 	}
 

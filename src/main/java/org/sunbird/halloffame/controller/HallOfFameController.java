@@ -30,7 +30,7 @@ public class HallOfFameController {
     @GetMapping("/v1/halloffame/learnerleaderboard")
     public ResponseEntity <SBApiResponse> learnerLeaderBoard
             (@RequestHeader(Constants.X_AUTH_TOKEN) String authToken,
-             @RequestHeader(Constants.X_AUTH_USER_ORG_ID) String rootOrgId) throws Exception {
+             @RequestHeader(Constants.X_AUTH_USER_ORG_ID) String rootOrgId) {
         SBApiResponse response = hallOfFameService.learnerLeaderBoard(rootOrgId, authToken);
         return new ResponseEntity<>(response, response.getResponseCode());
     }

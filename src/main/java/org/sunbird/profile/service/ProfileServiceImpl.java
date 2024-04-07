@@ -848,7 +848,7 @@ public class ProfileServiceImpl implements ProfileService {
 		return strSchema;
 	}
 
-	public String checkDepartment(Map<String, Object> requestProfile) throws Exception {
+	public String checkDepartment(Map<String, Object> requestProfile) {
 		String requestDeptName = null;
 		if (requestProfile.containsKey(Constants.PROFESSIONAL_DETAILS)) {
 			List<Map<String, Object>> profDetails = (List<Map<String, Object>>) requestProfile

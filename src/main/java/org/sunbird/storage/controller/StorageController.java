@@ -33,8 +33,7 @@ public class StorageController {
 	}
 
 	@DeleteMapping("/delete")
-	public ResponseEntity<SBApiResponse> deleteCloudFile(@RequestParam(value = "fileName", required = true) String fileName)
-			throws JsonProcessingException {
+	public ResponseEntity<SBApiResponse> deleteCloudFile(@RequestParam(value = "fileName", required = true) String fileName) {
 		SBApiResponse deleteResponse = storageService.deleteFile(fileName, serverConfig.getCloudContainerName());
 		return new ResponseEntity<>(deleteResponse, deleteResponse.getResponseCode());
 	}

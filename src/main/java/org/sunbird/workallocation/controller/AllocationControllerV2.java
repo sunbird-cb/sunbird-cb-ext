@@ -53,7 +53,7 @@ public class AllocationControllerV2 {
     }
 
     @GetMapping("/getWorkOrderById/{workOrderId}")
-    public ResponseEntity<Response> getWorkOrderById(@PathVariable("workOrderId") String workOrderId) throws Exception {
+    public ResponseEntity<Response> getWorkOrderById(@PathVariable("workOrderId") String workOrderId) {
         return new ResponseEntity<>(allocationServiceV2.getWorkOrderById(workOrderId),HttpStatus.OK);
     }
     @GetMapping("/getWorkAllocationById/{allocationId}")
@@ -73,7 +73,7 @@ public class AllocationControllerV2 {
     }
 
     @GetMapping("/user/competencies/{userId}")
-    public ResponseEntity<Response> getUserCompetencies(@PathVariable("userId") String userId) throws IOException {
+    public ResponseEntity<Response> getUserCompetencies(@PathVariable("userId") String userId) {
         return new ResponseEntity<>(allocationServiceV2.getUserCompetencies(userId), HttpStatus.OK);
     }
 

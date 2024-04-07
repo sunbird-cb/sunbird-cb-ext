@@ -700,7 +700,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 	 * @param userInfoMap - collection object where the data is set after the processing.
 	 */
 	private void processUserDetails(List<Map<String, Object>> userMapList,
-									Map<String, Map<String, Object>> userInfoMap) throws IOException{
+									Map<String, Map<String, Object>> userInfoMap){
 		for (Map<String, Object> user : userMapList) {
 			Map<String, Object> userInfo = new HashMap<>();
 			userInfo.put(Constants.USER_ID, user.get(Constants.USER_ID));

@@ -23,7 +23,7 @@ public class ExtendedOrgController {
 
 	@PostMapping("/org/ext/v1/create")
 	public ResponseEntity<SBApiResponse> createOrg(@RequestBody Map<String, Object> orgRequest,
-			@RequestHeader(Constants.X_AUTH_TOKEN) String userToken) throws Exception {
+			@RequestHeader(Constants.X_AUTH_TOKEN) String userToken) {
 		SBApiResponse response = orgService.createOrg(orgRequest, userToken);
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
@@ -41,7 +41,7 @@ public class ExtendedOrgController {
 	}
 
 	@PostMapping("/org/v1/ext/search")
-	public ResponseEntity<SBApiResponse> orgExtSearch(@RequestBody Map<String, Object> request) throws Exception {
+	public ResponseEntity<SBApiResponse> orgExtSearch(@RequestBody Map<String, Object> request) {
 		SBApiResponse response = orgService.orgExtSearch(request);
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}

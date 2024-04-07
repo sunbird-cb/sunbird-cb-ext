@@ -40,7 +40,7 @@ public class ContentProgressController {
      */
     @PostMapping("/v1/read/getUserDetails")
     public ResponseEntity<SBApiResponse> getUserSessionDetailsAndCourseProgress(@RequestBody SunbirdApiRequest requestBody,
-                                                                         @RequestHeader(Constants.USER_TOKEN) String authUserToken) throws IOException {
+                                                                         @RequestHeader(Constants.USER_TOKEN) String authUserToken) {
 
         SBApiResponse response = service.getUserSessionDetailsAndCourseProgress(authUserToken, requestBody);
         return new ResponseEntity<>(response, response.getResponseCode());

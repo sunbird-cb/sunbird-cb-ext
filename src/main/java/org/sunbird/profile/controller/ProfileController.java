@@ -126,7 +126,7 @@ public class ProfileController {
 	}
 
 	@GetMapping("/user/v1/groups")
-	public ResponseEntity<SBApiResponse> getGroupList() throws Exception {
+	public ResponseEntity<SBApiResponse> getGroupList() {
 		SBApiResponse response = profileService.getGroupList();
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}

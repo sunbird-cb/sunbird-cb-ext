@@ -50,8 +50,7 @@ public class AllocationController {
 	}
 
 	@GetMapping(value = "/getWAPdf/{userId}/{waId}", produces = MediaType.APPLICATION_PDF_VALUE)
-	public ResponseEntity<?> getWAPdf(@PathVariable("userId") String userId, @PathVariable("waId") String waId)
-			throws Exception {
+	public ResponseEntity<?> getWAPdf(@PathVariable("userId") String userId, @PathVariable("waId") String waId) {
 		byte[] out = null;
 		try {
 			out = allocationService.getWaPdf(userId, waId);

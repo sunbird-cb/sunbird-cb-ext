@@ -247,7 +247,7 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
 	 * @param userMap
 	 * @throws Exception
 	 */
-	private void appendUserDetails(Map<String, Object> responseObj, SearchUserApiContent userObj) throws Exception {
+	private void appendUserDetails(Map<String, Object> responseObj, SearchUserApiContent userObj) {
 		if (!ObjectUtils.isEmpty(userObj)) {
 			responseObj.put(Constants.FIRSTNAME, userObj.getFirstName());
 			responseObj.put(Constants.DEPARTMENT, userObj.getChannel());

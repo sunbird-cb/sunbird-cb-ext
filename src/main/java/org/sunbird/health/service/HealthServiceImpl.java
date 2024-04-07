@@ -43,7 +43,7 @@ public class HealthServiceImpl implements HealthService {
         return response;
     }
 
-    private void cassandraHealthStatus(SBApiResponse response) throws Exception {
+    private void cassandraHealthStatus(SBApiResponse response) {
         Map<String, Object> result = new HashMap<>();
         result.put(Constants.NAME, Constants.CASSANDRA_DB);
         Boolean res = true;
@@ -57,7 +57,7 @@ public class HealthServiceImpl implements HealthService {
         ((List<Map<String, Object>>) response.get(Constants.CHECKS)).add(result);
     }
 
-    private void redisHealthStatus(SBApiResponse response) throws Exception {
+    private void redisHealthStatus(SBApiResponse response) {
         Map<String, Object> result = new HashMap<>();
         result.put(Constants.NAME, Constants.REDIS_CACHE);
         Boolean res = true;

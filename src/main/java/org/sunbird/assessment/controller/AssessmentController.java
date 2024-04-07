@@ -17,7 +17,7 @@ import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.util.Constants;
 
 @RestController
-public class AssessmentController {
+public class  	AssessmentController {
 
 	@Autowired
 	AssessmentService assessmentService;
@@ -131,13 +131,12 @@ public class AssessmentController {
 	 * @param assessmentIdentifier
 	 * @param rootOrg
 	 * @return
-	 * @throws Exception
-	 */
+     */
 
 	@GetMapping("/v1/quml/assessment/read/{assessmentIdentifier}")
 	public ResponseEntity<SBApiResponse> readAssessment(
 			@PathVariable("assessmentIdentifier") String assessmentIdentifier,
-			@RequestHeader(Constants.X_AUTH_TOKEN) String token) throws Exception {
+			@RequestHeader(Constants.X_AUTH_TOKEN) String token) {
 		SBApiResponse readResponse = assessmentServiceV2.readAssessment(assessmentIdentifier, token);
 		return new ResponseEntity<>(readResponse, readResponse.getResponseCode());
 	}
