@@ -1026,7 +1026,7 @@ public class CbPlanServiceImpl implements CbPlanService {
     }
 
     private void enrichUserInfo(Map<String, Map<String, String>> userInfoMap) {
-        for (Map.Entry userEntry : userInfoMap.entrySet()) {
+        for(Map.Entry<String, Map<String, String>> userEntry : userInfoMap.entrySet()) {
             Map<String, String> userInfo = (Map<String, String>) userEntry.getValue();
             String profileDetails = userInfo.get(Constants.PROFILE_DETAILS_KEY);
             String userDesignation = userInfo.get(Constants.DESIGNATION) != null ? userInfo.get(Constants.DESIGNATION) :

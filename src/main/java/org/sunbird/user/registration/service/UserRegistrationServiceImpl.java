@@ -200,7 +200,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 		if (StringUtils.isBlank(errMsg)) {
 			try {
 				String url = serverProperties.getSbUrl() + serverProperties.getSbOTPGeneratePath();
-				Map<String, String> headers = new HashMap();
+				Map<String, String> headers = new HashMap<>();
 				headers.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
 				Map<String, Object> apiResponse = outboundRequestHandlerService.fetchResultUsingPost(url, otpRequests,
 						headers);

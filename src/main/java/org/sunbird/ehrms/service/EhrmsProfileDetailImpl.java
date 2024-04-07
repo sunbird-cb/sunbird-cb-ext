@@ -10,6 +10,7 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
@@ -111,7 +112,7 @@ public class EhrmsProfileDetailImpl implements EhrmsService {
         body.put(Constants.EHRMS_AUTH_PASSWORD, ehrmsAuthPassword);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity entity = new HttpEntity(body, headers);
+        HttpEntity<Object> entity = new HttpEntity<>(body, headers);
         ResponseEntity<String> response = restTemplate.exchange(ehrmsAuthUrl, HttpMethod.POST, entity, String.class);
         return response.getBody();
     }
@@ -122,8 +123,8 @@ public class EhrmsProfileDetailImpl implements EhrmsService {
         body.put(Constants.EMP_CODE, externalSystemId);
         HttpHeaders headers = new HttpHeaders();
         headers.put(Constants.AUTH_TOKEN, Collections.singletonList(jwtToken));
-        HttpEntity entity = new HttpEntity(body, headers);
-        ResponseEntity<Map> response = restTemplate.exchange(ehrmsAuthUrl, HttpMethod.POST, entity, Map.class);
+        HttpEntity<Object> entity = new HttpEntity<>(body, headers);
+        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(ehrmsAuthUrl, HttpMethod.POST, entity, new ParameterizedTypeReference<Map<String, Object>>() {});
         return response.getBody();
     }
 

@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.apache.commons.collections.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -119,7 +120,7 @@ public class OutboundRequestHandlerServiceImpl {
 	public Object fetchUsingGetWithHeaders(String uri, Map<String, String> headersValues) {
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-		ResponseEntity<Map> response = null;
+		ResponseEntity<Map<String, Object>> response = null;
 		try {
 			if (log.isDebugEnabled()) {
 				StringBuilder str = new StringBuilder(this.getClass().getCanonicalName())
@@ -131,8 +132,8 @@ public class OutboundRequestHandlerServiceImpl {
 			if (!CollectionUtils.isEmpty(headersValues)) {
 				headersValues.forEach((k, v) -> headers.set(k, v));
 			}
-			HttpEntity entity = new HttpEntity(headers);
-			response = restTemplate.exchange(uri, HttpMethod.GET, entity, Map.class);
+			HttpEntity<HttpHeaders> entity = new HttpEntity<>(headers);
+			response = restTemplate.exchange(uri, HttpMethod.GET, entity, new ParameterizedTypeReference<Map<String, Object>>() {});
 			return response.getBody();
 		}catch (Exception e) {
 			log.error(e);

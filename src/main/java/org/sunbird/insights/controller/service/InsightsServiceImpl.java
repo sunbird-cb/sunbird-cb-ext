@@ -83,7 +83,7 @@ public class InsightsServiceImpl implements InsightsService {
         LocalDate[]  dates = populateDate();
         if (result ==null || result.isEmpty()) {
             result = new ArrayList<>();
-            HashMap m = new HashMap();
+            HashMap<String, Object> m = new HashMap<>();
             result.add(m);
         }
 
