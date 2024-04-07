@@ -629,6 +629,7 @@ public class AllocationService {
 
 		// If status Draft
 		if (WorkAllocationConstants.DRAFT_STATUS.equalsIgnoreCase(waObj.getStatus())) {
+			logger.info("Work Allocation status is Draft.");
 		}
 		
 		return pdfService.getWAPdf(wa, statusSelected);

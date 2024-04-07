@@ -66,6 +66,7 @@ public class OutboundRequestHandlerServiceImpl {
 						new TypeReference<HashMap<String, Object>>() {
 						});
 			} catch (Exception e1) {
+				log.error("Failed to parse the response. ", e1);
 			}
 			log.error("Failed to get details. ", e);
 		} catch (Exception e) {
@@ -97,6 +98,7 @@ public class OutboundRequestHandlerServiceImpl {
 						new TypeReference<HashMap<String, Object>>() {
 						});
 			} catch (Exception e1) {
+				log.error("Failed to parse the response. ", e1);
 			}
 			log.error(Constants.ERROR_RECEIVED + e.getResponseBodyAsString(), e);
 		} catch (Exception e) {
@@ -161,6 +163,7 @@ public class OutboundRequestHandlerServiceImpl {
 						new TypeReference<HashMap<String, Object>>() {
 						});
 			} catch (Exception e1) {
+				log.error("Failed to parse the response. ", e1);
 			}
 			log.error(Constants.ERROR_RECEIVED + e.getResponseBodyAsString(), e);
 		} catch (Exception e) {
@@ -168,6 +171,7 @@ public class OutboundRequestHandlerServiceImpl {
 			try {
 				log.warn(Constants.ERROR_RESPONSE + mapper.writeValueAsString(response));
 			} catch (Exception e1) {
+				log.error("Failed to parse the error response. ", e1);
 			}
 		}
 		return response;
@@ -203,6 +207,7 @@ public class OutboundRequestHandlerServiceImpl {
 						new TypeReference<HashMap<String, Object>>() {
 						});
 			} catch (Exception e1) {
+				log.error("Failed to parse the response. ", e1);
 			}
 			log.error(Constants.ERROR_RECEIVED + hce.getResponseBodyAsString(), hce);
 		} catch(JsonProcessingException e) {
@@ -210,6 +215,7 @@ public class OutboundRequestHandlerServiceImpl {
 			try {
 				log.warn(Constants.ERROR_RESPONSE + mapper.writeValueAsString(response));
 			} catch (Exception e1) {
+				log.error("Failed to parse the error response. ", e1);
 			}
 		}
 		return response;
@@ -237,6 +243,7 @@ public class OutboundRequestHandlerServiceImpl {
 						new TypeReference<HashMap<String, Object>>() {
 						});
 			} catch (Exception e1) {
+				log.error("Failed to parse the response. ", e1);
 			}
 			log.error(Constants.ERROR_RECEIVED + e.getResponseBodyAsString(), e);
 		}
@@ -255,6 +262,7 @@ public class OutboundRequestHandlerServiceImpl {
 					.append(System.lineSeparator());
 			log.debug(str.toString());
 		} catch (JsonProcessingException je) {
+			log.error("Failed to process the JSON object", je);
 		}
 	}
 }

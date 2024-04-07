@@ -254,6 +254,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 						logger.error("Failed to auto onboard organisation. Error: "
 								+ (new ObjectMapper()).writeValueAsString(orgResponse));
 					} catch (Exception e) {
+						logger.error("Failed to convert orgResponse to JSON", e);
 					}
 					return;
 				}

@@ -1029,6 +1029,7 @@ public class ProfileServiceImpl implements ProfileService {
 					errMsg = "Failed to auto onboard org.";
 					log.warn(String.format("%s. Error: %s", errMsg, mapper.writeValueAsString(orgResponse)));
 				} catch (Exception e) {
+					log.error("Failed to convert orgResponse to JSON", e);
 				}
 			}
 		} else {
@@ -1053,6 +1054,7 @@ public class ProfileServiceImpl implements ProfileService {
 				errMsg = "Failed to Self migrate User.";
 				log.warn(String.format("%s. Error: %s", errMsg, mapper.writeValueAsString(migrateResponse)));
 			} catch (Exception e) {
+				log.error("Failed to convert migrateResponse to JSON", e);
 			}
 		}
 		return errMsg;
@@ -1691,6 +1693,7 @@ public class ProfileServiceImpl implements ProfileService {
 					Files.delete(tmpPath);
 				}
 			} catch(Exception e1) {
+				log.error("Failed to delete temporary file: " + tmpPath, e1);
 			}
 		}
 	}

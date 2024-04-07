@@ -229,6 +229,7 @@ public class StorageServiceImpl implements StorageService {
 				storageService = null;
 			}
 		} catch (Exception e) {
+			logger.error("An exception occurred in finalize block: ", e);
 		}
 	}
 

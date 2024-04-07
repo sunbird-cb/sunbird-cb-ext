@@ -153,6 +153,7 @@ public class SearchByService {
 			try {
 				logger.info(Constants.RECEIVED_RESPONSE + (new ObjectMapper()).writeValueAsString(compositeSearchResult));
 			} catch (Exception e) {
+				logger.error("Failed to convert compositeSearchResult to JSON", e);
 			}
 			throw err;
 		}
@@ -229,6 +230,7 @@ public class SearchByService {
 			try {
 				logger.info(Constants.RECEIVED_RESPONSE + (new ObjectMapper()).writeValueAsString(fracSearchRes));
 			} catch (Exception e) {
+				logger.error("Failed to convert fracSearchRes to JSON", e);
 			}
 			throw err;
 		}
@@ -287,6 +289,7 @@ public class SearchByService {
 			try {
 				logger.info(Constants.RECEIVED_RESPONSE + (new ObjectMapper()).writeValueAsString(compositeSearchResult));
 			} catch (Exception e) {
+				logger.error("Failed to convert compositeSearchResult to JSON", e);
 			}
 			throw err;
 		}
@@ -327,6 +330,7 @@ public class SearchByService {
 			try {
 				logger.info(Constants.RECEIVED_RESPONSE + (new ObjectMapper()).writeValueAsString(orgSearchRes));
 			} catch (Exception e) {
+				logger.error("Failed to convert orgSearchRes to JSON", e);
 			}
 			throw err;
 		}
@@ -376,6 +380,7 @@ public class SearchByService {
 			try {
 				logger.info(Constants.RECEIVED_RESPONSE + (new ObjectMapper()).writeValueAsString(fracSearchRes));
 			} catch (Exception e) {
+				logger.error("Failed to convert fracSearchRes to JSON", e);
 			}
 			throw err;
 		}

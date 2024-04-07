@@ -1,6 +1,8 @@
 package org.sunbird.common.util;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,7 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * this class is used for reading properties file
  */
 public class PropertiesCache {
-
+    private Logger logger = LoggerFactory.getLogger(PropertiesCache.class);
     private static PropertiesCache propertiesCache = null;
     public final Map<String, Float> attributePercentageMap = new ConcurrentHashMap<>();
     private final String[] fileName = {
@@ -34,6 +36,7 @@ public class PropertiesCache {
             try {
                 configProp.load(in);
             } catch (IOException e) {
+                logger.error("Failed to load properties from file: " + file, e);
             }
         }
     }

@@ -165,7 +165,7 @@ public class IndexerService {
 			}
 
 		} catch (Exception e) {
-
+			logger.error("Failed to get document count for index: " + index, e);
 		}
 		return 0l;
 	}
