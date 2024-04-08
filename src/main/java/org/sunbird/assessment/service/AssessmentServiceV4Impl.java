@@ -1,7 +1,6 @@
 package org.sunbird.assessment.service;
 
 import static java.util.stream.Collectors.toList;
-import static org.sunbird.common.util.Constants.API_USER_INSIGHTS;
 import static org.sunbird.common.util.Constants.RESPONSE;
 
 import java.io.IOException;
@@ -741,7 +740,7 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
             if (!new HashSet<>(hierarchySectionIds).containsAll(submitSectionIds)) {
                 return Constants.WRONG_SECTION_DETAILS;
             } else {
-                String areQuestionIdsSame = validateIfQuestionIdsAreSame(submitRequest,
+                String areQuestionIdsSame = validateIfQuestionIdsAreSame(
                         sectionListFromSubmitRequest, desiredKeys, userId, existingAssessmentData);
                 if (!areQuestionIdsSame.isEmpty())
                     return areQuestionIdsSame;
@@ -753,9 +752,8 @@ public class AssessmentServiceV4Impl implements AssessmentServiceV4 {
         return "";
     }
 
-    private String validateIfQuestionIdsAreSame(Map<String, Object> submitRequest,
-            List<Map<String, Object>> sectionListFromSubmitRequest, List<String> desiredKeys, String userId,
-            Map<String, Object> existingAssessmentData) throws IOException {
+    private String validateIfQuestionIdsAreSame(List<Map<String, Object>> sectionListFromSubmitRequest, List<String> desiredKeys, String userId,
+                                                Map<String, Object> existingAssessmentData) throws IOException {
         String questionSetFromAssessmentString = (String) existingAssessmentData
                 .get(Constants.ASSESSMENT_READ_RESPONSE_KEY);
         if (StringUtils.isNotBlank(questionSetFromAssessmentString)) {

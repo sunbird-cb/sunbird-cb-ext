@@ -1,8 +1,6 @@
 package org.sunbird.halloffame.service;
 
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -15,7 +13,6 @@ import org.sunbird.common.util.ProjectUtil;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * @author mahesh.vakkund
@@ -25,7 +22,6 @@ public class HallOfFameServiceImpl implements HallOfFameService {
     @Autowired
     private CassandraOperation cassandraOperation;
 
-    private Logger logger = LoggerFactory.getLogger(getClass().getName());
     @Autowired
     AccessTokenValidator accessTokenValidator;
     @Override

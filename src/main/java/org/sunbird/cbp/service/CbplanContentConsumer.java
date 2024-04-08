@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
-import org.jboss.resteasy.spi.ApplicationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
@@ -27,7 +26,7 @@ import java.util.concurrent.CompletableFuture;
 @Component
 public class CbplanContentConsumer {
 
-    private CbExtLogger logger = new CbExtLogger(getClass().getName());
+    private final CbExtLogger logger = new CbExtLogger(getClass().getName());
 
     @Autowired
     PropertiesConfig configuration;
@@ -35,7 +34,7 @@ public class CbplanContentConsumer {
     @Autowired
     private OutboundRequestHandlerServiceImpl outboundReqService;
 
-    private ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = new ObjectMapper();
 
     @Autowired
     CassandraOperation cassandraOperation;

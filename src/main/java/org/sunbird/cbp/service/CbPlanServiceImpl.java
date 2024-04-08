@@ -41,7 +41,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Service
 public class CbPlanServiceImpl implements CbPlanService {
 
-    private Logger logger = LoggerFactory.getLogger(getClass().getName());
+    private final Logger logger = LoggerFactory.getLogger(getClass().getName());
 
     @Autowired
     AccessTokenValidator accessTokenValidator;
@@ -148,7 +148,7 @@ public class CbPlanServiceImpl implements CbPlanService {
                             return response;
                         }
                     } else {
-                        draftInfo = updateDraftInfo(updatedCbPlan, cbPlanMapInfo.get(0));
+                        updateDraftInfo(updatedCbPlan, cbPlanMapInfo.get(0));
                     }
                     Map<String, Object> updatedCbPlanData = new HashMap<>();
                     draftInfo = mapper.writeValueAsString(updatedCbPlan);
@@ -855,9 +855,9 @@ public class CbPlanServiceImpl implements CbPlanService {
                 return response;
             }
 
-            Map<String, Map<String, Object>> courseInfoMap = new HashMap<String, Map<String, Object>>();
-            Map<String, Map<String, String>> userInfoMap = new HashMap<String, Map<String, String>>();
-            List<Map<String, Object>> filteredCbPlanList = new ArrayList<Map<String, Object>>();
+            Map<String, Map<String, Object>> courseInfoMap = new HashMap<>();
+            Map<String, Map<String, String>> userInfoMap = new HashMap<>();
+            List<Map<String, Object>> filteredCbPlanList = new ArrayList<>();
             for (Map<String, Object> cbPlan : cbPlanList) {
                 String status = (String) cbPlan.get(Constants.STATUS);
                 if (StringUtils.isBlank(status)) {
@@ -905,7 +905,7 @@ public class CbPlanServiceImpl implements CbPlanService {
 
                 // enrich course information
                 List<String> contentIdList = (List<String>) cbPlan.get(Constants.CB_CONTENT_LIST);
-                List<Map<String, Object>> courseMapList = new ArrayList<Map<String, Object>>();
+                List<Map<String, Object>> courseMapList = new ArrayList<>();
                 for (String contentId : contentIdList) {
                     if (!courseInfoMap.containsKey(contentId)) {
                         Map<String, Object> courseInfo = contentService.readContentFromCache(contentId,
@@ -1026,11 +1026,11 @@ public class CbPlanServiceImpl implements CbPlanService {
     }
 
     private void enrichUserInfo(Map<String, Map<String, String>> userInfoMap) {
-        for (Map.Entry userEntry : userInfoMap.entrySet()) {
-            Map<String, String> userInfo = (Map<String, String>) userEntry.getValue();
+        for (Map.Entry<String, Map<String, String>> userEntry : userInfoMap.entrySet()) {
+            Map<String, String> userInfo = userEntry.getValue();
             String profileDetails = userInfo.get(Constants.PROFILE_DETAILS_KEY);
             String userDesignation = userInfo.get(Constants.DESIGNATION) != null ? userInfo.get(Constants.DESIGNATION) :
-                    getDesignationForUser(profileDetails, (String) userEntry.getKey());
+                    getDesignationForUser(profileDetails, userEntry.getKey());
             userInfo.put(Constants.DESIGNATION, userDesignation);
             userInfo.remove(Constants.PROFILE_DETAILS_KEY);
         }

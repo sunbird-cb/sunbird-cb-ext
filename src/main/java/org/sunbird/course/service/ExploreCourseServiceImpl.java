@@ -62,7 +62,7 @@ public class ExploreCourseServiceImpl implements ExploreCourseService {
 				});
 				courseList = courseList.stream().sorted(customComparator).collect(Collectors.toList());
 			}
-			List<String> identifierList = new ArrayList<String>();
+			List<String> identifierList = new ArrayList<>();
 			for (Map<String, Object> course : courseList) {
 				identifierList.add((String) course.get(Constants.IDENTIFIER));
 			}
@@ -145,7 +145,7 @@ public class ExploreCourseServiceImpl implements ExploreCourseService {
 				});
 				courseList = courseList.stream().sorted(customComparator).collect(Collectors.toList());
 			}
-			List<String> identifierList = new ArrayList<String>();
+			List<String> identifierList = new ArrayList<>();
 			for (Map<String, Object> course : courseList) {
 				identifierList.add((String) course.get(Constants.IDENTIFIER));
 			}

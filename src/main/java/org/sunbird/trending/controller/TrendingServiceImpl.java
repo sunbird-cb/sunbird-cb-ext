@@ -7,11 +7,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.sunbird.cache.RedisCacheMgr;
-import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
-import org.sunbird.common.util.ProjectUtil;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -35,7 +33,6 @@ public class TrendingServiceImpl implements TrendingService {
     public Map<String, Object> trendingSearch(Map<String, Object> requestBody, String token) throws Exception {
 
         // Read req params
-        SBApiResponse response = ProjectUtil.createDefaultResponse(API_TRENDING_SEARCH);
         HashMap<String, Object> request = (HashMap<String, Object>) requestBody.get(Constants.REQUEST) ==null ? new HashMap<>() : (HashMap<String, Object>) requestBody.get(Constants.REQUEST);
         HashMap<String, Object> filter = ((HashMap<String, Object>) request.get(Constants.FILTERS)) ==null ? new HashMap<>() : ((HashMap<String, Object>) request.get(Constants.FILTERS));
         ArrayList<String> contextTypeList = ((ArrayList<String>) (filter).get(CONTEXT_TYPE)) == null ?  new ArrayList<>() : ((ArrayList<String>) (filter).get(CONTEXT_TYPE));
@@ -75,10 +72,10 @@ public class TrendingServiceImpl implements TrendingService {
                 String nameValue = redisKeyNameMap.get(newFieldsArray[i]);
                 if (typeList.containsKey(nameValue)) {
                     List<String> existingList = typeList.get(nameValue);
-                    List<String> newList = fetchIds(trendingCoursesAndPrograms.get(i), limit, newFieldsArray[i]); 
+                    List<String> newList = fetchIds(trendingCoursesAndPrograms.get(i), limit);
                     existingList.addAll(newList);
                 } else {
-                    typeList.put(nameValue, fetchIds(trendingCoursesAndPrograms.get(i), limit, newFieldsArray[i]));
+                    typeList.put(nameValue, fetchIds(trendingCoursesAndPrograms.get(i), limit));
                 }
             }
         }
@@ -122,7 +119,7 @@ public class TrendingServiceImpl implements TrendingService {
         resultMap.put(RESPONSE, resultContentMap);
         return resultMap;
     }
-    public List<String> fetchIds(String idStr, int limit, String type) {
+    public List<String> fetchIds(String idStr, int limit) {
         String[] idArray = Optional.ofNullable(idStr).filter(StringUtils::isNotBlank).map(str -> str.split(COMMA)).orElse(null);
         if (idArray == null || idArray.length == 0) {
             return new ArrayList<>();

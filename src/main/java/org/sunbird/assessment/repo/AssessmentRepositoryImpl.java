@@ -45,14 +45,12 @@ public class AssessmentRepositoryImpl implements AssessmentRepository {
 
 	@Override
 	public Map<String, Object> getAssessmentAnswerKey(String artifactUrl) {
-		// TODO Auto-generated method stub
-		return null;
+		return Collections.emptyMap();
 	}
 
 	@Override
 	public Map<String, Object> getQuizAnswerKey(AssessmentSubmissionDTO quizMap) {
-		// TODO Auto-generated method stub
-		return null;
+		return Collections.emptyMap();
 	}
 
 	@Override
@@ -63,7 +61,6 @@ public class AssessmentRepositoryImpl implements AssessmentRepository {
 
 		// insert assessment and assessment summary
 		if (Boolean.TRUE.equals(isAssessment)) {
-			Map<String, Object> userAssessmentMasterModelDate = this.getUserAssessmentMasterModelData(persist, date);
 			UserAssessmentMasterModel assessment = new UserAssessmentMasterModel();
 			UserAssessmentSummaryModel summary = new UserAssessmentSummaryModel();
 			UserAssessmentSummaryModel data = userAssessmentSummaryRepo

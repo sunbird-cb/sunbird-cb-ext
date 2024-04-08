@@ -35,9 +35,9 @@ public class InsightsServiceImpl implements InsightsService {
     public SBApiResponse insights(Map<String, Object> requestBody,String userId) throws Exception {
         String [] labelsCertificates = {extServerProperties.getInsightsLabelCertificatesAcross(),extServerProperties.getInsightsLabelCertificatesYourDepartment()} ;
         String [] labelsLearningHours = {extServerProperties.getInsightsLabelLearningHoursYourDepartment(),extServerProperties.getInsightsLabelLearningHoursAcross()} ;
-        HashMap<String, Object> request = (HashMap<String, Object>) requestBody.get(REQUEST) == null ? new HashMap<>() : (HashMap<String, Object>) requestBody.get(REQUEST);
-        HashMap<String, Object> filter = ((HashMap<String, Object>) request.get(FILTERS)) == null ? new HashMap<>() : ((HashMap<String, Object>) request.get(FILTERS));
-        ArrayList<String> organizations = (ArrayList<String>) (filter.get(ORGANISATIONS)) ==null ? new ArrayList<>() : (ArrayList<String>) (filter.get(ORGANISATIONS));
+        HashMap<String, Object> request = requestBody.get(REQUEST) == null ? new HashMap<>() : (HashMap<String, Object>) requestBody.get(REQUEST);
+        HashMap<String, Object> filter = request.get(FILTERS) == null ? new HashMap<>() : ((HashMap<String, Object>) request.get(FILTERS));
+        ArrayList<String> organizations = filter.get(ORGANISATIONS) ==null ? new ArrayList<>() : (ArrayList<String>) (filter.get(ORGANISATIONS));
         ArrayList<String> keys = nudgeKeys(organizations);
         String[] fieldsArray = keys.toArray(new String[keys.size()]);
         ArrayList<String> certificateOrgs= new ArrayList<>();
@@ -83,8 +83,7 @@ public class InsightsServiceImpl implements InsightsService {
         LocalDate[]  dates = populateDate();
         if (result ==null || result.isEmpty()) {
             result = new ArrayList<>();
-            HashMap m = new HashMap();
-            result.add(m);
+            result.add(new HashMap<>());
         }
 
             result.get(0).put("startDate", dates[0]);

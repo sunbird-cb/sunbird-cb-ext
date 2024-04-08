@@ -34,7 +34,7 @@ public class RedisCacheMgr {
     @Autowired
     CbExtServerProperties cbExtServerProperties;
 
-    private CbExtLogger logger = new CbExtLogger(getClass().getName());
+    private final CbExtLogger logger = new CbExtLogger(getClass().getName());
     
     ObjectMapper objectMapper = new ObjectMapper();
 
@@ -143,7 +143,7 @@ public class RedisCacheMgr {
     }
 
     public List<Map<String, Object>> getAllKeysAndValues() {
-        List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
+        List<Map<String, Object>> result = new ArrayList<>();
         try (Jedis jedis = jedisPool.getResource()) {
             String keyPattern = Constants.REDIS_COMMON_KEY + "*";
             Map<String, Object> res = new HashMap<>();

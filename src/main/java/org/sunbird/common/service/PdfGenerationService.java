@@ -28,7 +28,7 @@ import net.glxn.qrgen.javase.QRCode;
 @SuppressWarnings("unchecked")
 public class PdfGenerationService {
 
-	private CbExtLogger logger = new CbExtLogger(getClass().getName());
+	private final CbExtLogger logger = new CbExtLogger(getClass().getName());
 
 	@Value("${domain.host.name}")
 	public String baseUrl;
@@ -51,7 +51,7 @@ public class PdfGenerationService {
 		return out.toByteArray();
 	}
 
-	public byte[] getWaExpiredError(WorkAllocation wa, String oldWaId) {
+	public byte[] getWaExpiredError(WorkAllocation wa) {
 		if (ObjectUtils.isEmpty(wa.getActiveWAObject())) {
 			// There is no active WA object found. We can not create QR Code for
 			// redirection.
@@ -237,7 +237,6 @@ public class PdfGenerationService {
 	}
 
 	private static void addImageDepartment(JSONArray deptLogoArray) {
-		// TODO check the DeptRepo for Dept Image details.
 		JSONArray deptLogoImage = new JSONArray();
 		deptLogoImage.add("image");
 		JSONObject imageProperties = new JSONObject();

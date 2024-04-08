@@ -37,7 +37,7 @@ import com.fasterxml.jackson.databind.type.CollectionType;
 public class CohortsServiceImpl implements CohortsService {
 
 	public static final String TS_CREATED = "ts_created";
-	private CbExtLogger logger = new CbExtLogger(getClass().getName());
+	private final CbExtLogger logger = new CbExtLogger(getClass().getName());
 
 	@Autowired
 	UserUtilityService userUtilService;

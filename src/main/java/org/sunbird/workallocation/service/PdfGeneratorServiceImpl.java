@@ -22,13 +22,13 @@ import org.sunbird.cassandra.utils.CassandraOperation;
 import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
-import org.sunbird.core.exception.ApplicationLogicError;
 import org.sunbird.core.exception.BadRequestException;
 import org.sunbird.core.exception.InvalidDataInputException;
 import org.sunbird.workallocation.model.PdfGeneratorRequest;
 import org.sunbird.workallocation.util.WorkAllocationConstants;
 
 import java.io.*;
+import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -70,7 +70,7 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 
 	static final String TEMPLATE_PATH = "templates/";
 
-	private Logger log = LoggerFactory.getLogger(PdfGeneratorServiceImpl.class);
+	private final Logger log = LoggerFactory.getLogger(PdfGeneratorServiceImpl.class);
 	@Autowired
 	CassandraOperation cassandraOperation;
 
@@ -108,7 +108,7 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 			throw new InvalidDataInputException(Constants.ERROR_READING_EMPTY_FILE);
 		}
 		File htmlFooterPath = new File("/tmp/" + deptId + "pdf-draft-footer.html");
-		try(OutputStream outStream = new FileOutputStream(htmlFooterPath)){
+		try(OutputStream outStream = Files.newOutputStream(htmlFooterPath.toPath())){
 			outStream.write(buffer);
 		}
 		paramMap.put(UD_HTML_FOOTER_FILE_PATH, htmlFooterPath.getAbsolutePath());
@@ -205,7 +205,7 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 			ClassPathResource classPathResource = new ClassPathResource("government-of-india.jpg");
 			InputStream inputStream = classPathResource.getInputStream();
 			File tempFile = File.createTempFile("government-of-india", ".jpg");
-			try(OutputStream outStream = new FileOutputStream(tempFile)){
+			try(OutputStream outStream = Files.newOutputStream(tempFile.toPath())){
 				byte[] buffer = new byte[8 * 1024];
 				int bytesRead;
 				while ((bytesRead = inputStream.read(buffer)) != -1) {
@@ -219,7 +219,6 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 			log.error("Exception occurred while loading the default department logo");
 		}
 		headerDetails.put(DEPT_NAME,  workOrder.get(DEPT_NAME));
-//		headerDetails.put("deptImgUrl",  (String) workOrder.get("deptImgUrl"));
 		String headerMessage = readVm("pdf-header.vm", headerDetails);
 		String headerHtmlFilePath = createHTMLFile("pdf-header", headerMessage);
 
@@ -240,7 +239,7 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 		}
 
 		File htmlFooterPath = new File("/tmp/" + deptId + "pdf-draft-footer.html");
-		try(OutputStream outStream = new FileOutputStream(htmlFooterPath)){
+		try(OutputStream outStream = Files.newOutputStream(htmlFooterPath.toPath())){
 			outStream.write(buffer);
 		}
 		paramMap.put(UD_HTML_FOOTER_FILE_PATH, htmlFooterPath.getAbsolutePath());
@@ -297,10 +296,7 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 		VelocityEngine engine = new VelocityEngine();
 		VelocityContext context = new VelocityContext();
 		if (!CollectionUtils.isEmpty(paramValue)) {
-			paramValue.forEach((k, v) -> {
-				if (null != paramValue)
-					context.put(k, v);
-			});
+			paramValue.forEach(context::put);
 		}
 		Properties p = new Properties();
 		p.setProperty("resource.loader", "class");
@@ -364,7 +360,7 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 			try {
 				process = Runtime.getRuntime().exec(command);
 			} catch (IOException e) {
-				log.error("Exception occurred while writing the pdf file {}", e);
+				log.error("Exception occurred while writing the pdf file {}", e.getMessage());
 			}
 			if (process != null) {
 				try (InputStream stderr = process.getErrorStream(); BufferedReader brCleanUp = new BufferedReader(new InputStreamReader(stderr));) {
@@ -373,7 +369,7 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 						log.info("Writing the pdf file {}", line);
 					}
 				} catch (IOException e) {
-					log.error("Exception occurred while writing the pdf file {}", e);
+					log.error("Exception occurred while writing the pdf file {}", e.getMessage());
 				} finally {
 					process.destroy();
 				}

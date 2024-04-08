@@ -1067,6 +1067,7 @@ public class Constants {
 	public static final String REPORT_ACCESS_EXPIRY = "reportAccessExpiry";
 	public static final String READ_REPORT_ACCESS_API = "api.read.access.report";
 	public static final String ERROR_READING_EMPTY_FILE = "Error while reading the file since its empty";
+	public static final String EXCEPTION_MESSAGE = "Exception occurred :";
 
 	private Constants() {
 		throw new IllegalStateException("Utility class");

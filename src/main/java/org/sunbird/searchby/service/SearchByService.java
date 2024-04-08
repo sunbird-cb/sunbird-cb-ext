@@ -386,7 +386,7 @@ public class SearchByService {
 	}
 
 	private List<FracCommonInfo> getMasterPositionList(List<String> positionNameList) throws Exception {
-		List<FracCommonInfo> positionList = new ArrayList<FracCommonInfo>();
+		List<FracCommonInfo> positionList = new ArrayList<>();
 		JsonNode jsonTree = new ObjectMapper().readTree(this.getClass().getClassLoader()
 				.getResourceAsStream(cbExtServerProperties.getMasterPositionListFileName()));
 		JsonNode positionsObj = jsonTree.get(Constants.POSITIONS);

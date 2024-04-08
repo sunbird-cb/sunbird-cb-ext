@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class CassandraOperationImpl implements CassandraOperation {
 
-	private Logger logger = LoggerFactory.getLogger(getClass().getName());
+	private final Logger logger = LoggerFactory.getLogger(getClass().getName());
 
 	@Autowired
   	CassandraConnectionManager connectionManager;
@@ -278,7 +278,7 @@ public class CassandraOperationImpl implements CassandraOperation {
 
 		int n = 0;
 		PagingState pageStates = null;
-		Map<Integer, PagingState> stringMap = new HashMap<Integer, PagingState>();
+		Map<Integer, PagingState> stringMap = new HashMap<>();
 		do {
 			Statement select = selectQuery.setFetchSize(100).setPagingState(pageStates);
 			ResultSet resultSet = connectionManager.getSession(keyspace).execute(select);

@@ -211,7 +211,7 @@ public class AssessmentController {
 	}
 
 	@GetMapping("/v1/fetch/assessment/wheebox")
-	public ResponseEntity<?> readWheebox(@RequestHeader("x-authenticated-user-token") String authUserToken) {
+	public ResponseEntity<SBApiResponse> readWheebox(@RequestHeader("x-authenticated-user-token") String authUserToken) {
 		SBApiResponse response = assessmentServiceV4.readWheebox(authUserToken);
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}

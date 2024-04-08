@@ -8,11 +8,11 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class DataCacheMgr {
-    private Map<String, String> strCacheMap = new HashMap<>();
+    private final Map<String, String> strCacheMap = new HashMap<>();
 
-    private Map<String, Object> objCacheMap = new HashMap<>();
+    private final Map<String, Object> objCacheMap = new HashMap<>();
 
-    private Map<String, Map<String, Object>> contentCacheMap = new HashMap<>();
+    private final Map<String, Map<String, Object>> contentCacheMap = new HashMap<>();
 
     public void putStringInCache(String key, String value) {
         strCacheMap.put(key, value);

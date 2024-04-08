@@ -111,7 +111,7 @@ public class AllocationServiceV2 {
 
 	ObjectMapper mapper = new ObjectMapper();
 
-	private Logger logger = LoggerFactory.getLogger(AllocationServiceV2.class);
+	private final Logger logger = LoggerFactory.getLogger(AllocationServiceV2.class);
 
 	final String[] includeFields = { "roleCompetencyList.competencyDetails" };
 

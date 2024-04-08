@@ -37,8 +37,8 @@ public class AssessmentServiceImpl implements AssessmentService {
 	public static final String BLANK = "blank";
 	public static final String TAKEN_ON = "takenOn";
 
-	private CbExtLogger logger = new CbExtLogger(getClass().getName());
-	private ObjectMapper mapper = new ObjectMapper();
+	private final CbExtLogger logger = new CbExtLogger(getClass().getName());
+	private final ObjectMapper mapper = new ObjectMapper();
 
 	@Autowired
 	AssessmentRepository repository;

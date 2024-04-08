@@ -63,8 +63,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import io.jsonwebtoken.*;
 
-import io.jsonwebtoken.*;
-
 import static java.util.stream.Collectors.toList;
 
 @Service
@@ -160,8 +158,8 @@ public class ProfileServiceImpl implements ProfileService {
 			headerValues.put(Constants.AUTH_TOKEN, authToken);
 			headerValues.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
 			headerValues.put(Constants.X_AUTH_TOKEN, xAuthToken);
-			Map<String, Object> workflowResponse = new HashMap<>();
-			Map<String, Object> updateResponse = new HashMap<>();
+			Map<String, Object> workflowResponse;
+			Map<String, Object> updateResponse;
 			if (!profileDetailsMap.isEmpty()) {
 				List<String> listOfChangedDetails = new ArrayList<>();
 				for (String keys : profileDetailsMap.keySet()) {
@@ -229,7 +227,7 @@ public class ProfileServiceImpl implements ProfileService {
 						List<Map<String, Object>> transList = (List<Map<String, Object>>) transitionData
 								.get(listTransition);
 						for (int j = 0; j < transList.size(); j++) {
-							Map<String, Object> transData = new HashMap<>();
+							Map<String, Object> transData;
 							transData = transList.get(j);
 							Set<String> list = transData.keySet();
 							String[] innerData = list.toArray(new String[list.size()]);
@@ -265,7 +263,7 @@ public class ProfileServiceImpl implements ProfileService {
 						updatedTransitionData.put(Constants.FIELD_KEY, listTransition);
 						finalTransitionList.add(updatedTransitionData);
 					} else {
-						Map<String, Object> transListObject = new HashMap<>();
+						Map<String, Object> transListObject;
 						transListObject = (Map<String, Object>) transitionData.get(listTransition);
 						Set<String> listObject = transListObject.keySet();
 						String[] innerObjectData = listObject.toArray(new String[listObject.size()]);
@@ -1297,7 +1295,7 @@ public class ProfileServiceImpl implements ProfileService {
 		if (StringUtils.isNotEmpty((String) requestObject.get(Constants.POSITION))) {
 			professionDetailObj.put(Constants.DESIGNATION, requestObject.get(Constants.POSITION));
 		}
-		List<Map<String, Object>> professionalDetailsList = new ArrayList<Map<String, Object>>();
+		List<Map<String, Object>> professionalDetailsList = new ArrayList<>();
 		professionalDetailsList.add(professionDetailObj);
 		profileDetails.put(Constants.PROFESSIONAL_DETAILS, professionalDetailsList);
 
@@ -1420,7 +1418,7 @@ public class ProfileServiceImpl implements ProfileService {
 			log.info(String.format("Enriched %s records in courseInfo and %s records in orgInfo", courseInfoMap.size(),
 					orgInfoMap.size()));
 
-			Map<String, Map<String, String>> userEnrolmentMap = new HashMap<String, Map<String, String>>();
+			Map<String, Map<String, String>> userEnrolmentMap = new HashMap<>();
 			//UserEnrolment map is constructed here.
 			for (Map<String, Object> enrolment : userEnrolmentList) {
 				Map<String, String> enrolmentReport = new HashMap<>();
@@ -1459,7 +1457,7 @@ public class ProfileServiceImpl implements ProfileService {
 				userEnrolmentMap.put(enrolmentId, enrolmentReport);
 
 				Integer status = (Integer) enrolment.get(Constants.STATUS);
-				String strStatus = StringUtils.EMPTY;
+				String strStatus;
 				switch (status) {
 				case 0:
 					strStatus = Constants.STATUS_ENROLLED;
@@ -1519,7 +1517,7 @@ public class ProfileServiceImpl implements ProfileService {
 			boolean isCompleted = false;
 
 			List<Map<String, Object>> resultArray = new ArrayList<>();
-			Map<String, Map<String, String>> userInfoMap = new HashMap<String, Map<String, String>>();
+			Map<String, Map<String, String>> userInfoMap = new HashMap<>();
 			Map<String, Object> result;
 
 			final BoolQueryBuilder finalQuery = QueryBuilders.boolQuery();

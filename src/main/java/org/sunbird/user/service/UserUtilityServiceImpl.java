@@ -277,7 +277,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		if (!StringUtils.isEmpty(userRegistration.getGroup())) {
 			professionDetailObj.put(Constants.GROUP, userRegistration.getGroup());
 		}
-		List<Map<String, Object>> professionalDetailsList = new ArrayList<Map<String, Object>>();
+		List<Map<String, Object>> professionalDetailsList = new ArrayList<>();
 		professionalDetailsList.add(professionDetailObj);
 		profileDetails.put(Constants.PROFESSIONAL_DETAILS, professionalDetailsList);
 		Map<String, Object> additionalProperties = new HashMap<>();
@@ -426,7 +426,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 				Map<String, Object> searchResponse = (Map<String, Object>) result.get(Constants.RESPONSE);
 				int count = (int) searchResponse.get(Constants.COUNT);
 				if (count > 0) {
-					Map<String, Map<String, String>> userDetailsMap = new HashMap<String, Map<String, String>>();
+					Map<String, Map<String, String>> userDetailsMap = new HashMap<>();
 					List<Map<String, Object>> userProfiles = (List<Map<String, Object>>) searchResponse
 							.get(Constants.CONTENT);
 					if (!CollectionUtils.isEmpty(userProfiles)) {
@@ -536,15 +536,12 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 			String url = props.getSbUrl() + props.getUserSearchEndPoint();
 			Map<String, Object> response = outboundRequestHandlerService.fetchResultUsingPost(url, requestObj,
 					headersValue);
-			if (response != null && "OK".equalsIgnoreCase((String) response.get("responseCode"))) {
+			if (response != null && "OK".equalsIgnoreCase((String) response.get(Constants.RESPONSE_CODE))) {
 				Map<String, Object> map = (Map<String, Object>) response.get("result");
-				if (map.get("response") != null) {
-					Map<String, Object> responseObj = (Map<String, Object>) map.get("response");
+				if (map.get(Constants.RESPONSE) != null) {
+					Map<String, Object> responseObj = (Map<String, Object>) map.get(Constants.RESPONSE);
 					int count = (int) responseObj.get(Constants.COUNT);
-					if (count == 0)
-						return false;
-					else
-						return true;
+					return count != 0;
 				}
 			}
 		} catch (Exception e) {
@@ -618,7 +615,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		if (!StringUtils.isEmpty(userRegistration.getGroup())) {
 			professionDetailObj.put(Constants.GROUP, userRegistration.getGroup());
 		}
-		List<Map<String, Object>> professionalDetailsList = new ArrayList<Map<String, Object>>();
+		List<Map<String, Object>> professionalDetailsList = new ArrayList<>();
 		professionalDetailsList.add(professionDetailObj);
 		profileDetails.put(Constants.PROFESSIONAL_DETAILS, professionalDetailsList);
 		Map<String, Object> additionalProperties = new HashMap<>();
@@ -995,7 +992,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		} catch (Exception e) {
 			throw new ApplicationLogicError("Sunbird Service ERROR: ", e);
 		}
-		return null;
+		return Collections.emptyMap();
 	}
 
 }

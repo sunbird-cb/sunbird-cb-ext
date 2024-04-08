@@ -24,7 +24,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 
 @Service
 public class OutboundRequestHandlerServiceImpl {
-	private CbExtLogger log = new CbExtLogger(getClass().getName());
+	private final CbExtLogger log = new CbExtLogger(getClass().getName());
 
 	@Autowired
 	private RestTemplate restTemplate;
@@ -66,6 +66,7 @@ public class OutboundRequestHandlerServiceImpl {
 						new TypeReference<HashMap<String, Object>>() {
 						});
 			} catch (Exception e1) {
+				log.info(Constants.EXCEPTION_MESSAGE + e1.getMessage());
 			}
 			log.error("Failed to get details. ", e);
 		} catch (Exception e) {
@@ -97,6 +98,7 @@ public class OutboundRequestHandlerServiceImpl {
 						new TypeReference<HashMap<String, Object>>() {
 						});
 			} catch (Exception e1) {
+				log.info(Constants.EXCEPTION_MESSAGE + e1.getMessage());
 			}
 			log.error(Constants.ERROR_RECEIVED + e.getResponseBodyAsString(), e);
 		} catch (Exception e) {
@@ -104,6 +106,7 @@ public class OutboundRequestHandlerServiceImpl {
 			try {
 				log.warn(Constants.ERROR_RESPONSE + mapper.writeValueAsString(response));
 			} catch (Exception e1) {
+				log.info(Constants.EXCEPTION_MESSAGE + e1.getMessage());
 			}
 		}
 		return response;
@@ -127,7 +130,7 @@ public class OutboundRequestHandlerServiceImpl {
 			}
 			HttpHeaders headers = new HttpHeaders();
 			if (!CollectionUtils.isEmpty(headersValues)) {
-				headersValues.forEach((k, v) -> headers.set(k, v));
+				headersValues.forEach(headers::set);
 			}
 			HttpEntity entity = new HttpEntity(headers);
 			response = restTemplate.exchange(uri, HttpMethod.GET, entity, Map.class);
@@ -151,7 +154,7 @@ public class OutboundRequestHandlerServiceImpl {
 			}
 			HttpHeaders headers = new HttpHeaders();
 			if (!CollectionUtils.isEmpty(headersValues)) {
-				headersValues.forEach((k, v) -> headers.set(k, v));
+				headersValues.forEach(headers::set);
 			}
 			HttpEntity<Object> entity = new HttpEntity<>(headers);
 			response = restTemplate.exchange(uri, HttpMethod.GET, entity, Map.class).getBody();
@@ -161,6 +164,7 @@ public class OutboundRequestHandlerServiceImpl {
 						new TypeReference<HashMap<String, Object>>() {
 						});
 			} catch (Exception e1) {
+				log.info(Constants.EXCEPTION_MESSAGE + e1.getMessage());
 			}
 			log.error(Constants.ERROR_RECEIVED + e.getResponseBodyAsString(), e);
 		} catch (Exception e) {
@@ -168,6 +172,7 @@ public class OutboundRequestHandlerServiceImpl {
 			try {
 				log.warn(Constants.ERROR_RESPONSE + mapper.writeValueAsString(response));
 			} catch (Exception e1) {
+				log.info(Constants.EXCEPTION_MESSAGE + e1.getMessage());
 			}
 		}
 		return response;
@@ -180,7 +185,7 @@ public class OutboundRequestHandlerServiceImpl {
 		try {
 			HttpHeaders headers = new HttpHeaders();
 			if (!CollectionUtils.isEmpty(headersValues)) {
-				headersValues.forEach((k, v) -> headers.set(k, v));
+				headersValues.forEach(headers::set);
 			}
 			headers.setContentType(MediaType.APPLICATION_JSON);
 			HttpEntity<Object> entity = new HttpEntity<>(request, headers);
@@ -203,6 +208,7 @@ public class OutboundRequestHandlerServiceImpl {
 						new TypeReference<HashMap<String, Object>>() {
 						});
 			} catch (Exception e1) {
+				log.info(Constants.EXCEPTION_MESSAGE + e1.getMessage());
 			}
 			log.error(Constants.ERROR_RECEIVED + hce.getResponseBodyAsString(), hce);
 		} catch(JsonProcessingException e) {
@@ -210,6 +216,7 @@ public class OutboundRequestHandlerServiceImpl {
 			try {
 				log.warn(Constants.ERROR_RESPONSE + mapper.writeValueAsString(response));
 			} catch (Exception e1) {
+				log.info(Constants.EXCEPTION_MESSAGE + e1.getMessage());
 			}
 		}
 		return response;
@@ -220,7 +227,7 @@ public class OutboundRequestHandlerServiceImpl {
 		try {
 			HttpHeaders headers = new HttpHeaders();
 			if (!CollectionUtils.isEmpty(headersValues)) {
-				headersValues.forEach((k, v) -> headers.set(k, v));
+				headersValues.forEach(headers::set);
 			}
 			headers.setContentType(MediaType.APPLICATION_JSON);
 			HttpEntity<Object> entity = new HttpEntity<>(request, headers);
@@ -237,6 +244,7 @@ public class OutboundRequestHandlerServiceImpl {
 						new TypeReference<HashMap<String, Object>>() {
 						});
 			} catch (Exception e1) {
+				log.info(Constants.EXCEPTION_MESSAGE + e1.getMessage());
 			}
 			log.error(Constants.ERROR_RECEIVED + e.getResponseBodyAsString(), e);
 		}

@@ -49,7 +49,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Service
 public class UserRegistrationServiceImpl implements UserRegistrationService {
 
-	private Logger logger = LoggerFactory.getLogger(UserRegistrationServiceImpl.class);
+	private final Logger logger = LoggerFactory.getLogger(UserRegistrationServiceImpl.class);
 
 	ObjectMapper mapper = new ObjectMapper();
 
@@ -200,7 +200,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 		if (StringUtils.isBlank(errMsg)) {
 			try {
 				String url = serverProperties.getSbUrl() + serverProperties.getSbOTPGeneratePath();
-				Map<String, String> headers = new HashMap();
+				Map<String, String> headers = new HashMap<>();
 				headers.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
 				Map<String, Object> apiResponse = outboundRequestHandlerService.fetchResultUsingPost(url, otpRequests,
 						headers);
@@ -481,7 +481,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 	}
 
 	private List<DeptPublicInfo> getDepartmentDetails() throws Exception {
-		Set<String> orgNameList = new HashSet<String>();
+		Set<String> orgNameList = new HashSet<>();
 		List<DeptPublicInfo> orgList = new ArrayList<>();
 		int count = 0;
 		int iterateCount = 0;
@@ -522,7 +522,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 		if (CollectionUtils.isEmpty(orgList)) {
 			throw new Exception("Failed to retrieve organisation details.");
 		}
-		Map<String, List<DeptPublicInfo>> deptListMap = new HashMap<String, List<DeptPublicInfo>>();
+		Map<String, List<DeptPublicInfo>> deptListMap = new HashMap<>();
 		deptListMap.put(Constants.DEPARTMENT_LIST_CACHE_NAME, orgList);
 		redisCacheMgr.putCache(Constants.DEPARTMENT_LIST_CACHE_NAME, deptListMap);
 		return orgList;

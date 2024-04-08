@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 @Service
 public class MasterDataServiceImpl implements MasterDataService {
 
-    private Logger logger = LoggerFactory.getLogger(getClass().getName());
+    private final Logger logger = LoggerFactory.getLogger(getClass().getName());
     @Autowired
     CbExtServerProperties cbExtServerProperties;
     @Autowired
@@ -361,7 +361,7 @@ public class MasterDataServiceImpl implements MasterDataService {
         try {
             Map<String, Object> requestObj = (Map<String, Object>) request.get(Constants.REQUEST);
             List<String> orgIdList = (List<String>) requestObj.get(Constants.ORG_ID_LIST);
-            Set<String> positionList = new HashSet<String>();
+            Set<String> positionList = new HashSet<>();
             List<Map<String, String>> resultList = new ArrayList<>();
             for (String orgId : orgIdList) {
                 List<String> deptPositionList = redisCacheMgr.hget(Constants.ORG_DESIGNATION,

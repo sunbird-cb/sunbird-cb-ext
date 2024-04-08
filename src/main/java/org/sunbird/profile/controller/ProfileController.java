@@ -149,7 +149,7 @@ public class ProfileController {
 	}
 
 	@PostMapping("/v2/user/patch")
-	public ResponseEntity<?> profileUpdateV2(
+	public ResponseEntity<SBApiResponse> profileUpdateV2(
 			@RequestHeader(value = Constants.X_AUTH_TOKEN, required = true) String userToken,
 			@RequestHeader(value = Constants.AUTH_TOKEN, required = false) String authToken,
 			@RequestHeader(value = Constants.X_AUTH_USER_ORG_ID, required = false) String rootOrgId,

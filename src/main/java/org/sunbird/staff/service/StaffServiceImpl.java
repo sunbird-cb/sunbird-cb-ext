@@ -26,9 +26,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class StaffServiceImpl implements StaffService {
-	private ObjectMapper mapper = new ObjectMapper();
-	private SimpleDateFormat dateFormatter = new SimpleDateFormat(Constants.DATE_FORMAT);
-	private Logger logger = LoggerFactory.getLogger(getClass().getName());
+	private final ObjectMapper mapper = new ObjectMapper();
+	private final SimpleDateFormat dateFormatter = new SimpleDateFormat(Constants.DATE_FORMAT);
+	private final Logger logger = LoggerFactory.getLogger(getClass().getName());
 
 	@Autowired
 	private CassandraOperation cassandraOperation;

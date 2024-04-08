@@ -619,7 +619,7 @@ public class ExtendedOrgServiceImpl implements ExtendedOrgService {
 				response.getParams().setErrmsg(errMsg);
 				return response;
 			}
-			List<OrgHierarchyInfo> orgInfoList = new ArrayList<OrgHierarchyInfo>();
+			List<OrgHierarchyInfo> orgInfoList = new ArrayList<>();
 			List<OrgHierarchy> orgList;
 			if (searchFilters.containsKey(Constants.IDENTIFIER)) {
 				orgList = orgRepository.findAllBySbOrgId((List<String>) searchFilters.get(Constants.IDENTIFIER));

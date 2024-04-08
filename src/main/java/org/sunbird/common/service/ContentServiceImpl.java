@@ -25,7 +25,7 @@ import static java.util.Objects.nonNull;
 @Service
 public class ContentServiceImpl implements ContentService {
 
-	private CbExtLogger logger = new CbExtLogger(getClass().getName());
+	private final CbExtLogger logger = new CbExtLogger(getClass().getName());
 
 	@Autowired
 	private OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
@@ -230,7 +230,7 @@ public class ContentServiceImpl implements ContentService {
 				.append("?hierarchyType=detail");
 		Map<String, Object> response = (Map<String, Object>) outboundRequestHandlerService.fetchResult(url.toString());
 		if (ObjectUtils.isEmpty(response)) {
-			return Collections.EMPTY_MAP;
+			return Collections.emptyMap();
 		}
 
 		return response;

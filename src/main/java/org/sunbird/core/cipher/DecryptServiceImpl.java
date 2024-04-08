@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.sunbird.common.util.CbExtServerProperties;
-import org.sunbird.common.util.Constants;
 
 @Component
 public class DecryptServiceImpl {

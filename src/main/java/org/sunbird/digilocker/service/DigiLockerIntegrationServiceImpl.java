@@ -22,10 +22,6 @@ import org.sunbird.user.service.UserUtilityService;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
@@ -302,7 +298,7 @@ public class DigiLockerIntegrationServiceImpl implements DigiLockerIntegrationSe
         } catch (Exception e) {
             logger.error("Issue while get the data from pdf generator repo", e);
         }
-        return null;
+        return new byte[0];
     }
 
     private boolean addUpdateDigiLockerLookup(Map<String, Object> userDocInfo) {
@@ -331,7 +327,7 @@ public class DigiLockerIntegrationServiceImpl implements DigiLockerIntegrationSe
         if (CollectionUtils.isNotEmpty(digiLockerInfoMap)) {
             return digiLockerInfoMap.get(0);
         }
-        return null;
+        return Collections.emptyMap();
     }
 
     private CertificateInfo addCertificateInfo(CertificateAddInfoDTO certificateAddInfoDTO) throws ParseException {

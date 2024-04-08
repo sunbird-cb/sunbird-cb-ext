@@ -22,7 +22,7 @@ public class PdfGeneratorController {
     }
     
     @GetMapping(value = "/getWOPdf/{woId}", produces = MediaType.APPLICATION_PDF_VALUE)
-	public ResponseEntity<?> getWAPdf(@PathVariable("woId") String woId)
+	public ResponseEntity<byte[]> getWAPdf(@PathVariable("woId") String woId)
 			throws Exception {
 		byte[] out = null;
 		try {
@@ -47,7 +47,7 @@ public class PdfGeneratorController {
 	}
 
 	@GetMapping(value = "/getBatchSessionQRPdf/{courseId}/{batchId}", produces = MediaType.APPLICATION_PDF_VALUE)
-	public ResponseEntity<?> getBatchSessionQRPdf(@RequestHeader("x-authenticated-user-token") String authUserToken, @PathVariable("courseId") String courseId, @PathVariable("batchId") String batchId) throws IOException {
+	public ResponseEntity<byte[]> getBatchSessionQRPdf(@RequestHeader("x-authenticated-user-token") String authUserToken, @PathVariable("courseId") String courseId, @PathVariable("batchId") String batchId) throws IOException {
 		return new ResponseEntity<>(pdfGeneratorService.getBatchSessionQRPdf(authUserToken,courseId,batchId), HttpStatus.OK);
 	}
 

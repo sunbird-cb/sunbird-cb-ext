@@ -24,8 +24,6 @@ import org.sunbird.common.util.Constants;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import static org.sunbird.common.util.Constants.INSIGHTS_LEARNING_HOURS_REDIS_KEY;
-
 @Service
 public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 
@@ -41,7 +39,7 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 	@Autowired
 	CassandraOperation cassandraOperation;
 
-	private Logger logger = LoggerFactory.getLogger(AssessmentUtilServiceV2Impl.class);
+	private final Logger logger = LoggerFactory.getLogger(AssessmentUtilServiceV2Impl.class);
 
 	@Autowired
 	RedisCacheMgr redisCacheMgr;
@@ -49,10 +47,10 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 	public Map<String, Object> validateQumlAssessment(List<String> originalQuestionList,
 													  List<Map<String, Object>> userQuestionList,Map<String,Object> questionMap) {
 		try {
-			Integer correct = 0;
-			Integer blank = 0;
-			Integer inCorrect = 0;
-			Integer total = 0;
+			int correct = 0;
+			int blank = 0;
+			int inCorrect = 0;
+			int total = 0;
 			Map<String, Object> resultMap = new HashMap<>();
 			Map<String, Object> answers = getQumlAnswers(originalQuestionList,questionMap);
 			for (Map<String, Object> question : userQuestionList) {

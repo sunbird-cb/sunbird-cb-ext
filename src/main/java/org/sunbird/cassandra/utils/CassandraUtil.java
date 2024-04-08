@@ -20,7 +20,7 @@ import com.datastax.driver.core.Row;
 public final class CassandraUtil {
     private CassandraUtil() {}
 
-    private static CassandraPropertyReader propertiesCache = CassandraPropertyReader.getInstance();
+    private static final CassandraPropertyReader propertiesCache = CassandraPropertyReader.getInstance();
 
     /**
      * @param keyspaceName Keyspace name
