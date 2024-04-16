@@ -62,7 +62,7 @@ public class EventUtilityServiceImpl implements EventUtilityService {
         }
         try {
             Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPost(
-                    props.getContentHost() + props.getEventPublishAPI() + "/" + eventMap.get(Constants.IDENTIFIER), request, headerValues);
+                    props.getContentHost() + props.getEventPublishAPI() + Constants.SLASH + eventMap.get(Constants.IDENTIFIER), request, headerValues);
             if (readData != null && Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
                 Map<String, Object> result = (Map<String, Object>) readData.get(Constants.RESULT);
                 if (!MapUtils.isEmpty(result)) {
@@ -106,7 +106,7 @@ public class EventUtilityServiceImpl implements EventUtilityService {
         }
         try {
             Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPatch(
-                    props.getContentHost() + props.getEventUpdateAPI() + "/" + eventMap.get(Constants.IDENTIFIER), request, headerValues);
+                    props.getContentHost() + props.getEventUpdateAPI() + Constants.SLASH + eventMap.get(Constants.IDENTIFIER), request, headerValues);
             if (readData != null && Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
                 Map<String, Object> result = (Map<String, Object>) readData.get(Constants.RESULT);
                 if (!MapUtils.isEmpty(result)) {

@@ -1,5 +1,7 @@
 package org.sunbird.common.util;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -175,4 +177,12 @@ public class ProjectUtil {
 	public static String getFormattedDate() {
 		return getDateFormatter().format(new Date());
 	}
+
+	public static String decodeUrl(String encodeString){
+        try {
+            return URLDecoder.decode(encodeString, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
