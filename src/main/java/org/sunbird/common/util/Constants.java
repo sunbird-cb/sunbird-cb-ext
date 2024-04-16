@@ -1014,6 +1014,18 @@ public class Constants {
 	public static final String API_SECTOR_LIST = "api.sector.list";
 	public static final String TERMS = "terms";
 	public static final String SECTORS = "sectors";
+	public static final String API_CALENDAR_EVENT_BULK_UPLOAD = "api.calendar.event.bulk.upload";
+	public static final String TABLE_CALENDAR_EVENT_BULK_UPLOAD = "calendar_event_bulk_upload";
+	public static final String EVENT = "event";
+	public static final String REGISTRATION_LINK = "registrationLink";
+	public static final String EVENT_TYPE = "eventType";
+	public static final String ADDRESS = "address";
+	public static final String VENUE = "venue";
+	public static final String SOURCE_NAME = "sourceName";
+	public static final String CALENDAR = "Calendar";
+	public static final String RESOURCE_TYPE = "resourceType";
+	public static final String REGISTRATION_END_DATE = "registrationEndDate";
+	public static final String CODE = "code";
 
   private Constants() {
 		throw new IllegalStateException("Utility class");

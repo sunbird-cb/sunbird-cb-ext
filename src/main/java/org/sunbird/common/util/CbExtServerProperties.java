@@ -705,6 +705,21 @@ public class CbExtServerProperties {
 	@Value("${sector.category.name}")
 	private String sectorCategoryName;
 
+	@Value("${kafka.topics.calendar.bulk.upload.event}")
+	private String calendarEventBulkUploadTopic;
+
+	@Value("${event-create-api}")
+	private String eventCreateAPI;
+
+	@Value("${event-publish-api}")
+	private String eventPublishAPI;
+
+	@Value("${calendar.bulk.upload.container.name}")
+	private String calendarEventBulkUploadContainerName;
+
+	@Value("${event-update-api}")
+	private String eventUpdateAPI;
+
 	public boolean qListFromCacheEnabled() {
 		return qListFromCacheEnabled;
 	}
@@ -2489,5 +2504,45 @@ public class CbExtServerProperties {
 
 	public void setSubSectorFields(String subSectorFields) {
 		this.subSectorFields = subSectorFields;
+	}
+
+	public String getCalendarEventBulkUploadTopic() {
+		return calendarEventBulkUploadTopic;
+	}
+
+	public void setCalendarEventBulkUploadTopic(String calendarEventBulkUploadTopic) {
+		this.calendarEventBulkUploadTopic = calendarEventBulkUploadTopic;
+	}
+
+	public String getEventCreateAPI() {
+		return eventCreateAPI;
+	}
+
+	public void setEventCreateAPI(String eventCreateAPI) {
+		this.eventCreateAPI = eventCreateAPI;
+	}
+
+	public String getEventPublishAPI() {
+		return eventPublishAPI;
+	}
+
+	public void setEventPublishAPI(String eventPublishAPI) {
+		this.eventPublishAPI = eventPublishAPI;
+	}
+
+	public String getCalendarEventBulkUploadContainerName() {
+		return calendarEventBulkUploadContainerName;
+	}
+
+	public void setCalendarEventBulkUploadContainerName(String calendarEventBulkUploadContainerName) {
+		this.calendarEventBulkUploadContainerName = calendarEventBulkUploadContainerName;
+	}
+
+	public String getEventUpdateAPI() {
+		return eventUpdateAPI;
+	}
+
+	public void setEventUpdateAPI(String eventUpdateAPI) {
+		this.eventUpdateAPI = eventUpdateAPI;
 	}
 }
