@@ -22,7 +22,7 @@ public class CalendarBulkUploadController {
 
     private Logger log = LoggerFactory.getLogger(getClass().getName());
 
-    @PostMapping("/v1/bulkupload")
+    @PostMapping("/v1/bulkUpload")
     public ResponseEntity<?> bulkUploadCalendarEvent(@RequestParam(value = "file", required = true) MultipartFile multipartFile,
                                                      @RequestHeader(Constants.X_AUTH_USER_ORG_ID) String rootOrgId,
                                                      @RequestHeader(Constants.X_AUTH_USER_CHANNEL) String channel,

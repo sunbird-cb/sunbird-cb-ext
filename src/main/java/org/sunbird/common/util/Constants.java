@@ -1026,6 +1026,7 @@ public class Constants {
 	public static final String RESOURCE_TYPE = "resourceType";
 	public static final String REGISTRATION_END_DATE = "registrationEndDate";
 	public static final String CODE = "code";
+	public static final String EVENT_KEY = "Event";
 
   private Constants() {
 		throw new IllegalStateException("Utility class");

@@ -358,8 +358,37 @@ public class CalendarBulkUploadServiceImpl implements CalendarBulkUploadService 
                     } else {
                         Map<String, Object> eventInfoFromESMap = eventInfoFromES((String) eventInfoMap.get(Constants.NAME), inputDataMap.get(Constants.ROOT_ORG_ID),
                                 inputDataMap.get(Constants.X_AUTH_TOKEN));
-                        if (MapUtils.isNotEmpty(eventInfoFromESMap) && ((Integer) eventInfoFromESMap.get(Constants.COUNT)).intValue() > 0) {
-                            /*TBD*/
+                        if (MapUtils.isNotEmpty(eventInfoFromESMap) && ((Integer) eventInfoFromESMap.get(Constants.COUNT)).intValue() == 1) {
+                            List<Map<String, Object>> searchEventInfo = (List<Map<String, Object>>)eventInfoFromESMap.get(Constants.EVENT_KEY);
+                            if (CollectionUtils.isNotEmpty(searchEventInfo)) {
+                                eventInfoMap.put(Constants.IDENTIFIER, searchEventInfo.get(0).get(Constants.IDENTIFIER));
+                                eventInfoMap.put(Constants.VERSION_KEY, searchEventInfo.get(0).get(Constants.VERSION_KEY));
+                                Map<String, Object> responseObject = eventUtilityService.updateEvent(eventInfoMap, inputDataMap.get(Constants.X_AUTH_TOKEN));
+                                if (MapUtils.isEmpty(responseObject)) {
+                                    failedRecordsCount++;
+                                    statusCell.setCellValue(Constants.FAILED_UPPERCASE);
+                                    errorDetails.setCellValue("Error while updating the event");
+                                } else {
+                                    Map<String, Object> publishEventMap = new HashMap<>();
+                                    publishEventMap.put(Constants.STATUS, Constants.LIVE);
+                                    publishEventMap.put(Constants.VERSION_KEY, responseObject.get(Constants.VERSION_KEY));
+                                    publishEventMap.put(Constants.IDENTIFIER, responseObject.get(Constants.IDENTIFIER));
+                                    Map<String, Object> publishEventObject = eventUtilityService.publishEvent(publishEventMap, inputDataMap.get(Constants.X_AUTH_TOKEN));
+                                    if (MapUtils.isEmpty(publishEventObject)) {
+                                        failedRecordsCount++;
+                                        statusCell.setCellValue(Constants.FAILED_UPPERCASE);
+                                        errorDetails.setCellValue("Error while publishing the event");
+                                    } else {
+                                        noOfSuccessfulRecords++;
+                                        statusCell.setCellValue(Constants.SUCCESS_UPPERCASE);
+                                        errorDetails.setCellValue("");
+                                    }
+                                }
+                            } else {
+                                failedRecordsCount++;
+                                statusCell.setCellValue(Constants.FAILED_UPPERCASE);
+                                errorDetails.setCellValue("Error while updating the event");
+                            }
                         } else if (MapUtils.isNotEmpty(eventInfoFromESMap) && ((Integer) eventInfoFromESMap.get(Constants.COUNT)).intValue() == 0) {
                             Map<String, Object> responseObject = eventUtilityService.createEvent(eventInfoMap, inputDataMap.get(Constants.X_AUTH_TOKEN));
                             if (MapUtils.isEmpty(responseObject)) {

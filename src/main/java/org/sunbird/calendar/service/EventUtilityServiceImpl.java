@@ -106,7 +106,7 @@ public class EventUtilityServiceImpl implements EventUtilityService {
         }
         try {
             Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPatch(
-                    props.getContentHost() + props.getEventUpdateAPI(), request, headerValues);
+                    props.getContentHost() + props.getEventUpdateAPI() + "/" + eventMap.get(Constants.IDENTIFIER), request, headerValues);
             if (readData != null && Constants.OK.equalsIgnoreCase((String) readData.get(Constants.RESPONSE_CODE))) {
                 Map<String, Object> result = (Map<String, Object>) readData.get(Constants.RESULT);
                 if (!MapUtils.isEmpty(result)) {
