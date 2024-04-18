@@ -1023,6 +1023,7 @@ public class Constants {
 	public static final String CODE = "code";
 	public static final String PARENTS = "parents";
 	public static final String SUB_SECTORS = "subsectors";
+	public static final String COURSE_LINK = "courseLink";
 
 	private Constants() {
 		throw new IllegalStateException("Utility class");

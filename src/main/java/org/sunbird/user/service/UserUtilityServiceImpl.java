@@ -827,10 +827,15 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 					emailResponseList.add(email);
 				}
 			}
+			logger.info("emailist : " +  emailResponseList);
+			StringBuilder link = new StringBuilder();
+			if(requestData.containsKey(Constants.COURSE_LINK) && StringUtils.isNotEmpty((String)requestData.get(Constants.COURSE_LINK))){
+				link.append(serverConfig.getDomainUrl()).append((String)requestData.get(Constants.COURSE_LINK));
+			}else {
+				link.append(serverConfig.getCourseLinkUrl()).append(requestData.get(Constants.COURSE_ID)).append("/").append(Constants.OVERVIEW);
+			}
 
 			if (!emailResponseList.isEmpty()) {
-				StringBuilder link = new StringBuilder();
-				link.append(serverConfig.getCourseLinkUrl()).append(requestData.get(Constants.COURSE_ID)).append("/").append(Constants.OVERVIEW);
 				Map<String, Object> mailNotificationDetails = new HashMap<>();
 				mailNotificationDetails.put(Constants.RECIPIENT_EMAILS, emailResponseList);
 				mailNotificationDetails.put(Constants.COURSE_NAME, requestData.get(Constants.COURSE_NAME));

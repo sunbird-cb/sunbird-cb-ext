@@ -714,6 +714,9 @@ public class CbExtServerProperties {
 	@Value("${sector.framework.name}")
 	private String sectorFrameworkName;
 
+	@Value("${domain.url}")
+	private String domainUrl;
+
 	public boolean qListFromCacheEnabled() {
 		return qListFromCacheEnabled;
 	}
@@ -2523,4 +2526,9 @@ public class CbExtServerProperties {
 	public void setSectorFrameworkName(String sectorFrameworkName) {
 		this.sectorFrameworkName = sectorFrameworkName;
 	}
+
+	public void setDomainUrl(String domainUrl) {this.domainUrl = domainUrl;}
+
+	public String getDomainUrl() {return domainUrl;}
+
 }
