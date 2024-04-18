@@ -381,4 +381,21 @@ public class StorageServiceImpl implements StorageService {
 				.contentType(MediaType.APPLICATION_JSON)
 				.body(reportTypeInfo);
 	}
+
+	@Override
+	public SBApiResponse downloadFile(String fileName, String containerName) {
+		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_FILE_DOWNLOAD);
+		try {
+			String objectKey = containerName + "/" + fileName;
+			storageService.download(serverProperties.getCloudContainerName(), objectKey, Constants.LOCAL_BASE_PATH,
+					Option.apply(Boolean.FALSE));
+			return response;
+		} catch (Exception e) {
+			logger.error("Failed to download the file: " + fileName + ", Exception: ", e);
+			response.getParams().setStatus(Constants.FAILED);
+			response.getParams().setErrmsg("Failed to download the file. Exception: " + e.getMessage());
+			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+			return response;
+		}
+	}
 }

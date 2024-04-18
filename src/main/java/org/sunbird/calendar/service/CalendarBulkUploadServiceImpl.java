@@ -133,7 +133,7 @@ public class CalendarBulkUploadServiceImpl implements CalendarBulkUploadService 
             if (errList.isEmpty()) {
                 updateCalendarBulkUploadStatus(inputDataMap.get(Constants.ROOT_ORG_ID),
                         inputDataMap.get(Constants.IDENTIFIER), Constants.STATUS_IN_PROGRESS_UPPERCASE, 0, 0, 0);
-                storageService.downloadFile(inputDataMap.get(Constants.FILE_NAME));
+                storageService.downloadFile(inputDataMap.get(Constants.FILE_NAME), serverConfig.getCalendarEventBulkUploadContainerName());
                 processBulkUpload(inputDataMap);
             } else {
                 logger.error(String.format("Error in the Kafka Message Received : %s", errList));

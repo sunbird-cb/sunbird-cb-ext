@@ -26,4 +26,6 @@ public interface StorageService {
 	ResponseEntity<?> downloadFile(String reportType, String date, String fileName, String userToken);
 
 	ResponseEntity<?> getFileInfoSpv(String userToken, String date);
+
+	public SBApiResponse downloadFile(String fileName, String containerName);
 }
