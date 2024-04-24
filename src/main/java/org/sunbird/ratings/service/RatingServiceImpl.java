@@ -7,6 +7,8 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.kafka.common.KafkaException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +45,7 @@ import org.sunbird.ratings.responsecode.ResponseMessage;
 import com.datastax.driver.core.utils.UUIDs;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.sunbird.user.service.UserUtilityService;
 
 @Service
 public class RatingServiceImpl implements RatingService {
@@ -71,6 +74,9 @@ public class RatingServiceImpl implements RatingService {
 
     @Autowired
     RedisCacheMgr redisCacheMgr;
+
+    @Autowired
+    UserUtilityService userUtilityService;
 
     @Override
     public SBApiResponse getRatings(String activityId, String activityType, String userId) {
@@ -650,6 +656,67 @@ public class RatingServiceImpl implements RatingService {
         return response;
     }
 
+    @Override
+    public SBApiResponse getTopReviewsForUserByOrgID(String userOrgId) {
+        SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_TOD_COMMENT_FOR_USER);
+        try {
+            List<String> topCommentRedis = redisCacheMgr.hget(Constants.TOP_COMMENTS_ORG_REDIS_KEY, serverConfig.getRedisInsightIndex(), userOrgId);
+            List<Map<String, Object>> userRatingContentMap = new ArrayList<>();
+            Map<String, Map<String, String>> userInfoMap = new HashMap<>();
+            List<Map<String, Object>> topReviewMap = new ArrayList<>();
+            if (org.apache.commons.collections.CollectionUtils.isNotEmpty(topCommentRedis)) {
+                topReviewMap = mapper.readValue(topCommentRedis.get(0),
+                        new TypeReference<List<Map<String, Object>>>() {
+                        });
+            }
+            List<String> userInfo = new ArrayList<>();
+            for (Map<String, Object> commentInfo : topReviewMap) {
+                Map<String, Object> userRatingContent = new HashMap<>();
+                userInfo.add((String) commentInfo.get(Constants.USER_ID_KEY));
+                userRatingContent.put(Constants.USER_DETAILS, commentInfo.get(Constants.USER_ID_KEY));
+                Map<String, Object> contentResponse = contentService.readContentFromCache((String) commentInfo.get(Constants.COURSE_ID_KEY), null);
+                if (MapUtils.isNotEmpty(contentResponse)) {
+                    if (Constants.LIVE.equalsIgnoreCase((String) contentResponse.get(Constants.STATUS))) {
+                        Map<String, Object> enrichContentMap = new HashMap<>();
+                        enrichContentMap.put(Constants.NAME, contentResponse.get(Constants.NAME));
+                        enrichContentMap.put(Constants.COMPETENCIES_V5, contentResponse.get(Constants.COMPETENCIES_V5));
+                        enrichContentMap.put(Constants.AVG_RATING, contentResponse.get(Constants.AVG_RATING));
+                        enrichContentMap.put(Constants.IDENTIFIER, contentResponse.get(Constants.IDENTIFIER));
+                        enrichContentMap.put(Constants.DESCRIPTION, contentResponse.get(Constants.DESCRIPTION));
+                        enrichContentMap.put(Constants.ADDITIONAL_TAGS, contentResponse.get(Constants.ADDITIONAL_TAGS));
+                        enrichContentMap.put(Constants.CONTENT_TYPE_KEY, contentResponse.get(Constants.CONTENT_TYPE_KEY));
+                        enrichContentMap.put(Constants.PRIMARY_CATEGORY, contentResponse.get(Constants.PRIMARY_CATEGORY));
+                        enrichContentMap.put(Constants.DURATION, contentResponse.get(Constants.DURATION));
+                        enrichContentMap.put(Constants.COURSE_APP_ICON, contentResponse.get(Constants.COURSE_APP_ICON));
+                        enrichContentMap.put(Constants.POSTER_IMAGE, contentResponse.get(Constants.POSTER_IMAGE));
+                        enrichContentMap.put(Constants.ORGANISATION, contentResponse.get(Constants.ORGANISATION));
+                        enrichContentMap.put(Constants.CREATOR_LOGO, contentResponse.get(Constants.CREATOR_LOGO));
+                        userRatingContent.put(Constants.CONTENT_INFO, enrichContentMap);
+                    }
+                    userRatingContentMap.add(userRatingContent);
+                }
+                commentInfo.remove(Constants.USER_ID_KEY);
+                commentInfo.remove(Constants.COURSE_ID_KEY);
+                userRatingContent.putAll(commentInfo);
+            }
+            userUtilityService.getUserDetailsFromDB(userInfo, Arrays.asList(Constants.FIRSTNAME, Constants.USER_ID, Constants.PROFILE_DETAILS_KEY),
+                    userInfoMap);
+            enrichUserInfo(userInfoMap);
+
+            for (Map<String, Object> commentContentInfo : userRatingContentMap) {
+                Map<String, String> userDetailsInfo = userInfoMap.get((String) commentContentInfo.get(Constants.USER_DETAILS));
+                commentContentInfo.put(Constants.USER_DETAILS, userDetailsInfo);
+            }
+            response.getResult().put(Constants.CONTENT, userRatingContentMap);
+        } catch (Exception e) {
+            logger.error("Failed to Get Top Review of User for OrgId: " + userOrgId, e);
+            response.getParams().setStatus(Constants.FAILED);
+            response.getParams().setErrmsg(e.getMessage());
+            response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return response;
+    }
+
     private boolean updateAdditionalTag(Map<String, Object> contentResponse, String tag, boolean isRemove) {
         try {
             String versionKey = (String) contentResponse.get(Constants.VERSION_KEY);
@@ -703,5 +770,37 @@ public class RatingServiceImpl implements RatingService {
             return latestTrendingCourseList.stream().filter(courseId -> !courseId.contains("_rc")).collect(Collectors.toList());
         }
         throw new BadRequestException("Please provide a valid Tag");
+    }
+
+    private void enrichUserInfo(Map<String, Map<String, String>> userInfoMap) {
+        for (Map.Entry userEntry : userInfoMap.entrySet()) {
+            Map<String, String> userInfo = (Map<String, String>) userEntry.getValue();
+            String profileDetails = userInfo.get(Constants.PROFILE_DETAILS_KEY);
+            String userProfileImageUrl = userInfo.get(Constants.PROFILE_IMAGE_URL) != null ? userInfo.get(Constants.PROFILE_IMAGE_URL) :
+                    getProfileDetailsUrlForUser(profileDetails, (String) userEntry.getKey());
+            userInfo.put(Constants.PROFILE_IMAGE_URL, userProfileImageUrl);
+            userInfo.remove(Constants.PROFILE_DETAILS_KEY);
+        }
+    }
+
+    private String getProfileDetailsUrlForUser(String profileDetails, String userId) {
+        String profileImageUrl = "";
+        try {
+            Map<String, Object> profileDetailsMap = null;
+            Map<String, Object> personDetails = null;
+            if (org.apache.commons.lang3.StringUtils.isNotEmpty(profileDetails)) {
+                profileDetailsMap = mapper.readValue(profileDetails, new TypeReference<HashMap<String, Object>>() {
+                });
+            }
+            if (MapUtils.isNotEmpty(profileDetailsMap)) {
+                personDetails = (Map<String, Object>) profileDetailsMap.get(Constants.PERSONAL_DETAILS);
+            }
+            if (MapUtils.isNotEmpty(personDetails)) {
+                profileImageUrl = (String) personDetails.get(Constants.PROFILE_IMAGE_URL);
+            }
+        } catch (Exception e) {
+            logger.error("Not able to read the profile Details for userId: " + userId, e);
+        }
+        return profileImageUrl;
     }
 }

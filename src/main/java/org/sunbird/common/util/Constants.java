@@ -1037,6 +1037,12 @@ public class Constants {
 	public static final String REGISTRATION_END_DATE = "registrationEndDate";
 	public static final String EVENT_KEY = "Event";
 	public static final String SLASH = "/";
+	public static final String TOP_COMMENTS_ORG_REDIS_KEY = "top_reviews";
+	public static final String PROFILE_IMAGE_URL = "profileImageUrl";
+	public static final String API_TOD_COMMENT_FOR_USER = "api.rating.top.v1.comment";
+	public static final String CONTENT_INFO = "contentInfo";
+	public static final String COURSE_ID_KEY = "courseID";
+	public static final String USER_ID_KEY = "userID";
 
 	private Constants() {
 		throw new IllegalStateException("Utility class");
