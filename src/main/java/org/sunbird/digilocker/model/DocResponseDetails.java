@@ -6,6 +6,7 @@ public class DocResponseDetails {
 
     private String docContent;
     private String dataContent;
+    private String docDescription;
 
     public DocResponseDetails() {
     }
@@ -26,6 +27,15 @@ public class DocResponseDetails {
 
     public void setDataContent(String dataContent) {
         this.dataContent = dataContent;
+    }
+
+    @JacksonXmlProperty(localName = "DocDescription", namespace = "http://tempuri.org/")
+    public String getDocDescription() {
+        return docDescription;
+    }
+
+    public void setDocDescription(String docDescription) {
+        this.docDescription = docDescription;
     }
 
 }
