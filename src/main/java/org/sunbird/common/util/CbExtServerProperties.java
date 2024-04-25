@@ -732,6 +732,33 @@ public class CbExtServerProperties {
 	@Value("${event-update-api}")
 	private String eventUpdateAPI;
 
+	@Value("${redis.dashboard.course.live.count.index}")
+	private Integer redisDashboardCourseLiveCount;
+
+	@Value("${redis.dashboard.course.certificate.count.index}")
+	private Integer redisDashboardCertificateCount;
+
+	@Value("${redis.dashboard.course.average.rating.count.index}")
+	private Integer redisDashboardCourseAverageRatingCount;
+
+	@Value("${redis.dashboard.course.enrolment.count.index}")
+	private Integer redisDashboardEnrolmentCount;
+
+	@Value("${redis.dashboard.course.competencies.count.index}")
+	private Integer redisDashboardCompetenciesCount;
+
+	@Value("${label.dashboard.course.average.rating.count}")
+	private String labelDashboardCourseAverageRatingCount;
+
+	@Value("${label.dashboard.course.competencies.count}")
+	private String labelDashboardCourseCompetencies;
+
+	@Value("${label.dashboard.course.certificate.count}")
+	private String labelDashboardCourseCertificate;
+
+	@Value("${label.dashboard.course.enrolment.count}")
+	private String labelDashboardCourseEnrolmentCount;
+
 	public boolean qListFromCacheEnabled() {
 		return qListFromCacheEnabled;
 	}
@@ -2585,5 +2612,77 @@ public class CbExtServerProperties {
 
 	public void setEventUpdateAPI(String eventUpdateAPI) {
 		this.eventUpdateAPI = eventUpdateAPI;
+	}
+
+	public Integer getRedisDashboardCourseLiveCount() {
+		return redisDashboardCourseLiveCount;
+	}
+
+	public void setRedisDashboardCourseLiveCount(Integer redisDashboardCourseLiveCount) {
+		this.redisDashboardCourseLiveCount = Integer.valueOf(String.valueOf(redisDashboardCourseLiveCount));
+	}
+
+	public Integer getRedisDashboardCertificateCount() {
+		return redisDashboardCertificateCount;
+	}
+
+	public void setRedisDashboardCertificateCount(Integer redisDashboardCertificateCount) {
+		this.redisDashboardCertificateCount = Integer.valueOf(String.valueOf(redisDashboardCertificateCount));
+	}
+
+	public Integer getRedisDashboardCourseAverageRatingCount() {
+		return redisDashboardCourseAverageRatingCount;
+	}
+
+	public void setRedisDashboardCourseAverageRatingCount(Integer redisDashboardCourseAverageRatingCount) {
+		this.redisDashboardCourseAverageRatingCount = redisDashboardCourseAverageRatingCount;
+	}
+
+	public Integer getRedisDashboardEnrolmentCount() {
+		return redisDashboardEnrolmentCount;
+	}
+
+	public void setRedisDashboardEnrolmentCount(Integer redisDashboardEnrolmentCount) {
+		this.redisDashboardEnrolmentCount = redisDashboardEnrolmentCount;
+	}
+
+	public Integer getRedisDashboardCompetenciesCount() {
+		return redisDashboardCompetenciesCount;
+	}
+
+	public void setRedisDashboardCompetenciesCount(Integer redisDashboardCompetenciesCount) {
+		this.redisDashboardCompetenciesCount = Integer.valueOf(String.valueOf(redisDashboardCompetenciesCount));
+	}
+
+	public String getLabelDashboardCourseAverageRatingCount() {
+		return labelDashboardCourseAverageRatingCount;
+	}
+
+	public void setLabelDashboardCourseAverageRatingCount(String labelDashboardCourseAverageRatingCount) {
+		this.labelDashboardCourseAverageRatingCount = labelDashboardCourseAverageRatingCount;
+	}
+
+	public String getLabelDashboardCourseCompetencies() {
+		return labelDashboardCourseCompetencies;
+	}
+
+	public void setLabelDashboardCourseCompetencies(String labelDashboardCourseCompetencies) {
+		this.labelDashboardCourseCompetencies = labelDashboardCourseCompetencies;
+	}
+
+	public String getLabelDashboardCourseCertificate() {
+		return labelDashboardCourseCertificate;
+	}
+
+	public void setLabelDashboardCourseCertificate(String labelDashboardCourseCertificate) {
+		this.labelDashboardCourseCertificate = labelDashboardCourseCertificate;
+	}
+
+	public String getLabelDashboardCourseEnrolmentCount() {
+		return labelDashboardCourseEnrolmentCount;
+	}
+
+	public void setLabelDashboardCourseEnrolmentCount(String labelDashboardCourseEnrolmentCount) {
+		this.labelDashboardCourseEnrolmentCount = labelDashboardCourseEnrolmentCount;
 	}
 }

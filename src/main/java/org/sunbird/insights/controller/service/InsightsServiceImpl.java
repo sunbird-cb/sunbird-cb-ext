@@ -143,4 +143,53 @@ public class InsightsServiceImpl implements InsightsService {
         return bd.doubleValue();
     }
 
+    public SBApiResponse readInsights(Map<String, Object> requestBody, String userId) throws Exception {
+        String [] labelsCertificates = {extServerProperties.getLabelDashboardCourseCertificate(),extServerProperties.getLabelDashboardCourseCertificate()} ;
+        String [] labelsCompetencies = {extServerProperties.getLabelDashboardCourseCompetencies(),extServerProperties.getLabelDashboardCourseCompetencies()} ;
+        String [] labelsAvgRating = {extServerProperties.getLabelDashboardCourseAverageRatingCount(), extServerProperties.getLabelDashboardCourseAverageRatingCount()} ;
+        String [] labelsEnrolments = {extServerProperties.getLabelDashboardCourseEnrolmentCount(),extServerProperties.getLabelDashboardCourseEnrolmentCount()} ;
+        HashMap<String, Object> request = requestBody.get(REQUEST) == null ? new HashMap<>() : (HashMap<String, Object>) requestBody.get(REQUEST);
+        HashMap<String, Object> filter = request.get(FILTERS) == null ? new HashMap<>() : ((HashMap<String, Object>) request.get(FILTERS));
+        ArrayList<String> organizations = filter.get(ORGANISATIONS) ==null ? new ArrayList<>() : (ArrayList<String>) (filter.get(ORGANISATIONS));
+        ArrayList<String> keys = nudgeKeys(organizations);
+        String[] fieldsArray = keys.toArray(new String[keys.size()]);
+        ArrayList<String> certificateOrgs= new ArrayList<>();
+        certificateOrgs.add(ACROSS);
+        ArrayList<Object> nudges = new ArrayList<>();
+        List<String> competenciesByCourse =  redisCacheMgr.hget(DASHBOARD_COMPETENCIES_COUNT_BY_COURSE, serverProperties.getRedisDashboardCompetenciesCount(),fieldsArray);
+        List<String> certificatesByCourse = redisCacheMgr.hget(DASHBOARD_CERTIFICATES_GENERATED_BY_COURSE, serverProperties.getRedisDashboardCertificateCount(),fieldsArray);
+        List<String> avgRatingByCourse = redisCacheMgr.hget(DASHBOARD_COURSE_AVG_RATING, serverProperties.getRedisDashboardCourseAverageRatingCount(),fieldsArray);
+        List<String> enrolmentByCourse = redisCacheMgr.hget(DASHBOARD_ENROLMENT_COUNT_BY_COURSE, serverProperties.getRedisDashboardEnrolmentCount(),fieldsArray);
+        if(competenciesByCourse == null)
+            competenciesByCourse = new ArrayList<>();
+        if(certificatesByCourse ==null)
+            certificatesByCourse = new ArrayList<>();
+        if(avgRatingByCourse ==null)
+            avgRatingByCourse = new ArrayList<>();
+        if(enrolmentByCourse ==null)
+            enrolmentByCourse = new ArrayList<>();
+        populateNudgeForMicroSite(competenciesByCourse, nudges, TOTAL_CONTENT,organizations,labelsCompetencies);
+        populateNudgeForMicroSite(certificatesByCourse, nudges, TOTAL_CERTIFICATES,organizations,labelsCertificates);
+        populateNudgeForMicroSite(avgRatingByCourse, nudges, AVG_RATING_MICRO_SITE,organizations,labelsAvgRating);
+        populateNudgeForMicroSite(enrolmentByCourse, nudges, TOTAL_ENROLMENTS,organizations,labelsEnrolments);
+        HashMap<String, Object> responseMap = new HashMap<>();
+        responseMap.put(NUDGES, nudges);
+        SBApiResponse response = ProjectUtil.createDefaultResponse(API_MICRO_SITE_INSIGHTS);
+        response.getResult().put(RESPONSE, responseMap);
+        return response;
+    }
+
+    public void populateNudgeForMicroSite(List<String> data, List<Object> nudges, String type, List<String> organizations, String[] labels) {
+        for (int i = 0, j = 0; i < data.size(); i += 2, j++) {
+            HashMap<String, Object> nudge = new HashMap<>();
+            if(organizations.size() > j) {
+                nudge.put(LABEL, organizations.get(j).equals(ACROSS) ? labels[1] : labels[0]);
+                nudge.put(ORG, organizations.get(j));
+                nudge.put(TOTAL,data.get(0));
+            }
+            nudge.put(TYPE, type);
+            nudges.add(nudge);
+        }
+    }
 }
+

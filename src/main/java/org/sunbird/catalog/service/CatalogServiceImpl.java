@@ -201,12 +201,12 @@ public class CatalogServiceImpl {
 			return response;
 		}
 
-		//Check sector exists
+		// Check sector exists
 		Map<String, Object> reqBody = (Map<String, Object>) request.get(Constants.REQUEST);
 		String name = (String) reqBody.get(Constants.NAME);
 		SBApiResponse readResponse = readSector(getCodeValue(name));
 		if (readResponse == null) {
-			//We have failed to read the sector details before creating... through error
+			// We have failed to read the sector details before creating... through error
 			response.getParams().setErrmsg("Failed to validate sector exists or not.");
 			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
 			response.getParams().setStatus(Constants.FAILED);
@@ -214,7 +214,8 @@ public class CatalogServiceImpl {
 			// Resource is not found... we can create sector.
 			reqBody.put(Constants.CODE, name);
 			Map<String, Object> parentObj = new HashMap<>();
-			parentObj.put(Constants.IDENTIFIER, extServerProperties.getSectorFrameworkName() + "_" + extServerProperties.getSectorCategoryName());
+			parentObj.put(Constants.IDENTIFIER,
+					extServerProperties.getSectorFrameworkName() + "_" + extServerProperties.getSectorCategoryName());
 			reqBody.put(Constants.PARENTS, Arrays.asList(parentObj));
 			Map<String, Object> termReq = new HashMap<String, Object>();
 			termReq.put(Constants.TERM, reqBody);
@@ -237,6 +238,12 @@ public class CatalogServiceImpl {
 				response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
 				response.getParams().setStatus(Constants.FAILED);
 			}
+		} else if (HttpStatus.OK.equals(readResponse.getResponseCode())) {
+			errMsg = "Sector already exists with name: " + name;
+			log.error(errMsg);
+			response.getParams().setErrmsg(errMsg);
+			response.setResponseCode(HttpStatus.BAD_REQUEST);
+			response.getParams().setStatus(Constants.FAILED);
 		} else {
 			log.error("Failed to validate sector exists while creating with name: " + name);
 			response.getParams().setErrmsg("Failed to create sector.");
@@ -273,40 +280,71 @@ public class CatalogServiceImpl {
 			response.getParams().setStatus(Constants.FAILED);
 		} else if (HttpStatus.OK.equals(readResponse.getResponseCode())) {
 			List<Map<String, Object>> subSectorList = (List<Map<String, Object>>) reqBody.get(Constants.SUB_SECTORS);
+			List<String> requiredSubSector = new ArrayList<String>();
+			Map<String, Object> readTermResponse = (Map<String, Object>) readResponse.getResult();
+			Map<String, Object> existingTerm = (Map<String, Object>) readTermResponse.get(Constants.SECTOR);
+			List<Map<String, Object>> existingChildren = (List<Map<String, Object>>) existingTerm
+					.get(Constants.CHILDREN);
+
 			for (Map<String, Object> subSector : subSectorList) {
+				String name = (String) subSector.get(Constants.NAME);
 				if (subSector.containsKey(Constants.IDENTIFIER)) {
 					continue;
 				} else {
-					String name = (String) subSector.get(Constants.NAME);
-					Map<String, Object> requestBody = new HashMap<>();
-					Map<String, Object> termReq = new HashMap<>();
-					termReq.put(Constants.CODE, name);
-					termReq.put(Constants.NAME, name);
-
-					Map<String, Object> parentObj = new HashMap<>();
-					parentObj.put(Constants.IDENTIFIER, extServerProperties.getSectorFrameworkName() + "_" + extServerProperties.getSectorCategoryName() + "_" + id);
-					termReq.put(Constants.PARENTS, Arrays.asList(parentObj));
-					requestBody.put(Constants.TERM, termReq);
-					Map<String, Object> createReq = new HashMap<String, Object>();
-					createReq.put(Constants.REQUEST, requestBody);
-
-					StringBuilder strUrl = new StringBuilder(extServerProperties.getKmBaseHost());
-					strUrl.append(extServerProperties.getKmFrameworkTermCreatePath()).append("?framework=")
-							.append(extServerProperties.getSectorFrameworkName()).append("&category=")
-							.append(extServerProperties.getSectorCategoryName());
-					Map<String, Object> termResponse = outboundRequestHandlerServiceImpl.fetchResultUsingPost(strUrl.toString(),
-							createReq, null);
-					List<Map<String, Object>> sectors = new ArrayList<>();
-					if (termResponse != null
-							&& Constants.OK.equalsIgnoreCase((String) termResponse.get(Constants.RESPONSE_CODE))) {
-						log.info("Created sub sector successfully with name : " + name);
+					if (CollectionUtils.isEmpty(existingChildren)) {
+						requiredSubSector.add(name);
 					} else {
-						log.error("Failed to create the sector object with name: " + name);
-						response.getParams().setErrmsg("Failed to create sector.");
-						response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
-						response.getParams().setStatus(Constants.FAILED);
-						break;
+						for (Map<String, Object> existingSubSector : existingChildren) {
+							if (name.equalsIgnoreCase((String) existingSubSector.get(Constants.NAME))) {
+								errMsg = "Failed to create SubSector. Name '" + name + "' already exists in Sector.";
+								break;
+							} else {
+								requiredSubSector.add(name);
+							}
+						}
 					}
+				}
+				if (StringUtils.isNotBlank(errMsg)) {
+					break;
+				}
+			}
+			if (StringUtils.isNotBlank(errMsg)) {
+				response.getParams().setErrmsg(errMsg);
+				response.setResponseCode(HttpStatus.BAD_REQUEST);
+				response.getParams().setStatus(Constants.FAILED);
+				return response;
+			}
+			for (String name : requiredSubSector) {
+				Map<String, Object> requestBody = new HashMap<>();
+				Map<String, Object> termReq = new HashMap<>();
+				termReq.put(Constants.CODE, name);
+				termReq.put(Constants.NAME, name);
+
+				Map<String, Object> parentObj = new HashMap<>();
+				parentObj.put(Constants.IDENTIFIER, extServerProperties.getSectorFrameworkName() + "_"
+						+ extServerProperties.getSectorCategoryName() + "_" + id);
+				termReq.put(Constants.PARENTS, Arrays.asList(parentObj));
+				requestBody.put(Constants.TERM, termReq);
+				Map<String, Object> createReq = new HashMap<String, Object>();
+				createReq.put(Constants.REQUEST, requestBody);
+
+				StringBuilder strUrl = new StringBuilder(extServerProperties.getKmBaseHost());
+				strUrl.append(extServerProperties.getKmFrameworkTermCreatePath()).append("?framework=")
+						.append(extServerProperties.getSectorFrameworkName()).append("&category=")
+						.append(extServerProperties.getSectorCategoryName());
+				Map<String, Object> termResponse = outboundRequestHandlerServiceImpl.fetchResultUsingPost(
+						strUrl.toString(),
+						createReq, null);
+				List<Map<String, Object>> sectors = new ArrayList<>();
+				if (termResponse != null
+						&& Constants.OK.equalsIgnoreCase((String) termResponse.get(Constants.RESPONSE_CODE))) {
+					log.info("Created sub sector successfully with name : " + name);
+				} else {
+					log.error("Failed to create the sector object with name: " + name);
+					response.getParams().setErrmsg("Failed to create sector.");
+					response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+					response.getParams().setStatus(Constants.FAILED);
+					break;
 				}
 			}
 		} else {
