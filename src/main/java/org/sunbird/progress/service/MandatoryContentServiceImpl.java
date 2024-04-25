@@ -32,6 +32,7 @@ import org.sunbird.user.service.UserUtilityServiceImpl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.codehaus.plexus.util.StringUtils;
 
 @Service
 public class MandatoryContentServiceImpl implements MandatoryContentService {
@@ -150,6 +151,8 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
 
 	public Map<String, Object> getUserProgress(SunbirdApiRequest requestBody, String authUserToken, String rootOrgId, String userChannel) {
 		Map<String, Object> result = new HashMap<>();
+		Map<String,Object> reqMap = new HashMap<>();
+		Map<String,Object>participantsDetails = new HashMap<>();
 		try {
 			UserProgressRequest requestData = validateGetBatchEnrolment(requestBody);
 			if (ObjectUtils.isEmpty(requestData)) {
@@ -167,11 +170,11 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
 				if (request.getUserList() != null && !request.getUserList().isEmpty()) {
 					enrollmentIdList = request.getUserList();
 				} else{
-					List<Map<String, Object>> usersEnrolledInTheBatch = cassandraOperation.getRecordsByPropertiesWithoutFiltering(Constants.KEYSPACE_SUNBIRD_COURSES,
-							Constants.TABLE_ENROLLMENT_BATCH_LOOKUP,
-							propertyMap,
-							Arrays.asList(Constants.USER_ID, Constants.BATCH_ID,Constants.ACTIVE), cbExtServerProperties.getBatchEnrolmentReturnSize());
-					enrollmentIdList = usersEnrolledInTheBatch.stream().filter(obj -> (Boolean) obj.get(Constants.ACTIVE)).map(obj -> (String) obj.get(Constants.USER_ID_CONSTANT)).collect(Collectors.toList());
+					reqMap.put(Constants.BATCH_ID,request.getBatchId());
+					reqMap.put(Constants.LIMIT,requestData.getLimit());
+					reqMap.put(Constants.OFFSET,requestData.getOffset());
+					participantsDetails = getBatchParticipantsByPage(reqMap);
+					enrollmentIdList = (List<String>) participantsDetails.get(Constants.USERS_LIST);
 				}
 				propertyMap.put(Constants.USER_ID, enrollmentIdList);
 				propertyMap.put(Constants.COURSE_ID,requestData.getCourseId());
@@ -210,6 +213,7 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
 				setCourseCompletiondetails(responseObj, courseLeafCount);
 			}
 			result.put(Constants.STATUS, Constants.SUCCESSFUL);
+			result.put(Constants.TOTAL_COUNT,participantsDetails.get(Constants.COUNT));
 			result.put(Constants.RESULT, userEnrolmentList);
 		} catch (Exception ex) {
 			result.put(Constants.STATUS, Constants.FAILED);
@@ -218,6 +222,78 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
 		return result;
 	}
 
+	public Map<String,Object> getBatchParticipantsByPage(Map<String, Object> request) {
+		Map<String,Object> responseMap = new HashMap<>();
+		Map<String, Object> queryMap = new HashMap<>();
+		queryMap.put(Constants.BATCH_ID, (String) request.get(Constants.BATCH_ID));
+		Map<String, Object> result = new HashMap<String, Object>();
+		List<String> userList = new ArrayList<String>();
+		Boolean active = (Boolean) request.get(Constants.ACTIVE);
+		if (null == active) {
+			active = true;
+		}
+		Integer limit = (Integer) request.get(Constants.LIMIT);
+		if (limit == null) {
+			limit = 10; // check default limit add it as constants
+		}
+		Integer currentOffSetFromRequest = (Integer) request.get(Constants.OFFSET);
+		if (currentOffSetFromRequest == null) {
+			currentOffSetFromRequest = 0;
+		}
+		String pageId = (String) request.get(Constants.PAGE_ID);
+		String previousPageId = null;
+		int currentOffSet = 0;
+		String currentPagingState = null;
+		List<Map<String,Object>> countResponse = cassandraOperation.getCountOfRecordByIdentifier(Constants.KEYSPACE_SUNBIRD_COURSES,
+				Constants.TABLE_ENROLLMENT_BATCH_LOOKUP, queryMap, Constants.USER_ID);
+		Long count = ((Long)((Map<String,Object>)countResponse.get(0)).get(Constants.USERS_COUNT));
+		do {
+			Map<String,Object> response = cassandraOperation.getRecordByIdentifierWithPage(Constants.KEYSPACE_SUNBIRD_COURSES,
+					Constants.TABLE_ENROLLMENT_BATCH_LOOKUP, queryMap,
+					null, pageId, (Integer) request.get(Constants.LIMIT));
+			currentPagingState = (String) response.get(Constants.PAGE_ID);
+			if (StringUtils.isBlank(previousPageId) && StringUtils.isNotBlank(currentPagingState)) {
+				previousPageId = currentPagingState;
+			}
+			pageId = currentPagingState;
+			List<Map<String, Object>> userCoursesList = (List<Map<String, Object>>) response.get(Constants.RESPONSE);
+			if (org.apache.commons.collections.CollectionUtils.isEmpty(userCoursesList)) {
+				//Set null so that client knows there are no data to read further.
+				previousPageId = null;
+				break;
+			}
+			for (Map<String, Object> userCourse : userCoursesList) {
+				//From this page, we have already read some records, so skip the records
+				if (currentOffSetFromRequest > 0) {
+					currentOffSetFromRequest--;
+					continue;
+				}
+				if (userCourse.get(Constants.ACTIVE) != null
+						&& (active == (boolean) userCourse.get(Constants.ACTIVE))) {
+					userList.add((String) userCourse.get(Constants.USER_ID));
+					if (userList.size() == limit) {
+						//We have read the data... if pageId available send back in response.
+						previousPageId = pageId != null ? pageId : previousPageId;
+						break;
+					}
+				}
+				currentOffSet++;
+			}
+			//We may have read the given limit... if so, break from while loop
+			if (userList.size() == limit) {
+				break;
+			}
+		} while (StringUtils.isNotBlank(currentPagingState));
+		if (StringUtils.isNotBlank(previousPageId)) {
+			result.put(Constants.PAGE_ID, previousPageId);
+			if (currentOffSet >= limit) {
+				currentOffSet = currentOffSet - limit;
+			}
+		}
+		responseMap.put(Constants.COUNT,count);
+		responseMap.put(Constants.USERS_LIST,userList);
+		return responseMap;
+	}
 	private UserProgressRequest validateGetBatchEnrolment(SunbirdApiRequest requestBody) {
 		try {
 			UserProgressRequest userProgressRequest = new UserProgressRequest();

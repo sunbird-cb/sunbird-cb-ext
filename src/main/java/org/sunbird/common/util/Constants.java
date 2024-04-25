@@ -1024,7 +1024,10 @@ public class Constants {
 	public static final String PARENTS = "parents";
 	public static final String SUB_SECTORS = "subsectors";
 	public static final String COURSE_LINK = "courseLink";
-
+	public static final String PAGE_ID = "pageId";
+	public static final String USERS_COUNT = "system.count(userid)";
+	public static final String USERS_LIST = "userList";
+	public static final String TOTAL_COUNT = "totalCount";
 	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}
