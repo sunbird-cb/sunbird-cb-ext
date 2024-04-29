@@ -115,4 +115,9 @@ public interface CassandraOperation {
             Map<String, Object> propertyMap, List<String> fields, int limit, Date updatedOn, String key,Date limitDate);
 
 	public Long getRecordCountWithUserId(String keyspace, String table, String userId,Date limitDate);
-	}
+
+	public Map<String,Object> getRecordByIdentifierWithPage(String keyspaceName, String tableName, Map<String,Object> key, List<String> fields, String pageString, int limit);
+
+	public Long getCountOfRecordByIdentifier(String keyspaceName, String tableName, Map<String,Object> key, String field);
+
+}

@@ -43,4 +43,11 @@ public class MandatoryContentController {
 		return new ResponseEntity<>(service.getUserProgress(requestBody, authUserToken, rootOrgId ,userChannel), HttpStatus.OK);
 	}
 
+	@PostMapping("/v2/progress/getUserProgress")
+	public ResponseEntity<Map<String, Object>> getUserProgressV2(@RequestBody Map<String,Object> requestBody,
+															   @RequestHeader(Constants.USER_TOKEN) String authUserToken,
+															   @RequestHeader(Constants.X_AUTH_USER_ORG_ID) String rootOrgId,
+															   @RequestHeader(Constants.X_AUTH_USER_CHANNEL) String userChannel) {
+		return new ResponseEntity<>(service.getUserProgressV2(requestBody, authUserToken, rootOrgId, userChannel), HttpStatus.OK);
+	}
 }
