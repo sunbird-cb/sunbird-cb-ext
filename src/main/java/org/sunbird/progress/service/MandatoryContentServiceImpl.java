@@ -244,9 +244,8 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
 		String previousPageId = null;
 		int currentOffSet = 0;
 		String currentPagingState = null;
-		List<Map<String,Object>> countResponse = cassandraOperation.getCountOfRecordByIdentifier(Constants.KEYSPACE_SUNBIRD_COURSES,
+		Long count = cassandraOperation.getCountOfRecordByIdentifier(Constants.KEYSPACE_SUNBIRD_COURSES,
 				Constants.TABLE_ENROLLMENT_BATCH_LOOKUP, queryMap, Constants.USER_ID);
-		Long count = ((Long)((Map<String,Object>)countResponse.get(0)).get(Constants.USERS_COUNT));
 		do {
 			Map<String,Object> response = cassandraOperation.getRecordByIdentifierWithPage(Constants.KEYSPACE_SUNBIRD_COURSES,
 					Constants.TABLE_ENROLLMENT_BATCH_LOOKUP, queryMap,

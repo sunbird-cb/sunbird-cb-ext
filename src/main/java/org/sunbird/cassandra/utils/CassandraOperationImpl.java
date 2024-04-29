@@ -510,9 +510,10 @@ public class CassandraOperationImpl implements CassandraOperation {
 	}
 
 	@Override
-	public List<Map<String,Object>> getCountOfRecordByIdentifier(String keyspaceName, String tableName, Map<String,Object> key, String field) {
+	public Long getCountOfRecordByIdentifier(String keyspaceName, String tableName, Map<String,Object> key, String field) {
 		long startTime = System.currentTimeMillis();
 		List<Map<String,Object>>  response = new ArrayList<>();
+		Long count = 0L;
 		try {
 			if (MapUtils.isEmpty(key)) {
 				throw new IllegalArgumentException("Key parameter cannot be null");
@@ -543,11 +544,12 @@ public class CassandraOperationImpl implements CassandraOperation {
 			}
 			ResultSet results = session.execute(selectQuery);
 			response = CassandraUtil.createResponse(results);
+			count = ((Long)((Map<String,Object>)response.get(0)).get("system.count(" + field + ")"));
 		} catch (Exception e) {
 			logger.error(Constants.EXCEPTION_MSG_FETCH + tableName + " : " + e.getMessage(), e);
 
 		}
-		return response;
+		return count;
 	}
 
 }

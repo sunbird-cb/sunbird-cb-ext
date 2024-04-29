@@ -118,7 +118,7 @@ public interface CassandraOperation {
 
 	public Map<String,Object> getRecordByIdentifierWithPage(String keyspaceName, String tableName, Map<String,Object> key, List<String> fields, String pageString, int limit);
 
-	public List<Map<String,Object>> getCountOfRecordByIdentifier(String keyspaceName, String tableName, Map<String,Object> key, String field);
+	public Long getCountOfRecordByIdentifier(String keyspaceName, String tableName, Map<String,Object> key, String field);
 
 
 }
