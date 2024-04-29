@@ -544,7 +544,7 @@ public class CassandraOperationImpl implements CassandraOperation {
 			}
 			ResultSet results = session.execute(selectQuery);
 			response = CassandraUtil.createResponse(results);
-			count = ((Long)((Map<String,Object>)response.get(0)).get("system.count(" + field + ")"));
+			count = ((Long)((Map<String,Object>)response.get(0)).get("system.count(" + field.toLowerCase() + ")"));
 		} catch (Exception e) {
 			logger.error(Constants.EXCEPTION_MSG_FETCH + tableName + " : " + e.getMessage(), e);
 

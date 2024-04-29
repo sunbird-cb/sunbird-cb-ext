@@ -17,10 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.sunbird.cassandra.utils.CassandraOperation;
-import org.sunbird.common.model.SearchUserApiContent;
-import org.sunbird.common.model.SunbirdApiRequest;
-import org.sunbird.common.model.SunbirdApiResp;
-import org.sunbird.common.model.SunbirdUserProfileDetail;
+import org.sunbird.common.model.*;
 import org.sunbird.common.service.ContentServiceImpl;
 import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
 import org.sunbird.common.util.CbExtServerProperties;
@@ -220,32 +217,33 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
 		return result;
 	}
 
-	public Map<String, Object> getUserProgressV2(Map<String, Object> requestBody, String authUserToken, String rootOrgId, String userChannel) {
-		Map<String, Object> result = new HashMap<>();
+	public SBApiResponse getUserProgressV2(Map<String, Object> requestBody, String authUserToken, String rootOrgId, String userChannel) {
+		SBApiResponse response = new SBApiResponse(Constants.API_GET_USER_PROGRESS);
 		Map<String,Object> reqMap = new HashMap<>();
 		Map<String,Object>participantsDetails = new HashMap<>();
 		String errMsg = "";
 		try {
 			errMsg = validateRequest(requestBody);
 			if (StringUtils.isNotBlank(errMsg)) {
-				result.put(Constants.STATUS, Constants.FAILED);
-				result.put(Constants.RESULT, null);
-				result.put(Constants.MESSAGE,errMsg);
-				return result;
+				response.setResponseCode(HttpStatus.BAD_REQUEST);
+				response.getParams().setStatus(Constants.FAILED);
+				response.getParams().setErrmsg(errMsg);
+				return response;
 			}
-			int courseLeafCount = getLeafCountForTheCourse(rootOrgId, (String) requestBody.get(Constants.COURSE_ID), userChannel);
+			Map<String, Object> request = (Map<String, Object>) requestBody.get(Constants.REQUEST);
+			int courseLeafCount = getLeafCountForTheCourse(rootOrgId, (String) request.get(Constants.COURSE_ID), userChannel);
 			// get all enrolled details
 			List<String> enrollmentIdList = null;
 			List<Map<String, Object>> userEnrolmentList = new ArrayList<>();
 			Map<String, Object> propertyMap = new HashMap<>();
-			propertyMap.put(Constants.BATCH_ID, requestBody.get(Constants.BATCH_ID));
-			reqMap.put(Constants.BATCH_ID,requestBody.get(Constants.BATCH_ID));
-			reqMap.put(Constants.LIMIT,requestBody.get(Constants.LIMIT));
-			reqMap.put(Constants.OFFSET,requestBody.get(Constants.OFFSET));
+			propertyMap.put(Constants.BATCH_ID, request.get(Constants.BATCH_ID));
+			reqMap.put(Constants.BATCH_ID,request.get(Constants.BATCH_ID));
+			reqMap.put(Constants.LIMIT,request.get(Constants.LIMIT));
+			reqMap.put(Constants.OFFSET,request.get(Constants.OFFSET));
 			participantsDetails = getBatchParticipantsByPage(reqMap);
 			enrollmentIdList = (List<String>) participantsDetails.get(Constants.USERS_LIST);
 			propertyMap.put(Constants.USER_ID, enrollmentIdList);
-			propertyMap.put(Constants.COURSE_ID, requestBody.get(Constants.COURSE_ID));
+			propertyMap.put(Constants.COURSE_ID, request.get(Constants.COURSE_ID));
 			userEnrolmentList.addAll(cassandraOperation.getRecordsByPropertiesWithoutFiltering(Constants.KEYSPACE_SUNBIRD_COURSES,
 					Constants.TABLE_USER_ENROLMENT, propertyMap,
 					Arrays.asList(Constants.USER_ID_CONSTANT, Constants.COURSE_ID,
@@ -277,14 +275,16 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
 				// set completion percentage & status
 				setCourseCompletiondetails(responseObj, courseLeafCount);
 			}
-			result.put(Constants.STATUS, Constants.SUCCESSFUL);
-			result.put(Constants.TOTAL_COUNT,participantsDetails.get(Constants.COUNT));
-			result.put(Constants.RESULT, userEnrolmentList);
+			response.getParams().setStatus(Constants.SUCCESS);
+			response.setResponseCode(HttpStatus.OK);
+			response.getResult().put(Constants.TOTAL_COUNT,participantsDetails.get(Constants.COUNT));
+			response.getResult().put(Constants.PROGRESS, userEnrolmentList);
 		} catch (Exception ex) {
-			result.put(Constants.STATUS, Constants.FAILED);
+			response.setResponseCode(HttpStatus.BAD_REQUEST);
+			response.getParams().setStatus(Constants.FAILED);
 			logger.error(ex);
 		}
-		return result;
+		return response;
 	}
 
 
