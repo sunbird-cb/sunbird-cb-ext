@@ -514,6 +514,9 @@ public class CassandraOperationImpl implements CassandraOperation {
 		long startTime = System.currentTimeMillis();
 		List<Map<String,Object>>  response = new ArrayList<>();
 		try {
+			if (MapUtils.isEmpty(key)) {
+				throw new IllegalArgumentException("Key parameter cannot be null");
+			}
 			Session session = connectionManager.getSession(keyspaceName);
 			Builder selectBuilder;
 			if (StringUtils.isNotEmpty(field)) {
