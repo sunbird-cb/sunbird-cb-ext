@@ -238,6 +238,7 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
 			Map<String, Object> propertyMap = new HashMap<>();
 			propertyMap.put(Constants.BATCH_ID, request.get(Constants.BATCH_ID));
 			reqMap.put(Constants.BATCH_ID,request.get(Constants.BATCH_ID));
+			reqMap.put(Constants.COURSE_ID,request.get(Constants.COURSE_ID));
 			reqMap.put(Constants.LIMIT,request.get(Constants.LIMIT));
 			reqMap.put(Constants.OFFSET,request.get(Constants.OFFSET));
 			participantsDetails = getBatchParticipantsByPage(reqMap);
@@ -250,8 +251,11 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
 							Constants.BATCH_ID, Constants.COMPLETION_PERCENTAGE, Constants.PROGRESS,
 							Constants.STATUS, Constants.ISSUED_CERTIFICATES), cbExtServerProperties.getBatchEnrolmentReturnSize()));
 			// restricting with only 100 items in the response
-			if (userEnrolmentList.size() > cbExtServerProperties.getBatchEnrolmentReturnSize()) {
-				userEnrolmentList = userEnrolmentList.subList(0, cbExtServerProperties.getBatchEnrolmentReturnSize());
+			if ( (Integer) request.get(Constants.LIMIT) > cbExtServerProperties.getBatchEnrolmentReturnSize()) {
+				response.setResponseCode(HttpStatus.BAD_REQUEST);
+				response.getParams().setStatus(Constants.FAILED);
+				response.getParams().setErrmsg(" Given Limit is greater than expected value, Limit should be less than "+cbExtServerProperties.getBatchEnrolmentReturnSize());
+				return response;
 			}
 
 			//get id list from userEnrollmentList, in case  request has more than one batch
@@ -427,13 +431,7 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
 			active = true;
 		}
 		Integer limit = (Integer) request.get(Constants.LIMIT);
-		if (limit == null) {
-			limit = 10; // check default limit add it as constants
-		}
 		Integer currentOffSetFromRequest = (Integer) request.get(Constants.OFFSET);
-		if (currentOffSetFromRequest == null) {
-			currentOffSetFromRequest = 0;
-		}
 		String pageId = (String) request.get(Constants.PAGE_ID);
 		String previousPageId = null;
 		int currentOffSet = 0;
@@ -469,6 +467,8 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
 						previousPageId = pageId != null ? pageId : previousPageId;
 						break;
 					}
+				} else {
+					logger.info("No active enrolment for user : "+userCourse.get(Constants.USER_ID).toString()+" course : "+request.get(Constants.COURSE_ID).toString()+" batch : "+request.get(Constants.BATCH_ID).toString());
 				}
 				currentOffSet++;
 			}

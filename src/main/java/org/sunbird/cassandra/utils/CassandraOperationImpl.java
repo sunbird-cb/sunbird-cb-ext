@@ -520,11 +520,7 @@ public class CassandraOperationImpl implements CassandraOperation {
 			}
 			Session session = connectionManager.getSession(keyspaceName);
 			Builder selectBuilder;
-			if (StringUtils.isNotEmpty(field)) {
-				selectBuilder = QueryBuilder.select().count(field);
-			} else {
-				selectBuilder = QueryBuilder.select().countAll();
-			}
+			selectBuilder = QueryBuilder.select().count(field);
 			Select selectQuery = selectBuilder.from(keyspaceName, tableName);
 			if (MapUtils.isNotEmpty(key)) {
 				Where selectWhere = selectQuery.where();
