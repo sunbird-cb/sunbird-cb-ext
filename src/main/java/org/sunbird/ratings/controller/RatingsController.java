@@ -66,8 +66,8 @@ public class RatingsController {
         return new ResponseEntity<>(response, response.getResponseCode());
     }
 
-    @GetMapping("/ratings/v1/topReviews")
-    public ResponseEntity<?> getRatingTopReviewsSummary(@RequestHeader(Constants.X_AUTH_USER_ORG_ID) String userOrgId) {
+    @GetMapping("/ratings/v1/topReviews/{orgId}")
+    public ResponseEntity<?> getRatingTopReviewsSummary(@PathVariable(Constants.ORG_ID) String userOrgId) {
         SBApiResponse response = ratingService.getTopReviewsForUserByOrgID(userOrgId);
         return new ResponseEntity<>(response, response.getResponseCode());
     }
