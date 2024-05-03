@@ -36,20 +36,24 @@ public class HallOfFameServiceImpl implements HallOfFameService {
         int lastMonthValue = lastMonthDate.getMonthValue();
         int lastMonthYearValue = lastMonthDate.getYear();
 
-        String formattedDateLastMonth = currentDate.minusMonths(1).format(DateTimeFormatter.ofPattern("MMMM yyyy"));
+        String formattedDateLastMonth = lastMonthDate.format(DateTimeFormatter.ofPattern("MMMM yyyy"));
         Map<String, Object> propertyMap = new HashMap<>();
         propertyMap.put(Constants.MONTH, lastMonthValue);
         propertyMap.put(Constants.YEAR, lastMonthYearValue);
 
-        List<Map<String, Object>> dptList = cassandraOperation.getRecordsByPropertiesWithoutFiltering(
-                Constants.KEYSPACE_SUNBIRD, Constants.MDO_KARMA_POINTS, propertyMap, null);
-        if (dptList.isEmpty()) {
-            formattedDateLastMonth = currentDate.minusMonths(2).format(DateTimeFormatter.ofPattern("MMMM yyyy"));
-            propertyMap.clear();
-            propertyMap.put(Constants.MONTH, currentDate.minusMonths(2).getMonthValue());
-            propertyMap.put(Constants.YEAR, currentDate.minusMonths(2).getYear());
+        List<Map<String, Object>> dptList = new ArrayList<>();
+        while (dptList.isEmpty()) {
             dptList = cassandraOperation.getRecordsByPropertiesWithoutFiltering(
                     Constants.KEYSPACE_SUNBIRD, Constants.MDO_KARMA_POINTS, propertyMap, null);
+            if (dptList.isEmpty()) {
+                lastMonthDate = lastMonthDate.minusMonths(1);
+                lastMonthValue = lastMonthDate.getMonthValue();
+                lastMonthYearValue = lastMonthDate.getYear();
+                formattedDateLastMonth = lastMonthDate.format(DateTimeFormatter.ofPattern("MMMM yyyy"));
+                propertyMap.clear();
+                propertyMap.put(Constants.MONTH, lastMonthValue);
+                propertyMap.put(Constants.YEAR, lastMonthYearValue);
+            }
         }
         resultMap.put(Constants.MDO_LIST, dptList);
         resultMap.put(Constants.TITLE, formattedDateLastMonth);
