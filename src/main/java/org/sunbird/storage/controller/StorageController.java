@@ -71,4 +71,12 @@ public class StorageController {
 											@PathVariable("date") String date) {
 		return storageService.getFileInfoSpv(userToken, date);
 	}
+
+	@PostMapping("/orgStoreUpload")
+	public ResponseEntity<?> orgStoreUpload(@RequestHeader(Constants.X_AUTH_USER_ORG_ID) String orgId
+											,@RequestParam(value = "file", required = true) MultipartFile multipartFile)
+			throws IOException {
+		SBApiResponse uploadResponse = storageService.uploadFile(multipartFile, serverConfig.getOrgStoreFolderName() + "/" + orgId);
+		return new ResponseEntity<>(uploadResponse, uploadResponse.getResponseCode());
+	}
 }

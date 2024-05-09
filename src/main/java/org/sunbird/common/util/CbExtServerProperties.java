@@ -759,6 +759,9 @@ public class CbExtServerProperties {
 	@Value("${label.dashboard.course.enrolment.count}")
 	private String labelDashboardCourseEnrolmentCount;
 
+	@Value("${cloud.org.store.folder.name}")
+	private String orgStoreFolderName;
+
 	public boolean qListFromCacheEnabled() {
 		return qListFromCacheEnabled;
 	}
@@ -2684,5 +2687,13 @@ public class CbExtServerProperties {
 
 	public void setLabelDashboardCourseEnrolmentCount(String labelDashboardCourseEnrolmentCount) {
 		this.labelDashboardCourseEnrolmentCount = labelDashboardCourseEnrolmentCount;
+	}
+
+	public String getOrgStoreFolderName() {
+		return orgStoreFolderName;
+	}
+
+	public void setOrgStoreFolderName(String orgStoreFolderName) {
+		this.orgStoreFolderName = orgStoreFolderName;
 	}
 }
