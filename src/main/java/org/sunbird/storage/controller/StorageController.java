@@ -73,10 +73,10 @@ public class StorageController {
 	}
 
 	@PostMapping("/orgStoreUpload")
-	public ResponseEntity<?> orgStoreUpload(@RequestHeader(Constants.X_AUTH_USER_ORG_ID) String orgId
+	public ResponseEntity<?> orgStoreUpload(@RequestHeader(Constants.X_AUTH_TOKEN) String userToken
 											,@RequestParam(value = "file", required = true) MultipartFile multipartFile)
 			throws IOException {
-		SBApiResponse uploadResponse = storageService.uploadFile(multipartFile, serverConfig.getOrgStoreFolderName() + "/" + orgId);
+		SBApiResponse uploadResponse = storageService.uploadFileForOrg(multipartFile, userToken);
 		return new ResponseEntity<>(uploadResponse, uploadResponse.getResponseCode());
 	}
 }

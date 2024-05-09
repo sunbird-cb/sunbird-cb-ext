@@ -398,4 +398,36 @@ public class StorageServiceImpl implements StorageService {
 			return response;
 		}
 	}
+
+	@Override
+	public SBApiResponse uploadFileForOrg(MultipartFile mFile, String userToken) {
+		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_FILE_UPLOAD);
+		try {
+			String userId = accessTokenValidator.fetchUserIdFromAccessToken(userToken);
+			if (StringUtils.isEmpty(userId)) {
+				logger.error("Failed to get the UserInfo from token");
+				response.getParams().setStatus(Constants.FAILED);
+				response.getParams().setErrmsg("Failed to get the UserInfo from token");
+				response.setResponseCode(HttpStatus.UNAUTHORIZED);
+				return response;
+			}
+			Map<String, Map<String, String>> userInfoMap = new HashMap<>();
+			userUtilityService.getUserDetailsFromDB(Arrays.asList(userId), Arrays.asList(Constants.USER_ID, Constants.ROOT_ORG_ID), userInfoMap);
+			if (MapUtils.isEmpty(userInfoMap)) {
+				logger.error("Failed to get the UserInfo from token");
+				response.getParams().setStatus(Constants.FAILED);
+				response.getParams().setErrmsg("Failed to get the UserInfo from token");
+				response.setResponseCode(HttpStatus.UNAUTHORIZED);
+				return response;
+			}
+			String orgId = userInfoMap.get(userId).get(Constants.ROOT_ORG_ID);
+			return uploadFile(mFile, serverProperties.getOrgStoreFolderName() + "/" + orgId, serverProperties.getCloudContainerName());
+		} catch (IOException e) {
+			logger.error("Failed to upload the file, Exception: ", e);
+			response.getParams().setStatus(Constants.FAILED);
+			response.getParams().setErrmsg("Failed to upload the file, Exception: " + e.getMessage());
+			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+			return response;
+		}
+	}
 }
