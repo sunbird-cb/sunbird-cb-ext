@@ -187,7 +187,7 @@ public class TrendingServiceImpl implements TrendingService {
     }
 
     public SBApiResponse trendingContentSearch(Map<String, Object> requestBody, String token) throws Exception {
-       SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.MICROSITE_TOP_FEATURE_CONTENT_API);
+       SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.MICROSITE_TOP_CONTENT_API);
        try {
            Map<String, Object> request = requestBody.containsKey(REQUEST) ? (Map<String, Object>) requestBody.get(REQUEST) : MapUtils.EMPTY_MAP;
            if (MapUtils.isEmpty(request)) {
@@ -241,22 +241,20 @@ public class TrendingServiceImpl implements TrendingService {
                    aggregateData.put(contextType, limitCourses);
                }
            }
-           List<List<Map<String, Object>>> resultData = new ArrayList<>();
+           List<Map<String, Object>> contentList = new ArrayList<>();
            if (!aggregateData.isEmpty()) {
                List<String> compositeKeyList = new ArrayList<>(payloadToRedisKeyMapping.keySet());
                for (int i = 0; i < aggregateData.size(); i++) {
                    List<String> searchIds = (List<String>) aggregateData.get(compositeKeyList.get(i));
-                   List<Map<String, Object>> contentList = new ArrayList<>();
                    for (String searchId : searchIds) {
                        Map<String, Object> contentResponse = contentService.readContentFromCache(searchId, null);
                        if (MapUtils.isNotEmpty(contentResponse)) {
                            contentList.add(contentResponse);
                        }
                    }
-                   resultData.add(contentList);
                }
            }
-           response.put(RESPONSE, resultData);
+           response.put(Constants.CONTENT, contentList);
        } catch (Exception e) {
            response.getParams().setStatus(Constants.FAILED);
            response.getParams().setErrmsg(e.getMessage());
