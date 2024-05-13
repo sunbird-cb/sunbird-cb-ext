@@ -1039,16 +1039,6 @@ public class Constants {
 	public static final String EVENT_KEY = "Event";
 	public static final String SLASH = "/";
 	public static final String API_MICRO_SITE_INSIGHTS ="api.micro-site.insights";
-	public static final String ACROSS = "across";
-	public static final String DASHBOARD_LIVE_COURSE_COUNT ="dashboard_live_course_count_by_course_org";
-	public static final String DASHBOARD_CERTIFICATES_GENERATED_BY_COURSE ="dashboard_certificates_generated_count_by_course_org";
-	public static final String DASHBOARD_COURSE_AVG_RATING ="dashboard_course_average_rating_by_course_org";
-	public static final String DASHBOARD_ENROLMENT_COUNT_BY_COURSE ="dashboard_enrolment_count_by_course_org";
-	public static final String DASHBOARD_COMPETENCIES_COUNT_BY_COURSE ="dashboard_competencies_count_by_course_org";
-	public static final String TOTAL_CONTENT ="total-content";
-	public static final String AVG_RATING_MICRO_SITE="avg-rating";
-	public static final String TOTAL_ENROLMENTS ="total-enrolments";
-	public static final String TOTAL_CERTIFICATES ="total-certificates";
   	public static final String TOP_COMMENTS_ORG_REDIS_KEY = "cbp_top_10_users_reviews_by_org";
 	public static final String PROFILE_IMAGE_URL = "profileImageUrl";
 	public static final String API_TOD_COMMENT_FOR_USER = "api.rating.top.v1.comment";
@@ -1059,6 +1049,7 @@ public class Constants {
 	public static final String USERS_LIST = "userList";
 	public static final String TOTAL_COUNT = "totalCount";
 	public static final String MICROSITE_TOP_FEATURE_CONTENT_API = "api.microsite.topfeatured.content";
+	public static final String ICON = "icon";
 
 	private Constants() {
 		throw new IllegalStateException("Utility class");

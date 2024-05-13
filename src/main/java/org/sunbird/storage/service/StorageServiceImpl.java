@@ -421,7 +421,7 @@ public class StorageServiceImpl implements StorageService {
 				return response;
 			}
 			String orgId = userInfoMap.get(userId).get(Constants.ROOT_ORG_ID);
-			return uploadFile(mFile, serverProperties.getOrgStoreFolderName() + "/" + orgId, serverProperties.getCloudContainerName());
+			return uploadFile(mFile, serverProperties.getOrgStoreFolderName() + "/" + orgId, serverProperties.getCloudPublicContainerName());
 		} catch (IOException e) {
 			logger.error("Failed to upload the file, Exception: ", e);
 			response.getParams().setStatus(Constants.FAILED);

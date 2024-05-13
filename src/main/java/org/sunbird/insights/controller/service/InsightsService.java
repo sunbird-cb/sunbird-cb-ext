@@ -8,5 +8,5 @@ public interface InsightsService {
 
     public SBApiResponse insights(Map<String, Object> requestBody,String userId) throws Exception;
 
-    public SBApiResponse readInsights(Map<String, Object> requestBody, String userId) throws Exception;
+    public SBApiResponse readInsightsForOrganisation(Map<String, Object> requestBody, String userId);
 }
