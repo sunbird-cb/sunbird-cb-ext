@@ -362,19 +362,19 @@ public class UserBulkUploadService {
                 logger.info("Error in Process Bulk Upload : The File is not downloaded/present");
                 status = Constants.FAILED_UPPERCASE;
             }
-           /* updateUserBulkUploadStatus(inputDataMap.get(Constants.ROOT_ORG_ID), inputDataMap.get(Constants.IDENTIFIER),
-                    status, totalRecordsCount, noOfSuccessfulRecords, failedRecordsCount);*/
+            updateUserBulkUploadStatus(inputDataMap.get(Constants.ROOT_ORG_ID), inputDataMap.get(Constants.IDENTIFIER),
+                    status, totalRecordsCount, noOfSuccessfulRecords, failedRecordsCount);
         } catch (Exception e) {
             logger.error(String.format("Error in Process Bulk Upload %s", e.getMessage()), e);
-            /*updateUserBulkUploadStatus(inputDataMap.get(Constants.ROOT_ORG_ID), inputDataMap.get(Constants.IDENTIFIER),
-                    Constants.FAILED_UPPERCASE, 0, 0, 0);*/
+            updateUserBulkUploadStatus(inputDataMap.get(Constants.ROOT_ORG_ID), inputDataMap.get(Constants.IDENTIFIER),
+                    Constants.FAILED_UPPERCASE, 0, 0, 0);
         } finally {
             if (wb != null)
                 wb.close();
             if (fis != null)
                 fis.close();
-            /*if (file != null)
-                file.delete();*/
+            if (file != null)
+                file.delete();
         }
     }
 
