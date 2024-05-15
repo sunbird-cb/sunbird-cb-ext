@@ -192,7 +192,7 @@ public class UserBulkUploadService {
                             invalidErrList.add("Invalid column type. Expecting string format");
                         }
                     }
-                    if (nextRow.getCell(5) != null || nextRow.getCell(5).getCellType() != CellType.BLANK) {
+                    if (nextRow.getCell(5) != null && nextRow.getCell(5).getCellType() != CellType.BLANK) {
                         if (nextRow.getCell(5).getCellType() == CellType.NUMERIC) {
                             userRegistration.setEmployeeId(NumberToTextConverter.toText(nextRow.getCell(5).getNumericCellValue()).trim());
                         } else if (nextRow.getCell(5).getCellType() == CellType.STRING) {
@@ -201,35 +201,35 @@ public class UserBulkUploadService {
                             invalidErrList.add("Invalid column type. Expecting string/number format");
                         }
                     }
-                    if (nextRow.getCell(6) != null || nextRow.getCell(6).getCellType() != CellType.BLANK) {
+                    if (nextRow.getCell(6) != null && nextRow.getCell(6).getCellType() != CellType.BLANK) {
                         if (nextRow.getCell(6).getCellType() == CellType.STRING) {
                             userRegistration.setGender(nextRow.getCell(6).getStringCellValue().trim());
                         } else {
                             invalidErrList.add("Invalid column type. Expecting string format");
                         }
                     }
-                    if (nextRow.getCell(7) != null || nextRow.getCell(7).getCellType() != CellType.BLANK) {
+                    if (nextRow.getCell(7) != null && nextRow.getCell(7).getCellType() != CellType.BLANK) {
                         if (nextRow.getCell(7).getCellType() == CellType.STRING) {
                             userRegistration.setDob(nextRow.getCell(7).getStringCellValue().trim());
                         } else {
                             invalidErrList.add("Invalid column type. Expecting string format");
                         }
                     }
-                    if (nextRow.getCell(8) != null || nextRow.getCell(8).getCellType() != CellType.BLANK) {
+                    if (nextRow.getCell(8) != null && nextRow.getCell(8).getCellType() != CellType.BLANK) {
                         if (nextRow.getCell(8).getCellType() == CellType.STRING) {
                             userRegistration.setDomicileMedium(nextRow.getCell(8).getStringCellValue().trim());
                         } else {
                             invalidErrList.add("Invalid column type. Expecting string format");
                         }
                     }
-                    if (nextRow.getCell(9) != null || nextRow.getCell(9).getCellType() != CellType.BLANK) {
+                    if (nextRow.getCell(9) != null && nextRow.getCell(9).getCellType() != CellType.BLANK) {
                         if (nextRow.getCell(9).getCellType() == CellType.STRING) {
                             userRegistration.setCategory(nextRow.getCell(9).getStringCellValue().trim());
                         } else {
                             invalidErrList.add("Invalid column type. Expecting string format");
                         }
                     }
-                    if (nextRow.getCell(10) != null || nextRow.getCell(10).getCellType() != CellType.BLANK) {
+                    if (nextRow.getCell(10) != null && nextRow.getCell(10).getCellType() != CellType.BLANK) {
                         if (nextRow.getCell(10).getCellType() == CellType.NUMERIC) {
                             userRegistration.setPincode(NumberToTextConverter.toText(nextRow.getCell(10).getNumericCellValue()));
                         } else if (nextRow.getCell(10).getCellType() == CellType.STRING) {
@@ -362,19 +362,19 @@ public class UserBulkUploadService {
                 logger.info("Error in Process Bulk Upload : The File is not downloaded/present");
                 status = Constants.FAILED_UPPERCASE;
             }
-            updateUserBulkUploadStatus(inputDataMap.get(Constants.ROOT_ORG_ID), inputDataMap.get(Constants.IDENTIFIER),
-                    status, totalRecordsCount, noOfSuccessfulRecords, failedRecordsCount);
+           /* updateUserBulkUploadStatus(inputDataMap.get(Constants.ROOT_ORG_ID), inputDataMap.get(Constants.IDENTIFIER),
+                    status, totalRecordsCount, noOfSuccessfulRecords, failedRecordsCount);*/
         } catch (Exception e) {
             logger.error(String.format("Error in Process Bulk Upload %s", e.getMessage()), e);
-            updateUserBulkUploadStatus(inputDataMap.get(Constants.ROOT_ORG_ID), inputDataMap.get(Constants.IDENTIFIER),
-                    Constants.FAILED_UPPERCASE, 0, 0, 0);
+            /*updateUserBulkUploadStatus(inputDataMap.get(Constants.ROOT_ORG_ID), inputDataMap.get(Constants.IDENTIFIER),
+                    Constants.FAILED_UPPERCASE, 0, 0, 0);*/
         } finally {
             if (wb != null)
                 wb.close();
             if (fis != null)
                 fis.close();
-            if (file != null)
-                file.delete();
+            /*if (file != null)
+                file.delete();*/
         }
     }
 
