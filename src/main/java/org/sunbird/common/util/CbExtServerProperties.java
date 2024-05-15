@@ -750,6 +750,9 @@ public class CbExtServerProperties {
 	@Value("#{${organisation.insights.redis.key.mapping}}")
 	private Map<String, String> organisationInsightRedisKeyMapping;
 
+	@Value("${bulk.upload.allowed.roles.creation}")
+	private String bulkUploadAllowedRolesCreation;
+
 	public boolean qListFromCacheEnabled() {
 		return qListFromCacheEnabled;
 	}
@@ -2651,5 +2654,13 @@ public class CbExtServerProperties {
 
 	public void setOrganisationInsightRedisKeyMapping(Map<String, String> organisationInsightRedisKeyMapping) {
 		this.organisationInsightRedisKeyMapping = organisationInsightRedisKeyMapping;
+	}
+
+	public List<String> getBulkUploadAllowedRolesCreation() {
+		return Arrays.asList(bulkUploadAllowedRolesCreation.split(",", -1));
+	}
+
+	public void setBulkUploadAllowedRolesCreation(String bulkUploadAllowedRolesCreation) {
+		this.bulkUploadAllowedRolesCreation = bulkUploadAllowedRolesCreation;
 	}
 }
