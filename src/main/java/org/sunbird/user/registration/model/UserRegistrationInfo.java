@@ -33,6 +33,13 @@ public class UserRegistrationInfo {
     private List<String> tag;
     private String externalSystemId;
     private String externalSystem;
+    private String employeeId;
+    private String gender;
+    private String dob;
+    private String domicileMedium;
+    private String category;
+    private String pincode;
+    private List<String> roles;
 
     public String getRegistrationCode() {
         return registrationCode;
@@ -176,5 +183,61 @@ public class UserRegistrationInfo {
 
     public void setGroup(String group) {
         this.group = group;
+    }
+
+    public String getEmployeeId() {
+        return employeeId;
+    }
+
+    public void setEmployeeId(String employeeId) {
+        this.employeeId = employeeId;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    public String getDob() {
+        return dob;
+    }
+
+    public void setDob(String dob) {
+        this.dob = dob;
+    }
+
+    public String getDomicileMedium() {
+        return domicileMedium;
+    }
+
+    public void setDomicileMedium(String domicileMedium) {
+        this.domicileMedium = domicileMedium;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public String getPincode() {
+        return pincode;
+    }
+
+    public void setPincode(String pincode) {
+        this.pincode = pincode;
+    }
+
+    public List<String> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(List<String> roles) {
+        this.roles = roles;
     }
 }
