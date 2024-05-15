@@ -117,13 +117,13 @@ public class UserBulkUploadService {
                 // incrementing the iterator inorder to skip the headers in the first row
                 if (rowIterator.hasNext()) {
                     Row firstRow = rowIterator.next();
-                    Cell statusCell = firstRow.getCell(7);
-                    Cell errorDetails = firstRow.getCell(8);
+                    Cell statusCell = firstRow.getCell(15);
+                    Cell errorDetails = firstRow.getCell(16);
                     if (statusCell == null) {
-                        statusCell = firstRow.createCell(7);
+                        statusCell = firstRow.createCell(15);
                     }
                     if (errorDetails == null) {
-                        errorDetails = firstRow.createCell(8);
+                        errorDetails = firstRow.createCell(16);
                     }
                     statusCell.setCellValue("Status");
                     errorDetails.setCellValue("Error Details");
@@ -230,10 +230,12 @@ public class UserBulkUploadService {
                         }
                     }
                     if (nextRow.getCell(10) != null || nextRow.getCell(10).getCellType() != CellType.BLANK) {
-                        if (nextRow.getCell(10).getCellType() == CellType.STRING) {
+                        if (nextRow.getCell(10).getCellType() == CellType.NUMERIC) {
+                            userRegistration.setPincode(NumberToTextConverter.toText(nextRow.getCell(10).getNumericCellValue()));
+                        } else if (nextRow.getCell(10).getCellType() == CellType.STRING) {
                             userRegistration.setPincode(nextRow.getCell(10).getStringCellValue().trim());
                         } else {
-                            invalidErrList.add("Invalid column type. Expecting string format");
+                            invalidErrList.add("Invalid column type. Expecting number/string format");
                         }
                     }
                     if (nextRow.getCell(11) != null && nextRow.getCell(11).getCellType() != CellType.BLANK) {
