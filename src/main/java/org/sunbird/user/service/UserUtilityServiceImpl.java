@@ -636,19 +636,19 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		personalDetails.put(Constants.MOBILE, userRegistration.getPhone());
 		personalDetails.put(Constants.PHONE_VERIFIED, true);
 		if (StringUtils.isNotEmpty(userRegistration.getDob())) {
-			profileDetails.put(Constants.DOB, userRegistration.getDob());
+			personalDetails.put(Constants.DOB, userRegistration.getDob());
 		}
 		if (StringUtils.isNotEmpty(userRegistration.getCategory())) {
-			profileDetails.put(Constants.CATEGORY, userRegistration.getCategory());
+			personalDetails.put(Constants.CATEGORY, userRegistration.getCategory());
 		}
 		if (StringUtils.isNotEmpty(userRegistration.getDomicileMedium())) {
-			profileDetails.put(Constants.DOMICILE_MEDIUM, userRegistration.getDob());
+			personalDetails.put(Constants.DOMICILE_MEDIUM, userRegistration.getDomicileMedium());
 		}
 		if (StringUtils.isNotEmpty(userRegistration.getPincode())) {
-			profileDetails.put(Constants.PINCODE, userRegistration.getDob());
+			personalDetails.put(Constants.PINCODE, userRegistration.getPincode());
 		}
 		if (StringUtils.isNotEmpty(userRegistration.getGender())) {
-			profileDetails.put(Constants.GENDER, userRegistration.getDob());
+			personalDetails.put(Constants.GENDER, userRegistration.getGender());
 		}
 		profileDetails.put(Constants.PERSONAL_DETAILS, personalDetails);
 		Map<String, Object> professionDetailObj = new HashMap<String, Object>();
