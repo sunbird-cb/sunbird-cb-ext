@@ -675,6 +675,7 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		profileDetails.put(Constants.ADDITIONAL_PROPERTIES, additionalProperties);
 		profileDetails.put(Constants.VERIFIED_KARMAYOGI, false);
 		profileDetails.put(Constants.MANDATORY_FIELDS_EXISTS, false);
+		profileDetails.put(Constants.PROFILE_STATUS, Constants.NOT_VERIFIED);
 		requestBody.put(Constants.PROFILE_DETAILS, profileDetails);
 		request.put(Constants.REQUEST, requestBody);
 		Map<String, Object> readData = (Map<String, Object>) outboundRequestHandlerService.fetchResultUsingPatch(
