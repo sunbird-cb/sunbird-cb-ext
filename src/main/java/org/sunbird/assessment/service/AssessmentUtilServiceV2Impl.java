@@ -24,7 +24,7 @@ import org.sunbird.common.util.Constants;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import static org.sunbird.common.util.Constants.INSIGHTS_LEARNING_HOURS_REDIS_KEY;
+import javax.management.ObjectName;
 
 @Service
 public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
@@ -451,6 +451,118 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
                 throw new RuntimeException(e);
             }
         }
+		return new HashMap<>();
+	}
+
+
+
+	public Map<String, Object> validateQumlAssessmentV2(Map<String, Object> questionSetDetailsMap,List<String> originalQuestionList,
+													  List<Map<String, Object>> userQuestionList,Map<String,Object> questionMap) {
+		try {
+			Integer correct = 0;
+			Integer blank = 0;
+			Integer inCorrect = 0;
+			Double result;
+			Integer total = 0;
+			Integer totalSectionMarks =0;
+			Map<String,Object> questionSetSectionScheme;
+			questionSetSectionScheme= (Map<String, Object>) questionSetDetailsMap.get("questionSectionScheme");
+			String assessmentType= (String)questionSetDetailsMap.get("assessmentType");
+			String negativeWeightAgeEnabled= (String)questionSetDetailsMap.get("negativeMarkingEnabled");
+			String minimumPassPercentage= (String)questionSetDetailsMap.get("minimumPassPercentage");
+			Integer minimumPassValue = Integer.valueOf(minimumPassPercentage.replaceAll("%", ""));
+			Integer totalPossibleSectionMarks= (Integer) questionSetDetailsMap.get("totalPossibleSectionMarks");
+			/*String sectionName = (String)questionMap.get("sectionName");
+			String proficiency = (String)questionMap.get("proficiency");*/
+			String sectionName = "section_1";
+			String proficiency = "Proficiency1";
+
+			Map<String, Object> resultMap = new HashMap<>();
+			Map<String, Object> answers = getQumlAnswers(originalQuestionList,questionMap);
+			for (Map<String, Object> question : userQuestionList) {
+				List<String> marked = new ArrayList<>();
+				if (question.containsKey(Constants.QUESTION_TYPE)) {
+					String questionType = ((String) question.get(Constants.QUESTION_TYPE)).toLowerCase();
+					Map<String, Object> editorStateObj = (Map<String, Object>) question.get(Constants.EDITOR_STATE);
+					List<Map<String, Object>> options = (List<Map<String, Object>>) editorStateObj
+							.get(Constants.OPTIONS);
+					switch (questionType) {
+						case Constants.MTF:
+							for (Map<String, Object> option : options) {
+								marked.add(option.get(Constants.INDEX).toString() + "-"
+										+ option.get(Constants.SELECTED_ANSWER).toString().toLowerCase());
+							}
+							break;
+						case Constants.FTB:
+							for (Map<String, Object> option : options) {
+								marked.add((String) option.get(Constants.SELECTED_ANSWER));
+							}
+							break;
+						case Constants.MCQ_SCA:
+						case Constants.MCQ_MCA:
+							for (Map<String, Object> option : options) {
+								if ((boolean) option.get(Constants.SELECTED_ANSWER)) {
+									marked.add((String) option.get(Constants.INDEX));
+								}
+							}
+							break;
+						default:
+							break;
+					}
+				}
+				if (CollectionUtils.isEmpty(marked)){
+					blank++;
+					question.put(Constants.RESULT,Constants.BLANK);
+				}
+				else {
+					List<String> answer = (List<String>) answers.get(question.get(Constants.IDENTIFIER));
+					if (answer.size() > 1)
+						Collections.sort(answer);
+					if (marked.size() > 1)
+						Collections.sort(marked);
+					if (answer.equals(marked)){
+						question.put(Constants.RESULT,Constants.CORRECT);
+						correct++;
+						if (assessmentType.equalsIgnoreCase("optionWeightage")) {
+							totalSectionMarks = totalSectionMarks + 1;
+						}else {
+							totalSectionMarks = totalSectionMarks + (Integer)questionSetSectionScheme.get(sectionName + "|" + proficiency);
+						}
+					}
+					else{
+						question.put(Constants.RESULT,Constants.INCORRECT);
+						inCorrect++;
+						if (negativeWeightAgeEnabled.equalsIgnoreCase("yes")) {
+							totalSectionMarks = totalSectionMarks - (Integer) questionSetSectionScheme.get(sectionName + "|" + proficiency);
+						}
+					}
+				}
+
+			}
+			// Increment the blank counter for skipped question objects
+			if (answers.size() > userQuestionList.size()) {
+				blank += answers.size() - userQuestionList.size();
+			}
+			total = correct + blank + inCorrect;
+			resultMap.put(Constants.RESULT, total == 0 ? 0 : ((correct * 100d) / total));
+			resultMap.put(Constants.INCORRECT, inCorrect);
+			resultMap.put(Constants.BLANK, blank);
+			resultMap.put(Constants.CORRECT, correct);
+			resultMap.put(Constants.TOTAL, total);
+			resultMap.put(Constants.CHILDREN,userQuestionList);
+			resultMap.put("totalSectionMarks",totalSectionMarks);
+			resultMap.put("totalPossibleSectionMarks",totalPossibleSectionMarks);
+			if (totalSectionMarks > 0 && ((totalSectionMarks / totalPossibleSectionMarks) * 100 >= minimumPassValue)) {
+				resultMap.put("sectionResult", "pass");
+			} else {
+				resultMap.put("sectionResult", "fail");
+			}
+
+			return resultMap;
+
+		} catch (Exception ex) {
+			logger.error("Error when verifying assessment. Error : ", ex);
+		}
 		return new HashMap<>();
 	}
 }

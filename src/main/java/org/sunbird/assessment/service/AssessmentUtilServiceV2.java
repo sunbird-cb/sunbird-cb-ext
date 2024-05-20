@@ -25,4 +25,7 @@ public interface AssessmentUtilServiceV2 {
 	public Map<String,Object> fetchHierarchyFromAssessServc(String qSetId,String token);
 
 	public Map<String, Object> fetchWheebox(String userId);
+
+	public Map<String, Object> validateQumlAssessmentV2(Map<String, Object> questionSetDetailsMap, List<String> originalQuestionList,
+													   List<Map<String, Object>> userQuestionList, Map<String,Object> questionMap);
 }

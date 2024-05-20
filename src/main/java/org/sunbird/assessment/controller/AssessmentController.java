@@ -13,6 +13,7 @@ import org.sunbird.assessment.dto.AssessmentSubmissionDTO;
 import org.sunbird.assessment.service.AssessmentService;
 import org.sunbird.assessment.service.AssessmentServiceV2;
 import org.sunbird.assessment.service.AssessmentServiceV4;
+import org.sunbird.assessment.service.AssessmentServiceV5;
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.util.Constants;
 
@@ -27,6 +28,9 @@ public class AssessmentController {
 
 	@Autowired
 	AssessmentServiceV4 assessmentServiceV4;
+
+	@Autowired
+	AssessmentServiceV5 assessmentServiceV5;
 
 	/**
 	 * validates, submits and inserts assessments and quizzes into the db
@@ -214,6 +218,47 @@ public class AssessmentController {
 	@GetMapping("/v1/fetch/assessment/wheebox")
 	public ResponseEntity<?> readWheebox(@RequestHeader("x-authenticated-user-token") String authUserToken) {
 		SBApiResponse response = assessmentServiceV4.readWheebox(authUserToken);
+		return new ResponseEntity<>(response, response.getResponseCode());
+	}
+
+	@GetMapping("/v5/quml/assessment/read/{assessmentIdentifier}")
+	public ResponseEntity<SBApiResponse> readAssessmentV5(
+			@PathVariable("assessmentIdentifier") String assessmentIdentifier,
+			@RequestHeader(Constants.X_AUTH_TOKEN) String token,@RequestParam(name = "editMode" ,required = false) String editMode) {
+		boolean edit = !StringUtils.isEmpty(editMode) && Boolean.parseBoolean(editMode);
+		SBApiResponse readResponse = assessmentServiceV5.readAssessment(assessmentIdentifier, token,edit);
+		return new ResponseEntity<>(readResponse, readResponse.getResponseCode());
+	}
+
+	@PostMapping("/v5/quml/question/list")
+	public ResponseEntity<SBApiResponse> readQuestionListV5(@Valid @RequestBody Map<String, Object> requestBody,
+												@RequestHeader("x-authenticated-user-token") String authUserToken,@RequestParam(name = "editMode" ,required = false) String editMode) {
+		boolean edit = !StringUtils.isEmpty(editMode) && Boolean.parseBoolean(editMode);
+		SBApiResponse response = assessmentServiceV5.readQuestionList(requestBody, authUserToken,edit);
+		return new ResponseEntity<>(response, response.getResponseCode());
+	}
+
+	@PostMapping("/v5/user/assessment/submit")
+	public ResponseEntity<SBApiResponse> submitUserAssessmentV5(@Valid @RequestBody Map<String, Object> requestBody,
+													@RequestHeader("x-authenticated-user-token") String authUserToken,@RequestParam(name = "editMode" ,required = false) String editMode) {
+		boolean edit = !StringUtils.isEmpty(editMode) && Boolean.parseBoolean(editMode);
+		SBApiResponse submitResponse = assessmentServiceV5.submitAssessmentAsync(requestBody, authUserToken,edit);
+		return new ResponseEntity<>(submitResponse, submitResponse.getResponseCode());
+	}
+
+	@GetMapping("/v5/quml/assessment/retake/{assessmentIdentifier}")
+	public ResponseEntity<SBApiResponse> retakeAssessmentV5(
+			@PathVariable("assessmentIdentifier") String assessmentIdentifier,
+			@RequestHeader(Constants.X_AUTH_TOKEN) String token,@RequestParam(name = "editMode" ,required = false) String editMode) {
+		Boolean edit = !StringUtils.isEmpty(editMode) && Boolean.parseBoolean(editMode);
+		SBApiResponse readResponse = assessmentServiceV5.retakeAssessment(assessmentIdentifier, token,edit);
+		return new ResponseEntity<>(readResponse, readResponse.getResponseCode());
+	}
+
+	@PostMapping("/v5/quml/assessment/result")
+	public ResponseEntity<SBApiResponse> readAssessmentResultV5(@Valid @RequestBody Map<String, Object> requestBody,
+													@RequestHeader("x-authenticated-user-token") String authUserToken) {
+		SBApiResponse response = assessmentServiceV5.readAssessmentResultV5(requestBody, authUserToken);
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
 }
