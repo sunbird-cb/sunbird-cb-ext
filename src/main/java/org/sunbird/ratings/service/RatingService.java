@@ -20,4 +20,6 @@ public interface RatingService {
     public SBApiResponse updateRatingsMetaData();
 
     public SBApiResponse updateAdditionalTag(String tag);
+
+    SBApiResponse getTopReviewsForUserByOrgID(String userOrgId);
 }

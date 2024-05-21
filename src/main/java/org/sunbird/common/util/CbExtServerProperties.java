@@ -717,6 +717,42 @@ public class CbExtServerProperties {
 	@Value("${domain.url}")
 	private String domainUrl;
 
+	@Value("${kafka.topics.calendar.bulk.upload.event}")
+	private String calendarEventBulkUploadTopic;
+
+	@Value("${event-create-api}")
+	private String eventCreateAPI;
+
+	@Value("${event-publish-api}")
+	private String eventPublishAPI;
+
+	@Value("${calendar.bulk.upload.container.name}")
+	private String calendarEventBulkUploadContainerName;
+
+	@Value("${event-update-api}")
+	private String eventUpdateAPI;
+
+	@Value("#{${payload.to.redis.key.mapping}}")
+	private String payloadToRedisKeyMapping;
+
+	@Value("${cloud.org.store.folder.name}")
+	private String orgStoreFolderName;
+
+	@Value("${cloud.public.store.container.name}")
+	private String cloudPublicContainerName;
+
+	@Value("#{${organisation.insights.fields}}")
+	private Map<String, String> organisationInsightFields;
+
+	@Value("#{${organisation.insights.property.fields}}")
+	private Map<String, String> organisationInsightPropertyFields;
+
+	@Value("#{${organisation.insights.redis.key.mapping}}")
+	private Map<String, String> organisationInsightRedisKeyMapping;
+
+	@Value("${bulk.upload.allowed.roles.creation}")
+	private String bulkUploadAllowedRolesCreation;
+
 	public boolean qListFromCacheEnabled() {
 		return qListFromCacheEnabled;
 	}
@@ -2531,4 +2567,100 @@ public class CbExtServerProperties {
 
 	public String getDomainUrl() {return domainUrl;}
 
+
+	public String getCalendarEventBulkUploadTopic() {
+		return calendarEventBulkUploadTopic;
+	}
+
+	public void setCalendarEventBulkUploadTopic(String calendarEventBulkUploadTopic) {
+		this.calendarEventBulkUploadTopic = calendarEventBulkUploadTopic;
+	}
+
+	public String getEventCreateAPI() {
+		return eventCreateAPI;
+	}
+
+	public void setEventCreateAPI(String eventCreateAPI) {
+		this.eventCreateAPI = eventCreateAPI;
+	}
+
+	public String getEventPublishAPI() {
+		return eventPublishAPI;
+	}
+
+	public void setEventPublishAPI(String eventPublishAPI) {
+		this.eventPublishAPI = eventPublishAPI;
+	}
+
+	public String getCalendarEventBulkUploadContainerName() {
+		return calendarEventBulkUploadContainerName;
+	}
+
+	public void setCalendarEventBulkUploadContainerName(String calendarEventBulkUploadContainerName) {
+		this.calendarEventBulkUploadContainerName = calendarEventBulkUploadContainerName;
+	}
+
+	public String getEventUpdateAPI() {
+		return eventUpdateAPI;
+	}
+
+	public void setEventUpdateAPI(String eventUpdateAPI) {
+		this.eventUpdateAPI = eventUpdateAPI;
+	}
+
+	public String getOrgStoreFolderName() {
+		return orgStoreFolderName;
+	}
+
+	public void setOrgStoreFolderName(String orgStoreFolderName) {
+		this.orgStoreFolderName = orgStoreFolderName;
+	}
+
+	public String getPayloadToRedisKeyMapping() {
+		return payloadToRedisKeyMapping;
+	}
+
+	public void setPayloadToRedisKeyMapping(String payloadToRedisKeyMapping) {
+		this.payloadToRedisKeyMapping = payloadToRedisKeyMapping;
+	}
+
+	public String getCloudPublicContainerName() {
+		return cloudPublicContainerName;
+	}
+
+	public void setCloudPublicContainerName(String cloudPublicContainerName) {
+		this.cloudPublicContainerName = cloudPublicContainerName;
+	}
+
+	public Map<String, String> getOrganisationInsightFields() {
+		return organisationInsightFields;
+	}
+
+	public void setOrganisationInsightFields(Map<String, String> organisationInsightFields) {
+		this.organisationInsightFields = organisationInsightFields;
+	}
+
+	public Map<String, String> getOrganisationInsightPropertyFields() {
+		return organisationInsightPropertyFields;
+	}
+
+	public void setOrganisationInsightPropertyFields(Map<String, String> organisationInsightPropertyFields) {
+		this.organisationInsightPropertyFields = organisationInsightPropertyFields;
+	}
+
+	public Map<String, String> getOrganisationInsightRedisKeyMapping() {
+		return organisationInsightRedisKeyMapping;
+	}
+
+	public void setOrganisationInsightRedisKeyMapping(Map<String, String> organisationInsightRedisKeyMapping) {
+		this.organisationInsightRedisKeyMapping = organisationInsightRedisKeyMapping;
+	}
+
+	public List<String> getBulkUploadAllowedRolesCreation() {
+		return Arrays.asList(bulkUploadAllowedRolesCreation.split(",", -1));
+	}
+
+	public void setBulkUploadAllowedRolesCreation(String bulkUploadAllowedRolesCreation) {
+		this.bulkUploadAllowedRolesCreation = bulkUploadAllowedRolesCreation;
+	}
 }

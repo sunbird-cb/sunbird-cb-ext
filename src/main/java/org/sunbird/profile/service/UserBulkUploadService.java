@@ -117,13 +117,13 @@ public class UserBulkUploadService {
                 // incrementing the iterator inorder to skip the headers in the first row
                 if (rowIterator.hasNext()) {
                     Row firstRow = rowIterator.next();
-                    Cell statusCell = firstRow.getCell(7);
-                    Cell errorDetails = firstRow.getCell(8);
+                    Cell statusCell = firstRow.getCell(15);
+                    Cell errorDetails = firstRow.getCell(16);
                     if (statusCell == null) {
-                        statusCell = firstRow.createCell(7);
+                        statusCell = firstRow.createCell(15);
                     }
                     if (errorDetails == null) {
-                        errorDetails = firstRow.createCell(8);
+                        errorDetails = firstRow.createCell(16);
                     }
                     statusCell.setCellValue("Status");
                     errorDetails.setCellValue("Error Details");
@@ -183,9 +183,89 @@ public class UserBulkUploadService {
                             invalidErrList.add("Invalid column type. Expecting string format");
                         }
                     }
-                    if (nextRow.getCell(4) != null && nextRow.getCell(4).getCellType() != CellType.BLANK) {
+                    if (nextRow.getCell(4) == null || nextRow.getCell(4).getCellType() == CellType.BLANK) {
+                        errList.add("Designation");
+                    } else {
                         if (nextRow.getCell(4).getCellType() == CellType.STRING) {
-                            String tagStr = nextRow.getCell(4).getStringCellValue().trim();
+                            userRegistration.setPosition(nextRow.getCell(4).getStringCellValue().trim());
+                        } else {
+                            invalidErrList.add("Invalid column type. Expecting string format");
+                        }
+                    }
+                    if (nextRow.getCell(5) != null && nextRow.getCell(5).getCellType() != CellType.BLANK) {
+                        if (nextRow.getCell(5).getCellType() == CellType.NUMERIC) {
+                            userRegistration.setEmployeeId(NumberToTextConverter.toText(nextRow.getCell(5).getNumericCellValue()).trim());
+                        } else if (nextRow.getCell(5).getCellType() == CellType.STRING) {
+                            userRegistration.setEmployeeId(nextRow.getCell(5).getStringCellValue().trim());
+                        } else {
+                            invalidErrList.add("Invalid column type. Expecting string/number format");
+                        }
+                    }
+                    if (nextRow.getCell(6) != null && nextRow.getCell(6).getCellType() != CellType.BLANK) {
+                        if (nextRow.getCell(6).getCellType() == CellType.STRING) {
+                            userRegistration.setGender(nextRow.getCell(6).getStringCellValue().trim());
+                        } else {
+                            invalidErrList.add("Invalid column type. Expecting string format");
+                        }
+                    }
+                    if (nextRow.getCell(7) != null && nextRow.getCell(7).getCellType() != CellType.BLANK) {
+                        if (nextRow.getCell(7).getCellType() == CellType.STRING) {
+                            userRegistration.setDob(nextRow.getCell(7).getStringCellValue().trim());
+                        } else {
+                            invalidErrList.add("Invalid column type. Expecting string format");
+                        }
+                    }
+                    if (nextRow.getCell(8) != null && nextRow.getCell(8).getCellType() != CellType.BLANK) {
+                        if (nextRow.getCell(8).getCellType() == CellType.STRING) {
+                            userRegistration.setDomicileMedium(nextRow.getCell(8).getStringCellValue().trim());
+                        } else {
+                            invalidErrList.add("Invalid column type. Expecting string format");
+                        }
+                    }
+                    if (nextRow.getCell(9) != null && nextRow.getCell(9).getCellType() != CellType.BLANK) {
+                        if (nextRow.getCell(9).getCellType() == CellType.STRING) {
+                            userRegistration.setCategory(nextRow.getCell(9).getStringCellValue().trim());
+                        } else {
+                            invalidErrList.add("Invalid column type. Expecting string format");
+                        }
+                    }
+                    if (nextRow.getCell(10) != null && nextRow.getCell(10).getCellType() != CellType.BLANK) {
+                        if (nextRow.getCell(10).getCellType() == CellType.NUMERIC) {
+                            userRegistration.setPincode(NumberToTextConverter.toText(nextRow.getCell(10).getNumericCellValue()));
+                        } else if (nextRow.getCell(10).getCellType() == CellType.STRING) {
+                            userRegistration.setPincode(nextRow.getCell(10).getStringCellValue().trim());
+                        } else {
+                            invalidErrList.add("Invalid column type. Expecting number/string format");
+                        }
+                    }
+                    if (nextRow.getCell(11) != null && nextRow.getCell(11).getCellType() != CellType.BLANK) {
+                        if (nextRow.getCell(11).getCellType() == CellType.NUMERIC) {
+                            userRegistration.setExternalSystemId(NumberToTextConverter.toText(nextRow.getCell(11).getNumericCellValue()).trim());
+                            if (!ProjectUtil.validateExternalSystemId(userRegistration.getExternalSystemId())) {
+                                invalidErrList.add("Invalid External System ID : External System Id can contain alphanumeric characters and have a max length of 30");
+                            }
+                        } else if (nextRow.getCell(11).getCellType() == CellType.STRING) {
+                            userRegistration.setExternalSystemId(nextRow.getCell(11).getStringCellValue().trim());
+                            if (!ProjectUtil.validateExternalSystemId(userRegistration.getExternalSystemId())) {
+                                invalidErrList.add("Invalid External System ID : External System Id can contain alphanumeric characters and have a max length of 30");
+                            }
+                        } else {
+                            invalidErrList.add("Invalid column type. Expecting string/number format");
+                        }
+                    }
+                    if (nextRow.getCell(12) != null && !StringUtils.isBlank(nextRow.getCell(12).toString())) {
+                        if (nextRow.getCell(12).getCellType() == CellType.STRING) {
+                            userRegistration.setExternalSystem(nextRow.getCell(12).getStringCellValue().trim());
+                            if (!ProjectUtil.validateExternalSystem(userRegistration.getExternalSystem())) {
+                                invalidErrList.add("Invalid External System : External System can contain only alphabets and can have a max length of 255");
+                            }
+                        } else {
+                            invalidErrList.add("Invalid column type. Expecting string format");
+                        }
+                    }
+                    if (nextRow.getCell(13) != null && nextRow.getCell(13).getCellType() != CellType.BLANK) {
+                        if (nextRow.getCell(13).getCellType() == CellType.STRING) {
+                            String tagStr = nextRow.getCell(13).getStringCellValue().trim();
                             List<String> tagList = new ArrayList<String>();
                             if (!StringUtils.isEmpty(tagStr)) {
                                 String[] tagStrList = tagStr.split(",", -1);
@@ -201,27 +281,20 @@ public class UserBulkUploadService {
                             invalidErrList.add("Invalid column type. Expecting string format");
                         }
                     }
-                    if (nextRow.getCell(5) != null && nextRow.getCell(5).getCellType() != CellType.BLANK) {
-                        if (nextRow.getCell(5).getCellType() == CellType.NUMERIC) {
-                            userRegistration.setExternalSystemId(NumberToTextConverter.toText(nextRow.getCell(5).getNumericCellValue()).trim());
-                            if (!ProjectUtil.validateExternalSystemId(userRegistration.getExternalSystemId())) {
-                                invalidErrList.add("Invalid External System ID : External System Id can contain alphanumeric characters and have a max length of 30");
+                    if (nextRow.getCell(14) != null && nextRow.getCell(14).getCellType() != CellType.BLANK) {
+                        if (nextRow.getCell(14).getCellType() == CellType.STRING) {
+                            String rolesStr = nextRow.getCell(14).getStringCellValue().trim();
+                            List<String> rolesList = new ArrayList<String>();
+                            if (!StringUtils.isEmpty(rolesStr)) {
+                                String[] rolesStrList = rolesStr.split(",", -1);
+                                for (String role : rolesStrList) {
+                                    rolesList.add(role.trim());
+                                    if (!serverProperties.getBulkUploadAllowedRolesCreation().contains(role.trim())) {
+                                        invalidErrList.add("Invalid userRoles, allowed Roles are: " + serverProperties.getBulkUploadAllowedRolesCreation());
+                                    }
+                                }
                             }
-                        } else if (nextRow.getCell(5).getCellType() == CellType.STRING) {
-                            userRegistration.setExternalSystemId(nextRow.getCell(5).getStringCellValue().trim());
-                            if (!ProjectUtil.validateExternalSystemId(userRegistration.getExternalSystemId())) {
-                                invalidErrList.add("Invalid External System ID : External System Id can contain alphanumeric characters and have a max length of 30");
-                            }
-                        } else {
-                            invalidErrList.add("Invalid column type. Expecting string/number format");
-                        }
-                    }
-                    if (nextRow.getCell(6) != null && !StringUtils.isBlank(nextRow.getCell(6).toString())) {
-                        if (nextRow.getCell(6).getCellType() == CellType.STRING) {
-                            userRegistration.setExternalSystem(nextRow.getCell(6).getStringCellValue().trim());
-                            if (!ProjectUtil.validateExternalSystem(userRegistration.getExternalSystem())) {
-                                invalidErrList.add("Invalid External System : External System can contain only alphabets and can have a max length of 255");
-                            }
+                            userRegistration.setRoles(rolesList);
                         } else {
                             invalidErrList.add("Invalid column type. Expecting string format");
                         }
@@ -229,13 +302,13 @@ public class UserBulkUploadService {
                     userRegistration.setOrgName(inputDataMap.get(Constants.ORG_NAME));
                     userRegistration.setChannel(inputDataMap.get(Constants.ORG_NAME));
                     userRegistration.setSbOrgId(inputDataMap.get(Constants.ROOT_ORG_ID));
-                    Cell statusCell = nextRow.getCell(7);
-                    Cell errorDetails = nextRow.getCell(8);
+                    Cell statusCell = nextRow.getCell(15);
+                    Cell errorDetails = nextRow.getCell(16);
                     if (statusCell == null) {
-                        statusCell = nextRow.createCell(7);
+                        statusCell = nextRow.createCell(15);
                     }
                     if (errorDetails == null) {
-                        errorDetails = nextRow.createCell(8);
+                        errorDetails = nextRow.createCell(16);
                     }
                     if (totalRecordsCount == 0 && errList.size() == 4) {
                         setErrorDetails(str, errList, statusCell, errorDetails);
@@ -274,8 +347,8 @@ public class UserBulkUploadService {
                 }
                 if (totalRecordsCount == 0) {
                     XSSFRow row = sheet.createRow(sheet.getLastRowNum() + 1);
-                    Cell statusCell = row.createCell(7);
-                    Cell errorDetails = row.createCell(8);
+                    Cell statusCell = row.createCell(15);
+                    Cell errorDetails = row.createCell(16);
                     statusCell.setCellValue(Constants.FAILED_UPPERCASE);
                     errorDetails.setCellValue(Constants.EMPTY_FILE_FAILED);
 

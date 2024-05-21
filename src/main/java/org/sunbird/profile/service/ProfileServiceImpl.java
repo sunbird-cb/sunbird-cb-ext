@@ -1776,7 +1776,9 @@ public class ProfileServiceImpl implements ProfileService {
 						listOfChangedDetails.add(keys);
 					}
 					for (String changedObj : listOfChangedDetails) {
-						if (profileDetailsMap.get(changedObj) instanceof ArrayList) {
+						if (profileDetailsMap.get(changedObj) instanceof String) {
+							existingProfileDetails.put(changedObj, profileDetailsMap.get(changedObj));
+						} else if (profileDetailsMap.get(changedObj) instanceof ArrayList) {
 							existingProfileDetails.put(changedObj, profileDetailsMap.get(changedObj));
 						} else if (profileDetailsMap.get(changedObj) instanceof Boolean) {
 							existingProfileDetails.put(changedObj, profileDetailsMap.get(changedObj));

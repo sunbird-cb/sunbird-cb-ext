@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.sunbird.cassandra.utils.CassandraOperation;
 import org.sunbird.common.model.SBApiResponse;
+import org.sunbird.common.service.ContentService;
 import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
@@ -50,6 +51,9 @@ public class DigiLockerIntegrationServiceImpl implements DigiLockerIntegrationSe
 
     @Autowired
     ObjectMapper objectMapper;
+
+    @Autowired
+    ContentService contentService;
     private Logger logger = LoggerFactory.getLogger(getClass().getName());
     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy");
@@ -160,6 +164,10 @@ public class DigiLockerIntegrationServiceImpl implements DigiLockerIntegrationSe
                                     docDetails.setDataContent(encodeBytesToBase64((convertObjectToJsonBytes(addCertificateInfo(certificateAddInfoDTO)))));
                                     docDetails.setURI(serverProperties.getDigiLockerIssuerId() + "-" + request.getDocDetails().getDocType() + "-" + docId);
                                     responseStatus.setStatus("1");
+                                    Map<String, Object> contentResponse = contentService.readContentFromCache((String)dockerLookUpInfo.get(Constants.COURSE_ID), Arrays.asList(Constants.NAME));
+                                    if (MapUtils.isNotEmpty(contentResponse)) {
+                                        docDetails.setDocDescription((String) contentResponse.get(Constants.NAME));
+                                    }
                                 } else {
                                     logger.error("Not able to generate Pdf certificate for URI: " + docDetails.getURI());
                                     responseStatus.setStatus("0");
@@ -237,6 +245,10 @@ public class DigiLockerIntegrationServiceImpl implements DigiLockerIntegrationSe
                         certificateAddInfoDTO.setSwdIndicator(String.valueOf(((String)getUserInfo.get(Constants.CHANNEL)).charAt(0)));
                         docDetails.setDataContent(encodeBytesToBase64((convertObjectToJsonBytes(addCertificateInfo(certificateAddInfoDTO)))));
                         response.setDocDetails(docDetails);
+                        Map<String, Object> contentResponse = contentService.readContentFromCache((String)digiLockerDocInfo.get(Constants.COURSE_ID), Arrays.asList(Constants.NAME));
+                        if (MapUtils.isNotEmpty(contentResponse)) {
+                            docDetails.setDocDescription((String) contentResponse.get(Constants.NAME));
+                        }
                         responseStatus.setStatus("1");
                     } else {
                         logger.error("Error while getting the user Info request:" + request);

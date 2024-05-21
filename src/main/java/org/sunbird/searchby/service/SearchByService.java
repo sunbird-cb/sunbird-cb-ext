@@ -323,7 +323,7 @@ public class SearchByService {
 					ProviderInfo provInfo = providerMap.get(channelName);
 					provInfo.setName((String) respObj.get(Constants.CHANNEL));
 					provInfo.setDescription((String) respObj.get(Constants.DESCRIPTION));
-					provInfo.setLogoUrl((String) respObj.get(Constants.IMG_URL));
+					provInfo.setLogoUrl((String) respObj.get(Constants.IMG_URL_KEY));
 					provInfo.setOrgId((String) respObj.get(Constants.ID));
 					providerMap.put(channelName, provInfo);
 				}

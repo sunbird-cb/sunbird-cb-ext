@@ -10,15 +10,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.sunbird.cassandra.utils.CassandraOperation;
-import org.sunbird.common.model.SearchUserApiContent;
-import org.sunbird.common.model.SunbirdApiRequest;
-import org.sunbird.common.model.SunbirdApiResp;
-import org.sunbird.common.model.SunbirdUserProfileDetail;
+import org.sunbird.common.model.*;
 import org.sunbird.common.service.ContentServiceImpl;
 import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
 import org.sunbird.common.util.CbExtServerProperties;
@@ -218,6 +217,81 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
 		return result;
 	}
 
+	public SBApiResponse getUserProgressV2(Map<String, Object> requestBody, String authUserToken, String rootOrgId, String userChannel) {
+		SBApiResponse response = new SBApiResponse(Constants.API_GET_USER_PROGRESS);
+		Map<String,Object> reqMap = new HashMap<>();
+		Map<String,Object>participantsDetails = new HashMap<>();
+		String errMsg = "";
+		try {
+			errMsg = validateRequest(requestBody);
+			if (StringUtils.isNotBlank(errMsg)) {
+				response.setResponseCode(HttpStatus.BAD_REQUEST);
+				response.getParams().setStatus(Constants.FAILED);
+				response.getParams().setErrmsg(errMsg);
+				return response;
+			}
+			Map<String, Object> request = (Map<String, Object>) requestBody.get(Constants.REQUEST);
+			int courseLeafCount = getLeafCountForTheCourse(rootOrgId, (String) request.get(Constants.COURSE_ID), userChannel);
+			// get all enrolled details
+			List<String> enrollmentIdList = null;
+			List<Map<String, Object>> userEnrolmentList = new ArrayList<>();
+			Map<String, Object> propertyMap = new HashMap<>();
+			propertyMap.put(Constants.BATCH_ID, request.get(Constants.BATCH_ID));
+			reqMap.put(Constants.BATCH_ID,request.get(Constants.BATCH_ID));
+			reqMap.put(Constants.COURSE_ID,request.get(Constants.COURSE_ID));
+			reqMap.put(Constants.LIMIT,request.get(Constants.LIMIT));
+			reqMap.put(Constants.OFFSET,request.get(Constants.OFFSET));
+			participantsDetails = getBatchParticipantsByPage(reqMap);
+			enrollmentIdList = (List<String>) participantsDetails.get(Constants.USERS_LIST);
+			propertyMap.put(Constants.USER_ID, enrollmentIdList);
+			propertyMap.put(Constants.COURSE_ID, request.get(Constants.COURSE_ID));
+			userEnrolmentList.addAll(cassandraOperation.getRecordsByPropertiesWithoutFiltering(Constants.KEYSPACE_SUNBIRD_COURSES,
+					Constants.TABLE_USER_ENROLMENT, propertyMap,
+					Arrays.asList(Constants.USER_ID_CONSTANT, Constants.COURSE_ID,
+							Constants.BATCH_ID, Constants.COMPLETION_PERCENTAGE, Constants.PROGRESS,
+							Constants.STATUS, Constants.ISSUED_CERTIFICATES), cbExtServerProperties.getBatchEnrolmentReturnSize()));
+			// restricting with only 100 items in the response
+			if ( (Integer) request.get(Constants.LIMIT) > cbExtServerProperties.getBatchEnrolmentReturnSize()) {
+				response.setResponseCode(HttpStatus.BAD_REQUEST);
+				response.getParams().setStatus(Constants.FAILED);
+				response.getParams().setErrmsg(" Given Limit is greater than expected value, Limit should be less than "+cbExtServerProperties.getBatchEnrolmentReturnSize());
+				return response;
+			}
+
+			//get id list from userEnrollmentList, in case  request has more than one batch
+			List<String> enrolledUserIdList = userEnrolmentList.stream()
+					.map(obj -> (String) obj.get(Constants.USER_ID_CONSTANT)).collect(Collectors.toList());
+
+			//inside loop iterating batch list
+			List<String> userFields = Arrays.asList(Constants.USER_ID_CONSTANT, Constants.FIRSTNAME, Constants.PROFILE_DETAILS_PRIMARY_EMAIL, Constants.CHANNEL,
+					Constants.PROFILE_DETAILS_DESIGNATION, Constants.PROFILE_DETAILS_DESIGNATION_OTHER);
+			Map<String, Object> userMap = userUtilService.getUsersDataFromUserIds(enrolledUserIdList, userFields,
+					authUserToken);
+
+
+			for (Map<String, Object> responseObj : userEnrolmentList) {
+				// set user details
+				if (userMap.containsKey(responseObj.get(Constants.USER_ID_CONSTANT))) {
+					SearchUserApiContent userObj = mapper.convertValue(
+							userMap.get(responseObj.get(Constants.USER_ID_CONSTANT)), SearchUserApiContent.class);
+					appendUserDetails(responseObj, userObj);
+				}
+				// set completion percentage & status
+				setCourseCompletiondetails(responseObj, courseLeafCount);
+			}
+			response.getParams().setStatus(Constants.SUCCESS);
+			response.setResponseCode(HttpStatus.OK);
+			response.getResult().put(Constants.TOTAL_COUNT,participantsDetails.get(Constants.COUNT));
+			response.getResult().put(Constants.PROGRESS, userEnrolmentList);
+		} catch (Exception ex) {
+			response.setResponseCode(HttpStatus.BAD_REQUEST);
+			response.getParams().setStatus(Constants.FAILED);
+			logger.error(ex);
+		}
+		return response;
+	}
+
+
 	private UserProgressRequest validateGetBatchEnrolment(SunbirdApiRequest requestBody) {
 		try {
 			UserProgressRequest userProgressRequest = new UserProgressRequest();
@@ -311,5 +385,106 @@ public class MandatoryContentServiceImpl implements MandatoryContentService {
 			}
 		}
 		return leafCountForTheCOurse;
+	}
+
+	private String validateRequest(Map<String, Object> request) {
+		StringBuilder strBuilder = new StringBuilder();
+		Map<String, Object> requestBody = (Map<String, Object>) request.get(Constants.REQUEST);
+		if (ObjectUtils.isEmpty(requestBody)) {
+			strBuilder.append("Invalid Request Body.");
+			return strBuilder.toString();
+		}
+
+		List<String> missingAttrib = new ArrayList<String>();
+		if (!requestBody.containsKey(Constants.COURSE_ID)) {
+			missingAttrib.add(Constants.COURSE_ID);
+		}
+
+		if (!requestBody.containsKey(Constants.BATCH_ID)) {
+			missingAttrib.add(Constants.BATCH_ID);
+		}
+
+		if (!requestBody.containsKey(Constants.LIMIT)) {
+			missingAttrib.add(Constants.LIMIT);
+		}
+
+		if (!requestBody.containsKey(Constants.OFFSET)) {
+			missingAttrib.add(Constants.OFFSET);
+		}
+
+		if (missingAttrib.size() > 0) {
+			strBuilder.append("The following parameter(s) are missing. Missing params - [")
+					.append(missingAttrib.toString()).append("]");
+		}
+
+		return strBuilder.toString();
+	}
+
+	public Map<String,Object> getBatchParticipantsByPage(Map<String, Object> request) {
+		Map<String,Object> responseMap = new HashMap<>();
+		Map<String, Object> queryMap = new HashMap<>();
+		queryMap.put(Constants.BATCH_ID, (String) request.get(Constants.BATCH_ID));
+		Map<String, Object> result = new HashMap<String, Object>();
+		List<String> userList = new ArrayList<String>();
+		Boolean active = (Boolean) request.get(Constants.ACTIVE);
+		if (null == active) {
+			active = true;
+		}
+		Integer limit = (Integer) request.get(Constants.LIMIT);
+		Integer currentOffSetFromRequest = (Integer) request.get(Constants.OFFSET);
+		String pageId = (String) request.get(Constants.PAGE_ID);
+		String previousPageId = null;
+		int currentOffSet = 0;
+		String currentPagingState = null;
+		Long count = cassandraOperation.getCountOfRecordByIdentifier(Constants.KEYSPACE_SUNBIRD_COURSES,
+				Constants.TABLE_ENROLLMENT_BATCH_LOOKUP, queryMap, Constants.USER_ID);
+		do {
+			Map<String,Object> response = cassandraOperation.getRecordByIdentifierWithPage(Constants.KEYSPACE_SUNBIRD_COURSES,
+					Constants.TABLE_ENROLLMENT_BATCH_LOOKUP, queryMap,
+					null, pageId, (Integer) request.get(Constants.LIMIT));
+			currentPagingState = (String) response.get(Constants.PAGE_ID);
+			if (org.codehaus.plexus.util.StringUtils.isBlank(previousPageId) && org.codehaus.plexus.util.StringUtils.isNotBlank(currentPagingState)) {
+				previousPageId = currentPagingState;
+			}
+			pageId = currentPagingState;
+			List<Map<String, Object>> userCoursesList = (List<Map<String, Object>>) response.get(Constants.RESPONSE);
+			if (org.apache.commons.collections.CollectionUtils.isEmpty(userCoursesList)) {
+				//Set null so that client knows there are no data to read further.
+				previousPageId = null;
+				break;
+			}
+			for (Map<String, Object> userCourse : userCoursesList) {
+				//From this page, we have already read some records, so skip the records
+				if (currentOffSetFromRequest > 0) {
+					currentOffSetFromRequest--;
+					continue;
+				}
+				if (userCourse.get(Constants.ACTIVE) != null
+						&& (active == (boolean) userCourse.get(Constants.ACTIVE))) {
+					userList.add((String) userCourse.get(Constants.USER_ID));
+					if (userList.size() == limit) {
+						//We have read the data... if pageId available send back in response.
+						previousPageId = pageId != null ? pageId : previousPageId;
+						break;
+					}
+				} else {
+					logger.info("No active enrolment for user : "+userCourse.get(Constants.USER_ID).toString()+" course : "+request.get(Constants.COURSE_ID).toString()+" batch : "+request.get(Constants.BATCH_ID).toString());
+				}
+				currentOffSet++;
+			}
+			//We may have read the given limit... if so, break from while loop
+			if (userList.size() == limit) {
+				break;
+			}
+		} while (org.codehaus.plexus.util.StringUtils.isNotBlank(currentPagingState));
+		if (org.codehaus.plexus.util.StringUtils.isNotBlank(previousPageId)) {
+			result.put(Constants.PAGE_ID, previousPageId);
+			if (currentOffSet >= limit) {
+				currentOffSet = currentOffSet - limit;
+			}
+		}
+		responseMap.put(Constants.COUNT,count);
+		responseMap.put(Constants.USERS_LIST,userList);
+		return responseMap;
 	}
 }

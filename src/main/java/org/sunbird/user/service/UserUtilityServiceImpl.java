@@ -587,7 +587,11 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		requestBody.put(Constants.EMAIL_VERIFIED, true);
 		requestBody.put(Constants.PHONE, userRegistration.getPhone());
 		requestBody.put(Constants.PHONE_VERIFIED, true);
-		requestBody.put(Constants.ROLES, Arrays.asList(Constants.PUBLIC));
+		if (CollectionUtils.isEmpty(userRegistration.getRoles())) {
+			requestBody.put(Constants.ROLES, Arrays.asList(Constants.PUBLIC));
+		} else {
+			requestBody.put(Constants.ROLES, userRegistration.getRoles());
+		}
 		request.put(Constants.REQUEST, requestBody);
 		Map<String, String> headerValues = ProjectUtil.getDefaultHeaders();
 		if (StringUtils.isNotEmpty(userRegistration.getUserAuthToken())) {
@@ -622,12 +626,30 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		profileDetails.put(Constants.MANDATORY_FIELDS_EXISTS, false);
 		Map<String, Object> employementDetails = new HashMap<String, Object>();
 		employementDetails.put(Constants.DEPARTMENTNAME, userRegistration.getOrgName());
+		if (StringUtils.isNotEmpty(userRegistration.getEmployeeId())) {
+			employementDetails.put(Constants.EMPLOYEE_CODE, userRegistration.getEmployeeId());
+		}
 		profileDetails.put(Constants.EMPLOYMENTDETAILS, employementDetails);
 		Map<String, Object> personalDetails = new HashMap<String, Object>();
 		personalDetails.put(Constants.FIRSTNAME.toLowerCase(), userRegistration.getFirstName());
 		personalDetails.put(Constants.PRIMARY_EMAIL, userRegistration.getEmail());
 		personalDetails.put(Constants.MOBILE, userRegistration.getPhone());
 		personalDetails.put(Constants.PHONE_VERIFIED, true);
+		if (StringUtils.isNotEmpty(userRegistration.getDob())) {
+			personalDetails.put(Constants.DOB, userRegistration.getDob());
+		}
+		if (StringUtils.isNotEmpty(userRegistration.getCategory())) {
+			personalDetails.put(Constants.CATEGORY, userRegistration.getCategory());
+		}
+		if (StringUtils.isNotEmpty(userRegistration.getDomicileMedium())) {
+			personalDetails.put(Constants.DOMICILE_MEDIUM, userRegistration.getDomicileMedium());
+		}
+		if (StringUtils.isNotEmpty(userRegistration.getPincode())) {
+			personalDetails.put(Constants.PINCODE, userRegistration.getPincode());
+		}
+		if (StringUtils.isNotEmpty(userRegistration.getGender())) {
+			personalDetails.put(Constants.GENDER, userRegistration.getGender());
+		}
 		profileDetails.put(Constants.PERSONAL_DETAILS, personalDetails);
 		Map<String, Object> professionDetailObj = new HashMap<String, Object>();
 		professionDetailObj.put(Constants.ORGANIZATION_TYPE, Constants.GOVERNMENT);

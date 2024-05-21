@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.sunbird.common.model.SBApiResponse;
+import org.sunbird.common.util.Constants;
 import org.sunbird.ratings.model.LookupRequest;
 import org.sunbird.ratings.model.RequestRating;
 import org.sunbird.ratings.service.RatingService;
@@ -62,6 +63,12 @@ public class RatingsController {
     @PostMapping("/update/v1/content/additionaltag")
     public ResponseEntity<?> updateAdditionalTag(@RequestParam("tag") String tag) {
         SBApiResponse response = ratingService.updateAdditionalTag(tag);
+        return new ResponseEntity<>(response, response.getResponseCode());
+    }
+
+    @GetMapping("/ratings/v1/topReviews/{orgId}")
+    public ResponseEntity<?> getRatingTopReviewsSummary(@PathVariable(Constants.ORG_ID) String userOrgId) {
+        SBApiResponse response = ratingService.getTopReviewsForUserByOrgID(userOrgId);
         return new ResponseEntity<>(response, response.getResponseCode());
     }
 }

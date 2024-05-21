@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
+import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.model.SunbirdApiRequest;
 import org.sunbird.common.util.Constants;
 import org.sunbird.progress.model.MandatoryContentResponse;
@@ -43,4 +44,12 @@ public class MandatoryContentController {
 		return new ResponseEntity<>(service.getUserProgress(requestBody, authUserToken, rootOrgId ,userChannel), HttpStatus.OK);
 	}
 
+	@PostMapping("/v2/progress/getUserProgress")
+	public ResponseEntity<SBApiResponse> getUserProgressV2(@RequestBody Map<String,Object> requestBody,
+															   @RequestHeader(Constants.USER_TOKEN) String authUserToken,
+															   @RequestHeader(Constants.X_AUTH_USER_ORG_ID) String rootOrgId,
+															   @RequestHeader(Constants.X_AUTH_USER_CHANNEL) String userChannel) {
+		SBApiResponse response =service.getUserProgressV2(requestBody, authUserToken, rootOrgId, userChannel);
+		return new ResponseEntity<>(response, response.getResponseCode());
+	}
 }

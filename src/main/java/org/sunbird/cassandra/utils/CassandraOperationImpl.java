@@ -449,5 +449,103 @@ public class CassandraOperationImpl implements CassandraOperation {
 		}
 	}
 
+	@Override
+	public Map<String,Object> getRecordByIdentifierWithPage(String keyspaceName, String tableName,
+															Map<String,Object> key, List<String> fields, String pageString, int limit) {
+		long startTime = System.currentTimeMillis();
+		Map<String,Object> response = new HashMap<>();
+		try {
+			Session session = connectionManager.getSession(keyspaceName);
+			Builder selectBuilder;
+			if (CollectionUtils.isNotEmpty(fields)) {
+				selectBuilder = QueryBuilder.select(fields.toArray(new String[fields.size()]));
+			} else {
+				selectBuilder = QueryBuilder.select().all();
+			}
+			Select selectQuery = selectBuilder.from(keyspaceName, tableName);
+			if (MapUtils.isNotEmpty(key)) {
+				Where selectWhere = selectQuery.where();
+				for (Entry<String, Object> entry : key.entrySet()) {
+					if (entry.getValue() instanceof List) {
+						List<Object> list = (List) entry.getValue();
+						if (null != list) {
+							Object[] propertyValues = list.toArray(new Object[list.size()]);
+							Clause clause = QueryBuilder.in(entry.getKey(), propertyValues);
+							selectWhere.and(clause);
+						}
+					} else {
+						Clause clause = QueryBuilder.eq(entry.getKey(), entry.getValue());
+						selectWhere.and(clause);
+					}
+				}
+			}
+			if (StringUtils.isNotBlank(pageString)) {
+				selectQuery.setPagingState(PagingState.fromString(pageString));
+			}
+			selectQuery.setFetchSize(limit);
+			ResultSet results = session.execute(selectQuery);
+			List<Map<String, Object>> responseList = new ArrayList<>();
+			Map<String, String> columnsMapping = CassandraUtil.fetchColumnsMapping(results);
+			int remaining = results.getAvailableWithoutFetching();
+			Iterator<Row> rowIterator = results.iterator();
+			while(rowIterator.hasNext()) {
+				Row row = rowIterator.next();
+				Map<String, Object> rowMap = new HashMap<>();
+				columnsMapping.entrySet().stream()
+						.forEach(entry -> rowMap.put(entry.getKey(), row.getObject(entry.getValue())));
+				responseList.add(rowMap);
+				remaining--;
+				if (remaining == 0 || responseList.size() >= limit) {
+					break;
+				}
+			}
+			response.put(Constants.RESPONSE, responseList);
+			if (results.getExecutionInfo().getPagingState() != null) {
+				response.put(Constants.PAGE_ID, results.getExecutionInfo().getPagingState().toString());
+			}
+		} catch (Exception e) {
+			logger.error(Constants.EXCEPTION_MSG_FETCH + tableName + " : " + e.getMessage(), e);
+		}
+		return response;
+	}
+
+	@Override
+	public Long getCountOfRecordByIdentifier(String keyspaceName, String tableName, Map<String,Object> key, String field) {
+		long startTime = System.currentTimeMillis();
+		List<Map<String,Object>>  response = new ArrayList<>();
+		Long count = 0L;
+		try {
+			if (MapUtils.isEmpty(key)) {
+				throw new IllegalArgumentException("Key parameter cannot be null");
+			}
+			Session session = connectionManager.getSession(keyspaceName);
+			Builder selectBuilder;
+			selectBuilder = QueryBuilder.select().count(field);
+			Select selectQuery = selectBuilder.from(keyspaceName, tableName);
+			if (MapUtils.isNotEmpty(key)) {
+				Where selectWhere = selectQuery.where();
+				for (Entry<String, Object> entry : key.entrySet()) {
+					if (entry.getValue() instanceof List) {
+						List<Object> list = (List) entry.getValue();
+						if (null != list) {
+							Object[] propertyValues = list.toArray(new Object[list.size()]);
+							Clause clause = QueryBuilder.in(entry.getKey(), propertyValues);
+							selectWhere.and(clause);
+						}
+					} else {
+						Clause clause = QueryBuilder.eq(entry.getKey(), entry.getValue());
+						selectWhere.and(clause);
+					}
+				}
+			}
+			ResultSet results = session.execute(selectQuery);
+			response = CassandraUtil.createResponse(results);
+			count = ((Long)((Map<String,Object>)response.get(0)).get("system.count(" + field.toLowerCase() + ")"));
+		} catch (Exception e) {
+			logger.error(Constants.EXCEPTION_MSG_FETCH + tableName + " : " + e.getMessage(), e);
+
+		}
+		return count;
+	}
 }
 

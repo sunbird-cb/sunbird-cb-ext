@@ -1,12 +1,18 @@
 package org.sunbird.insights.controller.service;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.sunbird.cache.RedisCacheMgr;
 import org.sunbird.cassandra.utils.CassandraOperation;
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.util.CbExtServerProperties;
+import org.sunbird.common.util.Constants;
 import org.sunbird.common.util.ProjectUtil;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -20,6 +26,7 @@ import static org.sunbird.common.util.Constants.*;
 @Service
 public class InsightsServiceImpl implements InsightsService {
 
+    private static final Logger log = LoggerFactory.getLogger(InsightsServiceImpl.class);
     @Autowired
     CbExtServerProperties serverProperties;
 
@@ -143,4 +150,68 @@ public class InsightsServiceImpl implements InsightsService {
         return bd.doubleValue();
     }
 
+    public SBApiResponse readInsightsForOrganisation(Map<String, Object> requestBody, String userId) {
+        SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_MICRO_SITE_INSIGHTS);
+        try {
+            Map<String, Object> request = (Map<String, Object>) requestBody.get(REQUEST);
+            if (MapUtils.isEmpty(request)) {
+                response.getParams().setStatus(Constants.FAILED);
+                response.put(MESSAGE, "Request is Missing");
+                response.setResponseCode(HttpStatus.BAD_REQUEST);
+                return response;
+            }
+            Map<String, Object> filter = ((Map<String, Object>) request.get(FILTERS));
+            if (MapUtils.isEmpty(filter)) {
+                response.getParams().setStatus(Constants.FAILED);
+                response.put(MESSAGE, "Filter is Missing");
+                response.setResponseCode(HttpStatus.BAD_REQUEST);
+                return response;
+            }
+            List<String> organizations = (ArrayList<String>) (filter.get(ORGANISATIONS));
+            if (CollectionUtils.isEmpty(organizations)) {
+                response.getParams().setStatus(Constants.FAILED);
+                response.put(MESSAGE, "Organization is Required");
+                response.setResponseCode(HttpStatus.BAD_REQUEST);
+                return response;
+            }
+            Map<String, Object> responseMap = new HashMap<>();
+            Map<String, String> organisationInsideFields = serverProperties.getOrganisationInsightFields();
+            Map<String, String> redisKeyForInsight = serverProperties.getOrganisationInsightRedisKeyMapping();
+            List<Map<String, Object>> organisationDataMapList = new ArrayList<>();
+            for (String organisationId: organizations) {
+                Map<String, Object> organisationMap = new HashMap<>();
+                List<Map<String, Object>> nudgesDataList = new ArrayList<>();
+                for (Map.Entry<String,String> insightFields: organisationInsideFields.entrySet()) {
+                    Map<String, Object> nudgesData = new HashMap<>();
+                    nudgesData.put(Constants.ICON, insightFields.getValue());
+                    populateNudgeForMicroSite(insightFields.getKey(), organisationId, serverProperties.getOrganisationInsightPropertyFields(),
+                            redisKeyForInsight.get(insightFields.getKey()), nudgesData);
+                    nudgesDataList.add(nudgesData);
+                }
+                organisationMap.put(Constants.ORG_ID, organisationId);
+                organisationMap.put(Constants.DATA, nudgesDataList);
+                organisationDataMapList.add(organisationMap);
+            }
+            responseMap.put(NUDGES, organisationDataMapList);
+            response.getResult().put(RESPONSE, responseMap);
+        } catch (Exception e) {
+            log.error("Failed to get Insight Info for OrgId", e);
+            response.getParams().setStatus(Constants.FAILED);
+            response.getParams().setErrmsg(e.getMessage());
+            response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return response;
+    }
+
+    public void populateNudgeForMicroSite(String label, String organisationId, Map<String, String> additionalCssFields, String redisKey, Map<String, Object> nudgesData) {
+       List<String> redisData = redisCacheMgr.hget(redisKey, serverProperties.getRedisInsightIndex(), organisationId);
+       if (CollectionUtils.isNotEmpty(redisData)) {
+           nudgesData.put(Constants.LABEL, label);
+           nudgesData.put(Constants.VALUE, redisData.get(0));
+           nudgesData.putAll(additionalCssFields);
+       } else {
+           log.error("Not able to fetch Data from redis key for key: {} for organisation: {}", redisKey, organisationId);
+       }
+    }
 }
+

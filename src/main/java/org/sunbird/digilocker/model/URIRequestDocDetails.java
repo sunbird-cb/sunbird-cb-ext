@@ -13,7 +13,7 @@ public class URIRequestDocDetails {
     @JacksonXmlProperty(localName = "DocType")
     private String DocType;
 
-    @JacksonXmlProperty(localName = "Mobile")
+    @JacksonXmlProperty(localName = "mobile_no")
     private String Mobile;
 
     @JacksonXmlProperty(localName = "FullName")
