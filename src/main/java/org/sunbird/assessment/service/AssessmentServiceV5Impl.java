@@ -9,6 +9,7 @@ import jnr.ffi.annotations.In;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.tomcat.util.bcel.Const;
 import org.mortbay.util.ajax.JSON;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -341,13 +342,12 @@ public class AssessmentServiceV5Impl implements AssessmentServiceV5 {
                             .map(object -> Objects.toString(object, null)).collect(toList());
                     Map<String, Object> result = new HashMap<>();
                     Map<String, Object> questionSetDetailsMap = new HashMap<>();
-                    questionSetDetailsMap.put("negativeMarkingEnabled","Yes");
-                    // questionSetDetailsMap.put("assessmentType",assessmentHierarchy.get("assessmentType"));
-                    questionSetDetailsMap.put("assessmentType", "questionWeightAge");
-                    questionSetDetailsMap.put("minimumPassPercentage", "50%");
-                    questionSetDetailsMap.put("totalPossibleSectionMarks", 1);
-                    String questionSectionSchema= "{\"questionSectionScheme\":{\"section_1\":{\"Proficiency1\":{\"noOfQuestions\":1,\"marksForQuestion\":2},\"Proficiency2\":{\"noOfQuestions\":1,\"marksForQuestion\":4},\"Proficiency3\":{\"noOfQuestions\":1,\"marksForQuestion\":6},\"Proficiency4\":{\"noOfQuestions\":1,\"marksForQuestion\":8}},\"section_2\":{\"Proficiency1\":{\"noOfQuestions\":1,\"marksForQuestion\":2},\"Proficiency2\":{\"noOfQuestions\":1,\"marksForQuestion\":4},\"Proficiency3\":{\"noOfQuestions\":1,\"marksForQuestion\":6},\"Proficiency4\":{\"noOfQuestions\":1,\"marksForQuestion\":8}},\"section_3\":{\"easy\":{\"noOfQuestions\":1,\"marksForQuestion\":2},\"medium\":{\"noOfQuestions\":1,\"marksForQuestion\":4},\"difficult\":{\"noOfQuestions\":1,\"marksForQuestion\":6},\"hot\":{\"noOfQuestions\":1,\"marksForQuestion\":8}}}}";;
-                    questionSetDetailsMap.put("questionSectionScheme",generateMarkMap(mapper.readValue(questionSectionSchema,
+                    questionSetDetailsMap.put(Constants.NEGATIVE_MARKING_PERCENTAGE,assessmentHierarchy.get(Constants.NEGATIVE_MARKING_PERCENTAGE));
+                    questionSetDetailsMap.put(Constants.ASSESSMENT_TYPE, assessmentHierarchy.get(Constants.ASSESSMENT_TYPE));
+                    questionSetDetailsMap.put(Constants.MINIMUM_PASS_PERCENTAGE, assessmentHierarchy.get(Constants.MINIMUM_PASS_PERCENTAGE));
+                    questionSetDetailsMap.put(Constants.TOTAL_MARKS, assessmentHierarchy.get(Constants.TOTAL_MARKS));
+                    String questionSectionSchema= (String)assessmentHierarchy.get(Constants.QUESTION_SECTION_SCHEME);
+                    questionSetDetailsMap.put(Constants.QUESTION_SECTION_SCHEME,generateMarkMap(mapper.readValue(questionSectionSchema,
                             new TypeReference<Map<String, Object>>() {
                             })));
                     switch (scoreCutOffType) {
@@ -695,9 +695,10 @@ public class AssessmentServiceV5Impl implements AssessmentServiceV5 {
             sectionLevelResult.put(Constants.CORRECT, resultMap.get(Constants.CORRECT));
             sectionLevelResult.put(Constants.INCORRECT, resultMap.get(Constants.INCORRECT));
             sectionLevelResult.put(Constants.CHILDREN,resultMap.get(Constants.CHILDREN));
-            sectionLevelResult.put("sectionResult",resultMap.get("sectionResult"));
-            sectionLevelResult.put("totalSectionMarks",resultMap.get("totalSectionMarks"));
-            sectionLevelResult.put("totalPossibleSectionMarks",resultMap.get("totalPossibleSectionMarks"));
+            sectionLevelResult.put(Constants.SECTION_RESULT,resultMap.get(Constants.SECTION_RESULT));
+            sectionLevelResult.put(Constants.TOTAL_MARKS,resultMap.get(Constants.TOTAL_MARKS));
+            sectionLevelResult.put(Constants.SECTION_MARKS,resultMap.get(Constants.SECTION_MARKS));
+
 
         } else {
             result = 0.0;
@@ -725,7 +726,6 @@ public class AssessmentServiceV5Impl implements AssessmentServiceV5 {
             res.put(Constants.CORRECT, assessmentLevelResult.get(Constants.CORRECT));
             res.put(Constants.PASS_PERCENTAGE, assessmentLevelResult.get(Constants.PASS_PERCENTAGE));
             res.put(Constants.INCORRECT, assessmentLevelResult.get(Constants.INCORRECT));
-            res.put("questionLevelMarks",assessmentLevelResult.get("questionLevelMarks"));
             Integer minimumPassPercentage = (Integer) assessmentLevelResult.get(Constants.PASS_PERCENTAGE);
             res.put(Constants.PASS, result >= minimumPassPercentage);
         } catch (Exception e) {
@@ -785,7 +785,7 @@ public class AssessmentServiceV5Impl implements AssessmentServiceV5 {
         Integer inCorrect = 0;
         Integer total = 0;
         Integer totalSectionMarks = 0;
-        Integer totalPossibleSectionMarks = 0;
+        Integer totalMarks = 0;
         int pass = 0;
         Double totalResult = 0.0;
         try {
@@ -801,8 +801,8 @@ public class AssessmentServiceV5Impl implements AssessmentServiceV5 {
                 if (result >= minimumPassPercentage) {
                     pass++;
                 }
-                totalSectionMarks += (Integer) sectionChildren.get("totalSectionMarks");
-                totalPossibleSectionMarks += (Integer) sectionChildren.get("totalPossibleSectionMarks");
+                totalSectionMarks += (Integer) sectionChildren.get(Constants.TOTAL_SECTION_MARKS);
+                totalMarks += (Integer) sectionChildren.get(Constants.TOTAL_MARKS);
             }
             res.put(Constants.OVERALL_RESULT, totalResult / sectionLevelResults.size());
             res.put(Constants.TOTAL, total);
@@ -810,7 +810,7 @@ public class AssessmentServiceV5Impl implements AssessmentServiceV5 {
             res.put(Constants.CORRECT, correct);
             res.put(Constants.INCORRECT, inCorrect);
             res.put(Constants.PASS, (pass == sectionLevelResults.size()));
-            double totalPercentage = ((double) totalSectionMarks / (double)totalPossibleSectionMarks) * 100;
+            double totalPercentage = ((double) totalSectionMarks / (double)totalMarks) * 100;
             res.put("totalPercentage", totalPercentage);
         } catch (Exception e) {
             logger.error("Failed to calculate assessment score. Exception: ", e);
@@ -853,16 +853,17 @@ public class AssessmentServiceV5Impl implements AssessmentServiceV5 {
     }
 
 
-    public static Map<String, Integer> generateMarkMap(Map<String, Map<String, Map<String, Object>>> qSectionSchemeMap) {
+    public static Map<String, Integer> generateMarkMap(Map<String, Map<String, Object>> qSectionSchemeMap) {
         Map<String, Integer> markMap = new HashMap<>();
-        qSectionSchemeMap.keySet().stream().map(qSectionSchemeMap::get).forEach(sectionMap -> sectionMap.keySet().forEach(sections -> {
-            Map<String, Object> proficiencyMap = sectionMap.get(sections);
-            proficiencyMap.forEach((key, value) -> {
+        for (String sectionKey : qSectionSchemeMap.keySet()) {
+            Map<String, Object> proficiencyMap = qSectionSchemeMap.get(sectionKey);
+            for (Map.Entry<String, Object> entry : proficiencyMap.entrySet()) {
+                String key = entry.getKey();
+                Object value = entry.getValue();
                 Map<String, Integer> values = (Map<String, Integer>) value;
-                markMap.put(sections + "|" + key, values.get("marksForQuestion"));
-            });
-        }));
-
+                markMap.put(sectionKey + "|" + key, values.get("marksForQuestion"));
+            }
+        }
         return markMap;
     }
 }

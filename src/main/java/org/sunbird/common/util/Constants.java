@@ -1024,6 +1024,17 @@ public class Constants {
 	public static final String PARENTS = "parents";
 	public static final String SUB_SECTORS = "subsectors";
 	public static final String COURSE_LINK = "courseLink";
+	public static final String NEGATIVE_MARKING_PERCENTAGE = "negativeMarkingPercentage";
+	public static final String ASSESSMENT_TYPE = "assessmentType";
+	public static final String TOTAL_MARKS = "totalMarks";
+	public static final String QUESTION_SECTION_SCHEME = "questionSectionScheme";
+	public static final String OPTION_WEIGHTAGE = "optionWeightage";
+	public static final String QUESTION_WEIGHTAGE = "questionWeightage";
+	public static final String QUESTION_LEVEL = "questionLevel";
+	public static final String TOTAL_SECTION_MARKS = "totalSectionMarks";
+	public static final String SECTION_RESULT = "sectionResult";
+	public static final String SECTION_MARKS= "sectionMarks";
+	public static final String FAIL = "fail";
 
 	private Constants() {
 		throw new IllegalStateException("Utility class");

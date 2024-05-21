@@ -464,22 +464,20 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 			Integer inCorrect = 0;
 			Double result;
 			Integer total = 0;
-			Integer totalSectionMarks =0;
+			Integer sectionMarks =0;
 			Map<String,Object> questionSetSectionScheme;
-			questionSetSectionScheme= (Map<String, Object>) questionSetDetailsMap.get("questionSectionScheme");
-			String assessmentType= (String)questionSetDetailsMap.get("assessmentType");
-			String negativeWeightAgeEnabled= (String)questionSetDetailsMap.get("negativeMarkingEnabled");
-			String minimumPassPercentage= (String)questionSetDetailsMap.get("minimumPassPercentage");
-			Integer minimumPassValue = Integer.valueOf(minimumPassPercentage.replaceAll("%", ""));
-			Integer totalPossibleSectionMarks= (Integer) questionSetDetailsMap.get("totalPossibleSectionMarks");
-			/*String sectionName = (String)questionMap.get("sectionName");
-			String proficiency = (String)questionMap.get("proficiency");*/
-			String sectionName = "section_1";
-			String proficiency = "Proficiency1";
-
+			questionSetSectionScheme= (Map<String, Object>) questionSetDetailsMap.get(Constants.QUESTION_SECTION_SCHEME);
+			String assessmentType= (String)questionSetDetailsMap.get(Constants.ASSESSMENT_TYPE);
+			String negativeWeightAgeEnabled= (String)questionSetDetailsMap.get(Constants.NEGATIVE_MARKING_PERCENTAGE);
+			int negativeMarksValue = Integer.parseInt(negativeWeightAgeEnabled.replace("%", ""));
+			String minimumPassPercentage= (String)questionSetDetailsMap.get(Constants.MINIMUM_PASS_PERCENTAGE);
+			int minimumPassValue = Integer.parseInt(minimumPassPercentage.replace("%", ""));
+			Integer totalMarks= (Integer) questionSetDetailsMap.get(Constants.TOTAL_MARKS);
+			String sectionName = "section3";
 			Map<String, Object> resultMap = new HashMap<>();
 			Map<String, Object> answers = getQumlAnswers(originalQuestionList,questionMap);
 			for (Map<String, Object> question : userQuestionList) {
+				Map<String, Object> proficiencyMap = (Map<String, Object>) questionMap.get(question.get(Constants.IDENTIFIER));
 				List<String> marked = new ArrayList<>();
 				if (question.containsKey(Constants.QUESTION_TYPE)) {
 					String questionType = ((String) question.get(Constants.QUESTION_TYPE)).toLowerCase();
@@ -522,18 +520,23 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 						Collections.sort(marked);
 					if (answer.equals(marked)){
 						question.put(Constants.RESULT,Constants.CORRECT);
-						correct++;
-						if (assessmentType.equalsIgnoreCase("optionWeightage")) {
-							totalSectionMarks = totalSectionMarks + 1;
-						}else {
-							totalSectionMarks = totalSectionMarks + (Integer)questionSetSectionScheme.get(sectionName + "|" + proficiency);
+						if (assessmentType.equalsIgnoreCase(Constants.OPTION_WEIGHTAGE)) {
+							sectionMarks = sectionMarks + 1;
+						} else if (assessmentType.equalsIgnoreCase(Constants.QUESTION_WEIGHTAGE)) {
+							sectionMarks = sectionMarks + (Integer) questionSetSectionScheme.get(sectionName + "|" + proficiencyMap.get(Constants.QUESTION_LEVEL));
+						} else {
+							question.put(Constants.RESULT, Constants.INCORRECT);
+							inCorrect++;
+							if (negativeMarksValue > 0) {
+								sectionMarks = sectionMarks - (Integer) questionSetSectionScheme.get(sectionName + "|" + proficiencyMap.get(Constants.QUESTION_LEVEL));
+							}
 						}
 					}
 					else{
 						question.put(Constants.RESULT,Constants.INCORRECT);
 						inCorrect++;
-						if (negativeWeightAgeEnabled.equalsIgnoreCase("yes")) {
-							totalSectionMarks = totalSectionMarks - (Integer) questionSetSectionScheme.get(sectionName + "|" + proficiency);
+						if (negativeMarksValue>0) {
+							sectionMarks = sectionMarks - (Integer) questionSetSectionScheme.get(sectionName + "|" + proficiencyMap.get(Constants.QUESTION_LEVEL));
 						}
 					}
 				}
@@ -550,12 +553,12 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 			resultMap.put(Constants.CORRECT, correct);
 			resultMap.put(Constants.TOTAL, total);
 			resultMap.put(Constants.CHILDREN,userQuestionList);
-			resultMap.put("totalSectionMarks",totalSectionMarks);
-			resultMap.put("totalPossibleSectionMarks",totalPossibleSectionMarks);
-			if (totalSectionMarks > 0 && ((totalSectionMarks / totalPossibleSectionMarks) * 100 >= minimumPassValue)) {
-				resultMap.put("sectionResult", "pass");
+			resultMap.put(Constants.SECTION_MARKS,sectionMarks);
+			resultMap.put(Constants.TOTAL_MARKS,totalMarks);
+			if (sectionMarks > 0 && ((sectionMarks / totalMarks) * 100 >= minimumPassValue)) {
+				resultMap.put(Constants.SECTION_RESULT, Constants.PASS);
 			} else {
-				resultMap.put("sectionResult", "fail");
+				resultMap.put(Constants.SECTION_RESULT, Constants.FAIL);
 			}
 
 			return resultMap;
