@@ -1779,7 +1779,39 @@ public class ProfileServiceImpl implements ProfileService {
 						if (profileDetailsMap.get(changedObj) instanceof String) {
 							existingProfileDetails.put(changedObj, profileDetailsMap.get(changedObj));
 						} else if (profileDetailsMap.get(changedObj) instanceof ArrayList) {
-							existingProfileDetails.put(changedObj, profileDetailsMap.get(changedObj));
+							// KB-3718
+							if (Constants.PROFESSIONAL_DETAILS.equalsIgnoreCase(changedObj)) {
+								List<Map<String, Object>> professionalList = (List<Map<String, Object>>) existingProfileDetails
+										.get(Constants.PROFESSIONAL_DETAILS);
+								;
+								Map<String, Object> existingProfessionalDetailsMap = null;
+								// professional detail is empty... just replace...
+								if (CollectionUtils.isEmpty(professionalList)) {
+									existingProfileDetails.put(changedObj, profileDetailsMap.get(changedObj));
+									professionalList = (List<Map<String, Object>>) existingProfileDetails
+											.get(Constants.PROFESSIONAL_DETAILS);
+									existingProfessionalDetailsMap = professionalList.get(0);
+								} else {
+									existingProfessionalDetailsMap = professionalList.get(0);
+									Map<String, Object> updatedProfessionalDetailsMap = ((List<Map<String, Object>>) profileDetailsMap
+											.get(changedObj)).get(0);
+									for (String childKey : updatedProfessionalDetailsMap.keySet()) {
+										existingProfessionalDetailsMap.put(childKey,
+												updatedProfessionalDetailsMap.get(childKey));
+									}
+								}
+								if (StringUtils
+										.isNotBlank((String) existingProfessionalDetailsMap.get(Constants.GROUP)) &&
+										StringUtils
+												.isNotBlank((String) existingProfessionalDetailsMap
+														.get(Constants.DESIGNATION))) {
+									existingProfileDetails.put(Constants.PROFILE_STATUS, Constants.VERIFIED);
+								} else {
+									existingProfileDetails.put(Constants.PROFILE_STATUS, Constants.NOT_VERIFIED);
+								}
+							} else {
+								existingProfileDetails.put(changedObj, profileDetailsMap.get(changedObj));
+							}
 						} else if (profileDetailsMap.get(changedObj) instanceof Boolean) {
 							existingProfileDetails.put(changedObj, profileDetailsMap.get(changedObj));
 						} else {

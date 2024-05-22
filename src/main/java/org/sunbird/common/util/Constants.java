@@ -1065,6 +1065,8 @@ public class Constants {
 	public static final String PINCODE = "pinCode";
 	public static final String EMPLOYEE_CODE = "employeeCode";
 	public static final String OPTION_WEIGHT = "optionWeight";
+	public static final String PROFILE_STATUS = "profileStatus";
+	public static final String NOT_VERIFIED = "NOT-VERIFIED";
 
 	private Constants() {
 		throw new IllegalStateException("Utility class");
