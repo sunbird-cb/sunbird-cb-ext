@@ -1029,7 +1029,7 @@ public class Constants {
 	public static final String ASSESSMENT_TYPE = "assessmentType";
 	public static final String TOTAL_MARKS = "totalMarks";
 	public static final String QUESTION_SECTION_SCHEME = "questionSectionScheme";
-	public static final String OPTION_WEIGHTAGE = "optionWeightage";
+	public static final String OPTION_WEIGHTAGE = "optionalWeightage";
 	public static final String QUESTION_WEIGHTAGE = "questionWeightage";
 	public static final String QUESTION_LEVEL = "questionLevel";
 	public static final String TOTAL_SECTION_MARKS = "totalSectionMarks";
@@ -1064,6 +1064,7 @@ public class Constants {
 	public static final String DOMICILE_MEDIUM = "domicileMedium";
 	public static final String PINCODE = "pinCode";
 	public static final String EMPLOYEE_CODE = "employeeCode";
+	public static final String OPTION_WEIGHT = "optionWeight";
 
 	private Constants() {
 		throw new IllegalStateException("Utility class");

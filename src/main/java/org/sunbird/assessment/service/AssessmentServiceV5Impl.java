@@ -5,11 +5,9 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import jnr.ffi.annotations.In;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.tomcat.util.bcel.Const;
 import org.mortbay.util.ajax.JSON;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,11 +24,9 @@ import org.sunbird.common.util.Constants;
 import org.sunbird.common.util.ProjectUtil;
 import org.sunbird.core.producer.Producer;
 
-import javax.management.ObjectName;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
@@ -308,10 +304,10 @@ public class AssessmentServiceV5Impl implements AssessmentServiceV5 {
             errMsg = validateSubmitAssessmentRequest(submitRequest, userId, hierarchySectionList,
                     sectionListFromSubmitRequest, assessmentHierarchy, existingAssessmentData,userAuthToken,editMode);
 
-          /*  if (StringUtils.isNotBlank(errMsg)) {
+            if (StringUtils.isNotBlank(errMsg)) {
                 updateErrorDetails(outgoingResponse, errMsg, HttpStatus.BAD_REQUEST);
                 return outgoingResponse;
-            }*/
+            }
             String assessmentPrimaryCategory = (String) assessmentHierarchy.get(Constants.PRIMARY_CATEGORY);
 
                 String scoreCutOffType = ((String) assessmentHierarchy.get(Constants.SCORE_CUTOFF_TYPE)).toLowerCase();
@@ -341,15 +337,7 @@ public class AssessmentServiceV5Impl implements AssessmentServiceV5 {
                     List<String> questionsListFromAssessmentHierarchy = questionsList.stream()
                             .map(object -> Objects.toString(object, null)).collect(toList());
                     Map<String, Object> result = new HashMap<>();
-                    Map<String, Object> questionSetDetailsMap = new HashMap<>();
-                    questionSetDetailsMap.put(Constants.NEGATIVE_MARKING_PERCENTAGE,assessmentHierarchy.get(Constants.NEGATIVE_MARKING_PERCENTAGE));
-                    questionSetDetailsMap.put(Constants.ASSESSMENT_TYPE, assessmentHierarchy.get(Constants.ASSESSMENT_TYPE));
-                    questionSetDetailsMap.put(Constants.MINIMUM_PASS_PERCENTAGE, assessmentHierarchy.get(Constants.MINIMUM_PASS_PERCENTAGE));
-                    questionSetDetailsMap.put(Constants.TOTAL_MARKS, assessmentHierarchy.get(Constants.TOTAL_MARKS));
-                    String questionSectionSchema= (String)assessmentHierarchy.get(Constants.QUESTION_SECTION_SCHEME);
-                    questionSetDetailsMap.put(Constants.QUESTION_SECTION_SCHEME,generateMarkMap(mapper.readValue(questionSectionSchema,
-                            new TypeReference<Map<String, Object>>() {
-                            })));
+                    Map<String, Object> questionSetDetailsMap = getParamDetailsForQTypes(assessmentHierarchy);
                     switch (scoreCutOffType) {
                         case Constants.ASSESSMENT_LEVEL_SCORE_CUTOFF: {
                             result.putAll(createResponseMapWithProperStructure(hierarchySection,
@@ -853,17 +841,52 @@ public class AssessmentServiceV5Impl implements AssessmentServiceV5 {
     }
 
 
-    public static Map<String, Integer> generateMarkMap(Map<String, Map<String, Object>> qSectionSchemeMap) {
+    /**
+     * Generates a map containing marks for each question.
+     * The input is a map where each key is a section name, and the value is another map.
+     * This inner map has proficiency keys, and each proficiency key maps to a map containing various attributes including "marksForQuestion".
+     * The output map's keys are of the format "sectionKey|proficiencyKey" and values are the corresponding marks for that question.
+     *
+     * @param qSectionSchemeMap a map representing sections and their respective proficiency maps
+     * @return a map where each key is a combination of section and proficiency, and each value is the marks for that question
+     */
+    public Map<String, Integer> generateMarkMap(Map<String, Map<String, Object>> qSectionSchemeMap) {
         Map<String, Integer> markMap = new HashMap<>();
-        for (String sectionKey : qSectionSchemeMap.keySet()) {
+        logger.info("Starting to generate mark map from qSectionSchemeMap");
+        qSectionSchemeMap.keySet().forEach(sectionKey -> {
             Map<String, Object> proficiencyMap = qSectionSchemeMap.get(sectionKey);
-            for (Map.Entry<String, Object> entry : proficiencyMap.entrySet()) {
-                String key = entry.getKey();
-                Object value = entry.getValue();
+            proficiencyMap.forEach((key, value) -> {
                 Map<String, Integer> values = (Map<String, Integer>) value;
                 markMap.put(sectionKey + "|" + key, values.get("marksForQuestion"));
-            }
-        }
+            });
+        });
+        logger.info("Completed generating mark map");
         return markMap;
+    }
+
+
+    /**
+     * Retrieves the parameter details for question types based on the given assessment hierarchy.
+     *
+     * @param assessmentHierarchy a map containing the assessment hierarchy details.
+     * @return a map containing the parameter details for the question types.
+     * @throws IOException if there is an error processing the question section schema.
+     */
+    private Map<String, Object> getParamDetailsForQTypes(Map<String, Object> assessmentHierarchy) throws IOException {
+        logger.info("Starting getParamDetailsForQTypes with assessmentHierarchy: {}", assessmentHierarchy);
+        Map<String, Object> questionSetDetailsMap = new HashMap<>();
+        String assessmentType = (String) assessmentHierarchy.get(Constants.ASSESSMENT_TYPE);
+        questionSetDetailsMap.put(Constants.ASSESSMENT_TYPE, assessmentType);
+        questionSetDetailsMap.put(Constants.MINIMUM_PASS_PERCENTAGE, assessmentHierarchy.get(Constants.MINIMUM_PASS_PERCENTAGE));
+        questionSetDetailsMap.put(Constants.TOTAL_MARKS, assessmentHierarchy.get(Constants.TOTAL_MARKS));
+        if (assessmentType.equalsIgnoreCase(Constants.QUESTION_WEIGHTAGE)) {
+            String questionSectionSchema= (String) assessmentHierarchy.get(Constants.QUESTION_SECTION_SCHEME);
+            questionSetDetailsMap.put(Constants.QUESTION_SECTION_SCHEME, generateMarkMap(mapper.readValue(questionSectionSchema,
+                    new TypeReference<Map<String, Object>>() {
+                    })));
+            questionSetDetailsMap.put(Constants.NEGATIVE_MARKING_PERCENTAGE, assessmentHierarchy.get(Constants.NEGATIVE_MARKING_PERCENTAGE));
+        }
+        logger.info("Completed getParamDetailsForQTypes with result: {}", questionSetDetailsMap);
+        return questionSetDetailsMap;
     }
 }

@@ -26,6 +26,15 @@ public interface AssessmentUtilServiceV2 {
 
 	public Map<String, Object> fetchWheebox(String userId);
 
+	/**
+	 * Validates a Quml assessment by comparing the original list of questions with the user's provided list of questions.
+	 *
+	 * @param questionSetDetailsMap a map containing details about the question set.
+	 * @param originalQuestionList  a list of original question identifiers.
+	 * @param userQuestionList      a list of maps where each map represents a user's question with its details.
+	 * @param questionMap           a map containing additional question-related information.
+	 * @return a map with validation results and resultMap.
+	 */
 	public Map<String, Object> validateQumlAssessmentV2(Map<String, Object> questionSetDetailsMap, List<String> originalQuestionList,
 													   List<Map<String, Object>> userQuestionList, Map<String,Object> questionMap);
 }
