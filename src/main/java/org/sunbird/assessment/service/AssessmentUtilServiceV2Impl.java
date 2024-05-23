@@ -472,8 +472,7 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 			String assessmentType= (String)questionSetDetailsMap.get(Constants.ASSESSMENT_TYPE);
 			String negativeWeightAgeEnabled;
 			int negativeMarksValue = 0;
-			String minimumPassPercentage= (String)questionSetDetailsMap.get(Constants.MINIMUM_PASS_PERCENTAGE);
-			int minimumPassValue = Integer.parseInt(minimumPassPercentage.replace("%", ""));
+			int minimumPassPercentage = (int) questionSetDetailsMap.get(Constants.MINIMUM_PASS_PERCENTAGE);
 			Integer totalMarks= (Integer) questionSetDetailsMap.get(Constants.TOTAL_MARKS);
 			String sectionName = "section3";
 			Map<String, Object> resultMap = new HashMap<>();
@@ -489,13 +488,8 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 			for (Map<String, Object> question : userQuestionList) {
 				Map<String, Object> proficiencyMap = getProficiencyMap(questionMap, question);
 				List<String> marked = new ArrayList<>();
-				if (question.containsKey(Constants.QUESTION_TYPE)) {
-					String questionType = ((String) question.get(Constants.QUESTION_TYPE)).toLowerCase();
-					Map<String, Object> editorStateObj = (Map<String, Object>) question.get(Constants.EDITOR_STATE);
-					List<Map<String, Object>> options = (List<Map<String, Object>>) editorStateObj
-							.get(Constants.OPTIONS);
-					sectionMarks = getMarksOrIndexForEachQuestion(question, questionType, options, marked, assessmentType, optionWeightages, sectionMarks);
-				}
+				List<Map<String, Object>> options = new ArrayList<>();
+				options = handleqTypeQuestion(question, options, marked, assessmentType, optionWeightages, sectionMarks);
 				if (CollectionUtils.isEmpty(marked)){
 					blank++;
 					question.put(Constants.RESULT,Constants.BLANK);
@@ -504,27 +498,52 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 					List<String> answer = (List<String>) answers.get(question.get(Constants.IDENTIFIER));
 					sortAnswers(answer);
 					sortAnswers(marked);
-					if (answer.equals(marked)){
-						question.put(Constants.RESULT,Constants.CORRECT);
-						correct++;
-						sectionMarks = handleCorrectAnswer(assessmentType, sectionMarks, questionSetSectionScheme, sectionName, proficiencyMap);
+					if(assessmentType.equalsIgnoreCase(Constants.QUESTION_WEIGHTAGE)) {
+						if (answer.equals(marked)) {
+							question.put(Constants.RESULT, Constants.CORRECT);
+							correct++;
+							sectionMarks = handleCorrectAnswer(sectionMarks, questionSetSectionScheme, sectionName, proficiencyMap);
+						} else {
+							question.put(Constants.RESULT, Constants.INCORRECT);
+							inCorrect++;
+							sectionMarks = handleIncorrectAnswer(negativeMarksValue, sectionMarks, questionSetSectionScheme, sectionName, proficiencyMap);
+						}
 					}
-					else{
-						question.put(Constants.RESULT,Constants.INCORRECT);
-						inCorrect++;
-						sectionMarks = handleIncorrectAnswer(negativeMarksValue, assessmentType, sectionMarks, questionSetSectionScheme, sectionName, proficiencyMap);
-					}
+					sectionMarks = calculateScoreForOptionWeightage(question, assessmentType, optionWeightages, options, sectionMarks, marked);
 				}
-
 			}
 			blank = handleBlankAnswers(userQuestionList, answers, blank);
 			updateResultMap(userQuestionList, correct, blank, inCorrect, resultMap, sectionMarks, totalMarks);
-			computeSectionResults(sectionMarks, totalMarks, minimumPassValue, resultMap);
+			computeSectionResults(sectionMarks, totalMarks, minimumPassPercentage, resultMap);
 			return resultMap;
 		} catch (Exception ex) {
 			logger.error("Error when verifying assessment. Error : ", ex);
 		}
 		return new HashMap<>();
+	}
+
+	private static Integer calculateScoreForOptionWeightage(Map<String, Object> question, String assessmentType, Map<String, Object> optionWeightages, List<Map<String, Object>> options, Integer sectionMarks, List<String> marked) {
+		if (assessmentType.equalsIgnoreCase(Constants.OPTION_WEIGHTAGE)) {
+			Map<String, Object> optionWeightageMap = (Map<String, Object>) optionWeightages.get(question.get(Constants.IDENTIFIER));
+			for (Map.Entry<String, Object> optionWeightAgeFromOptions : optionWeightageMap.entrySet()) {
+				String submittedQuestionSetIndex = marked.get(0);
+				if (submittedQuestionSetIndex.equals(optionWeightAgeFromOptions.getKey())) {
+					sectionMarks = sectionMarks + Integer.parseInt((String) optionWeightAgeFromOptions.getValue());
+				}
+			}
+		}
+		return sectionMarks;
+	}
+
+	private List<Map<String, Object>> handleqTypeQuestion(Map<String, Object> question, List<Map<String, Object>> options, List<String> marked, String assessmentType, Map<String, Object> optionWeightages, Integer sectionMarks) {
+		if (question.containsKey(Constants.QUESTION_TYPE)) {
+			String questionType = ((String) question.get(Constants.QUESTION_TYPE)).toLowerCase();
+			Map<String, Object> editorStateObj = (Map<String, Object>) question.get(Constants.EDITOR_STATE);
+			options = (List<Map<String, Object>>) editorStateObj
+					.get(Constants.OPTIONS);
+			getMarkedIndexForEachQuestion(questionType, options, marked, assessmentType, optionWeightages, sectionMarks);
+		}
+		return options;
 	}
 
 
@@ -565,18 +584,17 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 	}
 
 	/**
-	 * Gets marks or index for each question based on the question type.
+	 * Gets index for each question based on the question type.
 	 *
-	 * @param question the question details.
+	 *
 	 * @param questionType the type of question.
 	 * @param options the list of options.
 	 * @param marked the list to store marked indices.
 	 * @param assessmentType the type of assessment.
 	 * @param optionWeightages the map of option weightages.
 	 * @param sectionMarks the current section marks.
-	 * @return the updated section marks.
 	 */
-	private  Integer getMarksOrIndexForEachQuestion(Map<String, Object> question, String questionType, List<Map<String, Object>> options, List<String> marked, String assessmentType, Map<String, Object> optionWeightages, Integer sectionMarks) {
+	private void getMarkedIndexForEachQuestion(String questionType, List<Map<String, Object>> options, List<String> marked, String assessmentType, Map<String, Object> optionWeightages, Integer sectionMarks) {
 		logger.info("Getting marks or index for each question...");
 		switch (questionType) {
 			case Constants.MTF:
@@ -593,40 +611,29 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 			case Constants.MCQ_SCA:
 			case Constants.MCQ_MCA:
 				if (assessmentType.equalsIgnoreCase(Constants.QUESTION_WEIGHTAGE)) {
-					getMarkedIndex(options, marked);
+					getMarkedIndexForQuestionWeightAge(options, marked);
 				} else if (assessmentType.equalsIgnoreCase(Constants.OPTION_WEIGHTAGE)) {
-					sectionMarks = processMarksForOptionWeightage(question, options, optionWeightages, sectionMarks);
+					getMarkedIndexForOptionWeightAge(options,marked);
 				}
 				break;
 			default:
 				break;
 		}
 		logger.info("Marks or index retrieved successfully.");
-		return sectionMarks;
 	}
 
 	/**
-	 * Processes marks for option weightage based on the provided question and options.
+	 * Gets index for each question based on the question type.
 	 *
-	 * @param question the question details.
 	 * @param options the list of options.
-	 * @param optionWeightages the map of option weightages.
-	 * @param sectionMarks the current section marks.
-	 * @return the updated section marks.
 	 */
-	private Integer processMarksForOptionWeightage(Map<String, Object> question, List<Map<String, Object>> options, Map<String, Object> optionWeightages, Integer sectionMarks) {
+	private void getMarkedIndexForOptionWeightAge(List<Map<String, Object>> options, List<String> marked) {
 		logger.info("Processing marks for option weightage...");
-		Map<String, Object> optionWeightageMap = (Map<String, Object>) optionWeightages.get(question.get(Constants.IDENTIFIER));
-		for (Map.Entry<String, Object> optionWeightAgeFromOptions : optionWeightageMap.entrySet()) {
-			for (Map<String, Object> option : options) {
-				String submittedQuestionSetIndex = (String) option.get(Constants.INDEX);
-				if (submittedQuestionSetIndex.equals(optionWeightAgeFromOptions.getKey())) {
-					sectionMarks = sectionMarks + Integer.parseInt((String) optionWeightAgeFromOptions.getValue());
-				}
-			}
+		for (Map<String, Object> option : options) {
+			String submittedQuestionSetIndex = (String) option.get(Constants.INDEX);
+			marked.add(submittedQuestionSetIndex);
 		}
 		logger.info("Marks for option weightage processed successfully.");
-		return sectionMarks;
 	}
 
 	/**
@@ -635,7 +642,7 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 	 * @param options the list of options.
 	 * @param marked  the list to store marked indices for correct answer.
 	 */
-	private  void getMarkedIndex(List<Map<String, Object>> options, List<String> marked) {
+	private  void getMarkedIndexForQuestionWeightAge(List<Map<String, Object>> options, List<String> marked) {
 		for (Map<String, Object> option : options) {
 			if ((boolean) option.get(Constants.SELECTED_ANSWER)) {
 				marked.add((String) option.get(Constants.INDEX));
@@ -644,39 +651,35 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 	}
 
 	/**
-	 * Handles the correct answer scenario by updating the section marks based on the assessment type.
+	 * Handles the correct answer scenario by updating the section marks.
 	 *
-	 * @param assessmentType the type of assessment.
 	 * @param sectionMarks the current section marks.
 	 * @param questionSetSectionScheme the question set section scheme.
 	 * @param sectionName the name of the section.
 	 * @param proficiencyMap the proficiency map containing question levels.
 	 * @return the updated section marks.
 	 */
-	private Integer handleCorrectAnswer(String assessmentType, Integer sectionMarks, Map<String, Object> questionSetSectionScheme, String sectionName, Map<String, Object> proficiencyMap) {
+	private Integer handleCorrectAnswer(Integer sectionMarks, Map<String, Object> questionSetSectionScheme, String sectionName, Map<String, Object> proficiencyMap) {
 		logger.info("Handling correct answer scenario...");
-		if (assessmentType.equalsIgnoreCase(Constants.QUESTION_WEIGHTAGE)) {
-			sectionMarks = sectionMarks + (Integer) questionSetSectionScheme.get(sectionName + "|" + proficiencyMap.get(Constants.QUESTION_LEVEL));
-		}
+		sectionMarks = sectionMarks + (Integer) questionSetSectionScheme.get(sectionName + "|" + proficiencyMap.get(Constants.QUESTION_LEVEL));
 		logger.info("Correct answer scenario handled successfully.");
 		return sectionMarks;
 	}
 
 	/**
-	 * Handles the incorrect answer scenario by updating the section marks based on the assessment type
+	 * Handles the incorrect answer scenario by updating the section marks .
 	 * and applying negative marking if applicable.
 	 *
 	 * @param negativeMarksValue the value of negative marks for incorrect answers.
-	 * @param assessmentType the type of assessment.
 	 * @param sectionMarks the current section marks.
 	 * @param questionSetSectionScheme the question set section scheme.
 	 * @param sectionName the name of the section.
 	 * @param proficiencyMap the proficiency map containing question levels.
 	 * @return the updated section marks.
 	 */
-	private Integer handleIncorrectAnswer(int negativeMarksValue, String assessmentType, Integer sectionMarks, Map<String, Object> questionSetSectionScheme, String sectionName, Map<String, Object> proficiencyMap) {
+	private Integer handleIncorrectAnswer(int negativeMarksValue,Integer sectionMarks, Map<String, Object> questionSetSectionScheme, String sectionName, Map<String, Object> proficiencyMap) {
 		logger.info("Handling incorrect answer scenario...");
-		if (negativeMarksValue > 0 && assessmentType.equalsIgnoreCase(Constants.QUESTION_WEIGHTAGE)) {
+		if (negativeMarksValue > 0) {
 			sectionMarks = sectionMarks - (Integer) questionSetSectionScheme.get(sectionName + "|" + proficiencyMap.get(Constants.QUESTION_LEVEL));
 		}
 		logger.info("Incorrect answer scenario handled successfully.");
