@@ -166,9 +166,15 @@ public class UserBulkUploadService {
                             phone = NumberToTextConverter.toText(nextRow.getCell(2).getNumericCellValue());
                             userRegistration.setPhone(phone.trim());
                         } else if (nextRow.getCell(2).getCellType() == CellType.STRING) {
-                            userRegistration.setPhone(nextRow.getCell(2).getStringCellValue().trim());
+                            phone = nextRow.getCell(2).getStringCellValue();
+                            userRegistration.setPhone(phone.trim());
                         } else {
                             invalidErrList.add("Invalid value for Mobile Number column type. Expecting number/string format");
+                        }
+                    }
+                    if (StringUtils.isNotBlank(phone)) {
+                        if (!ProjectUtil.validateContactPattern(phone)) {
+                            invalidErrList.add("The Mobile Number provided is Invalid");
                         }
                     }
                     if (nextRow.getCell(3) == null || nextRow.getCell(3).getCellType() == CellType.BLANK) {
@@ -208,7 +214,11 @@ public class UserBulkUploadService {
                     }
                     if (nextRow.getCell(7) != null && nextRow.getCell(7).getCellType() != CellType.BLANK) {
                         if (nextRow.getCell(7).getCellType() == CellType.STRING) {
-                            userRegistration.setDob(nextRow.getCell(7).getStringCellValue().trim());
+                            if (ProjectUtil.validateDate(nextRow.getCell(7).getStringCellValue().trim())) {
+                                userRegistration.setDob(nextRow.getCell(7).getStringCellValue().trim());
+                            } else {
+                                invalidErrList.add("Invalid format for Date of Birth type. Expecting in format dd-MM-yyyy");
+                            }
                         } else {
                             invalidErrList.add("Invalid value for Date of Birth column type. Expecting string format");
                         }

@@ -2,12 +2,9 @@ package org.sunbird.common.util;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -185,4 +182,20 @@ public class ProjectUtil {
             throw new RuntimeException(e);
         }
     }
+
+	public static Boolean validateDate(String dateString){
+		SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
+		dateFormat.setLenient(false);
+		try {
+			Date todaysDate = new Date();
+			Calendar calendar = Calendar.getInstance();
+			calendar.add(Calendar.YEAR, -65);
+			Date pastDate = calendar.getTime();
+			Date date = dateFormat.parse(dateString);
+			return date.after(pastDate) && (date.before(todaysDate) || date.equals(todaysDate));
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
 }
