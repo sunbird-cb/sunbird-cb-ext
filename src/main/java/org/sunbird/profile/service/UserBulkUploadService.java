@@ -238,6 +238,11 @@ public class UserBulkUploadService {
                         } else {
                             invalidErrList.add("Invalid value for Employee ID column type. Expecting string/number format");
                         }
+                        if (StringUtils.isNotBlank(userRegistration.getEmployeeId())) {
+                            if (!ProjectUtil.validateEmployeeId(userRegistration.getEmployeeId())) {
+                                invalidErrList.add("Invalid Employee ID : Employee ID can contain alphanumeric characters or numeric character and have a max length of 30");
+                            }
+                        }
                     }
                     if (nextRow.getCell(10) != null && nextRow.getCell(10).getCellType() != CellType.BLANK) {
                         if (nextRow.getCell(10).getCellType() == CellType.NUMERIC) {
@@ -267,7 +272,7 @@ public class UserBulkUploadService {
                         if (nextRow.getCell(12).getCellType() == CellType.STRING) {
                             userRegistration.setExternalSystem(nextRow.getCell(12).getStringCellValue().trim());
                             if (!ProjectUtil.validateExternalSystem(userRegistration.getExternalSystem())) {
-                                invalidErrList.add("Invalid External System : External System Name can contain only alphabets and can have a max length of 255");
+                                invalidErrList.add("Invalid External System Name : External System Name can contain only alphabets and alphanumeric and can have a max length of 255");
                             }
                         } else {
                             invalidErrList.add("Invalid value for External System Name column type. Expecting string format");
