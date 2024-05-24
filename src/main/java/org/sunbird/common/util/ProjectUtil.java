@@ -155,7 +155,7 @@ public class ProjectUtil {
 	}
 
 	public static Boolean validateExternalSystem(String externalSystem) {
-		return externalSystem.matches("[a-zA-Z ]{0,255}$");
+		return externalSystem.matches("^(?=.*[a-zA-Z .-])[a-zA-Z0-9 .-]{1,255}$"); // Allow only alphanumeric, alphabets and restrict if only numeric character
 	}
 
 	public static void updateErrorDetails(SBApiResponse response, String errMsg, HttpStatus responseCode) {
@@ -197,5 +197,9 @@ public class ProjectUtil {
 			e.printStackTrace();
 		}
 		return false;
+	}
+
+	public static Boolean validateEmployeeId(String employeeId) {
+		return employeeId.matches("^(?=.*\\d|[a-zA-Z]{30})[a-zA-Z0-9 .-]{1,30}$"); // Allow only alphanumeric, numeric and restrict if only alphabets character
 	}
 }
