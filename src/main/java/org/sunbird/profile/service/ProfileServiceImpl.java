@@ -5,10 +5,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.SignatureException;
-import io.jsonwebtoken.UnsupportedJwtException;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.ListUtils;
 import org.apache.commons.collections.MapUtils;
@@ -1785,29 +1782,49 @@ public class ProfileServiceImpl implements ProfileService {
 										.get(Constants.PROFESSIONAL_DETAILS);
 								;
 								Map<String, Object> existingProfessionalDetailsMap = null;
+								boolean isGroupOrDesignationUpdated = false;
 								// professional detail is empty... just replace...
 								if (CollectionUtils.isEmpty(professionalList)) {
 									existingProfileDetails.put(changedObj, profileDetailsMap.get(changedObj));
 									professionalList = (List<Map<String, Object>>) existingProfileDetails
 											.get(Constants.PROFESSIONAL_DETAILS);
 									existingProfessionalDetailsMap = professionalList.get(0);
+									isGroupOrDesignationUpdated = true;
 								} else {
 									existingProfessionalDetailsMap = professionalList.get(0);
 									Map<String, Object> updatedProfessionalDetailsMap = ((List<Map<String, Object>>) profileDetailsMap
 											.get(changedObj)).get(0);
 									for (String childKey : updatedProfessionalDetailsMap.keySet()) {
+										String updatedValue = (String) updatedProfessionalDetailsMap.get(childKey);
+										if ((Constants.GROUP.equalsIgnoreCase(childKey)
+												|| Constants.DESIGNATION.equalsIgnoreCase(childKey)) &&
+												!updatedValue.equalsIgnoreCase(
+														(String) existingProfessionalDetailsMap.get(childKey))) {
+											isGroupOrDesignationUpdated = true;
+										}
 										existingProfessionalDetailsMap.put(childKey,
 												updatedProfessionalDetailsMap.get(childKey));
 									}
 								}
-								if (StringUtils
-										.isNotBlank((String) existingProfessionalDetailsMap.get(Constants.GROUP)) &&
-										StringUtils
-												.isNotBlank((String) existingProfessionalDetailsMap
-														.get(Constants.DESIGNATION))) {
-									existingProfileDetails.put(Constants.PROFILE_STATUS, Constants.VERIFIED);
-								} else {
-									existingProfileDetails.put(Constants.PROFILE_STATUS, Constants.NOT_VERIFIED);
+								if (isGroupOrDesignationUpdated) {
+									if (StringUtils
+											.isNotBlank((String) existingProfessionalDetailsMap.get(Constants.GROUP)) &&
+											StringUtils
+													.isNotBlank((String) existingProfessionalDetailsMap
+															.get(Constants.DESIGNATION))) {
+											existingProfileDetails.put(Constants.PROFILE_STATUS, Constants.VERIFIED);
+									} else {
+										existingProfileDetails.put(Constants.PROFILE_STATUS, Constants.NOT_VERIFIED);
+									}
+								
+									existingProfileDetails.put(Constants.PROFILE_STATUS_UPDATED_ON, new DateTime());
+									Map<String, Object> additionalProperties = (Map<String, Object>) existingProfileDetails
+											.get(Constants.ADDITIONAL_PROPERTIES);
+									if (ObjectUtils.isEmpty(additionalProperties)) {
+										additionalProperties = new HashMap<>();
+									}
+									additionalProperties.put(Constants.PROFILE_STATUS_UPDATED_MSG_VIEWED, false);
+									existingProfileDetails.put(Constants.ADDITIONAL_PROPERTIES, additionalProperties);
 								}
 							} else {
 								existingProfileDetails.put(changedObj, profileDetailsMap.get(changedObj));
