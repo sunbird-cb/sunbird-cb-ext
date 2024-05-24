@@ -1,5 +1,7 @@
 package org.sunbird.insights.controller.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -14,6 +16,8 @@ import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.common.util.ProjectUtil;
+import org.sunbird.common.util.PropertiesCache;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
@@ -38,6 +42,8 @@ public class InsightsServiceImpl implements InsightsService {
 
     @Autowired
     CbExtServerProperties extServerProperties;
+
+    ObjectMapper mapper = new ObjectMapper();
 
     public SBApiResponse insights(Map<String, Object> requestBody,String userId) throws Exception {
         String [] labelsCertificates = {extServerProperties.getInsightsLabelCertificatesAcross(),extServerProperties.getInsightsLabelCertificatesYourDepartment()} ;
@@ -174,9 +180,24 @@ public class InsightsServiceImpl implements InsightsService {
                 response.setResponseCode(HttpStatus.BAD_REQUEST);
                 return response;
             }
+            Map<String, String> insightKeyMapping = serverProperties.getInsightsMappingKey();
+            String valueForInsightKey = insightKeyMapping.getOrDefault(filter.get(Constants.REQUEST_TYPE), Constants.ORGANISATION);
             Map<String, Object> responseMap = new HashMap<>();
-            Map<String, String> organisationInsideFields = serverProperties.getOrganisationInsightFields();
-            Map<String, String> redisKeyForInsight = serverProperties.getOrganisationInsightRedisKeyMapping();
+            String organisationInsideFieldsProperty =  PropertiesCache.getInstance().getProperty(valueForInsightKey + Constants.INSIGHT_FIELD_KEY);
+            String redisKeyForInsightsProperty =  PropertiesCache.getInstance().getProperty(valueForInsightKey + Constants.INSIGHT_REDIS_KEY_MAPPING);
+            String cssPropertiesForInsightsProperty =  PropertiesCache.getInstance().getProperty(valueForInsightKey + Constants.INSIGHT_PROPERTY_FIELDS);
+            if (StringUtils.isBlank(organisationInsideFieldsProperty) || StringUtils.isBlank(redisKeyForInsightsProperty)) {
+                response.getParams().setStatus(Constants.FAILED);
+                response.put(MESSAGE, "Not able to find value for requestType.");
+                response.setResponseCode(HttpStatus.BAD_REQUEST);
+                return response;
+            }
+            Map<String, String> organisationInsideFields = mapper.readValue(organisationInsideFieldsProperty, new TypeReference<HashMap<String, Object>>() {
+            });
+            Map<String, String> redisKeyForInsight =  mapper.readValue(redisKeyForInsightsProperty, new TypeReference<HashMap<String, Object>>() {
+            });
+            Map<String, String> cssPropertiesForInsight = mapper.readValue(cssPropertiesForInsightsProperty, new TypeReference<HashMap<String, Object>>() {
+            });
             List<Map<String, Object>> organisationDataMapList = new ArrayList<>();
             for (String organisationId: organizations) {
                 Map<String, Object> organisationMap = new HashMap<>();
@@ -184,7 +205,7 @@ public class InsightsServiceImpl implements InsightsService {
                 for (Map.Entry<String,String> insightFields: organisationInsideFields.entrySet()) {
                     Map<String, Object> nudgesData = new HashMap<>();
                     nudgesData.put(Constants.ICON, insightFields.getValue());
-                    populateNudgeForMicroSite(insightFields.getKey(), organisationId, serverProperties.getOrganisationInsightPropertyFields(),
+                    populateNudgeForMicroSite(insightFields.getKey(), organisationId, cssPropertiesForInsight,
                             redisKeyForInsight.get(insightFields.getKey()), nudgesData);
                     nudgesDataList.add(nudgesData);
                 }

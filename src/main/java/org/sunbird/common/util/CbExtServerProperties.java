@@ -753,6 +753,9 @@ public class CbExtServerProperties {
 	@Value("${bulk.upload.allowed.roles.creation}")
 	private String bulkUploadAllowedRolesCreation;
 
+	@Value("#{${insights.mapping.key}}")
+	private Map<String, String> insightsMappingKey;
+
 	public boolean qListFromCacheEnabled() {
 		return qListFromCacheEnabled;
 	}
@@ -2662,5 +2665,13 @@ public class CbExtServerProperties {
 
 	public void setBulkUploadAllowedRolesCreation(String bulkUploadAllowedRolesCreation) {
 		this.bulkUploadAllowedRolesCreation = bulkUploadAllowedRolesCreation;
+	}
+
+	public Map<String, String> getInsightsMappingKey() {
+		return insightsMappingKey;
+	}
+
+	public void setInsightsMappingKey(Map<String, String> insightsMappingKey) {
+		this.insightsMappingKey = insightsMappingKey;
 	}
 }
