@@ -287,7 +287,7 @@ public class UserBulkUploadService {
                         }
                         if (StringUtils.isNotBlank(userRegistration.getPincode())) {
                             if (!ProjectUtil.validatePinCode(userRegistration.getPincode())) {
-                                invalidErrList.add("Invalid Office Pin Code : Office Pin Code should be numeric and between 4 to 6 digit.");
+                                invalidErrList.add("Invalid Office Pin Code : Office Pin Code should be numeric and is of 6 digit.");
                             }
                         }
                     }
