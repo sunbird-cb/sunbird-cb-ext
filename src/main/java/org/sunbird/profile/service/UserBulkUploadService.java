@@ -232,7 +232,7 @@ public class UserBulkUploadService {
                             if (ProjectUtil.validateDate(nextRow.getCell(7).getStringCellValue().trim())) {
                                 userRegistration.setDob(nextRow.getCell(7).getStringCellValue().trim());
                             } else {
-                                invalidErrList.add("Invalid format for Date of Birth type. Expecting in format dd-MM-yyyy");
+                                invalidErrList.add("Invalid format for Date of Birth type. Expecting in format dd-mm-yyyy");
                             }
                         } else if (nextRow.getCell(7).getCellType() == CellType.NUMERIC) {
                             if (DateUtil.isCellDateFormatted(nextRow.getCell(7))) {
@@ -242,7 +242,7 @@ public class UserBulkUploadService {
                                 if (ProjectUtil.validateDate(dob)) {
                                     userRegistration.setDob(dob);
                                 } else {
-                                    invalidErrList.add("Invalid format for Date of Birth type. Expecting in format dd-MM-yyyy");
+                                    invalidErrList.add("Invalid format for Date of Birth type. Expecting in format dd-mm-yyyy");
                                 }
                             } else {
                                 invalidErrList.add("Cell is numeric but not a date.");
