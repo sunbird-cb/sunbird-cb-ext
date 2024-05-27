@@ -53,4 +53,8 @@ public interface UserUtilityService {
 	SBApiResponse recommendContent(String authUserToken, Map<String, Object> orgRequest);
 
 	Map<String, Object> getUserDetails(String key, String value);
+
+	boolean validateGender(String gender);
+
+	boolean validateCategory(String category);
 }

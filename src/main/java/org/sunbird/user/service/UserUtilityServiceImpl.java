@@ -1052,4 +1052,15 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		return null;
 	}
 
+	@Override
+	public boolean validateGender(String gender) {
+		List<String> genderValues = serverConfig.getBulkUploadGenderValue();
+		return genderValues != null && genderValues.contains(gender);
+	}
+
+	@Override
+	public boolean validateCategory(String category) {
+		List<String> categoryValues = serverConfig.getBulkUploadCategoryValue();
+		return categoryValues != null && categoryValues.contains(category);
+	}
 }

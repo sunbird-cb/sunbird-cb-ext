@@ -202,4 +202,12 @@ public class ProjectUtil {
 	public static Boolean validateEmployeeId(String employeeId) {
 		return employeeId.matches("^(?=.*\\d|[a-zA-Z]{30})[a-zA-Z0-9 .-]{1,30}$"); // Allow only alphanumeric, numeric and restrict if only alphabets character
 	}
+
+	public static Boolean validateRegexPatternWithNoSpecialCharacter(String regex) {
+		return regex.matches("^[a-zA-Z0-9 -()]*$");
+	}
+
+	public static Boolean validatePinCode(String regex) {
+		return regex.matches("^[0-9]{6}$");
+	}
 }

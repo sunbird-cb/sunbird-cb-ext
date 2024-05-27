@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.util.NumberToTextConverter;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -29,6 +30,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Service
@@ -197,17 +199,30 @@ public class UserBulkUploadService {
                         } else {
                             invalidErrList.add("Invalid value for Designation column type. Expecting string format");
                         }
+                        if (StringUtils.isNotBlank(userRegistration.getPosition())) {
+                            if (!ProjectUtil.validateRegexPatternWithNoSpecialCharacter(userRegistration.getPosition())) {
+                                invalidErrList.add("Invalid Designation: Designation should be added from default list and cannot contain special character");
+                            }
+                        }
                     }
                     if (nextRow.getCell(5) != null && nextRow.getCell(5).getCellType() != CellType.BLANK) {
                         if (nextRow.getCell(5).getCellType() == CellType.STRING) {
-                            userRegistration.setGender(nextRow.getCell(5).getStringCellValue().trim());
+                            if (userUtilityService.validateGender(nextRow.getCell(5).getStringCellValue().trim())) {
+                                userRegistration.setGender(nextRow.getCell(5).getStringCellValue().trim());
+                            } else {
+                                invalidErrList.add("Invalid Gender : Gender can be only among one of these " + serverProperties.getBulkUploadGenderValue());
+                            }
                         } else {
                             invalidErrList.add("Invalid value for Gender column type. Expecting string format");
                         }
                     }
                     if (nextRow.getCell(6) != null && nextRow.getCell(6).getCellType() != CellType.BLANK) {
                         if (nextRow.getCell(6).getCellType() == CellType.STRING) {
-                            userRegistration.setCategory(nextRow.getCell(6).getStringCellValue().trim());
+                            if (userUtilityService.validateCategory(nextRow.getCell(6).getStringCellValue().trim())) {
+                                userRegistration.setCategory(nextRow.getCell(6).getStringCellValue().trim());
+                            } else {
+                                invalidErrList.add("Invalid Category : Category can be only among one of these " + serverProperties.getBulkUploadCategoryValue());
+                            }
                         } else {
                             invalidErrList.add("Invalid value for Category column type. Expecting string format");
                         }
@@ -219,6 +234,19 @@ public class UserBulkUploadService {
                             } else {
                                 invalidErrList.add("Invalid format for Date of Birth type. Expecting in format dd-MM-yyyy");
                             }
+                        } else if (nextRow.getCell(7).getCellType() == CellType.NUMERIC) {
+                            if (DateUtil.isCellDateFormatted(nextRow.getCell(7))) {
+                                Date date = nextRow.getCell(7).getDateCellValue();
+                                SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
+                                String dob = dateFormat.format(date);
+                                if (ProjectUtil.validateDate(dob)) {
+                                    userRegistration.setDob(dob);
+                                } else {
+                                    invalidErrList.add("Invalid format for Date of Birth type. Expecting in format dd-MM-yyyy");
+                                }
+                            } else {
+                                invalidErrList.add("Cell is numeric but not a date.");
+                            }
                         } else {
                             invalidErrList.add("Invalid value for Date of Birth column type. Expecting string format");
                         }
@@ -228,6 +256,11 @@ public class UserBulkUploadService {
                             userRegistration.setDomicileMedium(nextRow.getCell(8).getStringCellValue().trim());
                         } else {
                             invalidErrList.add("Invalid value for Mother Tongue column type. Expecting string format");
+                        }
+                        if (StringUtils.isNotBlank(userRegistration.getDomicileMedium())) {
+                            if (!ProjectUtil.validateRegexPatternWithNoSpecialCharacter(userRegistration.getDomicileMedium())) {
+                                invalidErrList.add("Invalid Mother Tongue: Mother Tongue should be added from default list and cannot contain special character");
+                            }
                         }
                     }
                     if (nextRow.getCell(9) != null && nextRow.getCell(9).getCellType() != CellType.BLANK) {
@@ -251,6 +284,11 @@ public class UserBulkUploadService {
                             userRegistration.setPincode(nextRow.getCell(10).getStringCellValue().trim());
                         } else {
                             invalidErrList.add("Invalid value for Office Pin Code column type. Expecting number/string format");
+                        }
+                        if (StringUtils.isNotBlank(userRegistration.getPincode())) {
+                            if (!ProjectUtil.validatePinCode(userRegistration.getPincode())) {
+                                invalidErrList.add("Invalid Office Pin Code : Office Pin Code should be numeric and is of 6 digit.");
+                            }
                         }
                     }
                     if (nextRow.getCell(11) != null && nextRow.getCell(11).getCellType() != CellType.BLANK) {
