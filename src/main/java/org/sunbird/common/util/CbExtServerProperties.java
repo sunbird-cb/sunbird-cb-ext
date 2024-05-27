@@ -753,6 +753,12 @@ public class CbExtServerProperties {
 	@Value("${bulk.upload.allowed.roles.creation}")
 	private String bulkUploadAllowedRolesCreation;
 
+	@Value("${user.bulk.upload.gender.value}")
+	private String bulkUploadGenderValue;
+
+	@Value("${user.bulk.upload.category.value}")
+	private String bulkUploadCategoryValue;
+
 	public boolean qListFromCacheEnabled() {
 		return qListFromCacheEnabled;
 	}
@@ -2662,5 +2668,21 @@ public class CbExtServerProperties {
 
 	public void setBulkUploadAllowedRolesCreation(String bulkUploadAllowedRolesCreation) {
 		this.bulkUploadAllowedRolesCreation = bulkUploadAllowedRolesCreation;
+	}
+
+	public List<String> getBulkUploadGenderValue() {
+		return Arrays.asList(bulkUploadGenderValue.split(",", -1));
+	}
+
+	public void setBulkUploadGenderValue(String bulkUploadGenderValue) {
+		this.bulkUploadGenderValue = bulkUploadGenderValue;
+	}
+
+	public List<String> getBulkUploadCategoryValue() {
+		return Arrays.asList(bulkUploadCategoryValue.split(",", -1));
+	}
+
+	public void setBulkUploadCategoryValue(String bulkUploadCategoryValue) {
+		this.bulkUploadCategoryValue = bulkUploadCategoryValue;
 	}
 }
