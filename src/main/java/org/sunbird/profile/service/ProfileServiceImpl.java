@@ -55,6 +55,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
@@ -1780,7 +1781,6 @@ public class ProfileServiceImpl implements ProfileService {
 							if (Constants.PROFESSIONAL_DETAILS.equalsIgnoreCase(changedObj)) {
 								List<Map<String, Object>> professionalList = (List<Map<String, Object>>) existingProfileDetails
 										.get(Constants.PROFESSIONAL_DETAILS);
-								;
 								Map<String, Object> existingProfessionalDetailsMap = null;
 								boolean isGroupOrDesignationUpdated = false;
 								// professional detail is empty... just replace...
@@ -1817,7 +1817,8 @@ public class ProfileServiceImpl implements ProfileService {
 										existingProfileDetails.put(Constants.PROFILE_STATUS, Constants.NOT_VERIFIED);
 									}
 								
-									existingProfileDetails.put(Constants.PROFILE_STATUS_UPDATED_ON, new DateTime());
+									String timeStamp = new SimpleDateFormat("dd-MM-yyyy HH.mm.ss").format(new java.util.Date());
+									existingProfileDetails.put(Constants.PROFILE_STATUS_UPDATED_ON, timeStamp);
 									Map<String, Object> additionalProperties = (Map<String, Object>) existingProfileDetails
 											.get(Constants.ADDITIONAL_PROPERTIES);
 									if (ObjectUtils.isEmpty(additionalProperties)) {
