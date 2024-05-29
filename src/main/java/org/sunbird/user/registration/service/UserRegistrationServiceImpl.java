@@ -195,18 +195,17 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 	}
 
 	public SBApiResponse generateOTP(Map<String, Object> otpRequests) {
-		LOGGER.info("inside generateOTP method");
 		SBApiResponse response = createDefaultResponse(Constants.USER_GENERATE_OTP);
 		String errMsg = validateOTPPayload(otpRequests);
 		if (StringUtils.isBlank(errMsg)) {
 			try {
-				LOGGER.info("validation on OTP Request is successful");
 				String url = serverProperties.getSbUrl() + serverProperties.getSbOTPGeneratePath();
 				Map<String, String> headers = new HashMap();
 				headers.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
 				Map<String, Object> apiResponse = outboundRequestHandlerService.fetchResultUsingPost(url, otpRequests,
 						headers);
 				if (Constants.OK.equalsIgnoreCase((String) apiResponse.get(Constants.RESPONSE_CODE))) {
+					LOGGER.info("OTP Generation successful");
 					response.setVer("v1");
 					response.getParams().setStatus(Constants.SUCCESS.toUpperCase());
 					response.getParams().setResmsgid(UUID.randomUUID().toString());
@@ -220,8 +219,6 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 				LOGGER.error(String.format("Exception in %s : %s", "generateOTP", e.getMessage()), e);
 				errMsg = "Failed to process message. Exception: " + e.getMessage();
 			}
-		}else {
-			LOGGER.error("Validation failed for OTP generation request, error message : ",errMsg);
 		}
 		if (StringUtils.isNotBlank(errMsg)) {
 			LOGGER.error("OTP generation request failed, error message : ",errMsg);
