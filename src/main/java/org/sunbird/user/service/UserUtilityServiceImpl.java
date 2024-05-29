@@ -629,6 +629,9 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		if (StringUtils.isNotEmpty(userRegistration.getEmployeeId())) {
 			employementDetails.put(Constants.EMPLOYEE_CODE, userRegistration.getEmployeeId());
 		}
+		if (StringUtils.isNotEmpty(userRegistration.getPincode())) {
+			employementDetails.put(Constants.PINCODE, userRegistration.getPincode());
+		}
 		profileDetails.put(Constants.EMPLOYMENTDETAILS, employementDetails);
 		Map<String, Object> personalDetails = new HashMap<String, Object>();
 		personalDetails.put(Constants.FIRSTNAME.toLowerCase(), userRegistration.getFirstName());
@@ -643,9 +646,6 @@ public class UserUtilityServiceImpl implements UserUtilityService {
 		}
 		if (StringUtils.isNotEmpty(userRegistration.getDomicileMedium())) {
 			personalDetails.put(Constants.DOMICILE_MEDIUM, userRegistration.getDomicileMedium());
-		}
-		if (StringUtils.isNotEmpty(userRegistration.getPincode())) {
-			personalDetails.put(Constants.PINCODE, userRegistration.getPincode());
 		}
 		if (StringUtils.isNotEmpty(userRegistration.getGender())) {
 			personalDetails.put(Constants.GENDER, userRegistration.getGender());
