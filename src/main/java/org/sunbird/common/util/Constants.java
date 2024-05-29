@@ -1051,7 +1051,7 @@ public class Constants {
 	public static final String MICROSITE_TOP_CONTENT_API = "api.microsite.top.content";
 	public static final String ICON = "icon";
 	public static final String DOMICILE_MEDIUM = "domicileMedium";
-	public static final String PINCODE = "pincode";
+	public static final String PINCODE = "pinCode";
 	public static final String EMPLOYEE_CODE = "employeeCode";
 	public static final String PROFILE_STATUS = "profileStatus";
 	public static final String NOT_VERIFIED = "NOT-VERIFIED";
