@@ -321,7 +321,13 @@ public class AssessmentServiceV5Impl implements AssessmentServiceV5 {
                 return outgoingResponse;
             }
             String assessmentPrimaryCategory = (String) assessmentHierarchy.get(Constants.PRIMARY_CATEGORY);
-            String scoreCutOffType = ((String) assessmentHierarchy.get(Constants.SCORE_CUTOFF_TYPE)).toLowerCase();
+            String assessmentType=((String) assessmentHierarchy.get(Constants.ASSESSMENT_TYPE)).toLowerCase();
+            String scoreCutOffType ;
+            if(assessmentType.equalsIgnoreCase(Constants.QUESTION_WEIGHTAGE)){
+                scoreCutOffType= Constants.SECTION_LEVEL_SCORE_CUTOFF;
+            }else {
+                scoreCutOffType= Constants.ASSESSMENT_LEVEL_SCORE_CUTOFF;
+            }
                 List<Map<String, Object>> sectionLevelsResults = new ArrayList<>();
                 for (Map<String, Object> hierarchySection : hierarchySectionList) {
                     String hierarchySectionId = (String) hierarchySection.get(Constants.IDENTIFIER);
@@ -348,7 +354,7 @@ public class AssessmentServiceV5Impl implements AssessmentServiceV5 {
                     List<String> questionsListFromAssessmentHierarchy = questionsList.stream()
                             .map(object -> Objects.toString(object, null)).collect(toList());
                     Map<String, Object> result = new HashMap<>();
-                    Map<String, Object> questionSetDetailsMap = getParamDetailsForQTypes(assessmentHierarchy);
+                    Map<String, Object> questionSetDetailsMap = getParamDetailsForQTypes(assessmentHierarchy,hierarchySectionId);
                     switch (scoreCutOffType) {
                         case Constants.ASSESSMENT_LEVEL_SCORE_CUTOFF: {
                             result.putAll(createResponseMapWithProperStructure(hierarchySection,
@@ -881,7 +887,7 @@ public class AssessmentServiceV5Impl implements AssessmentServiceV5 {
      * @return a map containing the parameter details for the question types.
      * @throws IOException if there is an error processing the question section schema.
      */
-    private Map<String, Object> getParamDetailsForQTypes(Map<String, Object> assessmentHierarchy) throws IOException {
+    private Map<String, Object> getParamDetailsForQTypes(Map<String, Object> assessmentHierarchy,String hierarchySectionId) throws IOException {
         logger.info("Starting getParamDetailsForQTypes with assessmentHierarchy: {}", assessmentHierarchy);
         Map<String, Object> questionSetDetailsMap = new HashMap<>();
         String assessmentType = (String) assessmentHierarchy.get(Constants.ASSESSMENT_TYPE);
@@ -894,6 +900,7 @@ public class AssessmentServiceV5Impl implements AssessmentServiceV5 {
                     new TypeReference<Map<String, Object>>() {
                     })));
             questionSetDetailsMap.put(Constants.NEGATIVE_MARKING_PERCENTAGE, assessmentHierarchy.get(Constants.NEGATIVE_MARKING_PERCENTAGE));
+            questionSetDetailsMap.put("hierarchySectionId",hierarchySectionId);
         }
         logger.info("Completed getParamDetailsForQTypes with result: {}", questionSetDetailsMap);
         return questionSetDetailsMap;

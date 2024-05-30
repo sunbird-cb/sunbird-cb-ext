@@ -474,7 +474,7 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 			int negativeMarksValue = 0;
 			int minimumPassPercentage = (int) questionSetDetailsMap.get(Constants.MINIMUM_PASS_PERCENTAGE);
 			Integer totalMarks= (Integer) questionSetDetailsMap.get(Constants.TOTAL_MARKS);
-			String sectionName = "section3";
+			String sectionName = (String)questionSetDetailsMap.get("hierarchySectionId");
 			Map<String, Object> resultMap = new HashMap<>();
 			Map<String, Object> answers = getQumlAnswers(originalQuestionList,questionMap);
 			Map<String, Object> optionWeightages = new HashMap<>();
