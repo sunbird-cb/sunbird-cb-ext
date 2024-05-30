@@ -212,6 +212,13 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 					response.getParams().setMsgid(UUID.randomUUID().toString());
 					response.setResult(new HashMap<>());
 					response.getResult().put(Constants.RESPONSE, Constants.SUCCESS.toUpperCase());
+				} else if (Constants.TOO_MANY_REQUESTS.equalsIgnoreCase((String) apiResponse.get(Constants.RESPONSE_CODE))) {
+					errMsg = (String) ((Map<String, Object>) apiResponse.get(Constants.PARAMS)).get(Constants.ERROR_MESSAGE);
+					LOGGER.error("OTP limit rate exceeded, error message : ", errMsg);
+					response.getParams().setStatus(Constants.FAILED);
+					response.getParams().setErrmsg(errMsg);
+					response.setResponseCode(HttpStatus.TOO_MANY_REQUESTS);
+					return response;
 				} else {
 					errMsg = (String) ((Map<String, Object>)apiResponse.get(Constants.PARAMS)).get(Constants.ERROR_MESSAGE);
 				}

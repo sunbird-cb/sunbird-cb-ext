@@ -1028,6 +1028,7 @@ public class Constants {
 	public static final String PAGE_ID = "pageId";
 	public static final String USERS_LIST = "userList";
 	public static final String TOTAL_COUNT = "totalCount";
+	public static final String TOO_MANY_REQUESTS = "TOO_MANY_REQUESTS";
 	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}
