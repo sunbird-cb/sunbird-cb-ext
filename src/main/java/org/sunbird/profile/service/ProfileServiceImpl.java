@@ -1767,137 +1767,154 @@ public class ProfileServiceImpl implements ProfileService {
 			Map<String, Object> responseMap = userUtilityService.getUsersReadData(userId, StringUtils.EMPTY,
 					StringUtils.EMPTY);
 			Map<String, Object> existingProfileDetails = (Map<String, Object>) responseMap.get(Constants.PROFILE_DETAILS);
+			String updatedProfileStatus = null;
+			String updatedGroupVal = null;
+			String updatedDesignationVal = null;
+
 			if (!profileDetailsMap.isEmpty()) {
-				{
-					List<String> listOfChangedDetails = new ArrayList<>();
-					for (String keys : profileDetailsMap.keySet()) {
-						listOfChangedDetails.add(keys);
-					}
-					for (String changedObj : listOfChangedDetails) {
-						if (profileDetailsMap.get(changedObj) instanceof String) {
-							existingProfileDetails.put(changedObj, profileDetailsMap.get(changedObj));
-						} else if (profileDetailsMap.get(changedObj) instanceof ArrayList) {
-							// KB-3718
-							if (Constants.PROFESSIONAL_DETAILS.equalsIgnoreCase(changedObj)) {
-								List<Map<String, Object>> professionalList = (List<Map<String, Object>>) existingProfileDetails
+				List<String> listOfChangedDetails = new ArrayList<>();
+				for (String keys : profileDetailsMap.keySet()) {
+					listOfChangedDetails.add(keys);
+				}
+				boolean isGroupOrDesignationUpdated = false;
+				for (String changedObj : listOfChangedDetails) {
+					if (profileDetailsMap.get(changedObj) instanceof String) {
+						existingProfileDetails.put(changedObj, profileDetailsMap.get(changedObj));
+						if (Constants.PROFILE_STATUS.equalsIgnoreCase(changedObj)) {
+							updatedProfileStatus = (String) profileDetailsMap.get(changedObj);
+						}
+					} else if (profileDetailsMap.get(changedObj) instanceof ArrayList) {
+						// KB-3718
+						if (Constants.PROFESSIONAL_DETAILS.equalsIgnoreCase(changedObj)) {
+							List<Map<String, Object>> professionalList = (List<Map<String, Object>>) existingProfileDetails
+									.get(Constants.PROFESSIONAL_DETAILS);
+							Map<String, Object> existingProfessionalDetailsMap = null;
+							
+							// professional detail is empty... just replace...
+							if (CollectionUtils.isEmpty(professionalList)) {
+								existingProfileDetails.put(changedObj, profileDetailsMap.get(changedObj));
+								professionalList = (List<Map<String, Object>>) existingProfileDetails
 										.get(Constants.PROFESSIONAL_DETAILS);
-								Map<String, Object> existingProfessionalDetailsMap = null;
-								boolean isGroupOrDesignationUpdated = false;
-								// professional detail is empty... just replace...
-								if (CollectionUtils.isEmpty(professionalList)) {
-									existingProfileDetails.put(changedObj, profileDetailsMap.get(changedObj));
-									professionalList = (List<Map<String, Object>>) existingProfileDetails
-											.get(Constants.PROFESSIONAL_DETAILS);
-									existingProfessionalDetailsMap = professionalList.get(0);
-									isGroupOrDesignationUpdated = true;
-								} else {
-									existingProfessionalDetailsMap = professionalList.get(0);
-									Map<String, Object> updatedProfessionalDetailsMap = ((List<Map<String, Object>>) profileDetailsMap
-											.get(changedObj)).get(0);
-									for (String childKey : updatedProfessionalDetailsMap.keySet()) {
-										String updatedValue = (String) updatedProfessionalDetailsMap.get(childKey);
-										if ((Constants.GROUP.equalsIgnoreCase(childKey)
-												|| Constants.DESIGNATION.equalsIgnoreCase(childKey)) &&
-												!updatedValue.equalsIgnoreCase(
-														(String) existingProfessionalDetailsMap.get(childKey))) {
-											isGroupOrDesignationUpdated = true;
-										}
-										existingProfessionalDetailsMap.put(childKey,
-												updatedProfessionalDetailsMap.get(childKey));
-									}
-								}
-
-								if (isGroupOrDesignationUpdated) {
-									if (StringUtils
-											.isNotBlank((String) existingProfessionalDetailsMap.get(Constants.GROUP))) {
-										existingProfileDetails.put(Constants.PROFILE_GROUP_STATUS, Constants.VERIFIED);
-									} else {
-										existingProfileDetails.put(Constants.PROFILE_GROUP_STATUS,
-												Constants.NOT_VERIFIED);
-									}
-									if (StringUtils
-											.isNotBlank((String) existingProfessionalDetailsMap
-													.get(Constants.DESIGNATION))) {
-										existingProfileDetails.put(Constants.PROFILE_DESIGNATION_STATUS,
-												Constants.VERIFIED);
-									} else {
-										existingProfileDetails.put(Constants.PROFILE_DESIGNATION_STATUS,
-												Constants.NOT_VERIFIED);
-									}
-
-									if (Constants.VERIFIED.equalsIgnoreCase(
-											(String) existingProfileDetails.get(Constants.PROFILE_GROUP_STATUS)) &&
-											Constants.VERIFIED.equalsIgnoreCase((String) existingProfileDetails
-													.get(Constants.PROFILE_DESIGNATION_STATUS))) {
-										existingProfileDetails.put(Constants.PROFILE_STATUS, Constants.VERIFIED);
-									} else {
-										existingProfileDetails.put(Constants.PROFILE_STATUS, Constants.NOT_VERIFIED);
-									}
-								
-									SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH.mm.ss");
-									sdf.setTimeZone(TimeZone.getTimeZone("GMT+05:30"));
-									String timeStamp = sdf.format(new java.util.Date());
-									existingProfileDetails.put(Constants.PROFILE_STATUS_UPDATED_ON, timeStamp);
-									Map<String, Object> additionalProperties = (Map<String, Object>) existingProfileDetails
-											.get(Constants.ADDITIONAL_PROPERTIES);
-									if (ObjectUtils.isEmpty(additionalProperties)) {
-										additionalProperties = new HashMap<>();
-									}
-									additionalProperties.put(Constants.PROFILE_STATUS_UPDATED_MSG_VIEWED, false);
-									existingProfileDetails.put(Constants.ADDITIONAL_PROPERTIES, additionalProperties);
-								}
+								existingProfessionalDetailsMap = professionalList.get(0);
+								isGroupOrDesignationUpdated = true;
 							} else {
-								existingProfileDetails.put(changedObj, profileDetailsMap.get(changedObj));
+								existingProfessionalDetailsMap = professionalList.get(0);
+								Map<String, Object> updatedProfessionalDetailsMap = ((List<Map<String, Object>>) profileDetailsMap
+										.get(changedObj)).get(0);
+								for (String childKey : updatedProfessionalDetailsMap.keySet()) {
+									String updatedValue = (String) updatedProfessionalDetailsMap.get(childKey);
+									if ((Constants.GROUP.equalsIgnoreCase(childKey)
+											|| Constants.DESIGNATION.equalsIgnoreCase(childKey)) &&
+											!updatedValue.equalsIgnoreCase(
+													(String) existingProfessionalDetailsMap.get(childKey))) {
+										isGroupOrDesignationUpdated = true;
+									}
+									existingProfessionalDetailsMap.put(childKey,
+											updatedProfessionalDetailsMap.get(childKey));
+								}
 							}
-						} else if (profileDetailsMap.get(changedObj) instanceof Boolean) {
+							updatedGroupVal = (String) existingProfessionalDetailsMap.get(Constants.GROUP);
+							updatedDesignationVal = (String) existingProfessionalDetailsMap.get(Constants.DESIGNATION);
+						} else {
 							existingProfileDetails.put(changedObj, profileDetailsMap.get(changedObj));
-						} else {
-							if (existingProfileDetails.containsKey(changedObj)) {
-								Map<String, Object> existingProfileChild = (Map<String, Object>) existingProfileDetails
-										.get(changedObj);
-								Map<String, Object> requestedProfileChild = (Map<String, Object>) profileDetailsMap
-										.get(changedObj);
-								for (String childKey : requestedProfileChild.keySet()) {
-									existingProfileChild.put(childKey, requestedProfileChild.get(childKey));
-								}
-							} else {
-								existingProfileDetails.put(changedObj, profileDetailsMap.get(changedObj));
-							}
 						}
-
-						// Additional Condition for updating personal Details directly to user object
-						if (Constants.PERSONAL_DETAILS.equalsIgnoreCase(changedObj)) {
-							getModifiedPersonalDetails(profileDetailsMap.get(changedObj), requestData);
-						}
-					}
-
-					HashMap<String, String> headerValue = new HashMap<>();
-					headerValues.put(Constants.AUTH_TOKEN, authToken);
-					headerValues.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
-					String updatedUrl = serverConfig.getSbUrl() + serverConfig.getLmsUserUpdatePrivatePath();
-					Map<String, Object> updateRequestValue = requestData;
-					updateRequestValue.put(Constants.PROFILE_DETAILS, existingProfileDetails);
-					Map<String, Object> updateRequest = new HashMap<>();
-					updateRequest.put(Constants.REQUEST, updateRequestValue);
-					Map<String, Object> updateResponse = outboundRequestHandlerService.fetchResultUsingPatch(updatedUrl, updateRequest, headerValue);
-
-					if (Constants.OK.equalsIgnoreCase((String) updateResponse.get(Constants.RESPONSE_CODE))) {
-						response.setResponseCode(HttpStatus.OK);
-						response.getResult().put(Constants.RESPONSE, Constants.SUCCESS);
-						response.getParams().setStatus(Constants.SUCCESS);
+					} else if (profileDetailsMap.get(changedObj) instanceof Boolean) {
+						existingProfileDetails.put(changedObj, profileDetailsMap.get(changedObj));
 					} else {
-						if (updateResponse != null && Constants.CLIENT_ERROR.equalsIgnoreCase((String) updateResponse.get(Constants.RESPONSE_CODE))) {
-							response.setResponseCode(HttpStatus.BAD_REQUEST);
+						if (existingProfileDetails.containsKey(changedObj)) {
+							Map<String, Object> existingProfileChild = (Map<String, Object>) existingProfileDetails
+									.get(changedObj);
+							Map<String, Object> requestedProfileChild = (Map<String, Object>) profileDetailsMap
+									.get(changedObj);
+							for (String childKey : requestedProfileChild.keySet()) {
+								existingProfileChild.put(childKey, requestedProfileChild.get(childKey));
+							}
 						} else {
-							response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+							existingProfileDetails.put(changedObj, profileDetailsMap.get(changedObj));
 						}
-						response.getParams().setStatus(Constants.FAILED);
-						String errMsg = (String) ((Map<String, Object>) updateResponse.get(Constants.PARAMS)).get(Constants.ERROR_MESSAGE);
-						errMsg = PropertiesCache.getInstance().readCustomError(errMsg);
-						response.getParams().setErrmsg(errMsg);
-						log.error(errMsg, new Exception(errMsg));
-						return response;
 					}
+
+					// Additional Condition for updating personal Details directly to user object
+					if (Constants.PERSONAL_DETAILS.equalsIgnoreCase(changedObj)) {
+						getModifiedPersonalDetails(profileDetailsMap.get(changedObj), requestData);
+					}
+				}
+
+				if (Constants.VERIFIED.equalsIgnoreCase(updatedProfileStatus)) {
+					existingProfileDetails.put(Constants.PROFILE_GROUP_STATUS, Constants.VERIFIED);
+					existingProfileDetails.put(Constants.PROFILE_DESIGNATION_STATUS, Constants.VERIFIED);
+					isGroupOrDesignationUpdated = true;
+				} else if (Constants.NOT_VERIFIED.equalsIgnoreCase(updatedProfileStatus)
+						|| Constants.NOT_MY_USER.equalsIgnoreCase(updatedProfileStatus)) {
+					//If marked as "NOT-VERIFIED" then no need to change the details.
+					isGroupOrDesignationUpdated = false;
+					existingProfileDetails.put(Constants.PROFILE_GROUP_STATUS, Constants.NOT_VERIFIED);
+					existingProfileDetails.put(Constants.PROFILE_DESIGNATION_STATUS, Constants.NOT_VERIFIED);
+				}
+				if (isGroupOrDesignationUpdated) {
+					if (StringUtils.isNotBlank(updatedGroupVal)) {
+						existingProfileDetails.put(Constants.PROFILE_GROUP_STATUS, Constants.VERIFIED);
+					} else {
+						existingProfileDetails.put(Constants.PROFILE_GROUP_STATUS,
+								Constants.NOT_VERIFIED);
+					}
+					if (StringUtils
+							.isNotBlank(updatedDesignationVal)) {
+						existingProfileDetails.put(Constants.PROFILE_DESIGNATION_STATUS,
+								Constants.VERIFIED);
+					} else {
+						existingProfileDetails.put(Constants.PROFILE_DESIGNATION_STATUS,
+								Constants.NOT_VERIFIED);
+					}
+
+					if (Constants.VERIFIED.equalsIgnoreCase(
+							(String) existingProfileDetails.get(Constants.PROFILE_GROUP_STATUS)) &&
+							Constants.VERIFIED.equalsIgnoreCase((String) existingProfileDetails
+									.get(Constants.PROFILE_DESIGNATION_STATUS))) {
+						existingProfileDetails.put(Constants.PROFILE_STATUS, Constants.VERIFIED);
+					} else {
+						existingProfileDetails.put(Constants.PROFILE_STATUS, Constants.NOT_VERIFIED);
+					}
+				
+					SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH.mm.ss");
+					sdf.setTimeZone(TimeZone.getTimeZone("GMT+05:30"));
+					String timeStamp = sdf.format(new java.util.Date());
+					existingProfileDetails.put(Constants.PROFILE_STATUS_UPDATED_ON, timeStamp);
+					Map<String, Object> additionalProperties = (Map<String, Object>) existingProfileDetails
+							.get(Constants.ADDITIONAL_PROPERTIES);
+					if (ObjectUtils.isEmpty(additionalProperties)) {
+						additionalProperties = new HashMap<>();
+					}
+					additionalProperties.put(Constants.PROFILE_STATUS_UPDATED_MSG_VIEWED, false);
+					existingProfileDetails.put(Constants.ADDITIONAL_PROPERTIES, additionalProperties);
+				}
+
+				HashMap<String, String> headerValue = new HashMap<>();
+				headerValues.put(Constants.AUTH_TOKEN, authToken);
+				headerValues.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
+				String updatedUrl = serverConfig.getSbUrl() + serverConfig.getLmsUserUpdatePrivatePath();
+				Map<String, Object> updateRequestValue = requestData;
+				updateRequestValue.put(Constants.PROFILE_DETAILS, existingProfileDetails);
+				Map<String, Object> updateRequest = new HashMap<>();
+				updateRequest.put(Constants.REQUEST, updateRequestValue);
+				Map<String, Object> updateResponse = outboundRequestHandlerService.fetchResultUsingPatch(updatedUrl, updateRequest, headerValue);
+
+				if (Constants.OK.equalsIgnoreCase((String) updateResponse.get(Constants.RESPONSE_CODE))) {
+					response.setResponseCode(HttpStatus.OK);
+					response.getResult().put(Constants.RESPONSE, Constants.SUCCESS);
+					response.getParams().setStatus(Constants.SUCCESS);
+				} else {
+					if (updateResponse != null && Constants.CLIENT_ERROR.equalsIgnoreCase((String) updateResponse.get(Constants.RESPONSE_CODE))) {
+						response.setResponseCode(HttpStatus.BAD_REQUEST);
+					} else {
+						response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+					}
+					response.getParams().setStatus(Constants.FAILED);
+					String errMsg = (String) ((Map<String, Object>) updateResponse.get(Constants.PARAMS)).get(Constants.ERROR_MESSAGE);
+					errMsg = PropertiesCache.getInstance().readCustomError(errMsg);
+					response.getParams().setErrmsg(errMsg);
+					log.error(errMsg, new Exception(errMsg));
+					return response;
 				}
 			}
 		} catch (Exception e) {
