@@ -300,6 +300,7 @@ public class AssessmentServiceV5Impl implements AssessmentServiceV5 {
     public SBApiResponse submitAssessmentAsync(Map<String, Object> submitRequest, String userAuthToken,boolean editMode) {
         logger.info("AssessmentServicev5Impl::submitAssessmentAsync.. started");
         SBApiResponse outgoingResponse = ProjectUtil.createDefaultResponse(Constants.API_SUBMIT_ASSESSMENT);
+        long assessmentCompletionTime= Calendar.getInstance().getTime().getTime();
         try {
             // Step-1 fetch userid
             String userId = accessTokenValidator.fetchUserIdFromAccessToken(userAuthToken);
@@ -320,6 +321,10 @@ public class AssessmentServiceV5Impl implements AssessmentServiceV5 {
                 updateErrorDetails(outgoingResponse, errMsg, HttpStatus.BAD_REQUEST);
                 return outgoingResponse;
             }
+            Date assessmentStart = (Date) existingAssessmentData.get(Constants.START_TIME);
+            long assessmentStartTime = assessmentStart.getTime();
+            int maxAssessmentRetakeAttempts = (Integer) assessmentHierarchy.get(Constants.MAX_ASSESSMENT_RETAKE_ATTEMPTS);
+            int retakeAttemptsConsumed = calculateAssessmentRetakeCount(userId, assessmentIdFromRequest);
             String assessmentPrimaryCategory = (String) assessmentHierarchy.get(Constants.PRIMARY_CATEGORY);
             String assessmentType=((String) assessmentHierarchy.get(Constants.ASSESSMENT_TYPE)).toLowerCase();
             String scoreCutOffType ;
@@ -389,7 +394,7 @@ public class AssessmentServiceV5Impl implements AssessmentServiceV5 {
                     }
                 }
                 if (Constants.SECTION_LEVEL_SCORE_CUTOFF.equalsIgnoreCase(scoreCutOffType)) {
-                    Map<String, Object> result = calculateSectionFinalResults(sectionLevelsResults);
+                    Map<String, Object> result = calculateSectionFinalResults(sectionLevelsResults,assessmentStartTime,assessmentCompletionTime,maxAssessmentRetakeAttempts,retakeAttemptsConsumed);
                     outgoingResponse.getResult().putAll(result);
                     outgoingResponse.getParams().setStatus(Constants.SUCCESS);
                     outgoingResponse.setResponseCode(HttpStatus.OK);
@@ -780,7 +785,7 @@ public class AssessmentServiceV5Impl implements AssessmentServiceV5 {
         }
     }
 
-    private Map<String, Object> calculateSectionFinalResults(List<Map<String, Object>> sectionLevelResults) {
+    private Map<String, Object> calculateSectionFinalResults(List<Map<String, Object>> sectionLevelResults,long assessmentStartTime,long assessmentCompletionTime,int maxAssessmentRetakeAttempts,int retakeAttemptsConsumed) {
         Map<String, Object> res = new HashMap<>();
         Double result;
         Integer correct = 0;
@@ -813,8 +818,11 @@ public class AssessmentServiceV5Impl implements AssessmentServiceV5 {
             res.put(Constants.CORRECT, correct);
             res.put(Constants.INCORRECT, inCorrect);
             res.put(Constants.PASS, (pass == sectionLevelResults.size()));
+            res.put(Constants.TIME_TAKEN_FOR_ASSESSMENT,assessmentCompletionTime-assessmentStartTime);
+            res.put(Constants.MAX_ASSESSMENT_RETAKE_ATTEMPTS,maxAssessmentRetakeAttempts);
+            res.put(Constants.RETAKE_ATTEMPT_CONSUMED,retakeAttemptsConsumed);
             double totalPercentage = ((double) totalSectionMarks / (double)totalMarks) * 100;
-            res.put("totalPercentage", totalPercentage);
+            res.put(Constants.TOTAL_PERCENTAGE, totalPercentage);
         } catch (Exception e) {
             logger.error("Failed to calculate assessment score. Exception: ", e);
         }

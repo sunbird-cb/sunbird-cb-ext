@@ -1076,6 +1076,9 @@ public class Constants {
 	public static final String INSIGHT_FIELD_KEY = ".insights.fields";
 	public static final String INSIGHT_REDIS_KEY_MAPPING = ".insights.redis.key.mapping";
 	public static final String INSIGHT_PROPERTY_FIELDS = ".insights.property.fields";
+	public static final String TIME_TAKEN_FOR_ASSESSMENT= "timeTakenForAssessment";
+	public static final String RETAKE_ATTEMPT_CONSUMED = "retakeAttemptsConsumed";
+	public static final String TOTAL_PERCENTAGE = "totalPercentage";
 
 	private Constants() {
 		throw new IllegalStateException("Utility class");
