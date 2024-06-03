@@ -1029,6 +1029,8 @@ public class Constants {
 	public static final String USERS_LIST = "userList";
 	public static final String TOTAL_COUNT = "totalCount";
 	public static final String TOO_MANY_REQUESTS = "TOO_MANY_REQUESTS";
+	public static final String SERVER_ERROR = "serverError";
+	public static final String RESOURCE_NOT_FOUND = "RESOURCE_NOT_FOUND";
 	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}

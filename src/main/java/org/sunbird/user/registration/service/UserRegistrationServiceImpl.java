@@ -204,7 +204,8 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 				headers.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
 				Map<String, Object> apiResponse = outboundRequestHandlerService.fetchResultUsingPost(url, otpRequests,
 						headers);
-				if (Constants.OK.equalsIgnoreCase((String) apiResponse.get(Constants.RESPONSE_CODE))) {
+				String responseCode = (String) apiResponse.get(Constants.RESPONSE_CODE);
+				if (Constants.OK.equalsIgnoreCase(responseCode)) {
 					LOGGER.info("OTP Generation successful");
 					response.setVer("v1");
 					response.getParams().setStatus(Constants.SUCCESS.toUpperCase());
@@ -212,15 +213,27 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 					response.getParams().setMsgid(UUID.randomUUID().toString());
 					response.setResult(new HashMap<>());
 					response.getResult().put(Constants.RESPONSE, Constants.SUCCESS.toUpperCase());
-				} else if (Constants.TOO_MANY_REQUESTS.equalsIgnoreCase((String) apiResponse.get(Constants.RESPONSE_CODE))) {
-					errMsg = (String) ((Map<String, Object>) apiResponse.get(Constants.PARAMS)).get(Constants.ERROR_MESSAGE);
-					LOGGER.error("OTP limit rate exceeded, error message : ", errMsg);
-					response.getParams().setStatus(Constants.FAILED);
-					response.getParams().setErrmsg(errMsg);
-					response.setResponseCode(HttpStatus.TOO_MANY_REQUESTS);
-					return response;
 				} else {
-					errMsg = (String) ((Map<String, Object>)apiResponse.get(Constants.PARAMS)).get(Constants.ERROR_MESSAGE);
+					errMsg = (String) ((Map<String, Object>) apiResponse.get(Constants.PARAMS)).get(Constants.ERROR_MESSAGE);
+					response.getParams().setStatus(Constants.FAILED);
+
+					switch (responseCode.toUpperCase()) {
+						case Constants.TOO_MANY_REQUESTS:
+							response.setResponseCode(HttpStatus.TOO_MANY_REQUESTS);
+							break;
+						case Constants.CLIENT_ERROR:
+							response.setResponseCode(HttpStatus.BAD_REQUEST);
+							break;
+						case Constants.SERVER_ERROR:
+							response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+							break;
+						case Constants.RESOURCE_NOT_FOUND:
+							response.setResponseCode(HttpStatus.NOT_FOUND);
+							break;
+						default:
+							response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+							break;
+					}
 				}
 			} catch (Exception e) {
 				LOGGER.error(String.format("Exception in %s : %s", "generateOTP", e.getMessage()), e);
@@ -229,9 +242,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 		}
 		if (StringUtils.isNotBlank(errMsg)) {
 			LOGGER.error("OTP generation request failed, error message : ",errMsg);
-			response.getParams().setStatus(Constants.FAILED);
 			response.getParams().setErrmsg(errMsg);
-			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		return response;
 	}
