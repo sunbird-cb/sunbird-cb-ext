@@ -809,7 +809,7 @@ public class AssessmentServiceV5Impl implements AssessmentServiceV5 {
                 if (result >= minimumPassPercentage) {
                     pass++;
                 }
-                totalSectionMarks += (Integer) sectionChildren.get(Constants.TOTAL_SECTION_MARKS);
+                totalSectionMarks += (Integer) sectionChildren.get(Constants.SECTION_MARKS);
                 totalMarks += (Integer) sectionChildren.get(Constants.TOTAL_MARKS);
             }
             res.put(Constants.OVERALL_RESULT, totalResult / sectionLevelResults.size());
