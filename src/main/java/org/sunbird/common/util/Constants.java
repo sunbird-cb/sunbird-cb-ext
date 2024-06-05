@@ -1083,6 +1083,7 @@ public class Constants {
 	public static final String TIME_TAKEN_FOR_ASSESSMENT= "timeTakenForAssessment";
 	public static final String RETAKE_ATTEMPT_CONSUMED = "retakeAttemptsConsumed";
 	public static final String TOTAL_PERCENTAGE = "totalPercentage";
+	public static final String SECTION_LEVEL_DEFINITION = "sectionLevelDefinition";
 
 	private Constants() {
 		throw new IllegalStateException("Utility class");

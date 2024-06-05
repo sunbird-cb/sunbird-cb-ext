@@ -359,7 +359,7 @@ public class AssessmentServiceV5Impl implements AssessmentServiceV5 {
                     List<String> questionsListFromAssessmentHierarchy = questionsList.stream()
                             .map(object -> Objects.toString(object, null)).collect(toList());
                     Map<String, Object> result = new HashMap<>();
-                    Map<String, Object> questionSetDetailsMap = getParamDetailsForQTypes(assessmentHierarchy,hierarchySectionId);
+                    Map<String, Object> questionSetDetailsMap = getParamDetailsForQTypes(hierarchySection,assessmentHierarchy,hierarchySectionId);
                     switch (scoreCutOffType) {
                         case Constants.ASSESSMENT_LEVEL_SCORE_CUTOFF: {
                             result.putAll(createResponseMapWithProperStructure(hierarchySection,
@@ -879,8 +879,9 @@ public class AssessmentServiceV5Impl implements AssessmentServiceV5 {
         qSectionSchemeMap.keySet().forEach(sectionKey -> {
             Map<String, Object> proficiencyMap = qSectionSchemeMap.get(sectionKey);
             proficiencyMap.forEach((key, value) -> {
-                Map<String, Integer> values = (Map<String, Integer>) value;
-                markMap.put(sectionKey + "|" + key, values.get("marksForQuestion"));
+                if (key.equalsIgnoreCase("marksForQuestion")) {
+                    markMap.put(sectionKey, (Integer) value);
+                }
             });
         });
         logger.info("Completed generating mark map");
@@ -895,7 +896,7 @@ public class AssessmentServiceV5Impl implements AssessmentServiceV5 {
      * @return a map containing the parameter details for the question types.
      * @throws IOException if there is an error processing the question section schema.
      */
-    private Map<String, Object> getParamDetailsForQTypes(Map<String, Object> assessmentHierarchy,String hierarchySectionId) throws IOException {
+    private Map<String, Object> getParamDetailsForQTypes(Map<String, Object> hierarchySection,Map<String, Object> assessmentHierarchy,String hierarchySectionId) throws IOException {
         logger.info("Starting getParamDetailsForQTypes with assessmentHierarchy: {}", assessmentHierarchy);
         Map<String, Object> questionSetDetailsMap = new HashMap<>();
         String assessmentType = (String) assessmentHierarchy.get(Constants.ASSESSMENT_TYPE);
@@ -903,10 +904,8 @@ public class AssessmentServiceV5Impl implements AssessmentServiceV5 {
         questionSetDetailsMap.put(Constants.MINIMUM_PASS_PERCENTAGE, assessmentHierarchy.get(Constants.MINIMUM_PASS_PERCENTAGE));
         questionSetDetailsMap.put(Constants.TOTAL_MARKS, assessmentHierarchy.get(Constants.TOTAL_MARKS));
         if (assessmentType.equalsIgnoreCase(Constants.QUESTION_WEIGHTAGE)) {
-            String questionSectionSchema= (String) assessmentHierarchy.get(Constants.QUESTION_SECTION_SCHEME);
-            questionSetDetailsMap.put(Constants.QUESTION_SECTION_SCHEME, generateMarkMap(mapper.readValue(questionSectionSchema,
-                    new TypeReference<Map<String, Object>>() {
-                    })));
+            Map<String,Map<String, Object>> questionSectionSchema= (Map<String,Map<String, Object>>) hierarchySection.get(Constants.SECTION_LEVEL_DEFINITION);
+            questionSetDetailsMap.put(Constants.QUESTION_SECTION_SCHEME, generateMarkMap(questionSectionSchema));
             questionSetDetailsMap.put(Constants.NEGATIVE_MARKING_PERCENTAGE, assessmentHierarchy.get(Constants.NEGATIVE_MARKING_PERCENTAGE));
             questionSetDetailsMap.put("hierarchySectionId",hierarchySectionId);
         }
