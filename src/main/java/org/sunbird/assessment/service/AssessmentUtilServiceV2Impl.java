@@ -474,7 +474,6 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 			int negativeMarksValue = 0;
 			int minimumPassPercentage = (int) questionSetDetailsMap.get(Constants.MINIMUM_PASS_PERCENTAGE);
 			Integer totalMarks= (Integer) questionSetDetailsMap.get(Constants.TOTAL_MARKS);
-			String sectionName = (String)questionSetDetailsMap.get("hierarchySectionId");
 			Map<String, Object> resultMap = new HashMap<>();
 			Map<String, Object> answers = getQumlAnswers(originalQuestionList,questionMap);
 			Map<String, Object> optionWeightages = new HashMap<>();
@@ -502,11 +501,11 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 						if (answer.equals(marked)) {
 							question.put(Constants.RESULT, Constants.CORRECT);
 							correct++;
-							sectionMarks = handleCorrectAnswer(sectionMarks, questionSetSectionScheme, sectionName, proficiencyMap);
+							sectionMarks = handleCorrectAnswer(sectionMarks, questionSetSectionScheme, proficiencyMap);
 						} else {
 							question.put(Constants.RESULT, Constants.INCORRECT);
 							inCorrect++;
-							sectionMarks = handleIncorrectAnswer(negativeMarksValue, sectionMarks, questionSetSectionScheme, sectionName, proficiencyMap);
+							sectionMarks = handleIncorrectAnswer(negativeMarksValue, sectionMarks, questionSetSectionScheme, proficiencyMap);
 						}
 					}
 					sectionMarks = calculateScoreForOptionWeightage(question, assessmentType, optionWeightages, options, sectionMarks, marked);
@@ -655,13 +654,13 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 	 *
 	 * @param sectionMarks the current section marks.
 	 * @param questionSetSectionScheme the question set section scheme.
-	 * @param sectionName the name of the section.
 	 * @param proficiencyMap the proficiency map containing question levels.
 	 * @return the updated section marks.
 	 */
-	private Integer handleCorrectAnswer(Integer sectionMarks, Map<String, Object> questionSetSectionScheme, String sectionName, Map<String, Object> proficiencyMap) {
+	private Integer handleCorrectAnswer(Integer sectionMarks, Map<String, Object> questionSetSectionScheme, Map<String, Object> proficiencyMap) {
 		logger.info("Handling correct answer scenario...");
-		sectionMarks = sectionMarks + (Integer) questionSetSectionScheme.get(sectionName + "|" + proficiencyMap.get(Constants.QUESTION_LEVEL));
+		String questionLevel=(String) proficiencyMap.get(Constants.QUESTION_LEVEL);
+		sectionMarks = sectionMarks + (Integer) questionSetSectionScheme.get(questionLevel);
 		logger.info("Correct answer scenario handled successfully.");
 		return sectionMarks;
 	}
@@ -673,14 +672,14 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 	 * @param negativeMarksValue the value of negative marks for incorrect answers.
 	 * @param sectionMarks the current section marks.
 	 * @param questionSetSectionScheme the question set section scheme.
-	 * @param sectionName the name of the section.
 	 * @param proficiencyMap the proficiency map containing question levels.
 	 * @return the updated section marks.
 	 */
-	private Integer handleIncorrectAnswer(int negativeMarksValue,Integer sectionMarks, Map<String, Object> questionSetSectionScheme, String sectionName, Map<String, Object> proficiencyMap) {
+	private Integer handleIncorrectAnswer(int negativeMarksValue,Integer sectionMarks, Map<String, Object> questionSetSectionScheme, Map<String, Object> proficiencyMap) {
 		logger.info("Handling incorrect answer scenario...");
 		if (negativeMarksValue > 0) {
-			sectionMarks = sectionMarks - (Integer) questionSetSectionScheme.get(sectionName + "|" + proficiencyMap.get(Constants.QUESTION_LEVEL));
+			String questionLevel=(String) proficiencyMap.get(Constants.QUESTION_LEVEL);
+			sectionMarks = sectionMarks - (Integer) questionSetSectionScheme.get(questionLevel);
 		}
 		logger.info("Incorrect answer scenario handled successfully.");
 		return sectionMarks;
