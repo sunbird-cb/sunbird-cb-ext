@@ -515,6 +515,7 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 			}
 			blank = handleBlankAnswers(userQuestionList, answers, blank);
 			updateResultMap(userQuestionList, correct, blank, inCorrect, resultMap, sectionMarks, totalMarks);
+			calculatePassPercentage(sectionMarks,totalMarks,correct, blank, inCorrect,assessmentType,resultMap);
 			computeSectionResults(sectionMarks, totalMarks, minimumPassPercentage, resultMap);
 			return resultMap;
 		} catch (Exception ex) {
@@ -716,13 +717,9 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 	 */
 	private void updateResultMap(List<Map<String, Object>> userQuestionList, Integer correct, Integer blank, Integer inCorrect, Map<String, Object> resultMap, Integer sectionMarks, Integer totalMarks) {
 		logger.info("Updating result map...");
-		int total;
-		total = correct + blank + inCorrect;
-		resultMap.put(Constants.RESULT, total == 0 ? 0 : ((correct * 100d) / total));
 		resultMap.put(Constants.INCORRECT, inCorrect);
 		resultMap.put(Constants.BLANK, blank);
 		resultMap.put(Constants.CORRECT, correct);
-		resultMap.put(Constants.TOTAL, total);
 		resultMap.put(Constants.CHILDREN, userQuestionList);
 		resultMap.put(Constants.SECTION_MARKS, sectionMarks);
 		resultMap.put(Constants.TOTAL_MARKS, totalMarks);
@@ -755,5 +752,27 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 	private void sortAnswers(List<String> answer) {
 		if (answer.size() > 1)
 			Collections.sort(answer);
+	}
+
+	/**
+	 * Calculates the pass percentage based on the given assessment type and updates the resultMap with the result.
+	 *
+	 * @param sectionMarks    Marks obtained in the section
+	 * @param totalMarks      Total marks possible in the section
+	 * @param correct         Number of correct answers
+	 * @param blank           Number of blank answers
+	 * @param inCorrect       Number of incorrect answers
+	 * @param assessmentType  Type of assessment (either "QUESTION_WEIGHTAGE" or "OPTION_WEIGHTAGE")
+	 * @param resultMap       Map to store the result of the calculation
+	 */
+	private static void calculatePassPercentage(Integer sectionMarks, Integer totalMarks, Integer correct, Integer blank, Integer inCorrect,String assessmentType,Map<String, Object> resultMap) {
+		if (assessmentType.equalsIgnoreCase(Constants.QUESTION_WEIGHTAGE)) {
+			resultMap.put(Constants.RESULT, (double)sectionMarks / (double)totalMarks * 100);
+		} else if (assessmentType.equalsIgnoreCase(Constants.OPTION_WEIGHTAGE)) {
+			int total;
+			total = correct + blank + inCorrect;
+			resultMap.put(Constants.RESULT, total == 0 ? 0 : ((correct * 100d) / total));
+			resultMap.put(Constants.TOTAL, total);
+		}
 	}
 }

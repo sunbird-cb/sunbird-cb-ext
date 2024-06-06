@@ -823,6 +823,8 @@ public class AssessmentServiceV5Impl implements AssessmentServiceV5 {
             res.put(Constants.RETAKE_ATTEMPT_CONSUMED,retakeAttemptsConsumed);
             double totalPercentage = ((double) totalSectionMarks / (double)totalMarks) * 100;
             res.put(Constants.TOTAL_PERCENTAGE, totalPercentage);
+            res.put(Constants.TOTAL_SECTION_MARKS, totalSectionMarks);
+            res.put(Constants.TOTAL_MARKS, totalMarks);
         } catch (Exception e) {
             logger.error("Failed to calculate assessment score. Exception: ", e);
         }
