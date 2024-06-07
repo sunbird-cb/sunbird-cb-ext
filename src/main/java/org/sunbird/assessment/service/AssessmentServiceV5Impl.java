@@ -698,7 +698,6 @@ public class AssessmentServiceV5Impl implements AssessmentServiceV5 {
         if (!ObjectUtils.isEmpty(resultMap)) {
             result = (Double) resultMap.get(Constants.RESULT);
             sectionLevelResult.put(Constants.RESULT, result);
-            sectionLevelResult.put(Constants.TOTAL, resultMap.get(Constants.TOTAL));
             sectionLevelResult.put(Constants.BLANK, resultMap.get(Constants.BLANK));
             sectionLevelResult.put(Constants.CORRECT, resultMap.get(Constants.CORRECT));
             sectionLevelResult.put(Constants.INCORRECT, resultMap.get(Constants.INCORRECT));
@@ -801,7 +800,6 @@ public class AssessmentServiceV5Impl implements AssessmentServiceV5 {
                 res.put(Constants.CHILDREN, sectionLevelResults);
                 result = (Double) sectionChildren.get(Constants.RESULT);
                 totalResult += result;
-                total += (Integer) sectionChildren.get(Constants.TOTAL);
                 blank += (Integer) sectionChildren.get(Constants.BLANK);
                 correct += (Integer) sectionChildren.get(Constants.CORRECT);
                 inCorrect += (Integer) sectionChildren.get(Constants.INCORRECT);
@@ -813,7 +811,6 @@ public class AssessmentServiceV5Impl implements AssessmentServiceV5 {
                 totalMarks += (Integer) sectionChildren.get(Constants.TOTAL_MARKS);
             }
             res.put(Constants.OVERALL_RESULT, totalResult / sectionLevelResults.size());
-            res.put(Constants.TOTAL, total);
             res.put(Constants.BLANK, blank);
             res.put(Constants.CORRECT, correct);
             res.put(Constants.INCORRECT, inCorrect);
