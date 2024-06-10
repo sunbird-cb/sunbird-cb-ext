@@ -759,9 +759,6 @@ public class CbExtServerProperties {
 	@Value("${user.bulk.upload.category.value}")
 	private String bulkUploadCategoryValue;
 
-	@Value("#{${insights.mapping.key}}")
-	private Map<String, String> insightsMappingKey;
-
 	public boolean qListFromCacheEnabled() {
 		return qListFromCacheEnabled;
 	}
@@ -2687,13 +2684,5 @@ public class CbExtServerProperties {
 
 	public void setBulkUploadCategoryValue(String bulkUploadCategoryValue) {
 		this.bulkUploadCategoryValue = bulkUploadCategoryValue;
-	}
-
-	public Map<String, String> getInsightsMappingKey() {
-		return insightsMappingKey;
-	}
-
-	public void setInsightsMappingKey(Map<String, String> insightsMappingKey) {
-		this.insightsMappingKey = insightsMappingKey;
 	}
 }
