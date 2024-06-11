@@ -206,12 +206,33 @@ public class RedisCacheMgr {
         }
     }
 
-    public Boolean isKeyExist(String key) {
+    public boolean keyExists(String key) {
         try (Jedis jedis = jedisPool.getResource()) {
             return jedis.exists(Constants.REDIS_COMMON_KEY + key);
         } catch (Exception e) {
-            logger.error(e);
-            return null;
+            logger.error("An Error Occurred while fetching value from Redis", e);
+            return false;
+        }
+    }
+
+    public boolean valueExists(String key, String value) {
+        try (Jedis jedis = jedisPool.getResource()) {
+            return jedis.sismember(Constants.REDIS_COMMON_KEY + key, value);
+        } catch (Exception e) {
+            logger.error("An Error Occurred while fetching value from Redis", e);
+            return false;
+        }
+    }
+
+    public void putCacheAsStringArray(String key, String[] values, Integer ttl) {
+        try (Jedis jedis = jedisPool.getResource()) {
+            if(null == ttl)
+                ttl = cache_ttl;
+            jedis.sadd(Constants.REDIS_COMMON_KEY + key, values);
+            jedis.expire(Constants.REDIS_COMMON_KEY + key, ttl);
+            logger.debug("Cache_key_value " + Constants.REDIS_COMMON_KEY + key + " is saved in redis");
+        } catch (Exception e) {
+            logger.error("An error occurred while saving data into Redis",e);
         }
     }
 }

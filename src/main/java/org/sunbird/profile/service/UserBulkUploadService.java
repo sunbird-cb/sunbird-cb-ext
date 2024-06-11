@@ -16,6 +16,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+import org.sunbird.cache.RedisCacheMgr;
 import org.sunbird.cassandra.utils.CassandraOperation;
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.util.CbExtServerProperties;
@@ -46,6 +48,9 @@ public class UserBulkUploadService {
 
     @Autowired
     StorageService storageService;
+
+    @Autowired
+    RedisCacheMgr redisCacheMgr;
 
     public void initiateUserBulkUploadProcess(String inputData) {
         logger.info("UserBulkUploadService:: initiateUserBulkUploadProcess: Started");
@@ -200,8 +205,8 @@ public class UserBulkUploadService {
                             invalidErrList.add("Invalid value for Designation column type. Expecting string format");
                         }
                         if (StringUtils.isNotBlank(userRegistration.getPosition())) {
-                            if (!ProjectUtil.validateRegexPatternWithNoSpecialCharacter(userRegistration.getPosition())) {
-                                invalidErrList.add("Invalid Designation: Designation should be added from default list and cannot contain special character");
+                            if (!ProjectUtil.validateRegexPatternWithNoSpecialCharacter(userRegistration.getPosition()) || this.validateFieldValue(Constants.POSITION, userRegistration.getPosition())) {
+                                invalidErrList.add("Invalid Designation: Designation should be added from default list and/or cannot contain special character");
                             }
                         }
                     }
@@ -232,23 +237,19 @@ public class UserBulkUploadService {
                             if (ProjectUtil.validateDate(nextRow.getCell(7).getStringCellValue().trim())) {
                                 userRegistration.setDob(nextRow.getCell(7).getStringCellValue().trim());
                             } else {
-                                invalidErrList.add("Invalid format for Date of Birth type. Expecting in format dd-mm-yyyy");
+                                invalidErrList.add("Invalid format for Date of Birth type. Expecting in dd-mm-yyyy format");
                             }
-                        } else if (nextRow.getCell(7).getCellType() == CellType.NUMERIC) {
-                            if (DateUtil.isCellDateFormatted(nextRow.getCell(7))) {
-                                Date date = nextRow.getCell(7).getDateCellValue();
-                                SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
-                                String dob = dateFormat.format(date);
-                                if (ProjectUtil.validateDate(dob)) {
-                                    userRegistration.setDob(dob);
-                                } else {
-                                    invalidErrList.add("Invalid format for Date of Birth type. Expecting in format dd-mm-yyyy");
-                                }
+                        } else if (nextRow.getCell(7).getCellType() == CellType.NUMERIC || DateUtil.isCellDateFormatted(nextRow.getCell(7))) {
+                            Date date = nextRow.getCell(7).getDateCellValue();
+                            SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
+                            String dob = dateFormat.format(date);
+                            if (ProjectUtil.validateDate(dob)) {
+                                userRegistration.setDob(dob);
                             } else {
-                                invalidErrList.add("Cell is numeric but not a date.");
+                                invalidErrList.add("Invalid format for Date of Birth type. Expecting in dd-mm-yyyy format");
                             }
                         } else {
-                            invalidErrList.add("Invalid value for Date of Birth column type. Expecting string format");
+                            invalidErrList.add("Invalid value for Date of Birth column type. Expecting string type in dd-mm-yyyy format");
                         }
                     }
                     if (nextRow.getCell(8) != null && nextRow.getCell(8).getCellType() != CellType.BLANK) {
@@ -258,8 +259,8 @@ public class UserBulkUploadService {
                             invalidErrList.add("Invalid value for Mother Tongue column type. Expecting string format");
                         }
                         if (StringUtils.isNotBlank(userRegistration.getDomicileMedium())) {
-                            if (!ProjectUtil.validateRegexPatternWithNoSpecialCharacter(userRegistration.getDomicileMedium())) {
-                                invalidErrList.add("Invalid Mother Tongue: Mother Tongue should be added from default list and cannot contain special character");
+                            if (!ProjectUtil.validateRegexPatternWithNoSpecialCharacter(userRegistration.getDomicileMedium()) || this.validateFieldValue(Constants.LANGUAGES, userRegistration.getDomicileMedium())) {
+                                invalidErrList.add("Invalid Mother Tongue: Mother Tongue should be added from default list and/or cannot contain special character");
                             }
                         }
                     }
@@ -274,6 +275,9 @@ public class UserBulkUploadService {
                         if (StringUtils.isNotBlank(userRegistration.getEmployeeId())) {
                             if (!ProjectUtil.validateEmployeeId(userRegistration.getEmployeeId())) {
                                 invalidErrList.add("Invalid Employee ID : Employee ID can contain alphanumeric characters or numeric character and have a max length of 30");
+                            }
+                            if(userRegistration.getEmployeeId().contains(Constants.SPACE)){
+                                invalidErrList.add("Invalid Employee ID : Employee Id cannot contain spaces");
                             }
                         }
                     }
@@ -471,6 +475,25 @@ public class UserBulkUploadService {
             str.append("Failed to Validate User Details. Error Details - [").append(errList.toString()).append("]");
         }
         return errList;
+    }
+
+    private boolean validateFieldValue(String fieldKey, String fieldValue) {
+        if(redisCacheMgr.keyExists(fieldKey)){
+            return !redisCacheMgr.valueExists(fieldKey, fieldValue);
+        } else{
+            Set<String> designationsSet = new HashSet<>();
+            Map<String,Object> propertiesMap = new HashMap<>();
+            propertiesMap.put(Constants.CONTEXT_TYPE, fieldKey);
+            List<Map<String, Object>> fieldValueList = cassandraOperation.getRecordsByProperties(Constants.KEYSPACE_SUNBIRD, Constants.TABLE_MASTER_DATA, propertiesMap, Collections.singletonList(Constants.CONTEXT_NAME));
+            if(!CollectionUtils.isEmpty(fieldValueList)) {
+                String columnName = fieldValueList.get(0).get("contextname") != null ? "contextname" : "contextName";
+                for(Map<String, Object> languageMap : fieldValueList){
+                    designationsSet.add((String)languageMap.get(columnName));
+                }
+            }
+            redisCacheMgr.putCacheAsStringArray(fieldKey, designationsSet.toArray(new String[0]), null);
+            return !designationsSet.contains(fieldValue);
+        }
     }
 
 }

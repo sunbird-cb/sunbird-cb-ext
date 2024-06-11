@@ -321,8 +321,6 @@ public class AssessmentServiceV5Impl implements AssessmentServiceV5 {
                 updateErrorDetails(outgoingResponse, errMsg, HttpStatus.BAD_REQUEST);
                 return outgoingResponse;
             }
-            Date assessmentStart = (Date) existingAssessmentData.get(Constants.START_TIME);
-            long assessmentStartTime = assessmentStart.getTime();
             int maxAssessmentRetakeAttempts = (Integer) assessmentHierarchy.get(Constants.MAX_ASSESSMENT_RETAKE_ATTEMPTS);
             int retakeAttemptsConsumed = calculateAssessmentRetakeCount(userId, assessmentIdFromRequest);
             String assessmentPrimaryCategory = (String) assessmentHierarchy.get(Constants.PRIMARY_CATEGORY);
@@ -394,6 +392,8 @@ public class AssessmentServiceV5Impl implements AssessmentServiceV5 {
                     }
                 }
                 if (Constants.SECTION_LEVEL_SCORE_CUTOFF.equalsIgnoreCase(scoreCutOffType)) {
+                    Date assessmentStart = (Date) existingAssessmentData.get(Constants.START_TIME);
+                    long assessmentStartTime = assessmentStart.getTime();
                     Map<String, Object> result = calculateSectionFinalResults(sectionLevelsResults,assessmentStartTime,assessmentCompletionTime,maxAssessmentRetakeAttempts,retakeAttemptsConsumed);
                     outgoingResponse.getResult().putAll(result);
                     outgoingResponse.getParams().setStatus(Constants.SUCCESS);
