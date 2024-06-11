@@ -694,6 +694,7 @@ public class AssessmentServiceV5Impl implements AssessmentServiceV5 {
         sectionLevelResult.put(Constants.OBJECT_TYPE, hierarchySection.get(Constants.OBJECT_TYPE));
         sectionLevelResult.put(Constants.PRIMARY_CATEGORY, hierarchySection.get(Constants.PRIMARY_CATEGORY));
         sectionLevelResult.put(Constants.PASS_PERCENTAGE, hierarchySection.get(Constants.MINIMUM_PASS_PERCENTAGE));
+        sectionLevelResult.put(Constants.NAME, hierarchySection.get(Constants.NAME));
         Double result;
         if (!ObjectUtils.isEmpty(resultMap)) {
             result = (Double) resultMap.get(Constants.RESULT);
@@ -733,6 +734,7 @@ public class AssessmentServiceV5Impl implements AssessmentServiceV5 {
             res.put(Constants.CORRECT, assessmentLevelResult.get(Constants.CORRECT));
             res.put(Constants.PASS_PERCENTAGE, assessmentLevelResult.get(Constants.PASS_PERCENTAGE));
             res.put(Constants.INCORRECT, assessmentLevelResult.get(Constants.INCORRECT));
+            res.put(Constants.NAME, assessmentLevelResult.get(Constants.NAME));
             Integer minimumPassPercentage = (Integer) assessmentLevelResult.get(Constants.PASS_PERCENTAGE);
             res.put(Constants.PASS, result >= minimumPassPercentage);
         } catch (Exception e) {
