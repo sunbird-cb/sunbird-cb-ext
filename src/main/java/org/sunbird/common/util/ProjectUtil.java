@@ -200,7 +200,7 @@ public class ProjectUtil {
 	}
 
 	public static Boolean validateEmployeeId(String employeeId) {
-		return employeeId.matches("^[a-zA-Z0-9]{1,30}$"); // Allow alphabets,  alphanumeric and numeric.
+		return employeeId.matches("^[a-zA-Z0-9]{1,30}$"); // Allow alphabets,alphanumeric and numeric.
 	}
 
 	public static Boolean validateRegexPatternWithNoSpecialCharacter(String regex) {
