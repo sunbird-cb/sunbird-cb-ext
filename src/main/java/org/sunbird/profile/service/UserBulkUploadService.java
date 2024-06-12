@@ -277,7 +277,7 @@ public class UserBulkUploadService {
                                 invalidErrList.add("Invalid Employee ID : Employee ID can contain alphanumeric characters or numeric character and have a max length of 30");
                             }
                             if(userRegistration.getEmployeeId().contains(Constants.SPACE)){
-                                invalidErrList.add("Invalid Employee ID : Employee Id cannot contain spaces");
+                                invalidErrList.add("Employee Id cannot contain spaces");
                             }
                         }
                     }
