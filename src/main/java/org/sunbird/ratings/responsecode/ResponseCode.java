@@ -3,15 +3,15 @@ package org.sunbird.ratings.responsecode;
 import org.apache.commons.lang3.StringUtils;
 
 public enum ResponseCode {
-    invalidRating(ResponseMessage.Key.INVALID_RATING, ResponseMessage.Message.INVALID_RATING),
-    invalidReview(
+    INVALID_RATING(ResponseMessage.Key.INVALID_RATING, ResponseMessage.Message.INVALID_RATING),
+    INVALID_REVIEW(
             ResponseMessage.Key.INVALID_REVIEW, ResponseMessage.Message.INVALID_REVIEW),
-    invalidInput(
+    INVALID_INPUT(
             ResponseMessage.Key.INVALID_INPUT, ResponseMessage.Message.INVALID_INPUT),
-    invalidUser(
+    INVALID_USER(
             ResponseMessage.Key.INVALID_INPUT, ResponseMessage.Message.INVALID_INPUT),
 
-    success(ResponseMessage.Key.SUCCESS_MESSAGE, ResponseMessage.Message.SUCCESS_MESSAGE),
+    SUCCESS(ResponseMessage.Key.SUCCESS_MESSAGE, ResponseMessage.Message.SUCCESS_MESSAGE),
 
     OK(200),
     UPDATED(201),

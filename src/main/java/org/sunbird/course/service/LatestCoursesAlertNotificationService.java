@@ -81,12 +81,12 @@ public class LatestCoursesAlertNotificationService {
 			int i = 1;
 			for (CoursesDataMap courseDataMap : coursesDataMapList) {
 				params.put(Constants.COURSE_KEYWORD + i, true);
-				params.put(Constants.COURSE_KEYWORD + i + Constants._URL, courseDataMap.getCourseUrl());
+				params.put(Constants.COURSE_KEYWORD + i + Constants.URL_1, courseDataMap.getCourseUrl());
 				params.put(Constants.COURSE_KEYWORD + i + Constants.THUMBNAIL, courseDataMap.getThumbnail());
-				params.put(Constants.COURSE_KEYWORD + i + Constants._NAME, courseDataMap.getCourseName());
-				params.put(Constants.COURSE_KEYWORD + i + Constants._DURATION,
+				params.put(Constants.COURSE_KEYWORD + i + Constants.NAME_1, courseDataMap.getCourseName());
+				params.put(Constants.COURSE_KEYWORD + i + Constants.DURATION_1,
 						ProjectUtil.convertSecondsToHrsAndMinutes(courseDataMap.getDuration()));
-				params.put(Constants.COURSE_KEYWORD + i + Constants._DESCRIPTION, courseDataMap.getDescription());
+				params.put(Constants.COURSE_KEYWORD + i + Constants.DESCRIPTION_1, courseDataMap.getDescription());
 				i++;
 			}
 

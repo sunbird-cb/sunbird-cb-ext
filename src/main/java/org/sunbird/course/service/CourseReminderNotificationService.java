@@ -78,13 +78,13 @@ public class CourseReminderNotificationService {
 				for (int i = 0; i < userCourseProgressDetailsEntry.getValue().getIncompleteCourses().size(); i++) {
 					String courseId = Constants.COURSE_KEYWORD + (i + 1);
 					params.put(courseId, true);
-					params.put(courseId + Constants._URL,
+					params.put(courseId + Constants.URL_1,
 							userCourseProgressDetailsEntry.getValue().getIncompleteCourses().get(i).getCourseUrl());
 					params.put(courseId + Constants.THUMBNAIL,
 							userCourseProgressDetailsEntry.getValue().getIncompleteCourses().get(i).getThumbnail());
-					params.put(courseId + Constants._NAME,
+					params.put(courseId + Constants.NAME_1,
 							userCourseProgressDetailsEntry.getValue().getIncompleteCourses().get(i).getCourseName());
-					params.put(courseId + Constants._DURATION, String.valueOf(userCourseProgressDetailsEntry.getValue()
+					params.put(courseId + Constants.DURATION_1, String.valueOf(userCourseProgressDetailsEntry.getValue()
 							.getIncompleteCourses().get(i).getCompletionPercentage()));
 				}
 				CompletableFuture.runAsync(() -> {
