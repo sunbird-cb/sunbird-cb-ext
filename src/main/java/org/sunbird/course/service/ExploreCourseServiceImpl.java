@@ -311,7 +311,7 @@ public class ExploreCourseServiceImpl implements ExploreCourseService {
 				strBuilder.append("Item is missing 'identifier'. ");
 			}
 			if (!itemMap.containsKey(Constants.SEQUENCE_NO)) {
-				strBuilder.append("Item is missing 'seqno'. ");
+				strBuilder.append("Item is missing seqno. ");
 			}
 		}
 		return strBuilder.toString();
