@@ -1088,6 +1088,9 @@ public class Constants {
 	public static final String SECTION_LEVEL_DEFINITION = "sectionLevelDefinition";
 
 	public static final String ASSESSMENT_HIERARCHY_SAVE_NOT_AVBL = "Assessment hierarchy save point not available, failed to process request";
+	public static final String SEQUENCE_NO = "seqno";
+	public static final String API_EXPLORE_COURSE_UPDATE = "api.explore.course.update";
+	public static final String API_EXPLORE_COURSE_DELETE = "api.explore.course.delete";
 
 	private Constants() {
 		throw new IllegalStateException("Utility class");
