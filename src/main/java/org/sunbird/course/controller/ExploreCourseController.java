@@ -6,7 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.sunbird.common.model.SBApiResponse;
@@ -43,15 +43,15 @@ public class ExploreCourseController {
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
 
-	@PutMapping("/course/v1/explore/upsert")
+	@PostMapping("/course/v1/explore/upsert")
 	public ResponseEntity<SBApiResponse> upsertCourse(@RequestBody Map<String, Object> request) {
 		SBApiResponse response = courseService.upsertExploreCourse(request);
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
 
-	@DeleteMapping("/course/v1/explore/delete/{id}")
-	public ResponseEntity<SBApiResponse> deleteExploreCourse(@PathVariable String id) {
-		SBApiResponse response = courseService.deleteExploreCourse(id);
+	@DeleteMapping("/course/v1/explore/delete/{courseId}")
+	public ResponseEntity<SBApiResponse> deleteExploreCourse(@PathVariable String courseId) {
+		SBApiResponse response = courseService.deleteExploreCourse(courseId);
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
 }
