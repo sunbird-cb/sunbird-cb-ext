@@ -420,7 +420,7 @@ public class SearchByService {
 			Map<String, CompetencyInfo> competencyMap = new HashMap<>();
 			if (CollectionUtils.isEmpty(competencyMap)) {
 				logger.info("Initializing/Refreshing the Cache Value for Key : " + Constants.COMPETENCY_CACHE_NAME);
-				competencyMap = listCompetencyDetails(userToken, competenciesList);
+//				competencyMap = listCompetencyDetails(userToken, competenciesList);
 			}
 			return competencyMap.values();
 		}catch (Exception e){
