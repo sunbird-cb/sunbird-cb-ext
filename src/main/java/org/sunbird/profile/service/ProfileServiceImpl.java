@@ -1749,12 +1749,12 @@ public class ProfileServiceImpl implements ProfileService {
 				response.getParams().setStatus(Constants.FAILED);
 				return response;
 			}
-			String validationError = this.validateExistingPhoneEmail(requestData);
-			if (StringUtils.isEmpty(validationError)) {
+			String validationErrorMessage = this.validateExistingPhoneEmail(requestData);
+			if (StringUtils.isEmpty(validationErrorMessage)) {
 				response.setResponseCode(HttpStatus.BAD_REQUEST);
 				response.getParams().setStatus(Constants.FAILED);
 				response.getParams().setErr(Constants.CLIENT_ERROR);
-				response.getParams().setErrmsg(validationError);
+				response.getParams().setErrmsg(validationErrorMessage);
 				return response;
 			}
 			String userId = (String) requestData.get(Constants.USER_ID);
