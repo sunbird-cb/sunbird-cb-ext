@@ -910,7 +910,7 @@ public class AssessmentServiceV5Impl implements AssessmentServiceV5 {
         String assessmentType = (String) assessmentHierarchy.get(Constants.ASSESSMENT_TYPE);
         questionSetDetailsMap.put(Constants.ASSESSMENT_TYPE, assessmentType);
         questionSetDetailsMap.put(Constants.MINIMUM_PASS_PERCENTAGE, assessmentHierarchy.get(Constants.MINIMUM_PASS_PERCENTAGE));
-        questionSetDetailsMap.put(Constants.TOTAL_MARKS, assessmentHierarchy.get(Constants.TOTAL_MARKS));
+        questionSetDetailsMap.put(Constants.TOTAL_MARKS, hierarchySection.get(Constants.TOTAL_MARKS));
         if (assessmentType.equalsIgnoreCase(Constants.QUESTION_WEIGHTAGE)) {
             Map<String,Map<String, Object>> questionSectionSchema= (Map<String,Map<String, Object>>) hierarchySection.get(Constants.SECTION_LEVEL_DEFINITION);
             questionSetDetailsMap.put(Constants.QUESTION_SECTION_SCHEME, generateMarkMap(questionSectionSchema));
