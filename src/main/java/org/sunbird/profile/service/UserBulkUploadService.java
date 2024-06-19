@@ -618,7 +618,7 @@ public class UserBulkUploadService {
                                 updatedRecord.put("Error Details", responseCode);
                             } else {
                                 noOfSuccessfulRecords++;
-                                updatedRecord.put("Status", "SUCCESS");
+                                updatedRecord.put("Status", Constants.SUCCESSFUL_UPPERCASE);
                                 updatedRecord.put("Error Details", "");
                             }
                         } else {
@@ -656,7 +656,7 @@ public class UserBulkUploadService {
                 status = uploadTheUpdatedCSVFile(file);
 
                 status = (failedRecordsCount == 0 && totalRecordsCount == noOfSuccessfulRecords && totalRecordsCount >= 1)
-                        ? Constants.SUCCESSFUL
+                        ? Constants.SUCCESSFUL_UPPERCASE
                         : Constants.FAILED_UPPERCASE;
 
                 updateUserBulkUploadStatus(inputDataMap.get(Constants.ROOT_ORG_ID), inputDataMap.get(Constants.IDENTIFIER),
