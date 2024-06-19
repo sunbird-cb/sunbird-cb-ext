@@ -474,7 +474,10 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 			String assessmentType= (String)questionSetDetailsMap.get(Constants.ASSESSMENT_TYPE);
 			String negativeWeightAgeEnabled;
 			int negativeMarksValue = 0;
-			int minimumPassPercentage = (int) questionSetDetailsMap.get(Constants.MINIMUM_PASS_PERCENTAGE);
+			int minimumPassPercentage = 0;
+			if (questionSetDetailsMap.get(Constants.MINIMUM_PASS_PERCENTAGE) != null) {
+				minimumPassPercentage = (int) questionSetDetailsMap.get(Constants.MINIMUM_PASS_PERCENTAGE);
+			}
 			Integer totalMarks= (Integer) questionSetDetailsMap.get(Constants.TOTAL_MARKS);
 			Map<String, Object> resultMap = new HashMap<>();
 			Map<String, Object> answers = getQumlAnswers(originalQuestionList,questionMap);

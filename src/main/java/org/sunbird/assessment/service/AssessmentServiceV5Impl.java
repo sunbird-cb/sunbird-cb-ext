@@ -392,8 +392,11 @@ public class AssessmentServiceV5Impl implements AssessmentServiceV5 {
                     }
                 }
                 if (Constants.SECTION_LEVEL_SCORE_CUTOFF.equalsIgnoreCase(scoreCutOffType)) {
-                    Date assessmentStart = (Date) existingAssessmentData.get(Constants.START_TIME);
-                    long assessmentStartTime = assessmentStart.getTime();
+                    long assessmentStartTime = 0;
+                    if (existingAssessmentData.get(Constants.START_TIME)!=null) {
+                        Date assessmentStart = (Date) existingAssessmentData.get(Constants.START_TIME);
+                        assessmentStartTime = assessmentStart.getTime();
+                    }
                     Map<String, Object> result = calculateSectionFinalResults(sectionLevelsResults,assessmentStartTime,assessmentCompletionTime,maxAssessmentRetakeAttempts,retakeAttemptsConsumed);
                     outgoingResponse.getResult().putAll(result);
                     outgoingResponse.getParams().setStatus(Constants.SUCCESS);
@@ -809,8 +812,12 @@ public class AssessmentServiceV5Impl implements AssessmentServiceV5 {
                 if (result >= minimumPassPercentage) {
                     pass++;
                 }
-                totalSectionMarks += (Integer) sectionChildren.get(Constants.SECTION_MARKS);
-                totalMarks += (Integer) sectionChildren.get(Constants.TOTAL_MARKS);
+                if(sectionChildren.get(Constants.SECTION_MARKS)!=null){
+                    totalSectionMarks += (Integer) sectionChildren.get(Constants.SECTION_MARKS);
+                }
+                if(sectionChildren.get(Constants.TOTAL_MARKS)!=null){
+                    totalMarks += (Integer) sectionChildren.get(Constants.TOTAL_MARKS);
+                }
             }
             res.put(Constants.OVERALL_RESULT, totalResult / sectionLevelResults.size());
             res.put(Constants.BLANK, blank);

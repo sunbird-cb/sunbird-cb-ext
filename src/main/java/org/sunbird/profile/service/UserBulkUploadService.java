@@ -2,6 +2,10 @@ package org.sunbird.profile.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVPrinter;
+import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
@@ -27,10 +31,11 @@ import org.sunbird.storage.service.StorageService;
 import org.sunbird.user.registration.model.UserRegistration;
 import org.sunbird.user.service.UserUtilityService;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -65,7 +70,8 @@ public class UserBulkUploadService {
                 updateUserBulkUploadStatus(inputDataMap.get(Constants.ROOT_ORG_ID),
                         inputDataMap.get(Constants.IDENTIFIER), Constants.STATUS_IN_PROGRESS_UPPERCASE, 0, 0, 0);
                 storageService.downloadFile(inputDataMap.get(Constants.FILE_NAME));
-                processBulkUpload(inputDataMap);
+                //processBulkUpload(inputDataMap);
+                processCSVBulkUploadV2(inputDataMap);
             } else {
                 logger.error(String.format("Error in the Kafka Message Received : %s", errList));
             }
@@ -274,9 +280,9 @@ public class UserBulkUploadService {
                         }
                         if (StringUtils.isNotBlank(userRegistration.getEmployeeId())) {
                             if (!ProjectUtil.validateEmployeeId(userRegistration.getEmployeeId())) {
-                                invalidErrList.add("Invalid Employee ID : Employee ID can contain alphanumeric characters or numeric character and have a max length of 30");
+                                invalidErrList.add("Invalid Employee ID : Employee ID can contain alphabetic, alphanumeric or numeric character(s) and have a max length of 30");
                             }
-                            if(userRegistration.getEmployeeId().contains(Constants.SPACE)){
+                            if (userRegistration.getEmployeeId().contains(Constants.SPACE)) {
                                 invalidErrList.add("Invalid Employee ID : Employee Id cannot contain spaces");
                             }
                         }
@@ -326,7 +332,7 @@ public class UserBulkUploadService {
                             List<String> tagList = new ArrayList<String>();
                             if (!StringUtils.isEmpty(tagStr)) {
                                 String[] tagStrList = tagStr.split(",", -1);
-                                for(String tag : tagStrList) {
+                                for (String tag : tagStrList) {
                                     tagList.add(tag.trim());
                                 }
                             }
@@ -417,6 +423,275 @@ public class UserBulkUploadService {
                 file.delete();
         }
     }
+    public void processCSVBulkUploadV2(HashMap<String, String> inputDataMap) throws IOException {
+        File file = null;
+        CSVParser csvParser = null;
+       CSVPrinter csvPrinter = null;
+        BufferedWriter bufferedWriter = null;
+        FileWriter fileWriter = null;
+       int totalRecordsCount = 0;
+        int noOfSuccessfulRecords = 0;
+        int failedRecordsCount = 0;
+        String status = "";
+
+       try {
+           file = new File(Constants.LOCAL_BASE_PATH + inputDataMap.get(Constants.FILE_NAME));
+            if (file.exists() && file.length() > 0) {
+                BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8));
+                csvParser = new CSVParser(reader, CSVFormat.INFORMIX_UNLOAD.withFirstRecordAsHeader());
+
+                List<CSVRecord> csvRecords = csvParser.getRecords();
+                List<Map<String, String>> updatedRecords = new ArrayList<>();
+                List<String> headers = new ArrayList<>(csvParser.getHeaderNames());
+                headers.replaceAll(header -> header.replaceAll("^\"|\"$", ""));
+
+               if (!headers.contains("Status")) {
+                   headers.add("Status");
+                }
+                if (!headers.contains("Error Details")) {
+                    headers.add("Error Details");
+                }
+
+                for (CSVRecord record : csvRecords) {
+                    totalRecordsCount++;
+                   Map<String, String> updatedRecord = new LinkedHashMap<>(record.toMap());
+                    List<String> errList = new ArrayList<>();
+                    List<String> invalidErrList = new ArrayList<>();
+
+                    UserRegistration userRegistration = new UserRegistration();
+
+                    if (isFieldEmpty(record, 0)) {
+                        errList.add("Full Name");
+                    } else {
+                        String fullName = record.get(0).trim();
+                        if (!fullName.matches("[a-zA-Z ]+")) {
+                            invalidErrList.add("Invalid value for Full Name column type. Expecting string format");
+                        } else {
+                            userRegistration.setFirstName(fullName);
+                            if (!ProjectUtil.validateFullName(userRegistration.getFirstName())) {
+                                invalidErrList.add("Invalid Full Name");
+                            }
+                        }
+                    }
+
+                    if (isFieldEmpty(record, 1)) {
+                        errList.add("Email");
+                    } else {
+                        String email = record.get(1).trim();
+                        userRegistration.setEmail(email);
+                    }
+
+
+                    if (isFieldEmpty(record, 2)) {
+                        errList.add("Mobile Number");
+                    } else {
+                        String phone = record.get(2).trim();
+                        if (phone.matches("^\\d+$")) {
+                            userRegistration.setPhone(phone);
+                        } else {
+                            invalidErrList.add("Invalid value for Mobile Number column type. Expecting number format");
+                        }
+                    }
+                    if (!StringUtils.isBlank(userRegistration.getPhone()) && !ProjectUtil.validateContactPattern(userRegistration.getPhone())) {
+                        invalidErrList.add("The Mobile Number provided is Invalid");
+                    }
+
+                    if (isFieldEmpty(record, 3)) {
+                        errList.add("Group");
+                    } else {
+                        String group = record.get(3).trim();
+                        userRegistration.setGroup(group);
+                        if (!userUtilityService.validateGroup(userRegistration.getGroup())) {
+                            invalidErrList.add("Invalid Group : Group can be only among one of these " + serverProperties.getBulkUploadGroupValue());
+                        }
+                    }
+
+                    if (isFieldEmpty(record, 4)) {
+                        errList.add("Designation");
+                    } else {
+                        String position = record.get(4).trim();
+                        userRegistration.setPosition(position);
+                        if (!ProjectUtil.validateRegexPatternWithNoSpecialCharacter(userRegistration.getPosition()) || this.validateFieldValue(Constants.POSITION, userRegistration.getPosition())) {
+                            invalidErrList.add("Invalid Designation: Designation should be added from default list and/or cannot contain special character");
+                        }
+                    }
+
+                    if (!isFieldEmpty(record, 5)) {
+                        String gender = record.get(5).trim();
+                        if (userUtilityService.validateGender(gender)) {
+                            userRegistration.setGender(gender);
+                        } else {
+                            invalidErrList.add("Invalid Gender : Gender can be only among one of these " + serverProperties.getBulkUploadGenderValue());
+                        }
+                    }
+
+                    if (!isFieldEmpty(record, 6)) {
+                        String category = record.get(6).trim();
+                        if (userUtilityService.validateCategory(category)) {
+                            userRegistration.setCategory(category);
+                        } else {
+                            invalidErrList.add("Invalid Category : Category can be only among one of these " + serverProperties.getBulkUploadCategoryValue());
+                        }
+                    }
+
+                    if (!isFieldEmpty(record, 7)) {
+                        String dob = record.get(7).trim();
+                        if (ProjectUtil.validateDate(dob)) {
+                            userRegistration.setDob(dob);
+                        } else {
+                            invalidErrList.add("Invalid format for Date of Birth type. Expecting in dd-mm-yyyy format");
+                        }
+                   }
+
+                    if (!isFieldEmpty(record, 8)) {
+                        String motherTongue = record.get(8).trim();
+                        userRegistration.setDomicileMedium(motherTongue);
+                        if (!ProjectUtil.validateRegexPatternWithNoSpecialCharacter(userRegistration.getDomicileMedium()) || this.validateFieldValue(Constants.LANGUAGES, userRegistration.getDomicileMedium())) {
+                            invalidErrList.add("Invalid Mother Tongue: Mother Tongue should be added from default list and/or cannot contain special character");
+                        }
+                    }
+
+                   if (!isFieldEmpty(record, 9)) {
+                        String employeeId = record.get(9).trim();
+                        userRegistration.setEmployeeId(employeeId);
+                        if (!ProjectUtil.validateEmployeeId(userRegistration.getEmployeeId())) {
+                            invalidErrList.add("Invalid Employee ID : Employee ID can contain alphanumeric characters or numeric character and have a max length of 30");
+                        }
+                        if (userRegistration.getEmployeeId().contains(Constants.SPACE)) {
+                            invalidErrList.add("Invalid Employee ID : Employee Id cannot contain spaces");
+                        }
+                    }
+
+                    if (!isFieldEmpty(record, 10)) {
+                        String pincode = record.get(10).trim();
+                        userRegistration.setPincode(pincode);
+                        if (!ProjectUtil.validatePinCode(userRegistration.getPincode())) {
+                            invalidErrList.add("Invalid Office Pin Code : Office Pin Code should be numeric and is of 6 digit.");
+                        }
+                    }
+
+                    if (!isFieldEmpty(record, 11)) {
+                        String externalSystemId = record.get(11).trim();
+                        userRegistration.setExternalSystemId(externalSystemId);
+                        if (!ProjectUtil.validateExternalSystemId(userRegistration.getExternalSystemId())) {
+                            invalidErrList.add("Invalid External System ID : External System Id can contain alphanumeric characters and have a max length of 30");
+                        }
+                    }
+                    if (!isFieldEmpty(record, 12)) {
+                        String externalSystem = record.get(12).trim();
+                        userRegistration.setExternalSystem(externalSystem);
+                        if (!ProjectUtil.validateExternalSystem(userRegistration.getExternalSystem())) {
+                            invalidErrList.add("Invalid External System Name : External System Name can contain only alphabets and alphanumeric and can have a max length of 255");
+                        }
+                    }
+
+                    if (!isFieldEmpty(record, 13)) {
+                        String tagStr = record.get(13).trim();
+                        List<String> tagList = new ArrayList<>();
+                        if (!StringUtils.isEmpty(tagStr)) {
+                            String[] tagStrList = tagStr.split("&", -1);
+                            for (String tag : tagStrList) {
+                                tagList.add(tag.trim());
+                            }
+                        }
+                        userRegistration.setTag(tagList);
+                        if (!ProjectUtil.validateTag(userRegistration.getTag())) {
+                            invalidErrList.add("Invalid Tag: Tags are separated by '&' and can contain only alphabets with spaces. e.g., Bihar Circle&Patna Division");
+                        }
+                    }
+                    userRegistration.setOrgName(inputDataMap.get(Constants.ORG_NAME));
+                    userRegistration.setChannel(inputDataMap.get(Constants.ORG_NAME));
+                    userRegistration.setSbOrgId(inputDataMap.get(Constants.ROOT_ORG_ID));
+
+                    if (!errList.isEmpty()) {
+                        failedRecordsCount++;
+                        updatedRecord.put("Status", "FAILED");
+                        updatedRecord.put("Error Details", String.join(", ", errList));
+                    } else {
+                        invalidErrList.addAll(validateEmailContactAndDomain(userRegistration));
+                        if (invalidErrList.isEmpty()) {
+                            userRegistration.setUserAuthToken(inputDataMap.get(Constants.X_AUTH_TOKEN));
+                          String responseCode = userUtilityService.createBulkUploadUser(userRegistration);
+                            if (!Constants.OK.equalsIgnoreCase(responseCode)) {
+                                failedRecordsCount++;
+                                updatedRecord.put("Status", "FAILED");
+                                updatedRecord.put("Error Details", responseCode);
+                            } else {
+                                noOfSuccessfulRecords++;
+                                updatedRecord.put("Status", "SUCCESS");
+                                updatedRecord.put("Error Details", "");
+                            }
+                        } else {
+                            failedRecordsCount++;
+                            updatedRecord.put("Status", "FAILED");
+                            updatedRecord.put("Error Details", String.join(", ", invalidErrList));
+                        }
+                    }
+
+                    updatedRecords.add(updatedRecord);
+                }
+
+                // Write back updated records to the same CSV file
+                 fileWriter = new FileWriter(file);
+                bufferedWriter = new BufferedWriter(fileWriter);
+                 csvPrinter = new CSVPrinter(bufferedWriter, CSVFormat.INFORMIX_UNLOAD.withHeader(headers.toArray(new String[0])));
+
+
+                for (Map<String, String> record : updatedRecords) {
+                    List<String> recordValues = new ArrayList<>();
+                    for (String header :  headers) {
+                        recordValues.add(record.get(header));
+                    }
+                    csvPrinter.printRecord(recordValues);
+                }
+
+                if (totalRecordsCount == 0) {
+                    List<String> singleRow = new ArrayList<>(Collections.nCopies(headers.size(), ""));
+                    singleRow.set(headers.indexOf("Status"), Constants.FAILED_UPPERCASE);
+                    singleRow.set(headers.indexOf("Error Details"), Constants.EMPTY_FILE_FAILED);
+                    csvPrinter.printRecord(singleRow);
+                    status = Constants.FAILED_UPPERCASE;
+                }
+                csvPrinter.flush();
+
+                status = uploadTheUpdatedCSVFile(file);
+
+
+                status = (failedRecordsCount == 0 && totalRecordsCount == noOfSuccessfulRecords && totalRecordsCount >= 1)
+                        ? Constants.SUCCESSFUL
+                        : Constants.FAILED_UPPERCASE;
+
+                updateUserBulkUploadStatus(inputDataMap.get(Constants.ROOT_ORG_ID), inputDataMap.get(Constants.IDENTIFIER),
+                        status, totalRecordsCount, noOfSuccessfulRecords, failedRecordsCount);
+
+            } else {
+                logger.info("Error in Process Bulk Upload: The File is not downloaded/present");
+                status = Constants.FAILED_UPPERCASE;
+            }
+            updateUserBulkUploadStatus(inputDataMap.get(Constants.ROOT_ORG_ID), inputDataMap.get(Constants.IDENTIFIER),
+                    status, 0, 0, 0);
+        } catch (Exception e) {
+            logger.error(String.format("Error in Process Bulk Upload %s", e.getMessage()), e);
+           updateUserBulkUploadStatus(inputDataMap.get(Constants.ROOT_ORG_ID), inputDataMap.get(Constants.IDENTIFIER),
+                    Constants.FAILED_UPPERCASE, 0, 0, 0);
+        } finally {
+            if (csvParser != null)
+               csvParser.close();
+            if (csvPrinter != null)
+                csvPrinter.close();
+           if (bufferedWriter != null)
+               bufferedWriter.close();
+           if (fileWriter != null)
+               fileWriter.close();
+            if (file != null)
+                file.delete();
+        }
+   }
+
+    private boolean isFieldEmpty(CSVRecord record, int index) {
+        return record.get(index) == null || record.get(index).trim().isEmpty();
+    }
+
 
     private void setErrorDetails(StringBuffer str, List<String> errList, Cell statusCell, Cell errorDetails) {
         str.append("Failed to process user record. Missing Parameters - ").append(errList);
@@ -438,6 +713,17 @@ public class UserBulkUploadService {
         return Constants.SUCCESSFUL_UPPERCASE;
     }
 
+    private String uploadTheUpdatedCSVFile(File file)
+            throws IOException {
+
+        SBApiResponse uploadResponse = storageService.uploadFile(file, serverProperties.getBulkUploadContainerName(),serverProperties.getCloudContainerName());
+        if (!HttpStatus.OK.equals(uploadResponse.getResponseCode())) {
+            logger.info(String.format("Failed to upload file. Error: %s",
+                    uploadResponse.getParams().getErrmsg()));
+            return Constants.FAILED_UPPERCASE;
+        }
+        return Constants.SUCCESSFUL_UPPERCASE;
+    }
     private List<String> validateEmailContactAndDomain(UserRegistration userRegistration) {
         StringBuffer str = new StringBuffer();
         List<String> errList = new ArrayList<>();
