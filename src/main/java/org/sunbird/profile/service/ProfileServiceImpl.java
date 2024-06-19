@@ -1758,8 +1758,6 @@ public class ProfileServiceImpl implements ProfileService {
 					adminUpdateMap.put(key, profileDetailsMap.get(key));
 				}
 			}
-
-
 			Map<String, String> headerValues = new HashMap<>();
 			headerValues.put(Constants.AUTH_TOKEN, authToken);
 			headerValues.put(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
@@ -1905,14 +1903,22 @@ public class ProfileServiceImpl implements ProfileService {
 					response.getParams().setStatus(Constants.SUCCESS);
 				} else {
 					if (updateResponse != null && Constants.CLIENT_ERROR.equalsIgnoreCase((String) updateResponse.get(Constants.RESPONSE_CODE))) {
+						Map<String, Object> responseParams = (Map<String, Object>) updateResponse.get(Constants.PARAMS);
+						if(MapUtils.isNotEmpty(responseParams)){
+							String errorMessage = (String) responseParams.get(Constants.ERROR_MESSAGE);
+							response.getParams().setErrmsg(errorMessage);
+						}
 						response.setResponseCode(HttpStatus.BAD_REQUEST);
 					} else {
 						response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
 					}
 					response.getParams().setStatus(Constants.FAILED);
-					String errMsg = (String) ((Map<String, Object>) updateResponse.get(Constants.PARAMS)).get(Constants.ERROR_MESSAGE);
-					errMsg = PropertiesCache.getInstance().readCustomError(errMsg);
-					response.getParams().setErrmsg(errMsg);
+					String errMsg = response.getParams().getErrmsg();
+					if(StringUtils.isEmpty(errMsg)){
+						errMsg = (String) ((Map<String, Object>) updateResponse.get(Constants.PARAMS)).get(Constants.ERROR_MESSAGE);
+						errMsg = PropertiesCache.getInstance().readCustomError(errMsg);
+						response.getParams().setErrmsg(errMsg);
+					}
 					log.error(errMsg, new Exception(errMsg));
 					return response;
 				}

@@ -280,7 +280,7 @@ public class UserBulkUploadService {
                         }
                         if (StringUtils.isNotBlank(userRegistration.getEmployeeId())) {
                             if (!ProjectUtil.validateEmployeeId(userRegistration.getEmployeeId())) {
-                                invalidErrList.add("Invalid Employee ID : Employee ID can contain alphanumeric characters or numeric character and have a max length of 30");
+                                invalidErrList.add("Invalid Employee ID : Employee ID can contain alphabetic, alphanumeric or numeric character(s) and have a max length of 30");
                             }
                             if (userRegistration.getEmployeeId().contains(Constants.SPACE)) {
                                 invalidErrList.add("Invalid Employee ID : Employee Id cannot contain spaces");
@@ -653,7 +653,9 @@ public class UserBulkUploadService {
                     status = Constants.FAILED_UPPERCASE;
                 }
                 csvPrinter.flush();
+
                 status = uploadTheUpdatedCSVFile(file);
+
 
                 status = (failedRecordsCount == 0 && totalRecordsCount == noOfSuccessfulRecords && totalRecordsCount >= 1)
                         ? Constants.SUCCESSFUL_UPPERCASE
@@ -713,6 +715,7 @@ public class UserBulkUploadService {
 
     private String uploadTheUpdatedCSVFile(File file)
             throws IOException {
+
         SBApiResponse uploadResponse = storageService.uploadFile(file, serverProperties.getBulkUploadContainerName(),serverProperties.getCloudContainerName());
         if (!HttpStatus.OK.equals(uploadResponse.getResponseCode())) {
             logger.info(String.format("Failed to upload file. Error: %s",

@@ -438,7 +438,7 @@ public class Constants {
 	public static final String APPROVED = "approved";
 	public static final String DENIED = "denied";
 
-	public static final String EMAIL_EXIST_ERROR = "Email id already registered";
+	public static final String EMAIL_EXIST_ERROR = "Email id already registered with another User profile";
 	public static final String EMAIL_VERIFIED = "emailVerified";
 	public static final String USER_NAME = "userName";
 	public static final String USER_FULL_NAME = "fullName";
@@ -655,7 +655,7 @@ public class Constants {
 	public static final String CHECKS = "checks";
 	public static final String CASSANDRA_DB = "cassandra db";
 	public static final String REDIS_CACHE = "redis cache";
-	public static final String PHONE_NUMBER_EXIST_ERROR = "Phone number is already registered.";
+	public static final String PHONE_NUMBER_EXIST_ERROR = "Phone number is already registered with another User profile.";
 	public static final String MOBILE_NUMBER_EXIST_ERROR = "Mobile number is already registered.";
 	public static final String PHONE_VERIFIED = "phoneVerified";
 	public static final String QUERY = "query";
