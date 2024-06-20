@@ -48,8 +48,6 @@ public class SearchByService {
 	@Autowired
 	OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
 
-	@Autowired
-	private ContentService contentService;
 
 	public Collection<CompetencyInfo> getCompetencyDetails(String authUserToken) throws Exception {
 		String strCompetencyMap = redisCacheMgr.getCache(Constants.COMPETENCY_CACHE_NAME);
