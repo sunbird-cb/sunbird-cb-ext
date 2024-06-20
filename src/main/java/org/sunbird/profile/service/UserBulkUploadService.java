@@ -555,10 +555,10 @@ public class UserBulkUploadService {
                         String employeeId = record.get(9).trim();
                         userRegistration.setEmployeeId(employeeId);
                         if (!ProjectUtil.validateEmployeeId(userRegistration.getEmployeeId())) {
-                            invalidErrList.add("Invalid Employee ID : Employee ID can contain alphanumeric characters or numeric character and have a max length of 30");
+                            invalidErrList.add("Invalid Employee ID : Employee ID can contain alphabetic, alphanumeric or numeric character(s) and have a max length of 30");
                         }
                         if (userRegistration.getEmployeeId().contains(Constants.SPACE)) {
-                            invalidErrList.add("Invalid Employee ID : Employee Id cannot contain spaces");
+                            invalidErrList.add("Employee Id cannot contain spaces");
                         }
                     }
 
@@ -618,7 +618,7 @@ public class UserBulkUploadService {
                                 updatedRecord.put("Error Details", responseCode);
                             } else {
                                 noOfSuccessfulRecords++;
-                                updatedRecord.put("Status", "SUCCESS");
+                                updatedRecord.put("Status", Constants.SUCCESSFUL_UPPERCASE);
                                 updatedRecord.put("Error Details", "");
                             }
                         } else {
@@ -658,7 +658,7 @@ public class UserBulkUploadService {
 
 
                 status = (failedRecordsCount == 0 && totalRecordsCount == noOfSuccessfulRecords && totalRecordsCount >= 1)
-                        ? Constants.SUCCESSFUL
+                        ? Constants.SUCCESSFUL_UPPERCASE
                         : Constants.FAILED_UPPERCASE;
 
                 updateUserBulkUploadStatus(inputDataMap.get(Constants.ROOT_ORG_ID), inputDataMap.get(Constants.IDENTIFIER),
