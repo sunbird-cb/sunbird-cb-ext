@@ -821,7 +821,7 @@ public class AssessmentServiceV5Impl implements AssessmentServiceV5 {
                 }
             }
             if(practiceAssessmentFlag){
-                res.put(Constants.OVERALL_RESULT, (correct / blank+correct+inCorrect) * 100);
+                res.put(Constants.OVERALL_RESULT, ((double)correct / (double)(blank+correct+inCorrect)) * 100);
             }else{
                 res.put(Constants.OVERALL_RESULT, totalResult / sectionLevelResults.size());
             }
