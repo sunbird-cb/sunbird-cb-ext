@@ -203,9 +203,7 @@ public class ExploreCourseServiceImpl implements ExploreCourseService {
 			Iterator<?> iterator = dataList.iterator();
 
 			while (iterator.hasNext()) {
-				Object item = iterator.next();
-				Map<?, ?> itemMap = (Map<?, ?>) item;
-
+				Map<?, ?> itemMap = (Map) iterator.next();
 				// Check for "identifier" key
 				Map<String, Object> request = new HashMap<>();
 				request.put(Constants.IDENTIFIER, itemMap.get(Constants.IDENTIFIER));
@@ -226,7 +224,7 @@ public class ExploreCourseServiceImpl implements ExploreCourseService {
 						errMsg = String.format("Failed to update details");
 						response.getParams().setErrmsg(errMsg);
 						response.setResponseCode(HttpStatus.BAD_REQUEST);
-						return response;
+						break;
 					}
 				} else {
 					request.put(Constants.SEQUENCE_NO, itemMap.get(Constants.SEQUENCE_NO));
@@ -236,7 +234,7 @@ public class ExploreCourseServiceImpl implements ExploreCourseService {
 						errMsg = String.format("Failed to create position");
 						response.setResponseCode(HttpStatus.BAD_REQUEST);
 						response.getParams().setErrmsg(errMsg);
-						return response;
+						break;
 					}
 				}
 			}
@@ -249,17 +247,13 @@ public class ExploreCourseServiceImpl implements ExploreCourseService {
 			response.getParams().setStatus(Constants.FAILED);
 			response.getParams().setErrmsg(errMsg);
 			response.setResponseCode(HttpStatus.BAD_REQUEST);
-			return response;
 		}
-		response.setResponseCode(HttpStatus.OK);
-		response.getResult().put(Constants.RESPONSE, Constants.SUCCESS);
-		response.getParams().setStatus(Constants.SUCCESS);
 		return response;
 	}
 
 	@Override
 	public SBApiResponse deleteExploreCourse(String id) {
-		SBApiResponse response = new SBApiResponse(Constants.API_EXPLORE_COURSE_DELETE);
+		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_EXPLORE_COURSE_DELETE);
 		Map<String, Object> keyMap = new HashMap<>();
 		keyMap.put(Constants.IDENTIFIER, id);
 		try {

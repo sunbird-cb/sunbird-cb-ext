@@ -34,9 +34,4 @@ public class SearchByController {
 		FracApiResponse response = searchByService.listPositions(userToken);
 		return new ResponseEntity<>(response, HttpStatus.valueOf(response.getStatusInfo().getStatusCode()));
 	}
-
-	@GetMapping("/v1/competenciesByOrg/{orgId}")
-	public ResponseEntity<?> listOfCompetenciesByOrg(@PathVariable String orgId, @RequestHeader(Constants.X_AUTH_TOKEN) String userToken) {
-		return new ResponseEntity<>(searchByService.listCompetenciesByOrg(orgId, userToken), HttpStatus.OK);
-	}
 }
