@@ -16,7 +16,6 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.sunbird.cache.RedisCacheMgr;
 import org.sunbird.common.model.FracApiResponse;
-import org.sunbird.common.service.ContentService;
 import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
@@ -47,7 +46,6 @@ public class SearchByService {
 
 	@Autowired
 	OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
-
 
 	public Collection<CompetencyInfo> getCompetencyDetails(String authUserToken) throws Exception {
 		String strCompetencyMap = redisCacheMgr.getCache(Constants.COMPETENCY_CACHE_NAME);
@@ -410,5 +408,4 @@ public class SearchByService {
 		}
 		return positionList;
 	}
-
 }
