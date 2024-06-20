@@ -392,12 +392,13 @@ public class AssessmentServiceV5Impl implements AssessmentServiceV5 {
                     }
                 }
                 if (Constants.SECTION_LEVEL_SCORE_CUTOFF.equalsIgnoreCase(scoreCutOffType)) {
+                    boolean practiceAssessmentFlag = ((String) assessmentHierarchy.get(Constants.PRIMARY_CATEGORY)).equalsIgnoreCase(Constants.PRACTICE_QUESTION_SET);
                     long assessmentStartTime = 0;
                     if (existingAssessmentData.get(Constants.START_TIME)!=null) {
                         Date assessmentStart = (Date) existingAssessmentData.get(Constants.START_TIME);
                         assessmentStartTime = assessmentStart.getTime();
                     }
-                    Map<String, Object> result = calculateSectionFinalResults(sectionLevelsResults,assessmentStartTime,assessmentCompletionTime,maxAssessmentRetakeAttempts,retakeAttemptsConsumed);
+                    Map<String, Object> result = calculateSectionFinalResults(sectionLevelsResults,assessmentStartTime,assessmentCompletionTime,maxAssessmentRetakeAttempts,retakeAttemptsConsumed,practiceAssessmentFlag);
                     outgoingResponse.getResult().putAll(result);
                     outgoingResponse.getParams().setStatus(Constants.SUCCESS);
                     outgoingResponse.setResponseCode(HttpStatus.OK);
@@ -789,7 +790,7 @@ public class AssessmentServiceV5Impl implements AssessmentServiceV5 {
         }
     }
 
-    private Map<String, Object> calculateSectionFinalResults(List<Map<String, Object>> sectionLevelResults,long assessmentStartTime,long assessmentCompletionTime,int maxAssessmentRetakeAttempts,int retakeAttemptsConsumed) {
+    private Map<String, Object> calculateSectionFinalResults(List<Map<String, Object>> sectionLevelResults, long assessmentStartTime, long assessmentCompletionTime, int maxAssessmentRetakeAttempts, int retakeAttemptsConsumed, boolean practiceAssessmentFlag) {
         Map<String, Object> res = new HashMap<>();
         Double result;
         Integer correct = 0;
@@ -819,7 +820,11 @@ public class AssessmentServiceV5Impl implements AssessmentServiceV5 {
                     totalMarks += (Integer) sectionChildren.get(Constants.TOTAL_MARKS);
                 }
             }
-            res.put(Constants.OVERALL_RESULT, totalResult / sectionLevelResults.size());
+            if(practiceAssessmentFlag){
+                res.put(Constants.OVERALL_RESULT, (correct / blank+correct+inCorrect) * 100);
+            }else{
+                res.put(Constants.OVERALL_RESULT, totalResult / sectionLevelResults.size());
+            }
             res.put(Constants.BLANK, blank);
             res.put(Constants.CORRECT, correct);
             res.put(Constants.INCORRECT, inCorrect);
