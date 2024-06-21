@@ -230,6 +230,7 @@ public class ExploreCourseServiceImpl implements ExploreCourseService {
 					request.put(Constants.SEQUENCE_NO, itemMap.get(Constants.SEQUENCE_NO));
 					response = cassandraOperation.insertRecord(Constants.KEYSPACE_SUNBIRD,
 							Constants.TABLE_EXPLORE_COURSE_LIST_V2, request);
+					response.setResponseCode(HttpStatus.OK);
 					if (!Constants.SUCCESS.equalsIgnoreCase((String) response.get(Constants.RESPONSE))) {
 						errMsg = String.format("Failed to create position");
 						response.setResponseCode(HttpStatus.BAD_REQUEST);
