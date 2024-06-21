@@ -1,5 +1,6 @@
 package org.sunbird.course.service;
 
+import java.util.Map;
 import org.sunbird.common.model.SBApiResponse;
 
 /**
@@ -32,4 +33,8 @@ public interface ExploreCourseService {
 	 * @return - Course details in Sunbird API Response format.
 	 */
 	public SBApiResponse getExploreCourseListV2();
+
+	public SBApiResponse upsertExploreCourse(Map<String, Object> request);
+
+	public SBApiResponse deleteExploreCourse(String id);
 }

@@ -1,8 +1,13 @@
 package org.sunbird.course.controller;
 
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.course.service.ExploreCourseService;
@@ -35,6 +40,18 @@ public class ExploreCourseController {
 	@GetMapping("/course/v2/explore")
 	public ResponseEntity<SBApiResponse> getPublicCourseListV2() {
 		SBApiResponse response = courseService.getExploreCourseListV2();
+		return new ResponseEntity<>(response, response.getResponseCode());
+	}
+
+	@PostMapping("/course/v1/explore/upsert")
+	public ResponseEntity<SBApiResponse> upsertCourse(@RequestBody Map<String, Object> request) {
+		SBApiResponse response = courseService.upsertExploreCourse(request);
+		return new ResponseEntity<>(response, response.getResponseCode());
+	}
+
+	@DeleteMapping("/course/v1/explore/delete/{courseId}")
+	public ResponseEntity<SBApiResponse> deleteExploreCourse(@PathVariable String courseId) {
+		SBApiResponse response = courseService.deleteExploreCourse(courseId);
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
 }

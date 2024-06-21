@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 import org.sunbird.cache.RedisCacheMgr;
 import org.sunbird.cassandra.utils.CassandraOperation;
 import org.sunbird.common.model.SBApiResponse;
@@ -20,6 +21,7 @@ import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
 import org.sunbird.common.util.ProjectUtil;
 import org.sunbird.core.exception.ApplicationLogicError;
+import org.sunbird.staff.model.StaffInfo;
 
 /**
  * Implementation of ExploreCourseService
@@ -182,5 +184,131 @@ public class ExploreCourseServiceImpl implements ExploreCourseService {
 			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		return response;
+	}
+
+	@Override
+	public SBApiResponse upsertExploreCourse(Map<String, Object> requestObj) {
+		SBApiResponse response =
+				ProjectUtil.createDefaultResponse(Constants.API_EXPLORE_COURSE_UPDATE);
+		logger.info("ExploreCourseService::upsertExploreCourse:inside method");
+		Map<String, Object> masterData = (Map<String, Object>) requestObj.get(Constants.REQUEST);
+		String errMsg = validateUpsertRequest(masterData);
+		if (!StringUtils.isEmpty(errMsg)) {
+			response.getParams().setErrmsg(errMsg);
+			response.setResponseCode(HttpStatus.BAD_REQUEST);
+			return response;
+		}
+		try {
+			List<?> dataList = (List<?>) masterData.get(Constants.DATA);
+			Iterator<?> iterator = dataList.iterator();
+
+			while (iterator.hasNext()) {
+				Map<?, ?> itemMap = (Map) iterator.next();
+				// Check for "identifier" key
+				Map<String, Object> request = new HashMap<>();
+				request.put(Constants.IDENTIFIER, itemMap.get(Constants.IDENTIFIER));
+
+				List<Map<String, Object>> listOfMasterData = cassandraOperation.getRecordsByProperties(
+						Constants.KEYSPACE_SUNBIRD, Constants.TABLE_EXPLORE_COURSE_LIST_V2, request,
+						new ArrayList<>());
+
+				if (!CollectionUtils.isEmpty(listOfMasterData)) {
+					Map<String, Object> updateRequest = new HashMap<>();
+					updateRequest.put(Constants.SEQUENCE_NO, itemMap.get(Constants.SEQUENCE_NO));
+					Map<String, Object> updateResponse = cassandraOperation.updateRecord(
+							Constants.KEYSPACE_SUNBIRD, Constants.TABLE_EXPLORE_COURSE_LIST_V2, updateRequest,
+							request);
+
+					if (updateResponse != null && !Constants.SUCCESS.equalsIgnoreCase(
+							(String) updateResponse.get(Constants.RESPONSE))) {
+						errMsg = String.format("Failed to update details");
+						response.getParams().setErrmsg(errMsg);
+						response.setResponseCode(HttpStatus.BAD_REQUEST);
+						break;
+					}
+				} else {
+					request.put(Constants.SEQUENCE_NO, itemMap.get(Constants.SEQUENCE_NO));
+					response = cassandraOperation.insertRecord(Constants.KEYSPACE_SUNBIRD,
+							Constants.TABLE_EXPLORE_COURSE_LIST_V2, request);
+					response.setResponseCode(HttpStatus.OK);
+					if (!Constants.SUCCESS.equalsIgnoreCase((String) response.get(Constants.RESPONSE))) {
+						errMsg = String.format("Failed to create position");
+						response.setResponseCode(HttpStatus.BAD_REQUEST);
+						response.getParams().setErrmsg(errMsg);
+						break;
+					}
+				}
+			}
+
+		} catch (Exception e) {
+			errMsg = String.format("Exception occurred while performing upsert operation");
+			logger.error(errMsg, e);
+		}
+		if (org.apache.commons.lang.StringUtils.isNotBlank(errMsg)) {
+			response.getParams().setStatus(Constants.FAILED);
+			response.getParams().setErrmsg(errMsg);
+			response.setResponseCode(HttpStatus.BAD_REQUEST);
+		}
+		return response;
+	}
+
+	@Override
+	public SBApiResponse deleteExploreCourse(String id) {
+		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_EXPLORE_COURSE_DELETE);
+		Map<String, Object> keyMap = new HashMap<>();
+		keyMap.put(Constants.IDENTIFIER, id);
+		try {
+			List<Map<String, Object>> existingDetails = cassandraOperation.getRecordsByProperties(
+					Constants.KEYSPACE_SUNBIRD,
+					Constants.TABLE_EXPLORE_COURSE_LIST_V2, keyMap, null);
+			if (!existingDetails.isEmpty()) {
+				cassandraOperation.deleteRecord(Constants.KEYSPACE_SUNBIRD,
+						Constants.TABLE_EXPLORE_COURSE_LIST_V2, keyMap);
+				response.getParams().setStatus(Constants.SUCCESSFUL);
+				response.setResponseCode(HttpStatus.OK);
+			} else {
+				String errMsg = "Failed to find Course for OrgId: " + ", Id: " + id;
+				logger.error(errMsg);
+				response.getParams().setErrmsg(errMsg);
+				response.setResponseCode(HttpStatus.BAD_REQUEST);
+			}
+		} catch (Exception ex) {
+			String errMsg =
+					"Exception occurred while deleting the ExploredCourse. Exception: " + ex.getMessage();
+			logger.error(errMsg, ex);
+			response.getParams().setErrmsg(errMsg);
+			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		return response;
+	}
+
+	private String validateUpsertRequest(Map<String, Object> masterData) {
+		logger.info("ExploreCourseService::validateUpsertRequest:inside method");
+		StringBuilder strBuilder = new StringBuilder();
+		if (ObjectUtils.isEmpty(masterData)) {
+			strBuilder.append("Model object is empty.");
+			return strBuilder.toString();
+		}
+		// Check if the requestData contains the key "data"
+		if (!masterData.containsKey(Constants.DATA) || !(masterData.get(
+				Constants.DATA) instanceof List)) {
+			strBuilder.append("Data is missing or invalid.");
+			return strBuilder.toString();
+		}
+		List<?> dataList = (List<?>) masterData.get(Constants.DATA);
+		for (Object item : dataList) {
+			if (!(item instanceof Map)) {
+				strBuilder.append("Item in data list is not a valid map.");
+				return strBuilder.toString();
+			}
+			Map<?, ?> itemMap = (Map<?, ?>) item;
+			if (!itemMap.containsKey(Constants.IDENTIFIER)) {
+				strBuilder.append("Item is missing 'identifier'. ");
+			}
+			if (!itemMap.containsKey(Constants.SEQUENCE_NO)) {
+				strBuilder.append("Item is missing seqno. ");
+			}
+		}
+		return strBuilder.toString();
 	}
 }
