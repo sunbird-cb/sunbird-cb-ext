@@ -193,7 +193,7 @@ public class ExploreCourseServiceImpl implements ExploreCourseService {
 		logger.info("ExploreCourseService::upsertExploreCourse:inside method");
 		Map<String, Object> masterData = (Map<String, Object>) requestObj.get(Constants.REQUEST);
 		String errMsg = validateUpsertRequest(masterData);
-		if (!StringUtils.isEmpty(errMsg)) {
+		if (StringUtils.isNotBlank(errMsg)) {
 			response.getParams().setErrmsg(errMsg);
 			response.setResponseCode(HttpStatus.BAD_REQUEST);
 			return response;
@@ -204,7 +204,6 @@ public class ExploreCourseServiceImpl implements ExploreCourseService {
 
 			while (iterator.hasNext()) {
 				Map<?, ?> itemMap = (Map) iterator.next();
-				// Check for "identifier" key
 				Map<String, Object> request = new HashMap<>();
 				request.put(Constants.IDENTIFIER, itemMap.get(Constants.IDENTIFIER));
 
@@ -212,7 +211,7 @@ public class ExploreCourseServiceImpl implements ExploreCourseService {
 						Constants.KEYSPACE_SUNBIRD, Constants.TABLE_EXPLORE_COURSE_LIST_V2, request,
 						new ArrayList<>());
 
-				if (!CollectionUtils.isEmpty(listOfMasterData)) {
+				if (CollectionUtils.isNotEmpty(listOfMasterData)) {
 					Map<String, Object> updateRequest = new HashMap<>();
 					updateRequest.put(Constants.SEQUENCE_NO, itemMap.get(Constants.SEQUENCE_NO));
 					Map<String, Object> updateResponse = cassandraOperation.updateRecord(
@@ -225,6 +224,8 @@ public class ExploreCourseServiceImpl implements ExploreCourseService {
 						response.getParams().setErrmsg(errMsg);
 						response.setResponseCode(HttpStatus.BAD_REQUEST);
 						break;
+					} else {
+						response.getResult().put(Constants.STATUS, Constants.CREATED);
 					}
 				} else {
 					request.put(Constants.SEQUENCE_NO, itemMap.get(Constants.SEQUENCE_NO));
@@ -236,15 +237,16 @@ public class ExploreCourseServiceImpl implements ExploreCourseService {
 						response.setResponseCode(HttpStatus.BAD_REQUEST);
 						response.getParams().setErrmsg(errMsg);
 						break;
+					} else {
+						response.getResult().put(Constants.STATUS, Constants.CREATED);
 					}
 				}
 			}
-
 		} catch (Exception e) {
 			errMsg = String.format("Exception occurred while performing upsert operation");
 			logger.error(errMsg, e);
 		}
-		if (org.apache.commons.lang.StringUtils.isNotBlank(errMsg)) {
+		if (StringUtils.isNotBlank(errMsg)) {
 			response.getParams().setStatus(Constants.FAILED);
 			response.getParams().setErrmsg(errMsg);
 			response.setResponseCode(HttpStatus.BAD_REQUEST);
@@ -265,6 +267,8 @@ public class ExploreCourseServiceImpl implements ExploreCourseService {
 				cassandraOperation.deleteRecord(Constants.KEYSPACE_SUNBIRD,
 						Constants.TABLE_EXPLORE_COURSE_LIST_V2, keyMap);
 				response.getParams().setStatus(Constants.SUCCESSFUL);
+				response.getResult().put(Constants.STATUS, Constants.DELETED);
+				response.getResult().put(Constants.MESSAGE, "Deleted Explore Course for Id: " + id);
 				response.setResponseCode(HttpStatus.OK);
 			} else {
 				String errMsg = "Failed to find Course for OrgId: " + ", Id: " + id;
