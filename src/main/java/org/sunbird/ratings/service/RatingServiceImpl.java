@@ -793,10 +793,7 @@ public class RatingServiceImpl implements RatingService {
                 });
             }
             if (MapUtils.isNotEmpty(profileDetailsMap)) {
-                personDetails = (Map<String, Object>) profileDetailsMap.get(Constants.PERSONAL_DETAILS);
-            }
-            if (MapUtils.isNotEmpty(personDetails)) {
-                profileImageUrl = (String) personDetails.get(Constants.PROFILE_IMAGE_URL);
+                profileImageUrl = (String) profileDetailsMap.get(Constants.PROFILE_IMAGE_URL);
             }
         } catch (Exception e) {
             logger.error("Not able to read the profile Details for userId: " + userId, e);
