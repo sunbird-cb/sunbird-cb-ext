@@ -205,8 +205,8 @@ public class CalendarBulkUploadServiceImpl implements CalendarBulkUploadService 
         int noOfSuccessfulRecords = 0;
         int failedRecordsCount = 0;
         String status = "";
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
         try {
-            sdf.setTimeZone(TimeZone.getTimeZone("GMT+05:30"));
             file = new File(Constants.LOCAL_BASE_PATH + inputDataMap.get(Constants.FILE_NAME));
             if (file.exists() && file.length() > 0) {
                 fis = new FileInputStream(file);
