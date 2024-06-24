@@ -533,7 +533,7 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 			for (Map.Entry<String, Object> optionWeightAgeFromOptions : optionWeightageMap.entrySet()) {
 				String submittedQuestionSetIndex = marked.get(0);
 				if (submittedQuestionSetIndex.equals(optionWeightAgeFromOptions.getKey())) {
-					sectionMarks = sectionMarks + Integer.parseInt((String) optionWeightAgeFromOptions.getValue());
+					sectionMarks = sectionMarks + (Integer) optionWeightAgeFromOptions.getValue();
 				}
 			}
 		}
@@ -573,9 +573,10 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 				switch (questionType) {
 					case Constants.MCQ_SCA:
 					case Constants.MCQ_MCA:
+					case Constants.MCQ_MCA_W:
 						for (Map<String, Object> option : options) {
 							Map<String, Object> valueObj = (Map<String, Object>) option.get(Constants.VALUE);
-							optionWeightage.put(valueObj.get(Constants.VALUE).toString(), valueObj.get(Constants.OPTION_WEIGHT).toString());
+							optionWeightage.put(valueObj.get(Constants.VALUE).toString(), option.get(Constants.ANSWER));
 						}
 						break;
 					default:
@@ -689,7 +690,7 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 	private Integer handleIncorrectAnswer(int negativeMarksValue,Integer sectionMarks, Map<String, Object> questionSetSectionScheme, Map<String, Object> proficiencyMap) {
 		logger.info("Handling incorrect answer scenario...");
 		if (negativeMarksValue > 0) {
-			sectionMarks = sectionMarks - (Integer) questionSetSectionScheme.get((String)proficiencyMap.get(Constants.QUESTION_LEVEL));
+			sectionMarks = sectionMarks - ((negativeMarksValue /100 ) * (Integer) questionSetSectionScheme.get((String)proficiencyMap.get(Constants.QUESTION_LEVEL)));
 		}
 		logger.info("Incorrect answer scenario handled successfully.");
 		return sectionMarks;
@@ -746,7 +747,7 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 	 */
 	private  void computeSectionResults(Integer sectionMarks, Integer totalMarks, int minimumPassValue, Map<String, Object> resultMap) {
 		logger.info("Computing section results...");
-		if (sectionMarks > 0 && ((sectionMarks / totalMarks) * 100 >= minimumPassValue)) {
+		if (sectionMarks > 0 && totalMarks>0 && ((sectionMarks / totalMarks) * 100 >= minimumPassValue)) {
 			resultMap.put(Constants.SECTION_RESULT, Constants.PASS);
 		} else {
 			resultMap.put(Constants.SECTION_RESULT, Constants.FAIL);
