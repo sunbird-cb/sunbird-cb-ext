@@ -621,6 +621,11 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 					getMarkedIndexForOptionWeightAge(options,marked);
 				}
 				break;
+			case Constants.MCQ_MCA_W:
+				if (assessmentType.equalsIgnoreCase(Constants.OPTION_WEIGHTAGE)) {
+					getMarkedIndexForOptionWeightAge(options, marked);
+				}
+				break;
 			default:
 				break;
 		}
