@@ -1091,7 +1091,9 @@ public class Constants {
 	public static final String SEQUENCE_NO = "seqno";
 	public static final String API_EXPLORE_COURSE_UPDATE = "api.explore.course.update";
 	public static final String API_EXPLORE_COURSE_DELETE = "api.explore.course.delete";
-	public static final String MCQ_MCA_W = "MCQ-MCA-W";
+	public static final String MCQ_MCA_W = "mcq-mca-w";
+	public static final String MCQ_SCA_TF = "mcq-sca-tf";
+
 	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}

@@ -615,6 +615,7 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 				break;
 			case Constants.MCQ_SCA:
 			case Constants.MCQ_MCA:
+			case Constants.MCQ_SCA_TF:
 				if (assessmentType.equalsIgnoreCase(Constants.QUESTION_WEIGHTAGE)) {
 					getMarkedIndexForQuestionWeightAge(options, marked);
 				} else if (assessmentType.equalsIgnoreCase(Constants.OPTION_WEIGHTAGE)) {
