@@ -155,6 +155,7 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 						break;
 					case Constants.MCQ_SCA:
 					case Constants.MCQ_MCA:
+					case Constants.MCQ_SCA_TF:
 						for (Map<String, Object> option : options) {
 							if ((boolean) option.get(Constants.ANSWER)) {
 								Map<String, Object> valueObj = (Map<String, Object>) option.get(Constants.VALUE);
