@@ -796,7 +796,7 @@ public class AssessmentServiceV5Impl implements AssessmentServiceV5 {
         Integer blank = 0;
         Integer inCorrect = 0;
         Integer total = 0;
-        Integer totalSectionMarks = 0;
+        Double totalSectionMarks = 0.0;
         Integer totalMarks = 0;
         int pass = 0;
         Double totalResult = 0.0;
@@ -813,7 +813,7 @@ public class AssessmentServiceV5Impl implements AssessmentServiceV5 {
                     pass++;
                 }
                 if(sectionChildren.get(Constants.SECTION_MARKS)!=null){
-                    totalSectionMarks += (Integer) sectionChildren.get(Constants.SECTION_MARKS);
+                    totalSectionMarks += (Double) sectionChildren.get(Constants.SECTION_MARKS);
                 }
                 if(sectionChildren.get(Constants.TOTAL_MARKS)!=null){
                     totalMarks += (Integer) sectionChildren.get(Constants.TOTAL_MARKS);
@@ -827,7 +827,7 @@ public class AssessmentServiceV5Impl implements AssessmentServiceV5 {
             res.put(Constants.TIME_TAKEN_FOR_ASSESSMENT,assessmentCompletionTime-assessmentStartTime);
             res.put(Constants.MAX_ASSESSMENT_RETAKE_ATTEMPTS,maxAssessmentRetakeAttempts);
             res.put(Constants.RETAKE_ATTEMPT_CONSUMED,retakeAttemptsConsumed);
-            double totalPercentage = ((double) totalSectionMarks / (double)totalMarks) * 100;
+            double totalPercentage = (totalSectionMarks / (double)totalMarks) * 100;
             res.put(Constants.TOTAL_PERCENTAGE, totalPercentage);
             res.put(Constants.TOTAL_SECTION_MARKS, totalSectionMarks);
             res.put(Constants.TOTAL_MARKS, totalMarks);
