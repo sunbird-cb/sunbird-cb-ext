@@ -1091,6 +1091,10 @@ public class Constants {
 	public static final String SEQUENCE_NO = "seqno";
 	public static final String API_EXPLORE_COURSE_UPDATE = "api.explore.course.update";
 	public static final String API_EXPLORE_COURSE_DELETE = "api.explore.course.delete";
+	public static final String COMPETENCIES_ORG_COURSES_REDIS_KEY = "dashboard_core_competencies_by_user_org";
+	public static final String ORG_COMPETENCY_SEARCH_API = "api.org.competency.search";
+	public static final String SEARCH_COMPETENCY_THEMES = "competencyTheme";
+	public static final String SEARCH_COMPETENCY_SUB_THEMES = "competencySubTheme";
 
 	private Constants() {
 		throw new IllegalStateException("Utility class");

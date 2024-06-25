@@ -1,13 +1,9 @@
 package org.sunbird.searchby.service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,18 +12,19 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.sunbird.cache.RedisCacheMgr;
 import org.sunbird.common.model.FracApiResponse;
+import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.service.OutboundRequestHandlerServiceImpl;
+import org.sunbird.common.util.AccessTokenValidator;
 import org.sunbird.common.util.CbExtServerProperties;
 import org.sunbird.common.util.Constants;
+import org.sunbird.common.util.ProjectUtil;
 import org.sunbird.core.logger.CbExtLogger;
 import org.sunbird.searchby.model.CompetencyInfo;
 import org.sunbird.searchby.model.FracCommonInfo;
 import org.sunbird.searchby.model.ProviderInfo;
 import org.sunbird.workallocation.model.FracStatusInfo;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.*;
 
 @Service
 @SuppressWarnings("unchecked")
@@ -40,12 +37,15 @@ public class SearchByService {
 
 	@Autowired
 	RedisCacheMgr redisCacheMgr;
-	
+
 	@Autowired
 	ObjectMapper mapper;
 
 	@Autowired
 	OutboundRequestHandlerServiceImpl outboundRequestHandlerService;
+
+	@Autowired
+	AccessTokenValidator accessTokenValidator;
 
 	public Collection<CompetencyInfo> getCompetencyDetails(String authUserToken) throws Exception {
 		String strCompetencyMap = redisCacheMgr.getCache(Constants.COMPETENCY_CACHE_NAME);
@@ -183,7 +183,7 @@ public class SearchByService {
 
 		Map<String, Object> fracSearchRes = outboundRequestHandlerService.fetchResultUsingPost(
 				cbExtServerProperties.getFracHost() + cbExtServerProperties.getFracSearchPath(), reqBody, headers);
-		
+
 		List<Map<String, Object>> fracResponseList = (List<Map<String, Object>>) fracSearchRes
 				.get(Constants.RESPONSE_DATA);
 
@@ -407,5 +407,65 @@ public class SearchByService {
 					position.get(Constants.NAME).asText(), position.get(Constants.DESCRIPTION).asText()));
 		}
 		return positionList;
+	}
+
+	public SBApiResponse listCompetenciesByOrg(String orgId, String userToken) {
+		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.ORG_COMPETENCY_SEARCH_API);
+		try {
+			String userId = validateAuthTokenAndFetchUserId(userToken);
+			if (org.apache.commons.lang3.StringUtils.isBlank(userId)) {
+				response.getParams().setStatus(Constants.FAILED);
+				response.getParams().setErrmsg(Constants.USER_ID_DOESNT_EXIST);
+				response.setResponseCode(HttpStatus.BAD_REQUEST);
+				return response;
+			}
+			List<String> courseIdList = redisCacheMgr.hget(Constants.COMPETENCIES_ORG_COURSES_REDIS_KEY, cbExtServerProperties.getRedisInsightIndex(), orgId);
+			if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(courseIdList)) {
+				Map<String, Object> competencyMap = listCompetencyDetails(Arrays.asList(courseIdList.get(0).split(",")));
+				logger.info("Initializing/Refreshing the Cache Value for Key : " + Constants.COMPETENCY_CACHE_NAME);
+				if (MapUtils.isNotEmpty(competencyMap)) {
+					response.setResult((Map<String, Object>) competencyMap.get(Constants.RESULT));
+				} else {
+					response.getParams().setStatus(Constants.FAILED);
+					response.getParams().setErrmsg("Competency map is empty");
+					response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+				}
+			} else {
+				response.getParams().setStatus(Constants.FAILED);
+				response.getParams().setErrmsg("Issue while fetching the competency for org: " + orgId);
+				response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+			}
+		} catch (Exception e) {
+			logger.error("Issue while fetching the competency for org: " + orgId, e);
+			response.getParams().setStatus(Constants.FAILED);
+			response.getParams().setErrmsg(e.getMessage());
+			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		return response;
+	}
+
+	private Map<String, Object> listCompetencyDetails(List<String> identifiers) throws Exception {
+
+		HashMap<String, Object> reqBody = new HashMap<>();
+		HashMap<String, Object> req = new HashMap<>();
+		req.put(Constants.FACETS, Arrays.asList(Constants.COMPETENCIES_V5 + "." + Constants.COMPETENCY_AREA,
+				Constants.COMPETENCIES_V5 + "." + Constants.SEARCH_COMPETENCY_THEMES,
+				Constants.COMPETENCIES_V5 + "." + Constants.SEARCH_COMPETENCY_SUB_THEMES));
+		Map<String, Object> filters = new HashMap<>();
+		filters.put(Constants.IDENTIFIER, identifiers);
+		filters.put(Constants.STATUS, Arrays.asList(Constants.LIVE));
+		req.put(Constants.FILTERS, filters);
+		req.put(Constants.LIMIT, 0);
+		reqBody.put(Constants.REQUEST, req);
+
+		Map<String, Object> compositeSearchRes = outboundRequestHandlerService.fetchResultUsingPost(
+				cbExtServerProperties.getSbSearchServiceHost() + cbExtServerProperties.getSbCompositeV4Search(), reqBody,
+				null);
+
+		return compositeSearchRes;
+	}
+
+	private String validateAuthTokenAndFetchUserId(String authUserToken) {
+		return accessTokenValidator.fetchUserIdFromAccessToken(authUserToken);
 	}
 }
