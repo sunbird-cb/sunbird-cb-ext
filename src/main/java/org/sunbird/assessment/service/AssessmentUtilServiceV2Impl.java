@@ -686,7 +686,7 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 	private Double handleIncorrectAnswer(int negativeMarksValue,Double sectionMarks, Map<String, Object> questionSetSectionScheme, Map<String, Object> proficiencyMap) {
 		logger.info("Handling incorrect answer scenario...");
 		if (negativeMarksValue > 0) {
-			sectionMarks = sectionMarks - (((double)negativeMarksValue /100 ) * (double) questionSetSectionScheme.get((String)proficiencyMap.get(Constants.QUESTION_LEVEL)));
+			sectionMarks = sectionMarks - (((double)negativeMarksValue /100 ) * (int) questionSetSectionScheme.get((String)proficiencyMap.get(Constants.QUESTION_LEVEL)));
 		}
 		logger.info("Incorrect answer scenario handled successfully.");
 		return sectionMarks;
