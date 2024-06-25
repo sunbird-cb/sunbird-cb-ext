@@ -762,6 +762,12 @@ public class CbExtServerProperties {
 	@Value("#{${insights.mapping.key}}")
 	private Map<String, String> insightsMappingKey;
 
+	@Value("${sb.search.service.host}")
+	private String sbSearchServiceHost;
+
+	@Value("${sb.composite.v4.search}")
+	private String sbCompositeV4Search;
+
 	public boolean qListFromCacheEnabled() {
 		return qListFromCacheEnabled;
 	}
@@ -2695,5 +2701,21 @@ public class CbExtServerProperties {
 
 	public void setInsightsMappingKey(Map<String, String> insightsMappingKey) {
 		this.insightsMappingKey = insightsMappingKey;
+	}
+
+	public String getSbSearchServiceHost() {
+		return sbSearchServiceHost;
+	}
+
+	public void setSbSearchServiceHost(String sbSearchServiceHost) {
+		this.sbSearchServiceHost = sbSearchServiceHost;
+	}
+
+	public String getSbCompositeV4Search() {
+		return sbCompositeV4Search;
+	}
+
+	public void setSbCompositeV4Search(String sbCompositeV4Search) {
+		this.sbCompositeV4Search = sbCompositeV4Search;
 	}
 }
