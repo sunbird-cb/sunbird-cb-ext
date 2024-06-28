@@ -24,8 +24,6 @@ import org.sunbird.common.util.Constants;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import javax.validation.constraints.NotNull;
-
 @Service
 public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 
@@ -157,6 +155,7 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 						break;
 					case Constants.MCQ_SCA:
 					case Constants.MCQ_MCA:
+					case Constants.MCQ_SCA_TF:
 						for (Map<String, Object> option : options) {
 							if ((boolean) option.get(Constants.ANSWER)) {
 								Map<String, Object> valueObj = (Map<String, Object>) option.get(Constants.VALUE);
@@ -469,7 +468,7 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 			Integer correct = 0;
 			Integer blank = 0;
 			Integer inCorrect = 0;
-            Integer sectionMarks =0;
+            Double sectionMarks =0.0;
 			Map<String,Object> questionSetSectionScheme = new HashMap<>();
 			String assessmentType= (String)questionSetDetailsMap.get(Constants.ASSESSMENT_TYPE);
 			String negativeWeightAgeEnabled;
@@ -513,7 +512,7 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 							sectionMarks = handleIncorrectAnswer(negativeMarksValue, sectionMarks, questionSetSectionScheme, proficiencyMap);
 						}
 					}
-					sectionMarks = calculateScoreForOptionWeightage(question, assessmentType, optionWeightages, options, sectionMarks, marked);
+					sectionMarks = calculateScoreForOptionWeightage(question, assessmentType, optionWeightages, sectionMarks, marked);
 				}
 			}
 			blank = handleBlankAnswers(userQuestionList, answers, blank);
@@ -527,26 +526,26 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 		return new HashMap<>();
 	}
 
-	private static Integer calculateScoreForOptionWeightage(Map<String, Object> question, String assessmentType, Map<String, Object> optionWeightages, List<Map<String, Object>> options, Integer sectionMarks, List<String> marked) {
+	private static Double calculateScoreForOptionWeightage(Map<String, Object> question, String assessmentType, Map<String, Object> optionWeightages, Double sectionMarks, List<String> marked) {
 		if (assessmentType.equalsIgnoreCase(Constants.OPTION_WEIGHTAGE)) {
 			Map<String, Object> optionWeightageMap = (Map<String, Object>) optionWeightages.get(question.get(Constants.IDENTIFIER));
 			for (Map.Entry<String, Object> optionWeightAgeFromOptions : optionWeightageMap.entrySet()) {
 				String submittedQuestionSetIndex = marked.get(0);
 				if (submittedQuestionSetIndex.equals(optionWeightAgeFromOptions.getKey())) {
-					sectionMarks = sectionMarks + Integer.parseInt((String) optionWeightAgeFromOptions.getValue());
+					sectionMarks = sectionMarks + (Integer) optionWeightAgeFromOptions.getValue();
 				}
 			}
 		}
 		return sectionMarks;
 	}
 
-	private List<Map<String, Object>> handleqTypeQuestion(Map<String, Object> question, List<Map<String, Object>> options, List<String> marked, String assessmentType, Map<String, Object> optionWeightages, Integer sectionMarks) {
+	private List<Map<String, Object>> handleqTypeQuestion(Map<String, Object> question, List<Map<String, Object>> options, List<String> marked, String assessmentType, Map<String, Object> optionWeightages, Double sectionMarks) {
 		if (question.containsKey(Constants.QUESTION_TYPE)) {
 			String questionType = ((String) question.get(Constants.QUESTION_TYPE)).toLowerCase();
 			Map<String, Object> editorStateObj = (Map<String, Object>) question.get(Constants.EDITOR_STATE);
 			options = (List<Map<String, Object>>) editorStateObj
 					.get(Constants.OPTIONS);
-			getMarkedIndexForEachQuestion(questionType, options, marked, assessmentType, optionWeightages, sectionMarks);
+			getMarkedIndexForEachQuestion(questionType, options, marked, assessmentType);
 		}
 		return options;
 	}
@@ -560,7 +559,7 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 	 * @return a map containing Identifier mapped to their option and option weightages.
 	 * @throws Exception if there is an error processing the questions.
 	 */
-	private Map<String, Object> getOptionWeightages(List<String> questions, Map<String, Object> questionMap) throws Exception {
+	private Map<String, Object> getOptionWeightages(List<String> questions, Map<String, Object> questionMap) {
 		logger.info("Retrieving option weightages for questions based on the options...");
 		Map<String, Object> ret = new HashMap<>();
 		for (String questionId : questions) {
@@ -573,9 +572,10 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 				switch (questionType) {
 					case Constants.MCQ_SCA:
 					case Constants.MCQ_MCA:
+					case Constants.MCQ_MCA_W:
 						for (Map<String, Object> option : options) {
 							Map<String, Object> valueObj = (Map<String, Object>) option.get(Constants.VALUE);
-							optionWeightage.put(valueObj.get(Constants.VALUE).toString(), valueObj.get(Constants.OPTION_WEIGHT).toString());
+							optionWeightage.put(valueObj.get(Constants.VALUE).toString(), option.get(Constants.ANSWER));
 						}
 						break;
 					default:
@@ -596,10 +596,8 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 	 * @param options the list of options.
 	 * @param marked the list to store marked indices.
 	 * @param assessmentType the type of assessment.
-	 * @param optionWeightages the map of option weightages.
-	 * @param sectionMarks the current section marks.
 	 */
-	private void getMarkedIndexForEachQuestion(String questionType, List<Map<String, Object>> options, List<String> marked, String assessmentType, Map<String, Object> optionWeightages, Integer sectionMarks) {
+	private void getMarkedIndexForEachQuestion(String questionType, List<Map<String, Object>> options, List<String> marked, String assessmentType) {
 		logger.info("Getting marks or index for each question...");
 		switch (questionType) {
 			case Constants.MTF:
@@ -615,10 +613,16 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 				break;
 			case Constants.MCQ_SCA:
 			case Constants.MCQ_MCA:
+			case Constants.MCQ_SCA_TF:
 				if (assessmentType.equalsIgnoreCase(Constants.QUESTION_WEIGHTAGE)) {
 					getMarkedIndexForQuestionWeightAge(options, marked);
 				} else if (assessmentType.equalsIgnoreCase(Constants.OPTION_WEIGHTAGE)) {
 					getMarkedIndexForOptionWeightAge(options,marked);
+				}
+				break;
+			case Constants.MCQ_MCA_W:
+				if (assessmentType.equalsIgnoreCase(Constants.OPTION_WEIGHTAGE)) {
+					getMarkedIndexForOptionWeightAge(options, marked);
 				}
 				break;
 			default:
@@ -663,7 +667,7 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 	 * @param proficiencyMap the proficiency map containing question levels.
 	 * @return the updated section marks.
 	 */
-	private Integer handleCorrectAnswer(Integer sectionMarks, Map<String, Object> questionSetSectionScheme, Map<String, Object> proficiencyMap) {
+	private Double handleCorrectAnswer(Double sectionMarks, Map<String, Object> questionSetSectionScheme, Map<String, Object> proficiencyMap) {
 		logger.info("Handling correct answer scenario...");
 		sectionMarks = sectionMarks + (Integer) questionSetSectionScheme.get((String) proficiencyMap.get(Constants.QUESTION_LEVEL));
 		logger.info("Correct answer scenario handled successfully.");
@@ -680,10 +684,10 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 	 * @param proficiencyMap the proficiency map containing question levels.
 	 * @return the updated section marks.
 	 */
-	private Integer handleIncorrectAnswer(int negativeMarksValue,Integer sectionMarks, Map<String, Object> questionSetSectionScheme, Map<String, Object> proficiencyMap) {
+	private Double handleIncorrectAnswer(int negativeMarksValue,Double sectionMarks, Map<String, Object> questionSetSectionScheme, Map<String, Object> proficiencyMap) {
 		logger.info("Handling incorrect answer scenario...");
 		if (negativeMarksValue > 0) {
-			sectionMarks = sectionMarks - (Integer) questionSetSectionScheme.get((String)proficiencyMap.get(Constants.QUESTION_LEVEL));
+			sectionMarks = sectionMarks - (((double)negativeMarksValue /100 ) * (int) questionSetSectionScheme.get((String)proficiencyMap.get(Constants.QUESTION_LEVEL)));
 		}
 		logger.info("Incorrect answer scenario handled successfully.");
 		return sectionMarks;
@@ -718,7 +722,7 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 	 * @param sectionMarks the section marks obtained.
 	 * @param totalMarks the total marks for the assessment.
 	 */
-	private void updateResultMap(List<Map<String, Object>> userQuestionList, Integer correct, Integer blank, Integer inCorrect, Map<String, Object> resultMap, Integer sectionMarks, Integer totalMarks) {
+	private void updateResultMap(List<Map<String, Object>> userQuestionList, Integer correct, Integer blank, Integer inCorrect, Map<String, Object> resultMap, Double sectionMarks, Integer totalMarks) {
 		logger.info("Updating result map...");
 		resultMap.put(Constants.INCORRECT, inCorrect);
 		resultMap.put(Constants.BLANK, blank);
@@ -738,9 +742,9 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 	 * @param minimumPassValue the minimum percentage required to pass the section.
 	 * @param resultMap the map to store the section result.
 	 */
-	private  void computeSectionResults(Integer sectionMarks, Integer totalMarks, int minimumPassValue, Map<String, Object> resultMap) {
+	private  void computeSectionResults(Double sectionMarks, Integer totalMarks, int minimumPassValue, Map<String, Object> resultMap) {
 		logger.info("Computing section results...");
-		if (sectionMarks > 0 && ((sectionMarks / totalMarks) * 100 >= minimumPassValue)) {
+		if (sectionMarks > 0 && totalMarks>0 && ((sectionMarks / totalMarks) * 100 >= minimumPassValue)) {
 			resultMap.put(Constants.SECTION_RESULT, Constants.PASS);
 		} else {
 			resultMap.put(Constants.SECTION_RESULT, Constants.FAIL);
@@ -768,9 +772,9 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 	 * @param assessmentType  Type of assessment (either "QUESTION_WEIGHTAGE" or "OPTION_WEIGHTAGE")
 	 * @param resultMap       Map to store the result of the calculation
 	 */
-	private static void calculatePassPercentage(Integer sectionMarks, Integer totalMarks, Integer correct, Integer blank, Integer inCorrect,String assessmentType,Map<String, Object> resultMap) {
+	private static void calculatePassPercentage(Double sectionMarks, Integer totalMarks, Integer correct, Integer blank, Integer inCorrect,String assessmentType,Map<String, Object> resultMap) {
 		if (assessmentType.equalsIgnoreCase(Constants.QUESTION_WEIGHTAGE)) {
-			resultMap.put(Constants.RESULT, (double)sectionMarks / (double)totalMarks * 100);
+			resultMap.put(Constants.RESULT, sectionMarks / (double)totalMarks * 100);
 		} else if (assessmentType.equalsIgnoreCase(Constants.OPTION_WEIGHTAGE)) {
 			int total;
 			total = correct + blank + inCorrect;

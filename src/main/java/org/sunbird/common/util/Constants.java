@@ -1095,6 +1095,8 @@ public class Constants {
 	public static final String ORG_COMPETENCY_SEARCH_API = "api.org.competency.search";
 	public static final String SEARCH_COMPETENCY_THEMES = "competencyTheme";
 	public static final String SEARCH_COMPETENCY_SUB_THEMES = "competencySubTheme";
+	public static final String MCQ_MCA_W = "mcq-mca-w";
+	public static final String MCQ_SCA_TF = "mcq-sca-tf";
 
 	private Constants() {
 		throw new IllegalStateException("Utility class");

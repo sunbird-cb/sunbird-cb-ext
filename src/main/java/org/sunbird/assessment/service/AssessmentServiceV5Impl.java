@@ -392,13 +392,12 @@ public class AssessmentServiceV5Impl implements AssessmentServiceV5 {
                     }
                 }
                 if (Constants.SECTION_LEVEL_SCORE_CUTOFF.equalsIgnoreCase(scoreCutOffType)) {
-                    boolean practiceAssessmentFlag = ((String) assessmentHierarchy.get(Constants.PRIMARY_CATEGORY)).equalsIgnoreCase(Constants.PRACTICE_QUESTION_SET);
                     long assessmentStartTime = 0;
                     if (existingAssessmentData.get(Constants.START_TIME)!=null) {
                         Date assessmentStart = (Date) existingAssessmentData.get(Constants.START_TIME);
                         assessmentStartTime = assessmentStart.getTime();
                     }
-                    Map<String, Object> result = calculateSectionFinalResults(sectionLevelsResults,assessmentStartTime,assessmentCompletionTime,maxAssessmentRetakeAttempts,retakeAttemptsConsumed,practiceAssessmentFlag);
+                    Map<String, Object> result = calculateSectionFinalResults(sectionLevelsResults,assessmentStartTime,assessmentCompletionTime,maxAssessmentRetakeAttempts,retakeAttemptsConsumed);
                     outgoingResponse.getResult().putAll(result);
                     outgoingResponse.getParams().setStatus(Constants.SUCCESS);
                     outgoingResponse.setResponseCode(HttpStatus.OK);
@@ -790,14 +789,14 @@ public class AssessmentServiceV5Impl implements AssessmentServiceV5 {
         }
     }
 
-    private Map<String, Object> calculateSectionFinalResults(List<Map<String, Object>> sectionLevelResults, long assessmentStartTime, long assessmentCompletionTime, int maxAssessmentRetakeAttempts, int retakeAttemptsConsumed, boolean practiceAssessmentFlag) {
+    private Map<String, Object> calculateSectionFinalResults(List<Map<String, Object>> sectionLevelResults, long assessmentStartTime, long assessmentCompletionTime, int maxAssessmentRetakeAttempts, int retakeAttemptsConsumed) {
         Map<String, Object> res = new HashMap<>();
         Double result;
         Integer correct = 0;
         Integer blank = 0;
         Integer inCorrect = 0;
         Integer total = 0;
-        Integer totalSectionMarks = 0;
+        Double totalSectionMarks = 0.0;
         Integer totalMarks = 0;
         int pass = 0;
         Double totalResult = 0.0;
@@ -814,17 +813,13 @@ public class AssessmentServiceV5Impl implements AssessmentServiceV5 {
                     pass++;
                 }
                 if(sectionChildren.get(Constants.SECTION_MARKS)!=null){
-                    totalSectionMarks += (Integer) sectionChildren.get(Constants.SECTION_MARKS);
+                    totalSectionMarks += (Double) sectionChildren.get(Constants.SECTION_MARKS);
                 }
                 if(sectionChildren.get(Constants.TOTAL_MARKS)!=null){
                     totalMarks += (Integer) sectionChildren.get(Constants.TOTAL_MARKS);
                 }
             }
-            if(practiceAssessmentFlag){
-                res.put(Constants.OVERALL_RESULT, ((double)correct / (double)(blank+correct+inCorrect)) * 100);
-            }else{
-                res.put(Constants.OVERALL_RESULT, totalResult / sectionLevelResults.size());
-            }
+            res.put(Constants.OVERALL_RESULT, ((double)correct / (double)(correct+inCorrect)) * 100);
             res.put(Constants.BLANK, blank);
             res.put(Constants.CORRECT, correct);
             res.put(Constants.INCORRECT, inCorrect);
@@ -832,7 +827,7 @@ public class AssessmentServiceV5Impl implements AssessmentServiceV5 {
             res.put(Constants.TIME_TAKEN_FOR_ASSESSMENT,assessmentCompletionTime-assessmentStartTime);
             res.put(Constants.MAX_ASSESSMENT_RETAKE_ATTEMPTS,maxAssessmentRetakeAttempts);
             res.put(Constants.RETAKE_ATTEMPT_CONSUMED,retakeAttemptsConsumed);
-            double totalPercentage = ((double) totalSectionMarks / (double)totalMarks) * 100;
+            double totalPercentage = (totalSectionMarks / (double)totalMarks) * 100;
             res.put(Constants.TOTAL_PERCENTAGE, totalPercentage);
             res.put(Constants.TOTAL_SECTION_MARKS, totalSectionMarks);
             res.put(Constants.TOTAL_MARKS, totalMarks);
