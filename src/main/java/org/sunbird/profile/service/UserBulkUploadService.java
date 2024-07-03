@@ -453,7 +453,6 @@ public class UserBulkUploadService {
                 }
 
                 for (CSVRecord record : csvRecords) {
-                    totalRecordsCount++;
                    Map<String, String> updatedRecord = new LinkedHashMap<>(record.toMap());
                     List<String> errList = new ArrayList<>();
                     List<String> invalidErrList = new ArrayList<>();
@@ -603,6 +602,16 @@ public class UserBulkUploadService {
                     userRegistration.setChannel(inputDataMap.get(Constants.ORG_NAME));
                     userRegistration.setSbOrgId(inputDataMap.get(Constants.ROOT_ORG_ID));
 
+                    if (totalRecordsCount == 0 && errList.size() == 4) {
+                        updatedRecord.put("Status", "FAILED");
+                        updatedRecord.put("Error Details", String.join(", ", errList));
+                        failedRecordsCount++;
+                        break;
+                    } else if (totalRecordsCount > 0 && errList.size() == 4) {
+                        break;
+                    }
+                    totalRecordsCount++;
+
                     if (!errList.isEmpty()) {
                         failedRecordsCount++;
                         updatedRecord.put("Status", "FAILED");
@@ -630,7 +639,7 @@ public class UserBulkUploadService {
 
                     updatedRecords.add(updatedRecord);
                 }
-
+                logger.info("total noOfSuccessfulRecords {}, total nofailedRecordsCount {}, and total totalRecordsCount {}", noOfSuccessfulRecords,failedRecordsCount,totalRecordsCount);
                 // Write back updated records to the same CSV file
                  fileWriter = new FileWriter(file);
                 bufferedWriter = new BufferedWriter(fileWriter);
@@ -656,20 +665,17 @@ public class UserBulkUploadService {
 
                 status = uploadTheUpdatedCSVFile(file);
 
-
-                status = (failedRecordsCount == 0 && totalRecordsCount == noOfSuccessfulRecords && totalRecordsCount >= 1)
-                        ? Constants.SUCCESSFUL_UPPERCASE
-                        : Constants.FAILED_UPPERCASE;
-
-                updateUserBulkUploadStatus(inputDataMap.get(Constants.ROOT_ORG_ID), inputDataMap.get(Constants.IDENTIFIER),
-                        status, totalRecordsCount, noOfSuccessfulRecords, failedRecordsCount);
+                if (!(Constants.SUCCESSFUL.equalsIgnoreCase(status) && failedRecordsCount == 0
+                        && totalRecordsCount == noOfSuccessfulRecords && totalRecordsCount >= 1)) {
+                    status = Constants.FAILED_UPPERCASE;
+                }
 
             } else {
                 logger.info("Error in Process Bulk Upload: The File is not downloaded/present");
                 status = Constants.FAILED_UPPERCASE;
             }
-            updateUserBulkUploadStatus(inputDataMap.get(Constants.ROOT_ORG_ID), inputDataMap.get(Constants.IDENTIFIER),
-                    status, 0, 0, 0);
+           updateUserBulkUploadStatus(inputDataMap.get(Constants.ROOT_ORG_ID), inputDataMap.get(Constants.IDENTIFIER),
+                   status, totalRecordsCount, noOfSuccessfulRecords, failedRecordsCount);
         } catch (Exception e) {
             logger.error(String.format("Error in Process Bulk Upload %s", e.getMessage()), e);
            updateUserBulkUploadStatus(inputDataMap.get(Constants.ROOT_ORG_ID), inputDataMap.get(Constants.IDENTIFIER),
