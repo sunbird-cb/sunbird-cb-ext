@@ -1097,6 +1097,8 @@ public class Constants {
 	public static final String SEARCH_COMPETENCY_SUB_THEMES = "competencySubTheme";
 	public static final String MCQ_MCA_W = "mcq-mca-w";
 	public static final String MCQ_SCA_TF = "mcq-sca-tf";
+	public static final String CSV_FILE = "csv";
+	public static final String XLSX_FILE = "xlsx";
 
 	private Constants() {
 		throw new IllegalStateException("Utility class");
