@@ -820,7 +820,11 @@ public class AssessmentServiceV5Impl implements AssessmentServiceV5 {
                     totalMarks += (Integer) sectionChildren.get(Constants.TOTAL_MARKS);
                 }
             }
-            res.put(Constants.OVERALL_RESULT, ((double)correct / (double)(correct+inCorrect)) * 100);
+            double overAllResult = ((double) correct / (double) (correct + inCorrect)) * 100;
+            if (Double.isNaN(overAllResult)) {
+                overAllResult = 0.0;
+            }
+            res.put(Constants.OVERALL_RESULT, overAllResult);
             res.put(Constants.BLANK, blank);
             res.put(Constants.CORRECT, correct);
             res.put(Constants.INCORRECT, inCorrect);
@@ -829,6 +833,9 @@ public class AssessmentServiceV5Impl implements AssessmentServiceV5 {
             res.put(Constants.MAX_ASSESSMENT_RETAKE_ATTEMPTS,maxAssessmentRetakeAttempts);
             res.put(Constants.RETAKE_ATTEMPT_CONSUMED,retakeAttemptsConsumed);
             double totalPercentage = (totalSectionMarks / (double)totalMarks) * 100;
+            if(Double.isNaN(totalPercentage)){
+                totalPercentage=0.0;
+            }
             res.put(Constants.TOTAL_PERCENTAGE, totalPercentage);
             res.put(Constants.TOTAL_SECTION_MARKS, totalSectionMarks);
             res.put(Constants.TOTAL_MARKS, totalMarks);
