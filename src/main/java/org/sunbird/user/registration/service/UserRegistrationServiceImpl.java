@@ -305,6 +305,38 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 		}
 	}
 
+	public SBApiResponse getApprovedDomains() {
+		SBApiResponse response = createDefaultResponse(Constants.API_APPROVED_DOMAINS);
+		String errMsg ="";
+		try {
+				List<String> approvedDomains = getApprovedDomainsFromDB();
+				if (CollectionUtils.isNotEmpty(approvedDomains)) {
+					Map<String,Object> result = new HashMap<>();
+					result.put(Constants.RESULT,approvedDomains);
+					LOGGER.info("Fetched pre-approved and approved domains successfully");
+					response.setVer("v1");
+					response.getParams().setStatus(Constants.SUCCESS.toUpperCase());
+					response.getParams().setResmsgid(UUID.randomUUID().toString());
+					response.getParams().setMsgid(UUID.randomUUID().toString());
+					response.setResult(result);
+					response.getResult().put(Constants.RESPONSE, Constants.SUCCESS.toUpperCase());
+				} else {
+					errMsg = "Failed to Fetch Approved Domains";
+				}
+			} catch (Exception e) {
+				LOGGER.error(String.format("Exception in %s : %s", "getApprovedDomains", e.getMessage()), e);
+				errMsg = "Failed to process message. Exception: " + e.getMessage();
+			}
+
+		if (StringUtils.isNotBlank(errMsg)) {
+			LOGGER.error("Failed to Fetch Approved Domains, error message : ",errMsg);
+			response.getParams().setStatus(Constants.FAILED);
+			response.getParams().setErrmsg(errMsg);
+			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		return response;
+	}
+
 	private SBApiResponse createDefaultResponse(String api) {
 		SBApiResponse response = new SBApiResponse();
 		response.setId(api);
@@ -587,5 +619,23 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 		List<Map<String, Object>> listOfDomains = cassandraOperation.getRecordsByPropertiesWithoutFiltering(
 				Constants.KEYSPACE_SUNBIRD, Constants.TABLE_MASTER_DATA, propertyMap, Arrays.asList(Constants.CONTEXT_TYPE, Constants.CONTEXT_NAME));
 		return CollectionUtils.isNotEmpty(listOfDomains);
+	}
+
+	private List<String> getApprovedDomainsFromDB() {
+		List<String> domains = new ArrayList<>();
+		Map<String, Object> propertyMap = new HashMap<>();
+		propertyMap.put(Constants.CONTEXT_TYPE, Constants.USER_REGISTRATION_PRE_APPROVED_DOMAIN);
+		List<Map<String, Object>> listOfPreApprovedDomains = cassandraOperation.getRecordsByPropertiesWithoutFiltering(
+				Constants.KEYSPACE_SUNBIRD, Constants.TABLE_MASTER_DATA, propertyMap, Arrays.asList(Constants.CONTEXT_NAME));
+		propertyMap.put(Constants.CONTEXT_TYPE, Constants.USER_REGISTRATION_DOMAIN);
+		List<Map<String, Object>> listOfApprovedDomains = cassandraOperation.getRecordsByPropertiesWithoutFiltering(
+				Constants.KEYSPACE_SUNBIRD, Constants.TABLE_MASTER_DATA, propertyMap, Arrays.asList(Constants.CONTEXT_NAME));
+		listOfPreApprovedDomains.stream()
+				.map(map -> (String) map.get(Constants.CONTEXT_NAME))
+				.forEach(domains::add);
+		listOfApprovedDomains.stream()
+				.map(map -> (String) map.get(Constants.CONTEXT_NAME))
+				.forEach(domains::add);
+		return domains;
 	}
 }

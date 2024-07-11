@@ -1064,6 +1064,8 @@ public class Constants {
 	public static final String PROFILE_DESIGNATION_STATUS = "profileDesignationStatus";
 	public static final String NOT_MY_USER = "NOT-MY-USER";
 	public static final String SPACE = " ";
+	public static final String EMAIL_CHANGE_ERROR = "Only whitelisted government email domains are allowed for Email ID changes. Please reach out to MDO Admin, if you are not able to change the Email ID.";
+	public static final String API_APPROVED_DOMAINS = "api.approved.domains";
 
 	private Constants() {
 		throw new IllegalStateException("Utility class");

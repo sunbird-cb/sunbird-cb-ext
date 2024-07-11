@@ -44,4 +44,10 @@ public class UserRegistrationController {
 		SBApiResponse response = userRegService.generateOTP(otpRequests);
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
+
+	@GetMapping("/user/email/approved/domains")
+	public ResponseEntity<SBApiResponse> getApprovedDomain() throws Exception {
+		SBApiResponse response = userRegService.getApprovedDomains();
+		return new ResponseEntity<>(response, response.getResponseCode());
+	}
 }
