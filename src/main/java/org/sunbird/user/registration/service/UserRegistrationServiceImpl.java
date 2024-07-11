@@ -313,7 +313,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 			Set<String> approvedDomains = getApprovedDomainsFromDB();
 			if (CollectionUtils.isNotEmpty(approvedDomains)) {
 				Map<String, Object> result = new HashMap<>();
-				result.put(Constants.RESULT, approvedDomains);
+				result.put(Constants.DOMAINS, approvedDomains);
 				LOGGER.info("Fetched pre-approved and approved domains successfully");
 				response.setVer("v1");
 				response.getParams().setStatus(Constants.SUCCESS.toUpperCase());

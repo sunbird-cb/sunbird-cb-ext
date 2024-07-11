@@ -1065,6 +1065,7 @@ public class Constants {
 	public static final String NOT_MY_USER = "NOT-MY-USER";
 	public static final String SPACE = " ";
 	public static final String API_APPROVED_DOMAINS = "api.approved.domains";
+	public static final String DOMAINS = "domains";
 
 	private Constants() {
 		throw new IllegalStateException("Utility class");
