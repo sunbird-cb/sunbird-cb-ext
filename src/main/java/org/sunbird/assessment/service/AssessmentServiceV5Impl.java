@@ -820,7 +820,11 @@ public class AssessmentServiceV5Impl implements AssessmentServiceV5 {
                     totalMarks += (Integer) sectionChildren.get(Constants.TOTAL_MARKS);
                 }
             }
-            res.put(Constants.OVERALL_RESULT, ((double)correct / (double)(correct+inCorrect)) * 100);
+            if(correct > 0 && inCorrect>0) {
+                res.put(Constants.OVERALL_RESULT, ((double) correct / (double) (correct + inCorrect)) * 100);
+            }else{
+                res.put(Constants.OVERALL_RESULT,0.0);
+            }
             res.put(Constants.BLANK, blank);
             res.put(Constants.CORRECT, correct);
             res.put(Constants.INCORRECT, inCorrect);
@@ -828,8 +832,12 @@ public class AssessmentServiceV5Impl implements AssessmentServiceV5 {
             res.put(Constants.TIME_TAKEN_FOR_ASSESSMENT,assessmentCompletionTime-assessmentStartTime);
             res.put(Constants.MAX_ASSESSMENT_RETAKE_ATTEMPTS,maxAssessmentRetakeAttempts);
             res.put(Constants.RETAKE_ATTEMPT_CONSUMED,retakeAttemptsConsumed);
-            double totalPercentage = (totalSectionMarks / (double)totalMarks) * 100;
-            res.put(Constants.TOTAL_PERCENTAGE, totalPercentage);
+            if(totalSectionMarks>0.0 && totalMarks>0) {
+                double totalPercentage = (totalSectionMarks / (double) totalMarks) * 100;
+                res.put(Constants.TOTAL_PERCENTAGE, totalPercentage);
+            }else{
+                res.put(Constants.TOTAL_PERCENTAGE,0.0);
+            }
             res.put(Constants.TOTAL_SECTION_MARKS, totalSectionMarks);
             res.put(Constants.TOTAL_MARKS, totalMarks);
         } catch (Exception e) {
