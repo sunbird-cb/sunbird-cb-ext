@@ -310,7 +310,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 		SBApiResponse response = createDefaultResponse(Constants.API_APPROVED_DOMAINS);
 		String errMsg = "";
 		try {
-			List<String> approvedDomains = getApprovedDomainsFromDB();
+			Set<String> approvedDomains = getApprovedDomainsFromDB();
 			if (CollectionUtils.isNotEmpty(approvedDomains)) {
 				Map<String, Object> result = new HashMap<>();
 				result.put(Constants.RESULT, approvedDomains);
@@ -622,19 +622,19 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 		return CollectionUtils.isNotEmpty(listOfDomains);
 	}
 
-	private List<String> getApprovedDomainsFromDB() {
-		List<String> domains = new ArrayList<>();
+	private Set<String> getApprovedDomainsFromDB() {
+		Set<String> domains = new HashSet<>();
 
-		List<String> preApprovedDomains = fetchDomainsByContextType(Constants.USER_REGISTRATION_PRE_APPROVED_DOMAIN);
+		Set<String> preApprovedDomains = fetchDomainsByContextType(Constants.USER_REGISTRATION_PRE_APPROVED_DOMAIN);
 		domains.addAll(preApprovedDomains);
 
-		List<String> approvedDomains = fetchDomainsByContextType(Constants.USER_REGISTRATION_DOMAIN);
+		Set<String> approvedDomains = fetchDomainsByContextType(Constants.USER_REGISTRATION_DOMAIN);
 		domains.addAll(approvedDomains);
 
 		return domains;
 	}
 
-	private List<String> fetchDomainsByContextType(String contextType) {
+	private Set<String> fetchDomainsByContextType(String contextType) {
 		Map<String, Object> propertyMap = new HashMap<>();
 		propertyMap.put(Constants.CONTEXT_TYPE, contextType);
 
@@ -643,7 +643,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 
 		return records.stream()
 				.map(map -> (String) map.get(Constants.CONTEXT_NAME))
-				.collect(Collectors.toList());
+				.collect(Collectors.toSet());
 	}
 
 }
