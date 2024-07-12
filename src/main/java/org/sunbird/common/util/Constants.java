@@ -1103,7 +1103,7 @@ public class Constants {
 	public static final String REF_TYPE = "refType";
 	public static final String NODE_ID = "node_id";
 	public static final String REF_NODES = "refNodes";
-	public static final String API_DESIGNATION_UPDATE = "";
+	public static final String API_DESIGNATION_UPDATE = "api.designation.update";
 	public static final String INACTIVE = "Inactive";
 
 	private Constants() {

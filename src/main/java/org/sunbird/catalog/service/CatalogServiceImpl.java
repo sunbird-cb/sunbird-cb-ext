@@ -460,8 +460,8 @@ public class CatalogServiceImpl {
 			termReq.put(Constants.TERM, reqBody);
 			Map<String, Object> createReq = new HashMap<String, Object>();
 			createReq.put(Constants.REQUEST, termReq);
-			StringBuilder strUrl = new StringBuilder(extServerProperties.getKmBaseHost());
-			strUrl.append(extServerProperties.getKmFrameworkTermCreatePath()).append("?framework=")
+			StringBuilder strUrl = new StringBuilder(extServerProperties.getKnowledgeMS());
+			strUrl.append(extServerProperties.getOdcsTermCrete()).append("?framework=")
 					.append(extServerProperties.getOdcsFrameworkName()).append("&category=")
 					.append(extServerProperties.getOdcsCategoryName());
 			Map<String, Object> termResponse = outboundRequestHandlerServiceImpl.fetchResultUsingPost(strUrl.toString(),

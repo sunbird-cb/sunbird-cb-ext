@@ -792,6 +792,12 @@ public class CbExtServerProperties {
 	@Value("${designation.update.api}")
 	private String designationUpdateUrl;
 
+	@Value("${knowledge.mv.service}")
+	private String knowledgeMS;
+
+	@Value("${odcs.term.create}")
+	private String odcsTermCrete;
+
 	public boolean qListFromCacheEnabled() {
 		return qListFromCacheEnabled;
 	}
@@ -2801,5 +2807,13 @@ public class CbExtServerProperties {
 
 	public String getDesignationUpdateUrl() {
 		return designationUpdateUrl;
+	}
+
+	public String getKnowledgeMS() {
+		return knowledgeMS;
+	}
+
+	public String getOdcsTermCrete() {
+		return odcsTermCrete;
 	}
 }
