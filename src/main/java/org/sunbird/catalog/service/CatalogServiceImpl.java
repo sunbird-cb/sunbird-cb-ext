@@ -480,6 +480,12 @@ public class CatalogServiceImpl {
 				log.info("Created Designation successfully with name: " + refId);
 				log.info("termIdentifier : " + termIdentifier);
 				response = updateDesignation(refId, name, termIdentifier);
+				if (response.getResponseCode() != HttpStatus.OK) {
+					log.error("Failed to update designation: " + response.getParams().getErrmsg());
+					response.getParams().setErrmsg("Failed to update designation.");
+					response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+					response.getParams().setStatus(Constants.FAILED);
+				}
 			 }
 			} else if (HttpStatus.OK.equals(readResponse.getResponseCode())) {
 				errMsg = "Designation already exists with name: " + refId;
