@@ -714,8 +714,8 @@ public class UserBulkUploadService {
                bufferedWriter.close();
            if (fileWriter != null)
                fileWriter.close();
-//            if (file != null)
-//                file.delete();
+            if (file != null)
+                file.delete();
         }
    }
 
