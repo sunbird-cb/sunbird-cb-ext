@@ -470,6 +470,7 @@ public class UserBulkUploadService {
                 }
 
                 for (CSVRecord record : csvRecords) {
+
                     if (record.size() > headers.size() - 2) {
                         Map<String, String> errorRecord = new LinkedHashMap<>(record.toMap());
                         errorRecord.put("Status", "FAILED");
@@ -479,6 +480,7 @@ public class UserBulkUploadService {
                         failedRecordsCount++;
                         continue;
                     }
+
                    Map<String, String> updatedRecord = new LinkedHashMap<>(record.toMap());
                     List<String> errList = new ArrayList<>();
                     List<String> invalidErrList = new ArrayList<>();
