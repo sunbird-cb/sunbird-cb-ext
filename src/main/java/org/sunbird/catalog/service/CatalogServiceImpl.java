@@ -432,4 +432,153 @@ public class CatalogServiceImpl {
 		}
 		return errMsg;
 	}
+
+	public SBApiResponse createDesignation(Map<String, Object> request) {
+		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_SECTOR_CREATE);
+		String errMsg = validateDesignationCreateReq(request);
+		if (StringUtils.isNotBlank(errMsg)) {
+			response.getParams().setErrmsg(errMsg);
+			response.getParams().setStatus(Constants.FAILED);
+			response.setResponseCode(HttpStatus.BAD_REQUEST);
+			return response;
+		}
+		Map<String, Object> reqBody = (Map<String, Object>) request.get(Constants.REQUEST);
+		String name = (String) reqBody.get(Constants.NAME);
+		String refId = (String) reqBody.get(Constants.REF_ID);
+		String refType = (String) reqBody.get(Constants.REF_TYPE);
+		Map<String, Object> designationDetails = fetchDesignationDetails(refId);
+		String status = (String) designationDetails.getOrDefault(Constants.STATUS, Constants.INACTIVE);
+		if (status.equalsIgnoreCase(Constants.ACTIVE)) {
+			reqBody.put(Constants.CODE, name);
+			reqBody.put(Constants.REF_ID, refId);
+			reqBody.put(Constants.REF_TYPE, refType);
+			Map<String, Object> parentObj = new HashMap<>();
+			parentObj.put(Constants.IDENTIFIER,
+					extServerProperties.getOdcsFrameworkName() + "_" + extServerProperties.getOdcsCategoryName());
+			reqBody.put(Constants.PARENTS, Arrays.asList(parentObj));
+			Map<String, Object> termReq = new HashMap<String, Object>();
+			termReq.put(Constants.TERM, reqBody);
+			Map<String, Object> createReq = new HashMap<String, Object>();
+			createReq.put(Constants.REQUEST, termReq);
+			StringBuilder strUrl = new StringBuilder(extServerProperties.getKmBaseHost());
+			strUrl.append(extServerProperties.getKmFrameworkTermCreatePath()).append("?framework=")
+					.append(extServerProperties.getOdcsFrameworkName()).append("&category=")
+					.append(extServerProperties.getOdcsCategoryName());
+			Map<String, Object> termResponse = outboundRequestHandlerServiceImpl.fetchResultUsingPost(strUrl.toString(),
+					createReq, null);
+			if (termResponse != null
+					&& Constants.OK.equalsIgnoreCase((String) termResponse.get(Constants.RESPONSE_CODE))) {
+				Map<String, Object> resultMap = (Map<String, Object>) termResponse.get(Constants.RESULT);
+				List<String> termIdentifier = (List<String>) resultMap.getOrDefault(Constants.NODE_ID, "");
+				log.info("Created Designation successfully with name: " + name);
+				log.info("termIdentifier : " + termIdentifier);
+				response = updateDesignation(refId, name, termIdentifier);
+			} else {
+				log.error("Failed to create the  object with name: " + name);
+				response.getParams().setErrmsg("Failed to create.");
+				response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+				response.getParams().setStatus(Constants.FAILED);
+			}
+
+		} else {
+			log.error("Failed to validate Designation exists while creating with name: " + name);
+			response.getParams().setErrmsg("Failed to create Designation.");
+			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+			response.getParams().setStatus(Constants.FAILED);
+		}
+		return response;
+	}
+
+	private String validateDesignationCreateReq(Map<String, Object> request) {
+		String errMsg = "";
+		Map<String, Object> designationRequest = (Map<String, Object>) request.get(Constants.REQUEST);
+		if (MapUtils.isEmpty(designationRequest)) {
+			errMsg = "Invalid Request Object";
+			return errMsg;
+		}
+		List<String> missingParams = new ArrayList<>();
+		String name = (String) designationRequest.get(Constants.NAME);
+		if (StringUtils.isBlank(name)) {
+			missingParams.add(Constants.NAME);
+		}
+		String refId = (String) designationRequest.get(Constants.REF_ID);
+		if (StringUtils.isBlank(refId)) {
+			missingParams.add(refId);
+		}
+		String refType = (String) designationRequest.get(Constants.REF_TYPE);
+		if (StringUtils.isBlank(refType)) {
+			missingParams.add(refType);
+		}
+		if (CollectionUtils.isNotEmpty(missingParams)) {
+			errMsg = "Request is missing one or more parameters. Missing params : " + missingParams.toString();
+		}
+		return errMsg;
+	}
+
+	public Map fetchDesignationDetails(String Id) {
+		Map<String,Object> result = null;
+		try {
+			StringBuilder strUrl = new StringBuilder(extServerProperties.getPoresServiceHost());
+			strUrl.append(extServerProperties.getDesignationApiUrl()).append("/").append(Id);
+			log.info("printing api: "+strUrl.toString());
+			Map<String, String> map = new HashMap<String, String>();
+			map.put(Constants.CONTENT_TYPE_KEY,Constants.APPLICATION_JSON);
+			Map<String, Object> apiResponse = (Map<String, Object>) outboundRequestHandlerServiceImpl.fetchUsingGetWithHeaders(strUrl.toString(),map);
+			if (null != apiResponse) {
+				if (Constants.OK.equalsIgnoreCase((String) apiResponse.get(Constants.RESPONSE_CODE))) {
+					Map<String, Object> resultMap = (Map<String, Object>) apiResponse.get(Constants.RESULT);
+					result = (Map<String, Object>) resultMap.get(Constants.RESULT);
+					log.info("fetchDesignationDetails reulst: "+result);
+					return result;
+				} else {
+					log.info("Failed to fetch Designation Details: ");
+				}
+			} else {
+				log.error("Failed to read the des details for Id : " + Id);
+			}
+		} catch (Exception e) {
+			log.error("Failed to read Designation with Id: " + Id, e);
+		}
+		return result;
+	}
+
+	public SBApiResponse updateDesignation(String id, String designation, List<String> refNodes) {
+		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_DESIGNATION_UPDATE);
+		try {
+			String apiUrl = extServerProperties.getPoresServiceHost() + extServerProperties.getDesignationUpdateUrl();
+
+			Map map = createRequestBody(id, designation, refNodes);
+
+			Map<String,Object> result = outboundRequestHandlerServiceImpl.fetchResultUsingPut(apiUrl,map,null);
+			if (result != null
+					&& Constants.OK.equalsIgnoreCase((String) result.get(Constants.RESPONSE_CODE))) {
+				Map<String, Object> resultMap = (Map<String, Object>) result.get(Constants.RESULT);
+				log.info("update Designation with identifiers: "+resultMap);
+				response.setResponseCode(HttpStatus.OK);
+			} else {
+				response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+				response.getParams().setErrmsg("Failed to update the designation for id: " + id);
+			}
+		} catch (Exception e) {
+			log.error("Failed to update designation with id: " + id, e);
+			response.getParams().setErrmsg("Failed to update designation: " + e.getMessage());
+			response.getParams().setStatus(Constants.FAILED);
+			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		return response;
+	}
+
+	private Map<String, Object> createRequestBody(String id, String designation, List<String> refNodes) {
+		try {
+			Map<String, Object> reqBodyMap = new HashMap<>();
+			reqBodyMap.put(Constants.ID, id);
+			reqBodyMap.put(Constants.DESIGNATION, designation);
+			reqBodyMap.put(Constants.REF_NODES, refNodes);
+
+			return reqBodyMap;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
 }

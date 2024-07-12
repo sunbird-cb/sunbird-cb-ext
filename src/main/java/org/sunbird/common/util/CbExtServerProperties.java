@@ -637,6 +637,9 @@ public class CbExtServerProperties {
 	@Value("${sub.sector.category.fields}")
 	private String subSectorFields;
 
+	@Value("${odcs.category.fields}")
+	private String odcsFields;
+
 	public String getRedisWheeboxKey() {
 		return redisWheeboxKey;
 	}
@@ -767,6 +770,27 @@ public class CbExtServerProperties {
 
 	@Value("${sb.composite.v4.search}")
 	private String sbCompositeV4Search;
+
+	@Value("${sb.csv.delimiter}")
+	private char csvDelimiter;
+
+	@Value(("${sb.tags.delimiter}"))
+	private String tagsDelimiter;
+
+	@Value("${odcs.framework.name}")
+	private String odcsFrameworkName;
+
+	@Value("${odcs.category.name}")
+	private String odcsCategoryName;
+
+	@Value("${cb.pores.host}")
+	private String poresServiceHost;
+
+	@Value("${designation.status.api}")
+	private String designationApiUrl;
+
+	@Value("${designation.update.api}")
+	private String designationUpdateUrl;
 
 	public boolean qListFromCacheEnabled() {
 		return qListFromCacheEnabled;
@@ -2717,5 +2741,65 @@ public class CbExtServerProperties {
 
 	public void setSbCompositeV4Search(String sbCompositeV4Search) {
 		this.sbCompositeV4Search = sbCompositeV4Search;
+	}
+
+	public char getCsvDelimiter() {
+		return csvDelimiter;
+	}
+
+	public String getTagsDelimiter() {
+		return tagsDelimiter;
+	}
+
+	public void setCsvDelimiter(char csvDelimiter) {
+		this.csvDelimiter = csvDelimiter;
+	}
+
+	public void setTagsDelimiter(String tagsDelimiter) {
+		this.tagsDelimiter = tagsDelimiter;
+	}
+
+	public String getOdcsFrameworkName() {
+		return odcsFrameworkName;
+	}
+
+	public void setOdcsFrameworkName(String odcsFrameworkName) {
+		this.odcsFrameworkName = odcsFrameworkName;
+	}
+
+	public String getOdcsCategoryName() {
+		return odcsCategoryName;
+	}
+
+	public void setOdcsCategoryName(String odcsCategoryName) {
+		this.odcsCategoryName = odcsCategoryName;
+	}
+
+	public List<String> getOdcsFields() {
+		return Arrays.asList(odcsFields.split(",", -1));
+	}
+
+	public void setOdcsFields(String odcsFields) {
+		this.odcsFields = odcsFields;
+	}
+
+	public String getPoresServiceHost() {
+		return poresServiceHost;
+	}
+
+	public void setPoresServiceHost(String poresServiceHost) {
+		this.poresServiceHost = poresServiceHost;
+	}
+
+	public String getDesignationApiUrl() {
+		return designationApiUrl;
+	}
+
+	public void setDesignationApiUrl(String designationApiUrl) {
+		this.designationApiUrl = designationApiUrl;
+	}
+
+	public String getDesignationUpdateUrl() {
+		return designationUpdateUrl;
 	}
 }

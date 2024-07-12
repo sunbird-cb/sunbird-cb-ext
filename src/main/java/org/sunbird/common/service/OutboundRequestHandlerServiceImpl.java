@@ -1,10 +1,12 @@
 package org.sunbird.common.service;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.collections.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -258,5 +260,53 @@ public class OutboundRequestHandlerServiceImpl {
 			log.debug(str.toString());
 		} catch (JsonProcessingException je) {
 		}
+	}
+
+	public Map<String, Object> fetchResultUsingPut(String uri, Object request, Map<String, String> headersValues) {
+		Map<String, Object> response = null;
+		ObjectMapper mapper = new ObjectMapper();
+		try {
+			HttpHeaders headers = new HttpHeaders();
+			if (!CollectionUtils.isEmpty(headersValues)) {
+				headersValues.forEach(headers::set);
+			}
+			headers.setContentType(MediaType.APPLICATION_JSON);
+			headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+			HttpEntity<Object> entity = new HttpEntity<>(request, headers);
+
+			if (log.isDebugEnabled()) {
+				StringBuilder str = new StringBuilder(this.getClass().getCanonicalName()).append(".fetchResultUsingPut")
+						.append(System.lineSeparator());
+				str.append("URI: ").append(uri).append(System.lineSeparator());
+				str.append("Request: ").append(mapper.writeValueAsString(request)).append(System.lineSeparator());
+				log.debug(str.toString());
+			}
+			log.info("printing uri"+uri);
+			ResponseEntity<Map<String, Object>> responseEntity = restTemplate.exchange(
+					uri, HttpMethod.PUT, entity, new ParameterizedTypeReference<Map<String, Object>>() {});
+
+			response = responseEntity.getBody();
+			if (log.isDebugEnabled()) {
+				StringBuilder str = new StringBuilder("Response: ");
+				str.append(mapper.writeValueAsString(response)).append(System.lineSeparator());
+				log.debug(str.toString());
+			}
+		} catch (HttpClientErrorException hce) {
+			try {
+				response = mapper.readValue(hce.getResponseBodyAsString(),
+						new TypeReference<HashMap<String, Object>>() {});
+			} catch (Exception e1) {
+				log.error("Failed to parse error response", e1);
+			}
+			log.error("Error received: " + hce.getResponseBodyAsString(), hce);
+		} catch (JsonProcessingException e) {
+			log.error("Json processing error", e);
+			try {
+				log.warn("Error Response: " + mapper.writeValueAsString(response));
+			} catch (Exception e1) {
+				log.error("Failed to log error response", e1);
+			}
+		}
+		return response;
 	}
 }

@@ -46,4 +46,11 @@ public class CatalogController {
 		SBApiResponse response = catalogService.createSubSector(request);
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
+
+	@PostMapping("/designation/create")
+	public ResponseEntity<SBApiResponse> createDesi(@RequestBody Map<String, Object> request) {
+		SBApiResponse response = catalogService.createDesignation(request);
+		return new ResponseEntity<>(response, response.getResponseCode());
+	}
+
 }
