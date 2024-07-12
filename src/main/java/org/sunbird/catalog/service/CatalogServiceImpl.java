@@ -449,9 +449,16 @@ public class CatalogServiceImpl {
 		Map<String, Object> designationDetails = fetchDesignationDetails(refId);
 		String status = (String) designationDetails.getOrDefault(Constants.STATUS, Constants.INACTIVE);
 		if (status.equalsIgnoreCase(Constants.ACTIVE)) {
-			reqBody.put(Constants.CODE, name);
+			SBApiResponse readResponse = readDesignation(refId);
+			if (readResponse == null) {
+				response.getParams().setErrmsg("Failed to validate sector exists or not.");
+				response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+				response.getParams().setStatus(Constants.FAILED);
+			} else if (HttpStatus.NOT_FOUND.equals(readResponse.getResponseCode())) {
+			reqBody.put(Constants.CODE, refId);
 			reqBody.put(Constants.REF_ID, refId);
 			reqBody.put(Constants.REF_TYPE, refType);
+			reqBody.put(Constants.NAME, name);
 			Map<String, Object> parentObj = new HashMap<>();
 			parentObj.put(Constants.IDENTIFIER,
 					extServerProperties.getOdcsFrameworkName() + "_" + extServerProperties.getOdcsCategoryName());
@@ -470,18 +477,24 @@ public class CatalogServiceImpl {
 					&& Constants.OK.equalsIgnoreCase((String) termResponse.get(Constants.RESPONSE_CODE))) {
 				Map<String, Object> resultMap = (Map<String, Object>) termResponse.get(Constants.RESULT);
 				List<String> termIdentifier = (List<String>) resultMap.getOrDefault(Constants.NODE_ID, "");
-				log.info("Created Designation successfully with name: " + name);
+				log.info("Created Designation successfully with name: " + refId);
 				log.info("termIdentifier : " + termIdentifier);
 				response = updateDesignation(refId, name, termIdentifier);
+			 }
+			} else if (HttpStatus.OK.equals(readResponse.getResponseCode())) {
+				errMsg = "Designation already exists with name: " + refId;
+				log.error(errMsg);
+				response.getParams().setErrmsg(errMsg);
+				response.setResponseCode(HttpStatus.BAD_REQUEST);
+				response.getParams().setStatus(Constants.FAILED);
 			} else {
-				log.error("Failed to create the  object with name: " + name);
+				log.error("Failed to create the Designation with name: " + refId);
 				response.getParams().setErrmsg("Failed to create.");
 				response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
 				response.getParams().setStatus(Constants.FAILED);
 			}
-
 		} else {
-			log.error("Failed to validate Designation exists while creating with name: " + name);
+			log.error("Failed to validate Designation exists with name: " + name);
 			response.getParams().setErrmsg("Failed to create Designation.");
 			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
 			response.getParams().setStatus(Constants.FAILED);
@@ -579,6 +592,69 @@ public class CatalogServiceImpl {
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
+		}
+	}
+	public SBApiResponse readDesignation(String Id) {
+		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_SECTOR_READ);
+		try {
+			StringBuilder strUrl = new StringBuilder(extServerProperties.getKnowledgeMS());
+			strUrl.append(extServerProperties.getOdcsTermCrete()).append("/").append(Id).append("?framework=")
+					.append(extServerProperties.getOdcsFrameworkName()).append("&category=")
+					.append(extServerProperties.getOdcsCategoryName());
+
+			Map<String, Object> map = new HashMap<String, Object>();
+			Map<String, Object> desgResponse = (Map<String, Object>) outboundRequestHandlerServiceImpl.fetchResult(strUrl.toString());
+			if (null != desgResponse) {
+				if (Constants.OK.equalsIgnoreCase((String) desgResponse.get(Constants.RESPONSE_CODE))) {
+					Map<String, Object> resultMap = (Map<String, Object>) desgResponse.get(Constants.RESULT);
+					Map<String, Object> input = (Map<String, Object>) resultMap.get(Constants.TERM);
+					processDesignation(input, map);
+					response.getResult().put(Constants.DESIGNATION, map);
+				} else {
+					response.setResponseCode(HttpStatus.NOT_FOUND);
+					response.getParams().setErrmsg("Data not found with id : " + Id);
+				}
+			} else {
+				response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+				response.getParams().setErrmsg("Failed to read the des details for Id : " + Id);
+			}
+		} catch (Exception e) {
+			log.error("Failed to read Designation with Id: " + Id, e);
+			response.getParams().setErrmsg("Failed to read Designation: " + e.getMessage());
+			response.getParams().setStatus(Constants.FAILED);
+			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		return response;
+	}
+
+	private void processDesignation(Map<String, Object> designationInput, Map<String, Object> designationMap) {
+		for (String field : extServerProperties.getOdcsFields()) {
+			if (designationInput.containsKey(field)) {
+				designationMap.put(field, designationInput.get(field));
+			}
+		}
+		if (designationInput.containsKey(Constants.CHILDREN)) {
+			designationMap.put(Constants.CHILDREN, new ArrayList<Map<String, Object>>());
+			processSubDesignation(designationInput, designationMap);
+		}
+	}
+
+	private void processSubDesignation(Map<String, Object> designation, Map<String, Object> newDesignation) {
+		List<Map<String, Object>> designationList = (List<Map<String, Object>>) designation.get(Constants.CHILDREN);
+		Set<String> uniqueDesg = new HashSet<String>();
+		for (Map<String, Object> desig : designationList) {
+			if (uniqueDesg.contains((String) desig.get(Constants.IDENTIFIER))) {
+				continue;
+			} else {
+				uniqueDesg.add((String) desig.get(Constants.IDENTIFIER));
+			}
+			Map<String, Object> newSubDesignation = new HashMap<String, Object>();
+			for (String field : extServerProperties.getOdcsFields()) {
+				if (desig.containsKey(field)) {
+					newSubDesignation.put(field, desig.get(field));
+				}
+			}
+			((List) newDesignation.get(Constants.CHILDREN)).add(newSubDesignation);
 		}
 	}
 }
