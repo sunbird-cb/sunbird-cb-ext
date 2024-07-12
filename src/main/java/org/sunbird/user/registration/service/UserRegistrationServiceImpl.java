@@ -307,7 +307,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 	}
 
 	public SBApiResponse getApprovedDomains() {
-		SBApiResponse response = createDefaultResponse(Constants.API_APPROVED_DOMAINS);
+		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_APPROVED_DOMAINS);
 		String errMsg = "";
 		try {
 			Set<String> approvedDomains = getApprovedDomainsFromDB();
@@ -315,10 +315,6 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 				Map<String, Object> result = new HashMap<>();
 				result.put(Constants.DOMAINS, approvedDomains);
 				LOGGER.info("Fetched pre-approved and approved domains successfully");
-				response.setVer("v1");
-				response.getParams().setStatus(Constants.SUCCESS.toUpperCase());
-				response.getParams().setResmsgid(UUID.randomUUID().toString());
-				response.getParams().setMsgid(UUID.randomUUID().toString());
 				response.setResult(result);
 				response.getResult().put(Constants.RESPONSE, Constants.SUCCESS.toUpperCase());
 			} else {
