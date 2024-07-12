@@ -83,7 +83,9 @@ public class AssessmentServiceV5Impl implements AssessmentServiceV5 {
             
            // if (serverProperties.isAssessmentRetakeCountVerificationEnabled()) {
                 retakeAttemptsConsumed = calculateAssessmentRetakeCount(userId, assessmentIdentifier);
-                retakeAttemptsConsumed=retakeAttemptsConsumed-1;
+                if(retakeAttemptsConsumed>0){
+                    retakeAttemptsConsumed=retakeAttemptsConsumed-1;
+                }
             //}
         } catch (Exception e) {
             errMsg = String.format("Error while calculating retake assessment. Exception: %s", e.getMessage());
