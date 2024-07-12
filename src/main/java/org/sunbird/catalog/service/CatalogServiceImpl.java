@@ -479,8 +479,8 @@ public class CatalogServiceImpl {
 				List<String> termIdentifier = (List<String>) resultMap.getOrDefault(Constants.NODE_ID, "");
 				log.info("Created Designation successfully with name: " + refId);
 				log.info("termIdentifier : " + termIdentifier);
-				response = updateDesignation(refId, name, termIdentifier);
-				if (response.getResponseCode() != HttpStatus.OK) {
+				SBApiResponse desgResponse = updateDesignation(refId, name, termIdentifier);
+				if (desgResponse.getResponseCode() != HttpStatus.OK) {
 					log.error("Failed to update designation: " + response.getParams().getErrmsg());
 					response.getParams().setErrmsg("Failed to update designation.");
 					response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
