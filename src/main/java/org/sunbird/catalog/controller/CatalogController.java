@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import org.sunbird.catalog.model.Catalog;
 import org.sunbird.catalog.service.CatalogServiceImpl;
 import org.sunbird.common.model.SBApiResponse;
+import org.sunbird.common.util.CbExtServerProperties;
 
 import java.util.Map;
 
@@ -16,6 +17,8 @@ import java.util.Map;
 public class CatalogController {
 	@Autowired
 	private CatalogServiceImpl catalogService;
+
+	@Autowired private CbExtServerProperties extServerProperties;
 
 	@GetMapping("/")
 	public ResponseEntity<Catalog> getCatalog(@RequestHeader("x-authenticated-user-token") String authUserToken,
@@ -46,11 +49,4 @@ public class CatalogController {
 		SBApiResponse response = catalogService.createSubSector(request);
 		return new ResponseEntity<>(response, response.getResponseCode());
 	}
-
-	@PostMapping("/designation/create")
-	public ResponseEntity<SBApiResponse> createDesi(@RequestBody Map<String, Object> request) {
-		SBApiResponse response = catalogService.createDesignation(request);
-		return new ResponseEntity<>(response, response.getResponseCode());
-	}
-
 }
