@@ -637,9 +637,6 @@ public class CbExtServerProperties {
 	@Value("${sub.sector.category.fields}")
 	private String subSectorFields;
 
-	@Value("${odcs.category.fields}")
-	private String odcsFields;
-
 	public String getRedisWheeboxKey() {
 		return redisWheeboxKey;
 	}

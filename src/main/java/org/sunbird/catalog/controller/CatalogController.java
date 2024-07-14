@@ -18,8 +18,6 @@ public class CatalogController {
 	@Autowired
 	private CatalogServiceImpl catalogService;
 
-	@Autowired private CbExtServerProperties extServerProperties;
-
 	@GetMapping("/")
 	public ResponseEntity<Catalog> getCatalog(@RequestHeader("x-authenticated-user-token") String authUserToken,
 			@RequestParam(name = "consumption", required = false) boolean isEnrichConsumption) {
