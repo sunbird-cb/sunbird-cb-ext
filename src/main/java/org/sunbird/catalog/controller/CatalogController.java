@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.*;
 import org.sunbird.catalog.model.Catalog;
 import org.sunbird.catalog.service.CatalogServiceImpl;
 import org.sunbird.common.model.SBApiResponse;
-import org.sunbird.common.util.CbExtServerProperties;
 
 import java.util.Map;
 

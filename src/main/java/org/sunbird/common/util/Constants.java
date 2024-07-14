@@ -1100,7 +1100,6 @@ public class Constants {
 	public static final String CSV_FILE = ".csv";
 	public static final String XLSX_FILE = ".xlsx";
 
-
 	private Constants() {
 		throw new IllegalStateException("Utility class");
 	}
