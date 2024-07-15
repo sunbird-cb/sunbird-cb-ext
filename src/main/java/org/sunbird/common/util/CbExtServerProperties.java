@@ -768,6 +768,15 @@ public class CbExtServerProperties {
 	@Value("${sb.composite.v4.search}")
 	private String sbCompositeV4Search;
 
+	@Value("${sb.csv.delimiter}")
+	private char csvDelimiter;
+
+	@Value(("${sb.tags.delimiter}"))
+	private String tagsDelimiter;
+
+
+
+
 	public boolean qListFromCacheEnabled() {
 		return qListFromCacheEnabled;
 	}
@@ -2717,5 +2726,21 @@ public class CbExtServerProperties {
 
 	public void setSbCompositeV4Search(String sbCompositeV4Search) {
 		this.sbCompositeV4Search = sbCompositeV4Search;
+	}
+
+	public char getCsvDelimiter() {
+		return csvDelimiter;
+	}
+
+	public String getTagsDelimiter() {
+		return tagsDelimiter;
+	}
+
+	public void setCsvDelimiter(char csvDelimiter) {
+		this.csvDelimiter = csvDelimiter;
+	}
+
+	public void setTagsDelimiter(String tagsDelimiter) {
+		this.tagsDelimiter = tagsDelimiter;
 	}
 }
