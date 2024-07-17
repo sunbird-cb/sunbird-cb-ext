@@ -10,4 +10,5 @@ import java.util.Map;
 public interface HallOfFameService {
     public Map<String, Object> fetchHallOfFameData() ;
     public SBApiResponse learnerLeaderBoard(String rootOrgId, String authToken) ;
+    public SBApiResponse fetchingTop10Learners(String rootOrgId, String authToken) ;
 }

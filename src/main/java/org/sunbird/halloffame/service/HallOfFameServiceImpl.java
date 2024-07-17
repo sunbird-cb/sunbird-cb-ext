@@ -112,6 +112,54 @@ public class HallOfFameServiceImpl implements HallOfFameService {
         return response;
     }
 
+    @Override
+    public SBApiResponse fetchingTop10Learners(String rootOrgId, String authToken) {
+        SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.TOP_10_LEARNERS);
+        try {
+            if (StringUtils.isEmpty(rootOrgId)) {
+                setBadRequestResponse(response, Constants.ORG_ID_MISSING);
+                return response;
+            }
+
+            String userId =validateAuthTokenAndFetchUserId(authToken);
+            if (StringUtils.isBlank(userId)) {
+                setBadRequestResponse(response, Constants.USER_ID_DOESNT_EXIST);
+                return response;
+            }
+            Map<String, Object> propertiesMap = new HashMap<>();
+            propertiesMap.put(Constants.USER_ID_LOWER, userId);
+
+            List<Map<String, Object>> userRowNum = cassandraOperation.getRecordsByProperties(
+                    Constants.SUNBIRD_KEY_SPACE_NAME,
+                    Constants.TABLE_LEARNER_LEADER_BOARD_LOOK_UP,
+                    propertiesMap,
+                    null
+            );
+            if (userRowNum == null || userRowNum.isEmpty()) {
+                setNotFoundResponse(response, Constants.USER_ID_DOESNT_EXIST);
+                return response;
+            }
+            Map<String, Object> propMap = new HashMap<>();
+            int res = (Integer) userRowNum.get(0).get(Constants.DB_COLUMN_ROW_NUM);
+            List<Integer> ranksFilter = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+            propMap.put(Constants.DB_COLUMN_ROW_NUM, ranksFilter);
+            propMap.put(Constants.ORGID, rootOrgId);
+
+            List<Map<String, Object>> result = cassandraOperation.getRecordsByProperties(
+                    Constants.SUNBIRD_KEY_SPACE_NAME,
+                    Constants.TABLE_TOP_10_LEARNER,
+                    propMap,
+                    null
+            );
+            response.put(Constants.RESULT, result);
+            return response;
+
+        } catch (Exception e) {
+            setInternalServerErrorResponse(response);
+        }
+        return response;
+    }
+
     private void setBadRequestResponse(SBApiResponse response, String errMsg) {
         response.getParams().setStatus(Constants.FAILED);
         response.getParams().setErrmsg(errMsg);

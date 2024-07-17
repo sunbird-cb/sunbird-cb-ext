@@ -34,4 +34,12 @@ public class HallOfFameController {
         SBApiResponse response = hallOfFameService.learnerLeaderBoard(rootOrgId, authToken);
         return new ResponseEntity<>(response, response.getResponseCode());
     }
+
+    @GetMapping("/v1/top/learners")
+    public ResponseEntity <SBApiResponse> fetchingTopLearners
+            (@RequestHeader(Constants.X_AUTH_TOKEN) String authToken,
+             @RequestHeader(Constants.X_AUTH_USER_ORG_ID) String rootOrgId) throws Exception {
+        SBApiResponse response = hallOfFameService.fetchingTop10Learners(rootOrgId, authToken);
+        return new ResponseEntity<>(response, response.getResponseCode());
+    }
 }
