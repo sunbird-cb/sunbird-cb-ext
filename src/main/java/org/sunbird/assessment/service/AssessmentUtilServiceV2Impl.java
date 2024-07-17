@@ -259,7 +259,7 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 			if (choicesObj.containsKey(Constants.OPTIONS)) {
 				List<Map<String, Object>> optionsMapList = (List<Map<String, Object>>) choicesObj
 						.get(Constants.OPTIONS);
-				updatedChoicesMap.put(Constants.OPTIONS, optionsMapList);
+				updatedChoicesMap.put(Constants.OPTIONS, shuffleOptions(optionsMapList));
 			}
 			updatedQuestionMap.put(Constants.CHOICES, updatedChoicesMap);
 		}
@@ -781,5 +781,19 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 			resultMap.put(Constants.RESULT, total == 0 ? 0 : ((correct * 100d) / total));
 			resultMap.put(Constants.TOTAL, total);
 		}
+	}
+
+	/**
+	 * Shuffles the list of option maps.
+	 *
+	 * @param optionsMapList The list of option maps to be shuffled.
+	 * @return A new list containing the shuffled option maps.
+	 */
+	public static List<Map<String, Object>> shuffleOptions(List<Map<String, Object>> optionsMapList) {
+		// Create a copy of the original list to avoid modifying the input list
+		List<Map<String, Object>> shuffledList = new ArrayList<>(optionsMapList);
+		// Shuffle the list using Collections.shuffle()
+		Collections.shuffle(shuffledList);
+		return shuffledList;
 	}
 }
