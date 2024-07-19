@@ -69,9 +69,19 @@ public class UserBulkUploadService {
             if (errList.isEmpty()) {
                 updateUserBulkUploadStatus(inputDataMap.get(Constants.ROOT_ORG_ID),
                         inputDataMap.get(Constants.IDENTIFIER), Constants.STATUS_IN_PROGRESS_UPPERCASE, 0, 0, 0);
-                storageService.downloadFile(inputDataMap.get(Constants.FILE_NAME));
-                //processBulkUpload(inputDataMap);
-                processCSVBulkUploadV2(inputDataMap);
+                String fileName = inputDataMap.get(Constants.FILE_NAME);
+                logger.info("fileName {} ", fileName);
+                storageService.downloadFile(fileName);
+                switch (getFileExtension(fileName)) {
+                    case Constants.CSV_FILE:
+                        processCSVBulkUploadV2(inputDataMap);
+                        break;
+                    case Constants.XLSX_FILE:
+                        processBulkUpload(inputDataMap);
+                        break;
+                    default:
+                        logger.error("Unsupported file type: {}", fileName);
+                }
             } else {
                 logger.error(String.format("Error in the Kafka Message Received : %s", errList));
             }
@@ -787,6 +797,10 @@ public class UserBulkUploadService {
             redisCacheMgr.putCacheAsStringArray(fieldKey, designationsSet.toArray(new String[0]), null);
             return !designationsSet.contains(fieldValue);
         }
+    }
+    private String getFileExtension(String fileName) {
+        int lastIndexOfDot= fileName.lastIndexOf('.');
+        return lastIndexOfDot == -1 ? "" : fileName.substring(lastIndexOfDot);
     }
 
 }
