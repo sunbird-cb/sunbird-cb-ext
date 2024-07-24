@@ -126,21 +126,7 @@ public class HallOfFameServiceImpl implements HallOfFameService {
                 setBadRequestResponse(response, Constants.USER_ID_DOESNT_EXIST);
                 return response;
             }
-            Map<String, Object> propertiesMap = new HashMap<>();
-            propertiesMap.put(Constants.USER_ID_LOWER, userId);
-
-            List<Map<String, Object>> userRowNum = cassandraOperation.getRecordsByPropertiesWithoutFiltering(
-                    Constants.SUNBIRD_KEY_SPACE_NAME,
-                    Constants.TABLE_LEARNER_LEADER_BOARD_LOOK_UP,
-                    propertiesMap,
-                    null
-            );
-            if (CollectionUtils.isEmpty(userRowNum)) {
-                setNotFoundResponse(response, Constants.USER_ID_DOESNT_EXIST);
-                return response;
-            }
             Map<String, Object> propMap = new HashMap<>();
-            int res = (Integer) userRowNum.get(0).get(Constants.DB_COLUMN_ROW_NUM);
             List<Integer> ranksFilter = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
             propMap.put(Constants.DB_COLUMN_ROW_NUM, ranksFilter);
             propMap.put(Constants.ORGID, rootOrgId);
