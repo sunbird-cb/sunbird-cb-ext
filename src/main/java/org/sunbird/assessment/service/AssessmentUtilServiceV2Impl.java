@@ -252,8 +252,7 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 			updatedQuestionMap.put(Constants.EDITOR_STATE, editorState);
 		}
 		if (questionMapResponse.containsKey(Constants.CHOICES)
-				&& updatedQuestionMap.containsKey(Constants.PRIMARY_CATEGORY) && !updatedQuestionMap
-						.get(Constants.PRIMARY_CATEGORY).toString().equalsIgnoreCase(Constants.FTB_QUESTION)) {
+				&& updatedQuestionMap.containsKey(Constants.PRIMARY_CATEGORY)) {
 			Map<String, Object> choicesObj = (Map<String, Object>) questionMapResponse.get(Constants.CHOICES);
 			Map<String, Object> updatedChoicesMap = new HashMap<>();
 			if (choicesObj.containsKey(Constants.OPTIONS)) {
