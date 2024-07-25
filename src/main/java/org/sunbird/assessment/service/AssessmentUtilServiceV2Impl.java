@@ -796,4 +796,41 @@ public class AssessmentUtilServiceV2Impl implements AssessmentUtilServiceV2 {
 		Collections.shuffle(shuffledList);
 		return shuffledList;
 	}
+
+	@Override
+	public Map<String, Object> filterQuestionMapDetailV2(Map<String, Object> questionMapResponse,
+													   String primaryCategory) {
+		List<String> questionParams = serverProperties.getAssessmentQuestionParams();
+		Map<String, Object> updatedQuestionMap = new HashMap<>();
+		for (String questionParam : questionParams) {
+			if (questionMapResponse.containsKey(questionParam)) {
+				updatedQuestionMap.put(questionParam, questionMapResponse.get(questionParam));
+			}
+		}
+		if (questionMapResponse.containsKey(Constants.EDITOR_STATE)
+				&& primaryCategory.equalsIgnoreCase(Constants.PRACTICE_QUESTION_SET)) {
+			Map<String, Object> editorState = (Map<String, Object>) questionMapResponse.get(Constants.EDITOR_STATE);
+			updatedQuestionMap.put(Constants.EDITOR_STATE, editorState);
+		}
+		if (questionMapResponse.containsKey(Constants.CHOICES)
+				&& updatedQuestionMap.containsKey(Constants.PRIMARY_CATEGORY)) {
+			Map<String, Object> choicesObj = (Map<String, Object>) questionMapResponse.get(Constants.CHOICES);
+			Map<String, Object> updatedChoicesMap = new HashMap<>();
+			if (choicesObj.containsKey(Constants.OPTIONS)) {
+				List<Map<String, Object>> optionsMapList = (List<Map<String, Object>>) choicesObj
+						.get(Constants.OPTIONS);
+				updatedChoicesMap.put(Constants.OPTIONS, shuffleOptions(optionsMapList));
+			}
+			updatedQuestionMap.put(Constants.CHOICES, updatedChoicesMap);
+		}
+		if (questionMapResponse.containsKey(Constants.RHS_CHOICES)
+				&& updatedQuestionMap.containsKey(Constants.PRIMARY_CATEGORY) && updatedQuestionMap
+				.get(Constants.PRIMARY_CATEGORY).toString().equalsIgnoreCase(Constants.MTF_QUESTION)) {
+			List<Object> rhsChoicesObj = (List<Object>) questionMapResponse.get(Constants.RHS_CHOICES);
+			Collections.shuffle(rhsChoicesObj);
+			updatedQuestionMap.put(Constants.RHS_CHOICES, rhsChoicesObj);
+		}
+
+		return updatedQuestionMap;
+	}
 }
