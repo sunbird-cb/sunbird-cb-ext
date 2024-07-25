@@ -49,7 +49,7 @@ public class EhrmsProfileDetailImpl implements EhrmsService {
         SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.EHRMS);
         try {
             Map<String, Object> propertyMap = new HashMap<>();
-            propertyMap.put(Constants.USER_ID_LOWER, userId);
+            propertyMap.put(Constants.ID, userId);
             Map<String, Object> result = cassandraOperation.getRecordsByProperties(
                     Constants.KEYSPACE_SUNBIRD,
                     Constants.USER,

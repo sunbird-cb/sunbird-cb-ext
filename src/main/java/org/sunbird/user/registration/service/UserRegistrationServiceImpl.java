@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.*;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.RandomStringUtils;
@@ -305,6 +306,34 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 		}
 	}
 
+	public SBApiResponse getApprovedDomains() {
+		SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.API_APPROVED_DOMAINS);
+		String errMsg = "";
+		try {
+			Set<String> approvedDomains = getApprovedDomainsFromDB();
+			if (CollectionUtils.isNotEmpty(approvedDomains)) {
+				Map<String, Object> result = new HashMap<>();
+				result.put(Constants.DOMAINS, approvedDomains);
+				LOGGER.info("Fetched pre-approved and approved domains successfully");
+				response.setResult(result);
+				response.getResult().put(Constants.RESPONSE, Constants.SUCCESS.toUpperCase());
+			} else {
+				errMsg = "Failed to Fetch Approved Domains";
+			}
+		} catch (Exception e) {
+			LOGGER.error(String.format("Exception in %s : %s", "getApprovedDomains", e.getMessage()), e);
+			errMsg = "Failed to process message. Exception: " + e.getMessage();
+		}
+
+		if (StringUtils.isNotBlank(errMsg)) {
+			LOGGER.error("Failed to Fetch Approved Domains, error message : ", errMsg);
+			response.getParams().setStatus(Constants.FAILED);
+			response.getParams().setErrmsg(errMsg);
+			response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		return response;
+	}
+
 	private SBApiResponse createDefaultResponse(String api) {
 		SBApiResponse response = new SBApiResponse();
 		response.setId(api);
@@ -588,4 +617,29 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 				Constants.KEYSPACE_SUNBIRD, Constants.TABLE_MASTER_DATA, propertyMap, Arrays.asList(Constants.CONTEXT_TYPE, Constants.CONTEXT_NAME));
 		return CollectionUtils.isNotEmpty(listOfDomains);
 	}
+
+	private Set<String> getApprovedDomainsFromDB() {
+		Set<String> domains = new HashSet<>();
+
+		Set<String> preApprovedDomains = fetchDomainsByContextType(Constants.USER_REGISTRATION_PRE_APPROVED_DOMAIN);
+		domains.addAll(preApprovedDomains);
+
+		Set<String> approvedDomains = fetchDomainsByContextType(Constants.USER_REGISTRATION_DOMAIN);
+		domains.addAll(approvedDomains);
+
+		return domains;
+	}
+
+	private Set<String> fetchDomainsByContextType(String contextType) {
+		Map<String, Object> propertyMap = new HashMap<>();
+		propertyMap.put(Constants.CONTEXT_TYPE, contextType);
+
+		List<Map<String, Object>> records = cassandraOperation.getRecordsByPropertiesWithoutFiltering(
+				Constants.KEYSPACE_SUNBIRD, Constants.TABLE_MASTER_DATA, propertyMap, Arrays.asList(Constants.CONTEXT_NAME));
+
+		return records.stream()
+				.map(map -> (String) map.get(Constants.CONTEXT_NAME))
+				.collect(Collectors.toSet());
+	}
+
 }

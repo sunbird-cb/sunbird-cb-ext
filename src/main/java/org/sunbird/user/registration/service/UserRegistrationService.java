@@ -48,4 +48,6 @@ public interface UserRegistrationService {
 
 	public SBApiResponse generateOTP(Map<String,Object> otpRequests);
 
+	public SBApiResponse getApprovedDomains();
+
 }
