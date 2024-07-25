@@ -114,10 +114,10 @@ public class HallOfFameServiceImpl implements HallOfFameService {
     }
 
     @Override
-    public SBApiResponse fetchingTop10Learners(String rootOrgId, String authToken) {
+    public SBApiResponse fetchingTop10Learners(String ministryOrgId, String authToken) {
         SBApiResponse response = ProjectUtil.createDefaultResponse(Constants.TOP_10_LEARNERS);
         try {
-            if (StringUtils.isEmpty(rootOrgId)) {
+            if (StringUtils.isEmpty(ministryOrgId)) {
                 setBadRequestResponse(response, Constants.ORG_ID_MISSING);
                 return response;
             }
@@ -129,7 +129,7 @@ public class HallOfFameServiceImpl implements HallOfFameService {
             Map<String, Object> propMap = new HashMap<>();
             List<Integer> ranksFilter = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
             propMap.put(Constants.DB_COLUMN_ROW_NUM, ranksFilter);
-            propMap.put(Constants.ORGID, rootOrgId);
+            propMap.put(Constants.ORGID, ministryOrgId);
 
             List<Map<String, Object>> result = cassandraOperation.getRecordsByPropertiesWithoutFiltering(
                     Constants.SUNBIRD_KEY_SPACE_NAME,

@@ -3,10 +3,7 @@ package org.sunbird.halloffame.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.sunbird.common.model.SBApiResponse;
 import org.sunbird.common.util.Constants;
 import org.sunbird.halloffame.service.HallOfFameService;
@@ -35,11 +32,11 @@ public class HallOfFameController {
         return new ResponseEntity<>(response, response.getResponseCode());
     }
 
-    @GetMapping("/v1/top/learners")
+    @GetMapping("/v1/top/learners/{ministryOrgId}")
     public ResponseEntity<SBApiResponse> fetchingTopLearners
             (@RequestHeader(Constants.X_AUTH_TOKEN) String authToken,
-             @RequestHeader(Constants.X_AUTH_USER_ORG_ID) String rootOrgId) throws Exception {
-        SBApiResponse response = hallOfFameService.fetchingTop10Learners(rootOrgId, authToken);
+            @PathVariable String ministryOrgId) throws Exception {
+        SBApiResponse response = hallOfFameService.fetchingTop10Learners(ministryOrgId, authToken);
         return new ResponseEntity<>(response, response.getResponseCode());
     }
 }
