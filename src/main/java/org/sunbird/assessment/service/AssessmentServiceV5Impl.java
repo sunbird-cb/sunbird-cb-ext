@@ -238,7 +238,7 @@ public class AssessmentServiceV5Impl implements AssessmentServiceV5 {
             String assessmentIdFromRequest = (String) requestBody.get(Constants.ASSESSMENT_ID_KEY);
             Map<String, Object> questionsMap = assessUtilServ.readQListfromCache(identifierList,assessmentIdFromRequest,editMode,authUserToken);
             for (String questionId : identifierList) {
-                questionList.add(assessUtilServ.filterQuestionMapDetail((Map<String, Object>) questionsMap.get(questionId),
+                questionList.add(assessUtilServ.filterQuestionMapDetailV2((Map<String, Object>) questionsMap.get(questionId),
                         result.get(Constants.PRIMARY_CATEGORY)));
             }
             if (errMsg.isEmpty() && identifierList.size() == questionList.size()) {
