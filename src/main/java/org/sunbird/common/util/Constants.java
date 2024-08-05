@@ -1103,6 +1103,7 @@ public class Constants {
 	public static final String TABLE_TOP_10_LEARNER ="mdo_top_learners";
 	public static final String CSV_FILE = ".csv";
 	public static final String XLSX_FILE = ".xlsx";
+	public static final String NO_OF_QUESTIONS = "noOfQuestions";
 
 	private Constants() {
 		throw new IllegalStateException("Utility class");

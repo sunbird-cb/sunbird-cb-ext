@@ -481,10 +481,9 @@ public class AssessmentServiceV5Impl implements AssessmentServiceV5 {
                 }
             }
             List<Map<String, Object>> questions = (List<Map<String, Object>>) section.get(Constants.CHILDREN);
-            int maxQuestions = (int) section.getOrDefault(Constants.MAX_QUESTIONS, questions.size());
-            List<String> childNodeList = questions.stream()
+            List<Map<String, Object>> selectedQuestionsList  = processRandomizationForQuestions((Map<String, Map<String, Object>>) section.get(Constants.SECTION_LEVEL_DEFINITION),questions);
+            List<String> childNodeList = selectedQuestionsList.stream()
                     .map(question -> (String) question.get(Constants.IDENTIFIER))
-                    .limit(maxQuestions)
                     .collect(toList());
             Collections.shuffle(childNodeList);
             newSection.put(Constants.CHILD_NODES, childNodeList);
@@ -1092,5 +1091,69 @@ public class AssessmentServiceV5Impl implements AssessmentServiceV5 {
             updateErrorDetails(response, errMsg, HttpStatus.INTERNAL_SERVER_ERROR);
         }
         return response;
+    }
+
+
+    /**
+     * Process randomization for selecting questions based on section level definitions and limits.
+     *
+     * @param sectionLevelDefinitionMap Map containing section level definitions with 'noOfQuestions' and 'noOfMaxQuestions'.
+     * @param questions                 List of questions to be processed.
+     * @return List of selected questions based on randomization and limits.
+     */
+    private List<Map<String, Object>> processRandomizationForQuestions(Map<String, Map<String, Object>> sectionLevelDefinitionMap, List<Map<String, Object>> questions) {
+        List<Map<String, Object>> shuffledQuestionsList = shuffleQuestions(questions);
+        List<Map<String, Object>> selectedQuestionsList = new ArrayList<>();
+        Map<String, Integer> noOfQuestionsMap = new HashMap<>();
+        Map<String, Integer> dupNoOfQuestionsMap = new HashMap<>();     // Duplicate map for tracking selected questions
+        boolean result = sectionLevelDefinitionMap.values().stream()
+                .anyMatch(proficiencyMap -> {
+                    Object maxNoOfQuestionsValue = proficiencyMap.get(Constants.NO_OF_QUESTIONS);
+                    if (maxNoOfQuestionsValue instanceof Integer) {
+                        return (Integer) maxNoOfQuestionsValue > 0;
+                    }
+                    return false;
+                });
+
+        if (!result) {
+            return questions;
+        } else {
+            // Populate noOfQuestionsMap and noOfMaxQuestionsMap from sectionLevelDefinitionMap
+            sectionLevelDefinitionMap.forEach((sectionLevelDefinitionKey, proficiencyMap) -> proficiencyMap.forEach((key, value) -> {
+                if (key.equalsIgnoreCase(Constants.NO_OF_QUESTIONS)) {
+                    noOfQuestionsMap.put(sectionLevelDefinitionKey, (Integer) value);
+                    dupNoOfQuestionsMap.put(sectionLevelDefinitionKey,0);
+                }
+            }));
+
+            // Process each question for randomization and limit checking
+            for (Map<String, Object> question : shuffledQuestionsList) {
+                String questionLevel = (String) question.get(Constants.QUESTION_LEVEL);
+                // Check if adding one more question of this level is within limits
+                if (dupNoOfQuestionsMap.getOrDefault(questionLevel, 0) < noOfQuestionsMap.getOrDefault(questionLevel, 0)) {
+                    // Add the question to selected list
+                    selectedQuestionsList.add(question);
+                    // Update dupNoOfQuestionsMap to track the count of selected questions for this level
+                    dupNoOfQuestionsMap.put(questionLevel, dupNoOfQuestionsMap.getOrDefault(questionLevel, 0) + 1);
+                }
+            }
+            return selectedQuestionsList;
+        }
+    }
+
+
+
+    /**
+     * Shuffles the list of questions maps.
+     *
+     * @param questions The list of questions maps to be shuffled.
+     * @return A new list containing the shuffled questions maps.
+     */
+    public static List<Map<String, Object>> shuffleQuestions(List<Map<String, Object>> questions) {
+        // Create a copy of the original list to avoid modifying the input list
+        List<Map<String, Object>> shuffledQnsList = new ArrayList<>(questions);
+        // Shuffle the list using Collections.shuffle()
+        Collections.shuffle(shuffledQnsList);
+        return shuffledQnsList;
     }
 }
